@@ -27,6 +27,16 @@
     </a>
   </p>
 
+---
+
+## MAINTENANCE NOTICE
+
+Feishin is currently undergoing a major rewrite. New feature requests will not be accepted. The rewrite is being actively developed at the [audioling](https://github.com/audioling/audioling) repository.
+
+Follow the repository or join the discord/matrix server for updates.
+
+---
+
 Rewrite of [Sonixd](https://github.com/jeffvli/sonixd).
 
 ## Features
@@ -76,21 +86,21 @@ To install via Docker Compose use the following snippit. This also works on Port
 
 ```yaml
 services:
-  feishin:
-    container_name: feishin
-    image: 'ghcr.io/jeffvli/feishin:latest'
-    environment:
-      - SERVER_NAME=jellyfin # pre defined server name
-      - SERVER_LOCK=true # When true AND name/type/url are set, only username/password can be toggled
-      - SERVER_TYPE=jellyfin # navidrome also works
-      - SERVER_URL= # http://address:port
-      - PUID=1000
-      - PGID=1000
-      - UMASK=002
-      - TZ=America/Los_Angeles
-    ports:
-      - 9180:9180
-    restart: unless-stopped
+    feishin:
+        container_name: feishin
+        image: 'ghcr.io/jeffvli/feishin:latest'
+        environment:
+            - SERVER_NAME=jellyfin # pre defined server name
+            - SERVER_LOCK=true # When true AND name/type/url are set, only username/password can be toggled
+            - SERVER_TYPE=jellyfin # navidrome also works
+            - SERVER_URL= # http://address:port
+            - PUID=1000
+            - PGID=1000
+            - UMASK=002
+            - TZ=America/Los_Angeles
+        ports:
+            - 9180:9180
+        restart: unless-stopped
 ```
 
 ### Configuration
