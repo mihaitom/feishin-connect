@@ -69,10 +69,10 @@ export const useDiscordRpc = () => {
             activity.largeImageKey = song?.imageUrl;
         }
 
-        if (generalSettings.lastfmApiKey && song?.album && song?.artists.length) {
-            console.log('Fetching album info for', song.album, song.artists[0].name);
+        if (generalSettings.lastfmApiKey && song?.album && song?.albumArtists.length) {
+            console.log('Fetching album info for', song.album, song.albumArtists[0].name);
             const albumInfo = await fetch(
-                `https://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=${generalSettings.lastfmApiKey}&artist=${encodeURIComponent(song.artistName)}&album=${encodeURIComponent(song.album)}&format=json`,
+                `https://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=${generalSettings.lastfmApiKey}&artist=${encodeURIComponent(song.albumArtists[0].name)}&album=${encodeURIComponent(song.album)}&format=json`,
             );
 
             const albumInfoJson = await albumInfo.json();
