@@ -351,7 +351,7 @@ export const NavidromeController: ControllerEndpoint = {
         }
 
         return {
-            items: res.body.data.map((item) => ndNormalize.song(item, apiClientProps.server, '')),
+            items: res.body.data.map((item) => ndNormalize.song(item, apiClientProps.server)),
             startIndex: query?.startIndex || 0,
             totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
         };
@@ -416,7 +416,7 @@ export const NavidromeController: ControllerEndpoint = {
         if (res.status === 200 && res.body.similarSongs?.song) {
             const similar = res.body.similarSongs.song.reduce<Song[]>((acc, song) => {
                 if (song.id !== query.songId) {
-                    acc.push(ssNormalize.song(song, apiClientProps.server, ''));
+                    acc.push(ssNormalize.song(song, apiClientProps.server));
                 }
 
                 return acc;
@@ -443,7 +443,7 @@ export const NavidromeController: ControllerEndpoint = {
 
         return fallback.body.data.reduce<Song[]>((acc, song) => {
             if (song.id !== query.songId) {
-                acc.push(ndNormalize.song(song, apiClientProps.server, ''));
+                acc.push(ndNormalize.song(song, apiClientProps.server));
             }
 
             return acc;
@@ -462,7 +462,7 @@ export const NavidromeController: ControllerEndpoint = {
             throw new Error('Failed to get song detail');
         }
 
-        return ndNormalize.song(res.body.data, apiClientProps.server, '');
+        return ndNormalize.song(res.body.data, apiClientProps.server);
     },
     getSongList: async (args) => {
         const { query, apiClientProps } = args;
@@ -488,7 +488,7 @@ export const NavidromeController: ControllerEndpoint = {
 
         return {
             items: res.body.data.map((song) =>
-                ndNormalize.song(song, apiClientProps.server, '', query.imageSize),
+                ndNormalize.song(song, apiClientProps.server, query.imageSize),
             ),
             startIndex: query?.startIndex || 0,
             totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
