@@ -83,7 +83,7 @@ const albumArtist = z.object({
     mediumImageUrl: z.string().optional(),
     name: z.string(),
     orderArtistName: z.string(),
-    playCount: z.number(),
+    playCount: z.number().optional(),
     playDate: z.string().optional(),
     rating: z.number(),
     size: z.number(),
@@ -98,9 +98,19 @@ const albumArtistList = z.array(albumArtist);
 const albumArtistListParameters = paginationParameters.extend({
     _sort: z.nativeEnum(NDAlbumArtistListSort).optional(),
     genre_id: z.string().optional(),
+    missing: z.boolean().optional(),
     name: z.string().optional(),
+    role: z.string().optional(),
     starred: z.boolean().optional(),
 });
+
+const participant = z.object({
+    id: z.string(),
+    name: z.string(),
+    subRole: z.string().optional(),
+});
+
+const participants = z.record(z.string(), z.array(participant));
 
 const album = z.object({
     albumArtist: z.string(),
@@ -113,7 +123,7 @@ const album = z.object({
     coverArtId: z.string().optional(), // Removed after v0.48.0
     coverArtPath: z.string().optional(), // Removed after v0.48.0
     createdAt: z.string(),
-    duration: z.number(),
+    duration: z.number().optional(),
     fullText: z.string(),
     genre: z.string(),
     genres: z.array(genre).nullable(),
@@ -127,7 +137,8 @@ const album = z.object({
     orderAlbumName: z.string(),
     originalDate: z.string().optional(),
     originalYear: z.number().optional(),
-    playCount: z.number(),
+    participants: z.optional(participants),
+    playCount: z.number().optional(),
     playDate: z.string().optional(),
     rating: z.number().optional(),
     releaseDate: z.string().optional(),
@@ -195,8 +206,9 @@ const song = z.object({
     orderAlbumName: z.string(),
     orderArtistName: z.string(),
     orderTitle: z.string(),
+    participants: z.optional(participants),
     path: z.string(),
-    playCount: z.number(),
+    playCount: z.number().optional(),
     playDate: z.string().optional(),
     rating: z.number().optional(),
     releaseDate: z.string().optional(),
@@ -211,6 +223,7 @@ const song = z.object({
     starred: z.boolean(),
     starredAt: z.string().optional(),
     suffix: z.string(),
+    tags: z.record(z.string(), z.array(z.string())).optional(),
     title: z.string(),
     trackNumber: z.number(),
     updatedAt: z.string(),
