@@ -70,6 +70,12 @@ const genreListParameters = paginationParameters.extend({
 
 const genreList = z.array(genre);
 
+const stats = z.object({
+    albumCount: z.number(),
+    size: z.number(),
+    songCount: z.number(),
+});
+
 const albumArtist = z.object({
     albumCount: z.number(),
     biography: z.string(),
@@ -91,6 +97,7 @@ const albumArtist = z.object({
     songCount: z.number(),
     starred: z.boolean(),
     starredAt: z.string(),
+    stats: z.record(z.string(), stats).optional(),
 });
 
 const albumArtistList = z.array(albumArtist);
