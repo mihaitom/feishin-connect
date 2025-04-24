@@ -776,9 +776,10 @@ export const SubsonicController: ControllerEndpoint = {
         }
 
         const final: Array<string | { label: string; value: string }> = Array.from(roles).sort();
-        if (final.length > 0) {
-            final.splice(0, 0, { label: 'all artists', value: '' });
-        }
+        // Always add 'all artist' filter, even if there are no other roles
+        // This is relevant when switching from a server which has roles to one with
+        // no roles.
+        final.splice(0, 0, { label: 'all artists', value: '' });
         return final;
     },
     getServerInfo: async (args) => {
