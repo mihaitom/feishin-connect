@@ -287,7 +287,7 @@ export const NavidromeController: ControllerEndpoint = {
                 _start: query.startIndex,
                 name: query.searchTerm,
                 ...query._custom?.navidrome,
-                role: query.role,
+                role: query.role || undefined,
             },
         });
 
@@ -425,7 +425,8 @@ export const NavidromeController: ControllerEndpoint = {
         };
     },
     getRandomSongList: SubsonicController.getRandomSongList,
-    getRoles: async () => NAVIDROME_ROLES,
+    getRoles: async ({ apiClientProps }) =>
+        hasFeature(apiClientProps.server, ServerFeature.BFR) ? NAVIDROME_ROLES : [],
     getServerInfo: async (args) => {
         const { apiClientProps } = args;
 
