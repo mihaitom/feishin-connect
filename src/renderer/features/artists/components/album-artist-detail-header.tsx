@@ -16,11 +16,15 @@ interface AlbumArtistDetailHeaderProps {
 
 export const AlbumArtistDetailHeader = forwardRef(
     ({ background }: AlbumArtistDetailHeaderProps, ref: Ref<HTMLDivElement>) => {
-        const { albumArtistId } = useParams() as { albumArtistId: string };
+        const { albumArtistId, artistId } = useParams() as {
+            albumArtistId?: string;
+            artistId?: string;
+        };
+        const routeId = (artistId || albumArtistId) as string;
         const server = useCurrentServer();
         const { t } = useTranslation();
         const detailQuery = useAlbumArtistDetail({
-            query: { id: albumArtistId },
+            query: { id: routeId },
             serverId: server?.id,
         });
 

@@ -20,6 +20,7 @@ import {
     getAlbumArtistSongsById,
     getSongsByQuery,
     getGenreSongsById,
+    getArtistSongsById,
 } from '/@/renderer/features/player/utils';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { useTranslation } from 'react-i18next';
@@ -75,6 +76,8 @@ export const useHandlePlayQueueAdd = () => {
             let songs: QueueSong[] | null = null;
             let initialSongIndex = 0;
 
+            console.log('options :>> ', options);
+
             if (byItemType) {
                 let songList: SongListResponse | undefined;
                 const { type: itemType, id } = byItemType;
@@ -114,6 +117,13 @@ export const useHandlePlayQueueAdd = () => {
                         songList = await getAlbumSongsById({ id, query, queryClient, server });
                     } else if (itemType === LibraryItem.ALBUM_ARTIST) {
                         songList = await getAlbumArtistSongsById({
+                            id,
+                            query,
+                            queryClient,
+                            server,
+                        });
+                    } else if (itemType === LibraryItem.ARTIST) {
+                        songList = await getArtistSongsById({
                             id,
                             query,
                             queryClient,

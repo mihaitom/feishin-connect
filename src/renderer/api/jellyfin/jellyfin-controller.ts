@@ -700,7 +700,9 @@ export const JellyfinController: ControllerEndpoint = {
             : undefined;
         const artistIdsFilter = query.artistIds
             ? formatCommaDelimitedString(query.artistIds)
-            : undefined;
+            : query.albumArtistIds
+              ? formatCommaDelimitedString(query.albumArtistIds)
+              : undefined;
 
         const res = await jfApiClient(apiClientProps).getSongList({
             params: {

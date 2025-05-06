@@ -66,7 +66,11 @@ interface AlbumArtistDetailContentProps {
 export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailContentProps) => {
     const { t } = useTranslation();
     const { artistItems, externalLinks } = useGeneralSettings();
-    const { albumArtistId } = useParams() as { albumArtistId: string };
+    const { albumArtistId, artistId } = useParams() as {
+        albumArtistId?: string;
+        artistId?: string;
+    };
+    const routeId = (artistId || albumArtistId) as string;
     const cq = useContainerQuery();
     const handlePlayQueueAdd = usePlayQueueAdd();
     const server = useCurrentServer();
@@ -85,24 +89,24 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
     }, [artistItems]);
 
     const detailQuery = useAlbumArtistDetail({
-        query: { id: albumArtistId },
+        query: { id: routeId },
         serverId: server?.id,
     });
 
     const artistDiscographyLink = `${generatePath(
         AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_DISCOGRAPHY,
         {
-            albumArtistId,
+            albumArtistId: routeId,
         },
     )}?${createSearchParams({
-        artistId: albumArtistId,
+        artistId: routeId,
         artistName: detailQuery?.data?.name || '',
     })}`;
 
     const artistSongsLink = `${generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_SONGS, {
-        albumArtistId,
+        albumArtistId: routeId,
     })}?${createSearchParams({
-        artistId: albumArtistId,
+        artistId: routeId,
         artistName: detailQuery?.data?.name || '',
     })}`;
 
@@ -111,7 +115,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
             enabled: enabledItem.recentAlbums,
         },
         query: {
-            artistIds: [albumArtistId],
+            artistIds: [routeId],
             limit: 15,
             sortBy: AlbumListSort.RELEASE_DATE,
             sortOrder: SortOrder.DESC,
@@ -125,7 +129,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
             enabled: enabledItem.compilations && server?.type !== ServerType.SUBSONIC,
         },
         query: {
-            artistIds: [albumArtistId],
+            artistIds: [routeId],
             compilation: true,
             limit: 15,
             sortBy: AlbumListSort.RELEASE_DATE,
@@ -141,7 +145,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
         },
         query: {
             artist: detailQuery?.data?.name || '',
-            artistId: albumArtistId,
+            artistId: routeId,
         },
         serverId: server?.id,
     });
@@ -292,8 +296,8 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
     const handlePlay = async (playType?: Play) => {
         handlePlayQueueAdd?.({
             byItemType: {
-                id: [albumArtistId],
-                type: LibraryItem.ALBUM_ARTIST,
+                id: [routeId],
+                type: albumArtistId ? LibraryItem.ALBUM : LibraryItem.ALBUM_ARTIST,
             },
             playType: playType || playButtonBehavior,
         });
@@ -528,7 +532,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                                             to={generatePath(
                                                 AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_TOP_SONGS,
                                                 {
-                                                    albumArtistId,
+                                                    albumArtistId: routeId,
                                                 },
                                             )}
                                             variant="subtle"
