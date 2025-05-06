@@ -30,13 +30,13 @@ export const useFixedTableHeader = ({ enabled }: { enabled: boolean }) => {
         const root = document.querySelector('main .ag-root');
 
         if (!isTableHeaderInView && isTableInView) {
-            header?.classList.add('ag-header-fixed');
+            header?.classList.add('ag-header-fixed', 'ag-header-window-bar');
             root?.classList.add('ag-header-fixed-margin');
         } else if (!isTableInView) {
             header?.classList.remove('ag-header-fixed');
             root?.classList.remove('ag-header-fixed-margin');
         } else if (isTableHeaderInView) {
-            header?.classList.remove('ag-header-fixed');
+            header?.classList.remove('ag-header-fixed', 'ag-header-window-bar');
             root?.classList.remove('ag-header-fixed-margin');
         }
     }, [enabled, isTableHeaderInView, isTableInView, windowBarStyle]);
