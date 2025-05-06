@@ -76,8 +76,6 @@ export const useHandlePlayQueueAdd = () => {
             let songs: QueueSong[] | null = null;
             let initialSongIndex = 0;
 
-            console.log('options :>> ', options);
-
             if (byItemType) {
                 let songList: SongListResponse | undefined;
                 const { type: itemType, id } = byItemType;
