@@ -162,7 +162,7 @@ export const useHandlePlayQueueAdd = () => {
             if (!songs || songs?.length === 0)
                 return toast.warn({
                     message: t('common.noResultsFromQuery', { postProcess: 'sentenceCase' }),
-                    title: t('player.playbackFetchNoResults'),
+                    title: t('player.playbackFetchNoResults', { postProcess: 'sentenceCase' }),
                 });
 
             if (initialIndex) {
