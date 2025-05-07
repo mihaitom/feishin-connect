@@ -30,14 +30,26 @@ export const useFixedTableHeader = ({ enabled }: { enabled: boolean }) => {
         const root = document.querySelector('main .ag-root');
 
         if (!isTableHeaderInView && isTableInView) {
-            header?.classList.add('ag-header-fixed', 'ag-header-window-bar');
+            header?.classList.add('ag-header-fixed');
             root?.classList.add('ag-header-fixed-margin');
+
+            if (windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS) {
+                header?.classList.add('ag-header-window-bar');
+            }
         } else if (!isTableInView) {
             header?.classList.remove('ag-header-fixed');
             root?.classList.remove('ag-header-fixed-margin');
+
+            if (windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS) {
+                header?.classList.remove('ag-header-window-bar');
+            }
         } else if (isTableHeaderInView) {
-            header?.classList.remove('ag-header-fixed', 'ag-header-window-bar');
+            header?.classList.remove('ag-header-fixed');
             root?.classList.remove('ag-header-fixed-margin');
+
+            if (windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS) {
+                header?.classList.remove('ag-header-window-bar');
+            }
         }
     }, [enabled, isTableHeaderInView, isTableInView, windowBarStyle]);
 
