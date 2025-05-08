@@ -28,25 +28,29 @@ export const AlbumArtistDetailHeader = forwardRef(
             serverId: server?.id,
         });
 
+        const albumCount = detailQuery?.data?.albumCount;
+        const songCount = detailQuery?.data?.songCount;
+        const duration = detailQuery?.data?.duration;
+        const durationEnabled = duration !== null && duration !== undefined;
+
         const metadataItems = [
             {
-                enabled: detailQuery?.data?.albumCount,
+                enabled: albumCount !== null && albumCount !== undefined,
                 id: 'albumCount',
                 secondary: false,
-                value: t('entity.albumWithCount', { count: detailQuery?.data?.albumCount || 0 }),
+                value: t('entity.albumWithCount', { count: albumCount || 0 }),
             },
             {
-                enabled: detailQuery?.data?.songCount,
+                enabled: songCount !== null && songCount !== undefined,
                 id: 'songCount',
                 secondary: false,
-                value: t('entity.trackWithCount', { count: detailQuery?.data?.songCount || 0 }),
+                value: t('entity.trackWithCount', { count: songCount || 0 }),
             },
             {
-                enabled: detailQuery.data?.duration,
+                enabled: durationEnabled,
                 id: 'duration',
                 secondary: true,
-                value:
-                    detailQuery?.data?.duration && formatDurationString(detailQuery.data.duration),
+                value: durationEnabled && formatDurationString(duration),
             },
         ];
 
