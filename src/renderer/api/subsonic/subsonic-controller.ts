@@ -935,7 +935,9 @@ export const SubsonicController: ControllerEndpoint = {
             };
         }
 
-        if (query.albumIds || query.artistIds) {
+        const artistIds = query.albumArtistIds || query.artistIds;
+
+        if (query.albumIds || artistIds) {
             if (query.albumIds) {
                 for (const albumId of query.albumIds) {
                     fromAlbumPromises.push(
@@ -948,8 +950,8 @@ export const SubsonicController: ControllerEndpoint = {
                 }
             }
 
-            if (query.artistIds) {
-                for (const artistId of query.artistIds) {
+            if (artistIds) {
+                for (const artistId of artistIds) {
                     artistDetailPromises.push(
                         ssApiClient(apiClientProps).getArtist({
                             query: {
