@@ -340,9 +340,15 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
         }
     };
 
+    const albumCount = detailQuery?.data?.albumCount;
+    const artistContextItems =
+        (albumCount ?? 1) > 0
+            ? ARTIST_CONTEXT_MENU_ITEMS
+            : ARTIST_CONTEXT_MENU_ITEMS.filter((item) => !item.id.toLowerCase().includes('play'));
+
     const handleGeneralContextMenu = useHandleGeneralContextMenu(
         LibraryItem.ALBUM_ARTIST,
-        ARTIST_CONTEXT_MENU_ITEMS,
+        artistContextItems,
     );
 
     const topSongs = topSongsQuery?.data?.items?.slice(0, 10);
@@ -369,7 +375,10 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
             <LibraryBackgroundOverlay $backgroundColor={background} />
             <DetailContainer>
                 <Group spacing="md">
-                    <PlayButton onClick={() => handlePlay(playButtonBehavior)} />
+                    <PlayButton
+                        disabled={albumCount === 0}
+                        onClick={() => handlePlay(playButtonBehavior)}
+                    />
                     <Group spacing="xs">
                         <Button
                             compact
