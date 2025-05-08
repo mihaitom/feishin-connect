@@ -297,7 +297,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
         handlePlayQueueAdd?.({
             byItemType: {
                 id: [routeId],
-                type: albumArtistId ? LibraryItem.ALBUM : LibraryItem.ALBUM_ARTIST,
+                type: albumArtistId ? LibraryItem.ALBUM_ARTIST : LibraryItem.ARTIST,
             },
             playType: playType || playButtonBehavior,
         });
