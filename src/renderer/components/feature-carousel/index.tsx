@@ -207,11 +207,14 @@ export const FeatureCarousel = ({ data }: FeatureCarouselProps) => {
                                             </Badge>
                                         ))}
                                         <Badge size="lg">{currentItem?.releaseYear}</Badge>
-                                        <Badge size="lg">
-                                            {t('entity.trackWithCount', {
-                                                count: currentItem?.songCount || 0,
-                                            })}
-                                        </Badge>
+                                        {currentItem?.songCount !== null &&
+                                            currentItem?.songCount !== undefined && (
+                                                <Badge size="lg">
+                                                    {t('entity.trackWithCount', {
+                                                        count: currentItem?.songCount || 0,
+                                                    })}
+                                                </Badge>
+                                            )}
                                     </Group>
                                     <Group position="apart">
                                         <Button
