@@ -734,6 +734,22 @@ export const useSettingsStore = create<SettingsSlice>()(
         ),
         {
             merge: mergeOverridingColumns,
+            migrate(persistedState, version) {
+                if (version === 8) {
+                    const state = persistedState as SettingsSlice;
+                    state.general.sidebarItems = state.general.sidebarItems.filter(
+                        (item) => item.id !== 'Folders',
+                    );
+                    state.general.sidebarItems.push({
+                        disabled: false,
+                        id: 'Artists-all',
+                        label: i18n.t('page.sidebar.artists'),
+                        route: AppRoute.LIBRARY_ARTISTS,
+                    });
+                }
+
+                return persistedState;
+            },
             name: 'store_settings',
             version: 9,
         },
