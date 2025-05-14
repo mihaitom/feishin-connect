@@ -1,5 +1,6 @@
-import { forwardRef, ReactNode, Ref, useState } from 'react';
-import { Group } from '@mantine/core';
+import { forwardRef, ReactNode, Ref, useCallback, useState } from 'react';
+import { Center, Group } from '@mantine/core';
+import { closeAllModals, openModal } from '@mantine/modals';
 import { AutoTextSize } from 'auto-text-size';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
@@ -58,6 +59,35 @@ export const LibraryHeader = forwardRef(
             }
         };
 
+        const openImage = useCallback(() => {
+            if (imageUrl && !isImageError) {
+                const fullSized = imageUrl.replace(/&?(size|width|height)=\d+/, '');
+
+                openModal({
+                    children: (
+                        <Center
+                            style={{
+                                cursor: 'pointer',
+                                height: 'calc(100vh - 80px)',
+                                width: '100%',
+                            }}
+                            onClick={() => closeAllModals()}
+                        >
+                            <img
+                                alt="cover"
+                                src={fullSized}
+                                style={{
+                                    maxHeight: '100%',
+                                    maxWidth: '100%',
+                                }}
+                            />
+                        </Center>
+                    ),
+                    fullScreen: true,
+                });
+            }
+        }, [imageUrl, isImageError]);
+
         return (
             <div
                 ref={ref}
@@ -72,7 +102,16 @@ export const LibraryHeader = forwardRef(
                         [styles.opaqueOverlay]: albumBackground,
                     })}
                 />
-                <div className={styles.imageSection}>
+                <div
+                    className={styles.imageSection}
+                    role="button"
+                    style={{ cursor: 'pointer' }}
+                    tabIndex={0}
+                    onClick={() => openImage()}
+                    onKeyDown={(event) =>
+                        ['Spacebar', ' ', 'Enter'].includes(event.key) && openImage()
+                    }
+                >
                     {imageUrl && !isImageError ? (
                         <img
                             alt="cover"
