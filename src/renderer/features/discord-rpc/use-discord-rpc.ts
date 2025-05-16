@@ -76,7 +76,6 @@ export const useDiscordRpc = () => {
                     });
 
                     if (info.imageUrl) {
-                        console.log(info.imageUrl);
                         activity.largeImageKey = info.imageUrl;
                     }
                 } catch {
