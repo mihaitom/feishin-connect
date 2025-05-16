@@ -242,6 +242,26 @@ export const NavidromeController: ControllerEndpoint = {
             apiClientProps.server,
         );
     },
+    getAlbumInfo: async (args) => {
+        const { query, apiClientProps } = args;
+
+        const albumInfo = await ssApiClient(apiClientProps).getAlbumInfo2({
+            query: {
+                id: query.id,
+            },
+        });
+
+        if (albumInfo.status !== 200) {
+            throw new Error('Failed to get album info');
+        }
+
+        const info = albumInfo.body.albumInfo;
+
+        return {
+            imageUrl: info.largeImageUrl || info.mediumImageUrl || info.smallImageUrl || null,
+            notes: info.notes || null,
+        };
+    },
     getAlbumList: async (args) => {
         const { query, apiClientProps } = args;
 

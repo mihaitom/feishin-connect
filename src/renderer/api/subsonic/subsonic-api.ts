@@ -51,6 +51,14 @@ export const contract = c.router({
             200: ssType._response.getAlbum,
         },
     },
+    getAlbumInfo2: {
+        method: 'GET',
+        path: 'getAlbumInfo2.view',
+        query: ssType._parameters.albumInfo,
+        responses: {
+            200: ssType._response.albumInfo,
+        },
+    },
     getAlbumList2: {
         method: 'GET',
         path: 'getAlbumList2.view',

@@ -465,6 +465,11 @@ export type AlbumDetailQuery = { id: string };
 
 export type AlbumDetailArgs = { query: AlbumDetailQuery } & BaseEndpointArgs;
 
+export type AlbumInfo = {
+    imageUrl: string | null;
+    notes: string | null;
+};
+
 // Song List
 export type SongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
 
@@ -1246,6 +1251,7 @@ export type ControllerEndpoint = {
     getAlbumArtistList: (args: AlbumArtistListArgs) => Promise<AlbumArtistListResponse>;
     getAlbumArtistListCount: (args: AlbumArtistListArgs) => Promise<number>;
     getAlbumDetail: (args: AlbumDetailArgs) => Promise<AlbumDetailResponse>;
+    getAlbumInfo?: (args: AlbumDetailArgs) => Promise<AlbumInfo>;
     getAlbumList: (args: AlbumListArgs) => Promise<AlbumListResponse>;
     getAlbumListCount: (args: AlbumListArgs) => Promise<number>;
     // getArtistInfo?: (args: any) => void;

@@ -2,6 +2,7 @@
 import isElectron from 'is-electron';
 import { useCallback, useEffect, useRef } from 'react';
 import {
+    getServerById,
     useCurrentSong,
     useCurrentStatus,
     useDiscordSetttings,
@@ -11,6 +12,7 @@ import {
 import { SetActivity } from '@xhayper/discord-rpc';
 import { PlayerStatus } from '/@/renderer/types';
 import { ServerType } from '/@/renderer/api/types';
+import { controller } from '/@/renderer/api/controller';
 
 const discordRpc = isElectron() ? window.electron.discordRpc : null;
 
@@ -61,16 +63,34 @@ export const useDiscordRpc = () => {
             activity.smallImageKey = 'paused';
         }
 
-        if (
-            song?.serverType === ServerType.JELLYFIN &&
-            discordSettings.showServerImage &&
-            song?.imageUrl
-        ) {
-            activity.largeImageKey = song?.imageUrl;
+        if (discordSettings.showServerImage && song) {
+            if (song.serverType === ServerType.JELLYFIN && song.imageUrl) {
+                activity.largeImageKey = song.imageUrl;
+            } else if (song.serverType === ServerType.NAVIDROME) {
+                const server = getServerById(song.serverId);
+
+                try {
+                    const info = await controller.getAlbumInfo({
+                        apiClientProps: { server },
+                        query: { id: song.albumId },
+                    });
+
+                    if (info.imageUrl) {
+                        console.log(info.imageUrl);
+                        activity.largeImageKey = info.imageUrl;
+                    }
+                } catch {
+                    /* empty */
+                }
+            }
         }
 
-        if (generalSettings.lastfmApiKey && song?.album && song?.albumArtists.length) {
-            console.log('Fetching album info for', song.album, song.albumArtists[0].name);
+        if (
+            activity.largeImageKey === undefined &&
+            generalSettings.lastfmApiKey &&
+            song?.album &&
+            song?.albumArtists.length
+        ) {
             const albumInfo = await fetch(
                 `https://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=${generalSettings.lastfmApiKey}&artist=${encodeURIComponent(song.albumArtists[0].name)}&album=${encodeURIComponent(song.album)}&format=json`,
             );

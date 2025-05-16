@@ -149,6 +149,32 @@ export const DiscordSettings = () => {
         },
         {
             control: (
+                <Switch
+                    checked={settings.showServerImage}
+                    onChange={(e) => {
+                        setSettings({
+                            discord: {
+                                ...settings,
+                                showServerImage: e.currentTarget.checked,
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.discordServeImage', {
+                context: 'description',
+
+                discord: 'Discord',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: !isElectron(),
+            title: t('setting.discordServeImage', {
+                discord: 'Discord',
+                postProcess: 'sentenceCase',
+            }),
+        },
+        {
+            control: (
                 <TextInput
                     defaultValue={generalSettings.lastfmApiKey}
                     onBlur={(e) => {

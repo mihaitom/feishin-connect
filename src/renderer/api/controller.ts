@@ -117,6 +117,9 @@ export const controller: GeneralController = {
     getMusicFolderList(args) {
         return apiController('getMusicFolderList', args.apiClientProps.server?.type)?.(args);
     },
+    getAlbumInfo(args) {
+        return apiController('getAlbumInfo', args.apiClientProps.server?.type)?.(args);
+    },
     getPlaylistDetail(args) {
         return apiController('getPlaylistDetail', args.apiClientProps.server?.type)?.(args);
     },
