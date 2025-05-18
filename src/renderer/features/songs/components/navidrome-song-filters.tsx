@@ -2,11 +2,12 @@ import { ChangeEvent, useMemo } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
 import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/renderer/api/types';
-import { NumberInput, Select, Switch, Text } from '/@/renderer/components';
+import { NumberInput, Switch, Text } from '/@/renderer/components';
 import { useGenreList } from '/@/renderer/features/genres';
 import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
 import { useTranslation } from 'react-i18next';
 import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
+import { SelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 
 interface NavidromeSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
@@ -149,7 +150,7 @@ export const NavidromeSongFilters = ({
                     onChange={(e) => handleYearFilter(e)}
                 />
                 {!isGenrePage && (
-                    <Select
+                    <SelectWithInvalidData
                         clearable
                         searchable
                         data={genreList}
@@ -166,7 +167,7 @@ export const NavidromeSongFilters = ({
                         key={tag.name}
                         grow
                     >
-                        <Select
+                        <SelectWithInvalidData
                             clearable
                             searchable
                             data={tag.options}

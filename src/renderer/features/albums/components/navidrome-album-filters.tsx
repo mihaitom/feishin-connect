@@ -1,6 +1,6 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
-import { NumberInput, Switch, Text, Select, SpinnerIcon } from '/@/renderer/components';
+import { NumberInput, Switch, Text, SpinnerIcon } from '/@/renderer/components';
 import { AlbumListFilter, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
 import debounce from 'lodash/debounce';
 import { useGenreList } from '/@/renderer/features/genres';
@@ -14,6 +14,7 @@ import {
 } from '/@/renderer/api/types';
 import { useTranslation } from 'react-i18next';
 import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
+import { SelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 
 interface NavidromeAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
@@ -251,7 +252,7 @@ export const NavidromeAlbumFilters = ({
                     min={0}
                     onChange={(e) => handleYearFilter(e)}
                 />
-                <Select
+                <SelectWithInvalidData
                     clearable
                     searchable
                     data={genreList}
@@ -261,7 +262,7 @@ export const NavidromeAlbumFilters = ({
                 />
             </Group>
             <Group grow>
-                <Select
+                <SelectWithInvalidData
                     clearable
                     searchable
                     data={selectableAlbumArtists}
@@ -281,7 +282,7 @@ export const NavidromeAlbumFilters = ({
                         key={tag.name}
                         grow
                     >
-                        <Select
+                        <SelectWithInvalidData
                             clearable
                             searchable
                             data={tag.options}

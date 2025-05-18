@@ -2,11 +2,12 @@ import { ChangeEvent, useMemo } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
 import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/renderer/api/types';
-import { MultiSelect, NumberInput, Switch, Text } from '/@/renderer/components';
+import { NumberInput, Switch, Text } from '/@/renderer/components';
 import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
 import { useTranslation } from 'react-i18next';
 import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
 import { useGenreList } from '/@/renderer/features/genres';
+import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 
 interface JellyfinSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
@@ -201,7 +202,7 @@ export const JellyfinSongFilters = ({
             </Group>
             {!isGenrePage && (
                 <Group grow>
-                    <MultiSelect
+                    <MultiSelectWithInvalidData
                         clearable
                         searchable
                         data={genreList}
@@ -214,7 +215,7 @@ export const JellyfinSongFilters = ({
             )}
             {tagsQuery.data?.boolTags?.length && (
                 <Group grow>
-                    <MultiSelect
+                    <MultiSelectWithInvalidData
                         clearable
                         searchable
                         data={tagsQuery.data.boolTags}

@@ -5,7 +5,7 @@ import type {
 import { Select as MantineSelect, MultiSelect as MantineMultiSelect } from '@mantine/core';
 import styled from 'styled-components';
 
-interface SelectProps extends MantineSelectProps {
+export interface SelectProps extends MantineSelectProps {
     maxWidth?: number | string;
     width?: number | string;
 }
