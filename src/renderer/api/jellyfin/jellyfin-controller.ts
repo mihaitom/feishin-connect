@@ -246,7 +246,7 @@ export const JellyfinController: ControllerEndpoint = {
                 userId: apiClientProps.server.userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, ChildCount',
+                Fields: 'Genres, DateCreated, ChildCount, People, Tags',
             },
         });
 
@@ -255,7 +255,7 @@ export const JellyfinController: ControllerEndpoint = {
                 userId: apiClientProps.server.userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, ParentId',
+                Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
                 IncludeItemTypes: 'Audio',
                 ParentId: query.id,
                 SortBy: 'ParentIndexNumber,IndexNumber,SortName',
@@ -300,6 +300,7 @@ export const JellyfinController: ControllerEndpoint = {
                     query.artistIds && {
                         ContributingArtistIds: query.artistIds[0],
                     }),
+                Fields: 'People, Tags',
                 GenreIds: query.genres ? query.genres.join(',') : undefined,
                 IncludeItemTypes: 'MusicAlbum',
                 IsFavorite: query.favorite,
@@ -523,7 +524,7 @@ export const JellyfinController: ControllerEndpoint = {
                 id: query.id,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId',
+                Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId, People, Tags',
                 IncludeItemTypes: 'Audio',
                 Limit: query.limit,
                 SortBy: query.sortBy ? songListSortMap.jellyfin[query.sortBy] : undefined,
@@ -564,7 +565,7 @@ export const JellyfinController: ControllerEndpoint = {
                 userId: apiClientProps.server?.userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, ParentId',
+                Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
                 GenreIds: query.genre ? query.genre : undefined,
                 IncludeItemTypes: 'Audio',
                 IsPlayed:
@@ -719,7 +720,7 @@ export const JellyfinController: ControllerEndpoint = {
                     query: {
                         AlbumIds: albumIdsFilter,
                         ArtistIds: artistIdsFilter,
-                        Fields: 'Genres, DateCreated, MediaSources, ParentId',
+                        Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
                         GenreIds: query.genreIds?.join(','),
                         IncludeItemTypes: 'Audio',
                         IsFavorite: query.favorite,
@@ -754,7 +755,7 @@ export const JellyfinController: ControllerEndpoint = {
                 query: {
                     AlbumIds: albumIdsFilter,
                     ArtistIds: artistIdsFilter,
-                    Fields: 'Genres, DateCreated, MediaSources, ParentId',
+                    Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
                     GenreIds: query.genreIds?.join(','),
                     IncludeItemTypes: 'Audio',
                     IsFavorite: query.favorite,
@@ -967,6 +968,7 @@ export const JellyfinController: ControllerEndpoint = {
                 },
                 query: {
                     EnableTotalRecordCount: true,
+                    Fields: 'People, Tags',
                     ImageTypeLimit: 1,
                     IncludeItemTypes: 'MusicAlbum',
                     Limit: query.albumLimit,
@@ -1014,7 +1016,7 @@ export const JellyfinController: ControllerEndpoint = {
                 },
                 query: {
                     EnableTotalRecordCount: true,
-                    Fields: 'Genres, DateCreated, MediaSources, ParentId',
+                    Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
                     IncludeItemTypes: 'Audio',
                     Limit: query.songLimit,
                     Recursive: true,

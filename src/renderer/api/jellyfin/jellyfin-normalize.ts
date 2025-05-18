@@ -12,6 +12,7 @@ import {
     Genre,
     ServerListItem,
     ServerType,
+    RelatedArtist,
 } from '/@/renderer/api/types';
 
 const getStreamUrl = (args: {
@@ -121,6 +122,48 @@ const getPlaylistCoverArtUrl = (args: { baseUrl: string; item: JFPlaylist; size:
     );
 };
 
+type AlbumOrSong = z.infer<typeof jfType._response.song> | z.infer<typeof jfType._response.album>;
+
+const getPeople = (item: AlbumOrSong): Record<string, RelatedArtist[]> | null => {
+    if (item.People) {
+        const participants: Record<string, RelatedArtist[]> = {};
+
+        for (const person of item.People) {
+            const key = person.Type || '';
+            const item: RelatedArtist = {
+                // for other roles, we just want to display this and not filter.
+                // filtering (and links) would require a separate field, PersonIds
+                id: '',
+                imageUrl: null,
+                name: person.Name,
+            };
+
+            if (key in participants) {
+                participants[key].push(item);
+            } else {
+                participants[key] = [item];
+            }
+        }
+
+        return participants;
+    }
+
+    return null;
+};
+
+const getTags = (item: AlbumOrSong): Record<string, string[]> | null => {
+    if (item.Tags) {
+        const tags: Record<string, string[]> = {};
+        for (const tag of item.Tags) {
+            tags[tag] = [];
+        }
+
+        return tags;
+    }
+
+    return null;
+};
+
 const normalizeSong = (
     item: z.infer<typeof jfType._response.song>,
     server: ServerListItem | null,
@@ -176,7 +219,7 @@ const normalizeSong = (
         lastPlayedAt: null,
         lyrics: null,
         name: item.Name,
-        participants: null,
+        participants: getPeople(item),
         path: (item.MediaSources && item.MediaSources[0]?.Path) || null,
         peak: null,
         playCount: (item.UserData && item.UserData.PlayCount) || 0,
@@ -198,6 +241,7 @@ const normalizeSong = (
             mediaSourceId: item.MediaSources?.[0]?.Id,
             server,
         }),
+        tags: getTags(item),
         trackNumber: item.IndexNumber,
         uniqueId: nanoid(),
         updatedAt: item.DateCreated,
@@ -247,7 +291,7 @@ const normalizeAlbum = (
         mbzId: item.ProviderIds?.MusicBrainzAlbum || null,
         name: item.Name,
         originalDate: null,
-        participants: null,
+        participants: getPeople(item),
         playCount: item.UserData?.PlayCount || 0,
         releaseDate: item.PremiereDate?.split('T')[0] || null,
         releaseYear: item.ProductionYear || null,
@@ -256,6 +300,7 @@ const normalizeAlbum = (
         size: null,
         songCount: item?.ChildCount || null,
         songs: item.Songs?.map((song) => normalizeSong(song, server, '', imageSize)),
+        tags: getTags(item),
         uniqueId: nanoid(),
         updatedAt: item?.DateLastMediaAdded || item.DateCreated,
         userFavorite: item.UserData?.IsFavorite || false,

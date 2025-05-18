@@ -155,6 +155,7 @@ const album = z.object({
     sortArtistName: z.string(),
     starred: z.boolean(),
     starredAt: z.string().optional(),
+    tags: z.record(z.string(), z.array(z.string())).optional(),
     updatedAt: z.string(),
 });
 

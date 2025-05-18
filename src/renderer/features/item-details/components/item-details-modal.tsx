@@ -21,6 +21,7 @@ import { AppRoute } from '/@/renderer/router/routes';
 import { Separator } from '/@/renderer/components/separator';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { formatDateRelative, formatRating } from '/@/renderer/utils/format';
+import { SEPARATOR_STRING } from '/@/renderer/api/utils';
 
 export type ItemDetailsModalProps = {
     item: Album | AlbumArtist | Song;
@@ -277,9 +278,40 @@ const SongPropertyMapping: ItemDetailRow<Song>[] = [
     { label: 'filter.comment', render: formatComment },
 ];
 
-const handleParticipants = (item: Album | Song) => {
+const handleTags = (item: Album | Song, t: TFunction) => {
+    if (item.tags) {
+        const tags = Object.entries(item.tags).map(([tag, fields]) => {
+            return (
+                <tr key={tag}>
+                    <td>
+                        {tag.slice(0, 1).toLocaleUpperCase()}
+                        {tag.slice(1)}
+                    </td>
+                    <td>{fields.length === 0 ? BoolField(true) : fields.join(SEPARATOR_STRING)}</td>
+                </tr>
+            );
+        });
+
+        if (tags.length) {
+            return [
+                <tr key="tags">
+                    <td>
+                        <h3>{t('common.tags', { postProcess: 'sentenceCase' })}</h3>
+                    </td>
+                    <td>
+                        <h3>{tags.length}</h3>
+                    </td>
+                </tr>,
+            ].concat(tags);
+        }
+    }
+
+    return [];
+};
+
+const handleParticipants = (item: Album | Song, t: TFunction) => {
     if (item.participants) {
-        return Object.entries(item.participants).map(([role, participants]) => {
+        const participants = Object.entries(item.participants).map(([role, participants]) => {
             return (
                 <tr key={role}>
                     <td>
@@ -290,6 +322,23 @@ const handleParticipants = (item: Album | Song) => {
                 </tr>
             );
         });
+
+        if (participants.length) {
+            return [
+                <tr key="participants">
+                    <td>
+                        <h3>
+                            {t('common.additionalParticipants', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </h3>
+                    </td>
+                    <td>
+                        <h3>{participants.length}</h3>
+                    </td>
+                </tr>,
+            ].concat(participants);
+        }
     }
 
     return [];
@@ -302,14 +351,16 @@ export const ItemDetailsModal = ({ item }: ItemDetailsModalProps) => {
     switch (item.itemType) {
         case LibraryItem.ALBUM:
             body = AlbumPropertyMapping.map((rule) => handleRow(t, item, rule));
-            body.push(...handleParticipants(item));
+            body.push(...handleParticipants(item, t));
+            body.push(...handleTags(item, t));
             break;
         case LibraryItem.ALBUM_ARTIST:
             body = AlbumArtistPropertyMapping.map((rule) => handleRow(t, item, rule));
             break;
         case LibraryItem.SONG:
             body = SongPropertyMapping.map((rule) => handleRow(t, item, rule));
-            body.push(...handleParticipants(item));
+            body.push(...handleParticipants(item, t));
+            body.push(...handleTags(item, t));
             break;
         default:
             body = [];
