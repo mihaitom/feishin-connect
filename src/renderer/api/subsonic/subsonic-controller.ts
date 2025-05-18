@@ -529,7 +529,6 @@ export const SubsonicController: ControllerEndpoint = {
         }
 
         let artists = (res.body.artists?.index || []).flatMap((index) => index.artist);
-        console.log(artists.length);
         if (query.role) {
             artists = artists.filter(
                 (artist) => !artist.roles || artist.roles.includes(query.role!),
@@ -811,7 +810,7 @@ export const SubsonicController: ControllerEndpoint = {
         }
 
         if (subsonicFeatures[SubsonicExtensions.SONG_LYRICS]) {
-            features.lyricsMultipleStructured = true;
+            features.lyricsMultipleStructured = [1];
         }
 
         return { features, id: apiClientProps.server?.id, version: ping.body.serverVersion };

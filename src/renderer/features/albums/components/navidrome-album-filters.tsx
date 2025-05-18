@@ -13,6 +13,7 @@ import {
     SortOrder,
 } from '/@/renderer/api/types';
 import { useTranslation } from 'react-i18next';
+import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
 
 interface NavidromeAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
@@ -62,6 +63,13 @@ export const NavidromeAlbumFilters = ({
         }) as AlbumListFilter;
         onFilterChange(updatedFilters);
     }, 250);
+
+    const tagsQuery = useTagList({
+        query: {
+            type: LibraryItem.SONG,
+        },
+        serverId,
+    });
 
     const toggleFilters = [
         {
@@ -200,6 +208,25 @@ export const NavidromeAlbumFilters = ({
         onFilterChange(updatedFilters);
     };
 
+    const handleTagFilter = debounce((tag: string, e: string | null) => {
+        const updatedFilters = setFilter({
+            customFilters,
+            data: {
+                _custom: {
+                    ...filter._custom,
+                    navidrome: {
+                        ...filter._custom?.navidrome,
+                        [tag]: e || undefined,
+                    },
+                },
+            },
+            itemType: LibraryItem.SONG,
+            key: pageKey,
+        }) as AlbumListFilter;
+
+        onFilterChange(updatedFilters);
+    }, 250);
+
     return (
         <Stack p="0.8rem">
             {toggleFilters.map((filter) => (
@@ -248,6 +275,25 @@ export const NavidromeAlbumFilters = ({
                     onSearchChange={setAlbumArtistSearchTerm}
                 />
             </Group>
+            {tagsQuery.data?.enumTags?.length &&
+                tagsQuery.data.enumTags.map((tag) => (
+                    <Group
+                        key={tag.name}
+                        grow
+                    >
+                        <Select
+                            clearable
+                            searchable
+                            data={tag.options}
+                            defaultValue={
+                                filter._custom?.navidrome?.[tag.name] as string | undefined
+                            }
+                            label={tag.name}
+                            width={150}
+                            onChange={(value) => handleTagFilter(tag.name, value)}
+                        />
+                    </Group>
+                ))}
         </Stack>
     );
 };

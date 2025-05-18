@@ -6,6 +6,7 @@ import { NumberInput, Select, Switch, Text } from '/@/renderer/components';
 import { useGenreList } from '/@/renderer/features/genres';
 import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
 import { useTranslation } from 'react-i18next';
+import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
 
 interface NavidromeSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
@@ -35,6 +36,13 @@ export const NavidromeSongFilters = ({
         serverId,
     });
 
+    const tagsQuery = useTagList({
+        query: {
+            type: LibraryItem.SONG,
+        },
+        serverId,
+    });
+
     const genreList = useMemo(() => {
         if (!genreListQuery?.data) return [];
         return genreListQuery.data.items.map((genre) => ({
@@ -49,6 +57,25 @@ export const NavidromeSongFilters = ({
             data: {
                 _custom: filter._custom,
                 genreIds: e ? [e] : undefined,
+            },
+            itemType: LibraryItem.SONG,
+            key: pageKey,
+        }) as SongListFilter;
+
+        onFilterChange(updatedFilters);
+    }, 250);
+
+    const handleTagFilter = debounce((tag: string, e: string | null) => {
+        const updatedFilters = setFilter({
+            customFilters,
+            data: {
+                _custom: {
+                    ...filter._custom,
+                    navidrome: {
+                        ...filter._custom?.navidrome,
+                        [tag]: e || undefined,
+                    },
+                },
             },
             itemType: LibraryItem.SONG,
             key: pageKey,
@@ -84,6 +111,7 @@ export const NavidromeSongFilters = ({
                 _custom: {
                     ...filter._custom,
                     navidrome: {
+                        ...filter._custom?.navidrome,
                         year: e === '' ? undefined : (e as number),
                     },
                 },
@@ -132,6 +160,25 @@ export const NavidromeSongFilters = ({
                     />
                 )}
             </Group>
+            {tagsQuery.data?.enumTags?.length &&
+                tagsQuery.data.enumTags.map((tag) => (
+                    <Group
+                        key={tag.name}
+                        grow
+                    >
+                        <Select
+                            clearable
+                            searchable
+                            data={tag.options}
+                            defaultValue={
+                                filter._custom?.navidrome?.[tag.name] as string | undefined
+                            }
+                            label={tag.name}
+                            width={150}
+                            onChange={(value) => handleTagFilter(tag.name, value)}
+                        />
+                    </Group>
+                ))}
         </Stack>
     );
 };

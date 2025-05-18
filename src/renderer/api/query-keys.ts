@@ -294,6 +294,9 @@ export const queryKeys: Record<
             return [serverId, 'song', 'similar'] as const;
         },
     },
+    tags: {
+        list: (serverId: string, type: string) => [serverId, 'tags', type] as const,
+    },
     users: {
         list: (serverId: string, query?: UserListQuery) => {
             if (query) return [serverId, 'users', 'list', query] as const;

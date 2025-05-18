@@ -46,6 +46,8 @@ const NAVIDROME_ROLES: Array<string | { label: string; value: string }> = [
     'remixer',
 ];
 
+const EXCLUDED_TAGS = new Set<string>(['disctotal', 'genre', 'tracktotal']);
+
 const excludeMissing = (server: ServerListItem | null) => {
     if (hasFeature(server, ServerFeature.BFR)) {
         return { missing: false };
@@ -484,11 +486,12 @@ export const NavidromeController: ControllerEndpoint = {
         }
 
         const features: ServerFeatures = {
-            bfr: !!navidromeFeatures[ServerFeature.BFR],
-            lyricsMultipleStructured: !!navidromeFeatures[SubsonicExtensions.SONG_LYRICS],
-            playlistsSmart: !!navidromeFeatures[ServerFeature.PLAYLISTS_SMART],
-            publicPlaylist: true,
-            sharingAlbumSong: !!navidromeFeatures[ServerFeature.SHARING_ALBUM_SONG],
+            bfr: navidromeFeatures[ServerFeature.BFR],
+            lyricsMultipleStructured: navidromeFeatures[SubsonicExtensions.SONG_LYRICS],
+            playlistsSmart: navidromeFeatures[ServerFeature.PLAYLISTS_SMART],
+            publicPlaylist: [1],
+            sharingAlbumSong: navidromeFeatures[ServerFeature.SHARING_ALBUM_SONG],
+            tags: navidromeFeatures[ServerFeature.BFR],
         };
 
         return { features, id: apiClientProps.server?.id, version: ping.body.serverVersion! };
@@ -597,6 +600,45 @@ export const NavidromeController: ControllerEndpoint = {
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
     getStructuredLyrics: SubsonicController.getStructuredLyrics,
+    getTags: async (args) => {
+        const { apiClientProps } = args;
+
+        if (!hasFeature(apiClientProps.server, ServerFeature.TAGS)) {
+            return { boolTags: undefined, enumTags: undefined };
+        }
+
+        const res = await ndApiClient(apiClientProps).getTags();
+
+        if (res.status !== 200) {
+            throw new Error('failed to get tags');
+        }
+
+        const tagsToValues = new Map<string, string[]>();
+
+        for (const tag of res.body.data) {
+            if (!EXCLUDED_TAGS.has(tag.tagName)) {
+                if (tagsToValues.has(tag.tagName)) {
+                    tagsToValues.get(tag.tagName)!.push(tag.tagValue);
+                } else {
+                    tagsToValues.set(tag.tagName, [tag.tagValue]);
+                }
+            }
+        }
+
+        return {
+            boolTags: undefined,
+            enumTags: Array.from(tagsToValues)
+                .map((data) => ({
+                    name: data[0],
+                    options: data[1].sort((a, b) =>
+                        a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()),
+                    ),
+                }))
+                .sort((a, b) =>
+                    a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()),
+                ),
+        };
+    },
     getTopSongs: SubsonicController.getTopSongs,
     getTranscodingUrl: SubsonicController.getTranscodingUrl,
     getUserList: async (args) => {

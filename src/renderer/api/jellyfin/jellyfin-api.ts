@@ -104,6 +104,15 @@ export const contract = c.router({
             400: jfType._response.error,
         },
     },
+    getFilterList: {
+        method: 'GET',
+        path: 'items/filters',
+        query: jfType._parameters.filterList,
+        responses: {
+            200: jfType._response.filters,
+            400: jfType._response.error,
+        },
+    },
     getGenreList: {
         method: 'GET',
         path: 'genres',

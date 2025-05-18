@@ -7,6 +7,7 @@ export enum ServerFeature {
     PLAYLISTS_SMART = 'playlistsSmart',
     PUBLIC_PLAYLIST = 'publicPlaylist',
     SHARING_ALBUM_SONG = 'sharingAlbumSong',
+    TAGS = 'tags',
 }
 
-export type ServerFeatures = Partial<Record<ServerFeature, boolean>>;
+export type ServerFeatures = Partial<Record<ServerFeature, number[]>>;

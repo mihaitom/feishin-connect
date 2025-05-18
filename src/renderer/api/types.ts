@@ -1239,6 +1239,25 @@ export type TranscodingArgs = {
     query: TranscodingQuery;
 } & BaseEndpointArgs;
 
+export type TagQuery = {
+    folder?: string;
+    type: LibraryItem.ALBUM | LibraryItem.SONG;
+};
+
+export type TagArgs = {
+    query: TagQuery;
+} & BaseEndpointArgs;
+
+export type Tag = {
+    name: string;
+    options: string[];
+};
+
+export type TagResponses = {
+    boolTags?: string[];
+    enumTags?: Tag[];
+};
+
 export type ControllerEndpoint = {
     addToPlaylist: (args: AddToPlaylistArgs) => Promise<AddToPlaylistResponse>;
     authenticate: (
@@ -1275,6 +1294,7 @@ export type ControllerEndpoint = {
     getSongList: (args: SongListArgs) => Promise<SongListResponse>;
     getSongListCount: (args: SongListArgs) => Promise<number>;
     getStructuredLyrics?: (args: StructuredLyricsArgs) => Promise<StructuredLyric[]>;
+    getTags?: (args: TagArgs) => Promise<TagResponses>;
     getTopSongs: (args: TopSongListArgs) => Promise<TopSongListResponse>;
     getTranscodingUrl: (args: TranscodingArgs) => string;
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;

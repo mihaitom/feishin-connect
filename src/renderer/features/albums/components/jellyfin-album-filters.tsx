@@ -14,6 +14,7 @@ import { MultiSelect, NumberInput, SpinnerIcon, Switch, Text } from '/@/renderer
 import { useAlbumArtistList } from '/@/renderer/features/artists/queries/album-artist-list-query';
 import { useGenreList } from '/@/renderer/features/genres';
 import { AlbumListFilter, useListStoreActions } from '/@/renderer/store';
+import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
 
 interface JellyfinAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
@@ -52,6 +53,18 @@ export const JellyfinAlbumFilters = ({
             value: genre.id,
         }));
     }, [genreListQuery.data]);
+
+    const tagsQuery = useTagList({
+        query: {
+            folder: filter?.musicFolderId,
+            type: LibraryItem.SONG,
+        },
+        serverId,
+    });
+
+    const selectedTags = useMemo(() => {
+        return filter?._custom?.jellyfin?.Tags?.split('|');
+    }, [filter?._custom?.jellyfin?.Tags]);
 
     const toggleFilters = [
         {
@@ -150,6 +163,24 @@ export const JellyfinAlbumFilters = ({
         onFilterChange(updatedFilters);
     };
 
+    const handleTagFilter = debounce((e: string[] | undefined) => {
+        const updatedFilters = setFilter({
+            customFilters,
+            data: {
+                _custom: {
+                    ...filter?._custom,
+                    jellyfin: {
+                        ...filter?._custom?.jellyfin,
+                        Tags: e?.join('|') || undefined,
+                    },
+                },
+            },
+            itemType: LibraryItem.SONG,
+            key: pageKey,
+        }) as AlbumListFilter;
+        onFilterChange(updatedFilters);
+    }, 250);
+
     return (
         <Stack p="0.8rem">
             {toggleFilters.map((filter) => (
@@ -213,6 +244,19 @@ export const JellyfinAlbumFilters = ({
                     onSearchChange={setAlbumArtistSearchTerm}
                 />
             </Group>
+            {tagsQuery.data?.boolTags?.length && (
+                <Group grow>
+                    <MultiSelect
+                        clearable
+                        searchable
+                        data={tagsQuery.data.boolTags}
+                        defaultValue={selectedTags}
+                        label={t('common.tags', { postProcess: 'sentenceCase' })}
+                        width={250}
+                        onChange={handleTagFilter}
+                    />
+                </Group>
+            )}
         </Stack>
     );
 };

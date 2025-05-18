@@ -48,7 +48,7 @@ export const hasFeature = (server: ServerListItem | null, feature: ServerFeature
         return false;
     }
 
-    return server.features[feature] ?? false;
+    return (server.features[feature]?.length || 0) > 0;
 };
 
 export type VersionInfo = ReadonlyArray<[string, Record<string, readonly number[]>]>;

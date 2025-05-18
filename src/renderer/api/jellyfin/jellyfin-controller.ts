@@ -8,6 +8,7 @@ import {
     Song,
     Played,
     ControllerEndpoint,
+    LibraryItem,
 } from '/@/renderer/api/types';
 import { jfApiClient } from '/@/renderer/api/jellyfin/jellyfin-api';
 import { jfNormalize } from './jellyfin-normalize';
@@ -15,7 +16,7 @@ import { jfType } from '/@/renderer/api/jellyfin/jellyfin-types';
 import { z } from 'zod';
 import { JFSongListSort, JFSortOrder } from '/@/renderer/api/jellyfin.types';
 import { ServerFeature } from '/@/renderer/api/features-types';
-import { VersionInfo, getFeatures } from '/@/renderer/api/utils';
+import { VersionInfo, getFeatures, hasFeature } from '/@/renderer/api/utils';
 import chunk from 'lodash/chunk';
 
 const formatCommaDelimitedString = (value: string[]) => {
@@ -35,6 +36,7 @@ const VERSION_INFO: VersionInfo = [
             [ServerFeature.PUBLIC_PLAYLIST]: [1],
         },
     ],
+    ['10.0.0', { [ServerFeature.TAGS]: [1] }],
 ];
 
 export const JellyfinController: ControllerEndpoint = {
@@ -803,6 +805,31 @@ export const JellyfinController: ControllerEndpoint = {
             apiClientProps,
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
+    getTags: async (args) => {
+        const { apiClientProps, query } = args;
+
+        if (!hasFeature(apiClientProps.server, ServerFeature.TAGS)) {
+            return { boolTags: undefined, enumTags: undefined };
+        }
+
+        const res = await jfApiClient(apiClientProps).getFilterList({
+            query: {
+                IncludeItemTypes: query.type === LibraryItem.SONG ? 'Audio' : 'MusicAlbum',
+                ParentId: query.folder,
+                UserId: apiClientProps.server?.userId ?? '',
+            },
+        });
+
+        if (res.status !== 200) {
+            throw new Error('failed to get tags');
+        }
+
+        return {
+            boolTags: res.body.Tags?.sort((a, b) =>
+                a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()),
+            ),
+        };
+    },
     getTopSongs: async (args) => {
         const { apiClientProps, query } = args;
 

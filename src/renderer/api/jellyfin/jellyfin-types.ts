@@ -697,6 +697,18 @@ export enum JellyfinExtensions {
 
 const moveItem = z.null();
 
+const filterListParameters = z.object({
+    IncludeItemTypes: z.string().optional(),
+    ParentId: z.string().optional(),
+    UserId: z.string().optional(),
+});
+
+const filters = z.object({
+    Genres: z.string().array().optional(),
+    Tags: z.string().array().optional(),
+    Years: z.number().array().optional(),
+});
+
 export const jfType = {
     _enum: {
         albumArtistList: albumArtistListSort,
@@ -718,6 +730,7 @@ export const jfType = {
         createPlaylist: createPlaylistParameters,
         deletePlaylist: deletePlaylistParameters,
         favorite: favoriteParameters,
+        filterList: filterListParameters,
         genreList: genreListParameters,
         musicFolderList: musicFolderListParameters,
         playlistDetail: playlistDetailParameters,
@@ -742,6 +755,7 @@ export const jfType = {
         deletePlaylist,
         error,
         favorite,
+        filters,
         genre,
         genreList,
         lyrics,

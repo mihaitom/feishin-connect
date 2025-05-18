@@ -3,9 +3,10 @@ import { Divider, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
 import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/renderer/api/types';
 import { MultiSelect, NumberInput, Switch, Text } from '/@/renderer/components';
-import { useGenreList } from '/@/renderer/features/genres';
 import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
 import { useTranslation } from 'react-i18next';
+import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
+import { useGenreList } from '/@/renderer/features/genres';
 
 interface JellyfinSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
@@ -24,9 +25,10 @@ export const JellyfinSongFilters = ({
     const { setFilter } = useListStoreActions();
     const filter = useListFilterByKey<SongListQuery>({ key: pageKey });
 
-    const isGenrePage = customFilters?._custom?.jellyfin?.GenreIds !== undefined;
+    const isGenrePage = customFilters?.genreIds !== undefined;
 
-    // TODO - eventually replace with /items/filters endpoint to fetch genres and tags specific to the selected library
+    // Despite the fact that getTags returns genres, it only returns genre names.
+    // We prefer using IDs, hence the double query
     const genreListQuery = useGenreList({
         query: {
             musicFolderId: filter?.musicFolderId,
@@ -45,9 +47,21 @@ export const JellyfinSongFilters = ({
         }));
     }, [genreListQuery.data]);
 
+    const tagsQuery = useTagList({
+        query: {
+            folder: filter?.musicFolderId,
+            type: LibraryItem.SONG,
+        },
+        serverId,
+    });
+
     const selectedGenres = useMemo(() => {
         return filter?._custom?.jellyfin?.GenreIds?.split(',');
     }, [filter?._custom?.jellyfin?.GenreIds]);
+
+    const selectedTags = useMemo(() => {
+        return filter?._custom?.jellyfin?.Tags?.split('|');
+    }, [filter?._custom?.jellyfin?.Tags]);
 
     const toggleFilters = [
         {
@@ -133,6 +147,25 @@ export const JellyfinSongFilters = ({
         onFilterChange(updatedFilters);
     }, 250);
 
+    const handleTagFilter = debounce((e: string[] | undefined) => {
+        const updatedFilters = setFilter({
+            customFilters,
+            data: {
+                _custom: {
+                    ...filter?._custom,
+                    jellyfin: {
+                        ...filter?._custom?.jellyfin,
+                        IncludeItemTypes: 'Audio',
+                        Tags: e?.join('|') || undefined,
+                    },
+                },
+            },
+            itemType: LibraryItem.SONG,
+            key: pageKey,
+        }) as SongListFilter;
+        onFilterChange(updatedFilters);
+    }, 250);
+
     return (
         <Stack p="0.8rem">
             {toggleFilters.map((filter) => (
@@ -176,6 +209,19 @@ export const JellyfinSongFilters = ({
                         label={t('entity.genre', { count: 1, postProcess: 'sentenceCase' })}
                         width={250}
                         onChange={handleGenresFilter}
+                    />
+                </Group>
+            )}
+            {tagsQuery.data?.boolTags?.length && (
+                <Group grow>
+                    <MultiSelect
+                        clearable
+                        searchable
+                        data={tagsQuery.data.boolTags}
+                        defaultValue={selectedTags}
+                        label={t('common.tags', { postProcess: 'sentenceCase' })}
+                        width={250}
+                        onChange={handleTagFilter}
                     />
                 </Group>
             )}
