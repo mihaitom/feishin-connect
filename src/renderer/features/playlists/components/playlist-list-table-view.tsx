@@ -1,7 +1,9 @@
-import { MutableRefObject } from 'react';
-import { RowDoubleClickedEvent } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { RowDoubleClickedEvent } from '@ag-grid-community/core';
+import { MutableRefObject } from 'react';
 import { generatePath, useNavigate } from 'react-router';
+
 import { LibraryItem } from '/@/renderer/api/types';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
@@ -15,7 +17,7 @@ interface PlaylistListTableViewProps {
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const PlaylistListTableView = ({ tableRef, itemCount }: PlaylistListTableViewProps) => {
+export const PlaylistListTableView = ({ itemCount, tableRef }: PlaylistListTableViewProps) => {
     const navigate = useNavigate();
     const server = useCurrentServer();
     const pageKey = 'playlist';

@@ -1,6 +1,8 @@
-import { RowDoubleClickedEvent } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { RowDoubleClickedEvent } from '@ag-grid-community/core';
 import { MutableRefObject } from 'react';
+
 import { LibraryItem, QueueSong, SongListQuery } from '/@/renderer/api/types';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
@@ -21,9 +23,9 @@ interface SongListTableViewProps {
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const SongListTableView = ({ tableRef, itemCount }: SongListTableViewProps) => {
+export const SongListTableView = ({ itemCount, tableRef }: SongListTableViewProps) => {
     const server = useCurrentServer();
-    const { pageKey, id, handlePlay, customFilters } = useListContext();
+    const { customFilters, handlePlay, id, pageKey } = useListContext();
     const isFocused = useAppFocus();
     const currentSong = useCurrentSong();
     const status = useCurrentStatus();
@@ -56,15 +58,15 @@ export const SongListTableView = ({ tableRef, itemCount }: SongListTableViewProp
                 key={`table-${tableProps.rowHeight}-${server?.id}`}
                 ref={tableRef}
                 {...tableProps}
-                shouldUpdateSong
                 context={{
                     ...tableProps.context,
                     currentSong,
                     isFocused,
                     status,
                 }}
-                rowClassRules={rowClassRules}
                 onRowDoubleClicked={handleRowDoubleClick}
+                rowClassRules={rowClassRules}
+                shouldUpdateSong
             />
         </VirtualGridAutoSizerContainer>
     );

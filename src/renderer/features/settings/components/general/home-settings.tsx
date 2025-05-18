@@ -1,8 +1,9 @@
 import {
-    useSettingsStoreActions,
-    useGeneralSettings,
     HomeItem,
+    useGeneralSettings,
+    useSettingsStoreActions,
 } from '../../../../store/settings.store';
+
 import { DraggableItems } from '/@/renderer/features/settings/components/general/draggable-items';
 
 const HOME_ITEMS: Array<[string, string]> = [

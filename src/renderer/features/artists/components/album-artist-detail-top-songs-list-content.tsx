@@ -1,7 +1,10 @@
 import type { RowDoubleClickedEvent } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { MutableRefObject } from 'react';
+
 import { useListContext } from '../../../context/list-context';
+
 import { LibraryItem, QueueSong, SongListQuery } from '/@/renderer/api/types';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
@@ -18,8 +21,8 @@ interface AlbumArtistSongListContentProps {
 }
 
 export const AlbumArtistDetailTopSongsListContent = ({
-    tableRef,
     data,
+    tableRef,
 }: AlbumArtistSongListContentProps) => {
     const server = useCurrentServer();
     const { id, pageKey } = useListContext();
@@ -67,11 +70,11 @@ export const AlbumArtistDetailTopSongsListContent = ({
                     shouldUpdateSong
                     {...tableProps}
                     getRowId={(data) => data.data.uniqueId}
+                    onRowDoubleClicked={handleRowDoubleClick}
                     rowClassRules={rowClassRules}
                     rowData={data}
                     rowModelType="clientSide"
                     rowSelection="multiple"
-                    onRowDoubleClicked={handleRowDoubleClick}
                 />
             </VirtualGridAutoSizerContainer>
         </>

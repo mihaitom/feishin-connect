@@ -1,16 +1,17 @@
-import { useCallback, useState } from 'react';
-import { Stack, Group, Divider } from '@mantine/core';
-import { Button, Text, TimeoutButton } from '/@/renderer/components';
+import { Divider, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import isElectron from 'is-electron';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiDeleteBin2Line, RiEdit2Fill } from 'react-icons/ri';
+
+import { ServerListItem as ServerItem } from '/@/renderer/api/types';
+import { Button, Text, TimeoutButton } from '/@/renderer/components';
 import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
 import { ServerSection } from '/@/renderer/features/servers/components/server-section';
 import { useAuthStoreActions } from '/@/renderer/store';
-import { ServerListItem as ServerItem } from '/@/renderer/api/types';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 interface ServerListItemProps {
     server: ServerItem;
@@ -31,7 +32,7 @@ export const ServerListItem = ({ server }: ServerListItemProps) => {
         if (!edit && localSettings && server.savePassword) {
             localSettings
                 .passwordGet(server.id)
-                .then((password: string | null) => {
+                .then((password: null | string) => {
                     if (password) {
                         setSavedPassword(password);
                     } else {
@@ -66,9 +67,9 @@ export const ServerListItem = ({ server }: ServerListItemProps) => {
             >
                 {edit ? (
                     <EditServerForm
+                        onCancel={() => editHandlers.toggle()}
                         password={savedPassword}
                         server={server}
-                        onCancel={() => editHandlers.toggle()}
                     />
                 ) : (
                     <Stack>
@@ -93,13 +94,13 @@ export const ServerListItem = ({ server }: ServerListItemProps) => {
                         <Group grow>
                             <Button
                                 leftIcon={<RiEdit2Fill />}
+                                onClick={() => handleEdit()}
                                 tooltip={{
                                     label: t('page.manageServers.editServerDetailsTooltip', {
                                         postProcess: 'sentenceCase',
                                     }),
                                 }}
                                 variant="subtle"
-                                onClick={() => handleEdit()}
                             >
                                 {t('common.edit')}
                             </Button>

@@ -2,13 +2,14 @@ import { ActionIcon, CopyButton, Group } from '@mantine/core';
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 import { RiCheckFill, RiClipboardFill, RiExternalLinkFill } from 'react-icons/ri';
-import { Tooltip, toast } from '/@/renderer/components';
 import styled from 'styled-components';
 
-const util = isElectron() ? window.electron.utils : null;
+import { toast, Tooltip } from '/@/renderer/components';
+
+const util = isElectron() ? window.api.utils : null;
 
 export type SongPathProps = {
-    path: string | null;
+    path: null | string;
 };
 
 const PathText = styled.div`
@@ -28,11 +29,13 @@ export const SongPath = ({ path }: SongPathProps) => {
             >
                 {({ copied, copy }) => (
                     <Tooltip
-                        withinPortal
                         label={t(
                             copied ? 'page.itemDetail.copiedPath' : 'page.itemDetail.copyPath',
-                            { postProcess: 'sentenceCase' },
+                            {
+                                postProcess: 'sentenceCase',
+                            },
                         )}
+                        withinPortal
                     >
                         <ActionIcon onClick={copy}>
                             {copied ? <RiCheckFill /> : <RiClipboardFill />}
@@ -42,8 +45,8 @@ export const SongPath = ({ path }: SongPathProps) => {
             </CopyButton>
             {util && (
                 <Tooltip
-                    withinPortal
                     label={t('page.itemDetail.openFile', { postProcess: 'sentenceCase' })}
+                    withinPortal
                 >
                     <ActionIcon>
                         <RiExternalLinkFill

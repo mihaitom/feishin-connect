@@ -1,6 +1,8 @@
-import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
-import { RowClassRules, RowNode } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { RowClassRules, RowNode } from '@ag-grid-community/core';
+import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
+
 import { Song } from '/@/renderer/api/types';
 import { useAppFocus } from '/@/renderer/hooks';
 import { useCurrentSong, usePlayerStore } from '/@/renderer/store';

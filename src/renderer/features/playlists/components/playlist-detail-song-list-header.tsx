@@ -1,8 +1,10 @@
-import { MutableRefObject } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { Stack } from '@mantine/core';
+import { MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
+
 import { LibraryItem } from '/@/renderer/api/types';
 import { Badge, PageHeader, Paper, SpinnerIcon } from '/@/renderer/components';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
@@ -20,9 +22,9 @@ interface PlaylistDetailHeaderProps {
 }
 
 export const PlaylistDetailSongListHeader = ({
-    tableRef,
-    itemCount,
     handleToggleShowQueryBuilder,
+    itemCount,
+    tableRef,
 }: PlaylistDetailHeaderProps) => {
     const { t } = useTranslation();
     const { playlistId } = useParams() as { playlistId: string };

@@ -1,6 +1,7 @@
+import type { TitleTheme } from '/@/renderer/types';
+
 import { ipcMain, nativeTheme, safeStorage } from 'electron';
 import Store from 'electron-store';
-import type { TitleTheme } from '/@/renderer/types';
 
 export const store = new Store();
 
@@ -12,7 +13,7 @@ ipcMain.on('settings-set', (__event, data: { property: string; value: any }) => 
     store.set(`${data.property}`, data.value);
 });
 
-ipcMain.handle('password-get', (_event, server: string): string | null => {
+ipcMain.handle('password-get', (_event, server: string): null | string => {
     if (safeStorage.isEncryptionAvailable()) {
         const servers = store.get('server') as Record<string, string> | undefined;
 

@@ -1,7 +1,9 @@
-import { Center } from '@mantine/core';
 import type { IconType } from 'react-icons';
+
+import { Center } from '@mantine/core';
 import { RiLoader5Fill } from 'react-icons/ri';
 import styled from 'styled-components';
+
 import { rotating } from '/@/renderer/styles';
 
 interface SpinnerProps extends IconType {

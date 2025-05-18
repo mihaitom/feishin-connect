@@ -1,7 +1,9 @@
 import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { useGeneralSettings, useSettingsStoreActions } from '../../../../store/settings.store';
+
 import { Switch } from '/@/renderer/components';
-import { useSettingsStoreActions, useGeneralSettings } from '../../../../store/settings.store';
 import {
     SettingOption,
     SettingsSection,

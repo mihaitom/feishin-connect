@@ -3,6 +3,7 @@ import { MutableRefObject, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AutoSizer, { Size } from 'react-virtualized-auto-sizer';
 import { ListOnScrollProps } from 'react-window';
+
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import {
@@ -20,14 +21,14 @@ import {
 } from '/@/renderer/components/virtual-grid';
 import { useListContext } from '/@/renderer/context/list-context';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
-import { CardRow, ListDisplayType } from '/@/renderer/types';
-import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
 import { useEventStore } from '/@/renderer/store/event.store';
+import { CardRow, ListDisplayType } from '/@/renderer/types';
 
 interface SongListGridViewProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
 }
 
@@ -35,8 +36,8 @@ export const SongListGridView = ({ gridRef, itemCount }: SongListGridViewProps) 
     const queryClient = useQueryClient();
     const server = useCurrentServer();
     const handlePlayQueueAdd = usePlayQueueAdd();
-    const { pageKey, customFilters, id } = useListContext();
-    const { grid, display, filter } = useListStoreByKey<SongListQuery>({ key: pageKey });
+    const { customFilters, id, pageKey } = useListContext();
+    const { display, filter, grid } = useListStoreByKey<SongListQuery>({ key: pageKey });
     const { setGrid } = useListStoreActions();
 
     const [searchParams, setSearchParams] = useSearchParams();
@@ -201,8 +202,6 @@ export const SongListGridView = ({ gridRef, itemCount }: SongListGridViewProps) 
             <AutoSizer>
                 {({ height, width }: Size) => (
                     <VirtualInfiniteGrid
-                        key={`song-list-${server?.id}-${display}`}
-                        ref={gridRef}
                         cardRows={cardRows}
                         display={display || ListDisplayType.CARD}
                         fetchFn={fetch}
@@ -215,14 +214,16 @@ export const SongListGridView = ({ gridRef, itemCount }: SongListGridViewProps) 
                         itemGap={grid?.itemGap ?? 10}
                         itemSize={grid?.itemSize || 200}
                         itemType={LibraryItem.SONG}
+                        key={`song-list-${server?.id}-${display}`}
                         loading={itemCount === undefined || itemCount === null}
                         minimumBatchSize={40}
+                        onScroll={handleGridScroll}
+                        ref={gridRef}
                         route={{
                             route: AppRoute.LIBRARY_ALBUMS_DETAIL,
                             slugs: [{ idProperty: 'albumId', slugProperty: 'albumId' }],
                         }}
                         width={width}
-                        onScroll={handleGridScroll}
                     />
                 )}
             </AutoSizer>

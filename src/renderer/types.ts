@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+
 import { ServerFeatures } from '/@/renderer/api/features-types';
 import {
     Album,
@@ -10,38 +11,6 @@ import {
     Song,
 } from '/@/renderer/api/types';
 import { AppRoute } from '/@/renderer/router/routes';
-
-export type TablePagination = {
-    currentPage: number;
-    itemsPerPage: number;
-    totalItems: number;
-    totalPages: number;
-};
-
-export type RouteSlug = {
-    idProperty: string;
-    slugProperty: string;
-};
-
-export type CardRoute = {
-    route: AppRoute | string;
-    slugs?: RouteSlug[];
-};
-
-export type TableType =
-    | 'nowPlaying'
-    | 'sideQueue'
-    | 'sideDrawerQueue'
-    | 'songs'
-    | 'fullScreen'
-    | 'albumDetail';
-
-export type CardRow<T> = {
-    arrayProperty?: string;
-    format?: (value: T) => ReactNode;
-    property: keyof T;
-    route?: CardRoute;
-};
 
 export enum ListDisplayType {
     CARD = 'card',
@@ -63,7 +32,39 @@ export enum ServerType {
     SUBSONIC = 'subsonic',
 }
 
-export const toServerType = (value?: string): ServerType | null => {
+export type CardRoute = {
+    route: AppRoute | string;
+    slugs?: RouteSlug[];
+};
+
+export type CardRow<T> = {
+    arrayProperty?: string;
+    format?: (value: T) => ReactNode;
+    property: keyof T;
+    route?: CardRoute;
+};
+
+export type RouteSlug = {
+    idProperty: string;
+    slugProperty: string;
+};
+
+export type TablePagination = {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+};
+
+export type TableType =
+    | 'albumDetail'
+    | 'fullScreen'
+    | 'nowPlaying'
+    | 'sideDrawerQueue'
+    | 'sideQueue'
+    | 'songs';
+
+export const toServerType = (value?: string): null | ServerType => {
     switch (value?.toLowerCase()) {
         case ServerType.JELLYFIN:
             return ServerType.JELLYFIN;
@@ -76,23 +77,42 @@ export const toServerType = (value?: string): ServerType | null => {
     }
 };
 
-export type ServerListItem = {
-    credential: string;
-    features?: ServerFeatures;
-    id: string;
-    name: string;
-    ndCredential?: string;
-    savePassword?: boolean;
-    type: ServerType;
-    url: string;
-    userId: string | null;
-    username: string;
-    version?: string;
-};
+export enum AuthState {
+    INVALID = 'invalid',
+    LOADING = 'loading',
+    VALID = 'valid',
+}
 
-export enum PlayerStatus {
-    PAUSED = 'paused',
-    PLAYING = 'playing',
+export enum CrossfadeStyle {
+    CONSTANT_POWER = 'constantPower',
+    CONSTANT_POWER_SLOW_CUT = 'constantPowerSlowCut',
+    CONSTANT_POWER_SLOW_FADE = 'constantPowerSlowFade',
+    DIPPED = 'dipped',
+    EQUALPOWER = 'equalPower',
+    LINEAR = 'linear',
+}
+
+export enum FontType {
+    BUILT_IN = 'builtIn',
+    CUSTOM = 'custom',
+    SYSTEM = 'system',
+}
+
+export enum Play {
+    LAST = 'last',
+    NEXT = 'next',
+    NOW = 'now',
+    SHUFFLE = 'shuffle',
+}
+
+export enum PlaybackStyle {
+    CROSSFADE = 'crossfade',
+    GAPLESS = 'gapless',
+}
+
+export enum PlaybackType {
+    LOCAL = 'local',
+    WEB = 'web',
 }
 
 export enum PlayerRepeat {
@@ -107,49 +127,10 @@ export enum PlayerShuffle {
     TRACK = 'track',
 }
 
-export enum Play {
-    LAST = 'last',
-    NEXT = 'next',
-    NOW = 'now',
-    SHUFFLE = 'shuffle',
+export enum PlayerStatus {
+    PAUSED = 'paused',
+    PLAYING = 'playing',
 }
-
-export enum CrossfadeStyle {
-    CONSTANT_POWER = 'constantPower',
-    CONSTANT_POWER_SLOW_CUT = 'constantPowerSlowCut',
-    CONSTANT_POWER_SLOW_FADE = 'constantPowerSlowFade',
-    DIPPED = 'dipped',
-    EQUALPOWER = 'equalPower',
-    LINEAR = 'linear',
-}
-
-export enum PlaybackStyle {
-    CROSSFADE = 'crossfade',
-    GAPLESS = 'gapless',
-}
-
-export enum PlaybackType {
-    LOCAL = 'local',
-    WEB = 'web',
-}
-
-export interface UniqueId {
-    uniqueId: string;
-}
-
-export type QueryBuilderRule = {
-    field?: string | null;
-    operator?: string | null;
-    uniqueId: string;
-    value?: string | number | Date | undefined | null | any;
-};
-
-export type QueryBuilderGroup = {
-    group: QueryBuilderGroup[];
-    rules: QueryBuilderRule[];
-    type: 'any' | 'all';
-    uniqueId: string;
-};
 
 export enum TableColumn {
     ACTIONS = 'actions',
@@ -184,18 +165,6 @@ export enum TableColumn {
     YEAR = 'releaseYear',
 }
 
-export type PlayQueueAddOptions = {
-    byData?: QueueSong[];
-    byItemType?: {
-        id: string[];
-        type: LibraryItem;
-    };
-    initialIndex?: number;
-    initialSongId?: string;
-    playType: Play;
-    query?: Record<string, any>;
-};
-
 export type GridCardData = {
     cardControls: any;
     cardRows: CardRow<Album | AlbumArtist | Artist | Playlist | Song>[];
@@ -214,6 +183,46 @@ export type GridCardData = {
     route: CardRoute;
 };
 
+export type PlayQueueAddOptions = {
+    byData?: QueueSong[];
+    byItemType?: {
+        id: string[];
+        type: LibraryItem;
+    };
+    initialIndex?: number;
+    initialSongId?: string;
+    playType: Play;
+    query?: Record<string, any>;
+};
+
+export type QueryBuilderGroup = {
+    group: QueryBuilderGroup[];
+    rules: QueryBuilderRule[];
+    type: 'all' | 'any';
+    uniqueId: string;
+};
+
+export type QueryBuilderRule = {
+    field?: null | string;
+    operator?: null | string;
+    uniqueId: string;
+    value?: any | Date | null | number | string | undefined;
+};
+
+export type ServerListItem = {
+    credential: string;
+    features?: ServerFeatures;
+    id: string;
+    name: string;
+    ndCredential?: string;
+    savePassword?: boolean;
+    type: ServerType;
+    url: string;
+    userId: null | string;
+    username: string;
+    version?: string;
+};
+
 export type SongState = {
     position?: number;
     repeat?: PlayerRepeat;
@@ -224,18 +233,10 @@ export type SongState = {
     volume?: number;
 };
 
-export enum FontType {
-    BUILT_IN = 'builtIn',
-    CUSTOM = 'custom',
-    SYSTEM = 'system',
-}
-
 export type TitleTheme = 'dark' | 'light' | 'system';
 
-export enum AuthState {
-    INVALID = 'invalid',
-    LOADING = 'loading',
-    VALID = 'valid',
+export interface UniqueId {
+    uniqueId: string;
 }
 
 export type WebAudio = {

@@ -1,9 +1,12 @@
-import { RowDoubleClickedEvent } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { RowDoubleClickedEvent } from '@ag-grid-community/core';
 import { MutableRefObject } from 'react';
 import { generatePath, useNavigate } from 'react-router';
 import { useParams, useSearchParams } from 'react-router-dom';
+
 import { AppRoute } from '../../../router/routes';
+
 import { LibraryItem, QueueSong, SongListQuery } from '/@/renderer/api/types';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
@@ -93,17 +96,17 @@ export const SearchContent = ({ tableRef }: SearchContentProps) => {
         <VirtualGridAutoSizerContainer>
             <VirtualTable
                 {...tableProps}
-                key={`table-${itemType}-${tableProps.rowHeight}-${server?.id}`}
-                ref={tableRef}
                 context={{
                     itemType,
                     query: searchParams.get('query'),
                 }}
                 getRowId={(data) => data.data.id}
                 infiniteInitialRowCount={25}
+                key={`table-${itemType}-${tableProps.rowHeight}-${server?.id}`}
+                onRowDoubleClicked={handleRowDoubleClick}
+                ref={tableRef}
                 rowClassRules={rowClassRules}
                 shouldUpdateSong={itemType === LibraryItem.SONG}
-                onRowDoubleClicked={handleRowDoubleClick}
             />
         </VirtualGridAutoSizerContainer>
     );

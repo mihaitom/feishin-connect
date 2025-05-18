@@ -1,4 +1,5 @@
 import type { TooltipProps } from '@mantine/core';
+
 import { Tooltip as MantineTooltip } from '@mantine/core';
 import styled from 'styled-components';
 
@@ -12,7 +13,6 @@ export const Tooltip = ({ children, ...rest }: TooltipProps) => {
     return (
         <StyledTooltip
             multiline
-            withinPortal
             pl={10}
             pr={10}
             py={5}
@@ -31,6 +31,7 @@ export const Tooltip = ({ children, ...rest }: TooltipProps) => {
                 duration: 250,
                 transition: 'fade',
             }}
+            withinPortal
             {...rest}
         >
             {children}

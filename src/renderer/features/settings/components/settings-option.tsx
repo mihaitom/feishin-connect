@@ -1,6 +1,7 @@
-import React from 'react';
 import { Group, Stack } from '@mantine/core';
+import React from 'react';
 import { RiInformationLine } from 'react-icons/ri';
+
 import { Text, Tooltip } from '/@/renderer/components';
 
 interface SettingsOptionProps {
@@ -10,7 +11,7 @@ interface SettingsOptionProps {
     title: React.ReactNode | string;
 }
 
-export const SettingsOptions = ({ title, description, control, note }: SettingsOptionProps) => {
+export const SettingsOptions = ({ control, description, note, title }: SettingsOptionProps) => {
     return (
         <>
             <Group

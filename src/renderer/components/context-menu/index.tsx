@@ -1,6 +1,6 @@
-import { ComponentPropsWithoutRef, forwardRef, ReactNode, Ref } from 'react';
 import { Box, Group, UnstyledButton, UnstyledButtonProps } from '@mantine/core';
 import { motion, Variants } from 'framer-motion';
+import { ComponentPropsWithoutRef, forwardRef, ReactNode, Ref } from 'react';
 import styled from 'styled-components';
 
 interface ContextMenuProps {
@@ -61,11 +61,11 @@ export const ContextMenuButton = forwardRef(
     (
         {
             children,
-            rightIcon,
             leftIcon,
+            rightIcon,
             ...props
-        }: UnstyledButtonProps &
-            ComponentPropsWithoutRef<'button'> & {
+        }: ComponentPropsWithoutRef<'button'> &
+            UnstyledButtonProps & {
                 leftIcon?: ReactNode;
                 rightIcon?: ReactNode;
             },
@@ -74,11 +74,11 @@ export const ContextMenuButton = forwardRef(
         return (
             <StyledContextMenuButton
                 {...props}
-                key={props.key}
-                ref={ref}
                 as="button"
                 disabled={props.disabled}
+                key={props.key}
                 onClick={props.onClick}
+                ref={ref}
             >
                 <Group position="apart">
                     <Group spacing="md">
@@ -108,14 +108,14 @@ const variants: Variants = {
 };
 
 export const ContextMenu = forwardRef(
-    ({ yPos, xPos, minWidth, maxWidth, children }: ContextMenuProps, ref: Ref<HTMLDivElement>) => {
+    ({ children, maxWidth, minWidth, xPos, yPos }: ContextMenuProps, ref: Ref<HTMLDivElement>) => {
         return (
             <ContextMenuContainer
-                ref={ref}
                 animate="open"
                 initial="closed"
                 maxWidth={maxWidth}
                 minWidth={minWidth}
+                ref={ref}
                 variants={variants}
                 xPos={xPos}
                 yPos={yPos}

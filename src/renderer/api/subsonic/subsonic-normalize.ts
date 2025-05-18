@@ -1,16 +1,17 @@
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
+
 import { ssType } from '/@/renderer/api/subsonic/subsonic-types';
 import {
-    QueueSong,
-    LibraryItem,
-    AlbumArtist,
     Album,
+    AlbumArtist,
+    Genre,
+    LibraryItem,
+    Playlist,
+    QueueSong,
+    RelatedArtist,
     ServerListItem,
     ServerType,
-    Playlist,
-    Genre,
-    RelatedArtist,
 } from '/@/renderer/api/types';
 
 const getCoverArtUrl = (args: {
@@ -37,9 +38,9 @@ const getCoverArtUrl = (args: {
 
 const getArtists = (
     item:
-        | z.infer<typeof ssType._response.song>
         | z.infer<typeof ssType._response.album>
-        | z.infer<typeof ssType._response.albumListEntry>,
+        | z.infer<typeof ssType._response.albumListEntry>
+        | z.infer<typeof ssType._response.song>,
 ) => {
     const albumArtists: RelatedArtist[] = item.albumArtists
         ? item.albumArtists.map((item) => ({
@@ -69,7 +70,7 @@ const getArtists = (
               },
           ];
 
-    let participants: Record<string, RelatedArtist[]> | null = null;
+    let participants: null | Record<string, RelatedArtist[]> = null;
 
     if (item.contributors) {
         participants = {};
@@ -98,9 +99,9 @@ const getArtists = (
 
 const getGenres = (
     item:
-        | z.infer<typeof ssType._response.song>
         | z.infer<typeof ssType._response.album>
-        | z.infer<typeof ssType._response.albumListEntry>,
+        | z.infer<typeof ssType._response.albumListEntry>
+        | z.infer<typeof ssType._response.song>,
 ): Genre[] => {
     return item.genres
         ? item.genres.map((genre) => ({
@@ -123,7 +124,7 @@ const getGenres = (
 
 const normalizeSong = (
     item: z.infer<typeof ssType._response.song>,
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     size?: number,
 ): QueueSong => {
     const imageUrl =
@@ -194,7 +195,7 @@ const normalizeAlbumArtist = (
     item:
         | z.infer<typeof ssType._response.albumArtist>
         | z.infer<typeof ssType._response.artistListEntry>,
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     imageSize?: number,
 ): AlbumArtist => {
     const imageUrl =
@@ -229,7 +230,7 @@ const normalizeAlbumArtist = (
 
 const normalizeAlbum = (
     item: z.infer<typeof ssType._response.album> | z.infer<typeof ssType._response.albumListEntry>,
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     imageSize?: number,
 ): Album => {
     const imageUrl =
@@ -280,7 +281,7 @@ const normalizePlaylist = (
     item:
         | z.infer<typeof ssType._response.playlist>
         | z.infer<typeof ssType._response.playlistListEntry>,
-    server: ServerListItem | null,
+    server: null | ServerListItem,
 ): Playlist => {
     return {
         description: item.comment || null,

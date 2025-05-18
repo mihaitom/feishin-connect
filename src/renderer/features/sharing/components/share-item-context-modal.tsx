@@ -2,10 +2,12 @@ import { Box, Group, Stack, TextInput } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { closeModal, ContextModalProps } from '@mantine/modals';
+import { useTranslation } from 'react-i18next';
+
+import { useShareItem } from '../mutations/share-item-mutation';
+
 import { Button, Switch, toast } from '/@/renderer/components';
 import { useCurrentServer } from '/@/renderer/store';
-import { useTranslation } from 'react-i18next';
-import { useShareItem } from '../mutations/share-item-mutation';
 
 export const ShareItemContextModal = ({
     id,
@@ -122,9 +124,9 @@ export const ShareItemContextModal = ({
                     <Group position="right">
                         <Group>
                             <Button
+                                onClick={() => closeModal(id)}
                                 size="md"
                                 variant="subtle"
-                                onClick={() => closeModal(id)}
                             >
                                 {t('common.cancel', { postProcess: 'titleCase' })}
                             </Button>

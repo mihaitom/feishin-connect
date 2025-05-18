@@ -1,22 +1,24 @@
 import { nanoid } from 'nanoid';
+import z from 'zod';
+
+import { ndType } from './navidrome-types';
+
+import { NDGenre } from '/@/renderer/api/navidrome.types';
+import { ssType } from '/@/renderer/api/subsonic/subsonic-types';
 import {
-    Song,
-    LibraryItem,
     Album,
-    Playlist,
-    User,
     AlbumArtist,
     Genre,
+    LibraryItem,
+    Playlist,
+    RelatedArtist,
     ServerListItem,
     ServerType,
-    RelatedArtist,
+    Song,
+    User,
 } from '/@/renderer/api/types';
-import z from 'zod';
-import { ndType } from './navidrome-types';
-import { ssType } from '/@/renderer/api/subsonic/subsonic-types';
-import { NDGenre } from '/@/renderer/api/navidrome.types';
 
-const getImageUrl = (args: { url: string | null }) => {
+const getImageUrl = (args: { url: null | string }) => {
     const { url } = args;
     if (url === '/app/artist-placeholder.webp') {
         return null;
@@ -51,19 +53,19 @@ interface WithDate {
     playDate?: string;
 }
 
-const normalizePlayDate = (item: WithDate): string | null => {
+const normalizePlayDate = (item: WithDate): null | string => {
     return !item.playDate || item.playDate.includes('0001-') ? null : item.playDate;
 };
 
 const getArtists = (
     item:
-        | z.infer<typeof ndType._response.song>
+        | z.infer<typeof ndType._response.album>
         | z.infer<typeof ndType._response.playlistSong>
-        | z.infer<typeof ndType._response.album>,
+        | z.infer<typeof ndType._response.song>,
 ) => {
     let albumArtists: RelatedArtist[] | undefined;
     let artists: RelatedArtist[] | undefined;
-    let participants: Record<string, RelatedArtist[]> | null = null;
+    let participants: null | Record<string, RelatedArtist[]> = null;
 
     if (item.participants) {
         participants = {};
@@ -120,8 +122,8 @@ const getArtists = (
 };
 
 const normalizeSong = (
-    item: z.infer<typeof ndType._response.song> | z.infer<typeof ndType._response.playlistSong>,
-    server: ServerListItem | null,
+    item: z.infer<typeof ndType._response.playlistSong> | z.infer<typeof ndType._response.song>,
+    server: null | ServerListItem,
     imageSize?: number,
 ): Song => {
     let id;
@@ -204,7 +206,7 @@ const normalizeAlbum = (
     item: z.infer<typeof ndType._response.album> & {
         songs?: z.infer<typeof ndType._response.songList>;
     },
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     imageSize?: number,
 ): Album => {
     const imageUrl = getCoverArtUrl({
@@ -268,7 +270,7 @@ const normalizeAlbumArtist = (
     item: z.infer<typeof ndType._response.albumArtist> & {
         similarArtists?: z.infer<typeof ssType._response.artistInfo>['artistInfo']['similarArtist'];
     },
-    server: ServerListItem | null,
+    server: null | ServerListItem,
 ): AlbumArtist => {
     let imageUrl = getImageUrl({ url: item?.largeImageUrl || null });
 
@@ -332,7 +334,7 @@ const normalizeAlbumArtist = (
 
 const normalizePlaylist = (
     item: z.infer<typeof ndType._response.playlist>,
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     imageSize?: number,
 ): Playlist => {
     const imageUrl = getCoverArtUrl({

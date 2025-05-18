@@ -1,9 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import type { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById } from '../../../store/auth.store';
 import type { AlbumDetailQuery } from '/@/renderer/api/types';
+import type { QueryHookArgs } from '/@/renderer/lib/react-query';
+
+import { useQuery } from '@tanstack/react-query';
+
+import { getServerById } from '../../../store/auth.store';
+
 import { controller } from '/@/renderer/api/controller';
+import { queryKeys } from '/@/renderer/api/query-keys';
 
 export const useAlbumDetail = (args: QueryHookArgs<AlbumDetailQuery>) => {
     const { options, query, serverId } = args;

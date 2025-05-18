@@ -1,7 +1,11 @@
-import { useRef, useState } from 'react';
 import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { ServerFeature } from '/@/renderer/api/features-types';
 import { CreatePlaylistBody, ServerType, SongListSort } from '/@/renderer/api/types';
+import { hasFeature } from '/@/renderer/api/utils';
 import { Button, Switch, Text, TextInput, toast } from '/@/renderer/components';
 import {
     PlaylistQueryBuilder,
@@ -10,9 +14,6 @@ import {
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
 import { convertQueryGroupToNDQuery } from '/@/renderer/features/playlists/utils';
 import { useCurrentServer } from '/@/renderer/store';
-import { useTranslation } from 'react-i18next';
-import { hasFeature } from '/@/renderer/api/utils';
-import { ServerFeature } from '/@/renderer/api/features-types';
 
 interface CreatePlaylistFormProps {
     onCancel: () => void;
@@ -95,11 +96,11 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
             <Stack>
                 <TextInput
                     data-autofocus
-                    required
                     label={t('form.createPlaylist.input', {
                         context: 'name',
                         postProcess: 'titleCase',
                     })}
+                    required
                     {...form.getInputProps('name')}
                 />
                 {server?.type === ServerType.NAVIDROME && (
@@ -135,10 +136,10 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
                     <Stack pt="1rem">
                         <Text>Query Editor</Text>
                         <PlaylistQueryBuilder
-                            ref={queryBuilderRef}
                             isSaving={false}
                             limit={undefined}
                             query={undefined}
+                            ref={queryBuilderRef}
                             sortBy={SongListSort.ALBUM}
                             sortOrder="asc"
                         />
@@ -147,8 +148,8 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
 
                 <Group position="right">
                     <Button
-                        variant="subtle"
                         onClick={onCancel}
+                        variant="subtle"
                     >
                         {t('common.cancel', { postProcess: 'titleCase' })}
                     </Button>

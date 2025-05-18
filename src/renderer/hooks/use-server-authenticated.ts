@@ -1,10 +1,11 @@
+import { debounce } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useCurrentServer } from '/@/renderer/store';
-import { AuthState, ServerListItem, ServerType } from '/@/renderer/types';
+
 import { api } from '/@/renderer/api';
 import { SongListSort, SortOrder } from '/@/renderer/api/types';
-import { debounce } from 'lodash';
 import { toast } from '/@/renderer/components';
+import { useCurrentServer } from '/@/renderer/store';
+import { AuthState, ServerListItem, ServerType } from '/@/renderer/types';
 
 export const useServerAuthenticated = () => {
     const priorServerId = useRef<string>();

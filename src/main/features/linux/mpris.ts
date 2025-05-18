@@ -1,7 +1,9 @@
 import { ipcMain } from 'electron';
 import Player from 'mpris-service';
+
 import { PlayerRepeat, PlayerStatus } from '../../../renderer/types';
 import { getMainWindow } from '../../main';
+
 import { QueueSong } from '/@/renderer/api/types';
 
 const mprisPlayer = Player({
@@ -124,8 +126,8 @@ ipcMain.on('update-playback', (_event, status: PlayerStatus) => {
 
 const REPEAT_TO_MPRIS: Record<PlayerRepeat, string> = {
     [PlayerRepeat.ALL]: 'Playlist',
-    [PlayerRepeat.ONE]: 'Track',
     [PlayerRepeat.NONE]: 'None',
+    [PlayerRepeat.ONE]: 'Track',
 };
 
 ipcMain.on('update-repeat', (_event, arg: PlayerRepeat) => {

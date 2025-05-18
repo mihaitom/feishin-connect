@@ -1,22 +1,24 @@
 import type { IpcRendererEvent } from 'electron';
+
 import isElectron from 'is-electron';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import i18n, { languages } from '/@/i18n/i18n';
 import { FileInput, NumberInput, Select, toast } from '/@/renderer/components';
 import {
-    SettingsSection,
     SettingOption,
+    SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
 import {
     useFontSettings,
     useGeneralSettings,
     useSettingsStoreActions,
 } from '/@/renderer/store/settings.store';
-import { useTranslation } from 'react-i18next';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FontType } from '/@/renderer/types';
-import i18n, { languages } from '/@/i18n/i18n';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
-const ipc = isElectron() ? window.electron.ipc : null;
+const localSettings = isElectron() ? window.api.localSettings : null;
+const ipc = isElectron() ? window.api.ipc : null;
 
 type Font = {
     label: string;
@@ -158,8 +160,8 @@ export const ApplicationSettings = () => {
             control: (
                 <Select
                     data={languages}
-                    value={settings.language}
                     onChange={handleChangeLanguage}
+                    value={settings.language}
                 />
             ),
             description: t('setting.language', {
@@ -173,7 +175,6 @@ export const ApplicationSettings = () => {
             control: (
                 <Select
                     data={FONT_TYPES}
-                    value={fontSettings.type}
                     onChange={(e) => {
                         if (!e) return;
                         setSettings({
@@ -183,6 +184,7 @@ export const ApplicationSettings = () => {
                             },
                         });
                     }}
+                    value={fontSettings.type}
                 />
             ),
             description: t('setting.fontType', {
@@ -195,9 +197,7 @@ export const ApplicationSettings = () => {
         {
             control: (
                 <Select
-                    searchable
                     data={FONT_OPTIONS}
-                    value={fontSettings.builtIn}
                     onChange={(e) => {
                         if (!e) return;
                         setSettings({
@@ -207,6 +207,8 @@ export const ApplicationSettings = () => {
                             },
                         });
                     }}
+                    searchable
+                    value={fontSettings.builtIn}
                 />
             ),
             description: t('setting.font', { context: 'description', postProcess: 'sentenceCase' }),
@@ -216,10 +218,7 @@ export const ApplicationSettings = () => {
         {
             control: (
                 <Select
-                    searchable
                     data={localFonts}
-                    value={fontSettings.system}
-                    w={300}
                     onChange={(e) => {
                         if (!e) return;
                         setSettings({
@@ -229,6 +228,9 @@ export const ApplicationSettings = () => {
                             },
                         });
                     }}
+                    searchable
+                    value={fontSettings.system}
+                    w={300}
                 />
             ),
             description: t('setting.font', { context: 'description', postProcess: 'sentenceCase' }),
@@ -239,8 +241,6 @@ export const ApplicationSettings = () => {
             control: (
                 <FileInput
                     accept=".ttc,.ttf,.otf,.woff,.woff2"
-                    placeholder={fontList}
-                    w={300}
                     onChange={(e) =>
                         setSettings({
                             font: {
@@ -249,6 +249,8 @@ export const ApplicationSettings = () => {
                             },
                         })
                     }
+                    placeholder={fontList}
+                    w={300}
                 />
             ),
             description: t('setting.customFontPath', {
@@ -263,7 +265,6 @@ export const ApplicationSettings = () => {
                 <NumberInput
                     max={300}
                     min={50}
-                    value={settings.zoomFactor}
                     onBlur={(e) => {
                         if (!e) return;
                         const newVal = e.currentTarget.value
@@ -277,6 +278,7 @@ export const ApplicationSettings = () => {
                         });
                         localSettings!.setZoomFactor(newVal);
                     }}
+                    value={settings.zoomFactor}
                 />
             ),
             description: t('setting.zoom', {

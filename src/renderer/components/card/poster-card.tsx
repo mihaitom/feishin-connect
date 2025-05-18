@@ -3,15 +3,16 @@ import { RiAlbumFill, RiPlayListFill, RiUserVoiceFill } from 'react-icons/ri';
 import { generatePath, Link } from 'react-router-dom';
 import { SimpleImg } from 'react-simple-img';
 import styled, { css } from 'styled-components';
+
 import { Album, AlbumArtist, Artist, LibraryItem } from '/@/renderer/api/types';
 import { CardRows } from '/@/renderer/components/card';
 import { Skeleton } from '/@/renderer/components/skeleton';
 import { GridCardControls } from '/@/renderer/components/virtual-grid/grid-card/grid-card-controls';
-import { CardRow, PlayQueueAddOptions, Play, CardRoute } from '/@/renderer/types';
+import { CardRoute, CardRow, Play, PlayQueueAddOptions } from '/@/renderer/types';
 
 interface BaseGridCardProps {
     controls: {
-        cardRows: CardRow<Album>[] | CardRow<Artist>[] | CardRow<AlbumArtist>[];
+        cardRows: CardRow<Album>[] | CardRow<AlbumArtist>[] | CardRow<Artist>[];
         handleFavorite: (options: {
             id: string[];
             isFavorite: boolean;
@@ -101,8 +102,8 @@ const DetailContainer = styled.div`
 `;
 
 export const PosterCard = ({
-    data,
     controls,
+    data,
     isLoading,
     uniqueId,
 }: BaseGridCardProps & { uniqueId: string }) => {
@@ -123,10 +124,10 @@ export const PosterCard = ({
             case LibraryItem.ALBUM:
                 Placeholder = RiAlbumFill;
                 break;
-            case LibraryItem.ARTIST:
+            case LibraryItem.ALBUM_ARTIST:
                 Placeholder = RiUserVoiceFill;
                 break;
-            case LibraryItem.ALBUM_ARTIST:
+            case LibraryItem.ARTIST:
                 Placeholder = RiUserVoiceFill;
                 break;
             case LibraryItem.PLAYLIST:
@@ -184,8 +185,8 @@ export const PosterCard = ({
     return (
         <PosterCardContainer key={`placeholder-${uniqueId}-${data.id}`}>
             <Skeleton
-                visible
                 radius="sm"
+                visible
             >
                 <ImageContainerSkeleton />
             </Skeleton>
@@ -193,10 +194,10 @@ export const PosterCard = ({
                 <Stack spacing="sm">
                     {(controls?.cardRows || []).map((row, index) => (
                         <Skeleton
-                            key={`${index}-${row.arrayProperty}`}
-                            visible
                             height={14}
+                            key={`${index}-${row.arrayProperty}`}
                             radius="sm"
+                            visible
                         />
                     ))}
                 </Stack>

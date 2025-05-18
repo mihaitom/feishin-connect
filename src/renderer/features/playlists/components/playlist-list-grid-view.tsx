@@ -2,8 +2,10 @@ import { QueryKey, useQueryClient } from '@tanstack/react-query';
 import { MutableRefObject, useCallback, useMemo } from 'react';
 import AutoSizer, { Size } from 'react-virtualized-auto-sizer';
 import { ListOnScrollProps } from 'react-window';
+
 import { useListContext } from '../../../context/list-context';
 import { useListStoreActions } from '../../../store/list.store';
+
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import {
@@ -20,13 +22,13 @@ import {
     VirtualInfiniteGridRef,
 } from '/@/renderer/components/virtual-grid';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreByKey } from '/@/renderer/store';
 import { CardRow, ListDisplayType } from '/@/renderer/types';
-import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
 
 interface PlaylistListGridViewProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
 }
 
@@ -35,7 +37,7 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
     const queryClient = useQueryClient();
     const server = useCurrentServer();
     const handlePlayQueueAdd = usePlayQueueAdd();
-    const { display, grid, filter } = useListStoreByKey<PlaylistListQuery>({ key: pageKey });
+    const { display, filter, grid } = useListStoreByKey<PlaylistListQuery>({ key: pageKey });
     const { setGrid } = useListStoreActions();
     const handleFavorite = useHandleFavorite({ gridRef, server });
 
@@ -49,14 +51,14 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
             case PlaylistListSort.NAME:
                 rows.push(PLAYLIST_CARD_ROWS.songCount);
                 break;
-            case PlaylistListSort.SONG_COUNT:
-                rows.push(PLAYLIST_CARD_ROWS.songCount);
-                break;
             case PlaylistListSort.OWNER:
                 rows.push(PLAYLIST_CARD_ROWS.owner);
                 break;
             case PlaylistListSort.PUBLIC:
                 rows.push(PLAYLIST_CARD_ROWS.public);
+                break;
+            case PlaylistListSort.SONG_COUNT:
+                rows.push(PLAYLIST_CARD_ROWS.songCount);
                 break;
             case PlaylistListSort.UPDATED_AT:
                 break;
@@ -73,7 +75,7 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
     );
 
     const fetchInitialData = useCallback(() => {
-        const query: Omit<PlaylistListQuery, 'startIndex' | 'limit'> = {
+        const query: Omit<PlaylistListQuery, 'limit' | 'startIndex'> = {
             ...filter,
         };
 
@@ -140,8 +142,6 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
             <AutoSizer>
                 {({ height, width }: Size) => (
                     <VirtualInfiniteGrid
-                        key={`playlist-list-${server?.id}`}
-                        ref={gridRef}
                         cardRows={cardRows}
                         display={display || ListDisplayType.CARD}
                         fetchFn={fetch}
@@ -154,14 +154,16 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
                         itemGap={grid?.itemGap ?? 10}
                         itemSize={grid?.itemSize || 200}
                         itemType={LibraryItem.PLAYLIST}
+                        key={`playlist-list-${server?.id}`}
                         loading={itemCount === undefined || itemCount === null}
                         minimumBatchSize={40}
+                        onScroll={handleGridScroll}
+                        ref={gridRef}
                         route={{
                             route: AppRoute.PLAYLISTS_DETAIL_SONGS,
                             slugs: [{ idProperty: 'id', slugProperty: 'playlistId' }],
                         }}
                         width={width}
-                        onScroll={handleGridScroll}
                     />
                 )}
             </AutoSizer>

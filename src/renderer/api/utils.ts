@@ -3,10 +3,11 @@ import isElectron from 'is-electron';
 import semverCoerce from 'semver/functions/coerce';
 import semverGte from 'semver/functions/gte';
 import { z } from 'zod';
+
+import { ServerFeature } from '/@/renderer/api/features-types';
+import { ServerListItem } from '/@/renderer/api/types';
 import { toast } from '/@/renderer/components/toast';
 import { useAuthStore } from '/@/renderer/store';
-import { ServerListItem } from '/@/renderer/api/types';
-import { ServerFeature } from '/@/renderer/api/features-types';
 
 // Since ts-rest client returns a strict response type, we need to add the headers to the body object
 export const resultWithHeaders = <ItemType extends z.ZodTypeAny>(itemSchema: ItemType) => {
@@ -29,7 +30,7 @@ export const resultSubsonicBaseResponse = <ItemType extends z.ZodRawShape>(
     });
 };
 
-export const authenticationFailure = (currentServer: ServerListItem | null) => {
+export const authenticationFailure = (currentServer: null | ServerListItem) => {
     toast.error({
         message: 'Your session has expired.',
     });
@@ -43,7 +44,7 @@ export const authenticationFailure = (currentServer: ServerListItem | null) => {
     }
 };
 
-export const hasFeature = (server: ServerListItem | null, feature: ServerFeature): boolean => {
+export const hasFeature = (server: null | ServerListItem, feature: ServerFeature): boolean => {
     if (!server || !server.features) {
         return false;
     }

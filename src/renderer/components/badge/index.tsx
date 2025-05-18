@@ -1,4 +1,5 @@
 import type { BadgeProps as MantineBadgeProps } from '@mantine/core';
+
 import { createPolymorphicComponent, Badge as MantineBadge } from '@mantine/core';
 import styled from 'styled-components';
 

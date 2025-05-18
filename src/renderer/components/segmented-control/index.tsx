@@ -1,6 +1,7 @@
-import { forwardRef } from 'react';
 import type { SegmentedControlProps as MantineSegmentedControlProps } from '@mantine/core';
+
 import { SegmentedControl as MantineSegmentedControl } from '@mantine/core';
+import { forwardRef } from 'react';
 import styled from 'styled-components';
 
 type SegmentedControlProps = MantineSegmentedControlProps;

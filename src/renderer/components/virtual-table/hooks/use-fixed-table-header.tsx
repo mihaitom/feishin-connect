@@ -1,5 +1,6 @@
 import { useInView } from 'framer-motion';
 import { useEffect, useRef } from 'react';
+
 import { useWindowSettings } from '/@/renderer/store/settings.store';
 import { Platform } from '/@/renderer/types';
 

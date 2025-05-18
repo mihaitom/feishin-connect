@@ -1,16 +1,17 @@
 import { Center, Group, Stack } from '@mantine/core';
+import { openModal } from '@mantine/modals';
 import { useTranslation } from 'react-i18next';
 import { RiCheckFill, RiEdit2Line, RiHome4Line } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
+
 import { Button, PageHeader, Text } from '/@/renderer/components';
 import { ActionRequiredContainer } from '/@/renderer/features/action-required/components/action-required-container';
 import { ServerCredentialRequired } from '/@/renderer/features/action-required/components/server-credential-required';
 import { ServerRequired } from '/@/renderer/features/action-required/components/server-required';
+import { ServerList } from '/@/renderer/features/servers';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
-import { openModal } from '@mantine/modals';
-import { ServerList } from '/@/renderer/features/servers';
 
 const ActionRequiredRoute = () => {
     const { t } = useTranslation();
@@ -88,8 +89,8 @@ const ActionRequiredRoute = () => {
                                 <Button
                                     fullWidth
                                     leftIcon={<RiEdit2Line />}
-                                    variant="filled"
                                     onClick={handleManageServersModal}
+                                    variant="filled"
                                 >
                                     {t('page.appMenu.manageServers', {
                                         postProcess: 'sentenceCase',

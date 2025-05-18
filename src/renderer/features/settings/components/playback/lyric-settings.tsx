@@ -1,23 +1,24 @@
+import isElectron from 'is-electron';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+
+import { languages } from '/@/i18n/i18n';
+import { LyricSource } from '/@/renderer/api/types';
+import {
+    MultiSelect,
+    MultiSelectProps,
+    NumberInput,
+    Select,
+    Switch,
+    TextInput,
+} from '/@/renderer/components';
 import {
     SettingOption,
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
 import { useLyricsSettings, useSettingsStoreActions } from '/@/renderer/store';
-import {
-    Select,
-    MultiSelect,
-    MultiSelectProps,
-    TextInput,
-    NumberInput,
-    Switch,
-} from '/@/renderer/components';
-import isElectron from 'is-electron';
-import styled from 'styled-components';
-import { LyricSource } from '/@/renderer/api/types';
-import { useTranslation } from 'react-i18next';
-import { languages } from '/@/i18n/i18n';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 const WorkingButtonSelect = styled(MultiSelect)<MultiSelectProps>`
     & button {
@@ -77,11 +78,10 @@ export const LyricSettings = () => {
         {
             control: (
                 <WorkingButtonSelect
-                    clearable
                     aria-label="Lyric providers"
+                    clearable
                     data={Object.values(LyricSource)}
                     defaultValue={settings.sources}
-                    width={300}
                     onChange={(e: LyricSource[]) => {
                         localSettings?.set('lyrics', e);
                         setSettings({
@@ -91,6 +91,7 @@ export const LyricSettings = () => {
                             },
                         });
                     }}
+                    width={300}
                 />
             ),
             description: t('setting.lyricFetchProvider', {
@@ -104,8 +105,6 @@ export const LyricSettings = () => {
             control: (
                 <NumberInput
                     defaultValue={settings.delayMs}
-                    step={10}
-                    width={100}
                     onBlur={(e) => {
                         const value = Number(e.currentTarget.value);
                         setSettings({
@@ -115,6 +114,8 @@ export const LyricSettings = () => {
                             },
                         });
                     }}
+                    step={10}
+                    width={100}
                 />
             ),
             description: t('setting.lyricOffset', {
@@ -128,10 +129,10 @@ export const LyricSettings = () => {
             control: (
                 <Select
                     data={languages}
-                    value={settings.translationTargetLanguage}
                     onChange={(value) => {
                         setSettings({ lyrics: { ...settings, translationTargetLanguage: value } });
                     }}
+                    value={settings.translationTargetLanguage}
                 />
             ),
             description: t('setting.translationTargetLanguage', {
@@ -145,10 +146,10 @@ export const LyricSettings = () => {
             control: (
                 <Select
                     data={['Microsoft Azure', 'Google Cloud']}
-                    value={settings.translationApiProvider}
                     onChange={(value) => {
                         setSettings({ lyrics: { ...settings, translationApiProvider: value } });
                     }}
+                    value={settings.translationApiProvider}
                 />
             ),
             description: t('setting.translationApiProvider', {
@@ -161,12 +162,12 @@ export const LyricSettings = () => {
         {
             control: (
                 <TextInput
-                    value={settings.translationApiKey}
                     onChange={(e) => {
                         setSettings({
                             lyrics: { ...settings, translationApiKey: e.currentTarget.value },
                         });
                     }}
+                    value={settings.translationApiKey}
                 />
             ),
             description: t('setting.translationApiKey', {

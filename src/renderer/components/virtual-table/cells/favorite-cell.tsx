@@ -1,11 +1,13 @@
 /* eslint-disable import/no-cycle */
 import type { ICellRendererParams } from '@ag-grid-community/core';
+
 import { RiHeartFill, RiHeartLine } from 'react-icons/ri';
+
 import { Button } from '/@/renderer/components/button';
 import { CellContainer } from '/@/renderer/components/virtual-table/cells/generic-cell';
 import { useCreateFavorite, useDeleteFavorite } from '/@/renderer/features/shared';
 
-export const FavoriteCell = ({ value, data, node }: ICellRendererParams) => {
+export const FavoriteCell = ({ data, node, value }: ICellRendererParams) => {
     const createMutation = useCreateFavorite({});
     const deleteMutation = useDeleteFavorite({});
 
@@ -49,6 +51,7 @@ export const FavoriteCell = ({ value, data, node }: ICellRendererParams) => {
         <CellContainer $position="center">
             <Button
                 compact
+                onClick={handleToggleFavorite}
                 sx={{
                     svg: {
                         fill: !value
@@ -57,7 +60,6 @@ export const FavoriteCell = ({ value, data, node }: ICellRendererParams) => {
                     },
                 }}
                 variant="subtle"
-                onClick={handleToggleFavorite}
             >
                 {!value ? <RiHeartLine size="1.3em" /> : <RiHeartFill size="1.3em" />}
             </Button>

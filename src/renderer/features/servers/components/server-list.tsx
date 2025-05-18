@@ -1,17 +1,18 @@
-import { ChangeEvent } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
-import { Accordion, Button, ContextModalVars, Switch, Text } from '/@/renderer/components';
 import { useLocalStorage } from '@mantine/hooks';
 import { openContextModal } from '@mantine/modals';
 import isElectron from 'is-electron';
+import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiAddFill, RiServerFill } from 'react-icons/ri';
+
+import { Accordion, Button, ContextModalVars, Switch, Text } from '/@/renderer/components';
 import { AddServerForm } from '/@/renderer/features/servers/components/add-server-form';
 import { ServerListItem } from '/@/renderer/features/servers/components/server-list-item';
 import { useCurrentServer, useServerList } from '/@/renderer/store';
 import { titleCase } from '/@/renderer/utils';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 export const ServerList = () => {
     const { t } = useTranslation();
@@ -21,7 +22,6 @@ export const ServerList = () => {
     const handleAddServerModal = () => {
         openContextModal({
             innerProps: {
-                // eslint-disable-next-line react/no-unstable-nested-components
                 modalBody: (vars: ContextModalVars) => (
                     <AddServerForm onCancel={() => vars.context.closeModal(vars.id)} />
                 ),
@@ -73,9 +73,9 @@ export const ServerList = () => {
                     autoFocus
                     compact
                     leftIcon={<RiAddFill size={15} />}
+                    onClick={handleAddServerModal}
                     size="sm"
                     variant="filled"
-                    onClick={handleAddServerModal}
                 >
                     {t('form.addServer.title', { postProcess: 'titleCase' })}
                 </Button>

@@ -1,5 +1,7 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { lazy, MutableRefObject, Suspense } from 'react';
+
 import { Spinner } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { useListContext } from '/@/renderer/context/list-context';
@@ -19,12 +21,12 @@ const GenreListTableView = lazy(() =>
 );
 
 interface AlbumListContentProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const GenreListContent = ({ itemCount, gridRef, tableRef }: AlbumListContentProps) => {
+export const GenreListContent = ({ gridRef, itemCount, tableRef }: AlbumListContentProps) => {
     const { pageKey } = useListContext();
     const { display } = useListStoreByKey({ key: pageKey });
 

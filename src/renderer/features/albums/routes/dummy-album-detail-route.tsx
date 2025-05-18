@@ -1,4 +1,19 @@
+import { Box, Center, Group, Stack } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
+import { Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RiErrorWarningLine, RiHeartFill, RiHeartLine, RiMoreFill } from 'react-icons/ri';
+import { generatePath, useParams } from 'react-router';
+import { Link } from 'react-router-dom';
+import { styled } from 'styled-components';
+
+import { api } from '/@/renderer/api';
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { LibraryItem, SongDetailResponse } from '/@/renderer/api/types';
 import { Button, Spinner, Spoiler, Text } from '/@/renderer/components';
+import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu';
+import { SONG_ALBUM_PAGE } from '/@/renderer/features/context-menu/context-menu-items';
+import { usePlayQueueAdd } from '/@/renderer/features/player';
 import {
     AnimatedPage,
     LibraryHeader,
@@ -6,27 +21,13 @@ import {
     useCreateFavorite,
     useDeleteFavorite,
 } from '/@/renderer/features/shared';
-import { Fragment } from 'react';
-import { generatePath, useParams } from 'react-router';
 import { useContainerQuery, useFastAverageColor } from '/@/renderer/hooks';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { LibraryItem, SongDetailResponse } from '/@/renderer/api/types';
-import { useCurrentServer } from '/@/renderer/store';
-import { Stack, Group, Box, Center } from '@mantine/core';
-import { Link } from 'react-router-dom';
-import { AppRoute } from '/@/renderer/router/routes';
-import { formatDurationString } from '/@/renderer/utils';
-import { RiErrorWarningLine, RiHeartFill, RiHeartLine, RiMoreFill } from 'react-icons/ri';
-import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
-import { SONG_ALBUM_PAGE } from '/@/renderer/features/context-menu/context-menu-items';
-import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu';
-import { styled } from 'styled-components';
 import { queryClient } from '/@/renderer/lib/react-query';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '/@/renderer/api';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import { useTranslation } from 'react-i18next';
+import { AppRoute } from '/@/renderer/router/routes';
+import { useCurrentServer } from '/@/renderer/store';
+import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import { formatDurationString } from '/@/renderer/utils';
+import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
 
 const DetailContainer = styled.div`
     display: flex;
@@ -152,17 +153,17 @@ const DummyAlbumDetailRoute = () => {
                             mah="4rem"
                             spacing="md"
                             sx={{
+                                overflow: 'hidden',
                                 WebkitBoxOrient: 'vertical',
                                 WebkitLineClamp: 2,
-                                overflow: 'hidden',
                             }}
                         >
                             {detailQuery?.data?.albumArtists.map((artist) => (
                                 <Text
-                                    key={`artist-${artist.id}`}
                                     $link
                                     component={Link}
                                     fw={600}
+                                    key={`artist-${artist.id}`}
                                     size="md"
                                     to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
                                         albumArtistId: artist.id,
@@ -190,8 +191,8 @@ const DummyAlbumDetailRoute = () => {
                                     createFavoriteMutation.isLoading ||
                                     deleteFavoriteMutation.isLoading
                                 }
-                                variant="subtle"
                                 onClick={handleFavorite}
+                                variant="subtle"
                             >
                                 {detailQuery?.data?.userFavorite ? (
                                     <RiHeartFill
@@ -204,11 +205,11 @@ const DummyAlbumDetailRoute = () => {
                             </Button>
                             <Button
                                 compact
-                                variant="subtle"
                                 onClick={(e) => {
                                     if (!detailQuery?.data) return;
                                     handleGeneralContextMenu(e, [detailQuery.data!]);
                                 }}
+                                variant="subtle"
                             >
                                 <RiMoreFill size={20} />
                             </Button>
@@ -220,9 +221,9 @@ const DummyAlbumDetailRoute = () => {
                         <Group spacing="sm">
                             {detailQuery?.data?.genres?.map((genre) => (
                                 <Button
-                                    key={`genre-${genre.id}`}
                                     compact
                                     component={Link}
+                                    key={`genre-${genre.id}`}
                                     radius={0}
                                     size="md"
                                     to={generatePath(AppRoute.LIBRARY_GENRES_SONGS, {

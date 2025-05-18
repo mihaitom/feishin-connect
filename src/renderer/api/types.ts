@@ -2,28 +2,29 @@ import orderBy from 'lodash/orderBy';
 import reverse from 'lodash/reverse';
 import shuffle from 'lodash/shuffle';
 import { z } from 'zod';
+
 import { ServerFeatures } from './features-types';
+import {
+    JFAlbumArtistListSort,
+    JFAlbumListSort,
+    JFArtistListSort,
+    JFGenreListSort,
+    JFPlaylistListSort,
+    JFSongListSort,
+    JFSortOrder,
+} from './jellyfin.types';
 import { jfType } from './jellyfin/jellyfin-types';
 import {
-    JFSortOrder,
-    JFAlbumListSort,
-    JFSongListSort,
-    JFAlbumArtistListSort,
-    JFArtistListSort,
-    JFPlaylistListSort,
-    JFGenreListSort,
-} from './jellyfin.types';
-import { ndType } from './navidrome/navidrome-types';
-import {
-    NDSortOrder,
-    NDOrder,
-    NDAlbumListSort,
     NDAlbumArtistListSort,
+    NDAlbumListSort,
+    NDGenreListSort,
+    NDOrder,
     NDPlaylistListSort,
     NDSongListSort,
+    NDSortOrder,
     NDUserListSort,
-    NDGenreListSort,
 } from './navidrome.types';
+import { ndType } from './navidrome/navidrome-types';
 
 export enum LibraryItem {
     ALBUM = 'album',
@@ -34,29 +35,29 @@ export enum LibraryItem {
     SONG = 'song',
 }
 
-export type AnyLibraryItem = Album | AlbumArtist | Artist | Playlist | Song | QueueSong;
-
-export type AnyLibraryItems =
-    | Album[]
-    | AlbumArtist[]
-    | Artist[]
-    | Playlist[]
-    | Song[]
-    | QueueSong[];
+export enum ServerType {
+    JELLYFIN = 'jellyfin',
+    NAVIDROME = 'navidrome',
+    SUBSONIC = 'subsonic',
+}
 
 export enum SortOrder {
     ASC = 'ASC',
     DESC = 'DESC',
 }
 
-export type User = {
-    createdAt: string | null;
-    email: string | null;
-    id: string;
-    isAdmin: boolean | null;
-    lastLoginAt: string | null;
-    name: string;
-    updatedAt: string | null;
+export type AnyLibraryItem = Album | AlbumArtist | Artist | Playlist | QueueSong | Song;
+
+export type AnyLibraryItems =
+    | Album[]
+    | AlbumArtist[]
+    | Artist[]
+    | Playlist[]
+    | QueueSong[]
+    | Song[];
+
+export type QueueSong = Song & {
+    uniqueId: string;
 };
 
 export type ServerListItem = {
@@ -68,19 +69,19 @@ export type ServerListItem = {
     savePassword?: boolean;
     type: ServerType;
     url: string;
-    userId: string | null;
+    userId: null | string;
     username: string;
     version?: string;
 };
 
-export enum ServerType {
-    JELLYFIN = 'jellyfin',
-    NAVIDROME = 'navidrome',
-    SUBSONIC = 'subsonic',
-}
-
-export type QueueSong = Song & {
-    uniqueId: string;
+export type User = {
+    createdAt: null | string;
+    email: null | string;
+    id: string;
+    isAdmin: boolean | null;
+    lastLoginAt: null | string;
+    name: string;
+    updatedAt: null | string;
 };
 
 type SortOrderMap = {
@@ -116,6 +117,10 @@ export enum ExternalType {
     LINK = 'LINK',
 }
 
+export enum GenreListSort {
+    NAME = 'name',
+}
+
 export enum ImageType {
     BACKDROP = 'BACKDROP',
     LOGO = 'LOGO',
@@ -123,212 +128,112 @@ export enum ImageType {
     SCREENSHOT = 'SCREENSHOT',
 }
 
-export type EndpointDetails = {
-    server: ServerListItem;
-};
-
-export interface BasePaginatedResponse<T> {
-    error?: string | any;
-    items: T;
-    startIndex: number;
-    totalRecordCount: number | null;
-}
-
-export type AuthenticationResponse = {
-    credential: string;
-    ndCredential?: string;
-    userId: string | null;
-    username: string;
-};
-
-export type Genre = {
-    albumCount?: number;
-    id: string;
-    imageUrl: string | null;
-    itemType: LibraryItem.GENRE;
-    name: string;
-    songCount?: number;
-};
-
 export type Album = {
     albumArtist: string;
     albumArtists: RelatedArtist[];
     artists: RelatedArtist[];
-    backdropImageUrl: string | null;
-    comment: string | null;
+    backdropImageUrl: null | string;
+    comment: null | string;
     createdAt: string;
-    duration: number | null;
+    duration: null | number;
     genres: Genre[];
     id: string;
-    imagePlaceholderUrl: string | null;
-    imageUrl: string | null;
+    imagePlaceholderUrl: null | string;
+    imageUrl: null | string;
     isCompilation: boolean | null;
     itemType: LibraryItem.ALBUM;
-    lastPlayedAt: string | null;
-    mbzId: string | null;
+    lastPlayedAt: null | string;
+    mbzId: null | string;
     name: string;
-    originalDate: string | null;
-    participants: Record<string, RelatedArtist[]> | null;
-    playCount: number | null;
-    releaseDate: string | null;
-    releaseYear: number | null;
+    originalDate: null | string;
+    participants: null | Record<string, RelatedArtist[]>;
+    playCount: null | number;
+    releaseDate: null | string;
+    releaseYear: null | number;
     serverId: string;
     serverType: ServerType;
-    size: number | null;
-    songCount: number | null;
+    size: null | number;
+    songCount: null | number;
     songs?: Song[];
-    tags: Record<string, string[]> | null;
+    tags: null | Record<string, string[]>;
     uniqueId: string;
     updatedAt: string;
     userFavorite: boolean;
-    userRating: number | null;
+    userRating: null | number;
 } & { songs?: Song[] };
 
-export type GainInfo = {
-    album?: number;
-    track?: number;
-};
-
-export type Song = {
-    album: string | null;
-    albumArtists: RelatedArtist[];
-    albumId: string;
-    artistName: string;
-    artists: RelatedArtist[];
-    bitRate: number;
-    bpm: number | null;
-    channels: number | null;
-    comment: string | null;
-    compilation: boolean | null;
-    container: string | null;
-    createdAt: string;
-    discNumber: number;
-    discSubtitle: string | null;
-    duration: number;
-    gain: GainInfo | null;
-    genres: Genre[];
-    id: string;
-    imagePlaceholderUrl: string | null;
-    imageUrl: string | null;
-    itemType: LibraryItem.SONG;
-    lastPlayedAt: string | null;
-    lyrics: string | null;
-    name: string;
-    participants: Record<string, RelatedArtist[]> | null;
-    path: string | null;
-    peak: GainInfo | null;
-    playCount: number;
-    playlistItemId?: string;
-    releaseDate: string | null;
-    releaseYear: string | null;
-    serverId: string;
-    serverType: ServerType;
-    size: number;
-    streamUrl: string;
-    tags: Record<string, string[]> | null;
-    trackNumber: number;
-    uniqueId: string;
-    updatedAt: string;
-    userFavorite: boolean;
-    userRating: number | null;
-};
-
 export type AlbumArtist = {
-    albumCount: number | null;
-    backgroundImageUrl: string | null;
-    biography: string | null;
-    duration: number | null;
+    albumCount: null | number;
+    backgroundImageUrl: null | string;
+    biography: null | string;
+    duration: null | number;
     genres: Genre[];
     id: string;
-    imageUrl: string | null;
+    imageUrl: null | string;
     itemType: LibraryItem.ALBUM_ARTIST;
-    lastPlayedAt: string | null;
-    mbz: string | null;
+    lastPlayedAt: null | string;
+    mbz: null | string;
     name: string;
-    playCount: number | null;
+    playCount: null | number;
     serverId: string;
     serverType: ServerType;
-    similarArtists: RelatedArtist[] | null;
-    songCount: number | null;
+    similarArtists: null | RelatedArtist[];
+    songCount: null | number;
     userFavorite: boolean;
-    userRating: number | null;
-};
-
-export type RelatedAlbumArtist = {
-    id: string;
-    name: string;
+    userRating: null | number;
 };
 
 export type Artist = {
-    biography: string | null;
+    biography: null | string;
     createdAt: string;
     id: string;
     itemType: LibraryItem.ARTIST;
     name: string;
-    remoteCreatedAt: string | null;
+    remoteCreatedAt: null | string;
     serverFolderId: string;
     serverId: string;
     serverType: ServerType;
     updatedAt: string;
 };
 
-export type RelatedArtist = {
-    id: string;
-    imageUrl: string | null;
-    name: string;
+export type AuthenticationResponse = {
+    credential: string;
+    ndCredential?: string;
+    userId: null | string;
+    username: string;
 };
 
-export type MusicFolder = {
-    id: string;
-    name: string;
-};
-
-export type Playlist = {
-    description: string | null;
-    duration: number | null;
-    genres: Genre[];
-    id: string;
-    imagePlaceholderUrl: string | null;
-    imageUrl: string | null;
-    itemType: LibraryItem.PLAYLIST;
-    name: string;
-    owner: string | null;
-    ownerId: string | null;
-    public: boolean | null;
-    rules?: Record<string, any> | null;
-    serverId: string;
-    serverType: ServerType;
-    size: number | null;
-    songCount: number | null;
-    sync?: boolean | null;
-};
-
-export type GenresResponse = Genre[];
-
-export type MusicFoldersResponse = MusicFolder[];
-
-export type ListSortOrder = NDOrder | JFSortOrder;
-
-type BaseEndpointArgs = {
-    apiClientProps: {
-        server: ServerListItem | null;
-        signal?: AbortSignal;
-    };
-};
+export interface BasePaginatedResponse<T> {
+    error?: any | string;
+    items: T;
+    startIndex: number;
+    totalRecordCount: null | number;
+}
 
 export interface BaseQuery<T> {
     sortBy: T;
     sortOrder: SortOrder;
 }
 
-// Genre List
-export type GenreListResponse = BasePaginatedResponse<Genre[]> | null | undefined;
+export type EndpointDetails = {
+    server: ServerListItem;
+};
 
-export type GenreListArgs = { query: GenreListQuery } & BaseEndpointArgs;
+export type GainInfo = {
+    album?: number;
+    track?: number;
+};
 
-export enum GenreListSort {
-    NAME = 'name',
-}
+export type Genre = {
+    albumCount?: number;
+    id: string;
+    imageUrl: null | string;
+    itemType: LibraryItem.GENRE;
+    name: string;
+    songCount?: number;
+};
+
+export type GenreListArgs = BaseEndpointArgs & { query: GenreListQuery };
 
 export interface GenreListQuery extends BaseQuery<GenreListSort> {
     _custom?: {
@@ -340,6 +245,102 @@ export interface GenreListQuery extends BaseQuery<GenreListSort> {
     searchTerm?: string;
     startIndex: number;
 }
+
+// Genre List
+export type GenreListResponse = BasePaginatedResponse<Genre[]> | null | undefined;
+
+export type GenresResponse = Genre[];
+
+export type ListSortOrder = JFSortOrder | NDOrder;
+
+export type MusicFolder = {
+    id: string;
+    name: string;
+};
+
+export type MusicFoldersResponse = MusicFolder[];
+
+export type Playlist = {
+    description: null | string;
+    duration: null | number;
+    genres: Genre[];
+    id: string;
+    imagePlaceholderUrl: null | string;
+    imageUrl: null | string;
+    itemType: LibraryItem.PLAYLIST;
+    name: string;
+    owner: null | string;
+    ownerId: null | string;
+    public: boolean | null;
+    rules?: null | Record<string, any>;
+    serverId: string;
+    serverType: ServerType;
+    size: null | number;
+    songCount: null | number;
+    sync?: boolean | null;
+};
+
+export type RelatedAlbumArtist = {
+    id: string;
+    name: string;
+};
+
+export type RelatedArtist = {
+    id: string;
+    imageUrl: null | string;
+    name: string;
+};
+
+export type Song = {
+    album: null | string;
+    albumArtists: RelatedArtist[];
+    albumId: string;
+    artistName: string;
+    artists: RelatedArtist[];
+    bitRate: number;
+    bpm: null | number;
+    channels: null | number;
+    comment: null | string;
+    compilation: boolean | null;
+    container: null | string;
+    createdAt: string;
+    discNumber: number;
+    discSubtitle: null | string;
+    duration: number;
+    gain: GainInfo | null;
+    genres: Genre[];
+    id: string;
+    imagePlaceholderUrl: null | string;
+    imageUrl: null | string;
+    itemType: LibraryItem.SONG;
+    lastPlayedAt: null | string;
+    lyrics: null | string;
+    name: string;
+    participants: null | Record<string, RelatedArtist[]>;
+    path: null | string;
+    peak: GainInfo | null;
+    playCount: number;
+    playlistItemId?: string;
+    releaseDate: null | string;
+    releaseYear: null | string;
+    serverId: string;
+    serverType: ServerType;
+    size: number;
+    streamUrl: string;
+    tags: null | Record<string, string[]>;
+    trackNumber: number;
+    uniqueId: string;
+    updatedAt: string;
+    userFavorite: boolean;
+    userRating: null | number;
+};
+
+type BaseEndpointArgs = {
+    apiClientProps: {
+        server: null | ServerListItem;
+        signal?: AbortSignal;
+    };
+};
 
 type GenreListSortMap = {
     jellyfin: Record<GenreListSort, JFGenreListSort | undefined>;
@@ -359,9 +360,6 @@ export const genreListSortMap: GenreListSortMap = {
     },
 };
 
-// Album List
-export type AlbumListResponse = BasePaginatedResponse<Album[]> | null | undefined;
-
 export enum AlbumListSort {
     ALBUM_ARTIST = 'albumArtist',
     ARTIST = 'artist',
@@ -380,6 +378,8 @@ export enum AlbumListSort {
     YEAR = 'year',
 }
 
+export type AlbumListArgs = BaseEndpointArgs & { query: AlbumListQuery };
+
 export interface AlbumListQuery extends BaseQuery<AlbumListSort> {
     _custom?: {
         jellyfin?: Partial<z.infer<typeof jfType._parameters.albumList>>;
@@ -397,7 +397,8 @@ export interface AlbumListQuery extends BaseQuery<AlbumListSort> {
     startIndex: number;
 }
 
-export type AlbumListArgs = { query: AlbumListQuery } & BaseEndpointArgs;
+// Album List
+export type AlbumListResponse = BasePaginatedResponse<Album[]> | null | undefined;
 
 type AlbumListSortMap = {
     jellyfin: Record<AlbumListSort, JFAlbumListSort | undefined>;
@@ -460,21 +461,6 @@ export const albumListSortMap: AlbumListSortMap = {
     },
 };
 
-// Album Detail
-export type AlbumDetailResponse = Album | null | undefined;
-
-export type AlbumDetailQuery = { id: string };
-
-export type AlbumDetailArgs = { query: AlbumDetailQuery } & BaseEndpointArgs;
-
-export type AlbumInfo = {
-    imageUrl: string | null;
-    notes: string | null;
-};
-
-// Song List
-export type SongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
-
 export enum SongListSort {
     ALBUM = 'album',
     ALBUM_ARTIST = 'albumArtist',
@@ -496,6 +482,20 @@ export enum SongListSort {
     YEAR = 'year',
 }
 
+export type AlbumDetailArgs = BaseEndpointArgs & { query: AlbumDetailQuery };
+
+export type AlbumDetailQuery = { id: string };
+
+// Album Detail
+export type AlbumDetailResponse = Album | null | undefined;
+
+export type AlbumInfo = {
+    imageUrl: null | string;
+    notes: null | string;
+};
+
+export type SongListArgs = BaseEndpointArgs & { query: SongListQuery };
+
 export interface SongListQuery extends BaseQuery<SongListSort> {
     _custom?: {
         jellyfin?: Partial<z.infer<typeof jfType._parameters.songList>>;
@@ -516,7 +516,8 @@ export interface SongListQuery extends BaseQuery<SongListSort> {
     startIndex: number;
 }
 
-export type SongListArgs = { query: SongListQuery } & BaseEndpointArgs;
+// Song List
+export type SongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
 
 type SongListSortMap = {
     jellyfin: Record<SongListSort, JFSongListSort | undefined>;
@@ -587,16 +588,6 @@ export const songListSortMap: SongListSortMap = {
     },
 };
 
-// Song Detail
-export type SongDetailResponse = Song | null | undefined;
-
-export type SongDetailQuery = { id: string };
-
-export type SongDetailArgs = { query: SongDetailQuery } & BaseEndpointArgs;
-
-// Album Artist List
-export type AlbumArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
-
 export enum AlbumArtistListSort {
     ALBUM = 'album',
     ALBUM_COUNT = 'albumCount',
@@ -611,6 +602,8 @@ export enum AlbumArtistListSort {
     SONG_COUNT = 'songCount',
 }
 
+export type AlbumArtistListArgs = BaseEndpointArgs & { query: AlbumArtistListQuery };
+
 export interface AlbumArtistListQuery extends BaseQuery<AlbumArtistListSort> {
     _custom?: {
         jellyfin?: Partial<z.infer<typeof jfType._parameters.albumArtistList>>;
@@ -622,7 +615,15 @@ export interface AlbumArtistListQuery extends BaseQuery<AlbumArtistListSort> {
     startIndex: number;
 }
 
-export type AlbumArtistListArgs = { query: AlbumArtistListQuery } & BaseEndpointArgs;
+// Album Artist List
+export type AlbumArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
+
+export type SongDetailArgs = BaseEndpointArgs & { query: SongDetailQuery };
+
+export type SongDetailQuery = { id: string };
+
+// Song Detail
+export type SongDetailResponse = null | Song | undefined;
 
 type AlbumArtistListSortMap = {
     jellyfin: Record<AlbumArtistListSort, JFAlbumArtistListSort | undefined>;
@@ -674,15 +675,6 @@ export const albumArtistListSortMap: AlbumArtistListSortMap = {
 
 // Album Artist Detail
 
-export type AlbumArtistDetailResponse = AlbumArtist | null;
-
-export type AlbumArtistDetailQuery = { id: string };
-
-export type AlbumArtistDetailArgs = { query: AlbumArtistDetailQuery } & BaseEndpointArgs;
-
-// Artist List
-export type ArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
-
 export enum ArtistListSort {
     ALBUM = 'album',
     ALBUM_COUNT = 'albumCount',
@@ -697,6 +689,14 @@ export enum ArtistListSort {
     SONG_COUNT = 'songCount',
 }
 
+export type AlbumArtistDetailArgs = BaseEndpointArgs & { query: AlbumArtistDetailQuery };
+
+export type AlbumArtistDetailQuery = { id: string };
+
+export type AlbumArtistDetailResponse = AlbumArtist | null;
+
+export type ArtistListArgs = BaseEndpointArgs & { query: ArtistListQuery };
+
 export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
     _custom?: {
         jellyfin?: Partial<z.infer<typeof jfType._parameters.albumArtistList>>;
@@ -709,7 +709,8 @@ export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
     startIndex: number;
 }
 
-export type ArtistListArgs = { query: ArtistListQuery } & BaseEndpointArgs;
+// Artist List
+export type ArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
 
 type ArtistListSortMap = {
     jellyfin: Record<ArtistListSort, JFArtistListSort | undefined>;
@@ -761,71 +762,33 @@ export const artistListSortMap: ArtistListSortMap = {
 
 // Artist Detail
 
-// Favorite
-export type FavoriteResponse = null | undefined;
+export enum PlaylistListSort {
+    DURATION = 'duration',
+    NAME = 'name',
+    OWNER = 'owner',
+    PUBLIC = 'public',
+    SONG_COUNT = 'songCount',
+    UPDATED_AT = 'updatedAt',
+}
 
-export type FavoriteQuery = {
-    id: string[];
-    type: LibraryItem;
-};
-
-export type FavoriteArgs = { query: FavoriteQuery; serverId?: string } & BaseEndpointArgs;
-
-// Rating
-export type RatingResponse = null | undefined;
-
-export type RatingQuery = {
-    item: AnyLibraryItems;
-    rating: number;
-};
-
-export type SetRatingArgs = { query: RatingQuery; serverId?: string } & BaseEndpointArgs;
-
-// Sharing
-export type ShareItemResponse = { id: string } | undefined;
-
-export type ShareItemBody = {
-    description: string;
-    downloadable: boolean;
-    expires: number;
-    resourceIds: string;
-    resourceType: string;
-};
-
-export type ShareItemArgs = { body: ShareItemBody; serverId?: string } & BaseEndpointArgs;
-
-// Add to playlist
-export type AddToPlaylistResponse = null | undefined;
-
-export type AddToPlaylistQuery = {
-    id: string;
+export type AddToPlaylistArgs = BaseEndpointArgs & {
+    body: AddToPlaylistBody;
+    query: AddToPlaylistQuery;
+    serverId?: string;
 };
 
 export type AddToPlaylistBody = {
     songId: string[];
 };
 
-export type AddToPlaylistArgs = {
-    body: AddToPlaylistBody;
-    query: AddToPlaylistQuery;
-    serverId?: string;
-} & BaseEndpointArgs;
-
-// Remove from playlist
-export type RemoveFromPlaylistResponse = null | undefined;
-
-export type RemoveFromPlaylistQuery = {
+export type AddToPlaylistQuery = {
     id: string;
-    songId: string[];
 };
 
-export type RemoveFromPlaylistArgs = {
-    query: RemoveFromPlaylistQuery;
-    serverId?: string;
-} & BaseEndpointArgs;
+// Add to playlist
+export type AddToPlaylistResponse = null | undefined;
 
-// Create Playlist
-export type CreatePlaylistResponse = { id: string } | undefined;
+export type CreatePlaylistArgs = BaseEndpointArgs & { body: CreatePlaylistBody; serverId?: string };
 
 export type CreatePlaylistBody = {
     _custom?: {
@@ -841,13 +804,84 @@ export type CreatePlaylistBody = {
     public?: boolean;
 };
 
-export type CreatePlaylistArgs = { body: CreatePlaylistBody; serverId?: string } & BaseEndpointArgs;
+// Create Playlist
+export type CreatePlaylistResponse = undefined | { id: string };
 
-// Update Playlist
-export type UpdatePlaylistResponse = null | undefined;
+export type DeletePlaylistArgs = BaseEndpointArgs & {
+    query: DeletePlaylistQuery;
+    serverId?: string;
+};
 
-export type UpdatePlaylistQuery = {
+export type DeletePlaylistQuery = { id: string };
+
+// Delete Playlist
+export type DeletePlaylistResponse = null | undefined;
+
+export type FavoriteArgs = BaseEndpointArgs & { query: FavoriteQuery; serverId?: string };
+
+export type FavoriteQuery = {
+    id: string[];
+    type: LibraryItem;
+};
+
+// Favorite
+export type FavoriteResponse = null | undefined;
+
+export type PlaylistListArgs = BaseEndpointArgs & { query: PlaylistListQuery };
+
+export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
+    _custom?: {
+        jellyfin?: Partial<z.infer<typeof jfType._parameters.playlistList>>;
+        navidrome?: Partial<z.infer<typeof ndType._parameters.playlistList>>;
+    };
+    limit?: number;
+    searchTerm?: string;
+    startIndex: number;
+}
+
+// Playlist List
+export type PlaylistListResponse = BasePaginatedResponse<Playlist[]> | null | undefined;
+
+export type RatingQuery = {
+    item: AnyLibraryItems;
+    rating: number;
+};
+
+// Rating
+export type RatingResponse = null | undefined;
+
+export type RemoveFromPlaylistArgs = BaseEndpointArgs & {
+    query: RemoveFromPlaylistQuery;
+    serverId?: string;
+};
+
+export type RemoveFromPlaylistQuery = {
     id: string;
+    songId: string[];
+};
+
+// Remove from playlist
+export type RemoveFromPlaylistResponse = null | undefined;
+
+export type SetRatingArgs = BaseEndpointArgs & { query: RatingQuery; serverId?: string };
+
+export type ShareItemArgs = BaseEndpointArgs & { body: ShareItemBody; serverId?: string };
+
+export type ShareItemBody = {
+    description: string;
+    downloadable: boolean;
+    expires: number;
+    resourceIds: string;
+    resourceType: string;
+};
+
+// Sharing
+export type ShareItemResponse = undefined | { id: string };
+
+export type UpdatePlaylistArgs = BaseEndpointArgs & {
+    body: UpdatePlaylistBody;
+    query: UpdatePlaylistQuery;
+    serverId?: string;
 };
 
 export type UpdatePlaylistBody = {
@@ -865,45 +899,12 @@ export type UpdatePlaylistBody = {
     public?: boolean;
 };
 
-export type UpdatePlaylistArgs = {
-    body: UpdatePlaylistBody;
-    query: UpdatePlaylistQuery;
-    serverId?: string;
-} & BaseEndpointArgs;
+export type UpdatePlaylistQuery = {
+    id: string;
+};
 
-// Delete Playlist
-export type DeletePlaylistResponse = null | undefined;
-
-export type DeletePlaylistQuery = { id: string };
-
-export type DeletePlaylistArgs = {
-    query: DeletePlaylistQuery;
-    serverId?: string;
-} & BaseEndpointArgs;
-
-// Playlist List
-export type PlaylistListResponse = BasePaginatedResponse<Playlist[]> | null | undefined;
-
-export enum PlaylistListSort {
-    DURATION = 'duration',
-    NAME = 'name',
-    OWNER = 'owner',
-    PUBLIC = 'public',
-    SONG_COUNT = 'songCount',
-    UPDATED_AT = 'updatedAt',
-}
-
-export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
-    _custom?: {
-        jellyfin?: Partial<z.infer<typeof jfType._parameters.playlistList>>;
-        navidrome?: Partial<z.infer<typeof ndType._parameters.playlistList>>;
-    };
-    limit?: number;
-    searchTerm?: string;
-    startIndex: number;
-}
-
-export type PlaylistListArgs = { query: PlaylistListQuery } & BaseEndpointArgs;
+// Update Playlist
+export type UpdatePlaylistResponse = null | undefined;
 
 type PlaylistListSortMap = {
     jellyfin: Record<PlaylistListSort, JFPlaylistListSort | undefined>;
@@ -938,17 +939,27 @@ export const playlistListSortMap: PlaylistListSortMap = {
     },
 };
 
-// Playlist Detail
-export type PlaylistDetailResponse = Playlist;
+export enum UserListSort {
+    NAME = 'name',
+}
+
+export type MusicFolderListArgs = BaseEndpointArgs;
+
+export type MusicFolderListQuery = null;
+
+// Music Folder List
+export type MusicFolderListResponse = BasePaginatedResponse<MusicFolder[]> | null | undefined;
+
+export type PlaylistDetailArgs = BaseEndpointArgs & { query: PlaylistDetailQuery };
 
 export type PlaylistDetailQuery = {
     id: string;
 };
 
-export type PlaylistDetailArgs = { query: PlaylistDetailQuery } & BaseEndpointArgs;
+// Playlist Detail
+export type PlaylistDetailResponse = Playlist;
 
-// Playlist Songs
-export type PlaylistSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+export type PlaylistSongListArgs = BaseEndpointArgs & { query: PlaylistSongListQuery };
 
 export type PlaylistSongListQuery = {
     id: string;
@@ -958,22 +969,10 @@ export type PlaylistSongListQuery = {
     startIndex: number;
 };
 
-export type PlaylistSongListArgs = { query: PlaylistSongListQuery } & BaseEndpointArgs;
+// Playlist Songs
+export type PlaylistSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
 
-// Music Folder List
-export type MusicFolderListResponse = BasePaginatedResponse<MusicFolder[]> | null | undefined;
-
-export type MusicFolderListQuery = null;
-
-export type MusicFolderListArgs = BaseEndpointArgs;
-
-// User list
-// Playlist List
-export type UserListResponse = BasePaginatedResponse<User[]> | null | undefined;
-
-export enum UserListSort {
-    NAME = 'name',
-}
+export type UserListArgs = BaseEndpointArgs & { query: UserListQuery };
 
 export interface UserListQuery extends BaseQuery<UserListSort> {
     _custom?: {
@@ -986,7 +985,9 @@ export interface UserListQuery extends BaseQuery<UserListSort> {
     startIndex: number;
 }
 
-export type UserListArgs = { query: UserListQuery } & BaseEndpointArgs;
+// User list
+// Playlist List
+export type UserListResponse = BasePaginatedResponse<User[]> | null | undefined;
 
 type UserListSortMap = {
     jellyfin: Record<UserListSort, undefined>;
@@ -1006,16 +1007,13 @@ export const userListSortMap: UserListSortMap = {
     },
 };
 
-// Top Songs List
-export type TopSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+export enum Played {
+    All = 'all',
+    Never = 'never',
+    Played = 'played',
+}
 
-export type TopSongListQuery = {
-    artist: string;
-    artistId: string;
-    limit?: number;
-};
-
-export type TopSongListArgs = { query: TopSongListQuery } & BaseEndpointArgs;
+export type ArtistInfoArgs = BaseEndpointArgs & { query: ArtistInfoQuery };
 
 // Artist Info
 export type ArtistInfoQuery = {
@@ -1024,97 +1022,11 @@ export type ArtistInfoQuery = {
     musicFolderId?: string;
 };
 
-export type ArtistInfoArgs = { query: ArtistInfoQuery } & BaseEndpointArgs;
-
-// Scrobble
-export type ScrobbleResponse = null | undefined;
-
-export type ScrobbleArgs = {
-    query: ScrobbleQuery;
-    serverId?: string;
-} & BaseEndpointArgs;
-
-export type ScrobbleQuery = {
-    event?: 'pause' | 'unpause' | 'timeupdate' | 'start';
-    id: string;
-    position?: number;
-    submission: boolean;
+export type FullLyricsMetadata = Omit<InternetProviderLyricResponse, 'id' | 'lyrics' | 'source'> & {
+    lyrics: LyricsResponse;
+    remote: boolean;
+    source: string;
 };
-
-export type SearchQuery = {
-    albumArtistLimit?: number;
-    albumArtistStartIndex?: number;
-    albumLimit?: number;
-    albumStartIndex?: number;
-    musicFolderId?: string;
-    query?: string;
-    songLimit?: number;
-    songStartIndex?: number;
-};
-
-export type SearchSongsQuery = {
-    musicFolderId?: string;
-    query?: string;
-    songLimit?: number;
-    songStartIndex?: number;
-};
-
-export type SearchAlbumsQuery = {
-    albumLimit?: number;
-    albumStartIndex?: number;
-    musicFolderId?: string;
-    query?: string;
-};
-
-export type SearchAlbumArtistsQuery = {
-    albumArtistLimit?: number;
-    albumArtistStartIndex?: number;
-    musicFolderId?: string;
-    query?: string;
-};
-
-export type SearchArgs = {
-    query: SearchQuery;
-} & BaseEndpointArgs;
-
-export type SearchResponse = {
-    albumArtists: AlbumArtist[];
-    albums: Album[];
-    songs: Song[];
-};
-
-export enum Played {
-    All = 'all',
-    Never = 'never',
-    Played = 'played',
-}
-
-export type RandomSongListQuery = {
-    genre?: string;
-    limit?: number;
-    maxYear?: number;
-    minYear?: number;
-    musicFolderId?: string;
-    played: Played;
-};
-
-export type RandomSongListArgs = {
-    query: RandomSongListQuery;
-} & BaseEndpointArgs;
-
-export type RandomSongListResponse = SongListResponse;
-
-export type LyricsQuery = {
-    songId: string;
-};
-
-export type LyricsArgs = {
-    query: LyricsQuery;
-} & BaseEndpointArgs;
-
-export type SynchronizedLyricsArray = Array<[number, string]>;
-
-export type LyricsResponse = SynchronizedLyricsArray | string;
 
 export type InternetProviderLyricResponse = {
     artist: string;
@@ -1132,29 +1044,105 @@ export type InternetProviderLyricSearchResponse = {
     source: LyricSource;
 };
 
-export type FullLyricsMetadata = {
-    lyrics: LyricsResponse;
-    remote: boolean;
-    source: string;
-} & Omit<InternetProviderLyricResponse, 'id' | 'lyrics' | 'source'>;
-
 export type LyricOverride = Omit<InternetProviderLyricResponse, 'lyrics'>;
+
+export type LyricsArgs = BaseEndpointArgs & {
+    query: LyricsQuery;
+};
+
+export type LyricsQuery = {
+    songId: string;
+};
+
+export type LyricsResponse = string | SynchronizedLyricsArray;
+
+export type RandomSongListArgs = BaseEndpointArgs & {
+    query: RandomSongListQuery;
+};
+
+export type RandomSongListQuery = {
+    genre?: string;
+    limit?: number;
+    maxYear?: number;
+    minYear?: number;
+    musicFolderId?: string;
+    played: Played;
+};
+
+export type RandomSongListResponse = SongListResponse;
+
+export type ScrobbleArgs = BaseEndpointArgs & {
+    query: ScrobbleQuery;
+    serverId?: string;
+};
+
+export type ScrobbleQuery = {
+    event?: 'pause' | 'start' | 'timeupdate' | 'unpause';
+    id: string;
+    position?: number;
+    submission: boolean;
+};
+
+// Scrobble
+export type ScrobbleResponse = null | undefined;
+
+export type SearchAlbumArtistsQuery = {
+    albumArtistLimit?: number;
+    albumArtistStartIndex?: number;
+    musicFolderId?: string;
+    query?: string;
+};
+
+export type SearchAlbumsQuery = {
+    albumLimit?: number;
+    albumStartIndex?: number;
+    musicFolderId?: string;
+    query?: string;
+};
+
+export type SearchArgs = BaseEndpointArgs & {
+    query: SearchQuery;
+};
+
+export type SearchQuery = {
+    albumArtistLimit?: number;
+    albumArtistStartIndex?: number;
+    albumLimit?: number;
+    albumStartIndex?: number;
+    musicFolderId?: string;
+    query?: string;
+    songLimit?: number;
+    songStartIndex?: number;
+};
+
+export type SearchResponse = {
+    albumArtists: AlbumArtist[];
+    albums: Album[];
+    songs: Song[];
+};
+
+export type SearchSongsQuery = {
+    musicFolderId?: string;
+    query?: string;
+    songLimit?: number;
+    songStartIndex?: number;
+};
+
+export type SynchronizedLyricsArray = Array<[number, string]>;
+
+export type TopSongListArgs = BaseEndpointArgs & { query: TopSongListQuery };
+
+export type TopSongListQuery = {
+    artist: string;
+    artistId: string;
+    limit?: number;
+};
+
+// Top Songs List
+export type TopSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
 
 export const instanceOfCancellationError = (error: any) => {
     return 'revert' in error;
-};
-
-export type LyricSearchQuery = {
-    album?: string;
-    artist?: string;
-    duration?: number;
-    name?: string;
-};
-
-export type LyricGetQuery = {
-    remoteSongId: string;
-    remoteSource: LyricSource;
-    song: Song;
 };
 
 export enum LyricSource {
@@ -1162,101 +1150,6 @@ export enum LyricSource {
     LRCLIB = 'lrclib.net',
     NETEASE = 'NetEase',
 }
-
-export type LyricsOverride = Omit<FullLyricsMetadata, 'lyrics'> & { id: string };
-
-// This type from https://wicg.github.io/local-font-access/#fontdata
-// NOTE: it is still experimental, so this should be updates as appropriate
-export type FontData = {
-    family: string;
-    fullName: string;
-    postscriptName: string;
-    style: string;
-};
-
-export type ServerInfoArgs = BaseEndpointArgs;
-
-export type ServerInfo = {
-    features: ServerFeatures;
-    id?: string;
-    version: string;
-};
-
-export type StructuredLyricsArgs = {
-    query: LyricsQuery;
-} & BaseEndpointArgs;
-
-export type StructuredUnsyncedLyric = {
-    lyrics: string;
-    synced: false;
-} & Omit<FullLyricsMetadata, 'lyrics'>;
-
-export type StructuredSyncedLyric = {
-    lyrics: SynchronizedLyricsArray;
-    synced: true;
-} & Omit<FullLyricsMetadata, 'lyrics'>;
-
-export type StructuredLyric = {
-    lang: string;
-} & (StructuredUnsyncedLyric | StructuredSyncedLyric);
-
-export type SimilarSongsQuery = {
-    albumArtistIds: string[];
-    count?: number;
-    songId: string;
-};
-
-export type SimilarSongsArgs = {
-    query: SimilarSongsQuery;
-} & BaseEndpointArgs;
-
-export type MoveItemQuery = {
-    endingIndex: number;
-    playlistId: string;
-    startingIndex: number;
-    trackId: string;
-};
-
-export type MoveItemArgs = {
-    query: MoveItemQuery;
-} & BaseEndpointArgs;
-
-export type DownloadQuery = {
-    id: string;
-};
-
-export type DownloadArgs = {
-    query: DownloadQuery;
-} & BaseEndpointArgs;
-
-export type TranscodingQuery = {
-    base: string;
-    bitrate?: number;
-    format?: string;
-};
-
-export type TranscodingArgs = {
-    query: TranscodingQuery;
-} & BaseEndpointArgs;
-
-export type TagQuery = {
-    folder?: string;
-    type: LibraryItem.ALBUM | LibraryItem.SONG;
-};
-
-export type TagArgs = {
-    query: TagQuery;
-} & BaseEndpointArgs;
-
-export type Tag = {
-    name: string;
-    options: string[];
-};
-
-export type TagResponses = {
-    boolTags?: string[];
-    enumTags?: Tag[];
-};
 
 export type ControllerEndpoint = {
     addToPlaylist: (args: AddToPlaylistArgs) => Promise<AddToPlaylistResponse>;
@@ -1307,6 +1200,114 @@ export type ControllerEndpoint = {
     updatePlaylist: (args: UpdatePlaylistArgs) => Promise<UpdatePlaylistResponse>;
 };
 
+export type DownloadArgs = BaseEndpointArgs & {
+    query: DownloadQuery;
+};
+
+export type DownloadQuery = {
+    id: string;
+};
+
+// This type from https://wicg.github.io/local-font-access/#fontdata
+// NOTE: it is still experimental, so this should be updates as appropriate
+export type FontData = {
+    family: string;
+    fullName: string;
+    postscriptName: string;
+    style: string;
+};
+
+export type LyricGetQuery = {
+    remoteSongId: string;
+    remoteSource: LyricSource;
+    song: Song;
+};
+
+export type LyricSearchQuery = {
+    album?: string;
+    artist?: string;
+    duration?: number;
+    name?: string;
+};
+
+export type LyricsOverride = Omit<FullLyricsMetadata, 'lyrics'> & { id: string };
+
+export type MoveItemArgs = BaseEndpointArgs & {
+    query: MoveItemQuery;
+};
+
+export type MoveItemQuery = {
+    endingIndex: number;
+    playlistId: string;
+    startingIndex: number;
+    trackId: string;
+};
+
+export type ServerInfo = {
+    features: ServerFeatures;
+    id?: string;
+    version: string;
+};
+
+export type ServerInfoArgs = BaseEndpointArgs;
+
+export type SimilarSongsArgs = BaseEndpointArgs & {
+    query: SimilarSongsQuery;
+};
+
+export type SimilarSongsQuery = {
+    albumArtistIds: string[];
+    count?: number;
+    songId: string;
+};
+
+export type StructuredLyric = (StructuredSyncedLyric | StructuredUnsyncedLyric) & {
+    lang: string;
+};
+
+export type StructuredLyricsArgs = BaseEndpointArgs & {
+    query: LyricsQuery;
+};
+
+export type StructuredSyncedLyric = Omit<FullLyricsMetadata, 'lyrics'> & {
+    lyrics: SynchronizedLyricsArray;
+    synced: true;
+};
+
+export type StructuredUnsyncedLyric = Omit<FullLyricsMetadata, 'lyrics'> & {
+    lyrics: string;
+    synced: false;
+};
+
+export type Tag = {
+    name: string;
+    options: string[];
+};
+
+export type TagArgs = BaseEndpointArgs & {
+    query: TagQuery;
+};
+
+export type TagQuery = {
+    folder?: string;
+    type: LibraryItem.ALBUM | LibraryItem.SONG;
+};
+
+export type TagResponses = {
+    boolTags?: string[];
+    enumTags?: Tag[];
+};
+
+export type TranscodingArgs = BaseEndpointArgs & {
+    query: TranscodingQuery;
+};
+
+export type TranscodingQuery = {
+    base: string;
+    bitrate?: number;
+    format?: string;
+};
+
 export const sortAlbumList = (albums: Album[], sortBy: AlbumListSort, sortOrder: SortOrder) => {
     let results = albums;
 
@@ -1335,20 +1336,20 @@ export const sortAlbumList = (albums: Album[], sortBy: AlbumListSort, sortOrder:
         case AlbumListSort.RANDOM:
             results = shuffle(results);
             break;
+        case AlbumListSort.RATING:
+            results = orderBy(results, ['userRating'], [order]);
+            break;
         case AlbumListSort.RECENTLY_ADDED:
             results = orderBy(results, ['createdAt'], [order]);
             break;
         case AlbumListSort.RECENTLY_PLAYED:
             results = orderBy(results, ['lastPlayedAt'], [order]);
             break;
-        case AlbumListSort.RATING:
-            results = orderBy(results, ['userRating'], [order]);
+        case AlbumListSort.SONG_COUNT:
+            results = orderBy(results, ['songCount'], [order]);
             break;
         case AlbumListSort.YEAR:
             results = orderBy(results, ['releaseYear'], [order]);
-            break;
-        case AlbumListSort.SONG_COUNT:
-            results = orderBy(results, ['songCount'], [order]);
             break;
         default:
             break;
@@ -1463,12 +1464,12 @@ export const sortAlbumArtistList = (
             results = orderBy(artists, ['albumCount', (v) => v.name.toLowerCase()], [order, 'asc']);
             break;
 
-        case AlbumArtistListSort.NAME:
-            results = orderBy(artists, [(v) => v.name.toLowerCase()], [order]);
-            break;
-
         case AlbumArtistListSort.FAVORITED:
             results = orderBy(artists, ['starred'], [order]);
+            break;
+
+        case AlbumArtistListSort.NAME:
+            results = orderBy(artists, [(v) => v.name.toLowerCase()], [order]);
             break;
 
         case AlbumArtistListSort.RATING:

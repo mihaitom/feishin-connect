@@ -1,11 +1,13 @@
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import type { Font } from '/@/renderer/styles';
 import type { TextProps as MantineTextProps } from '@mantine/core';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+
 import { createPolymorphicComponent, Text as MantineText } from '@mantine/core';
 import styled from 'styled-components';
-import type { Font } from '/@/renderer/styles';
+
 import { textEllipsis } from '/@/renderer/styles';
 
-type MantineTextDivProps = MantineTextProps & ComponentPropsWithoutRef<'div'>;
+type MantineTextDivProps = ComponentPropsWithoutRef<'div'> & MantineTextProps;
 
 interface TextProps extends MantineTextDivProps {
     $link?: boolean;
@@ -32,7 +34,7 @@ const StyledText = styled(MantineText)<TextProps>`
     }
 `;
 
-export const _Text = ({ children, $secondary, overflow, font, $noSelect, ...rest }: TextProps) => {
+export const _Text = ({ $noSelect, $secondary, children, font, overflow, ...rest }: TextProps) => {
     return (
         <StyledText
             $noSelect={$noSelect}

@@ -1,7 +1,8 @@
 import isElectron from 'is-electron';
 import { useLocation } from 'react-router';
+
 import { AppRoute } from '/@/renderer/router/routes';
-import { useSidebarRightExpanded, useGeneralSettings, useWindowSettings } from '/@/renderer/store';
+import { useGeneralSettings, useSidebarRightExpanded, useWindowSettings } from '/@/renderer/store';
 import { Platform } from '/@/renderer/types';
 
 export const useShouldPadTitlebar = () => {

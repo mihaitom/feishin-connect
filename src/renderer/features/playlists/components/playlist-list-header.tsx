@@ -1,27 +1,29 @@
-import { ChangeEvent, MutableRefObject } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { Flex, Group, Stack } from '@mantine/core';
-import { openModal, closeAllModals } from '@mantine/modals';
-import { PageHeader, SpinnerIcon, Paper, Button, SearchInput } from '/@/renderer/components';
+import { closeAllModals, openModal } from '@mantine/modals';
+import debounce from 'lodash/debounce';
+import { ChangeEvent, MutableRefObject } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RiFileAddFill } from 'react-icons/ri';
+
+import { LibraryItem, PlaylistListQuery, ServerType } from '/@/renderer/api/types';
+import { Button, PageHeader, Paper, SearchInput, SpinnerIcon } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { CreatePlaylistForm } from '/@/renderer/features/playlists/components/create-playlist-form';
 import { PlaylistListHeaderFilters } from '/@/renderer/features/playlists/components/playlist-list-header-filters';
 import { LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
-import { PlaylistListFilter, useCurrentServer } from '/@/renderer/store';
-import debounce from 'lodash/debounce';
-import { useTranslation } from 'react-i18next';
-import { RiFileAddFill } from 'react-icons/ri';
-import { LibraryItem, PlaylistListQuery, ServerType } from '/@/renderer/api/types';
 import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
+import { PlaylistListFilter, useCurrentServer } from '/@/renderer/store';
 
 interface PlaylistListHeaderProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const PlaylistListHeader = ({ itemCount, tableRef, gridRef }: PlaylistListHeaderProps) => {
+export const PlaylistListHeader = ({ gridRef, itemCount, tableRef }: PlaylistListHeaderProps) => {
     const { t } = useTranslation();
     const cq = useContainerQuery();
     const server = useCurrentServer();
@@ -78,12 +80,12 @@ export const PlaylistListHeader = ({ itemCount, tableRef, gridRef }: PlaylistLis
                             )}
                         </Paper>
                         <Button
+                            onClick={handleCreatePlaylistModal}
                             tooltip={{
                                 label: t('action.createPlaylist', { postProcess: 'sentenceCase' }),
                                 openDelay: 500,
                             }}
                             variant="filled"
-                            onClick={handleCreatePlaylistModal}
                         >
                             <RiFileAddFill />
                         </Button>
@@ -91,8 +93,8 @@ export const PlaylistListHeader = ({ itemCount, tableRef, gridRef }: PlaylistLis
                     <Group>
                         <SearchInput
                             defaultValue={filter.searchTerm}
-                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                             onChange={handleSearch}
+                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                         />
                     </Group>
                 </Flex>

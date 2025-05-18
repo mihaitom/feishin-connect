@@ -1,14 +1,16 @@
-import { useAuthStore } from '/@/renderer/store';
-import { jfType } from '/@/renderer/api/jellyfin/jellyfin-types';
 import { initClient, initContract } from '@ts-rest/core';
 import axios, { AxiosError, AxiosResponse, isAxiosError, Method } from 'axios';
-import qs from 'qs';
-import { ServerListItem } from '/@/renderer/api/types';
 import omitBy from 'lodash/omitBy';
+import qs from 'qs';
 import { z } from 'zod';
-import { authenticationFailure, getClientType } from '/@/renderer/api/utils';
-import i18n from '/@/i18n/i18n';
+
 import packageJson from '../../../../package.json';
+
+import i18n from '/@/i18n/i18n';
+import { jfType } from '/@/renderer/api/jellyfin/jellyfin-types';
+import { ServerListItem } from '/@/renderer/api/types';
+import { authenticationFailure, getClientType } from '/@/renderer/api/utils';
+import { useAuthStore } from '/@/renderer/store';
 
 const c = initContract();
 
@@ -356,14 +358,14 @@ export const createAuthHeader = (): string => {
 };
 
 export const jfApiClient = (args: {
-    server: ServerListItem | null;
+    server: null | ServerListItem;
     signal?: AbortSignal;
     url?: string;
 }) => {
-    const { server, url, signal } = args;
+    const { server, signal, url } = args;
 
     return initClient(contract, {
-        api: async ({ path, method, headers, body }) => {
+        api: async ({ body, headers, method, path }) => {
             let baseUrl: string | undefined;
             let token: string | undefined;
 
@@ -395,7 +397,7 @@ export const jfApiClient = (args: {
                     headers: result.headers as any,
                     status: result.status,
                 };
-            } catch (e: Error | AxiosError | any) {
+            } catch (e: any | AxiosError | Error) {
                 if (isAxiosError(e)) {
                     if (e.code === 'ERR_NETWORK') {
                         throw new Error(

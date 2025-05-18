@@ -3,7 +3,7 @@ import { GridApi, RowNode } from '@ag-grid-community/core';
 export const getNodesByDiscNumber = (args: {
     api: GridApi;
     discNumber: number;
-    subtitle: string | null;
+    subtitle: null | string;
 }) => {
     const { api, discNumber, subtitle } = args;
 
@@ -21,7 +21,7 @@ export const setNodeSelection = (args: {
     isSelected: boolean;
     nodes: RowNode<any>[];
 }) => {
-    const { nodes, isSelected } = args;
+    const { isSelected, nodes } = args;
 
     nodes.forEach((node) => {
         node.setSelected(isSelected);

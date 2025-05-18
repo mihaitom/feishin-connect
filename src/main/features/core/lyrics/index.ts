@@ -1,36 +1,76 @@
 import { ipcMain } from 'electron';
+
+import { store } from '../settings/index';
 import {
+    getLyricsBySongId as getGenius,
     query as queryGenius,
     getSearchResults as searchGenius,
-    getLyricsBySongId as getGenius,
 } from './genius';
 import {
+    getLyricsBySongId as getLrcLib,
     query as queryLrclib,
     getSearchResults as searchLrcLib,
-    getLyricsBySongId as getLrcLib,
 } from './lrclib';
 import {
+    getLyricsBySongId as getNetease,
     query as queryNetease,
     getSearchResults as searchNetease,
-    getLyricsBySongId as getNetease,
 } from './netease';
-import {
-    InternetProviderLyricResponse,
-    InternetProviderLyricSearchResponse,
-    LyricSearchQuery,
-    QueueSong,
-    LyricGetQuery,
-    LyricSource,
-} from '../../../../renderer/api/types';
-import { store } from '../settings/index';
 
-type SongFetcher = (params: LyricSearchQuery) => Promise<InternetProviderLyricResponse | null>;
+export enum LyricSource {
+    GENIUS = 'Genius',
+    LRCLIB = 'lrclib.net',
+    NETEASE = 'NetEase',
+}
+
+export type FullLyricsMetadata = Omit<InternetProviderLyricResponse, 'id' | 'lyrics' | 'source'> & {
+    lyrics: LyricsResponse;
+    remote: boolean;
+    source: string;
+};
+
+export type InternetProviderLyricResponse = {
+    artist: string;
+    id: string;
+    lyrics: string;
+    name: string;
+    source: LyricSource;
+};
+
+export type InternetProviderLyricSearchResponse = {
+    artist: string;
+    id: string;
+    name: string;
+    score?: number;
+    source: LyricSource;
+};
+
+export type LyricGetQuery = {
+    remoteSongId: string;
+    remoteSource: LyricSource;
+    song: Song;
+};
+
+export type LyricOverride = Omit<InternetProviderLyricResponse, 'lyrics'>;
+
+export type LyricSearchQuery = {
+    album?: string;
+    artist?: string;
+    duration?: number;
+    name?: string;
+};
+
+export type LyricsResponse = string | SynchronizedLyricsArray;
+
+export type SynchronizedLyricsArray = Array<[number, string]>;
+
+type CachedLyrics = Record<LyricSource, InternetProviderLyricResponse>;
+type GetFetcher = (id: string) => Promise<null | string>;
 type SearchFetcher = (
     params: LyricSearchQuery,
 ) => Promise<InternetProviderLyricSearchResponse[] | null>;
-type GetFetcher = (id: string) => Promise<string | null>;
 
-type CachedLyrics = Record<LyricSource, InternetProviderLyricResponse>;
+type SongFetcher = (params: LyricSearchQuery) => Promise<InternetProviderLyricResponse | null>;
 
 const FETCHERS: Record<LyricSource, SongFetcher> = {
     [LyricSource.GENIUS]: queryGenius,
@@ -54,7 +94,7 @@ const MAX_CACHED_ITEMS = 10;
 
 const lyricCache = new Map<string, CachedLyrics>();
 
-const getRemoteLyrics = async (song: QueueSong) => {
+const getRemoteLyrics = async (song: any) => {
     const sources = store.get('lyrics', []) as LyricSource[];
 
     const cached = lyricCache.get(song.id);
@@ -122,7 +162,7 @@ const searchRemoteLyrics = async (params: LyricSearchQuery) => {
     return results;
 };
 
-const getRemoteLyricsById = async (params: LyricGetQuery): Promise<string | null> => {
+const getRemoteLyricsById = async (params: LyricGetQuery): Promise<null | string> => {
     const { remoteSongId, remoteSource } = params;
     const response = await GET_FETCHERS[remoteSource](remoteSongId);
 
@@ -133,7 +173,7 @@ const getRemoteLyricsById = async (params: LyricGetQuery): Promise<string | null
     return response;
 };
 
-ipcMain.handle('lyric-by-song', async (_event, song: QueueSong) => {
+ipcMain.handle('lyric-by-song', async (_event, song: any) => {
     const lyric = await getRemoteLyrics(song);
     return lyric;
 });

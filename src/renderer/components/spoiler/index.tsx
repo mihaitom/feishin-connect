@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import { HTMLAttributes, ReactNode, useRef, useState } from 'react';
+
 import styles from './spoiler.module.scss';
+
 import { useIsOverflow } from '/@/renderer/hooks';
 
 interface SpoilerProps extends HTMLAttributes<HTMLDivElement> {
@@ -9,7 +11,7 @@ interface SpoilerProps extends HTMLAttributes<HTMLDivElement> {
     maxHeight?: number;
 }
 
-export const Spoiler = ({ maxHeight, defaultOpened, children, ...props }: SpoilerProps) => {
+export const Spoiler = ({ children, defaultOpened, maxHeight, ...props }: SpoilerProps) => {
     const ref = useRef(null);
     const isOverflow = useIsOverflow(ref);
     const [isExpanded, setIsExpanded] = useState(!!defaultOpened);
@@ -25,12 +27,12 @@ export const Spoiler = ({ maxHeight, defaultOpened, children, ...props }: Spoile
 
     return (
         <div
-            ref={ref}
             className={spoilerClassNames}
+            onClick={handleToggleExpand}
+            ref={ref}
             role="button"
             style={{ maxHeight: maxHeight ?? '100px', whiteSpace: 'pre-wrap' }}
             tabIndex={-1}
-            onClick={handleToggleExpand}
             {...props}
         >
             {children}

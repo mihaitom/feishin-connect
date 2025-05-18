@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { createPolymorphicComponent, Flex, FlexProps } from '@mantine/core';
 import type { LinkProps } from 'react-router-dom';
+
+import { createPolymorphicComponent, Flex, FlexProps } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
@@ -46,7 +47,7 @@ const _ItemLink = styled(StyledItem)<LinkProps & { disabled?: boolean }>`
 
 const ItemLink = createPolymorphicComponent<'a', ListItemProps>(_ItemLink);
 
-export const SidebarItem = ({ to, children, ...props }: ListItemProps) => {
+export const SidebarItem = ({ children, to, ...props }: ListItemProps) => {
     if (to) {
         return (
             <ItemLink

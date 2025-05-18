@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
 import { Box, Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { closeModal, ContextModalProps } from '@mantine/modals';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { PlaylistListSort, SongListQuery, SongListSort, SortOrder } from '/@/renderer/api/types';
@@ -11,7 +13,6 @@ import { useAddToPlaylist } from '/@/renderer/features/playlists/mutations/add-t
 import { usePlaylistList } from '/@/renderer/features/playlists/queries/playlist-list-query';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentServer } from '/@/renderer/store';
-import { useTranslation } from 'react-i18next';
 
 export const AddToPlaylistContextModal = ({
     id,
@@ -217,13 +218,13 @@ export const AddToPlaylistContextModal = ({
                 <Stack>
                     <MultiSelect
                         clearable
-                        searchable
                         data={playlistSelect}
                         disabled={playlistList.isLoading}
                         label={t('form.addToPlaylist.input', {
                             context: 'playlists',
                             postProcess: 'titleCase',
                         })}
+                        searchable
                         size="md"
                         {...form.getInputProps('playlistId')}
                     />
@@ -238,9 +239,9 @@ export const AddToPlaylistContextModal = ({
                         <Group>
                             <Button
                                 disabled={addToPlaylistMutation.isLoading}
+                                onClick={() => closeModal(id)}
                                 size="md"
                                 variant="subtle"
-                                onClick={() => closeModal(id)}
                             >
                                 {t('common.cancel', { postProcess: 'titleCase' })}
                             </Button>

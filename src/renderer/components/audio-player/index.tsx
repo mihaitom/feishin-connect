@@ -1,27 +1,36 @@
+import type { Song } from '/@/renderer/api/types';
+import type { CrossfadeStyle } from '/@/renderer/types';
+import type { ReactPlayerProps } from 'react-player';
+
+import isElectron from 'is-electron';
 import {
-    useImperativeHandle,
     forwardRef,
-    useRef,
-    useState,
     useCallback,
     useEffect,
+    useImperativeHandle,
     useMemo,
+    useRef,
+    useState,
 } from 'react';
-import isElectron from 'is-electron';
-import type { ReactPlayerProps } from 'react-player';
 import ReactPlayer from 'react-player/lazy';
-import type { Song } from '/@/renderer/api/types';
+
+import { api } from '/@/renderer/api';
 import {
     crossfadeHandler,
     gaplessHandler,
 } from '/@/renderer/components/audio-player/utils/list-handlers';
-import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
-import type { CrossfadeStyle } from '/@/renderer/types';
-import { PlaybackStyle, PlayerStatus } from '/@/renderer/types';
+import { toast } from '/@/renderer/components/toast';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { getServerById, TranscodingConfig, usePlaybackSettings, useSpeed } from '/@/renderer/store';
-import { toast } from '/@/renderer/components/toast';
-import { api } from '/@/renderer/api';
+import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
+import { PlaybackStyle, PlayerStatus } from '/@/renderer/types';
+
+export type AudioPlayerProgress = {
+    loaded: number;
+    loadedSeconds: number;
+    played: number;
+    playedSeconds: number;
+};
 
 interface AudioPlayerProps extends ReactPlayerProps {
     crossfadeDuration: number;
@@ -33,13 +42,6 @@ interface AudioPlayerProps extends ReactPlayerProps {
     status: PlayerStatus;
     volume: number;
 }
-
-export type AudioPlayerProgress = {
-    loaded: number;
-    loadedSeconds: number;
-    played: number;
-    playedSeconds: number;
-};
 
 const getDuration = (ref: any) => {
     return ref.current?.player?.player?.player?.duration;
@@ -53,7 +55,7 @@ const getDuration = (ref: any) => {
 const EMPTY_SOURCE =
     'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU2LjM2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////////////////8AAAAATGF2YzU2LjQxAAAAAAAAAAAAAAAAJAAAAAAAAAAAASDs90hvAAAAAAAAAAAAAAAAAAAA//MUZAAAAAGkAAAAAAAAA0gAAAAATEFN//MUZAMAAAGkAAAAAAAAA0gAAAAARTMu//MUZAYAAAGkAAAAAAAAA0gAAAAAOTku//MUZAkAAAGkAAAAAAAAA0gAAAAANVVV';
 
-const useSongUrl = (transcode: TranscodingConfig, current: boolean, song?: Song): string | null => {
+const useSongUrl = (transcode: TranscodingConfig, current: boolean, song?: Song): null | string => {
     const prior = useRef(['', '']);
 
     return useMemo(() => {
@@ -94,15 +96,15 @@ const useSongUrl = (transcode: TranscodingConfig, current: boolean, song?: Song)
 export const AudioPlayer = forwardRef(
     (
         {
-            status,
-            playbackStyle,
-            crossfadeStyle,
-            crossfadeDuration,
-            currentPlayer,
             autoNext,
+            crossfadeDuration,
+            crossfadeStyle,
+            currentPlayer,
+            muted,
+            playbackStyle,
             player1,
             player2,
-            muted,
+            status,
             volume,
         }: AudioPlayerProps,
         ref: any,
@@ -120,7 +122,7 @@ export const AudioPlayer = forwardRef(
         const stream1 = useSongUrl(transcode, currentPlayer === 1, player1);
         const stream2 = useSongUrl(transcode, currentPlayer === 2, player2);
 
-        const { webAudio, setWebAudio } = useWebAudio();
+        const { setWebAudio, webAudio } = useWebAudio();
         const [player1Source, setPlayer1Source] = useState<MediaElementAudioSourceNode | null>(
             null,
         );
@@ -415,43 +417,43 @@ export const AudioPlayer = forwardRef(
         return (
             <>
                 <ReactPlayer
-                    ref={player1Ref}
                     config={{
                         file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
                     }}
                     height={0}
                     muted={muted}
-                    playbackRate={playbackSpeed}
-                    playing={currentPlayer === 1 && status === PlayerStatus.PLAYING}
-                    progressInterval={isTransitioning ? 10 : 250}
-                    url={stream1 || EMPTY_SOURCE}
-                    volume={webAudio ? 1 : volume}
-                    width={0}
                     // If there is no stream url, we do not need to handle when the audio finishes
                     onEnded={stream1 ? handleOnEnded : undefined}
                     onProgress={
                         playbackStyle === PlaybackStyle.GAPLESS ? handleGapless1 : handleCrossfade1
                     }
                     onReady={handlePlayer1Start}
+                    playbackRate={playbackSpeed}
+                    playing={currentPlayer === 1 && status === PlayerStatus.PLAYING}
+                    progressInterval={isTransitioning ? 10 : 250}
+                    ref={player1Ref}
+                    url={stream1 || EMPTY_SOURCE}
+                    volume={webAudio ? 1 : volume}
+                    width={0}
                 />
                 <ReactPlayer
-                    ref={player2Ref}
                     config={{
                         file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
                     }}
                     height={0}
                     muted={muted}
-                    playbackRate={playbackSpeed}
-                    playing={currentPlayer === 2 && status === PlayerStatus.PLAYING}
-                    progressInterval={isTransitioning ? 10 : 250}
-                    url={stream2 || EMPTY_SOURCE}
-                    volume={webAudio ? 1 : volume}
-                    width={0}
                     onEnded={stream2 ? handleOnEnded : undefined}
                     onProgress={
                         playbackStyle === PlaybackStyle.GAPLESS ? handleGapless2 : handleCrossfade2
                     }
                     onReady={handlePlayer2Start}
+                    playbackRate={playbackSpeed}
+                    playing={currentPlayer === 2 && status === PlayerStatus.PLAYING}
+                    progressInterval={isTransitioning ? 10 : 250}
+                    ref={player2Ref}
+                    url={stream2 || EMPTY_SOURCE}
+                    volume={webAudio ? 1 : volume}
+                    width={0}
                 />
             </>
         );

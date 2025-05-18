@@ -1,10 +1,12 @@
 import type {
-    UseQueryOptions,
     DefaultOptions,
-    UseMutationOptions,
     UseInfiniteQueryOptions,
+    UseMutationOptions,
+    UseQueryOptions,
 } from '@tanstack/react-query';
-import { QueryClient, QueryCache } from '@tanstack/react-query';
+
+import { QueryCache, QueryClient } from '@tanstack/react-query';
+
 import { toast } from '/@/renderer/components/toast/index';
 
 const queryCache = new QueryCache({
@@ -38,14 +40,43 @@ export const queryClient = new QueryClient({
     queryCache,
 });
 
-export type QueryHookArgs<T> = {
-    options?: QueryOptions;
-    query: T;
-    serverId: string | undefined;
+export type InfiniteQueryOptions = {
+    cacheTime?: UseInfiniteQueryOptions['cacheTime'];
+    enabled?: UseInfiniteQueryOptions['enabled'];
+    keepPreviousData?: UseInfiniteQueryOptions['keepPreviousData'];
+    meta?: UseInfiniteQueryOptions['meta'];
+    onError?: (err: any) => void;
+    onSettled?: any;
+    onSuccess?: any;
+    queryKey?: UseInfiniteQueryOptions['queryKey'];
+    refetchInterval?: number;
+    refetchIntervalInBackground?: UseInfiniteQueryOptions['refetchIntervalInBackground'];
+    refetchOnWindowFocus?: boolean;
+    retry?: UseInfiniteQueryOptions['retry'];
+    retryDelay?: UseInfiniteQueryOptions['retryDelay'];
+    staleTime?: UseInfiniteQueryOptions['staleTime'];
+    suspense?: UseInfiniteQueryOptions['suspense'];
+    useErrorBoundary?: boolean;
 };
 
 export type MutationHookArgs = {
     options?: MutationOptions;
+};
+
+export type MutationOptions = {
+    mutationKey: UseMutationOptions['mutationKey'];
+    onError?: (err: any) => void;
+    onSettled?: any;
+    onSuccess?: any;
+    retry?: UseQueryOptions['retry'];
+    retryDelay?: UseQueryOptions['retryDelay'];
+    useErrorBoundary?: boolean;
+};
+
+export type QueryHookArgs<T> = {
+    options?: QueryOptions;
+    query: T;
+    serverId: string | undefined;
 };
 
 export type QueryOptions = {
@@ -64,34 +95,5 @@ export type QueryOptions = {
     retryDelay?: UseQueryOptions['retryDelay'];
     staleTime?: UseQueryOptions['staleTime'];
     suspense?: UseQueryOptions['suspense'];
-    useErrorBoundary?: boolean;
-};
-
-export type MutationOptions = {
-    mutationKey: UseMutationOptions['mutationKey'];
-    onError?: (err: any) => void;
-    onSettled?: any;
-    onSuccess?: any;
-    retry?: UseQueryOptions['retry'];
-    retryDelay?: UseQueryOptions['retryDelay'];
-    useErrorBoundary?: boolean;
-};
-
-export type InfiniteQueryOptions = {
-    cacheTime?: UseInfiniteQueryOptions['cacheTime'];
-    enabled?: UseInfiniteQueryOptions['enabled'];
-    keepPreviousData?: UseInfiniteQueryOptions['keepPreviousData'];
-    meta?: UseInfiniteQueryOptions['meta'];
-    onError?: (err: any) => void;
-    onSettled?: any;
-    onSuccess?: any;
-    queryKey?: UseInfiniteQueryOptions['queryKey'];
-    refetchInterval?: number;
-    refetchIntervalInBackground?: UseInfiniteQueryOptions['refetchIntervalInBackground'];
-    refetchOnWindowFocus?: boolean;
-    retry?: UseInfiniteQueryOptions['retry'];
-    retryDelay?: UseInfiniteQueryOptions['retryDelay'];
-    staleTime?: UseInfiniteQueryOptions['staleTime'];
-    suspense?: UseInfiniteQueryOptions['suspense'];
     useErrorBoundary?: boolean;
 };

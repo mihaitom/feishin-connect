@@ -1,6 +1,7 @@
-import { Center, Stack, Group, Divider, Box } from '@mantine/core';
+import { Box, Center, Divider, Group, Stack } from '@mantine/core';
 import { RiArrowLeftSLine, RiErrorWarningLine, RiHome4Line, RiMenuFill } from 'react-icons/ri';
 import { useNavigate, useRouteError } from 'react-router';
+
 import { Button, DropdownMenu, Text } from '/@/renderer/components';
 import { AppMenu } from '/@/renderer/features/titlebar/components/app-menu';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -28,9 +29,9 @@ const RouteErrorBoundary = () => {
                 <Stack sx={{ maxWidth: '50%' }}>
                     <Group>
                         <Button
+                            onClick={handleReturn}
                             px={10}
                             variant="subtle"
-                            onClick={handleReturn}
                         >
                             <RiArrowLeftSLine size={20} />
                         </Button>
@@ -48,10 +49,10 @@ const RouteErrorBoundary = () => {
                     >
                         <Button
                             leftIcon={<RiHome4Line />}
+                            onClick={handleHome}
                             size="md"
                             sx={{ flex: 0.5 }}
                             variant="default"
-                            onClick={handleHome}
                         >
                             Go home
                         </Button>
@@ -73,9 +74,9 @@ const RouteErrorBoundary = () => {
                     </Group>
                     <Group grow>
                         <Button
+                            onClick={handleReload}
                             size="md"
                             variant="filled"
-                            onClick={handleReload}
                         >
                             Reload
                         </Button>

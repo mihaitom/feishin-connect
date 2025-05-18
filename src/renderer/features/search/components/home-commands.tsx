@@ -1,9 +1,10 @@
-import { Dispatch, useCallback } from 'react';
-import { openModal, closeAllModals } from '@mantine/modals';
+import { closeAllModals, openModal } from '@mantine/modals';
 import { nanoid } from 'nanoid/non-secure';
+import { Dispatch, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate } from 'react-router';
 import { createSearchParams } from 'react-router-dom';
+
 import { LibraryItem, ServerType } from '/@/renderer/api/types';
 import { CreatePlaylistForm } from '/@/renderer/features/playlists';
 import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
@@ -19,11 +20,11 @@ interface HomeCommandsProps {
 }
 
 export const HomeCommands = ({
-    query,
-    setQuery,
-    pages,
-    setPages,
     handleClose,
+    pages,
+    query,
+    setPages,
+    setQuery,
 }: HomeCommandsProps) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -61,8 +62,8 @@ export const HomeCommands = ({
         <>
             <Command.Group heading={t('page.globalSearch.title', { postProcess: 'titleCase' })}>
                 <Command.Item
-                    value={t('common.search', { postProcess: 'sentenceCase' })}
                     onSelect={handleSearch}
+                    value={t('common.search', { postProcess: 'sentenceCase' })}
                 >
                     {query
                         ? t('page.globalSearch.commands.searchFor', {

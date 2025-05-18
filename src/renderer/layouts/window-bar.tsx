@@ -1,19 +1,21 @@
-import { useCallback, useState } from 'react';
 import isElectron from 'is-electron';
+import { useCallback, useState } from 'react';
 import { RiCheckboxBlankLine, RiCloseLine, RiSubtractLine } from 'react-icons/ri';
 import styled from 'styled-components';
-import { useCurrentStatus, useQueueStatus } from '/@/renderer/store';
-import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform, PlayerStatus } from '/@/renderer/types';
+
+import appIcon from '../../../assets/icons/32x32.png';
 import macCloseHover from './assets/close-mac-hover.png';
 import macClose from './assets/close-mac.png';
 import macMaxHover from './assets/max-mac-hover.png';
 import macMax from './assets/max-mac.png';
 import macMinHover from './assets/min-mac-hover.png';
 import macMin from './assets/min-mac.png';
-import appIcon from '../../../assets/icons/32x32.png';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+import { useCurrentStatus, useQueueStatus } from '/@/renderer/store';
+import { useWindowSettings } from '/@/renderer/store/settings.store';
+import { Platform, PlayerStatus } from '/@/renderer/types';
+
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 const WindowsContainer = styled.div`
     display: flex;
@@ -61,7 +63,7 @@ const PlayerStatusContainer = styled.div`
     white-space: nowrap;
 `;
 
-const browser = isElectron() ? window.electron.browser : null;
+const browser = isElectron() ? window.api.browser : null;
 const close = () => browser?.exit();
 const minimize = () => browser?.minimize();
 const maximize = () => browser?.maximize();
@@ -92,21 +94,21 @@ const WindowsControls = ({ controls, title }: WindowBarControlsProps) => {
             </PlayerStatusContainer>
             <WindowsButtonGroup>
                 <WindowsButton
-                    role="button"
                     onClick={handleMinimize}
+                    role="button"
                 >
                     <RiSubtractLine size={19} />
                 </WindowsButton>
                 <WindowsButton
-                    role="button"
                     onClick={handleMaximize}
+                    role="button"
                 >
                     <RiCheckboxBlankLine size={13} />
                 </WindowsButton>
                 <WindowsButton
                     $exit
-                    role="button"
                     onClick={handleClose}
+                    role="button"
                 >
                     <RiCloseLine size={19} />
                 </WindowsButton>

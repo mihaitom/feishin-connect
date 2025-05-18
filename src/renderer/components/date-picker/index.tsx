@@ -1,4 +1,5 @@
 import type { DatePickerProps as MantineDatePickerProps } from '@mantine/dates';
+
 import { DatePicker as MantineDatePicker } from '@mantine/dates';
 import styled from 'styled-components';
 
@@ -34,7 +35,7 @@ const StyledDatePicker = styled(MantineDatePicker)<DatePickerProps>`
     }
 `;
 
-export const DatePicker = ({ width, maxWidth, ...props }: DatePickerProps) => {
+export const DatePicker = ({ maxWidth, width, ...props }: DatePickerProps) => {
     return (
         <StyledDatePicker
             {...props}

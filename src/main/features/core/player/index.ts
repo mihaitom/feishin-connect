@@ -1,10 +1,11 @@
 import console from 'console';
-import { rm } from 'fs/promises';
-import { pid } from 'node:process';
 import { app, ipcMain } from 'electron';
+import { rm } from 'fs/promises';
 import uniq from 'lodash/uniq';
 import MpvAPI from 'node-mpv';
-import { getMainWindow, sendToastToRenderer } from '../../../main';
+import { pid } from 'node:process';
+
+import { getMainWindow, sendToastToRenderer } from '../../../index';
 import { createLog, isWindows } from '../../../utils';
 import { store } from '../settings';
 
@@ -86,7 +87,7 @@ const createMpv = async (data: {
     extraParameters?: string[];
     properties?: Record<string, any>;
 }): Promise<MpvAPI> => {
-    const { extraParameters, properties, binaryPath } = data;
+    const { binaryPath, extraParameters, properties } = data;
 
     const params = uniq([...DEFAULT_MPV_PARAMETERS(extraParameters), ...(extraParameters || [])]);
 
@@ -174,7 +175,7 @@ ipcMain.on('player-set-properties', async (_event, data: Record<string, any>) =>
         } else {
             getMpvInstance()?.setMultipleProperties(data);
         }
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to set properties: ${JSON.stringify(data)}` }, err);
     }
 });
@@ -199,7 +200,7 @@ ipcMain.handle(
             mpvInstance = await createMpv(data);
             mpvLog({ action: 'Restarted mpv', toast: 'success' });
             setAudioPlayerFallback(false);
-        } catch (err: NodeMpvError | any) {
+        } catch (err: any | NodeMpvError) {
             mpvLog({ action: 'Failed to restart mpv, falling back to web player' }, err);
             setAudioPlayerFallback(true);
         }
@@ -215,7 +216,7 @@ ipcMain.handle(
             });
             mpvInstance = await createMpv(data);
             setAudioPlayerFallback(false);
-        } catch (err: NodeMpvError | any) {
+        } catch (err: any | NodeMpvError) {
             mpvLog({ action: 'Failed to initialize mpv, falling back to web player' }, err);
             setAudioPlayerFallback(true);
         }
@@ -226,7 +227,7 @@ ipcMain.on('player-quit', async () => {
     try {
         await getMpvInstance()?.stop();
         await quit();
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: 'Failed to quit mpv' }, err);
     } finally {
         mpvInstance = null;
@@ -245,7 +246,7 @@ ipcMain.handle('player-clean-up', async () => {
 ipcMain.on('player-start', async () => {
     try {
         await getMpvInstance()?.play();
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: 'Failed to start mpv playback' }, err);
     }
 });
@@ -254,7 +255,7 @@ ipcMain.on('player-start', async () => {
 ipcMain.on('player-play', async () => {
     try {
         await getMpvInstance()?.play();
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: 'Failed to start mpv playback' }, err);
     }
 });
@@ -263,7 +264,7 @@ ipcMain.on('player-play', async () => {
 ipcMain.on('player-pause', async () => {
     try {
         await getMpvInstance()?.pause();
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: 'Failed to pause mpv playback' }, err);
     }
 });
@@ -272,7 +273,7 @@ ipcMain.on('player-pause', async () => {
 ipcMain.on('player-stop', async () => {
     try {
         await getMpvInstance()?.stop();
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: 'Failed to stop mpv playback' }, err);
     }
 });
@@ -281,7 +282,7 @@ ipcMain.on('player-stop', async () => {
 ipcMain.on('player-next', async () => {
     try {
         await getMpvInstance()?.next();
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: 'Failed to go to next track' }, err);
     }
 });
@@ -290,7 +291,7 @@ ipcMain.on('player-next', async () => {
 ipcMain.on('player-previous', async () => {
     try {
         await getMpvInstance()?.prev();
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: 'Failed to go to previous track' }, err);
     }
 });
@@ -299,7 +300,7 @@ ipcMain.on('player-previous', async () => {
 ipcMain.on('player-seek', async (_event, time: number) => {
     try {
         await getMpvInstance()?.seek(time);
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to seek by ${time} seconds` }, err);
     }
 });
@@ -308,7 +309,7 @@ ipcMain.on('player-seek', async (_event, time: number) => {
 ipcMain.on('player-seek-to', async (_event, time: number) => {
     try {
         await getMpvInstance()?.goToPosition(time);
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to seek to ${time} seconds` }, err);
     }
 });
@@ -320,7 +321,7 @@ ipcMain.on('player-set-queue', async (_event, current?: string, next?: string, p
             await getMpvInstance()?.clearPlaylist();
             await getMpvInstance()?.pause();
             return;
-        } catch (err: NodeMpvError | any) {
+        } catch (err: any | NodeMpvError) {
             mpvLog({ action: `Failed to clear play queue` }, err);
         }
     }
@@ -344,7 +345,7 @@ ipcMain.on('player-set-queue', async (_event, current?: string, next?: string, p
             // Only force play if pause is explicitly false
             await getMpvInstance()?.play();
         }
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to set play queue` }, err);
     }
 });
@@ -365,7 +366,7 @@ ipcMain.on('player-set-queue-next', async (_event, url?: string) => {
         if (url) {
             await getMpvInstance()?.load(url, 'append');
         }
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to set play queue` }, err);
     }
 });
@@ -385,7 +386,7 @@ ipcMain.on('player-auto-next', async (_event, url?: string) => {
         if (url) {
             await getMpvInstance()?.load(url, 'append');
         }
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to load next song` }, err);
     }
 });
@@ -398,7 +399,7 @@ ipcMain.on('player-volume', async (_event, value: number) => {
         }
 
         await getMpvInstance()?.volume(value);
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to set volume to ${value}` }, err);
     }
 });
@@ -407,7 +408,7 @@ ipcMain.on('player-volume', async (_event, value: number) => {
 ipcMain.on('player-mute', async (_event, mute: boolean) => {
     try {
         await getMpvInstance()?.mute(mute);
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to set mute status` }, err);
     }
 });
@@ -415,7 +416,7 @@ ipcMain.on('player-mute', async (_event, mute: boolean) => {
 ipcMain.handle('player-get-time', async (): Promise<number | undefined> => {
     try {
         return getMpvInstance()?.getTimePosition();
-    } catch (err: NodeMpvError | any) {
+    } catch (err: any | NodeMpvError) {
         mpvLog({ action: `Failed to get current time` }, err);
         return 0;
     }
@@ -442,7 +443,7 @@ app.on('before-quit', async (event) => {
                 event.preventDefault();
                 await getMpvInstance()?.stop();
                 await quit();
-            } catch (err: NodeMpvError | any) {
+            } catch (err: any | NodeMpvError) {
                 mpvLog({ action: `Failed to cleanly before-quit` }, err);
             } finally {
                 mpvState = MpvState.DONE;

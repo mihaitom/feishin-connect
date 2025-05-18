@@ -1,24 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Center, Group } from '@mantine/core';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 import { RiInformationFill } from 'react-icons/ri';
 import styled from 'styled-components';
+
 import { useSongLyricsByRemoteId, useSongLyricsBySong } from './queries/lyric-query';
 import { translateLyrics } from './queries/lyric-translate';
 import { SynchronizedLyrics, SynchronizedLyricsProps } from './synchronized-lyrics';
+
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { FullLyricsMetadata, LyricSource, LyricsOverride } from '/@/renderer/api/types';
 import { Spinner, TextTitle } from '/@/renderer/components';
 import { ErrorFallback } from '/@/renderer/features/action-required';
+import { LyricsActions } from '/@/renderer/features/lyrics/lyrics-actions';
 import {
     UnsynchronizedLyrics,
     UnsynchronizedLyricsProps,
 } from '/@/renderer/features/lyrics/unsynchronized-lyrics';
-import { useCurrentSong, usePlayerStore, useLyricsSettings } from '/@/renderer/store';
-import { FullLyricsMetadata, LyricSource, LyricsOverride } from '/@/renderer/api/types';
-import { LyricsActions } from '/@/renderer/features/lyrics/lyrics-actions';
-import { queryKeys } from '/@/renderer/api/query-keys';
 import { queryClient } from '/@/renderer/lib/react-query';
+import { useCurrentSong, useLyricsSettings, usePlayerStore } from '/@/renderer/store';
 
 const ActionsContainer = styled.div`
     position: absolute;
@@ -89,7 +91,7 @@ export const Lyrics = () => {
     const lyricsSettings = useLyricsSettings();
     const { t } = useTranslation();
     const [index, setIndex] = useState(0);
-    const [translatedLyrics, setTranslatedLyrics] = useState<string | null>(null);
+    const [translatedLyrics, setTranslatedLyrics] = useState<null | string>(null);
     const [showTranslation, setShowTranslation] = useState(false);
 
     const { data, isInitialLoading } = useSongLyricsBySong(
@@ -153,7 +155,7 @@ export const Lyrics = () => {
             : lyrics.lyrics;
         const { translationApiKey, translationApiProvider, translationTargetLanguage } =
             lyricsSettings;
-        const TranslatedText: string | null = await translateLyrics(
+        const TranslatedText: null | string = await translateLyrics(
             originalLyrics,
             translationApiKey,
             translationApiProvider,
@@ -250,11 +252,11 @@ export const Lyrics = () => {
                     <LyricsActions
                         index={index}
                         languages={languages}
-                        setIndex={setIndex}
                         onRemoveLyric={handleOnRemoveLyric}
                         onResetLyric={handleOnResetLyric}
                         onSearchOverride={handleOnSearchOverride}
                         onTranslateLyric={handleOnTranslateLyric}
+                        setIndex={setIndex}
                     />
                 </ActionsContainer>
             </LyricsContainer>

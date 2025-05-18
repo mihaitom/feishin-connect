@@ -1,6 +1,8 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { useMemo, useRef } from 'react';
 import { useParams } from 'react-router';
+
 import { PlaylistListSort, PlaylistSongListQuery, SortOrder } from '/@/renderer/api/types';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ListContext } from '/@/renderer/context/list-context';
@@ -11,7 +13,7 @@ import { AnimatedPage } from '/@/renderer/features/shared';
 import { useCurrentServer, useListStoreByKey } from '/@/renderer/store';
 
 const PlaylistListRoute = () => {
-    const gridRef = useRef<VirtualInfiniteGridRef | null>(null);
+    const gridRef = useRef<null | VirtualInfiniteGridRef>(null);
     const tableRef = useRef<AgGridReactType | null>(null);
     const server = useCurrentServer();
     const { playlistId } = useParams();

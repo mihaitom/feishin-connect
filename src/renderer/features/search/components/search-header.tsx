@@ -1,10 +1,13 @@
-import { ChangeEvent, MutableRefObject } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { Flex, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
+import { ChangeEvent, MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, Link, useParams, useSearchParams } from 'react-router-dom';
+
 import { useCurrentServer } from '../../../store/auth.store';
+
 import {
     AlbumArtistListQuery,
     AlbumListQuery,
@@ -23,13 +26,13 @@ interface SearchHeaderProps {
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const SearchHeader = ({ tableRef, navigationId }: SearchHeaderProps) => {
+export const SearchHeader = ({ navigationId, tableRef }: SearchHeaderProps) => {
     const { t } = useTranslation();
     const { itemType } = useParams() as { itemType: LibraryItem };
     const [searchParams, setSearchParams] = useSearchParams();
     const cq = useContainerQuery();
     const server = useCurrentServer();
-    const { filter } = useListStoreByKey<AlbumListQuery | AlbumArtistListQuery | SongListQuery>({
+    const { filter } = useListStoreByKey<AlbumArtistListQuery | AlbumListQuery | SongListQuery>({
         key: itemType,
     });
 
@@ -59,8 +62,8 @@ export const SearchHeader = ({ tableRef, navigationId }: SearchHeaderProps) => {
                     <Group>
                         <SearchInput
                             defaultValue={searchParams.get('query') || ''}
-                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                             onChange={handleSearch}
+                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                         />
                     </Group>
                 </Flex>
@@ -69,9 +72,9 @@ export const SearchHeader = ({ tableRef, navigationId }: SearchHeaderProps) => {
                 <Group>
                     <Button
                         compact
-                        replace
                         component={Link}
                         fw={600}
+                        replace
                         size="md"
                         state={{ navigationId }}
                         to={{
@@ -84,9 +87,9 @@ export const SearchHeader = ({ tableRef, navigationId }: SearchHeaderProps) => {
                     </Button>
                     <Button
                         compact
-                        replace
                         component={Link}
                         fw={600}
+                        replace
                         size="md"
                         state={{ navigationId }}
                         to={{
@@ -101,9 +104,9 @@ export const SearchHeader = ({ tableRef, navigationId }: SearchHeaderProps) => {
                     </Button>
                     <Button
                         compact
-                        replace
                         component={Link}
                         fw={600}
+                        replace
                         size="md"
                         state={{ navigationId }}
                         to={{

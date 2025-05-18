@@ -1,21 +1,21 @@
+import type { CardRoute, CardRow, PlayQueueAddOptions } from '/@/renderer/types';
+import type { FixedSizeListProps } from 'react-window';
+
+import debounce from 'lodash/debounce';
 import {
-    useState,
-    useRef,
-    useMemo,
-    useCallback,
     forwardRef,
     Ref,
+    useCallback,
     useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
-import debounce from 'lodash/debounce';
-import type { FixedSizeListProps } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
-import { VirtualGridWrapper } from '/@/renderer/components/virtual-grid/virtual-grid-wrapper';
-import type { CardRoute, CardRow, PlayQueueAddOptions } from '/@/renderer/types';
-import { ListDisplayType } from '/@/renderer/types';
-import { AnyLibraryItem, Genre, LibraryItem } from '/@/renderer/api/types';
 
-type LibraryItemOrGenre = AnyLibraryItem | Genre;
+import { AnyLibraryItem, Genre, LibraryItem } from '/@/renderer/api/types';
+import { VirtualGridWrapper } from '/@/renderer/components/virtual-grid/virtual-grid-wrapper';
+import { ListDisplayType } from '/@/renderer/types';
 
 export type VirtualInfiniteGridRef = {
     resetLoadMoreItemsCache: () => void;
@@ -24,8 +24,10 @@ export type VirtualInfiniteGridRef = {
     updateItemData: (rule: (item: LibraryItemOrGenre) => LibraryItemOrGenre) => void;
 };
 
+type LibraryItemOrGenre = AnyLibraryItem | Genre;
+
 interface VirtualGridProps
-    extends Omit<FixedSizeListProps, 'children' | 'itemSize' | 'height' | 'width'> {
+    extends Omit<FixedSizeListProps, 'children' | 'height' | 'itemSize' | 'width'> {
     cardRows: CardRow<any>[];
     display?: ListDisplayType;
     fetchFn: (options: { columnCount: number; skip: number; take: number }) => Promise<any>;
@@ -49,22 +51,22 @@ interface VirtualGridProps
 export const VirtualInfiniteGrid = forwardRef(
     (
         {
+            cardRows,
+            display,
+            fetchFn,
+            fetchInitialData,
+            handleFavorite,
+            handlePlayQueueAdd,
+            height,
+            initialScrollOffset,
             itemCount,
             itemGap,
             itemSize,
             itemType,
-            cardRows,
-            route,
-            onScroll,
-            display,
-            handlePlayQueueAdd,
-            minimumBatchSize,
-            fetchFn,
-            fetchInitialData,
             loading,
-            initialScrollOffset,
-            handleFavorite,
-            height,
+            minimumBatchSize,
+            onScroll,
+            route,
             width,
         }: VirtualGridProps,
         ref: Ref<VirtualInfiniteGridRef>,
@@ -78,7 +80,7 @@ export const VirtualInfiniteGrid = forwardRef(
             fetchInitialData?.() || [],
         );
 
-        const { itemHeight, rowCount, columnCount } = useMemo(() => {
+        const { columnCount, itemHeight, rowCount } = useMemo(() => {
             const itemsPerRow = width ? Math.floor(width / (itemSize + itemGap * 2)) : 5;
             const widthPerItem = Number(width) / itemsPerRow;
             const itemHeight = widthPerItem + cardRows.length * 26;
@@ -165,11 +167,11 @@ export const VirtualInfiniteGrid = forwardRef(
         return (
             <>
                 <InfiniteLoader
-                    ref={loader}
                     isItemLoaded={(index) => isItemLoaded(index)}
                     itemCount={itemCount || 0}
                     loadMoreItems={debouncedLoadMoreItems}
                     minimumBatchSize={minimumBatchSize}
+                    ref={loader}
                     threshold={30}
                 >
                     {({ onItemsRendered, ref: infiniteLoaderRef }) => (
@@ -187,6 +189,8 @@ export const VirtualInfiniteGrid = forwardRef(
                             itemHeight={itemHeight}
                             itemType={itemType}
                             itemWidth={itemSize}
+                            onItemsRendered={onItemsRendered}
+                            onScroll={onScroll}
                             refInstance={(list) => {
                                 infiniteLoaderRef(list);
                                 listRef.current = list;
@@ -200,8 +204,6 @@ export const VirtualInfiniteGrid = forwardRef(
                             route={route}
                             rowCount={rowCount}
                             width={width}
-                            onItemsRendered={onItemsRendered}
-                            onScroll={onScroll}
                         />
                     )}
                 </InfiniteLoader>

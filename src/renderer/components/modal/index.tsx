@@ -1,12 +1,13 @@
-import React, { ReactNode } from 'react';
 import {
-    ModalProps as MantineModalProps,
-    Stack,
-    Modal as MantineModal,
     Flex,
     Group,
+    Modal as MantineModal,
+    ModalProps as MantineModalProps,
+    Stack,
 } from '@mantine/core';
 import { closeAllModals, ContextModalProps } from '@mantine/modals';
+import React, { ReactNode } from 'react';
+
 import { Button } from '/@/renderer/components/button';
 
 export interface ModalProps extends Omit<MantineModalProps, 'onClose'> {
@@ -59,12 +60,12 @@ interface ConfirmModalProps {
 }
 
 export const ConfirmModal = ({
-    loading,
+    children,
     disabled,
     labels,
+    loading,
     onCancel,
     onConfirm,
-    children,
 }: ConfirmModalProps) => {
     const handleCancel = () => {
         if (onCancel) {
@@ -80,16 +81,16 @@ export const ConfirmModal = ({
             <Group position="right">
                 <Button
                     data-focus
-                    variant="default"
                     onClick={handleCancel}
+                    variant="default"
                 >
                     {labels?.cancel ? labels.cancel : 'Cancel'}
                 </Button>
                 <Button
                     disabled={disabled}
                     loading={loading}
-                    variant="filled"
                     onClick={onConfirm}
+                    variant="filled"
                 >
                     {labels?.confirm ? labels.confirm : 'Confirm'}
                 </Button>

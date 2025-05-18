@@ -1,7 +1,10 @@
 import { Group, Table } from '@mantine/core';
-import { RiCheckFill, RiCloseFill } from 'react-icons/ri';
-import { TFunction, useTranslation } from 'react-i18next';
 import { ReactNode } from 'react';
+import { TFunction, useTranslation } from 'react-i18next';
+import { RiCheckFill, RiCloseFill } from 'react-icons/ri';
+import { generatePath } from 'react-router';
+import { Link } from 'react-router-dom';
+
 import {
     Album,
     AlbumArtist,
@@ -10,18 +13,16 @@ import {
     RelatedArtist,
     Song,
 } from '/@/renderer/api/types';
-import { formatDurationString, formatSizeString } from '/@/renderer/utils';
-import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
-import { Spoiler, Text } from '/@/renderer/components';
-import { sanitize } from '/@/renderer/utils/sanitize';
-import { SongPath } from '/@/renderer/features/item-details/components/song-path';
-import { generatePath } from 'react-router';
-import { Link } from 'react-router-dom';
-import { AppRoute } from '/@/renderer/router/routes';
-import { Separator } from '/@/renderer/components/separator';
-import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
-import { formatDateRelative, formatRating } from '/@/renderer/utils/format';
 import { SEPARATOR_STRING } from '/@/renderer/api/utils';
+import { Spoiler, Text } from '/@/renderer/components';
+import { Separator } from '/@/renderer/components/separator';
+import { SongPath } from '/@/renderer/features/item-details/components/song-path';
+import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
+import { AppRoute } from '/@/renderer/router/routes';
+import { formatDurationString, formatSizeString } from '/@/renderer/utils';
+import { formatDateRelative, formatRating } from '/@/renderer/utils/format';
+import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
+import { sanitize } from '/@/renderer/utils/sanitize';
 
 export type ItemDetailsModalProps = {
     item: Album | AlbumArtist | Song;
@@ -54,7 +55,7 @@ const handleRow = <T extends AnyLibraryItem>(t: TFunction, item: T, rule: ItemDe
     );
 };
 
-const formatArtists = (artists: RelatedArtist[] | undefined | null) =>
+const formatArtists = (artists: null | RelatedArtist[] | undefined) =>
     artists?.map((artist, index) => (
         <span key={artist.id || artist.name}>
             {index > 0 && <Separator />}

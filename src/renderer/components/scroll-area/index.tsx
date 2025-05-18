@@ -1,10 +1,13 @@
+/* eslint-disable react/display-name */
 import type { ScrollAreaProps as MantineScrollAreaProps } from '@mantine/core';
+
 import { ScrollArea as MantineScrollArea } from '@mantine/core';
 import { useMergedRef } from '@mantine/hooks';
 import { useInView } from 'framer-motion';
 import { useOverlayScrollbars } from 'overlayscrollbars-react';
 import { CSSProperties, forwardRef, ReactNode, Ref, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+
 import { PageHeader, PageHeaderProps } from '/@/renderer/components/page-header';
 import { useWindowSettings } from '/@/renderer/store/settings.store';
 import { Platform } from '/@/renderer/types';
@@ -51,7 +54,7 @@ const StyledNativeScrollArea = styled.div<{
     $scrollBarOffset?: string;
     $windowBarStyle?: Platform;
 }>`
-    height: 100%;
+    height: calc(100vh - 90px);
 `;
 
 export const ScrollArea = forwardRef(({ children, ...props }: ScrollAreaProps, ref: Ref<any>) => {
@@ -80,10 +83,10 @@ export const NativeScrollArea = forwardRef(
     (
         {
             children,
+            noHeader,
             pageHeaderProps,
             scrollBarOffset,
             scrollHideDelay,
-            noHeader,
             ...props
         }: NativeScrollAreaProps,
         ref: Ref<HTMLDivElement>,
@@ -156,9 +159,9 @@ export const NativeScrollArea = forwardRef(
                     />
                 )}
                 <StyledNativeScrollArea
-                    ref={mergedRef}
                     $scrollBarOffset={scrollBarOffset}
                     $windowBarStyle={windowBarStyle}
+                    ref={mergedRef}
                     {...props}
                 >
                     {children}

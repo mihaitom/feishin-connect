@@ -1,5 +1,6 @@
 import { CellContextMenuEvent, GridApi } from '@ag-grid-community/core';
 import sortBy from 'lodash/sortBy';
+
 import { Album, AlbumArtist, Artist, LibraryItem, QueueSong, Song } from '/@/renderer/api/types';
 import { openContextMenu, SetContextMenuItems } from '/@/renderer/features/context-menu/events';
 
@@ -64,7 +65,7 @@ export const useHandleGeneralContextMenu = (
 ) => {
     const handleContextMenu = (
         e: any,
-        data: Song[] | QueueSong[] | AlbumArtist[] | Artist[] | Album[],
+        data: Album[] | AlbumArtist[] | Artist[] | QueueSong[] | Song[],
     ) => {
         if (!e) return;
         const clickEvent = e as MouseEvent;
@@ -92,7 +93,7 @@ export const useHandleGridContextMenu = (
 ) => {
     const handleContextMenu = (
         e: any,
-        data: Song[] | QueueSong[] | AlbumArtist[] | Artist[] | Album[],
+        data: Album[] | AlbumArtist[] | Artist[] | QueueSong[] | Song[],
     ) => {
         if (!e) return;
         const clickEvent = e as MouseEvent;

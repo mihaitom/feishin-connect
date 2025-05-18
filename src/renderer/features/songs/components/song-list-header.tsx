@@ -1,21 +1,23 @@
-import { ChangeEvent, MutableRefObject, useEffect, useRef } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { Flex, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
+import { ChangeEvent, MutableRefObject, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { LibraryItem, SongListQuery } from '/@/renderer/api/types';
 import { PageHeader, SearchInput } from '/@/renderer/components';
+import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { FilterBar, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { SongListHeaderFilters } from '/@/renderer/features/songs/components/song-list-header-filters';
 import { useContainerQuery } from '/@/renderer/hooks';
+import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
 import { SongListFilter, useCurrentServer } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
-import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
 
 interface SongListHeaderProps {
     genreId?: string;
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
     tableRef: MutableRefObject<AgGridReactType | null>;
     title?: string;
@@ -24,9 +26,9 @@ interface SongListHeaderProps {
 export const SongListHeader = ({
     genreId,
     gridRef,
-    title,
     itemCount,
     tableRef,
+    title,
 }: SongListHeaderProps) => {
     const { t } = useTranslation();
     const server = useCurrentServer();
@@ -90,8 +92,8 @@ export const SongListHeader = ({
                     <Group>
                         <SearchInput
                             defaultValue={filter.searchTerm}
-                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                             onChange={handleSearch}
+                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                         />
                     </Group>
                 </Flex>

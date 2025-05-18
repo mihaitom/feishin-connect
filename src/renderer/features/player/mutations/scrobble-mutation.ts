@@ -1,7 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+
 import { api } from '/@/renderer/api';
-import { ScrobbleResponse, ScrobbleArgs } from '/@/renderer/api/types';
+import { ScrobbleArgs, ScrobbleResponse } from '/@/renderer/api/types';
 import { MutationOptions } from '/@/renderer/lib/react-query';
 import { getServerById, useIncrementQueuePlayCount } from '/@/renderer/store';
 import { usePlayEvent } from '/@/renderer/store/event.store';
@@ -13,7 +14,7 @@ export const useSendScrobble = (options?: MutationOptions) => {
     return useMutation<
         ScrobbleResponse,
         AxiosError,
-        Omit<ScrobbleArgs, 'server' | 'apiClientProps'>,
+        Omit<ScrobbleArgs, 'apiClientProps' | 'server'>,
         null
     >({
         mutationFn: (args) => {

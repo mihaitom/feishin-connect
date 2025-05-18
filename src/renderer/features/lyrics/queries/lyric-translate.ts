@@ -3,8 +3,8 @@ import axios from 'axios';
 export const translateLyrics = async (
     originalLyrics: string,
     translationApiKey: string,
-    translationApiProvider: string | null,
-    translationTargetLanguage: string | null,
+    translationApiProvider: null | string,
+    translationTargetLanguage: null | string,
 ) => {
     let TranslatedText = '';
     if (translationApiProvider === 'Microsoft Azure') {

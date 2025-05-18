@@ -1,11 +1,14 @@
-import { useLayoutEffect, useRef } from 'react';
 import { Divider, Group } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
-import { Variants, motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
+import { useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiArrowDownSLine, RiSettings3Line } from 'react-icons/ri';
 import { useLocation } from 'react-router';
 import styled from 'styled-components';
+
+import { useFastAverageColor } from '../../../hooks/use-fast-average-color';
+
 import {
     Button,
     NumberInput,
@@ -15,6 +18,9 @@ import {
     Slider,
     Switch,
 } from '/@/renderer/components';
+import { TableConfigDropdown } from '/@/renderer/components/virtual-table';
+import { FullScreenPlayerImage } from '/@/renderer/features/player/components/full-screen-player-image';
+import { FullScreenPlayerQueue } from '/@/renderer/features/player/components/full-screen-player-queue';
 import {
     useCurrentSong,
     useFullScreenPlayerStore,
@@ -24,10 +30,6 @@ import {
     useSettingsStoreActions,
     useWindowSettings,
 } from '/@/renderer/store';
-import { useFastAverageColor } from '../../../hooks/use-fast-average-color';
-import { FullScreenPlayerImage } from '/@/renderer/features/player/components/full-screen-player-image';
-import { FullScreenPlayerQueue } from '/@/renderer/features/player/components/full-screen-player-queue';
-import { TableConfigDropdown } from '/@/renderer/components/virtual-table';
 import { Platform } from '/@/renderer/types';
 
 const Container = styled(motion.div)`
@@ -119,10 +121,10 @@ const Controls = () => {
         >
             <Button
                 compact
+                onClick={handleToggleFullScreenPlayer}
                 size="sm"
                 tooltip={{ label: t('common.minimize', { postProcess: 'titleCase' }) }}
                 variant="subtle"
-                onClick={handleToggleFullScreenPlayer}
             >
                 <RiArrowDownSLine size="2rem" />
             </Button>
@@ -187,9 +189,9 @@ const Controls = () => {
                                     label={(e) => `${e} rem`}
                                     max={6}
                                     min={0}
+                                    onChangeEnd={(e) => setStore({ dynamicImageBlur: Number(e) })}
                                     step={0.5}
                                     w="100%"
-                                    onChangeEnd={(e) => setStore({ dynamicImageBlur: Number(e) })}
                                 />
                             </Option.Control>
                         </Option>
@@ -207,8 +209,8 @@ const Controls = () => {
                                     label={(e) => `${e} %`}
                                     max={100}
                                     min={0}
-                                    w="100%"
                                     onChangeEnd={(e) => setStore({ opacity: Number(e) })}
+                                    w="100%"
                                 />
                             </Option.Control>
                         </Option>
@@ -296,8 +298,8 @@ const Controls = () => {
                                     }
                                     max={72}
                                     min={8}
-                                    w="100%"
                                     onChangeEnd={(e) => handleLyricsSettings('fontSize', Number(e))}
+                                    w="100%"
                                 />
                                 <Slider
                                     defaultValue={lyricConfig.fontSize}
@@ -308,10 +310,10 @@ const Controls = () => {
                                     }
                                     max={72}
                                     min={8}
-                                    w="100%"
                                     onChangeEnd={(e) =>
                                         handleLyricsSettings('fontSizeUnsync', Number(e))
                                     }
+                                    w="100%"
                                 />
                             </Group>
                         </Option.Control>
@@ -332,18 +334,18 @@ const Controls = () => {
                                     label={(e) => `Synchronized: ${e}px`}
                                     max={50}
                                     min={0}
-                                    w="100%"
                                     onChangeEnd={(e) => handleLyricsSettings('gap', Number(e))}
+                                    w="100%"
                                 />
                                 <Slider
                                     defaultValue={lyricConfig.gap}
                                     label={(e) => `Unsynchronized: ${e}px`}
                                     max={50}
                                     min={0}
-                                    w="100%"
                                     onChangeEnd={(e) =>
                                         handleLyricsSettings('gapUnsync', Number(e))
                                     }
+                                    w="100%"
                                 />
                             </Group>
                         </Option.Control>
@@ -376,8 +378,8 @@ const Controls = () => {
                                         value: 'right',
                                     },
                                 ]}
-                                value={lyricConfig.alignment}
                                 onChange={(e) => handleLyricsSettings('alignment', e)}
+                                value={lyricConfig.alignment}
                             />
                         </Option.Control>
                     </Option>
@@ -391,10 +393,10 @@ const Controls = () => {
                             <NumberInput
                                 defaultValue={lyricConfig.delayMs}
                                 hideControls={false}
-                                step={10}
                                 onBlur={(e) =>
                                     handleLyricsSettings('delayMs', Number(e.currentTarget.value))
                                 }
+                                step={10}
                             />
                         </Option.Control>
                     </Option>

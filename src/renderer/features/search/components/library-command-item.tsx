@@ -1,5 +1,5 @@
-import { useCallback, MouseEvent } from 'react';
 import { Center, Flex } from '@mantine/core';
+import { MouseEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     RiAddBoxFill,
@@ -10,6 +10,7 @@ import {
     RiUserVoiceFill,
 } from 'react-icons/ri';
 import styled from 'styled-components';
+
 import { LibraryItem } from '/@/renderer/api/types';
 import { Button, Text } from '/@/renderer/components';
 import { Play, PlayQueueAddOptions } from '/@/renderer/types';
@@ -56,7 +57,7 @@ interface LibraryCommandItemProps {
     disabled?: boolean;
     handlePlayQueueAdd?: (options: PlayQueueAddOptions) => void;
     id: string;
-    imageUrl: string | null;
+    imageUrl: null | string;
     itemType: LibraryItem;
     subtitle?: string;
     title?: string;
@@ -64,12 +65,12 @@ interface LibraryCommandItemProps {
 
 export const LibraryCommandItem = ({
     disabled,
+    handlePlayQueueAdd,
     id,
     imageUrl,
+    itemType,
     subtitle,
     title,
-    itemType,
-    handlePlayQueueAdd,
 }: LibraryCommandItemProps) => {
     const { t } = useTranslation();
     let Placeholder = RiAlbumFill;
@@ -78,10 +79,10 @@ export const LibraryCommandItem = ({
         case LibraryItem.ALBUM:
             Placeholder = RiAlbumFill;
             break;
-        case LibraryItem.ARTIST:
+        case LibraryItem.ALBUM_ARTIST:
             Placeholder = RiUserVoiceFill;
             break;
-        case LibraryItem.ALBUM_ARTIST:
+        case LibraryItem.ARTIST:
             Placeholder = RiUserVoiceFill;
             break;
         case LibraryItem.PLAYLIST:
@@ -157,19 +158,20 @@ export const LibraryCommandItem = ({
                 <Button
                     compact
                     disabled={disabled}
+                    onClick={(e) => handlePlay(e, id, Play.NOW)}
                     size="md"
                     tooltip={{
                         label: t('player.play', { postProcess: 'sentenceCase' }),
                         openDelay: 500,
                     }}
                     variant="default"
-                    onClick={(e) => handlePlay(e, id, Play.NOW)}
                 >
                     <RiPlayFill />
                 </Button>
                 <Button
                     compact
                     disabled={disabled}
+                    onClick={(e) => handlePlay(e, id, Play.LAST)}
                     size="md"
                     tooltip={{
                         label: t('player.addLast', { postProcess: 'sentenceCase' }),
@@ -177,20 +179,19 @@ export const LibraryCommandItem = ({
                         openDelay: 500,
                     }}
                     variant="default"
-                    onClick={(e) => handlePlay(e, id, Play.LAST)}
                 >
                     <RiAddBoxFill />
                 </Button>
                 <Button
                     compact
                     disabled={disabled}
+                    onClick={(e) => handlePlay(e, id, Play.NEXT)}
                     size="md"
                     tooltip={{
                         label: t('player.addNext', { postProcess: 'sentenceCase' }),
                         openDelay: 500,
                     }}
                     variant="default"
-                    onClick={(e) => handlePlay(e, id, Play.NEXT)}
                 >
                     <RiAddCircleFill />
                 </Button>

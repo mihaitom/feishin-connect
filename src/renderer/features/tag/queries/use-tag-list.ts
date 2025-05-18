@@ -1,14 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
+
+import { api } from '/@/renderer/api';
+import { ServerFeature } from '/@/renderer/api/features-types';
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { TagQuery } from '/@/renderer/api/types';
+import { hasFeature } from '/@/renderer/api/utils';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { api } from '/@/renderer/api';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import { hasFeature } from '/@/renderer/api/utils';
-import { ServerFeature } from '/@/renderer/api/features-types';
-import { TagQuery } from '/@/renderer/api/types';
 
 export const useTagList = (args: QueryHookArgs<TagQuery>) => {
-    const { query, options, serverId } = args || {};
+    const { options, query, serverId } = args || {};
     const server = getServerById(serverId);
 
     return useQuery({

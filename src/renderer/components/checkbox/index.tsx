@@ -1,5 +1,5 @@
+import { CheckboxProps, Checkbox as MantineCheckbox } from '@mantine/core';
 import { forwardRef } from 'react';
-import { Checkbox as MantineCheckbox, CheckboxProps } from '@mantine/core';
 import styled from 'styled-components';
 
 const StyledCheckbox = styled(MantineCheckbox)`

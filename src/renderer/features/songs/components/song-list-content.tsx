@@ -1,10 +1,12 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { lazy, MutableRefObject, Suspense } from 'react';
+
 import { Spinner } from '/@/renderer/components';
+import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useListStoreByKey } from '/@/renderer/store';
 import { ListDisplayType } from '/@/renderer/types';
-import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 
 const SongListTableView = lazy(() =>
     import('/@/renderer/features/songs/components/song-list-table-view').then((module) => ({
@@ -19,12 +21,12 @@ const SongListGridView = lazy(() =>
 );
 
 interface SongListContentProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const SongListContent = ({ itemCount, gridRef, tableRef }: SongListContentProps) => {
+export const SongListContent = ({ gridRef, itemCount, tableRef }: SongListContentProps) => {
     const { pageKey } = useListContext();
     const { display } = useListStoreByKey({ key: pageKey });
 

@@ -1,12 +1,14 @@
 import type { ChangeEvent } from 'react';
+
+import { useTranslation } from 'react-i18next';
+
+import i18n from '/@/i18n/i18n';
+import { Option } from '/@/renderer/components/option';
 import { MultiSelect } from '/@/renderer/components/select';
 import { Slider } from '/@/renderer/components/slider';
 import { Switch } from '/@/renderer/components/switch';
-import { useSettingsStoreActions, useSettingsStore } from '/@/renderer/store/settings.store';
+import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import { TableColumn, TableType } from '/@/renderer/types';
-import { Option } from '/@/renderer/components/option';
-import i18n from '/@/i18n/i18n';
-import { useTranslation } from 'react-i18next';
 
 export const SONG_TABLE_COLUMNS = [
     {
@@ -408,8 +410,8 @@ export const TableConfigDropdown = ({ type }: TableConfigDropdownProps) => {
                         label={(value) => `Item size: ${value}`}
                         max={100}
                         min={25}
-                        w="100%"
                         onChangeEnd={handleUpdateRowHeight}
+                        w="100%"
                     />
                 </Option.Control>
             </Option>
@@ -420,8 +422,8 @@ export const TableConfigDropdown = ({ type }: TableConfigDropdownProps) => {
                         data={SONG_TABLE_COLUMNS}
                         defaultValue={tableConfig[type]?.columns.map((column) => column.column)}
                         dropdownPosition="bottom"
-                        width={300}
                         onChange={handleAddOrRemoveColumns}
+                        width={300}
                     />
                 </Option.Control>
             </Option>

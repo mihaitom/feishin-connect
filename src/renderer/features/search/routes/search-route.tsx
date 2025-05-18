@@ -1,6 +1,8 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { useId, useRef } from 'react';
 import { useLocation, useParams } from 'react-router';
+
 import { SearchContent } from '/@/renderer/features/search/components/search-content';
 import { SearchHeader } from '/@/renderer/features/search/components/search-header';
 import { AnimatedPage } from '/@/renderer/features/shared';

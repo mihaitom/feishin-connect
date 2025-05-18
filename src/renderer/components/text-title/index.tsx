@@ -1,10 +1,12 @@
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import type { TitleProps as MantineTitleProps } from '@mantine/core';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+
 import { createPolymorphicComponent, Title as MantineHeader } from '@mantine/core';
 import styled from 'styled-components';
+
 import { textEllipsis } from '/@/renderer/styles';
 
-type MantineTextTitleDivProps = MantineTitleProps & ComponentPropsWithoutRef<'div'>;
+type MantineTextTitleDivProps = ComponentPropsWithoutRef<'div'> & MantineTitleProps;
 
 interface TextTitleProps extends MantineTextTitleDivProps {
     $link?: boolean;
@@ -30,7 +32,7 @@ const StyledTextTitle = styled(MantineHeader)<TextTitleProps>`
     }
 `;
 
-const _TextTitle = ({ children, $secondary, overflow, $noSelect, ...rest }: TextTitleProps) => {
+const _TextTitle = ({ $noSelect, $secondary, children, overflow, ...rest }: TextTitleProps) => {
     return (
         <StyledTextTitle
             $noSelect={$noSelect}

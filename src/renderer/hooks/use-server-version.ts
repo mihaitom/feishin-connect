@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
-import { useAuthStoreActions, useCurrentServer } from '/@/renderer/store';
 import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import { controller } from '/@/renderer/api/controller';
 import isEqual from 'lodash/isEqual';
+import { useEffect } from 'react';
+
+import { controller } from '/@/renderer/api/controller';
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { useAuthStoreActions, useCurrentServer } from '/@/renderer/store';
 
 export const useServerVersion = () => {
     const { updateServer } = useAuthStoreActions();
@@ -28,7 +29,7 @@ export const useServerVersion = () => {
         }
 
         if (server?.id === serverInfo.data?.id) {
-            const { version, features } = serverInfo.data || {};
+            const { features, version } = serverInfo.data || {};
             if (version !== server?.version || !isEqual(features, server?.features)) {
                 updateServer(server.id, {
                     features,

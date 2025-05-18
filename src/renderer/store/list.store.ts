@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
+
 import {
     AlbumArtistListArgs,
     AlbumArtistListSort,
@@ -18,33 +19,18 @@ import {
     SortOrder,
 } from '/@/renderer/api/types';
 import { DataTableProps, PersistedTableColumn } from '/@/renderer/store/settings.store';
-import { ListDisplayType, TableColumn, TablePagination } from '/@/renderer/types';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
+import { ListDisplayType, TableColumn, TablePagination } from '/@/renderer/types';
 
 export const generatePageKey = (page: string, id?: string) => {
     return id ? `${page}_${id}` : page;
 };
 
-export type AlbumListFilter = Omit<AlbumListArgs['query'], 'startIndex' | 'limit'>;
-export type SongListFilter = Omit<SongListArgs['query'], 'startIndex' | 'limit'>;
-export type AlbumArtistListFilter = Omit<AlbumArtistListArgs['query'], 'startIndex' | 'limit'>;
-export type ArtistListFilter = Omit<ArtistListArgs['query'], 'startIndex' | 'limit'>;
-export type PlaylistListFilter = Omit<PlaylistListArgs['query'], 'startIndex' | 'limit'>;
-export type GenreListFilter = Omit<GenreListArgs['query'], 'startIndex' | 'limit'>;
-
-type FilterType =
-    | AlbumListFilter
-    | SongListFilter
-    | AlbumArtistListFilter
-    | ArtistListFilter
-    | PlaylistListFilter
-    | GenreListFilter;
-
-export type ListTableProps = {
-    pagination: TablePagination;
-    scrollOffset: number;
-} & DataTableProps;
-
+export type AlbumArtistListFilter = Omit<AlbumArtistListArgs['query'], 'limit' | 'startIndex'>;
+export type AlbumListFilter = Omit<AlbumListArgs['query'], 'limit' | 'startIndex'>;
+export type ArtistListFilter = Omit<ArtistListArgs['query'], 'limit' | 'startIndex'>;
+export type GenreListFilter = Omit<GenreListArgs['query'], 'limit' | 'startIndex'>;
+export type ListDeterministicArgs = { key: ListKey };
 export type ListGridProps = {
     itemGap?: number;
     itemSize?: number;
@@ -58,6 +44,35 @@ export type ListItemProps<TFilter = any> = {
     grid?: ListGridProps;
     table: ListTableProps;
 };
+
+export type ListKey = keyof ListState['item'] | string;
+
+export interface ListSlice extends ListState {
+    _actions: {
+        getFilter: (args: {
+            customFilters?: Record<any, any>;
+            id?: string;
+            itemType: LibraryItem;
+            key?: string;
+        }) => FilterType;
+        resetFilter: () => void;
+        setDisplayType: (args: ListDeterministicArgs & { data: ListDisplayType }) => void;
+        setFilter: (
+            args: ListDeterministicArgs & {
+                customFilters?: Record<any, any>;
+                data: Partial<FilterType>;
+                itemType: LibraryItem;
+            },
+        ) => FilterType;
+        setGrid: (args: ListDeterministicArgs & { data: Partial<ListGridProps> }) => void;
+        setStore: (data: Partial<ListSlice>) => void;
+        setTable: (args: ListDeterministicArgs & { data: Partial<ListTableProps> }) => void;
+        setTableColumns: (args: ListDeterministicArgs & { data: PersistedTableColumn[] }) => void;
+        setTablePagination: (
+            args: ListDeterministicArgs & { data: Partial<TablePagination> },
+        ) => void;
+    };
+}
 
 export interface ListState {
     detail: {
@@ -75,36 +90,22 @@ export interface ListState {
     };
 }
 
-export type ListKey = keyof ListState['item'] | string;
+export type ListTableProps = DataTableProps & {
+    pagination: TablePagination;
+    scrollOffset: number;
+};
 
-export type ListDeterministicArgs = { key: ListKey };
+export type PlaylistListFilter = Omit<PlaylistListArgs['query'], 'limit' | 'startIndex'>;
 
-export interface ListSlice extends ListState {
-    _actions: {
-        getFilter: (args: {
-            customFilters?: Record<any, any>;
-            id?: string;
-            itemType: LibraryItem;
-            key?: string;
-        }) => FilterType;
-        resetFilter: () => void;
-        setDisplayType: (args: { data: ListDisplayType } & ListDeterministicArgs) => void;
-        setFilter: (
-            args: {
-                customFilters?: Record<any, any>;
-                data: Partial<FilterType>;
-                itemType: LibraryItem;
-            } & ListDeterministicArgs,
-        ) => FilterType;
-        setGrid: (args: { data: Partial<ListGridProps> } & ListDeterministicArgs) => void;
-        setStore: (data: Partial<ListSlice>) => void;
-        setTable: (args: { data: Partial<ListTableProps> } & ListDeterministicArgs) => void;
-        setTableColumns: (args: { data: PersistedTableColumn[] } & ListDeterministicArgs) => void;
-        setTablePagination: (
-            args: { data: Partial<TablePagination> } & ListDeterministicArgs,
-        ) => void;
-    };
-}
+export type SongListFilter = Omit<SongListArgs['query'], 'limit' | 'startIndex'>;
+
+type FilterType =
+    | AlbumArtistListFilter
+    | AlbumListFilter
+    | ArtistListFilter
+    | GenreListFilter
+    | PlaylistListFilter
+    | SongListFilter;
 
 export const useListStore = create<ListSlice>()(
     persist(
@@ -678,7 +679,7 @@ export const useListStoreByKey = <TFilter>(args: {
 };
 
 export const useListFilterByKey = <TFilter>(args: {
-    filter?: Partial<TFilter> | any;
+    filter?: any | Partial<TFilter>;
     key: string;
 }): TFilter => {
     const key = args.key as keyof ListState['item'];

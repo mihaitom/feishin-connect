@@ -1,19 +1,20 @@
-import { forwardRef, Fragment, Ref, useCallback, useMemo } from 'react';
 import { Group, Stack } from '@mantine/core';
+import { forwardRef, Fragment, Ref, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
+
+import { queryKeys } from '/@/renderer/api/query-keys';
 import { AlbumDetailResponse, LibraryItem, ServerType } from '/@/renderer/api/types';
 import { Rating, Text } from '/@/renderer/components';
 import { useAlbumDetail } from '/@/renderer/features/albums/queries/album-detail-query';
 import { LibraryHeader, useSetRating } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
+import { useSongChange } from '/@/renderer/hooks/use-song-change';
+import { queryClient } from '/@/renderer/lib/react-query';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
-import { useSongChange } from '/@/renderer/hooks/use-song-change';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import { queryClient } from '/@/renderer/lib/react-query';
 
 interface AlbumDetailHeaderProps {
     background: {
@@ -121,9 +122,9 @@ export const AlbumDetailHeader = forwardRef(
         return (
             <Stack ref={cq.ref}>
                 <LibraryHeader
-                    ref={ref}
                     imageUrl={detailQuery?.data?.imageUrl}
                     item={{ route: AppRoute.LIBRARY_ALBUMS, type: LibraryItem.ALBUM }}
+                    ref={ref}
                     title={detailQuery?.data?.name || ''}
                     {...background}
                 >
@@ -139,12 +140,12 @@ export const AlbumDetailHeader = forwardRef(
                                 <>
                                     <Text $noSelect>•</Text>
                                     <Rating
+                                        onChange={handleUpdateRating}
                                         readOnly={
                                             detailQuery?.isFetching ||
                                             updateRatingMutation.isLoading
                                         }
                                         value={detailQuery?.data?.userRating || 0}
-                                        onChange={handleUpdateRating}
                                     />
                                 </>
                             )}
@@ -153,17 +154,17 @@ export const AlbumDetailHeader = forwardRef(
                             mah="4rem"
                             spacing="md"
                             sx={{
+                                overflow: 'hidden',
                                 WebkitBoxOrient: 'vertical',
                                 WebkitLineClamp: 2,
-                                overflow: 'hidden',
                             }}
                         >
                             {detailQuery?.data?.albumArtists.map((artist) => (
                                 <Text
-                                    key={`artist-${artist.id}`}
                                     $link
                                     component={Link}
                                     fw={600}
+                                    key={`artist-${artist.id}`}
                                     to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
                                         albumArtistId: artist.id,
                                     })}

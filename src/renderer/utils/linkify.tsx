@@ -19,8 +19,8 @@ export const replaceURLWithHTMLLinks = (text: string) => {
         const prefix = link.startsWith('http') ? '' : 'https://';
         elements.push(
             <a
-                key={lastIndex}
                 href={prefix + link}
+                key={lastIndex}
                 rel="noopener noreferrer"
                 target="_blank"
             >

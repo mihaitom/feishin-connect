@@ -1,11 +1,12 @@
-import { ChangeEvent, useMemo } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
+import { ChangeEvent, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/renderer/api/types';
 import { Select, Switch, Text } from '/@/renderer/components';
 import { useGenreList } from '/@/renderer/features/genres';
 import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
-import { useTranslation } from 'react-i18next';
 
 interface SubsonicSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
@@ -43,7 +44,7 @@ export const SubsonicSongFilters = ({
         }));
     }, [genreListQuery.data]);
 
-    const handleGenresFilter = debounce((e: string | null) => {
+    const handleGenresFilter = debounce((e: null | string) => {
         const updatedFilters = setFilter({
             customFilters,
             data: {
@@ -87,8 +88,8 @@ export const SubsonicSongFilters = ({
                     <Switch
                         checked={filter?.value || false}
                         disabled={filter.disabled}
-                        size="xs"
                         onChange={filter.onChange}
+                        size="xs"
                     />
                 </Group>
             ))}
@@ -97,13 +98,13 @@ export const SubsonicSongFilters = ({
                 {!isGenrePage && (
                     <Select
                         clearable
-                        searchable
                         data={genreList}
                         defaultValue={filter.genreIds ? filter.genreIds[0] : undefined}
                         disabled={!!filter.searchTerm}
                         label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
-                        width={150}
                         onChange={handleGenresFilter}
+                        searchable
+                        width={150}
                     />
                 )}
             </Group>

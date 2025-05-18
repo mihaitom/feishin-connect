@@ -1,5 +1,5 @@
-/* eslint-disable prefer-destructuring */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { ContextMenuItemType } from '/@/renderer/features/context-menu';
+
 import { ColDef } from '@ag-grid-community/core';
 import isElectron from 'is-electron';
 import { generatePath } from 'react-router';
@@ -7,26 +7,26 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
+
+import i18n from '/@/i18n/i18n';
 import { LibraryItem, LyricSource } from '/@/renderer/api/types';
 import { AppRoute } from '/@/renderer/router/routes';
+import { usePlayerStore } from '/@/renderer/store/player.store';
+import { mergeOverridingColumns } from '/@/renderer/store/utils';
 import { AppTheme } from '/@/renderer/themes/types';
 import {
-    TableColumn,
     CrossfadeStyle,
+    FontType,
+    Platform,
     Play,
     PlaybackStyle,
     PlaybackType,
+    TableColumn,
     TableType,
-    Platform,
-    FontType,
 } from '/@/renderer/types';
 import { randomString } from '/@/renderer/utils';
-import i18n from '/@/i18n/i18n';
-import { usePlayerStore } from '/@/renderer/store/player.store';
-import { mergeOverridingColumns } from '/@/renderer/store/utils';
-import type { ContextMenuItemType } from '/@/renderer/features/context-menu';
 
-const utils = isElectron() ? window.electron.utils : null;
+const utils = isElectron() ? window.api.utils : null;
 
 export type SidebarItemType = {
     disabled: boolean;
@@ -93,17 +93,17 @@ export const sidebarItems: SidebarItemType[] = [
     },
 ];
 
-export type SortableItem<T> = {
-    disabled: boolean;
-    id: T;
-};
-
 export enum HomeItem {
     MOST_PLAYED = 'mostPlayed',
     RANDOM = 'random',
     RECENTLY_ADDED = 'recentlyAdded',
     RECENTLY_PLAYED = 'recentlyPlayed',
 }
+
+export type SortableItem<T> = {
+    disabled: boolean;
+    id: T;
+};
 
 const homeItems = Object.values(HomeItem).map((item) => ({
     disabled: false,
@@ -113,10 +113,10 @@ const homeItems = Object.values(HomeItem).map((item) => ({
 /* eslint-disable typescript-sort-keys/string-enum */
 export enum ArtistItem {
     BIOGRAPHY = 'biography',
-    TOP_SONGS = 'topSongs',
-    RECENT_ALBUMS = 'recentAlbums',
     COMPILATIONS = 'compilations',
+    RECENT_ALBUMS = 'recentAlbums',
     SIMILAR_ARTISTS = 'similarArtists',
+    TOP_SONGS = 'topSongs',
 }
 /* eslint-enable typescript-sort-keys/string-enum */
 
@@ -124,32 +124,6 @@ const artistItems = Object.values(ArtistItem).map((item) => ({
     disabled: false,
     id: item,
 }));
-
-export type PersistedTableColumn = {
-    column: TableColumn;
-    extraProps?: Partial<ColDef>;
-    width: number;
-};
-
-export type DataTableProps = {
-    autoFit: boolean;
-    columns: PersistedTableColumn[];
-    followCurrentSong?: boolean;
-    rowHeight: number;
-};
-
-export type SideQueueType = 'sideQueue' | 'sideDrawerQueue';
-
-type MpvSettings = {
-    audioExclusiveMode: 'yes' | 'no';
-    audioFormat?: 's16' | 's32' | 'float';
-    audioSampleRateHz?: number;
-    gaplessAudio: 'yes' | 'no' | 'weak';
-    replayGainClip: boolean;
-    replayGainFallbackDB?: number;
-    replayGainMode: 'no' | 'track' | 'album';
-    replayGainPreampDB?: number;
-};
 
 export enum BindingActions {
     BROWSER_BACK = 'browserBack',
@@ -192,11 +166,34 @@ export enum GenreTarget {
     TRACK = 'track',
 }
 
-export type TranscodingConfig = {
-    bitrate?: number;
-    enabled: boolean;
-    format?: string;
+export type DataTableProps = {
+    autoFit: boolean;
+    columns: PersistedTableColumn[];
+    followCurrentSong?: boolean;
+    rowHeight: number;
 };
+
+export type PersistedTableColumn = {
+    column: TableColumn;
+    extraProps?: Partial<ColDef>;
+    width: number;
+};
+
+export interface SettingsSlice extends SettingsState {
+    actions: {
+        reset: () => void;
+        resetSampleRate: () => void;
+        setArtistItems: (item: SortableItem<ArtistItem>[]) => void;
+        setGenreBehavior: (target: GenreTarget) => void;
+        setHomeItems: (item: SortableItem<HomeItem>[]) => void;
+        setSettings: (data: Partial<SettingsState>) => void;
+        setSidebarItems: (items: SidebarItemType[]) => void;
+        setTable: (type: TableType, data: DataTableProps) => void;
+        setTranscodingConfig: (config: TranscodingConfig) => void;
+        toggleContextMenuItem: (item: ContextMenuItemType) => void;
+        toggleSidebarCollapseShare: () => void;
+    };
+}
 
 export interface SettingsState {
     css: {
@@ -205,21 +202,21 @@ export interface SettingsState {
     };
     discord: {
         clientId: string;
-        enableIdle: boolean;
         enabled: boolean;
+        enableIdle: boolean;
         showAsListening: boolean;
         showServerImage: boolean;
         updateInterval: number;
     };
     font: {
         builtIn: string;
-        custom: string | null;
-        system: string | null;
+        custom: null | string;
+        system: null | string;
         type: FontType;
     };
     general: {
         accent: string;
-        albumArtRes?: number | null;
+        albumArtRes?: null | number;
         albumBackground: boolean;
         albumBackgroundBlur: number;
         artistItems: SortableItem<ArtistItem>[];
@@ -239,11 +236,11 @@ export interface SettingsState {
         playerbarOpenDrawer: boolean;
         resume: boolean;
         showQueueDrawerButton: boolean;
-        sideQueueType: SideQueueType;
-        sidebarCollapseShared: boolean;
         sidebarCollapsedNavigation: boolean;
+        sidebarCollapseShared: boolean;
         sidebarItems: SidebarItemType[];
         sidebarPlaylistList: boolean;
+        sideQueueType: SideQueueType;
         skipButtons: {
             enabled: boolean;
             skipBackwardSeconds: number;
@@ -264,7 +261,7 @@ export interface SettingsState {
         globalMediaHotkeys: boolean;
     };
     lyrics: {
-        alignment: 'left' | 'center' | 'right';
+        alignment: 'center' | 'left' | 'right';
         delayMs: number;
         fetch: boolean;
         follow: boolean;
@@ -276,11 +273,11 @@ export interface SettingsState {
         showProvider: boolean;
         sources: LyricSource[];
         translationApiKey: string;
-        translationApiProvider: string | null;
-        translationTargetLanguage: string | null;
+        translationApiProvider: null | string;
+        translationTargetLanguage: null | string;
     };
     playback: {
-        audioDeviceId?: string | null;
+        audioDeviceId?: null | string;
         crossfadeDuration: number;
         crossfadeStyle: CrossfadeStyle;
         mpvExtraParameters: string[];
@@ -302,7 +299,7 @@ export interface SettingsState {
         port: number;
         username: string;
     };
-    tab: 'general' | 'playback' | 'window' | 'hotkeys' | string;
+    tab: 'general' | 'hotkeys' | 'playback' | 'window' | string;
     tables: {
         albumDetail: DataTableProps;
         fullScreen: DataTableProps;
@@ -321,21 +318,24 @@ export interface SettingsState {
     };
 }
 
-export interface SettingsSlice extends SettingsState {
-    actions: {
-        reset: () => void;
-        resetSampleRate: () => void;
-        setArtistItems: (item: SortableItem<ArtistItem>[]) => void;
-        setGenreBehavior: (target: GenreTarget) => void;
-        setHomeItems: (item: SortableItem<HomeItem>[]) => void;
-        setSettings: (data: Partial<SettingsState>) => void;
-        setSidebarItems: (items: SidebarItemType[]) => void;
-        setTable: (type: TableType, data: DataTableProps) => void;
-        setTranscodingConfig: (config: TranscodingConfig) => void;
-        toggleContextMenuItem: (item: ContextMenuItemType) => void;
-        toggleSidebarCollapseShare: () => void;
-    };
-}
+export type SideQueueType = 'sideDrawerQueue' | 'sideQueue';
+
+export type TranscodingConfig = {
+    bitrate?: number;
+    enabled: boolean;
+    format?: string;
+};
+
+type MpvSettings = {
+    audioExclusiveMode: 'no' | 'yes';
+    audioFormat?: 'float' | 's16' | 's32';
+    audioSampleRateHz?: number;
+    gaplessAudio: 'no' | 'weak' | 'yes';
+    replayGainClip: boolean;
+    replayGainFallbackDB?: number;
+    replayGainMode: 'album' | 'no' | 'track';
+    replayGainPreampDB?: number;
+};
 
 // Determines the default/initial windowBarStyle value based on the current platform.
 const getPlatformDefaultWindowBarStyle = (): Platform => {
@@ -351,8 +351,8 @@ const initialState: SettingsState = {
     },
     discord: {
         clientId: '1165957668758900787',
-        enableIdle: false,
         enabled: false,
+        enableIdle: false,
         showAsListening: false,
         showServerImage: false,
         updateInterval: 15,
@@ -385,11 +385,11 @@ const initialState: SettingsState = {
         playerbarOpenDrawer: false,
         resume: false,
         showQueueDrawerButton: false,
-        sideQueueType: 'sideQueue',
-        sidebarCollapseShared: false,
         sidebarCollapsedNavigation: true,
+        sidebarCollapseShared: false,
         sidebarItems,
         sidebarPlaylistList: true,
+        sideQueueType: 'sideQueue',
         skipButtons: {
             enabled: false,
             skipBackwardSeconds: 5,

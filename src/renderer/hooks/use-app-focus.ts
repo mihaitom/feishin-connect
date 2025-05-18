@@ -1,6 +1,6 @@
 // From https://learnersbucket.com/examples/interview/usehasfocus-hook-in-react/
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export const useAppFocus = () => {
     const [focus, setFocus] = useState(document.hasFocus());

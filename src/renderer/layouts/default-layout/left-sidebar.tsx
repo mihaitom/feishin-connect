@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import styled from 'styled-components';
+
 import { ResizeHandle } from '/@/renderer/features/shared';
 import { CollapsedSidebar } from '/@/renderer/features/sidebar/components/collapsed-sidebar';
 import { Sidebar } from '/@/renderer/features/sidebar/components/sidebar';
@@ -24,13 +25,13 @@ export const LeftSidebar = ({ isResizing, startResizing }: LeftSidebarProps) => 
     return (
         <SidebarContainer id="sidebar">
             <ResizeHandle
-                ref={sidebarRef}
                 $isResizing={isResizing}
                 $placement="right"
                 onMouseDown={(e) => {
                     e.preventDefault();
                     startResizing('left');
                 }}
+                ref={sidebarRef}
             />
             {collapsed ? <CollapsedSidebar /> : <Sidebar />}
         </SidebarContainer>

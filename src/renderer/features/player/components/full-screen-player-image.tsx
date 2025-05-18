@@ -1,11 +1,12 @@
-import { Flex, Stack, Group, Center } from '@mantine/core';
+import { Center, Flex, Group, Stack } from '@mantine/core';
 import { useSetState } from '@mantine/hooks';
 import { AnimatePresence, HTMLMotionProps, motion, Variants } from 'framer-motion';
-import { useEffect, useRef, useLayoutEffect, useState, useCallback, Fragment } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RiAlbumFill } from 'react-icons/ri';
 import { generatePath } from 'react-router';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+
 import { QueueSong } from '/@/renderer/api/types';
 import { Badge, Text, TextTitle } from '/@/renderer/components';
 import { useFastAverageColor } from '/@/renderer/hooks';
@@ -90,7 +91,7 @@ const imageVariants: Variants = {
     },
 };
 
-const scaleImageUrl = (imageSize: number, url?: string | null) => {
+const scaleImageUrl = (imageSize: number, url?: null | string) => {
     return url
         ?.replace(/&size=\d+/, `&size=${imageSize}`)
         .replace(/\?width=\d+/, `?width=${imageSize}`)
@@ -213,13 +214,13 @@ export const FullScreenPlayerImage = () => {
                 >
                     {imageState.current === 0 && (
                         <ImageWithPlaceholder
-                            key={imageKey}
                             animate="open"
                             className="full-screen-player-image"
                             custom={{ isOpen: imageState.current === 0 }}
                             draggable={false}
                             exit="closed"
                             initial="closed"
+                            key={imageKey}
                             placeholder="var(--placeholder-bg)"
                             src={imageState.topImage || ''}
                             useAspectRatio={useImageAspectRatio}
@@ -229,13 +230,13 @@ export const FullScreenPlayerImage = () => {
 
                     {imageState.current === 1 && (
                         <ImageWithPlaceholder
-                            key={imageKey}
                             animate="open"
                             className="full-screen-player-image"
                             custom={{ isOpen: imageState.current === 1 }}
                             draggable={false}
                             exit="closed"
                             initial="closed"
+                            key={imageKey}
                             placeholder="var(--placeholder-bg)"
                             src={imageState.bottomImage || ''}
                             useAspectRatio={useImageAspectRatio}
@@ -279,8 +280,8 @@ export const FullScreenPlayerImage = () => {
                     {currentSong?.album}{' '}
                 </TextTitle>
                 <TextTitle
-                    key="fs-artists"
                     align="center"
+                    key="fs-artists"
                     order={3}
                     style={{
                         textShadow: 'var(--fullscreen-player-text-shadow)',

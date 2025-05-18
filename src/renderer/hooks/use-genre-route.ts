@@ -1,7 +1,8 @@
-import { useLocation } from 'react-router';
-import { GenreTarget, useSettingsStore } from '/@/renderer/store';
-import { AppRoute } from '/@/renderer/router/routes';
 import { useMemo } from 'react';
+import { useLocation } from 'react-router';
+
+import { AppRoute } from '/@/renderer/router/routes';
+import { GenreTarget, useSettingsStore } from '/@/renderer/store';
 
 const ALBUM_REGEX = /albums$/;
 const SONG_REGEX = /songs$/;

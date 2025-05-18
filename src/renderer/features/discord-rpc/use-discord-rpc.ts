@@ -1,6 +1,9 @@
-/* eslint-disable consistent-return */
+import { SetActivity } from '@xhayper/discord-rpc';
 import isElectron from 'is-electron';
 import { useCallback, useEffect, useRef } from 'react';
+
+import { controller } from '/@/renderer/api/controller';
+import { ServerType } from '/@/renderer/api/types';
 import {
     getServerById,
     useCurrentSong,
@@ -9,12 +12,9 @@ import {
     useGeneralSettings,
     usePlayerStore,
 } from '/@/renderer/store';
-import { SetActivity } from '@xhayper/discord-rpc';
 import { PlayerStatus } from '/@/renderer/types';
-import { ServerType } from '/@/renderer/api/types';
-import { controller } from '/@/renderer/api/controller';
 
-const discordRpc = isElectron() ? window.electron.discordRpc : null;
+const discordRpc = isElectron() ? window.api.discordRpc : null;
 
 export const useDiscordRpc = () => {
     const intervalRef = useRef(0);

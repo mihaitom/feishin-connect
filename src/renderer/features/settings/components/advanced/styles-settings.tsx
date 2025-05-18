@@ -1,17 +1,18 @@
-import { useState } from 'react';
-import { Button, ConfirmModal, Switch, Text, Textarea } from '/@/renderer/components';
-import { sanitizeCss } from '/@/renderer/utils/sanitize';
 import { Code } from '@mantine/core';
-import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
 import { closeAllModals, openModal } from '@mantine/modals';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { Button, ConfirmModal, Switch, Text, Textarea } from '/@/renderer/components';
+import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
 import { useCssSettings, useSettingsStoreActions } from '/@/renderer/store';
+import { sanitizeCss } from '/@/renderer/utils/sanitize';
 
 export const StylesSettings = () => {
     const [open, setOpen] = useState(false);
     const { t } = useTranslation();
 
-    const { enabled, content } = useCssSettings();
+    const { content, enabled } = useCssSettings();
     const [css, setCss] = useState(content);
 
     const { setSettings } = useSettingsStoreActions();
@@ -82,17 +83,17 @@ export const StylesSettings = () => {
                                 {open && (
                                     <Button
                                         compact
+                                        onClick={handleSave}
                                         // disabled={isSaveButtonDisabled}
                                         variant="filled"
-                                        onClick={handleSave}
                                     >
                                         {t('common.save', { postProcess: 'titleCase' })}
                                     </Button>
                                 )}
                                 <Button
                                     compact
-                                    variant="filled"
                                     onClick={() => setOpen(!open)}
+                                    variant="filled"
                                 >
                                     {t(open ? 'common.close' : 'common.edit', {
                                         postProcess: 'titleCase',

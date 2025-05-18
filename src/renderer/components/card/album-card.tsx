@@ -1,14 +1,16 @@
-import { useCallback } from 'react';
+import type { CardRoute, CardRow, Play, PlayQueueAddOptions } from '/@/renderer/types';
+
 import { Center } from '@mantine/core';
+import { useCallback } from 'react';
 import { RiAlbumFill } from 'react-icons/ri';
 import { generatePath, useNavigate } from 'react-router';
 import { SimpleImg } from 'react-simple-img';
 import styled from 'styled-components';
-import type { CardRow, CardRoute, Play, PlayQueueAddOptions } from '/@/renderer/types';
-import { Skeleton } from '/@/renderer/components/skeleton';
-import { CardControls } from '/@/renderer/components/card/card-controls';
+
 import { Album, AlbumArtist, Artist, LibraryItem } from '/@/renderer/api/types';
+import { CardControls } from '/@/renderer/components/card/card-controls';
 import { CardRows } from '/@/renderer/components/card/card-rows';
+import { Skeleton } from '/@/renderer/components/skeleton';
 
 const CardWrapper = styled.div<{
     link?: boolean;
@@ -104,7 +106,7 @@ const Row = styled.div<{ $secondary?: boolean }>`
 
 interface BaseGridCardProps {
     controls: {
-        cardRows: CardRow<Album | Artist | AlbumArtist>[];
+        cardRows: CardRow<Album | AlbumArtist | Artist>[];
         itemType: LibraryItem;
         playButtonBehavior: Play;
         route: CardRoute;
@@ -116,14 +118,14 @@ interface BaseGridCardProps {
 }
 
 export const AlbumCard = ({
+    controls,
+    data,
+    handlePlayQueueAdd,
     loading,
     size,
-    handlePlayQueueAdd,
-    data,
-    controls,
 }: BaseGridCardProps) => {
     const navigate = useNavigate();
-    const { itemType, cardRows, route } = controls;
+    const { cardRows, itemType, route } = controls;
 
     const handleNavigate = useCallback(() => {
         navigate(
@@ -194,9 +196,9 @@ export const AlbumCard = ({
         <CardWrapper>
             <StyledCard style={{ alignItems: 'center', display: 'flex' }}>
                 <Skeleton
-                    visible
                     height={size}
                     radius="sm"
+                    visible
                     width={size}
                 >
                     <ImageSection />
@@ -204,10 +206,10 @@ export const AlbumCard = ({
                 <DetailSection style={{ width: '100%' }}>
                     {(cardRows || []).map((_row: CardRow<Album>, index: number) => (
                         <Skeleton
-                            visible
                             height={15}
                             my={3}
                             radius="md"
+                            visible
                             width={!data ? (index > 0 ? '50%' : '90%') : '100%'}
                         >
                             <Row />

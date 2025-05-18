@@ -1,12 +1,12 @@
-import { useState } from 'react';
 import isElectron from 'is-electron';
+import { useState } from 'react';
 import { RiCheckboxBlankLine, RiCloseLine, RiSubtractLine } from 'react-icons/ri';
 import styled from 'styled-components';
 
-const browser = isElectron() ? window.electron.browser : null;
+const browser = isElectron() ? window.api.browser : null;
 
 interface WindowControlsProps {
-    style?: 'macos' | 'windows' | 'linux';
+    style?: 'linux' | 'macos' | 'windows';
 }
 
 const WindowsButtonGroup = styled.div`
@@ -66,21 +66,21 @@ export const WindowControls = ({ style }: WindowControlsProps) => {
                     {style === 'windows' && (
                         <WindowsButtonGroup>
                             <WindowsButton
-                                role="button"
                                 onClick={handleMinimize}
+                                role="button"
                             >
                                 <RiSubtractLine size={19} />
                             </WindowsButton>
                             <WindowsButton
-                                role="button"
                                 onClick={handleMaximize}
+                                role="button"
                             >
                                 <RiCheckboxBlankLine size={13} />
                             </WindowsButton>
                             <WindowsButton
                                 $exit
-                                role="button"
                                 onClick={handleClose}
+                                role="button"
                             >
                                 <RiCloseLine size={19} />
                             </WindowsButton>

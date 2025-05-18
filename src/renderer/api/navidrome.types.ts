@@ -1,30 +1,77 @@
 import { SSArtistInfo } from '/@/renderer/api/subsonic.types';
 
-export type NDAuthenticate = {
-    id: string;
-    isAdmin: boolean;
-    name: string;
-    subsonicSalt: string;
-    subsonicToken: string;
-    token: string;
-    username: string;
+export enum NDAlbumArtistListSort {
+    ALBUM_COUNT = 'albumCount',
+    FAVORITED = 'starred_at',
+    NAME = 'name',
+    PLAY_COUNT = 'playCount',
+    RATING = 'rating',
+    SONG_COUNT = 'songCount',
+}
+
+export enum NDAlbumListSort {
+    ALBUM_ARTIST = 'album_artist',
+    ARTIST = 'artist',
+    DURATION = 'duration',
+    NAME = 'name',
+    PLAY_COUNT = 'play_count',
+    PLAY_DATE = 'play_date',
+    RANDOM = 'random',
+    RATING = 'rating',
+    RECENTLY_ADDED = 'recently_added',
+    SONG_COUNT = 'songCount',
+    STARRED = 'starred_at',
+    YEAR = 'max_year',
+}
+
+export enum NDGenreListSort {
+    NAME = 'name',
+}
+
+export enum NDPlaylistListSort {
+    DURATION = 'duration',
+    NAME = 'name',
+    OWNER = 'owner_name',
+    PUBLIC = 'public',
+    SONG_COUNT = 'songCount',
+    UPDATED_AT = 'updatedAt',
+}
+
+export enum NDSongListSort {
+    ALBUM = 'album',
+    ALBUM_ARTIST = 'order_album_artist_name',
+    ALBUM_SONGS = 'album',
+    ARTIST = 'artist',
+    BPM = 'bpm',
+    CHANNELS = 'channels',
+    COMMENT = 'comment',
+    DURATION = 'duration',
+    FAVORITED = 'starred_at',
+    GENRE = 'genre',
+    ID = 'id',
+    PLAY_COUNT = 'playCount',
+    PLAY_DATE = 'playDate',
+    RANDOM = 'random',
+    RATING = 'rating',
+    RECENTLY_ADDED = 'createdAt',
+    TITLE = 'title',
+    TRACK = 'track',
+    YEAR = 'year',
+}
+
+export enum NDSortOrder {
+    ASC = 'ASC',
+    DESC = 'DESC',
+}
+
+export type NDAddToPlaylist = null;
+
+export type NDAddToPlaylistBody = {
+    ids: string[];
 };
 
-export type NDUser = {
-    createdAt: string;
-    email: string;
-    id: string;
-    isAdmin: boolean;
-    lastAccessAt: string;
-    lastLoginAt: string;
-    name: string;
-    updatedAt: string;
-    userName: string;
-};
-
-export type NDGenre = {
-    id: string;
-    name: string;
+export type NDAddToPlaylistResponse = {
+    added: number;
 };
 
 export type NDAlbum = {
@@ -60,6 +107,193 @@ export type NDAlbum = {
     starredAt: string;
     updatedAt: string;
 } & { songs?: NDSong[] };
+
+export type NDAlbumArtist = {
+    albumCount: number;
+    biography: string;
+    externalInfoUpdatedAt: string;
+    externalUrl: string;
+    fullText: string;
+    genres: NDGenre[];
+    id: string;
+    largeImageUrl?: string;
+    mbzArtistId: string;
+    mediumImageUrl?: string;
+    name: string;
+    orderArtistName: string;
+    playCount: number;
+    playDate: string;
+    rating: number;
+    size: number;
+    smallImageUrl?: string;
+    songCount: number;
+    starred: boolean;
+    starredAt: string;
+} & {
+    similarArtists?: SSArtistInfo['similarArtist'];
+};
+
+export type NDAlbumArtistDetail = NDAlbumArtist;
+
+export type NDAlbumArtistDetailResponse = NDAlbumArtist;
+
+export type NDAlbumArtistList = {
+    items: NDAlbumArtist[];
+    startIndex: number;
+    totalRecordCount: number;
+};
+
+export type NDAlbumArtistListParams = NDOrder &
+    NDPagination & {
+        _sort?: NDAlbumArtistListSort;
+        genre_id?: string;
+        starred?: boolean;
+    };
+
+export type NDAlbumDetail = NDAlbum & { songs?: NDSongListResponse };
+
+export type NDAlbumDetailResponse = NDAlbum;
+
+export type NDAlbumList = {
+    items: NDAlbum[];
+    startIndex: number;
+    totalRecordCount: number;
+};
+
+export type NDAlbumListParams = NDOrder &
+    NDPagination & {
+        _sort?: NDAlbumListSort;
+        album_id?: string;
+        artist_id?: string;
+        compilation?: boolean;
+        genre_id?: string;
+        has_rating?: boolean;
+        id?: string;
+        name?: string;
+        recently_played?: boolean;
+        starred?: boolean;
+        year?: number;
+    };
+
+export type NDAlbumListResponse = NDAlbum[];
+
+export type NDArtistListResponse = NDAlbumArtist[];
+
+export type NDAuthenticate = {
+    id: string;
+    isAdmin: boolean;
+    name: string;
+    subsonicSalt: string;
+    subsonicToken: string;
+    token: string;
+    username: string;
+};
+
+export type NDAuthenticationResponse = NDAuthenticate;
+
+export type NDCreatePlaylist = NDCreatePlaylistResponse;
+
+export type NDCreatePlaylistParams = {
+    comment?: string;
+    name: string;
+    public?: boolean;
+    rules?: null | Record<string, any>;
+};
+
+export type NDCreatePlaylistResponse = {
+    id: string;
+};
+
+export type NDDeletePlaylist = NDDeletePlaylistResponse;
+
+export type NDDeletePlaylistParams = {
+    id: string;
+};
+
+export type NDDeletePlaylistResponse = null;
+
+export type NDGenre = {
+    id: string;
+    name: string;
+};
+
+export type NDGenreList = NDGenre[];
+
+export type NDGenreListParams = NDOrder &
+    NDPagination & {
+        _sort?: NDGenreListSort;
+        id?: string;
+    };
+
+export type NDGenreListResponse = NDGenre[];
+
+export type NDOrder = {
+    _order?: NDSortOrder;
+};
+
+export type NDPagination = {
+    _end?: number;
+    _start?: number;
+};
+
+export type NDPlaylist = {
+    comment: string;
+    createdAt: string;
+    duration: number;
+    evaluatedAt: string;
+    id: string;
+    name: string;
+    ownerId: string;
+    ownerName: string;
+    path: string;
+    public: boolean;
+    rules: null | Record<string, any>;
+    size: number;
+    songCount: number;
+    sync: boolean;
+    updatedAt: string;
+};
+
+export type NDPlaylistDetail = NDPlaylist;
+
+export type NDPlaylistDetailResponse = NDPlaylist;
+
+export type NDPlaylistList = {
+    items: NDPlaylist[];
+    startIndex: number;
+    totalRecordCount: number;
+};
+
+export type NDPlaylistListParams = NDOrder &
+    NDPagination & {
+        _sort?: NDPlaylistListSort;
+        owner_id?: string;
+    };
+
+export type NDPlaylistListResponse = NDPlaylist[];
+
+export type NDPlaylistSong = NDSong & {
+    mediaFileId: string;
+    playlistId: string;
+};
+
+export type NDPlaylistSongList = {
+    items: NDPlaylistSong[];
+    startIndex: number;
+    totalRecordCount: number;
+};
+
+export type NDPlaylistSongListResponse = NDPlaylistSong[];
+
+export type NDRemoveFromPlaylist = null;
+
+export type NDRemoveFromPlaylistParams = {
+    id: string[];
+};
+
+export type NDRemoveFromPlaylistResponse = {
+    ids: string[];
+};
 
 export type NDSong = {
     album: string;
@@ -107,64 +341,9 @@ export type NDSong = {
     year: number;
 };
 
-export type NDAlbumArtist = {
-    albumCount: number;
-    biography: string;
-    externalInfoUpdatedAt: string;
-    externalUrl: string;
-    fullText: string;
-    genres: NDGenre[];
-    id: string;
-    largeImageUrl?: string;
-    mbzArtistId: string;
-    mediumImageUrl?: string;
-    name: string;
-    orderArtistName: string;
-    playCount: number;
-    playDate: string;
-    rating: number;
-    size: number;
-    smallImageUrl?: string;
-    songCount: number;
-    starred: boolean;
-    starredAt: string;
-} & {
-    similarArtists?: SSArtistInfo['similarArtist'];
-};
-
-export type NDAuthenticationResponse = NDAuthenticate;
-
-export type NDAlbumArtistList = {
-    items: NDAlbumArtist[];
-    startIndex: number;
-    totalRecordCount: number;
-};
-
-export type NDAlbumArtistDetail = NDAlbumArtist;
-
-export type NDAlbumArtistDetailResponse = NDAlbumArtist;
-
-export type NDGenreList = NDGenre[];
-
-export type NDGenreListResponse = NDGenre[];
-
-export type NDAlbumDetailResponse = NDAlbum;
-
-export type NDAlbumDetail = NDAlbum & { songs?: NDSongListResponse };
-
-export type NDAlbumListResponse = NDAlbum[];
-
-export type NDAlbumList = {
-    items: NDAlbum[];
-    startIndex: number;
-    totalRecordCount: number;
-};
-
 export type NDSongDetail = NDSong;
 
 export type NDSongDetailResponse = NDSong;
-
-export type NDSongListResponse = NDSong[];
 
 export type NDSongList = {
     items: NDSong[];
@@ -172,210 +351,31 @@ export type NDSongList = {
     totalRecordCount: number;
 };
 
-export type NDArtistListResponse = NDAlbumArtist[];
+export type NDSongListParams = NDOrder &
+    NDPagination & {
+        _sort?: NDSongListSort;
+        album_id?: string[];
+        artist_id?: string[];
+        genre_id?: string;
+        starred?: boolean;
+    };
 
-export type NDPagination = {
-    _end?: number;
-    _start?: number;
-};
-
-export enum NDSortOrder {
-    ASC = 'ASC',
-    DESC = 'DESC',
-}
-
-export type NDOrder = {
-    _order?: NDSortOrder;
-};
-
-export enum NDGenreListSort {
-    NAME = 'name',
-}
-
-export type NDGenreListParams = {
-    _sort?: NDGenreListSort;
-    id?: string;
-} & NDPagination &
-    NDOrder;
-
-export enum NDAlbumListSort {
-    ALBUM_ARTIST = 'album_artist',
-    ARTIST = 'artist',
-    DURATION = 'duration',
-    NAME = 'name',
-    PLAY_COUNT = 'play_count',
-    PLAY_DATE = 'play_date',
-    RANDOM = 'random',
-    RATING = 'rating',
-    RECENTLY_ADDED = 'recently_added',
-    SONG_COUNT = 'songCount',
-    STARRED = 'starred_at',
-    YEAR = 'max_year',
-}
-
-export type NDAlbumListParams = {
-    _sort?: NDAlbumListSort;
-    album_id?: string;
-    artist_id?: string;
-    compilation?: boolean;
-    genre_id?: string;
-    has_rating?: boolean;
-    id?: string;
-    name?: string;
-    recently_played?: boolean;
-    starred?: boolean;
-    year?: number;
-} & NDPagination &
-    NDOrder;
-
-export enum NDSongListSort {
-    ALBUM = 'album',
-    ALBUM_ARTIST = 'order_album_artist_name',
-    ALBUM_SONGS = 'album',
-    ARTIST = 'artist',
-    BPM = 'bpm',
-    CHANNELS = 'channels',
-    COMMENT = 'comment',
-    DURATION = 'duration',
-    FAVORITED = 'starred_at',
-    GENRE = 'genre',
-    ID = 'id',
-    PLAY_COUNT = 'playCount',
-    PLAY_DATE = 'playDate',
-    RANDOM = 'random',
-    RATING = 'rating',
-    RECENTLY_ADDED = 'createdAt',
-    TITLE = 'title',
-    TRACK = 'track',
-    YEAR = 'year',
-}
-
-export type NDSongListParams = {
-    _sort?: NDSongListSort;
-    album_id?: string[];
-    artist_id?: string[];
-    genre_id?: string;
-    starred?: boolean;
-} & NDPagination &
-    NDOrder;
-
-export enum NDAlbumArtistListSort {
-    ALBUM_COUNT = 'albumCount',
-    FAVORITED = 'starred_at',
-    NAME = 'name',
-    PLAY_COUNT = 'playCount',
-    RATING = 'rating',
-    SONG_COUNT = 'songCount',
-}
-
-export type NDAlbumArtistListParams = {
-    _sort?: NDAlbumArtistListSort;
-    genre_id?: string;
-    starred?: boolean;
-} & NDPagination &
-    NDOrder;
-
-export type NDAddToPlaylistResponse = {
-    added: number;
-};
-
-export type NDAddToPlaylistBody = {
-    ids: string[];
-};
-
-export type NDAddToPlaylist = null;
-
-export type NDRemoveFromPlaylistResponse = {
-    ids: string[];
-};
-
-export type NDRemoveFromPlaylistParams = {
-    id: string[];
-};
-
-export type NDRemoveFromPlaylist = null;
-
-export type NDCreatePlaylistParams = {
-    comment?: string;
-    name: string;
-    public?: boolean;
-    rules?: Record<string, any> | null;
-};
-
-export type NDCreatePlaylistResponse = {
-    id: string;
-};
-
-export type NDCreatePlaylist = NDCreatePlaylistResponse;
+export type NDSongListResponse = NDSong[];
 
 export type NDUpdatePlaylistParams = Partial<NDPlaylist>;
 
 export type NDUpdatePlaylistResponse = NDPlaylist;
 
-export type NDDeletePlaylistParams = {
-    id: string;
-};
-
-export type NDDeletePlaylistResponse = null;
-
-export type NDDeletePlaylist = NDDeletePlaylistResponse;
-
-export type NDPlaylist = {
-    comment: string;
+export type NDUser = {
     createdAt: string;
-    duration: number;
-    evaluatedAt: string;
+    email: string;
     id: string;
+    isAdmin: boolean;
+    lastAccessAt: string;
+    lastLoginAt: string;
     name: string;
-    ownerId: string;
-    ownerName: string;
-    path: string;
-    public: boolean;
-    rules: Record<string, any> | null;
-    size: number;
-    songCount: number;
-    sync: boolean;
     updatedAt: string;
-};
-
-export type NDPlaylistDetail = NDPlaylist;
-
-export type NDPlaylistDetailResponse = NDPlaylist;
-
-export type NDPlaylistList = {
-    items: NDPlaylist[];
-    startIndex: number;
-    totalRecordCount: number;
-};
-
-export type NDPlaylistListResponse = NDPlaylist[];
-
-export enum NDPlaylistListSort {
-    DURATION = 'duration',
-    NAME = 'name',
-    OWNER = 'owner_name',
-    PUBLIC = 'public',
-    SONG_COUNT = 'songCount',
-    UPDATED_AT = 'updatedAt',
-}
-
-export type NDPlaylistListParams = {
-    _sort?: NDPlaylistListSort;
-    owner_id?: string;
-} & NDPagination &
-    NDOrder;
-
-export type NDPlaylistSong = NDSong & {
-    mediaFileId: string;
-    playlistId: string;
-};
-
-export type NDPlaylistSongListResponse = NDPlaylistSong[];
-
-export type NDPlaylistSongList = {
-    items: NDPlaylistSong[];
-    startIndex: number;
-    totalRecordCount: number;
+    userName: string;
 };
 
 export const NDSongQueryFields = [
@@ -515,12 +515,9 @@ export const NDSongQueryNumberOperators = [
     { label: 'is in the range', value: 'inTheRange' },
 ];
 
-export type NDUserListParams = {
-    _sort?: NDUserListSort;
-} & NDPagination &
-    NDOrder;
-
-export type NDUserListResponse = NDUser[];
+export enum NDUserListSort {
+    NAME = 'name',
+}
 
 export type NDUserList = {
     items: NDUser[];
@@ -528,6 +525,9 @@ export type NDUserList = {
     totalRecordCount: number;
 };
 
-export enum NDUserListSort {
-    NAME = 'name',
-}
+export type NDUserListParams = NDOrder &
+    NDPagination & {
+        _sort?: NDUserListSort;
+    };
+
+export type NDUserListResponse = NDUser[];

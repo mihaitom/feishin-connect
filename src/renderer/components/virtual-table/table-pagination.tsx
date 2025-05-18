@@ -1,19 +1,22 @@
-import { MutableRefObject } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { Group } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
+import { MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiHashtag } from 'react-icons/ri';
-import { Button } from '/@/renderer/components/button';
+
 import { MotionFlex } from '../motion';
+
+import { Button } from '/@/renderer/components/button';
 import { NumberInput } from '/@/renderer/components/input';
 import { Pagination } from '/@/renderer/components/pagination';
 import { Popover } from '/@/renderer/components/popover';
 import { Text } from '/@/renderer/components/text';
 import { useContainerQuery } from '/@/renderer/hooks';
-import { TablePagination as TablePaginationType } from '/@/renderer/types';
 import { ListKey } from '/@/renderer/store';
+import { TablePagination as TablePaginationType } from '/@/renderer/types';
 
 interface TablePaginationProps {
     pageKey: ListKey;
@@ -25,10 +28,10 @@ interface TablePaginationProps {
 
 export const TablePagination = ({
     pageKey,
-    tableRef,
     pagination,
-    setPagination,
     setIdPagination,
+    setPagination,
+    tableRef,
 }: TablePaginationProps) => {
     const { t } = useTranslation();
     const [isGoToPageOpen, handlers] = useDisclosure(false);
@@ -70,14 +73,14 @@ export const TablePagination = ({
 
     return (
         <MotionFlex
-            ref={containerQuery.ref}
-            layout
             align="center"
             animate={{ y: 0 }}
             exit={{ y: 50 }}
             initial={{ y: 50 }}
             justify="space-between"
+            layout
             p="1rem"
+            ref={containerQuery.ref}
             sx={{ borderTop: '1px solid var(--generic-border-color)' }}
         >
             <Text
@@ -102,18 +105,19 @@ export const TablePagination = ({
                 )}
             </Text>
             <Group
-                ref={containerQuery.ref}
                 noWrap
+                ref={containerQuery.ref}
                 spacing="sm"
             >
                 <Popover
-                    trapFocus
+                    onClose={() => handlers.close()}
                     opened={isGoToPageOpen}
                     position="bottom-start"
-                    onClose={() => handlers.close()}
+                    trapFocus
                 >
                     <Popover.Target>
                         <Button
+                            onClick={() => handlers.toggle()}
                             radius="sm"
                             size="sm"
                             sx={{ height: '26px', padding: '0', width: '26px' }}
@@ -121,7 +125,6 @@ export const TablePagination = ({
                                 label: t('action.goToPage', { postProcess: 'sentenceCase' }),
                             }}
                             variant="default"
-                            onClick={() => handlers.toggle()}
                         >
                             <RiHashtag size={15} />
                         </Button>
@@ -147,14 +150,14 @@ export const TablePagination = ({
                     </Popover.Dropdown>
                 </Popover>
                 <Pagination
-                    noWrap
                     $hideDividers={!containerQuery.isSm}
                     boundaries={1}
+                    noWrap
+                    onChange={handlePagination}
                     radius="sm"
                     siblings={containerQuery.isMd ? 2 : containerQuery.isSm ? 1 : 0}
                     total={pagination.totalPages - 1}
                     value={pagination.currentPage + 1}
-                    onChange={handlePagination}
                 />
             </Group>
         </MotionFlex>

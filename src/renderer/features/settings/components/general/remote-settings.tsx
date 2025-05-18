@@ -1,11 +1,12 @@
 import isElectron from 'is-electron';
-import { SettingsSection } from '/@/renderer/features/settings/components/settings-section';
-import { useRemoteSettings, useSettingsStoreActions } from '/@/renderer/store';
-import { NumberInput, Switch, Text, TextInput, toast } from '/@/renderer/components';
 import debounce from 'lodash/debounce';
 import { useTranslation } from 'react-i18next';
 
-const remote = isElectron() ? window.electron.remote : null;
+import { NumberInput, Switch, Text, TextInput, toast } from '/@/renderer/components';
+import { SettingsSection } from '/@/renderer/features/settings/components/settings-section';
+import { useRemoteSettings, useSettingsStoreActions } from '/@/renderer/store';
+
+const remote = isElectron() ? window.api.remote : null;
 
 export const RemoteSettings = () => {
     const { t } = useTranslation();
@@ -93,12 +94,12 @@ export const RemoteSettings = () => {
             control: (
                 <NumberInput
                     max={65535}
-                    value={settings.port}
                     onBlur={async (e) => {
                         if (!e) return;
                         const port = Number(e.currentTarget.value);
                         await debouncedChangeRemotePort(port);
                     }}
+                    value={settings.port}
                 />
             ),
             description: t('setting.remotePort', {

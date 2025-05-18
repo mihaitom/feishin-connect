@@ -1,12 +1,14 @@
-/* stylelint-disable no-descending-specificity */
-import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 import type { TooltipProps, UnstyledButtonProps } from '@mantine/core';
+
 import { UnstyledButton } from '@mantine/core';
 import { motion } from 'framer-motion';
+/* stylelint-disable no-descending-specificity */
+import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 import styled, { css } from 'styled-components';
+
 import { Tooltip } from '/@/renderer/components';
 
-type MantineButtonProps = UnstyledButtonProps & ComponentPropsWithoutRef<'button'>;
+type MantineButtonProps = ComponentPropsWithoutRef<'button'> & UnstyledButtonProps;
 interface PlayerButtonProps extends MantineButtonProps {
     $isActive?: boolean;
     icon: ReactNode;
@@ -121,7 +123,7 @@ const StyledPlayerButton = styled(UnstyledButton)<StyledPlayerButtonProps>`
 `;
 
 export const PlayerButton = forwardRef<HTMLDivElement, PlayerButtonProps>(
-    ({ tooltip, variant, icon, ...rest }: PlayerButtonProps, ref) => {
+    ({ icon, tooltip, variant, ...rest }: PlayerButtonProps, ref) => {
         if (tooltip) {
             return (
                 <Tooltip {...tooltip}>

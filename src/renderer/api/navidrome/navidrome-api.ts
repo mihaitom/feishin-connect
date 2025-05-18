@@ -1,17 +1,19 @@
 import { initClient, initContract } from '@ts-rest/core';
-import axios, { Method, AxiosError, AxiosResponse, isAxiosError } from 'axios';
+import axios, { AxiosError, AxiosResponse, isAxiosError, Method } from 'axios';
 import isElectron from 'is-electron';
 import debounce from 'lodash/debounce';
 import omitBy from 'lodash/omitBy';
 import qs from 'qs';
-import { ndType } from './navidrome-types';
-import { authenticationFailure, resultWithHeaders } from '/@/renderer/api/utils';
-import { useAuthStore } from '/@/renderer/store';
-import { ServerListItem } from '/@/renderer/api/types';
-import { toast } from '/@/renderer/components/toast';
-import i18n from '/@/i18n/i18n';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+import { ndType } from './navidrome-types';
+
+import i18n from '/@/i18n/i18n';
+import { ServerListItem } from '/@/renderer/api/types';
+import { authenticationFailure, resultWithHeaders } from '/@/renderer/api/utils';
+import { toast } from '/@/renderer/components/toast';
+import { useAuthStore } from '/@/renderer/store';
+
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 const c = initContract();
 
@@ -275,7 +277,7 @@ axiosClient.interceptors.response.use(
                 // eslint-disable-next-line promise/no-promise-in-callback
                 return localSettings
                     .passwordGet(currentServer.id)
-                    .then(async (password: string | null) => {
+                    .then(async (password: null | string) => {
                         authSuccess = false;
 
                         if (password === null) {
@@ -367,14 +369,14 @@ axiosClient.interceptors.response.use(
 );
 
 export const ndApiClient = (args: {
-    server: ServerListItem | null;
+    server: null | ServerListItem;
     signal?: AbortSignal;
     url?: string;
 }) => {
-    const { server, url, signal } = args;
+    const { server, signal, url } = args;
 
     return initClient(contract, {
-        api: async ({ path, method, headers, body }) => {
+        api: async ({ body, headers, method, path }) => {
             let baseUrl: string | undefined;
             let token: string | undefined;
 
@@ -406,7 +408,7 @@ export const ndApiClient = (args: {
                     headers: result.headers as any,
                     status: result.status,
                 };
-            } catch (e: Error | AxiosError | any) {
+            } catch (e: any | AxiosError | Error) {
                 if (isAxiosError(e)) {
                     if (e.code === 'ERR_NETWORK') {
                         throw new Error(

@@ -1,23 +1,24 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import isElectron from 'is-electron';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import {
     Album,
     AlbumArtist,
+    AlbumArtistDetailResponse,
+    AlbumDetailResponse,
     AnyLibraryItems,
     LibraryItem,
-    SetRatingArgs,
     RatingResponse,
-    AlbumDetailResponse,
-    AlbumArtistDetailResponse,
+    SetRatingArgs,
 } from '/@/renderer/api/types';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById, useSetAlbumListItemDataById, useSetQueueRating } from '/@/renderer/store';
-import isElectron from 'is-electron';
 import { useRatingEvent } from '/@/renderer/store/event.store';
 
-const remote = isElectron() ? window.electron.remote : null;
+const remote = isElectron() ? window.api.remote : null;
 
 export const useSetRating = (args: MutationHookArgs) => {
     const { options } = args || {};
@@ -29,8 +30,8 @@ export const useSetRating = (args: MutationHookArgs) => {
     return useMutation<
         RatingResponse,
         AxiosError,
-        Omit<SetRatingArgs, 'server' | 'apiClientProps'>,
-        { previous: { items: AnyLibraryItems } | undefined }
+        Omit<SetRatingArgs, 'apiClientProps' | 'server'>,
+        { previous: undefined | { items: AnyLibraryItems } }
     >({
         mutationFn: (args) => {
             const server = getServerById(args.serverId);

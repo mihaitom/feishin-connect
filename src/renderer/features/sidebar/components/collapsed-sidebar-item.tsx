@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { forwardRef, ReactNode } from 'react';
 import { useMatch } from 'react-router';
 import styled from 'styled-components';
+
 import { Text } from '/@/renderer/components';
 
 const Container = styled(Flex)<{ $active?: boolean; $disabled?: boolean }>`
@@ -71,17 +72,17 @@ interface CollapsedSidebarItemProps {
 }
 
 const _CollapsedSidebarItem = forwardRef<HTMLDivElement, CollapsedSidebarItemProps>(
-    ({ route, activeIcon, icon, label, disabled, ...props }: CollapsedSidebarItemProps, ref) => {
+    ({ activeIcon, disabled, icon, label, route, ...props }: CollapsedSidebarItemProps, ref) => {
         const match = useMatch(route || '/null');
         const isMatch = Boolean(match);
 
         return (
             <Container
-                ref={ref}
                 $active={Boolean(match)}
                 $disabled={disabled}
                 align="center"
                 direction="column"
+                ref={ref}
                 {...props}
             >
                 {isMatch ? <ActiveTabIndicator /> : null}

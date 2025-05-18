@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { useParams } from 'react-router';
+
 import { LibraryItem } from '/@/renderer/api/types';
 import { NativeScrollArea, Spinner } from '/@/renderer/components';
 import { AlbumArtistDetailContent } from '/@/renderer/features/artists/components/album-artist-detail-content';
@@ -52,7 +53,6 @@ const AlbumArtistDetailRoute = () => {
     return (
         <AnimatedPage key={`album-artist-detail-${routeId}`}>
             <NativeScrollArea
-                ref={scrollAreaRef}
                 pageHeaderProps={{
                     backgroundColor: background,
                     children: (
@@ -66,10 +66,11 @@ const AlbumArtistDetailRoute = () => {
                     offset: 200,
                     target: headerRef,
                 }}
+                ref={scrollAreaRef}
             >
                 <AlbumArtistDetailHeader
-                    ref={headerRef}
                     background={background}
+                    ref={headerRef}
                 />
                 <AlbumArtistDetailContent background={background} />
             </NativeScrollArea>

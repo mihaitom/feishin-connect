@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { AlbumListQuery, AlbumListSort, SortOrder } from '/@/renderer/api/types';
-import { getServerById } from '/@/renderer/store';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
+import { getServerById } from '/@/renderer/store';
 
 export const useRecentlyPlayed = (args: QueryHookArgs<Partial<AlbumListQuery>>) => {
     const { options, query, serverId } = args;

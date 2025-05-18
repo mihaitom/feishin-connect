@@ -1,6 +1,7 @@
-import { useCallback, Dispatch } from 'react';
+import { Dispatch, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
+
 import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
 import { AppRoute } from '/@/renderer/router/routes';
 
@@ -10,7 +11,7 @@ interface GoToCommandsProps {
     setQuery: Dispatch<string>;
 }
 
-export const GoToCommands = ({ setQuery, setPages, handleClose }: GoToCommandsProps) => {
+export const GoToCommands = ({ handleClose, setPages, setQuery }: GoToCommandsProps) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 

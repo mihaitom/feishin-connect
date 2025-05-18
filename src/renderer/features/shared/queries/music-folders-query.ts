@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
+
+import { MusicFolderListQuery } from '../../../api/types';
+import { QueryHookArgs } from '../../../lib/react-query';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { getServerById } from '/@/renderer/store';
-import { MusicFolderListQuery } from '../../../api/types';
-import { QueryHookArgs } from '../../../lib/react-query';
 
 export const useMusicFolders = (args: QueryHookArgs<MusicFolderListQuery>) => {
     const { options, serverId } = args || {};

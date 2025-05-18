@@ -1,23 +1,30 @@
-import React, { forwardRef } from 'react';
 import type {
-    TextInputProps as MantineTextInputProps,
-    NumberInputProps as MantineNumberInputProps,
-    PasswordInputProps as MantinePasswordInputProps,
     FileInputProps as MantineFileInputProps,
     JsonInputProps as MantineJsonInputProps,
+    NumberInputProps as MantineNumberInputProps,
+    PasswordInputProps as MantinePasswordInputProps,
     TextareaProps as MantineTextareaProps,
+    TextInputProps as MantineTextInputProps,
 } from '@mantine/core';
+
 import {
-    TextInput as MantineTextInput,
-    NumberInput as MantineNumberInput,
-    PasswordInput as MantinePasswordInput,
     FileInput as MantineFileInput,
     JsonInput as MantineJsonInput,
+    NumberInput as MantineNumberInput,
+    PasswordInput as MantinePasswordInput,
     Textarea as MantineTextarea,
+    TextInput as MantineTextInput,
 } from '@mantine/core';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
-interface TextInputProps extends MantineTextInputProps {
+interface FileInputProps extends MantineFileInputProps {
+    children?: React.ReactNode;
+    maxWidth?: number | string;
+    width?: number | string;
+}
+
+interface JsonInputProps extends MantineJsonInputProps {
     children?: React.ReactNode;
     maxWidth?: number | string;
     width?: number | string;
@@ -35,19 +42,13 @@ interface PasswordInputProps extends MantinePasswordInputProps {
     width?: number | string;
 }
 
-interface FileInputProps extends MantineFileInputProps {
-    children?: React.ReactNode;
-    maxWidth?: number | string;
-    width?: number | string;
-}
-
-interface JsonInputProps extends MantineJsonInputProps {
-    children?: React.ReactNode;
-    maxWidth?: number | string;
-    width?: number | string;
-}
-
 interface TextareaProps extends MantineTextareaProps {
+    children?: React.ReactNode;
+    maxWidth?: number | string;
+    width?: number | string;
+}
+
+interface TextInputProps extends MantineTextInputProps {
     children?: React.ReactNode;
     maxWidth?: number | string;
     width?: number | string;
@@ -276,7 +277,7 @@ const StyledTextarea = styled(MantineTextarea)<TextareaProps>`
 `;
 
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
-    ({ children, width, maxWidth, ...props }: TextInputProps, ref) => {
+    ({ children, maxWidth, width, ...props }: TextInputProps, ref) => {
         return (
             <StyledTextInput
                 ref={ref}
@@ -291,11 +292,11 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
 );
 
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
-    ({ children, width, maxWidth, ...props }: NumberInputProps, ref) => {
+    ({ children, maxWidth, width, ...props }: NumberInputProps, ref) => {
         return (
             <StyledNumberInput
-                ref={ref}
                 hideControls
+                ref={ref}
                 spellCheck={false}
                 {...props}
                 sx={{ maxWidth, width }}
@@ -307,7 +308,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 );
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-    ({ children, width, maxWidth, ...props }: PasswordInputProps, ref) => {
+    ({ children, maxWidth, width, ...props }: PasswordInputProps, ref) => {
         return (
             <StyledPasswordInput
                 ref={ref}
@@ -321,7 +322,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
 );
 
 export const FileInput = forwardRef<HTMLButtonElement, FileInputProps>(
-    ({ children, width, maxWidth, ...props }: FileInputProps, ref) => {
+    ({ children, maxWidth, width, ...props }: FileInputProps, ref) => {
         return (
             <StyledFileInput
                 ref={ref}
@@ -340,7 +341,7 @@ export const FileInput = forwardRef<HTMLButtonElement, FileInputProps>(
 );
 
 export const JsonInput = forwardRef<HTMLTextAreaElement, JsonInputProps>(
-    ({ children, width, maxWidth, ...props }: JsonInputProps, ref) => {
+    ({ children, maxWidth, width, ...props }: JsonInputProps, ref) => {
         return (
             <StyledJsonInput
                 ref={ref}
@@ -354,7 +355,7 @@ export const JsonInput = forwardRef<HTMLTextAreaElement, JsonInputProps>(
 );
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-    ({ children, width, maxWidth, ...props }: TextareaProps, ref) => {
+    ({ children, maxWidth, width, ...props }: TextareaProps, ref) => {
         return (
             <StyledTextarea
                 ref={ref}

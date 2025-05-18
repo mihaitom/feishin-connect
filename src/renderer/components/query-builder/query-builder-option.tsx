@@ -1,6 +1,7 @@
 import { Group } from '@mantine/core';
 import { useState } from 'react';
 import { RiSubtractLine } from 'react-icons/ri';
+
 import { Button } from '/@/renderer/components/button';
 import { NumberInput, TextInput } from '/@/renderer/components/input';
 import { Select } from '/@/renderer/components/select';
@@ -31,62 +32,10 @@ interface QueryOptionProps {
     selectData?: { label: string; value: string }[];
 }
 
-const QueryValueInput = ({ onChange, type, data, ...props }: any) => {
+const QueryValueInput = ({ data, onChange, type, ...props }: any) => {
     const [numberRange, setNumberRange] = useState([0, 0]);
 
     switch (type) {
-        case 'string':
-            return (
-                <TextInput
-                    size="sm"
-                    onChange={onChange}
-                    {...props}
-                />
-            );
-        case 'number':
-            return (
-                <NumberInput
-                    size="sm"
-                    onChange={onChange}
-                    {...props}
-                    defaultValue={props.defaultValue && Number(props.defaultValue)}
-                />
-            );
-        case 'date':
-            return (
-                <TextInput
-                    size="sm"
-                    onChange={onChange}
-                    {...props}
-                />
-            );
-        case 'dateRange':
-            return (
-                <>
-                    <NumberInput
-                        {...props}
-                        defaultValue={props.defaultValue && Number(props.defaultValue?.[0])}
-                        maxWidth={81}
-                        width="10%"
-                        onChange={(e) => {
-                            const newRange = [e || 0, numberRange[1]];
-                            setNumberRange(newRange);
-                            onChange(newRange);
-                        }}
-                    />
-                    <NumberInput
-                        {...props}
-                        defaultValue={props.defaultValue && Number(props.defaultValue?.[1])}
-                        maxWidth={81}
-                        width="10%"
-                        onChange={(e) => {
-                            const newRange = [numberRange[0], e || 0];
-                            setNumberRange(newRange);
-                            onChange(newRange);
-                        }}
-                    />
-                </>
-            );
         case 'boolean':
             return (
                 <Select
@@ -98,11 +47,63 @@ const QueryValueInput = ({ onChange, type, data, ...props }: any) => {
                     {...props}
                 />
             );
+        case 'date':
+            return (
+                <TextInput
+                    onChange={onChange}
+                    size="sm"
+                    {...props}
+                />
+            );
+        case 'dateRange':
+            return (
+                <>
+                    <NumberInput
+                        {...props}
+                        defaultValue={props.defaultValue && Number(props.defaultValue?.[0])}
+                        maxWidth={81}
+                        onChange={(e) => {
+                            const newRange = [e || 0, numberRange[1]];
+                            setNumberRange(newRange);
+                            onChange(newRange);
+                        }}
+                        width="10%"
+                    />
+                    <NumberInput
+                        {...props}
+                        defaultValue={props.defaultValue && Number(props.defaultValue?.[1])}
+                        maxWidth={81}
+                        onChange={(e) => {
+                            const newRange = [numberRange[0], e || 0];
+                            setNumberRange(newRange);
+                            onChange(newRange);
+                        }}
+                        width="10%"
+                    />
+                </>
+            );
+        case 'number':
+            return (
+                <NumberInput
+                    onChange={onChange}
+                    size="sm"
+                    {...props}
+                    defaultValue={props.defaultValue && Number(props.defaultValue)}
+                />
+            );
         case 'playlist':
             return (
                 <Select
                     data={data}
                     onChange={onChange}
+                    {...props}
+                />
+            );
+        case 'string':
+            return (
+                <TextInput
+                    onChange={onChange}
+                    size="sm"
                     {...props}
                 />
             );
@@ -115,14 +116,14 @@ const QueryValueInput = ({ onChange, type, data, ...props }: any) => {
 export const QueryBuilderOption = ({
     data,
     filters,
-    level,
-    onDeleteRule,
-    operators,
     groupIndex,
+    level,
     noRemove,
     onChangeField,
     onChangeOperator,
     onChangeValue,
+    onDeleteRule,
+    operators,
     selectData,
 }: QueryOptionProps) => {
     const { field, operator, uniqueId, value } = data;
@@ -192,51 +193,51 @@ export const QueryBuilderOption = ({
             spacing="sm"
         >
             <Select
-                searchable
                 data={filters}
                 maxWidth={170}
+                onChange={handleChangeField}
+                searchable
                 size="sm"
                 value={field}
                 width="25%"
-                onChange={handleChangeField}
             />
             <Select
-                searchable
                 data={operatorsByFieldType || []}
                 disabled={!field}
                 maxWidth={170}
+                onChange={handleChangeOperator}
+                searchable
                 size="sm"
                 value={operator}
                 width="25%"
-                onChange={handleChangeOperator}
             />
             {field ? (
                 <QueryValueInput
                     data={selectData || []}
                     defaultValue={value}
                     maxWidth={170}
+                    onChange={handleChangeValue}
                     size="sm"
                     type={operator === 'inTheRange' ? 'dateRange' : fieldType}
                     width="25%"
-                    onChange={handleChangeValue}
                 />
             ) : (
                 <TextInput
-                    disabled
                     defaultValue={value}
+                    disabled
                     maxWidth={170}
+                    onChange={handleChangeValue}
                     size="sm"
                     width="25%"
-                    onChange={handleChangeValue}
                 />
             )}
             <Button
                 disabled={noRemove}
+                onClick={handleDeleteRule}
                 px={5}
                 size="sm"
                 tooltip={{ label: 'Remove rule' }}
                 variant="default"
-                onClick={handleDeleteRule}
             >
                 <RiSubtractLine size={20} />
             </Button>

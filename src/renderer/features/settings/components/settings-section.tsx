@@ -1,11 +1,12 @@
+import { Divider } from '@mantine/core';
 import { ReactNode } from 'react';
+
 import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
 import { useSettingSearchContext } from '/@/renderer/features/settings/context/search-context';
-import { Divider } from '@mantine/core';
 
 export type SettingOption = {
     control: ReactNode;
-    description: string | ReactNode;
+    description: ReactNode | string;
     isHidden?: boolean;
     note?: string;
     title: string;

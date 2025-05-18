@@ -2,14 +2,14 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-export interface AlbumArtistListDataState {
-    itemData: any[];
-}
-
 export interface AlbumArtistListDataSlice extends AlbumArtistListDataState {
     actions: {
         setItemData: (data: any[]) => void;
     };
+}
+
+export interface AlbumArtistListDataState {
+    itemData: any[];
 }
 
 export const useAlbumArtistListDataStore = create<AlbumArtistListDataSlice>()(

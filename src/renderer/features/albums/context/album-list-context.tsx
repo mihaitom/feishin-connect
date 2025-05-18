@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+
 import { ListKey } from '/@/renderer/store';
 
 export const AlbumListContext = createContext<{ id?: string; pageKey: ListKey }>({

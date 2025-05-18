@@ -1,18 +1,19 @@
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
-import { JFAlbum, JFPlaylist, JFMusicFolder, JFGenre } from '/@/renderer/api/jellyfin.types';
+
+import { JFAlbum, JFGenre, JFMusicFolder, JFPlaylist } from '/@/renderer/api/jellyfin.types';
 import { jfType } from '/@/renderer/api/jellyfin/jellyfin-types';
 import {
-    Song,
-    LibraryItem,
     Album,
     AlbumArtist,
-    Playlist,
-    MusicFolder,
     Genre,
+    LibraryItem,
+    MusicFolder,
+    Playlist,
+    RelatedArtist,
     ServerListItem,
     ServerType,
-    RelatedArtist,
+    Song,
 } from '/@/renderer/api/types';
 
 const getStreamUrl = (args: {
@@ -21,9 +22,9 @@ const getStreamUrl = (args: {
     eTag?: string;
     id: string;
     mediaSourceId?: string;
-    server: ServerListItem | null;
+    server: null | ServerListItem;
 }) => {
-    const { id, server, deviceId } = args;
+    const { deviceId, id, server } = args;
 
     return (
         `${server?.url}/audio` +
@@ -122,9 +123,9 @@ const getPlaylistCoverArtUrl = (args: { baseUrl: string; item: JFPlaylist; size:
     );
 };
 
-type AlbumOrSong = z.infer<typeof jfType._response.song> | z.infer<typeof jfType._response.album>;
+type AlbumOrSong = z.infer<typeof jfType._response.album> | z.infer<typeof jfType._response.song>;
 
-const getPeople = (item: AlbumOrSong): Record<string, RelatedArtist[]> | null => {
+const getPeople = (item: AlbumOrSong): null | Record<string, RelatedArtist[]> => {
     if (item.People) {
         const participants: Record<string, RelatedArtist[]> = {};
 
@@ -151,7 +152,7 @@ const getPeople = (item: AlbumOrSong): Record<string, RelatedArtist[]> | null =>
     return null;
 };
 
-const getTags = (item: AlbumOrSong): Record<string, string[]> | null => {
+const getTags = (item: AlbumOrSong): null | Record<string, string[]> => {
     if (item.Tags) {
         const tags: Record<string, string[]> = {};
         for (const tag of item.Tags) {
@@ -166,7 +167,7 @@ const getTags = (item: AlbumOrSong): Record<string, string[]> | null => {
 
 const normalizeSong = (
     item: z.infer<typeof jfType._response.song>,
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     deviceId: string,
     imageSize?: number,
 ): Song => {
@@ -252,7 +253,7 @@ const normalizeSong = (
 
 const normalizeAlbum = (
     item: z.infer<typeof jfType._response.album>,
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     imageSize?: number,
 ): Album => {
     return {
@@ -312,7 +313,7 @@ const normalizeAlbumArtist = (
     item: z.infer<typeof jfType._response.albumArtist> & {
         similarArtists?: z.infer<typeof jfType._response.albumArtistList>;
     },
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     imageSize?: number,
 ): AlbumArtist => {
     const similarArtists =
@@ -361,7 +362,7 @@ const normalizeAlbumArtist = (
 
 const normalizePlaylist = (
     item: z.infer<typeof jfType._response.playlist>,
-    server: ServerListItem | null,
+    server: null | ServerListItem,
     imageSize?: number,
 ): Playlist => {
     const imageUrl = getPlaylistCoverArtUrl({
@@ -445,7 +446,7 @@ const getGenreCoverArtUrl = (args: {
     );
 };
 
-const normalizeGenre = (item: JFGenre, server: ServerListItem | null): Genre => {
+const normalizeGenre = (item: JFGenre, server: null | ServerListItem): Genre => {
     return {
         albumCount: undefined,
         id: item.Id,

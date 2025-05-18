@@ -1,5 +1,5 @@
+import { Tabs as MantineTabs, TabsProps as MantineTabsProps, TabsPanelProps } from '@mantine/core';
 import { Suspense } from 'react';
-import { TabsPanelProps, TabsProps as MantineTabsProps, Tabs as MantineTabs } from '@mantine/core';
 import styled from 'styled-components';
 
 type TabsProps = MantineTabsProps;

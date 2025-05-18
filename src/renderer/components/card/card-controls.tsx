@@ -1,21 +1,23 @@
-import type { MouseEvent } from 'react';
-import React from 'react';
-import type { UnstyledButtonProps } from '@mantine/core';
-import { Group } from '@mantine/core';
-import { RiPlayFill, RiMore2Fill, RiHeartFill, RiHeartLine } from 'react-icons/ri';
-import styled from 'styled-components';
-import { _Button } from '/@/renderer/components/button';
 import type { PlayQueueAddOptions } from '/@/renderer/types';
-import { Play } from '/@/renderer/types';
-import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import type { UnstyledButtonProps } from '@mantine/core';
+import type { MouseEvent } from 'react';
+
+import { Group } from '@mantine/core';
+import React from 'react';
+import { RiHeartFill, RiHeartLine, RiMore2Fill, RiPlayFill } from 'react-icons/ri';
+import styled from 'styled-components';
+
 import { LibraryItem } from '/@/renderer/api/types';
-import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
+import { _Button } from '/@/renderer/components/button';
 import {
     ALBUM_CONTEXT_MENU_ITEMS,
     ARTIST_CONTEXT_MENU_ITEMS,
 } from '/@/renderer/features/context-menu/context-menu-items';
+import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
+import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import { Play } from '/@/renderer/types';
 
-type PlayButtonType = UnstyledButtonProps & React.ComponentPropsWithoutRef<'button'>;
+type PlayButtonType = React.ComponentPropsWithoutRef<'button'> & UnstyledButtonProps;
 
 const PlayButton = styled.button<PlayButtonType>`
     display: flex;
@@ -104,9 +106,9 @@ const FavoriteWrapper = styled.span<{ isFavorite: boolean }>`
 `;
 
 export const CardControls = ({
+    handlePlayQueueAdd,
     itemData,
     itemType,
-    handlePlayQueueAdd,
 }: {
     handlePlayQueueAdd?: (options: PlayQueueAddOptions) => void;
     itemData: any;
@@ -156,14 +158,14 @@ export const CardControls = ({
                         </FavoriteWrapper>
                     </SecondaryButton>
                     <SecondaryButton
-                        p={5}
-                        sx={{ svg: { fill: 'white !important' } }}
-                        variant="subtle"
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             handleContextMenu(e, [itemData]);
                         }}
+                        p={5}
+                        sx={{ svg: { fill: 'white !important' } }}
+                        variant="subtle"
                     >
                         <RiMore2Fill
                             color="white"

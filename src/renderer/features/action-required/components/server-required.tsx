@@ -1,4 +1,5 @@
 import { RiMenuFill } from 'react-icons/ri';
+
 import { Button, DropdownMenu, Text } from '/@/renderer/components';
 import { AppMenu } from '/@/renderer/features/titlebar/components/app-menu';
 

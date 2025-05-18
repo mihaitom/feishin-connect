@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { RemoveFromPlaylistArgs, RemoveFromPlaylistResponse } from '/@/renderer/api/types';
@@ -12,7 +13,7 @@ export const useRemoveFromPlaylist = (options?: MutationOptions) => {
     return useMutation<
         RemoveFromPlaylistResponse,
         AxiosError,
-        Omit<RemoveFromPlaylistArgs, 'server' | 'apiClientProps'>,
+        Omit<RemoveFromPlaylistArgs, 'apiClientProps' | 'server'>,
         null
     >({
         mutationFn: (args) => {

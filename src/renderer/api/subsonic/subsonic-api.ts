@@ -1,12 +1,13 @@
 import { initClient, initContract } from '@ts-rest/core';
-import axios, { Method, AxiosError, isAxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse, isAxiosError, Method } from 'axios';
 import omitBy from 'lodash/omitBy';
 import qs from 'qs';
 import { z } from 'zod';
+
+import i18n from '/@/i18n/i18n';
 import { ssType } from '/@/renderer/api/subsonic/subsonic-types';
 import { ServerListItem } from '/@/renderer/api/types';
 import { toast } from '/@/renderer/components/toast/index';
-import i18n from '/@/i18n/i18n';
 
 const c = initContract();
 
@@ -284,15 +285,15 @@ const silentlyTransformResponse = (data: any) => {
 };
 
 export const ssApiClient = (args: {
-    server: ServerListItem | null;
+    server: null | ServerListItem;
     signal?: AbortSignal;
     silent?: boolean;
     url?: string;
 }) => {
-    const { server, url, signal, silent } = args;
+    const { server, signal, silent, url } = args;
 
     return initClient(contract, {
-        api: async ({ path, method, headers, body }) => {
+        api: async ({ body, headers, method, path }) => {
             let baseUrl: string | undefined;
             const authParams: Record<string, any> = {};
 
@@ -339,7 +340,7 @@ export const ssApiClient = (args: {
                     headers: result.headers as any,
                     status: result.status,
                 };
-            } catch (e: Error | AxiosError | any) {
+            } catch (e: any | AxiosError | Error) {
                 if (isAxiosError(e)) {
                     if (e.code === 'ERR_NETWORK') {
                         throw new Error(

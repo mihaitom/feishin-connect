@@ -1,43 +1,46 @@
-import type { MutableRefObject } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+import type { MutableRefObject } from 'react';
+
 import { Group } from '@mantine/core';
-import { Button, Popover } from '/@/renderer/components';
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 import {
     RiArrowDownLine,
     RiArrowGoForwardLine,
     RiArrowUpLine,
-    RiShuffleLine,
     RiDeleteBinLine,
-    RiListSettingsLine,
     RiEraserLine,
+    RiListSettingsLine,
+    RiShuffleLine,
 } from 'react-icons/ri';
-import { Song } from '/@/renderer/api/types';
-import { usePlayerControls, useQueueControls } from '/@/renderer/store';
-import { PlaybackType, TableType } from '/@/renderer/types';
-import { usePlaybackType } from '/@/renderer/store/settings.store';
+
 import { usePlayerStore, useSetCurrentTime } from '../../../store/player.store';
+
+import { Song } from '/@/renderer/api/types';
+import { Button, Popover } from '/@/renderer/components';
 import { TableConfigDropdown } from '/@/renderer/components/virtual-table';
 import { updateSong } from '/@/renderer/features/player/update-remote-song';
+import { usePlayerControls, useQueueControls } from '/@/renderer/store';
+import { usePlaybackType } from '/@/renderer/store/settings.store';
+import { PlaybackType, TableType } from '/@/renderer/types';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
 
-const mpvPlayer = isElectron() ? window.electron.mpvPlayer : null;
+const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 
 interface PlayQueueListOptionsProps {
-    tableRef: MutableRefObject<{ grid: AgGridReactType<Song> } | null>;
+    tableRef: MutableRefObject<null | { grid: AgGridReactType<Song> }>;
     type: TableType;
 }
 
-export const PlayQueueListControls = ({ type, tableRef }: PlayQueueListOptionsProps) => {
+export const PlayQueueListControls = ({ tableRef, type }: PlayQueueListOptionsProps) => {
     const { t } = useTranslation();
     const {
         clearQueue,
         moveToBottomOfQueue,
         moveToNextOfQueue,
         moveToTopOfQueue,
-        shuffleQueue,
         removeFromQueue,
+        shuffleQueue,
     } = useQueueControls();
 
     const { pause } = usePlayerControls();
@@ -136,57 +139,57 @@ export const PlayQueueListControls = ({ type, tableRef }: PlayQueueListOptionsPr
             <Group spacing="sm">
                 <Button
                     compact
+                    onClick={handleShuffleQueue}
                     size="md"
                     tooltip={{ label: t('player.shuffle', { postProcess: 'sentenceCase' }) }}
                     variant="default"
-                    onClick={handleShuffleQueue}
                 >
                     <RiShuffleLine size="1.1rem" />
                 </Button>
                 <Button
                     compact
+                    onClick={handleMoveToNext}
                     size="md"
                     tooltip={{ label: t('action.moveToNext', { postProcess: 'sentenceCase' }) }}
                     variant="default"
-                    onClick={handleMoveToNext}
                 >
                     <RiArrowGoForwardLine size="1.1rem" />
                 </Button>
                 <Button
                     compact
+                    onClick={handleMoveToBottom}
                     size="md"
                     tooltip={{ label: t('action.moveToBottom', { postProcess: 'sentenceCase' }) }}
                     variant="default"
-                    onClick={handleMoveToBottom}
                 >
                     <RiArrowDownLine size="1.1rem" />
                 </Button>
                 <Button
                     compact
+                    onClick={handleMoveToTop}
                     size="md"
                     tooltip={{ label: t('action.moveToTop', { postProcess: 'sentenceCase' }) }}
                     variant="default"
-                    onClick={handleMoveToTop}
                 >
                     <RiArrowUpLine size="1.1rem" />
                 </Button>
                 <Button
                     compact
+                    onClick={handleRemoveSelected}
                     size="md"
                     tooltip={{
                         label: t('action.removeFromQueue', { postProcess: 'sentenceCase' }),
                     }}
                     variant="default"
-                    onClick={handleRemoveSelected}
                 >
                     <RiEraserLine size="1.1rem" />
                 </Button>
                 <Button
                     compact
+                    onClick={handleClearQueue}
                     size="md"
                     tooltip={{ label: t('action.clearQueue', { postProcess: 'sentenceCase' }) }}
                     variant="default"
-                    onClick={handleClearQueue}
                 >
                     <RiDeleteBinLine size="1.1rem" />
                 </Button>

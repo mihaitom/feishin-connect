@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { AlbumArtistListQuery } from '/@/renderer/api/types';

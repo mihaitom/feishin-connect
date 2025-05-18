@@ -1,13 +1,14 @@
+import { Divider } from '@mantine/core';
+import { Reorder } from 'framer-motion';
 import isEqual from 'lodash/isEqual';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SortableItem } from '/@/renderer/store';
-import { useSettingSearchContext } from '/@/renderer/features/settings/context/search-context';
-import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
+
 import { Button } from '/@/renderer/components';
-import { Reorder } from 'framer-motion';
-import { Divider } from '@mantine/core';
 import { DraggableItem } from '/@/renderer/features/settings/components/general/draggable-item';
+import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
+import { useSettingSearchContext } from '/@/renderer/features/settings/context/search-context';
+import { SortableItem } from '/@/renderer/store';
 
 export type DraggableItemsProps<K, T> = {
     description: string;
@@ -20,8 +21,8 @@ export type DraggableItemsProps<K, T> = {
 export const DraggableItems = <K extends string, T extends SortableItem<K>>({
     description,
     itemLabels,
-    settings,
     setItems,
+    settings,
     title,
 }: DraggableItemsProps<K, T>) => {
     const { t } = useTranslation();
@@ -86,16 +87,16 @@ export const DraggableItems = <K extends string, T extends SortableItem<K>>({
                             <Button
                                 compact
                                 disabled={isSaveButtonDisabled}
-                                variant="filled"
                                 onClick={handleSave}
+                                variant="filled"
                             >
                                 {t('common.save', { postProcess: 'titleCase' })}
                             </Button>
                         )}
                         <Button
                             compact
-                            variant="filled"
                             onClick={() => setOpen(!open)}
+                            variant="filled"
                         >
                             {t(open ? 'common.close' : 'common.edit', { postProcess: 'titleCase' })}
                         </Button>
@@ -107,15 +108,15 @@ export const DraggableItems = <K extends string, T extends SortableItem<K>>({
             {open && (
                 <Reorder.Group
                     axis="y"
+                    onReorder={setLocalItems}
                     style={{ userSelect: 'none' }}
                     values={localItems}
-                    onReorder={setLocalItems}
                 >
                     {localItems.map((item) => (
                         <DraggableItem
-                            key={item.id}
                             handleChangeDisabled={handleChangeDisabled}
                             item={item}
+                            key={item.id}
                             value={translatedItemMap[item.id]}
                         />
                     ))}

@@ -1,8 +1,10 @@
-import { useCallback, useMemo, useRef } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import isEmpty from 'lodash/isEmpty';
+import { useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { AlbumListQuery, GenreListSort, LibraryItem, SortOrder } from '/@/renderer/api/types';
@@ -21,7 +23,7 @@ import { useAlbumListCount } from '/@/renderer/features/albums/queries/album-lis
 
 const AlbumListRoute = () => {
     const { t } = useTranslation();
-    const gridRef = useRef<VirtualInfiniteGridRef | null>(null);
+    const gridRef = useRef<null | VirtualInfiniteGridRef>(null);
     const tableRef = useRef<AgGridReactType | null>(null);
     const server = useCurrentServer();
     const [searchParams] = useSearchParams();

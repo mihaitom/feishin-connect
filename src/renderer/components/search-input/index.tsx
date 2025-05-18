@@ -1,10 +1,11 @@
-import { ChangeEvent, KeyboardEvent } from 'react';
 import { ActionIcon, TextInputProps } from '@mantine/core';
 import { useFocusWithin, useHotkeys, useMergedRef } from '@mantine/hooks';
+import { ChangeEvent, KeyboardEvent } from 'react';
 import { RiCloseFill, RiSearchLine } from 'react-icons/ri';
+import { shallow } from 'zustand/shallow';
+
 import { TextInput } from '/@/renderer/components/input';
 import { useSettingsStore } from '/@/renderer/store';
-import { shallow } from 'zustand/shallow';
 
 interface SearchInputProps extends TextInputProps {
     initialWidth?: number;
@@ -18,7 +19,7 @@ export const SearchInput = ({
     openedWidth,
     ...props
 }: SearchInputProps) => {
-    const { ref, focused } = useFocusWithin();
+    const { focused, ref } = useFocusWithin();
     const mergedRef = useMergedRef<HTMLInputElement>(ref);
     const binding = useSettingsStore((state) => state.hotkeys.bindings.localSearch, shallow);
 
@@ -40,6 +41,8 @@ export const SearchInput = ({
             ref={mergedRef}
             {...props}
             icon={showIcon && <RiSearchLine />}
+            onChange={onChange}
+            onKeyDown={handleEscape}
             rightSection={
                 isOpened ? (
                     <ActionIcon
@@ -64,8 +67,6 @@ export const SearchInput = ({
                 },
             }}
             width={isOpened ? openedWidth || 150 : initialWidth || 35}
-            onChange={onChange}
-            onKeyDown={handleEscape}
         />
     );
 };

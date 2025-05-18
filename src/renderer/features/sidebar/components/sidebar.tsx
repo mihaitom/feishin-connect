@@ -1,16 +1,18 @@
-import { MouseEvent, useMemo } from 'react';
 import { Box, Center, Divider, Group, Stack } from '@mantine/core';
 import { closeAllModals, openModal } from '@mantine/modals';
 import { AnimatePresence, motion } from 'framer-motion';
+import { MouseEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiAddFill, RiArrowDownSLine, RiDiscLine, RiListUnordered } from 'react-icons/ri';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+
 import {
     SidebarItemType,
     useGeneralSettings,
     useWindowSettings,
 } from '../../../store/settings.store';
+
 import { ServerType } from '/@/renderer/api/types';
 import { Button, MotionStack, Tooltip } from '/@/renderer/components';
 import { CreatePlaylistForm } from '/@/renderer/features/playlists';
@@ -137,8 +139,8 @@ export const Sidebar = () => {
 
     return (
         <SidebarContainer
-            ref={cq.ref}
             $windowBarStyle={windowBarStyle}
+            ref={cq.ref}
         >
             <ActionBar />
             <Stack
@@ -193,6 +195,7 @@ export const Sidebar = () => {
                                 <Group spacing="sm">
                                     <Button
                                         compact
+                                        onClick={handleCreatePlaylistModal}
                                         size="md"
                                         tooltip={{
                                             label: t('action.createPlaylist', {
@@ -201,13 +204,13 @@ export const Sidebar = () => {
                                             openDelay: 500,
                                         }}
                                         variant="default"
-                                        onClick={handleCreatePlaylistModal}
                                     >
                                         <RiAddFill size="1em" />
                                     </Button>
                                     <Button
                                         compact
                                         component={Link}
+                                        onClick={(e) => e.stopPropagation()}
                                         size="md"
                                         to={AppRoute.PLAYLISTS}
                                         tooltip={{
@@ -217,7 +220,6 @@ export const Sidebar = () => {
                                             openDelay: 500,
                                         }}
                                         variant="default"
-                                        onClick={(e) => e.stopPropagation()}
                                     >
                                         <RiListUnordered size="1em" />
                                     </Button>
@@ -233,14 +235,14 @@ export const Sidebar = () => {
                 >
                     {showImage && (
                         <ImageContainer
-                            key="sidebar-image"
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 200 }}
                             height={sidebar.leftWidth}
                             initial={{ opacity: 0, y: 200 }}
+                            key="sidebar-image"
+                            onClick={expandFullScreenPlayer}
                             role="button"
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            onClick={expandFullScreenPlayer}
                         >
                             <Tooltip
                                 label={t('player.toggleFullscreenPlayer', {
@@ -266,6 +268,10 @@ export const Sidebar = () => {
                             </Tooltip>
                             <Button
                                 compact
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSideBar({ image: false });
+                                }}
                                 opacity={0.8}
                                 radius={100}
                                 size="md"
@@ -275,10 +281,6 @@ export const Sidebar = () => {
                                     openDelay: 500,
                                 }}
                                 variant="default"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSideBar({ image: false });
-                                }}
                             >
                                 <RiArrowDownSLine
                                     color="white"

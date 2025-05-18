@@ -1,16 +1,17 @@
 import { ColorInput, Stack } from '@mantine/core';
-import { Switch, Select } from '/@/renderer/components';
+import isElectron from 'is-electron';
+import { useTranslation } from 'react-i18next';
+
+import { Select, Switch } from '/@/renderer/components';
 import {
-    SettingsSection,
     SettingOption,
+    SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
 import { THEME_DATA } from '/@/renderer/hooks';
 import { useGeneralSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import { AppTheme } from '/@/renderer/themes/types';
-import isElectron from 'is-electron';
-import { useTranslation } from 'react-i18next';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 export const ThemeSettings = () => {
     const { t } = useTranslation();
@@ -126,6 +127,14 @@ export const ThemeSettings = () => {
                     <ColorInput
                         defaultValue={settings.accent}
                         format="rgb"
+                        onChangeEnd={(e) => {
+                            setSettings({
+                                general: {
+                                    ...settings,
+                                    accent: e,
+                                },
+                            });
+                        }}
                         swatches={[
                             'rgb(53, 116, 252)',
                             'rgb(240, 170, 22)',
@@ -135,14 +144,6 @@ export const ThemeSettings = () => {
                         ]}
                         swatchesPerRow={5}
                         withEyeDropper={false}
-                        onChangeEnd={(e) => {
-                            setSettings({
-                                general: {
-                                    ...settings,
-                                    accent: e,
-                                },
-                            });
-                        }}
                     />
                 </Stack>
             ),

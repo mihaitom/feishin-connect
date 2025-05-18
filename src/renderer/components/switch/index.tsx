@@ -1,4 +1,5 @@
 import type { SwitchProps as MantineSwitchProps } from '@mantine/core';
+
 import { Switch as MantineSwitch } from '@mantine/core';
 import styled from 'styled-components';
 

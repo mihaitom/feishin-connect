@@ -1,8 +1,10 @@
+import type { Album, AlbumArtist, Song } from '/@/renderer/api/types';
+
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import formatDuration from 'format-duration';
-import type { Album, AlbumArtist, Song } from '/@/renderer/api/types';
+
 import { Rating } from '/@/renderer/components/rating';
 
 dayjs.extend(relativeTime);
@@ -19,13 +21,13 @@ const getDateFormat = (key: string): string => {
     return FORMATS[dashes];
 };
 
-export const formatDateAbsolute = (key: string | null) =>
+export const formatDateAbsolute = (key: null | string) =>
     key ? dayjs(key).format(getDateFormat(key)) : '';
 
-export const formatDateAbsoluteUTC = (key: string | null) =>
+export const formatDateAbsoluteUTC = (key: null | string) =>
     key ? dayjs.utc(key).format(getDateFormat(key)) : '';
 
-export const formatDateRelative = (key: string | null) => (key ? dayjs(key).fromNow() : '');
+export const formatDateRelative = (key: null | string) => (key ? dayjs(key).fromNow() : '');
 
 export const formatDurationString = (duration: number) => {
     const rawDuration = formatDuration(duration).split(':');

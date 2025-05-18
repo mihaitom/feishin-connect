@@ -1,9 +1,11 @@
-import isElectron from 'is-electron';
-import { getServerById, PlayerData, useSettingsStore } from '/@/renderer/store';
 import type { QueueSong } from '/@/renderer/api/types';
-import { api } from '/@/renderer/api';
 
-const mpvPlayer = isElectron() ? window.electron.mpvPlayer : null;
+import isElectron from 'is-electron';
+
+import { api } from '/@/renderer/api';
+import { getServerById, PlayerData, useSettingsStore } from '/@/renderer/store';
+
+const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 
 const modifyUrl = (song: QueueSong): string => {
     const transcode = useSettingsStore.getState().playback.transcode;

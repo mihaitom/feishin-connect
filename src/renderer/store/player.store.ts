@@ -6,34 +6,9 @@ import { create } from 'zustand';
 import { devtools, persist, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
-import { QueueSong } from '/@/renderer/api/types';
-import { PlayerStatus, PlayerRepeat, PlayerShuffle, Play } from '/@/renderer/types';
 
-export interface PlayerState {
-    current: {
-        index: number;
-        nextIndex: number;
-        player: 1 | 2;
-        previousIndex: number;
-        seek: boolean;
-        shuffledIndex: number;
-        song?: QueueSong;
-        status: PlayerStatus;
-        time: number;
-    };
-    fallback: boolean | null;
-    muted: boolean;
-    queue: {
-        default: QueueSong[];
-        previousNode?: QueueSong;
-        shuffled: string[];
-        sorted: QueueSong[];
-    };
-    repeat: PlayerRepeat;
-    shuffle: PlayerShuffle;
-    speed: number;
-    volume: number;
-}
+import { QueueSong } from '/@/renderer/api/types';
+import { Play, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/renderer/types';
 
 export interface PlayerData {
     current: {
@@ -48,13 +23,6 @@ export interface PlayerData {
     player1?: QueueSong;
     player2?: QueueSong;
     queue: QueueData;
-}
-
-export interface QueueData {
-    current?: QueueSong;
-    length: number;
-    next?: QueueSong;
-    previous?: QueueSong;
 }
 
 export interface PlayerSlice extends PlayerState {
@@ -90,7 +58,7 @@ export interface PlayerSlice extends PlayerState {
         setFallback: (fallback: boolean | null) => boolean;
         setFavorite: (ids: string[], favorite: boolean) => string[];
         setMuted: (muted: boolean) => void;
-        setRating: (ids: string[], rating: number | null) => string[];
+        setRating: (ids: string[], rating: null | number) => string[];
         setRepeat: (type: PlayerRepeat) => PlayerData;
         setShuffle: (type: PlayerShuffle) => PlayerData;
         setShuffledIndex: (index: number) => PlayerData;
@@ -98,6 +66,39 @@ export interface PlayerSlice extends PlayerState {
         setVolume: (volume: number) => void;
         shuffleQueue: () => PlayerData;
     };
+}
+
+export interface PlayerState {
+    current: {
+        index: number;
+        nextIndex: number;
+        player: 1 | 2;
+        previousIndex: number;
+        seek: boolean;
+        shuffledIndex: number;
+        song?: QueueSong;
+        status: PlayerStatus;
+        time: number;
+    };
+    fallback: boolean | null;
+    muted: boolean;
+    queue: {
+        default: QueueSong[];
+        previousNode?: QueueSong;
+        shuffled: string[];
+        sorted: QueueSong[];
+    };
+    repeat: PlayerRepeat;
+    shuffle: PlayerShuffle;
+    speed: number;
+    volume: number;
+}
+
+export interface QueueData {
+    current?: QueueSong;
+    length: number;
+    next?: QueueSong;
+    previous?: QueueSong;
 }
 
 export const usePlayerStore = create<PlayerSlice>()(

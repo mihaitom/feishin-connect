@@ -1,13 +1,15 @@
-import React, { MouseEvent } from 'react';
 import type { UnstyledButtonProps } from '@mantine/core';
+
+import React, { MouseEvent } from 'react';
 import { RiPlayFill } from 'react-icons/ri';
 import styled from 'styled-components';
-import { Play } from '/@/renderer/types';
-import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+
 import { LibraryItem } from '/@/renderer/api/types';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import { Play } from '/@/renderer/types';
 
-type PlayButtonType = UnstyledButtonProps & React.ComponentPropsWithoutRef<'button'>;
+type PlayButtonType = React.ComponentPropsWithoutRef<'button'> & UnstyledButtonProps;
 
 const PlayButton = styled.button<PlayButtonType>`
     position: absolute;
@@ -50,9 +52,9 @@ const ListConverControlsContainer = styled.div`
 `;
 
 export const ListCoverControls = ({
+    context,
     itemData,
     itemType,
-    context,
     uniqueId,
 }: {
     context: Record<string, any>;

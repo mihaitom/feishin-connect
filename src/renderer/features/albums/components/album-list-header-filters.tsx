@@ -1,8 +1,9 @@
-import { ChangeEvent, MouseEvent, MutableRefObject, useCallback, useMemo } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { Divider, Flex, Group, Stack } from '@mantine/core';
 import { openModal } from '@mantine/modals';
 import { useQueryClient } from '@tanstack/react-query';
+import { ChangeEvent, MouseEvent, MutableRefObject, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     RiAddBoxFill,
@@ -14,6 +15,8 @@ import {
     RiRefreshLine,
     RiSettings3Fill,
 } from 'react-icons/ri';
+
+import i18n from '/@/i18n/i18n';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import {
     AlbumListQuery,
@@ -39,7 +42,6 @@ import {
     useListStoreByKey,
 } from '/@/renderer/store';
 import { ListDisplayType, Play, TableColumn } from '/@/renderer/types';
-import i18n from '/@/i18n/i18n';
 
 const FILTERS = {
     jellyfin: [
@@ -191,7 +193,7 @@ const FILTERS = {
 };
 
 interface AlbumListHeaderFiltersProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount: number | undefined;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
@@ -203,16 +205,16 @@ export const AlbumListHeaderFilters = ({
 }: AlbumListHeaderFiltersProps) => {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
-    const { pageKey, customFilters, handlePlay } = useListContext();
+    const { customFilters, handlePlay, pageKey } = useListContext();
     const server = useCurrentServer();
-    const { setFilter, setTable, setGrid, setDisplayType } = useListStoreActions();
-    const { display, filter, table, grid } = useListStoreByKey<AlbumListQuery>({
+    const { setDisplayType, setFilter, setGrid, setTable } = useListStoreActions();
+    const { display, filter, grid, table } = useListStoreByKey<AlbumListQuery>({
         filter: customFilters,
         key: pageKey,
     });
     const cq = useContainerQuery();
 
-    const { handleRefreshTable, handleRefreshGrid } = useListFilterRefresh({
+    const { handleRefreshGrid, handleRefreshTable } = useListFilterRefresh({
         itemCount,
         itemType: LibraryItem.ALBUM,
         server,
@@ -249,11 +251,11 @@ export const AlbumListHeaderFilters = ({
         let FilterComponent;
 
         switch (server?.type) {
-            case ServerType.NAVIDROME:
-                FilterComponent = NavidromeAlbumFilters;
-                break;
             case ServerType.JELLYFIN:
                 FilterComponent = JellyfinAlbumFilters;
+                break;
+            case ServerType.NAVIDROME:
+                FilterComponent = NavidromeAlbumFilters;
                 break;
             case ServerType.SUBSONIC:
                 FilterComponent = SubsonicAlbumFilters;
@@ -271,9 +273,9 @@ export const AlbumListHeaderFilters = ({
                 <FilterComponent
                     customFilters={customFilters}
                     disableArtistFilter={!!customFilters}
+                    onFilterChange={onFilterChange}
                     pageKey={pageKey}
                     serverId={server?.id}
-                    onFilterChange={onFilterChange}
                 />
             ),
             title: 'Album Filters',
@@ -450,10 +452,10 @@ export const AlbumListHeaderFilters = ({
                     <DropdownMenu.Dropdown>
                         {FILTERS[server?.type as keyof typeof FILTERS].map((f) => (
                             <DropdownMenu.Item
-                                key={`filter-${f.name}`}
                                 $isActive={f.value === filter.sortBy}
-                                value={f.value}
+                                key={`filter-${f.name}`}
                                 onClick={handleSetSortBy}
+                                value={f.value}
                             >
                                 {f.name}
                             </DropdownMenu.Item>
@@ -462,8 +464,8 @@ export const AlbumListHeaderFilters = ({
                 </DropdownMenu>
                 <Divider orientation="vertical" />
                 <OrderToggleButton
-                    sortOrder={filter.sortOrder}
                     onToggle={handleToggleSortOrder}
+                    sortOrder={filter.sortOrder}
                 />
                 {server?.type === ServerType.JELLYFIN && (
                     <>
@@ -489,10 +491,10 @@ export const AlbumListHeaderFilters = ({
                             <DropdownMenu.Dropdown>
                                 {musicFoldersQuery.data?.items.map((folder) => (
                                     <DropdownMenu.Item
-                                        key={`musicFolder-${folder.id}`}
                                         $isActive={filter.musicFolderId === folder.id}
-                                        value={folder.id}
+                                        key={`musicFolder-${folder.id}`}
                                         onClick={handleSetMusicFolder}
+                                        value={folder.id}
                                     >
                                         {folder.name}
                                     </DropdownMenu.Item>
@@ -504,6 +506,7 @@ export const AlbumListHeaderFilters = ({
                 <Divider orientation="vertical" />
                 <Button
                     compact
+                    onClick={handleOpenFiltersModal}
                     size="md"
                     sx={{
                         svg: {
@@ -514,17 +517,16 @@ export const AlbumListHeaderFilters = ({
                         label: t('common.filters', { count: 2, postProcess: 'sentenceCase' }),
                     }}
                     variant="subtle"
-                    onClick={handleOpenFiltersModal}
                 >
                     <RiFilterFill size="1.3rem" />
                 </Button>
                 <Divider orientation="vertical" />
                 <Button
                     compact
+                    onClick={handleRefresh}
                     size="md"
                     tooltip={{ label: t('common.refresh', { postProcess: 'sentenceCase' }) }}
                     variant="subtle"
-                    onClick={handleRefresh}
                 >
                     <RiRefreshLine size="1.3rem" />
                 </Button>
@@ -594,22 +596,22 @@ export const AlbumListHeaderFilters = ({
                         </DropdownMenu.Label>
                         <DropdownMenu.Item
                             $isActive={display === ListDisplayType.CARD}
-                            value={ListDisplayType.CARD}
                             onClick={handleSetViewType}
+                            value={ListDisplayType.CARD}
                         >
                             {t('table.config.view.card', { postProcess: 'sentenceCase' })}
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
                             $isActive={display === ListDisplayType.POSTER}
-                            value={ListDisplayType.POSTER}
                             onClick={handleSetViewType}
+                            value={ListDisplayType.POSTER}
                         >
                             {t('table.config.view.poster', { postProcess: 'sentenceCase' })}
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
                             $isActive={display === ListDisplayType.TABLE}
-                            value={ListDisplayType.TABLE}
                             onClick={handleSetViewType}
+                            value={ListDisplayType.TABLE}
                         >
                             {t('table.config.view.table', { postProcess: 'sentenceCase' })}
                         </DropdownMenu.Item>
@@ -665,8 +667,8 @@ export const AlbumListHeaderFilters = ({
                                             defaultValue={table?.columns.map(
                                                 (column) => column.column,
                                             )}
-                                            width={300}
                                             onChange={handleTableColumns}
+                                            width={300}
                                         />
                                         <Group position="apart">
                                             <Text>Auto Fit Columns</Text>

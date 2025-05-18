@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
+
 import { Group } from '@mantine/core';
 import styled from 'styled-components';
+
 import { WindowControls } from '../../window-controls';
 
 interface TitlebarProps {

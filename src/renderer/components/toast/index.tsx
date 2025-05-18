@@ -1,14 +1,15 @@
 import type { NotificationProps as MantineNotificationProps } from '@mantine/notifications';
+
 import {
-    showNotification,
-    updateNotification,
-    hideNotification,
     cleanNotifications,
     cleanNotificationsQueue,
+    hideNotification,
+    showNotification,
+    updateNotification,
 } from '@mantine/notifications';
 
 interface NotificationProps extends MantineNotificationProps {
-    type?: 'success' | 'error' | 'warning' | 'info';
+    type?: 'error' | 'info' | 'success' | 'warning';
 }
 
 const showToast = ({ type, ...props }: NotificationProps) => {

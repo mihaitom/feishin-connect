@@ -1,5 +1,6 @@
 /* eslint-disable promise/always-return */
 import { BrowserWindow, globalShortcut, systemPreferences } from 'electron';
+
 import { isMacOS } from '../../../utils';
 import { store } from '../settings';
 

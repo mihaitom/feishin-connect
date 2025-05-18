@@ -2,6 +2,7 @@ import { Box, Center, Group, Select, SelectItem } from '@mantine/core';
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 import { RiAddFill, RiSubtractFill } from 'react-icons/ri';
+
 import { LyricsOverride } from '/@/renderer/api/types';
 import { Button, NumberInput, Tooltip } from '/@/renderer/components';
 import { openLyricSearchModal } from '/@/renderer/features/lyrics/components/lyrics-search-form';
@@ -56,9 +57,9 @@ export const LyricsActions = ({
                     <Select
                         clearable={false}
                         data={languages}
+                        onChange={(value) => setIndex(parseInt(value!, 10))}
                         style={{ bottom: 30, position: 'absolute' }}
                         value={index.toString()}
-                        onChange={(value) => setIndex(parseInt(value!, 10))}
                     />
                 </Center>
             )}
@@ -66,9 +67,7 @@ export const LyricsActions = ({
             <Group position="center">
                 {isDesktop && sources.length ? (
                     <Button
-                        uppercase
                         disabled={isActionsDisabled}
-                        variant="subtle"
                         onClick={() =>
                             openLyricSearchModal({
                                 artist: currentSong?.artistName,
@@ -76,14 +75,16 @@ export const LyricsActions = ({
                                 onSearchOverride,
                             })
                         }
+                        uppercase
+                        variant="subtle"
                     >
                         {t('common.search', { postProcess: 'titleCase' })}
                     </Button>
                 ) : null}
                 <Button
                     aria-label="Decrease lyric offset"
-                    variant="subtle"
                     onClick={() => handleLyricOffset(delayMs - 50)}
+                    variant="subtle"
                 >
                     <RiSubtractFill />
                 </Button>
@@ -93,25 +94,25 @@ export const LyricsActions = ({
                 >
                     <NumberInput
                         aria-label="Lyric offset"
+                        onChange={handleLyricOffset}
                         styles={{ input: { textAlign: 'center' } }}
                         value={delayMs || 0}
                         width={55}
-                        onChange={handleLyricOffset}
                     />
                 </Tooltip>
                 <Button
                     aria-label="Increase lyric offset"
-                    variant="subtle"
                     onClick={() => handleLyricOffset(delayMs + 50)}
+                    variant="subtle"
                 >
                     <RiAddFill />
                 </Button>
                 {isDesktop && sources.length ? (
                     <Button
-                        uppercase
                         disabled={isActionsDisabled}
-                        variant="subtle"
                         onClick={onResetLyric}
+                        uppercase
+                        variant="subtle"
                     >
                         {t('common.reset', { postProcess: 'sentenceCase' })}
                     </Button>
@@ -121,10 +122,10 @@ export const LyricsActions = ({
             <Box style={{ position: 'absolute', right: 0, top: 0 }}>
                 {isDesktop && sources.length ? (
                     <Button
-                        uppercase
                         disabled={isActionsDisabled}
-                        variant="subtle"
                         onClick={onRemoveLyric}
+                        uppercase
+                        variant="subtle"
                     >
                         {t('common.clear', { postProcess: 'sentenceCase' })}
                     </Button>
@@ -134,10 +135,10 @@ export const LyricsActions = ({
             <Box style={{ position: 'absolute', right: 0, top: -50 }}>
                 {isDesktop && sources.length ? (
                     <Button
-                        uppercase
                         disabled={isActionsDisabled}
-                        variant="subtle"
                         onClick={onTranslateLyric}
+                        uppercase
+                        variant="subtle"
                     >
                         {t('common.translation', { postProcess: 'sentenceCase' })}
                     </Button>

@@ -1,4 +1,5 @@
 import type { SliderProps as MantineSliderProps } from '@mantine/core';
+
 import { Slider as MantineSlider } from '@mantine/core';
 import styled from 'styled-components';
 

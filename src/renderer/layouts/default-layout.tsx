@@ -1,20 +1,21 @@
-import { lazy } from 'react';
+import { HotkeyItem, useHotkeys } from '@mantine/hooks';
 import isElectron from 'is-electron';
+import { lazy } from 'react';
 import { useNavigate } from 'react-router';
 import styled from 'styled-components';
-import {
-    useWindowSettings,
-    useSettingsStore,
-    useHotkeySettings,
-    useGeneralSettings,
-    useSettingsStoreActions,
-} from '/@/renderer/store/settings.store';
-import { Platform, PlaybackType } from '/@/renderer/types';
+
+import { CommandPalette } from '/@/renderer/features/search/components/command-palette';
 import { MainContent } from '/@/renderer/layouts/default-layout/main-content';
 import { PlayerBar } from '/@/renderer/layouts/default-layout/player-bar';
-import { HotkeyItem, useHotkeys } from '@mantine/hooks';
-import { CommandPalette } from '/@/renderer/features/search/components/command-palette';
 import { useCommandPalette } from '/@/renderer/store';
+import {
+    useGeneralSettings,
+    useHotkeySettings,
+    useSettingsStore,
+    useSettingsStoreActions,
+    useWindowSettings,
+} from '/@/renderer/store/settings.store';
+import { Platform, PlaybackType } from '/@/renderer/types';
 
 if (!isElectron()) {
     useSettingsStore.getState().actions.setSettings({
@@ -56,7 +57,7 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
     const { opened, ...handlers } = useCommandPalette();
     const { bindings } = useHotkeySettings();
     const navigate = useNavigate();
-    const localSettings = isElectron() ? window.electron.localSettings : null;
+    const localSettings = isElectron() ? window.api.localSettings : null;
     const settings = useGeneralSettings();
     const { setSettings } = useSettingsStoreActions();
 

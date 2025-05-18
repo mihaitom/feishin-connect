@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
 import { Group, UnstyledButton } from '@mantine/core';
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiArrowLeftSLine, RiArrowRightSLine, RiMenuFill } from 'react-icons/ri';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
 import { DropdownMenu, ScrollArea } from '/@/renderer/components';
 import { CollapsedSidebarButton } from '/@/renderer/features/sidebar/components/collapsed-sidebar-button';
 import { CollapsedSidebarItem } from '/@/renderer/features/sidebar/components/collapsed-sidebar-item';
@@ -28,7 +29,7 @@ export const CollapsedSidebar = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { windowBarStyle } = useWindowSettings();
-    const { sidebarItems, sidebarCollapsedNavigation } = useGeneralSettings();
+    const { sidebarCollapsedNavigation, sidebarItems } = useGeneralSettings();
 
     const translatedSidebarItemMap = useMemo(
         () => ({
@@ -68,8 +69,8 @@ export const CollapsedSidebar = () => {
     return (
         <SidebarContainer $windowBarStyle={windowBarStyle}>
             <ScrollArea
-                scrollHideDelay={0}
                 scrollbarSize={8}
+                scrollHideDelay={0}
             >
                 {sidebarCollapsedNavigation && (
                     <Group
@@ -108,7 +109,6 @@ export const CollapsedSidebar = () => {
                 </DropdownMenu>
                 {sidebarItemsWithRoute.map((item) => (
                     <CollapsedSidebarItem
-                        key={item.id}
                         activeIcon={
                             <SidebarIcon
                                 active
@@ -123,6 +123,7 @@ export const CollapsedSidebar = () => {
                                 size="25"
                             />
                         }
+                        key={item.id}
                         label={item.label}
                         route={item.route}
                         to={item.route}
