@@ -17,7 +17,7 @@ export const useTagList = (args: QueryHookArgs<TagQuery>) => {
             if (!server) throw new Error('Server not found');
             return api.controller.getTags({ apiClientProps: { server, signal }, query });
         },
-        queryKey: queryKeys.tags.list(server?.id || ''),
+        queryKey: queryKeys.tags.list(server?.id || '', query.type),
         staleTime: 1000 * 60,
         ...options,
     });
