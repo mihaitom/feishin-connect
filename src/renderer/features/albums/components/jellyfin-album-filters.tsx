@@ -10,11 +10,12 @@ import {
     LibraryItem,
     SortOrder,
 } from '/@/renderer/api/types';
-import { MultiSelect, NumberInput, SpinnerIcon, Switch, Text } from '/@/renderer/components';
+import { NumberInput, SpinnerIcon, Switch, Text } from '/@/renderer/components';
 import { useAlbumArtistList } from '/@/renderer/features/artists/queries/album-artist-list-query';
 import { useGenreList } from '/@/renderer/features/genres';
 import { AlbumListFilter, useListStoreActions } from '/@/renderer/store';
 import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
+import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 
 interface JellyfinAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
@@ -218,7 +219,7 @@ export const JellyfinAlbumFilters = ({
                 />
             </Group>
             <Group grow>
-                <MultiSelect
+                <MultiSelectWithInvalidData
                     clearable
                     searchable
                     data={genreList}
@@ -229,7 +230,7 @@ export const JellyfinAlbumFilters = ({
             </Group>
 
             <Group grow>
-                <MultiSelect
+                <MultiSelectWithInvalidData
                     clearable
                     searchable
                     data={selectableAlbumArtists}
@@ -246,7 +247,7 @@ export const JellyfinAlbumFilters = ({
             </Group>
             {tagsQuery.data?.boolTags?.length && (
                 <Group grow>
-                    <MultiSelect
+                    <MultiSelectWithInvalidData
                         clearable
                         searchable
                         data={tagsQuery.data.boolTags}
