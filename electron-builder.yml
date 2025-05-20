@@ -1,5 +1,6 @@
-appId: com.electron.app
-productName: feishin
+appId: org.jeffvli.feishin
+productName: Feishin
+artifactName: ${productName}-${version}-${os}-setup.${ext}
 directories:
     buildResources: build
 files:
@@ -9,35 +10,69 @@ files:
     - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
     - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
     - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+extraResources:
+    - assets/**
 asarUnpack:
     - resources/**
 win:
-    executableName: feishin
+    target:
+        - zip
+        - nsis
+    icon: assets/icons/icon.png
 nsis:
-    artifactName: ${name}-${version}-setup.${ext}
     shortcutName: ${productName}
     uninstallDisplayName: ${productName}
     createDesktopShortcut: always
 mac:
+    target:
+        target: default
+        arch:
+            - arm64
+            - x64
+    icon: assets/icons/icon.icns
+    type: distribution
+    hardenedRuntime: true
+    entitlements: build/entitlements.mac.plist
     entitlementsInherit: build/entitlements.mac.plist
-    extendInfo:
-        - NSCameraUsageDescription: Application requests access to the device's camera.
-        - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-        - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-        - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+    gatekeeperAssess: false
     notarize: false
 dmg:
-    artifactName: ${name}-${version}.${ext}
+    contents: [{ x: 130, y: 220 }, { x: 410, y: 220, type: link, path: /Applications }]
+deb:
+    depends:
+        - libgssapi_krb5.so.2
+        - libavahi-common.so.3
+        - libavahi-client.so.3
+        - libkrb5.so.3
+        - libkrb5support.so.0
+        - libkeyutils.so.1
+        - libcups.so.2
+    rpm:
+        depends:
+            - libgssapi_krb5.so.2
+            - libavahi-common.so.3
+            - libavahi-client.so.3
+            - libkrb5.so.3
+            - libkrb5support.so.0
+            - libkeyutils.so.1
+            - libcups.so.2
+    freebsd:
+        depends:
+            - libgssapi_krb5.so.2
+            - libavahi-common.so.3
+            - libavahi-client.so.3
+            - libkrb5.so.3
+            - libkrb5support.so.0
+            - libkeyutils.so.1
+            - libcups.so.2
 linux:
     target:
         - AppImage
-        - snap
-        - deb
-    maintainer: electronjs.org
-    category: Utility
-appImage:
-    artifactName: ${name}-${version}.${ext}
+        - tar.xz
+    category: AudioVideo;Audio;Player
+    icon: assets/icons/icon.png
 npmRebuild: false
 publish:
-    provider: generic
-    url: https://example.com/auto-updates
+    provider: github
+    owner: jeffvli
+    repo: feishin
