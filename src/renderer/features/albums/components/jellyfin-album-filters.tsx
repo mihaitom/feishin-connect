@@ -58,7 +58,7 @@ export const JellyfinAlbumFilters = ({
     const tagsQuery = useTagList({
         query: {
             folder: filter?.musicFolderId,
-            type: LibraryItem.SONG,
+            type: LibraryItem.ALBUM,
         },
         serverId,
     });

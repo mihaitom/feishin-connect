@@ -67,7 +67,7 @@ export const NavidromeAlbumFilters = ({
 
     const tagsQuery = useTagList({
         query: {
-            type: LibraryItem.SONG,
+            type: LibraryItem.ALBUM,
         },
         serverId,
     });
