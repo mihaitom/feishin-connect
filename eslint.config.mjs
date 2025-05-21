@@ -29,6 +29,7 @@ export default tseslint.config(
             ...eslintPluginReactRefresh.configs.vite.rules,
             '@typescript-eslint/explicit-function-return-type': 'off',
             '@typescript-eslint/no-duplicate-enum-values': 'off',
+            '@typescript-eslint/no-explicit-any': 'off',
             '@typescript-eslint/no-unused-vars': 'warn',
             curly: ['error', 'all'],
             indent: [
@@ -42,6 +43,7 @@ export default tseslint.config(
             'no-unused-vars': 'off',
             'no-use-before-define': 'off',
             quotes: ['error', 'single'],
+            'react/display-name': 'off',
             semi: ['error', 'always'],
         },
     },

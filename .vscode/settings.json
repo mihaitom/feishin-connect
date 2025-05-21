@@ -18,7 +18,7 @@
         { "directory": "./", "changeProcessCWD": true },
         { "directory": "./server", "changeProcessCWD": true }
     ],
-    "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
         "source.fixAll.stylelint": "explicit",
