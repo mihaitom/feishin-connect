@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
-import { ssType } from '/@/renderer/api/subsonic/subsonic-types';
+import { ssType } from '/@/shared/api/subsonic/subsonic-types';
 import {
     Album,
     AlbumArtist,
@@ -12,7 +12,7 @@ import {
     RelatedArtist,
     ServerListItem,
     ServerType,
-} from '/@/renderer/api/types';
+} from '/@/shared/types/domain-types';
 
 const getCoverArtUrl = (args: {
     baseUrl: string | undefined;

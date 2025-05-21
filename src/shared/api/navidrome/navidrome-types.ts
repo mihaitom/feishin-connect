@@ -5,7 +5,7 @@ import {
     NDAlbumListSort,
     NDPlaylistListSort,
     NDSongListSort,
-} from '/@/renderer/api/navidrome.types';
+} from '/@/shared/api/navidrome.types';
 
 const sortOrderValues = ['ASC', 'DESC'] as const;
 

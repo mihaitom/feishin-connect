@@ -1,6 +1,7 @@
+import { AppRoute } from '@ts-rest/core';
 import { ReactNode } from 'react';
+import { Song } from 'src/main/features/core/lyrics/netease';
 
-import { ServerFeatures } from '/@/renderer/api/features-types';
 import {
     Album,
     AlbumArtist,
@@ -8,9 +9,8 @@ import {
     LibraryItem,
     Playlist,
     QueueSong,
-    Song,
-} from '/@/renderer/api/types';
-import { AppRoute } from '/@/renderer/router/routes';
+} from '/@/shared/types/domain-types';
+import { ServerFeatures } from '/@/shared/types/features-types';
 
 export enum ListDisplayType {
     CARD = 'card',

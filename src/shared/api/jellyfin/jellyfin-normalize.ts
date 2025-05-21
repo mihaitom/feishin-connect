@@ -1,8 +1,8 @@
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
-import { JFAlbum, JFGenre, JFMusicFolder, JFPlaylist } from '/@/renderer/api/jellyfin.types';
-import { jfType } from '/@/renderer/api/jellyfin/jellyfin-types';
+import { JFAlbum, JFGenre, JFMusicFolder, JFPlaylist } from '/@/shared/api/jellyfin.types';
+import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import {
     Album,
     AlbumArtist,
@@ -11,10 +11,9 @@ import {
     MusicFolder,
     Playlist,
     RelatedArtist,
-    ServerListItem,
-    ServerType,
     Song,
-} from '/@/renderer/api/types';
+} from '/@/shared/types/domain-types';
+import { ServerListItem, ServerType } from '/@/shared/types/types';
 
 const getStreamUrl = (args: {
     container?: string;

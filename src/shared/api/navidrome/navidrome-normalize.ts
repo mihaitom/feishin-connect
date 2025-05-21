@@ -1,10 +1,9 @@
 import { nanoid } from 'nanoid';
 import z from 'zod';
 
-import { ndType } from './navidrome-types';
-
-import { NDGenre } from '/@/renderer/api/navidrome.types';
-import { ssType } from '/@/renderer/api/subsonic/subsonic-types';
+import { NDGenre } from '/@/shared/api/navidrome.types';
+import { ndType } from '/@/shared/api/navidrome/navidrome-types';
+import { ssType } from '/@/shared/api/subsonic/subsonic-types';
 import {
     Album,
     AlbumArtist,
@@ -12,11 +11,10 @@ import {
     LibraryItem,
     Playlist,
     RelatedArtist,
-    ServerListItem,
-    ServerType,
     Song,
     User,
-} from '/@/renderer/api/types';
+} from '/@/shared/types/domain-types';
+import { ServerListItem, ServerType } from '/@/shared/types/types';
 
 const getImageUrl = (args: { url: null | string }) => {
     const { url } = args;

@@ -1,8 +1,24 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
-  "include": ["electron.vite.config.*", "src/main/**/*", "src/preload/**/*", "src/i18n/**/*"],
+  "include": ["electron.vite.config.*", "src/main/**/*", "src/preload/**/*", "src/i18n/**/*", "src/types/**/*", "src/shared/**/*", "src/renderer/api/jellyfin/jellyfin-controller.ts", "src/renderer/api/jellyfin/jellyfin-api.ts", "src/renderer/api/navidrome/navidrome-api.ts", "src/renderer/api/navidrome/navidrome-controller.ts", "src/renderer/api/subsonic/subsonic-api.ts", "src/renderer/api/subsonic/subsonic-controller.ts"],
   "compilerOptions": {
     "composite": true,
-    "types": ["electron-vite/node"]
+    "types": ["electron-vite/node"],
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "/@/renderer/*": [
+        "src/renderer/*"
+      ],
+      "/@/main/*": [
+        "src/main/src/*"
+      ],
+      "/@/preload/*": [
+        "src/preload/*"
+      ],
+      "/@/shared/*": [
+        "src/shared/*"
+      ],
+    }
   }
 }

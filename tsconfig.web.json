@@ -6,6 +6,7 @@
     "src/renderer/**/*.tsx",
     "src/preload/*.d.ts",
     "src/i18n/**/*",
+    "src/shared/**/*",
     "package.json"
   ],
   "compilerOptions": {
@@ -21,7 +22,7 @@
         "src/main/src/*"
       ],
       "/@/shared/*": [
-        "src/shared/src/*"
+        "src/shared/*"
       ],
       "/@/i18n/*": [
         "src/i18n/*"

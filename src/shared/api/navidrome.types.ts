@@ -1,4 +1,4 @@
-import { SSArtistInfo } from '/@/renderer/api/subsonic.types';
+import { SSArtistInfo } from '/@/shared/api/subsonic.types';
 
 export enum NDAlbumArtistListSort {
     ALBUM_COUNT = 'albumCount',
@@ -197,7 +197,7 @@ export type NDCreatePlaylistParams = {
     comment?: string;
     name: string;
     public?: boolean;
-    rules?: null | Record<string, any>;
+    rules?: null | Record<string, unknown>;
 };
 
 export type NDCreatePlaylistResponse = {
@@ -247,7 +247,7 @@ export type NDPlaylist = {
     ownerName: string;
     path: string;
     public: boolean;
-    rules: null | Record<string, any>;
+    rules: null | Record<string, unknown>;
     size: number;
     songCount: number;
     sync: boolean;

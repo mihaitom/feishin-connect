@@ -3,7 +3,8 @@ import reverse from 'lodash/reverse';
 import shuffle from 'lodash/shuffle';
 import { z } from 'zod';
 
-import { ServerFeatures } from './features-types';
+import { jfType } from '../../renderer/api/jellyfin/jellyfin-types';
+import { ndType } from '../api/navidrome/navidrome-types';
 import {
     JFAlbumArtistListSort,
     JFAlbumListSort,
@@ -12,8 +13,7 @@ import {
     JFPlaylistListSort,
     JFSongListSort,
     JFSortOrder,
-} from './jellyfin.types';
-import { jfType } from './jellyfin/jellyfin-types';
+} from '../renderer/api/jellyfin.types';
 import {
     NDAlbumArtistListSort,
     NDAlbumListSort,
@@ -23,8 +23,8 @@ import {
     NDSongListSort,
     NDSortOrder,
     NDUserListSort,
-} from './navidrome.types';
-import { ndType } from './navidrome/navidrome-types';
+} from '../renderer/api/navidrome.types';
+import { ServerFeatures } from './features-types';
 
 export enum LibraryItem {
     ALBUM = 'album',
