@@ -38,10 +38,3 @@ export const Tooltip = ({ children, ...rest }: TooltipProps) => {
         </StyledTooltip>
     );
 };
-
-Tooltip.defaultProps = {
-    openDelay: 0,
-    position: 'top',
-    withArrow: true,
-    withinPortal: true,
-};

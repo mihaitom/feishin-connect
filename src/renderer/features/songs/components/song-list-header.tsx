@@ -5,7 +5,6 @@ import debounce from 'lodash/debounce';
 import { ChangeEvent, MutableRefObject, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { LibraryItem, SongListQuery } from '/@/renderer/api/types';
 import { PageHeader, SearchInput } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { FilterBar, LibraryHeaderBar } from '/@/renderer/features/shared';
@@ -14,6 +13,7 @@ import { useContainerQuery } from '/@/renderer/hooks';
 import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
 import { SongListFilter, useCurrentServer } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import { LibraryItem, SongListQuery } from '/@/shared/types/domain-types';
 
 interface SongListHeaderProps {
     genreId?: string;
@@ -33,7 +33,7 @@ export const SongListHeader = ({
     const { t } = useTranslation();
     const server = useCurrentServer();
     const cq = useContainerQuery();
-    const genreRef = useRef<string>();
+    const genreRef = useRef<string | undefined>(undefined);
 
     const { customFilters, filter, handlePlay, refresh, search } = useDisplayRefresh<SongListQuery>(
         {

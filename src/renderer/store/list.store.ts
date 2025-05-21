@@ -3,6 +3,8 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 
+import { DataTableProps, PersistedTableColumn } from '/@/renderer/store/settings.store';
+import { mergeOverridingColumns } from '/@/renderer/store/utils';
 import {
     AlbumArtistListArgs,
     AlbumArtistListSort,
@@ -17,10 +19,8 @@ import {
     SongListArgs,
     SongListSort,
     SortOrder,
-} from '/@/renderer/api/types';
-import { DataTableProps, PersistedTableColumn } from '/@/renderer/store/settings.store';
-import { mergeOverridingColumns } from '/@/renderer/store/utils';
-import { ListDisplayType, TableColumn, TablePagination } from '/@/renderer/types';
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
 
 export const generatePageKey = (page: string, id?: string) => {
     return id ? `${page}_${id}` : page;

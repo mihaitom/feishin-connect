@@ -71,7 +71,3 @@ export const GenericCell = (
         </CellContainer>
     );
 };
-
-GenericCell.defaultProps = {
-    position: undefined,
-};

@@ -43,10 +43,6 @@ export const BaseContextModal = ({
     modalBody: (vars: ContextModalVars) => React.ReactNode;
 }>) => <>{innerProps.modalBody({ context, id })}</>;
 
-Modal.defaultProps = {
-    children: undefined,
-};
-
 interface ConfirmModalProps {
     children: ReactNode;
     disabled?: boolean;

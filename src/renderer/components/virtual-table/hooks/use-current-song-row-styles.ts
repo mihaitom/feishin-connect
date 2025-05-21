@@ -3,10 +3,10 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 import { RowClassRules, RowNode } from '@ag-grid-community/core';
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 
-import { Song } from '/@/renderer/api/types';
 import { useAppFocus } from '/@/renderer/hooks';
 import { useCurrentSong, usePlayerStore } from '/@/renderer/store';
-import { PlayerStatus } from '/@/renderer/types';
+import { Song } from '/@/shared/types/domain-types';
+import { PlayerStatus } from '/@/shared/types/types';
 
 interface UseCurrentSongRowStylesProps {
     tableRef: MutableRefObject<AgGridReactType | null>;

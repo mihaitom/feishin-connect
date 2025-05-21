@@ -1,5 +1,5 @@
-import type { UserListQuery } from '/@/renderer/api/types';
 import type { QueryHookArgs } from '/@/renderer/lib/react-query';
+import type { UserListQuery } from '/@/shared/types/domain-types';
 
 import { useQuery } from '@tanstack/react-query';
 

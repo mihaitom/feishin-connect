@@ -1,5 +1,3 @@
-import { QueryFunctionContext } from '@tanstack/react-query';
-
 import type {
     AlbumArtistDetailQuery,
     AlbumArtistListQuery,
@@ -19,9 +17,11 @@ import type {
     SongListQuery,
     TopSongListQuery,
     UserListQuery,
-} from './types';
+} from '/@/shared/types/domain-types';
 
-import { LyricSource } from './types';
+import { QueryFunctionContext } from '@tanstack/react-query';
+
+import { LyricSource } from '/@/shared/types/domain-types';
 
 export const splitPaginatedQuery = (key: any) => {
     const { limit, startIndex, ...filter } = key || {};

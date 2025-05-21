@@ -1,13 +1,20 @@
-import { hideNotification, showNotification } from '@mantine/notifications';
 import type { NotificationProps as MantineNotificationProps } from '@mantine/notifications';
+
+import { hideNotification, showNotification } from '@mantine/notifications';
 import merge from 'lodash/merge';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import type { ClientEvent, ServerEvent, SongUpdateSocket } from '/@/remote/types';
 
-interface StatefulWebSocket extends WebSocket {
-    natural: boolean;
+import { ClientEvent, ServerEvent, SongUpdateSocket } from '/@/shared/types/remote-types';
+
+export interface SettingsSlice extends SettingsState {
+    actions: {
+        reconnect: () => void;
+        send: (data: ClientEvent) => void;
+        toggleIsDark: () => void;
+        toggleShowImage: () => void;
+    };
 }
 
 interface SettingsState {
@@ -18,13 +25,8 @@ interface SettingsState {
     socket?: StatefulWebSocket;
 }
 
-export interface SettingsSlice extends SettingsState {
-    actions: {
-        reconnect: () => void;
-        send: (data: ClientEvent) => void;
-        toggleIsDark: () => void;
-        toggleShowImage: () => void;
-    };
+interface StatefulWebSocket extends WebSocket {
+    natural: boolean;
 }
 
 const initialState: SettingsState = {
@@ -106,19 +108,18 @@ export const useRemoteStore = create<SettingsSlice>()(
                             const credentials = await fetch('/credentials');
                             authHeader = await credentials.text();
                         } catch (error) {
-                            console.error('Failed to get credentials');
+                            console.error('Failed to get credentials', error);
                         }
 
                         set((state) => {
                             const socket = new WebSocket(
-                                // eslint-disable-next-line no-restricted-globals
                                 location.href.replace('http', 'ws'),
                             ) as StatefulWebSocket;
 
                             socket.natural = false;
 
                             socket.addEventListener('message', (message) => {
-                                const { event, data } = JSON.parse(message.data) as ServerEvent;
+                                const { data, event } = JSON.parse(message.data) as ServerEvent;
 
                                 switch (event) {
                                     case 'error': {
@@ -207,7 +208,6 @@ export const useRemoteStore = create<SettingsSlice>()(
 
                             socket.addEventListener('close', (reason) => {
                                 if (reason.code === 4002 || reason.code === 4003) {
-                                    // eslint-disable-next-line no-restricted-globals
                                     location.reload();
                                 } else if (reason.code === 4000) {
                                     toast.warn({

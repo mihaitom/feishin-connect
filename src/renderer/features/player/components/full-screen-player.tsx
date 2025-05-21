@@ -7,8 +7,6 @@ import { RiArrowDownSLine, RiSettings3Line } from 'react-icons/ri';
 import { useLocation } from 'react-router';
 import styled from 'styled-components';
 
-import { useFastAverageColor } from '../../../hooks/use-fast-average-color';
-
 import {
     Button,
     NumberInput,
@@ -21,6 +19,7 @@ import {
 import { TableConfigDropdown } from '/@/renderer/components/virtual-table';
 import { FullScreenPlayerImage } from '/@/renderer/features/player/components/full-screen-player-image';
 import { FullScreenPlayerQueue } from '/@/renderer/features/player/components/full-screen-player-queue';
+import { useFastAverageColor } from '/@/renderer/hooks';
 import {
     useCurrentSong,
     useFullScreenPlayerStore,
@@ -30,7 +29,7 @@ import {
     useSettingsStoreActions,
     useWindowSettings,
 } from '/@/renderer/store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const Container = styled(motion.div)`
     position: absolute;

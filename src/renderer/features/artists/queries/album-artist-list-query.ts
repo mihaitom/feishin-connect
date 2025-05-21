@@ -1,11 +1,10 @@
-import type { AlbumArtistListQuery } from '/@/renderer/api/types';
+import type { AlbumArtistListQuery } from '/@/shared/types/domain-types';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { QueryHookArgs } from '../../../lib/react-query';
-
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
 
 export const useAlbumArtistList = (args: QueryHookArgs<AlbumArtistListQuery>) => {

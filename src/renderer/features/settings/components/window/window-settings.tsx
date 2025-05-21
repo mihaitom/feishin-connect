@@ -1,14 +1,13 @@
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 
-import { useSettingsStoreActions, useWindowSettings } from '../../../../store/settings.store';
-
 import { Select, Switch, toast } from '/@/renderer/components';
 import {
     SettingOption,
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
-import { Platform } from '/@/renderer/types';
+import { useSettingsStoreActions, useWindowSettings } from '/@/renderer/store';
+import { Platform } from '/@/shared/types/types';
 
 const WINDOW_BAR_OPTIONS = [
     { label: 'Web (hidden)', value: Platform.WEB },

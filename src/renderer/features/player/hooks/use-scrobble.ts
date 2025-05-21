@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { QueueSong, ServerType } from '/@/renderer/api/types';
 import { useSendScrobble } from '/@/renderer/features/player/mutations/scrobble-mutation';
 import { usePlayerStore } from '/@/renderer/store';
 import { usePlaybackSettings } from '/@/renderer/store/settings.store';
-import { PlayerStatus } from '/@/renderer/types';
+import { QueueSong, ServerType } from '/@/shared/types/domain-types';
+import { PlayerStatus } from '/@/shared/types/types';
 
 /*
  Scrobble Conditions (match any):

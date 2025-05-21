@@ -22,8 +22,8 @@ import {
 } from 'react-icons/ri';
 import { generatePath } from 'react-router';
 
-import { LibraryItem } from '/@/renderer/api/types';
 import { AppRoute } from '/@/renderer/router/routes';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface SidebarIconProps {
     active?: boolean;

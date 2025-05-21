@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 export interface AppSlice extends AppState {
     actions: {

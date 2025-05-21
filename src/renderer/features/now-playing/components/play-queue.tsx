@@ -14,7 +14,6 @@ import debounce from 'lodash/debounce';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { LibraryItem, QueueSong } from '/@/renderer/api/types';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-table';
 import { ErrorFallback } from '/@/renderer/features/action-required';
@@ -34,13 +33,15 @@ import {
     useVolume,
 } from '/@/renderer/store';
 import {
+    PersistedTableColumn,
     usePlaybackType,
     useSettingsStore,
     useSettingsStoreActions,
     useTableSettings,
 } from '/@/renderer/store/settings.store';
-import { PlaybackType, TableType } from '/@/renderer/types';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
+import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { PlaybackType, TableType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 
@@ -150,7 +151,7 @@ export const PlayQueue = forwardRef(({ type }: QueueProps, ref: Ref<any>) => {
 
         const columnsInSettings = useSettingsStore.getState().tables[type].columns;
 
-        const updatedColumns = [];
+        const updatedColumns: PersistedTableColumn[] = [];
         for (const column of columnsOrder) {
             const columnInSettings = columnsInSettings.find(
                 (c) => c.column === column.getColDef().colId,

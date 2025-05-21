@@ -269,7 +269,7 @@ const normalizeAlbum = (
             (item as z.infer<typeof ssType._response.album>).song?.map((song) =>
                 normalizeSong(song, server),
             ) || [],
-        tags: item.tags || null,
+        tags: null,
         uniqueId: nanoid(),
         updatedAt: item.created,
         userFavorite: item.starred || false,

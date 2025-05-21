@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { AlbumArtistListArgs, AlbumArtistListSort, SortOrder } from '/@/renderer/api/types';
 import { DataTableProps } from '/@/renderer/store/settings.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
-import { ListDisplayType, TableColumn, TablePagination } from '/@/renderer/types';
+import { AlbumArtistListArgs, AlbumArtistListSort, SortOrder } from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
 
 export type AlbumArtistListFilter = Omit<AlbumArtistListArgs['query'], 'limit' | 'startIndex'>;
 

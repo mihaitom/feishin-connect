@@ -9,14 +9,14 @@ import { RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Album, LibraryItem } from '/@/renderer/api/types';
 import { Badge } from '/@/renderer/components/badge';
 import { Button } from '/@/renderer/components/button';
 import { TextTitle } from '/@/renderer/components/text-title';
 import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { AppRoute } from '/@/renderer/router/routes';
 import { usePlayButtonBehavior } from '/@/renderer/store';
-import { Play } from '/@/renderer/types';
+import { Album, LibraryItem } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 const Carousel = styled(motion.div)`
     position: relative;
@@ -64,9 +64,9 @@ const BackgroundImage = styled.img`
     width: 150%;
     height: 150%;
     user-select: none;
-    filter: blur(24px);
     object-fit: var(--image-fit);
     object-position: 0 30%;
+    filter: blur(24px);
 `;
 
 const BackgroundImageOverlay = styled.div`

@@ -7,7 +7,6 @@ import { RiArrowUpSLine, RiDiscLine, RiMore2Fill } from 'react-icons/ri';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { LibraryItem } from '/@/renderer/api/types';
 import { Button, Text, Tooltip } from '/@/renderer/components';
 import { Separator } from '/@/renderer/components/separator';
 import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
@@ -22,6 +21,7 @@ import {
     useSidebarStore,
 } from '/@/renderer/store';
 import { fadeIn } from '/@/renderer/styles';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 const ImageWrapper = styled.div`
     position: relative;

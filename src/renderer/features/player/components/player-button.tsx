@@ -165,8 +165,3 @@ export const PlayerButton = forwardRef<HTMLDivElement, PlayerButtonProps>(
         );
     },
 );
-
-PlayerButton.defaultProps = {
-    $isActive: false,
-    tooltip: undefined,
-};

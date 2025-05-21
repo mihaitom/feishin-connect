@@ -115,7 +115,7 @@ export const HotkeyManagerSettings = () => {
         (binding: BindingActions, e: KeyboardEvent<HTMLInputElement>) => {
             e.preventDefault();
             const IGNORED_KEYS = ['Control', 'Alt', 'Shift', 'Meta', ' ', 'Escape'];
-            const keys = [];
+            const keys: string[] = [];
             if (e.ctrlKey) keys.push('mod');
             if (e.altKey) keys.push('alt');
             if (e.shiftKey) keys.push('shift');

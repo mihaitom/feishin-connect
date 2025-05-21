@@ -5,13 +5,13 @@ import debounce from 'lodash/debounce';
 import omitBy from 'lodash/omitBy';
 import qs from 'qs';
 
-import { ndType } from './navidrome-types';
-
 import i18n from '/@/i18n/i18n';
-import { ServerListItem } from '/@/renderer/api/types';
-import { authenticationFailure, resultWithHeaders } from '/@/renderer/api/utils';
-import { toast } from '/@/renderer/components/toast';
+import { authenticationFailure } from '/@/renderer/api/utils';
+import { toast } from '/@/renderer/components';
 import { useAuthStore } from '/@/renderer/store';
+import { ndType } from '/@/shared/api/navidrome/navidrome-types';
+import { resultWithHeaders } from '/@/shared/api/utils';
+import { ServerListItem } from '/@/shared/types/domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 
@@ -274,7 +274,6 @@ axiosClient.interceptors.response.use(
             const currentServer = useAuthStore.getState().currentServer;
 
             if (localSettings && currentServer?.savePassword) {
-                // eslint-disable-next-line promise/no-promise-in-callback
                 return localSettings
                     .passwordGet(currentServer.id)
                     .then(async (password: null | string) => {

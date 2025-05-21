@@ -17,14 +17,6 @@ import { useParams } from 'react-router';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    LibraryItem,
-    PlaylistSongListQuery,
-    QueueSong,
-    Song,
-    SongListSort,
-    SortOrder,
-} from '/@/renderer/api/types';
 import { toast } from '/@/renderer/components';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { getColumnDefs, TablePagination, VirtualTable } from '/@/renderer/components/virtual-table';
@@ -47,8 +39,16 @@ import {
     useSetPlaylistDetailTable,
     useSetPlaylistDetailTablePagination,
 } from '/@/renderer/store';
-import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { ListDisplayType, ServerType } from '/@/renderer/types';
+import { PersistedTableColumn, usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import {
+    LibraryItem,
+    PlaylistSongListQuery,
+    QueueSong,
+    Song,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, ServerType } from '/@/shared/types/types';
 
 interface PlaylistDetailContentProps {
     songs?: Song[];
@@ -232,7 +232,7 @@ export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetai
         if (!columnsOrder) return;
 
         const columnsInSettings = page.table.columns;
-        const updatedColumns = [];
+        const updatedColumns: PersistedTableColumn[] = [];
         for (const column of columnsOrder) {
             const columnInSettings = columnsInSettings.find(
                 (c) => c.column === column.getColDef().colId,

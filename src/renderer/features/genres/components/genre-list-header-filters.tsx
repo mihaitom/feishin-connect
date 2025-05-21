@@ -15,13 +15,6 @@ import {
 
 import i18n from '/@/i18n/i18n';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    GenreListQuery,
-    GenreListSort,
-    LibraryItem,
-    ServerType,
-    SortOrder,
-} from '/@/renderer/api/types';
 import { Button, DropdownMenu, MultiSelect, Slider, Switch, Text } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { GENRE_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
@@ -38,7 +31,14 @@ import {
     useListStoreByKey,
     useSettingsStoreActions,
 } from '/@/renderer/store';
-import { ListDisplayType, TableColumn } from '/@/renderer/types';
+import {
+    GenreListQuery,
+    GenreListSort,
+    LibraryItem,
+    ServerType,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [
@@ -150,7 +150,7 @@ export const GenreListHeaderFilters = ({
         (e: MouseEvent<HTMLButtonElement>) => {
             if (!e.currentTarget?.value) return;
 
-            let updatedFilters = null;
+            let updatedFilters: GenreListFilter | null = null;
             if (e.currentTarget.value === String(filter.musicFolderId)) {
                 updatedFilters = setFilter({
                     customFilters,

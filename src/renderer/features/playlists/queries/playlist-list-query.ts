@@ -1,5 +1,5 @@
-import type { PlaylistListQuery } from '/@/renderer/api/types';
 import type { QueryOptions } from '/@/renderer/lib/react-query';
+import type { PlaylistListQuery } from '/@/shared/types/domain-types';
 
 import { useQuery } from '@tanstack/react-query';
 

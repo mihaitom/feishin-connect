@@ -10,8 +10,8 @@ import {
 } from '/@/renderer/features/settings/components/settings-section';
 import { useCurrentStatus, usePlayerStore } from '/@/renderer/store';
 import { usePlaybackSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
-import { CrossfadeStyle, PlaybackStyle, PlaybackType, PlayerStatus } from '/@/renderer/types';
 import { setQueue } from '/@/renderer/utils/set-transcoded-queue-data';
+import { CrossfadeStyle, PlaybackStyle, PlaybackType, PlayerStatus } from '/@/shared/types/types';
 
 const getAudioDevice = async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();

@@ -1,4 +1,4 @@
-import type { CardRoute, CardRow, PlayQueueAddOptions } from '/@/renderer/types';
+import type { CardRoute, CardRow, PlayQueueAddOptions } from '/@/shared/types/types';
 import type { FixedSizeListProps } from 'react-window';
 
 import debounce from 'lodash/debounce';
@@ -13,9 +13,9 @@ import {
 } from 'react';
 import InfiniteLoader from 'react-window-infinite-loader';
 
-import { AnyLibraryItem, Genre, LibraryItem } from '/@/renderer/api/types';
 import { VirtualGridWrapper } from '/@/renderer/components/virtual-grid/virtual-grid-wrapper';
-import { ListDisplayType } from '/@/renderer/types';
+import { AnyLibraryItem, Genre, LibraryItem } from '/@/shared/types/domain-types';
+import { ListDisplayType } from '/@/shared/types/types';
 
 export type VirtualInfiniteGridRef = {
     resetLoadMoreItemsCache: () => void;
@@ -211,9 +211,3 @@ export const VirtualInfiniteGrid = forwardRef(
         );
     },
 );
-
-VirtualInfiniteGrid.defaultProps = {
-    display: ListDisplayType.CARD,
-    minimumBatchSize: 20,
-    route: undefined,
-};

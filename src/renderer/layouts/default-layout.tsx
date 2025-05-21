@@ -15,7 +15,7 @@ import {
     useSettingsStoreActions,
     useWindowSettings,
 } from '/@/renderer/store/settings.store';
-import { Platform, PlaybackType } from '/@/renderer/types';
+import { Platform, PlaybackType } from '/@/shared/types/types';
 
 if (!isElectron()) {
     useSettingsStore.getState().actions.setSettings({
@@ -99,8 +99,4 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
             <CommandPalette modalProps={{ handlers, opened }} />
         </>
     );
-};
-
-DefaultLayout.defaultProps = {
-    shell: false,
 };

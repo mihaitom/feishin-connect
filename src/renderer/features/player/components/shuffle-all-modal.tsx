@@ -11,6 +11,8 @@ import { immer } from 'zustand/middleware/immer';
 import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { Button, Checkbox, NumberInput, Select } from '/@/renderer/components';
+import { useAuthStore } from '/@/renderer/store';
 import {
     GenreListResponse,
     GenreListSort,
@@ -20,10 +22,8 @@ import {
     ServerListItem,
     ServerType,
     SortOrder,
-} from '/@/renderer/api/types';
-import { Button, Checkbox, NumberInput, Select } from '/@/renderer/components';
-import { useAuthStore } from '/@/renderer/store';
-import { Play, PlayQueueAddOptions } from '/@/renderer/types';
+} from '/@/shared/types/domain-types';
+import { Play, PlayQueueAddOptions } from '/@/shared/types/types';
 
 interface ShuffleAllSlice extends RandomSongListQuery {
     actions: {

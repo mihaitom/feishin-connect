@@ -1,9 +1,9 @@
-import type { QueueSong } from '/@/renderer/api/types';
+import type { PlayerData, QueueSong } from '/@/shared/types/domain-types';
 
 import isElectron from 'is-electron';
 
 import { api } from '/@/renderer/api';
-import { getServerById, PlayerData, useSettingsStore } from '/@/renderer/store';
+import { getServerById, useSettingsStore } from '/@/renderer/store';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 

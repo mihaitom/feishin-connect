@@ -91,7 +91,3 @@ export const WindowControls = ({ style }: WindowControlsProps) => {
         </>
     );
 };
-
-WindowControls.defaultProps = {
-    style: 'windows',
-};

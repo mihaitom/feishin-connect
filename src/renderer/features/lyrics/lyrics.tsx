@@ -6,21 +6,26 @@ import { useTranslation } from 'react-i18next';
 import { RiInformationFill } from 'react-icons/ri';
 import styled from 'styled-components';
 
-import { useSongLyricsByRemoteId, useSongLyricsBySong } from './queries/lyric-query';
-import { translateLyrics } from './queries/lyric-translate';
-import { SynchronizedLyrics, SynchronizedLyricsProps } from './synchronized-lyrics';
-
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { FullLyricsMetadata, LyricSource, LyricsOverride } from '/@/renderer/api/types';
 import { Spinner, TextTitle } from '/@/renderer/components';
 import { ErrorFallback } from '/@/renderer/features/action-required';
 import { LyricsActions } from '/@/renderer/features/lyrics/lyrics-actions';
+import {
+    useSongLyricsByRemoteId,
+    useSongLyricsBySong,
+} from '/@/renderer/features/lyrics/queries/lyric-query';
+import { translateLyrics } from '/@/renderer/features/lyrics/queries/lyric-translate';
+import {
+    SynchronizedLyrics,
+    SynchronizedLyricsProps,
+} from '/@/renderer/features/lyrics/synchronized-lyrics';
 import {
     UnsynchronizedLyrics,
     UnsynchronizedLyricsProps,
 } from '/@/renderer/features/lyrics/unsynchronized-lyrics';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentSong, useLyricsSettings, usePlayerStore } from '/@/renderer/store';
+import { FullLyricsMetadata, LyricSource, LyricsOverride } from '/@/shared/types/domain-types';
 
 const ActionsContainer = styled.div`
     position: absolute;

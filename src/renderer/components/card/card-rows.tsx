@@ -4,11 +4,11 @@ import { generatePath } from 'react-router';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Album, AlbumArtist, Artist, Playlist, Song } from '/@/renderer/api/types';
 import { Text } from '/@/renderer/components/text';
 import { AppRoute } from '/@/renderer/router/routes';
-import { CardRow } from '/@/renderer/types';
 import { formatDateAbsolute, formatDateRelative, formatRating } from '/@/renderer/utils/format';
+import { Album, AlbumArtist, Artist, Playlist, Song } from '/@/shared/types/domain-types';
+import { CardRow } from '/@/shared/types/types';
 
 const Row = styled.div<{ $secondary?: boolean }>`
     width: 100%;

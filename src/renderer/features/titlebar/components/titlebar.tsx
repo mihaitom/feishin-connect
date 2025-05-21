@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Group } from '@mantine/core';
 import styled from 'styled-components';
 
-import { WindowControls } from '../../window-controls';
+import { WindowControls } from '/@/renderer/features/window-controls';
 
 interface TitlebarProps {
     children?: ReactNode;
@@ -58,8 +58,4 @@ export const Titlebar = ({ children }: TitlebarProps) => {
             </TitlebarContainer>
         </>
     );
-};
-
-Titlebar.defaultProps = {
-    children: undefined,
 };

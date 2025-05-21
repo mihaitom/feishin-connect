@@ -3,7 +3,6 @@ import { AgGridReact } from '@ag-grid-community/react';
 import { useMemo, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { LibraryItem, Song } from '/@/renderer/api/types';
 import { Spinner } from '/@/renderer/components';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-table';
@@ -13,6 +12,7 @@ import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/conte
 import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-handle-playqueue-add';
 import { useSimilarSongs } from '/@/renderer/features/similar-songs/queries/similar-song-queries';
 import { usePlayButtonBehavior, useTableSettings } from '/@/renderer/store';
+import { LibraryItem, Song } from '/@/shared/types/domain-types';
 
 export type SimilarSongsListProps = {
     count?: number;

@@ -8,10 +8,10 @@ import { Link } from 'react-router-dom';
 
 import styles from './library-header.module.css';
 
-import { LibraryItem } from '/@/renderer/api/types';
 import { Text } from '/@/renderer/components';
 import { ItemImagePlaceholder } from '/@/renderer/features/shared/components/item-image-placeholder';
 import { useGeneralSettings } from '/@/renderer/store';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface LibraryHeaderProps {
     background: string;
@@ -25,15 +25,7 @@ interface LibraryHeaderProps {
 
 export const LibraryHeader = forwardRef(
     (
-        {
-            background,
-            blur,
-            children,
-            imagePlaceholderUrl,
-            imageUrl,
-            item,
-            title,
-        }: LibraryHeaderProps,
+        { background, blur, children, imageUrl, item, title }: LibraryHeaderProps,
         ref: Ref<HTMLDivElement>,
     ) => {
         const { t } = useTranslation();
@@ -119,7 +111,7 @@ export const LibraryHeader = forwardRef(
                             alt="cover"
                             className={styles.image}
                             onError={onImageError}
-                            placeholder={imagePlaceholderUrl || 'var(--placeholder-bg)'}
+                            // placeholder={imagePlaceholderUrl || 'var(--placeholder-bg)'}
                             src={imageUrl}
                             style={{ height: '' }}
                         />

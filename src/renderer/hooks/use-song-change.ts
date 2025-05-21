@@ -2,8 +2,8 @@ import { RowNode } from '@ag-grid-community/core';
 import { AgGridReact } from '@ag-grid-community/react';
 import { MutableRefObject, useCallback, useEffect } from 'react';
 
-import { Song } from '/@/renderer/api/types';
 import { useEventStore, UserEvent } from '/@/renderer/store/event.store';
+import { Song } from '/@/shared/types/domain-types';
 
 export const useSongChange = (
     handler: (ids: string[], event: UserEvent) => void,

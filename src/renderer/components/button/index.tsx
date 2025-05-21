@@ -130,12 +130,6 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 export const Button = createPolymorphicComponent<'button', ButtonProps>(_Button);
 
-_Button.defaultProps = {
-    loading: undefined,
-    onClick: undefined,
-    tooltip: undefined,
-};
-
 interface HoldButtonProps extends ButtonProps {
     timeoutProps: {
         callback: () => void;

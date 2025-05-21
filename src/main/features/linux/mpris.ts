@@ -1,10 +1,9 @@
 import { ipcMain } from 'electron';
 import Player from 'mpris-service';
 
-import { PlayerRepeat, PlayerStatus } from '../../../renderer/types';
-import { getMainWindow } from '../../main';
-
-import { QueueSong } from '/@/renderer/api/types';
+import { getMainWindow } from '/@/main/index';
+import { QueueSong } from '/@/shared/types/domain-types';
+import { PlayerRepeat, PlayerStatus } from '/@/shared/types/types';
 
 const mprisPlayer = Player({
     identity: 'Feishin',

@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { FullLyricsMetadata } from '/@/renderer/api/types';
 import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
 import { useLyricsSettings } from '/@/renderer/store';
+import { FullLyricsMetadata } from '/@/shared/types/domain-types';
 
 export interface UnsynchronizedLyricsProps extends Omit<FullLyricsMetadata, 'lyrics'> {
     lyrics: string;
@@ -18,7 +18,6 @@ const UnsynchronizedLyricsContainer = styled.div<{ $gap: number }>`
     height: 100%;
     padding: 10vh 0 6vh;
     overflow: scroll;
-    transform: translateY(-2rem);
 
     -webkit-mask-image: linear-gradient(
         180deg,
@@ -35,6 +34,7 @@ const UnsynchronizedLyricsContainer = styled.div<{ $gap: number }>`
         rgb(0 0 0 / 100%) 85%,
         transparent 95%
     );
+    transform: translateY(-2rem);
 
     @media screen and (orientation: portrait) {
         padding: 5vh 0;

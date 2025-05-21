@@ -7,11 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { RiArrowDownSLine, RiArrowUpSLine } from 'react-icons/ri';
 import { generatePath, useNavigate, useParams } from 'react-router';
 
-import { PlaylistDetailSongListContent } from '../components/playlist-detail-song-list-content';
-import { PlaylistDetailSongListHeader } from '../components/playlist-detail-song-list-header';
-
-import { PlaylistSongListQuery, ServerType, SongListSort, SortOrder } from '/@/renderer/api/types';
 import { Button, Paper, Text, toast } from '/@/renderer/components';
+import { PlaylistDetailSongListContent } from '/@/renderer/features/playlists/components/playlist-detail-song-list-content';
+import { PlaylistDetailSongListHeader } from '/@/renderer/features/playlists/components/playlist-detail-song-list-header';
 import { PlaylistQueryBuilder } from '/@/renderer/features/playlists/components/playlist-query-builder';
 import { SaveAsPlaylistForm } from '/@/renderer/features/playlists/components/save-as-playlist-form';
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
@@ -21,6 +19,12 @@ import { usePlaylistSongList } from '/@/renderer/features/playlists/queries/play
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, usePlaylistDetailStore } from '/@/renderer/store';
+import {
+    PlaylistSongListQuery,
+    ServerType,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
 
 const PlaylistDetailSongListRoute = () => {
     const { t } = useTranslation();

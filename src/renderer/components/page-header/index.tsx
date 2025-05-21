@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import { useShouldPadTitlebar, useTheme } from '/@/renderer/hooks';
 import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const Container = styled(motion(Flex))<{
     $height?: string;

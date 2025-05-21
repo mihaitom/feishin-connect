@@ -15,17 +15,8 @@ import {
     RiSettings3Fill,
 } from 'react-icons/ri';
 
-import { useListStoreByKey } from '../../../store/list.store';
-
 import i18n from '/@/i18n/i18n';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    LibraryItem,
-    ServerType,
-    SongListQuery,
-    SongListSort,
-    SortOrder,
-} from '/@/renderer/api/types';
 import { Button, DropdownMenu, MultiSelect, Slider, Switch, Text } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
@@ -38,7 +29,15 @@ import { useContainerQuery } from '/@/renderer/hooks';
 import { useListFilterRefresh } from '/@/renderer/hooks/use-list-filter-refresh';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { SongListFilter, useCurrentServer, useListStoreActions } from '/@/renderer/store';
-import { ListDisplayType, Play, TableColumn } from '/@/renderer/types';
+import { useListStoreByKey } from '/@/renderer/store/list.store';
+import {
+    LibraryItem,
+    ServerType,
+    SongListQuery,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, Play, TableColumn } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [
@@ -265,7 +264,7 @@ export const SongListHeaderFilters = ({
         (e: MouseEvent<HTMLButtonElement>) => {
             if (!e.currentTarget?.value) return;
 
-            let updatedFilters = null;
+            let updatedFilters: null | SongListFilter = null;
             if (e.currentTarget.value === String(filter.musicFolderId)) {
                 updatedFilters = setFilter({
                     customFilters,

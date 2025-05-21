@@ -46,12 +46,3 @@ const _TextTitle = ({ $noSelect, $secondary, children, overflow, ...rest }: Text
 };
 
 export const TextTitle = createPolymorphicComponent<'div', TextTitleProps>(_TextTitle);
-
-_TextTitle.defaultProps = {
-    $link: false,
-    $noSelect: false,
-    $secondary: false,
-    overflow: 'visible',
-    to: '',
-    weight: 400,
-};

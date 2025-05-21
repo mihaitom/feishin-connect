@@ -9,12 +9,12 @@ import { Link } from 'react-router-dom';
 import { SimpleImg } from 'react-simple-img';
 import styled from 'styled-components';
 
-import { AlbumArtist, Artist } from '/@/renderer/api/types';
-import { SEPARATOR_STRING } from '/@/renderer/api/utils';
 import { Skeleton } from '/@/renderer/components/skeleton';
 import { Text } from '/@/renderer/components/text';
 import { ListCoverControls } from '/@/renderer/components/virtual-table/cells/combined-title-cell-controls';
 import { AppRoute } from '/@/renderer/router/routes';
+import { SEPARATOR_STRING } from '/@/shared/api/utils';
+import { AlbumArtist, Artist } from '/@/shared/types/domain-types';
 
 const CellContainer = styled(motion.div)<{ height: number }>`
     display: grid;

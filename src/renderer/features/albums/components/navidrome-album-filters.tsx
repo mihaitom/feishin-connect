@@ -3,19 +3,19 @@ import debounce from 'lodash/debounce';
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-    AlbumArtistListSort,
-    AlbumListQuery,
-    GenreListSort,
-    LibraryItem,
-    SortOrder,
-} from '/@/renderer/api/types';
 import { NumberInput, SpinnerIcon, Switch, Text } from '/@/renderer/components';
 import { SelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 import { useAlbumArtistList } from '/@/renderer/features/artists/queries/album-artist-list-query';
 import { useGenreList } from '/@/renderer/features/genres';
 import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
 import { AlbumListFilter, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
+import {
+    AlbumArtistListSort,
+    AlbumListQuery,
+    GenreListSort,
+    LibraryItem,
+    SortOrder,
+} from '/@/shared/types/domain-types';
 
 interface NavidromeAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;

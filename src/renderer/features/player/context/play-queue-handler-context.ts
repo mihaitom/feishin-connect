@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { PlayQueueAddOptions } from '/@/renderer/types';
+import { PlayQueueAddOptions } from '/@/shared/types/types';
 
 export const PlayQueueHandlerContext = createContext<{
     handlePlayQueueAdd: ((options: PlayQueueAddOptions) => void) | undefined;

@@ -3,17 +3,16 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 
 import { MutableRefObject } from 'react';
 
-import { useListContext } from '../../../context/list-context';
-
-import { LibraryItem, QueueSong, SongListQuery } from '/@/renderer/api/types';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
 import { useCurrentSongRowStyles } from '/@/renderer/components/virtual-table/hooks/use-current-song-row-styles';
 import { useVirtualTable } from '/@/renderer/components/virtual-table/hooks/use-virtual-table';
+import { useListContext } from '/@/renderer/context/list-context';
 import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { useCurrentServer } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import { LibraryItem, QueueSong, SongListQuery } from '/@/shared/types/domain-types';
 
 interface AlbumArtistSongListContentProps {
     data: QueueSong[];

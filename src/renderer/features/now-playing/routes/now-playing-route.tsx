@@ -1,4 +1,4 @@
-import type { Song } from '/@/renderer/api/types';
+import type { Song } from '/@/shared/types/domain-types';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 
 import { useRef } from 'react';

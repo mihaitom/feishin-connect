@@ -5,7 +5,7 @@ import { RiSubtractLine } from 'react-icons/ri';
 import { Button } from '/@/renderer/components/button';
 import { NumberInput, TextInput } from '/@/renderer/components/input';
 import { Select } from '/@/renderer/components/select';
-import { QueryBuilderRule } from '/@/renderer/types';
+import { QueryBuilderRule } from '/@/shared/types/types';
 
 type DeleteArgs = {
     groupIndex: number[];

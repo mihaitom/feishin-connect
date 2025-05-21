@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { Rating as MantineRating, RatingProps } from '@mantine/core';
 import debounce from 'lodash/debounce';
 import { useCallback } from 'react';

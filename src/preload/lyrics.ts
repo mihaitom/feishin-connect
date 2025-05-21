@@ -7,6 +7,8 @@ import {
     LyricSource,
 } from '../main/features/core/lyrics';
 
+import { QueueSong } from '/@/shared/types/domain-types';
+
 const getRemoteLyricsBySong = (song: QueueSong) => {
     const result = ipcRenderer.invoke('lyric-by-song', song);
     return result;

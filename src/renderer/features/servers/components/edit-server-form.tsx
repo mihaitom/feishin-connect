@@ -10,10 +10,10 @@ import { RiInformationLine } from 'react-icons/ri';
 import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { AuthenticationResponse, ServerListItem, ServerType } from '/@/renderer/api/types';
 import { Button, Checkbox, PasswordInput, TextInput, toast, Tooltip } from '/@/renderer/components';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useAuthStoreActions } from '/@/renderer/store';
+import { AuthenticationResponse, ServerListItem, ServerType } from '/@/shared/types/domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

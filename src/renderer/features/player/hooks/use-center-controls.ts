@@ -17,8 +17,8 @@ import {
     useShuffleStatus,
 } from '/@/renderer/store';
 import { usePlaybackType } from '/@/renderer/store/settings.store';
-import { PlaybackType, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/renderer/types';
 import { setAutoNext, setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
+import { PlaybackType, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 const mpvPlayerListener = isElectron() ? window.api.mpvPlayerListener : null;
@@ -565,7 +565,6 @@ export const useCenterControls = (args: { playersRef: any }) => {
             });
 
             mpvPlayerListener.rendererCurrentTime((_event: any, time: number) => {
-                console.log('time :>> ', time);
                 setCurrentTime(time);
             });
 

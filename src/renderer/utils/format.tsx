@@ -1,4 +1,4 @@
-import type { Album, AlbumArtist, Song } from '/@/renderer/api/types';
+import type { Album, AlbumArtist, Song } from '/@/shared/types/domain-types';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';

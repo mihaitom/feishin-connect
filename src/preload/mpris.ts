@@ -1,5 +1,7 @@
 import { ipcRenderer, IpcRendererEvent } from 'electron';
 
+import { PlayerRepeat } from '/@/shared/types/types';
+
 const updatePosition = (timeSec: number) => {
     ipcRenderer.send('mpris-update-position', timeSec);
 };

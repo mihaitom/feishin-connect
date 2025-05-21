@@ -14,7 +14,6 @@ import { Link } from 'react-router-dom';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 
-import { LibraryItem, Playlist, PlaylistListSort, SortOrder } from '/@/renderer/api/types';
 import { Button, Text } from '/@/renderer/components';
 import { openContextMenu } from '/@/renderer/features/context-menu';
 import { PLAYLIST_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
@@ -23,7 +22,8 @@ import { usePlaylistList } from '/@/renderer/features/playlists';
 import { useHideScrollbar } from '/@/renderer/hooks';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useGeneralSettings, useSettingsStoreActions } from '/@/renderer/store';
-import { Play } from '/@/renderer/types';
+import { LibraryItem, Playlist, PlaylistListSort, SortOrder } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 const PlaylistRow = ({ data, index, style }: ListChildComponentProps) => {
     const { t } = useTranslation();

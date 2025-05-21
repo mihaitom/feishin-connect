@@ -3,7 +3,6 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 import { useMemo, useRef } from 'react';
 import { useParams } from 'react-router';
 
-import { PlaylistListSort, PlaylistSongListQuery, SortOrder } from '/@/renderer/api/types';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { PlaylistListContent } from '/@/renderer/features/playlists/components/playlist-list-content';
@@ -11,6 +10,7 @@ import { PlaylistListHeader } from '/@/renderer/features/playlists/components/pl
 import { usePlaylistList } from '/@/renderer/features/playlists/queries/playlist-list-query';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { useCurrentServer, useListStoreByKey } from '/@/renderer/store';
+import { PlaylistListSort, PlaylistSongListQuery, SortOrder } from '/@/shared/types/domain-types';
 
 const PlaylistListRoute = () => {
     const gridRef = useRef<null | VirtualInfiniteGridRef>(null);

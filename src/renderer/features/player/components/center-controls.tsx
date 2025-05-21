@@ -19,12 +19,11 @@ import {
 } from 'react-icons/ri';
 import styled from 'styled-components';
 
-import { useCenterControls } from '../hooks/use-center-controls';
-import { PlayerButton } from './player-button';
-import { openShuffleAllModal } from './shuffle-all-modal';
-
 import { Text } from '/@/renderer/components';
+import { PlayerButton } from '/@/renderer/features/player/components/player-button';
 import { PlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
+import { openShuffleAllModal } from '/@/renderer/features/player/components/shuffle-all-modal';
+import { useCenterControls } from '/@/renderer/features/player/hooks/use-center-controls';
 import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import {
     useCurrentPlayer,
@@ -40,7 +39,7 @@ import {
     usePlaybackType,
     useSettingsStore,
 } from '/@/renderer/store/settings.store';
-import { PlaybackType, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/renderer/types';
+import { PlaybackType, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
 interface CenterControlsProps {
     playersRef: any;

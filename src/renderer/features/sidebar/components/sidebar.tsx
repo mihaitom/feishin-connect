@@ -7,13 +7,6 @@ import { RiAddFill, RiArrowDownSLine, RiDiscLine, RiListUnordered } from 'react-
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import {
-    SidebarItemType,
-    useGeneralSettings,
-    useWindowSettings,
-} from '../../../store/settings.store';
-
-import { ServerType } from '/@/renderer/api/types';
 import { Button, MotionStack, Tooltip } from '/@/renderer/components';
 import { CreatePlaylistForm } from '/@/renderer/features/playlists';
 import { ActionBar } from '/@/renderer/features/sidebar/components/action-bar';
@@ -30,8 +23,14 @@ import {
     useSetFullScreenPlayerStore,
     useSidebarStore,
 } from '/@/renderer/store';
+import {
+    SidebarItemType,
+    useGeneralSettings,
+    useWindowSettings,
+} from '/@/renderer/store/settings.store';
 import { fadeIn } from '/@/renderer/styles';
-import { Platform } from '/@/renderer/types';
+import { ServerType } from '/@/shared/types/domain-types';
+import { Platform } from '/@/shared/types/types';
 
 const SidebarContainer = styled.div<{ $windowBarStyle: Platform }>`
     height: 100%;

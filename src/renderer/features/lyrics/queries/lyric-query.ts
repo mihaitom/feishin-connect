@@ -2,8 +2,10 @@ import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query'
 import isElectron from 'is-electron';
 
 import { api } from '/@/renderer/api';
-import { ServerFeature } from '/@/renderer/api/features-types';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { QueryHookArgs } from '/@/renderer/lib/react-query';
+import { getServerById, useLyricsSettings } from '/@/renderer/store';
+import { hasFeature } from '/@/shared/api/utils';
 import {
     FullLyricsMetadata,
     InternetProviderLyricResponse,
@@ -13,10 +15,8 @@ import {
     ServerType,
     StructuredLyric,
     SynchronizedLyricsArray,
-} from '/@/renderer/api/types';
-import { hasFeature } from '/@/renderer/api/utils';
-import { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById, useLyricsSettings } from '/@/renderer/store';
+} from '/@/shared/types/domain-types';
+import { ServerFeature } from '/@/shared/types/features-types';
 
 const lyricsIpc = isElectron() ? window.api.lyrics : null;
 

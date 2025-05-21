@@ -136,13 +136,3 @@ export const MultiSelect = ({ maxWidth, width, ...props }: MultiSelectProps) => 
         />
     );
 };
-
-Select.defaultProps = {
-    maxWidth: undefined,
-    width: undefined,
-};
-
-MultiSelect.defaultProps = {
-    maxWidth: undefined,
-    width: undefined,
-};

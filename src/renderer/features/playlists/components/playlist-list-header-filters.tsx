@@ -7,20 +7,24 @@ import { ChangeEvent, MouseEvent, MutableRefObject, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiMoreFill, RiRefreshLine, RiSettings3Fill } from 'react-icons/ri';
 
-import { useListContext } from '../../../context/list-context';
-import { useListStoreByKey } from '../../../store/list.store';
-
 import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { LibraryItem, PlaylistListQuery, PlaylistListSort, SortOrder } from '/@/renderer/api/types';
 import { Button, DropdownMenu, MultiSelect, Slider, Switch, Text } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { PLAYLIST_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
+import { useListContext } from '/@/renderer/context/list-context';
 import { OrderToggleButton } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { PlaylistListFilter, useCurrentServer, useListStoreActions } from '/@/renderer/store';
-import { ListDisplayType, TableColumn } from '/@/renderer/types';
+import { useListStoreByKey } from '/@/renderer/store/list.store';
+import {
+    LibraryItem,
+    PlaylistListQuery,
+    PlaylistListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [

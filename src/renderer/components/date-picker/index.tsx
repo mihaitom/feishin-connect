@@ -43,8 +43,3 @@ export const DatePicker = ({ maxWidth, width, ...props }: DatePickerProps) => {
         />
     );
 };
-
-DatePicker.defaultProps = {
-    maxWidth: undefined,
-    width: undefined,
-};

@@ -5,7 +5,7 @@ import { RiAlbumFill, RiPlayListFill, RiUserVoiceFill } from 'react-icons/ri';
 
 import styles from './item-image-placeholder.module.css';
 
-import { LibraryItem } from '/@/renderer/api/types';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface ItemImagePlaceholderProps {
     itemType?: LibraryItem;

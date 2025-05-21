@@ -11,9 +11,9 @@ import {
 } from 'react-icons/ri';
 import styled from 'styled-components';
 
-import { LibraryItem } from '/@/renderer/api/types';
 import { Button, Text } from '/@/renderer/components';
-import { Play, PlayQueueAddOptions } from '/@/renderer/types';
+import { LibraryItem } from '/@/shared/types/domain-types';
+import { Play, PlayQueueAddOptions } from '/@/shared/types/types';
 
 const Item = styled(Flex)``;
 
@@ -46,7 +46,7 @@ const MetadataWrapper = styled.div`
     width: 100%;
 `;
 
-const StyledImage = styled.img`
+const StyledImage = styled.img<{ placeholder?: string }>`
     object-fit: var(--image-fit);
     border-radius: 4px;
 `;

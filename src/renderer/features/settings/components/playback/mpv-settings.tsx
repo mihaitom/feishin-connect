@@ -24,7 +24,7 @@ import {
     useSettingsStore,
     useSettingsStoreActions,
 } from '/@/renderer/store/settings.store';
-import { PlaybackType } from '/@/renderer/types';
+import { PlaybackType } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
@@ -127,7 +127,7 @@ export const MpvSettings = () => {
 
         const extraParameters = useSettingsStore.getState().playback.mpvExtraParameters;
         const properties: Record<string, any> = {
-            speed: usePlayerStore.getState().current.speed,
+            speed: usePlayerStore.getState().speed,
             ...getMpvProperties(useSettingsStore.getState().playback.mpvProperties),
         };
         mpvPlayer?.restart({
@@ -162,7 +162,6 @@ export const MpvSettings = () => {
                     </Button>
                     <FileInput
                         onChange={handleSetMpvPath}
-                        placeholder={mpvPath}
                         rightSection={
                             mpvPath && (
                                 <Button

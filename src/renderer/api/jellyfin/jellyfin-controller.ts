@@ -1,12 +1,11 @@
 import chunk from 'lodash/chunk';
 import { z } from 'zod';
 
-import { jfNormalize } from './jellyfin-normalize';
-
-import { ServerFeature } from '/@/renderer/api/features-types';
-import { JFSongListSort, JFSortOrder } from '/@/renderer/api/jellyfin.types';
 import { jfApiClient } from '/@/renderer/api/jellyfin/jellyfin-api';
-import { jfType } from '/@/renderer/api/jellyfin/jellyfin-types';
+import { JFSongListSort, JFSortOrder } from '/@/shared/api/jellyfin.types';
+import { jfNormalize } from '/@/shared/api/jellyfin/jellyfin-normalize';
+import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
+import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
 import {
     albumArtistListSortMap,
     albumListSortMap,
@@ -18,8 +17,8 @@ import {
     Song,
     songListSortMap,
     sortOrderMap,
-} from '/@/renderer/api/types';
-import { getFeatures, hasFeature, VersionInfo } from '/@/renderer/api/utils';
+} from '/@/shared/types/domain-types';
+import { ServerFeature } from '/@/shared/types/features-types';
 
 const formatCommaDelimitedString = (value: string[]) => {
     return value.join(',');
@@ -282,7 +281,7 @@ export const JellyfinController: ControllerEndpoint = {
             throw new Error('No userId found');
         }
 
-        const yearsGroup = [];
+        const yearsGroup: string[] = [];
         if (query.minYear && query.maxYear) {
             for (let i = Number(query.minYear); i <= Number(query.maxYear); i += 1) {
                 yearsGroup.push(String(i));
@@ -555,7 +554,7 @@ export const JellyfinController: ControllerEndpoint = {
             throw new Error('No userId found');
         }
 
-        const yearsGroup = [];
+        const yearsGroup: string[] = [];
         if (query.minYear && query.maxYear) {
             for (let i = Number(query.minYear); i <= Number(query.maxYear); i += 1) {
                 yearsGroup.push(String(i));
@@ -692,7 +691,7 @@ export const JellyfinController: ControllerEndpoint = {
             throw new Error('No userId found');
         }
 
-        const yearsGroup = [];
+        const yearsGroup: string[] = [];
         if (query.minYear && query.maxYear) {
             for (let i = Number(query.minYear); i <= Number(query.maxYear); i += 1) {
                 yearsGroup.push(String(i));

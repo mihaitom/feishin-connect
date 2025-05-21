@@ -35,9 +35,6 @@ import {
 
 import { api } from '/@/renderer/api';
 import { controller } from '/@/renderer/api/controller';
-import { ServerFeature } from '/@/renderer/api/features-types';
-import { AnyLibraryItem, AnyLibraryItems, LibraryItem, ServerType } from '/@/renderer/api/types';
-import { hasFeature } from '/@/renderer/api/utils';
 import {
     ConfirmModal,
     ContextMenu,
@@ -67,8 +64,16 @@ import {
     useSettingsStore,
 } from '/@/renderer/store';
 import { usePlaybackType } from '/@/renderer/store/settings.store';
-import { Play, PlaybackType } from '/@/renderer/types';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
+import { hasFeature } from '/@/shared/api/utils';
+import {
+    AnyLibraryItem,
+    AnyLibraryItems,
+    LibraryItem,
+    ServerType,
+} from '/@/shared/types/domain-types';
+import { ServerFeature } from '/@/shared/types/features-types';
+import { Play, PlaybackType } from '/@/shared/types/types';
 
 type ContextMenuContextProps = {
     closeContextMenu: () => void;

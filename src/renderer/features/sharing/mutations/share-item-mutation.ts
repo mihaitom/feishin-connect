@@ -2,9 +2,9 @@ import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
-import { AnyLibraryItems, ShareItemArgs, ShareItemResponse } from '/@/renderer/api/types';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
+import { AnyLibraryItems, ShareItemArgs, ShareItemResponse } from '/@/shared/types/domain-types';
 
 export const useShareItem = (args: MutationHookArgs) => {
     const { options } = args || {};

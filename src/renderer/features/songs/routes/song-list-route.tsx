@@ -5,7 +5,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/renderer/api/types';
+import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { useGenreList } from '/@/renderer/features/genres';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
@@ -14,9 +14,9 @@ import { SongListContent } from '/@/renderer/features/songs/components/song-list
 import { SongListHeader } from '/@/renderer/features/songs/components/song-list-header';
 import { useSongListCount } from '/@/renderer/features/songs/queries/song-list-count-query';
 import { useCurrentServer, useListFilterByKey } from '/@/renderer/store';
-import { Play } from '/@/renderer/types';
 import { sentenceCase, titleCase } from '/@/renderer/utils';
-import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
+import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 const TrackListRoute = () => {
     const { t } = useTranslation();

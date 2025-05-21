@@ -3,7 +3,6 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 import { RowDoubleClickedEvent } from '@ag-grid-community/core';
 import { MutableRefObject } from 'react';
 
-import { LibraryItem, QueueSong, SongListQuery } from '/@/renderer/api/types';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
 import { useCurrentSongRowStyles } from '/@/renderer/components/virtual-table/hooks/use-current-song-row-styles';
@@ -17,6 +16,7 @@ import {
     useCurrentStatus,
     usePlayButtonBehavior,
 } from '/@/renderer/store';
+import { LibraryItem, QueueSong, SongListQuery } from '/@/shared/types/domain-types';
 
 interface SongListTableViewProps {
     itemCount?: number;

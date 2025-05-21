@@ -9,7 +9,6 @@ import { styled } from 'styled-components';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { LibraryItem, SongDetailResponse } from '/@/renderer/api/types';
 import { Button, Spinner, Spoiler, Text } from '/@/renderer/components';
 import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu';
 import { SONG_ALBUM_PAGE } from '/@/renderer/features/context-menu/context-menu-items';
@@ -28,6 +27,7 @@ import { useCurrentServer } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { formatDurationString } from '/@/renderer/utils';
 import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
+import { LibraryItem, SongDetailResponse } from '/@/shared/types/domain-types';
 
 const DetailContainer = styled.div`
     display: flex;

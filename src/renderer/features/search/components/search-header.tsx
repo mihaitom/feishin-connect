@@ -6,20 +6,18 @@ import { ChangeEvent, MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, Link, useParams, useSearchParams } from 'react-router-dom';
 
-import { useCurrentServer } from '../../../store/auth.store';
-
-import {
-    AlbumArtistListQuery,
-    AlbumListQuery,
-    LibraryItem,
-    SongListQuery,
-} from '/@/renderer/api/types';
 import { Button, PageHeader, SearchInput } from '/@/renderer/components';
 import { FilterBar, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useListFilterRefresh } from '/@/renderer/hooks/use-list-filter-refresh';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useListStoreByKey } from '/@/renderer/store';
+import { useCurrentServer, useListStoreByKey } from '/@/renderer/store';
+import {
+    AlbumArtistListQuery,
+    AlbumListQuery,
+    LibraryItem,
+    SongListQuery,
+} from '/@/shared/types/domain-types';
 
 interface SearchHeaderProps {
     navigationId: string;

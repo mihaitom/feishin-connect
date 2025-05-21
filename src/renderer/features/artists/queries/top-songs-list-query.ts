@@ -1,5 +1,5 @@
-import type { TopSongListQuery } from '/@/renderer/api/types';
 import type { QueryHookArgs } from '/@/renderer/lib/react-query';
+import type { TopSongListQuery } from '/@/shared/types/domain-types';
 
 import { useQuery } from '@tanstack/react-query';
 

@@ -1,5 +1,5 @@
 import i18n from '/@/i18n/i18n';
-import { Play } from '/@/renderer/types';
+import { Play } from '/@/shared/types/types';
 
 export const PLAY_TYPES = [
     {

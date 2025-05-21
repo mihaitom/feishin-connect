@@ -1,6 +1,6 @@
 import type { Dispatch } from 'react';
 
-import { CrossfadeStyle } from '/@/renderer/types';
+import { CrossfadeStyle } from '/@/shared/types/types';
 
 export const gaplessHandler = (args: {
     currentTime: number;

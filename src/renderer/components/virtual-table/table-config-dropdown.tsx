@@ -8,7 +8,7 @@ import { MultiSelect } from '/@/renderer/components/select';
 import { Slider } from '/@/renderer/components/slider';
 import { Switch } from '/@/renderer/components/switch';
 import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
-import { TableColumn, TableType } from '/@/renderer/types';
+import { TableColumn, TableType } from '/@/shared/types/types';
 
 export const SONG_TABLE_COLUMNS = [
     {

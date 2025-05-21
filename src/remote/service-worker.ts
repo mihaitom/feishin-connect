@@ -1,10 +1,9 @@
 /// <reference lib="WebWorker" />
 
 export type {};
-// eslint-disable-next-line no-undef
+
 declare const self: ServiceWorkerGlobalScope;
 
-// eslint-disable-next-line no-restricted-globals
 const url = new URL(location.toString());
 const version = url.searchParams.get('version');
 const prod = url.searchParams.get('prod') === 'true';

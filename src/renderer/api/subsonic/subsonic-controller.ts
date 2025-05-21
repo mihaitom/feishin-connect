@@ -3,10 +3,10 @@ import filter from 'lodash/filter';
 import orderBy from 'lodash/orderBy';
 import md5 from 'md5';
 
-import { ServerFeatures } from '/@/renderer/api/features-types';
 import { ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
-import { ssNormalize } from '/@/renderer/api/subsonic/subsonic-normalize';
-import { AlbumListSortType, SubsonicExtensions } from '/@/renderer/api/subsonic/subsonic-types';
+import { randomString } from '/@/renderer/utils';
+import { ssNormalize } from '/@/shared/api/subsonic/subsonic-normalize';
+import { AlbumListSortType, SubsonicExtensions } from '/@/shared/api/subsonic/subsonic-types';
 import {
     AlbumListSort,
     ControllerEndpoint,
@@ -18,8 +18,8 @@ import {
     sortAlbumList,
     SortOrder,
     sortSongList,
-} from '/@/renderer/api/types';
-import { randomString } from '/@/renderer/utils';
+} from '/@/shared/types/domain-types';
+import { ServerFeatures } from '/@/shared/types/features-types';
 
 const ALBUM_LIST_SORT_MAPPING: Record<AlbumListSort, AlbumListSortType | undefined> = {
     [AlbumListSort.ALBUM_ARTIST]: AlbumListSortType.ALPHABETICAL_BY_ARTIST,
@@ -287,7 +287,7 @@ export const SubsonicController: ControllerEndpoint = {
         let type = ALBUM_LIST_SORT_MAPPING[query.sortBy] ?? AlbumListSortType.ALPHABETICAL_BY_NAME;
 
         if (query.artistIds) {
-            const promises = [];
+            const promises: any[] = [];
 
             for (const artistId of query.artistIds) {
                 promises.push(
@@ -858,8 +858,8 @@ export const SubsonicController: ControllerEndpoint = {
         return ssNormalize.song(res.body.song, apiClientProps.server);
     },
     getSongList: async ({ apiClientProps, query }) => {
-        const fromAlbumPromises = [];
-        const artistDetailPromises = [];
+        const fromAlbumPromises: any[] = [];
+        const artistDetailPromises: any[] = [];
         let results: any[] = [];
 
         if (query.searchTerm) {

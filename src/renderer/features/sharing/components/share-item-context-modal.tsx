@@ -4,10 +4,14 @@ import { useForm } from '@mantine/form';
 import { closeModal, ContextModalProps } from '@mantine/modals';
 import { useTranslation } from 'react-i18next';
 
-import { useShareItem } from '../mutations/share-item-mutation';
-
 import { Button, Switch, toast } from '/@/renderer/components';
+import { useShareItem } from '/@/renderer/features/sharing/mutations/share-item-mutation';
 import { useCurrentServer } from '/@/renderer/store';
+
+// Bugged prop types in mantine v6
+const WrappedDateTimePicker = ({ ...props }: any) => {
+    return <DateTimePicker {...props} />;
+};
 
 export const ShareItemContextModal = ({
     id,
@@ -110,7 +114,7 @@ export const ShareItemContextModal = ({
                         })}
                         {...form.getInputProps('allowDownloading')}
                     />
-                    <DateTimePicker
+                    <WrappedDateTimePicker
                         clearable
                         label={t('form.shareItem.setExpiration', {
                             postProcess: 'titleCase',

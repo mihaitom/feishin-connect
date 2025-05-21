@@ -2,10 +2,10 @@ import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
-import { ScrobbleArgs, ScrobbleResponse } from '/@/renderer/api/types';
 import { MutationOptions } from '/@/renderer/lib/react-query';
 import { getServerById, useIncrementQueuePlayCount } from '/@/renderer/store';
 import { usePlayEvent } from '/@/renderer/store/event.store';
+import { ScrobbleArgs, ScrobbleResponse } from '/@/shared/types/domain-types';
 
 export const useSendScrobble = (options?: MutationOptions) => {
     const incrementPlayCount = useIncrementQueuePlayCount();

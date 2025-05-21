@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
-import { queryKeys } from '../../../api/query-keys';
-
 import { api } from '/@/renderer/api';
-import { CreatePlaylistArgs, CreatePlaylistResponse } from '/@/renderer/api/types';
+import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
+import { CreatePlaylistArgs, CreatePlaylistResponse } from '/@/shared/types/domain-types';
 
 export const useCreatePlaylist = (args: MutationHookArgs) => {
     const { options } = args || {};

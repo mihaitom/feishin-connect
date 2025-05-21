@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { PlaylistListSort, SortOrder } from '/@/renderer/api/types';
 import { PlaylistListFilter, SongListFilter } from '/@/renderer/store/list.store';
 import { DataTableProps } from '/@/renderer/store/settings.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
-import { ListDisplayType, TableColumn, TablePagination } from '/@/renderer/types';
+import { PlaylistListSort, SortOrder } from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
 
 export interface PlaylistSlice extends PlaylistState {
     actions: {

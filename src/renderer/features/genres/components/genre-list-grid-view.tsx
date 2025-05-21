@@ -6,7 +6,6 @@ import { ListOnScrollProps } from 'react-window';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { Album, GenreListQuery, GenreListResponse, LibraryItem } from '/@/renderer/api/types';
 import { ALBUM_CARD_ROWS } from '/@/renderer/components';
 import {
     VirtualGridAutoSizerContainer,
@@ -16,7 +15,14 @@ import { useListContext } from '/@/renderer/context/list-context';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
-import { CardRow, ListDisplayType } from '/@/renderer/types';
+import {
+    Album,
+    Genre,
+    GenreListQuery,
+    GenreListResponse,
+    LibraryItem,
+} from '/@/shared/types/domain-types';
+import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 export const GenreListGridView = ({ gridRef, itemCount }: any) => {
     const queryClient = useQueryClient();
@@ -65,7 +71,7 @@ export const GenreListGridView = ({ gridRef, itemCount }: any) => {
             stale: false,
         });
 
-        const itemData = [];
+        const itemData: Genre[] = [];
 
         for (const [, data] of queriesFromCache) {
             const { items, startIndex } = data || {};

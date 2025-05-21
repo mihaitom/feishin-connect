@@ -97,8 +97,3 @@ export const GenericTableHeader = (
         </HeaderWrapper>
     );
 };
-
-GenericTableHeader.defaultProps = {
-    position: 'left',
-    preset: undefined,
-};

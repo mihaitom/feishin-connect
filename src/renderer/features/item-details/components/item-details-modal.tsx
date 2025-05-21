@@ -5,15 +5,6 @@ import { RiCheckFill, RiCloseFill } from 'react-icons/ri';
 import { generatePath } from 'react-router';
 import { Link } from 'react-router-dom';
 
-import {
-    Album,
-    AlbumArtist,
-    AnyLibraryItem,
-    LibraryItem,
-    RelatedArtist,
-    Song,
-} from '/@/renderer/api/types';
-import { SEPARATOR_STRING } from '/@/renderer/api/utils';
 import { Spoiler, Text } from '/@/renderer/components';
 import { Separator } from '/@/renderer/components/separator';
 import { SongPath } from '/@/renderer/features/item-details/components/song-path';
@@ -23,6 +14,15 @@ import { formatDurationString, formatSizeString } from '/@/renderer/utils';
 import { formatDateRelative, formatRating } from '/@/renderer/utils/format';
 import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
 import { sanitize } from '/@/renderer/utils/sanitize';
+import { SEPARATOR_STRING } from '/@/shared/api/utils';
+import {
+    Album,
+    AlbumArtist,
+    AnyLibraryItem,
+    LibraryItem,
+    RelatedArtist,
+    Song,
+} from '/@/shared/types/domain-types';
 
 export type ItemDetailsModalProps = {
     item: Album | AlbumArtist | Song;

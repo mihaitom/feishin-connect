@@ -7,7 +7,7 @@ import { Button } from '/@/renderer/components/button';
 import { DropdownMenu } from '/@/renderer/components/dropdown-menu';
 import { QueryBuilderOption } from '/@/renderer/components/query-builder/query-builder-option';
 import { Select } from '/@/renderer/components/select';
-import { QueryBuilderGroup, QueryBuilderRule } from '/@/renderer/types';
+import { QueryBuilderGroup, QueryBuilderRule } from '/@/shared/types/types';
 
 const FILTER_GROUP_OPTIONS_DATA = [
     {

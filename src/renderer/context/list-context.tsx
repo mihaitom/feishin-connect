@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 import { ListKey } from '/@/renderer/store';
-import { Play } from '/@/renderer/types';
+import { Play } from '/@/shared/types/types';
 
 interface ListContextProps {
     customFilters?: Record<string, unknown>;

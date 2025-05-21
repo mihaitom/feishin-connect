@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { DrawerPlayQueue } from '/@/renderer/features/now-playing';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAppStore, useSidebarStore } from '/@/renderer/store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const QueueDrawerArea = styled(motion.div)`
     position: absolute;

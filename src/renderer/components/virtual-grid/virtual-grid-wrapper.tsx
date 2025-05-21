@@ -1,4 +1,9 @@
-import type { CardRoute, CardRow, ListDisplayType, PlayQueueAddOptions } from '/@/renderer/types';
+import type {
+    CardRoute,
+    CardRow,
+    ListDisplayType,
+    PlayQueueAddOptions,
+} from '/@/shared/types/types';
 import type { Ref } from 'react';
 import type { FixedSizeListProps } from 'react-window';
 
@@ -7,8 +12,8 @@ import memoize from 'memoize-one';
 import { FixedSizeList } from 'react-window';
 import styled from 'styled-components';
 
-import { Album, AlbumArtist, Artist, LibraryItem } from '/@/renderer/api/types';
 import { GridCard } from '/@/renderer/components/virtual-grid/grid-card';
+import { Album, AlbumArtist, Artist, LibraryItem } from '/@/shared/types/domain-types';
 
 const createItemData = memoize(
     (
@@ -121,10 +126,6 @@ export const VirtualGridWrapper = ({
             {GridCard}
         </FixedSizeList>
     );
-};
-
-VirtualGridWrapper.defaultProps = {
-    route: undefined,
 };
 
 export const VirtualGridContainer = styled.div`

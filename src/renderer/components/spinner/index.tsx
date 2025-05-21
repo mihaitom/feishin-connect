@@ -1,12 +1,11 @@
-import type { IconType } from 'react-icons';
-
 import { Center } from '@mantine/core';
+import { IconBaseProps } from 'react-icons';
 import { RiLoader5Fill } from 'react-icons/ri';
 import styled from 'styled-components';
 
 import { rotating } from '/@/renderer/styles';
 
-interface SpinnerProps extends IconType {
+interface SpinnerProps extends IconBaseProps {
     color?: string;
     container?: boolean;
     size?: number;
@@ -33,9 +32,4 @@ export const Spinner = ({ ...props }: SpinnerProps) => {
     }
 
     return <SpinnerIcon {...props} />;
-};
-
-Spinner.defaultProps = {
-    color: undefined,
-    size: 15,
 };

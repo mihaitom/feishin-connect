@@ -3,9 +3,9 @@ import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { RemoveFromPlaylistArgs, RemoveFromPlaylistResponse } from '/@/renderer/api/types';
 import { MutationOptions } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
+import { RemoveFromPlaylistArgs, RemoveFromPlaylistResponse } from '/@/shared/types/domain-types';
 
 export const useRemoveFromPlaylist = (options?: MutationOptions) => {
     const queryClient = useQueryClient();

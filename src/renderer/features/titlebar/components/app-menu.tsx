@@ -21,7 +21,6 @@ import { Link } from 'react-router-dom';
 
 import packageJson from '../../../../../package.json';
 
-import { ServerListItem, ServerType } from '/@/renderer/api/types';
 import { DropdownMenu } from '/@/renderer/components';
 import { ServerList } from '/@/renderer/features/servers';
 import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
@@ -33,6 +32,7 @@ import {
     useServerList,
     useSidebarStore,
 } from '/@/renderer/store';
+import { ServerListItem, ServerType } from '/@/shared/types/domain-types';
 
 const browser = isElectron() ? window.api.browser : null;
 const localSettings = isElectron() ? window.api.localSettings : null;

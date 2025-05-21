@@ -2,7 +2,6 @@ import isElectron from 'is-electron';
 import { useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import { FullLyricsMetadata, SynchronizedLyricsArray } from '/@/renderer/api/types';
 import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
 import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
 import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
@@ -16,7 +15,8 @@ import {
     useSeeked,
     useSetCurrentTime,
 } from '/@/renderer/store';
-import { PlaybackType, PlayerStatus } from '/@/renderer/types';
+import { FullLyricsMetadata, SynchronizedLyricsArray } from '/@/shared/types/domain-types';
+import { PlaybackType, PlayerStatus } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 const utils = isElectron() ? window.api.utils : null;
@@ -31,7 +31,6 @@ const SynchronizedLyricsContainer = styled.div<{ $gap: number }>`
     padding: 10vh 0 50vh;
     overflow: scroll;
     word-break: break-word;
-    transform: translateY(-2rem);
 
     -webkit-mask-image: linear-gradient(
         180deg,
@@ -48,6 +47,7 @@ const SynchronizedLyricsContainer = styled.div<{ $gap: number }>`
         rgb(0 0 0 / 100%) 85%,
         transparent 95%
     );
+    transform: translateY(-2rem);
 
     @media screen and (orientation: portrait) {
         padding: 5vh 0;
@@ -96,12 +96,12 @@ export const SynchronizedLyrics = ({
     const seeked = useSeeked();
 
     // A reference to the timeout handler
-    const lyricTimer = useRef<ReturnType<typeof setTimeout>>();
+    const lyricTimer = useRef<null | ReturnType<typeof setTimeout>>(null);
 
     // A reference to the lyrics. This is necessary for the
     // timers, which are not part of react necessarily, to always
     // have the most updated values
-    const lyricRef = useRef<SynchronizedLyricsArray>();
+    const lyricRef = useRef<null | SynchronizedLyricsArray>(null);
 
     // A constantly increasing value, used to tell timers that may be out of date
     // whether to proceed or stop
@@ -178,7 +178,7 @@ export const SynchronizedLyrics = ({
                 .forEach((node) => node.classList.remove('active'));
 
             if (index === -1) {
-                lyricRef.current = undefined;
+                lyricRef.current = null;
                 return;
             }
 
@@ -187,10 +187,10 @@ export const SynchronizedLyrics = ({
             ) as HTMLElement;
             const currentLyric = document.querySelector(`#lyric-${index}`) as HTMLElement;
 
-            const offsetTop = currentLyric?.offsetTop - doc?.clientHeight / 2 ?? 0;
+            const offsetTop = currentLyric?.offsetTop - doc?.clientHeight / 2 || 0;
 
             if (currentLyric === null) {
-                lyricRef.current = undefined;
+                lyricRef.current = null;
                 return;
             }
 

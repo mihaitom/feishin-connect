@@ -7,7 +7,6 @@ import { ChangeEvent, MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiFileAddFill } from 'react-icons/ri';
 
-import { LibraryItem, PlaylistListQuery, ServerType } from '/@/renderer/api/types';
 import { Button, PageHeader, Paper, SearchInput, SpinnerIcon } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { CreatePlaylistForm } from '/@/renderer/features/playlists/components/create-playlist-form';
@@ -16,6 +15,7 @@ import { LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
 import { PlaylistListFilter, useCurrentServer } from '/@/renderer/store';
+import { LibraryItem, PlaylistListQuery, ServerType } from '/@/shared/types/domain-types';
 
 interface PlaylistListHeaderProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

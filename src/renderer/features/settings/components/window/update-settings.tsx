@@ -1,13 +1,12 @@
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 
-import { useSettingsStoreActions, useWindowSettings } from '../../../../store/settings.store';
-
 import { Switch } from '/@/renderer/components';
 import {
     SettingOption,
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
+import { useSettingsStoreActions, useWindowSettings } from '/@/renderer/store';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 const utils = isElectron() ? window.api.utils : null;

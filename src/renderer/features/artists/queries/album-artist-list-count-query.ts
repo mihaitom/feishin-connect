@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { AlbumArtistListQuery } from '/@/renderer/api/types';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
+import { AlbumArtistListQuery } from '/@/shared/types/domain-types';
 
 export const useAlbumArtistListCount = (args: QueryHookArgs<AlbumArtistListQuery>) => {
     const { options, query, serverId } = args;

@@ -3,7 +3,6 @@ import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 import { RiAddFill, RiSubtractFill } from 'react-icons/ri';
 
-import { LyricsOverride } from '/@/renderer/api/types';
 import { Button, NumberInput, Tooltip } from '/@/renderer/components';
 import { openLyricSearchModal } from '/@/renderer/features/lyrics/components/lyrics-search-form';
 import {
@@ -12,6 +11,7 @@ import {
     useSettingsStore,
     useSettingsStoreActions,
 } from '/@/renderer/store';
+import { LyricsOverride } from '/@/shared/types/domain-types';
 
 interface LyricsActionsProps {
     index: number;

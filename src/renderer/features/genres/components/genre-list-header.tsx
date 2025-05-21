@@ -5,7 +5,6 @@ import debounce from 'lodash/debounce';
 import { ChangeEvent, MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { GenreListQuery, LibraryItem } from '/@/renderer/api/types';
 import { PageHeader, SearchInput } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { GenreListHeaderFilters } from '/@/renderer/features/genres/components/genre-list-header-filters';
@@ -13,6 +12,7 @@ import { FilterBar, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
 import { GenreListFilter, useCurrentServer } from '/@/renderer/store';
+import { GenreListQuery, LibraryItem } from '/@/shared/types/domain-types';
 
 interface GenreListHeaderProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

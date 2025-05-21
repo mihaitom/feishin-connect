@@ -5,7 +5,6 @@ import debounce from 'lodash/debounce';
 import { type ChangeEvent, type MutableRefObject, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AlbumListQuery, LibraryItem } from '/@/renderer/api/types';
 import { PageHeader, SearchInput } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { AlbumListHeaderFilters } from '/@/renderer/features/albums/components/album-list-header-filters';
@@ -14,6 +13,7 @@ import { useContainerQuery } from '/@/renderer/hooks';
 import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
 import { AlbumListFilter, useCurrentServer, usePlayButtonBehavior } from '/@/renderer/store';
 import { titleCase } from '/@/renderer/utils';
+import { AlbumListQuery, LibraryItem } from '/@/shared/types/domain-types';
 
 interface AlbumListHeaderProps {
     genreId?: string;
@@ -34,7 +34,7 @@ export const AlbumListHeader = ({
     const server = useCurrentServer();
     const cq = useContainerQuery();
     const playButtonBehavior = usePlayButtonBehavior();
-    const genreRef = useRef<string>();
+    const genreRef = useRef<string | undefined>(undefined);
     const { filter, handlePlay, refresh, search } = useDisplayRefresh<AlbumListQuery>({
         gridRef,
         itemCount,

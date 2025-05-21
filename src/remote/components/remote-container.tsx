@@ -1,9 +1,7 @@
-import { useCallback } from 'react';
-import { Group, Image, Text, Title } from '@mantine/core';
-import { useInfo, useSend, useShowImage } from '/@/remote/store';
-import { RemoteButton } from '/@/remote/components/buttons/remote-button';
+import { Group, Image, Rating, Text, Title, Tooltip } from '@mantine/core';
 import formatDuration from 'format-duration';
 import debounce from 'lodash/debounce';
+import { useCallback } from 'react';
 import {
     RiHeartLine,
     RiPauseFill,
@@ -15,10 +13,11 @@ import {
     RiSkipForwardFill,
     RiVolumeUpFill,
 } from 'react-icons/ri';
-import { PlayerRepeat, PlayerStatus } from '/@/renderer/types';
+
+import { RemoteButton } from '/@/remote/components/buttons/remote-button';
 import { WrapperSlider } from '/@/remote/components/wrapped-slider';
-import { Tooltip } from '/@/renderer/components/tooltip';
-import { Rating } from '/@/renderer/components/rating';
+import { useInfo, useSend, useShowImage } from '/@/remote/store';
+import { PlayerRepeat, PlayerStatus } from '/@/shared/types/types';
 
 export const RemoteContainer = () => {
     const { position, repeat, shuffle, song, status, volume } = useInfo();
@@ -62,16 +61,14 @@ export const RemoteContainer = () => {
             >
                 <RemoteButton
                     disabled={!id}
+                    onClick={() => send({ event: 'previous' })}
                     tooltip="Previous track"
                     variant="default"
-                    onClick={() => send({ event: 'previous' })}
                 >
                     <RiSkipBackFill size={25} />
                 </RemoteButton>
                 <RemoteButton
                     disabled={!id}
-                    tooltip={id && status === PlayerStatus.PLAYING ? 'Pause' : 'Play'}
-                    variant="default"
                     onClick={() => {
                         if (status === PlayerStatus.PLAYING) {
                             send({ event: 'pause' });
@@ -79,6 +76,8 @@ export const RemoteContainer = () => {
                             send({ event: 'play' });
                         }
                     }}
+                    tooltip={id && status === PlayerStatus.PLAYING ? 'Pause' : 'Play'}
+                    variant="default"
                 >
                     {id && status === PlayerStatus.PLAYING ? (
                         <RiPauseFill size={25} />
@@ -88,9 +87,9 @@ export const RemoteContainer = () => {
                 </RemoteButton>
                 <RemoteButton
                     disabled={!id}
+                    onClick={() => send({ event: 'next' })}
                     tooltip="Next track"
                     variant="default"
-                    onClick={() => send({ event: 'next' })}
                 >
                     <RiSkipForwardFill size={25} />
                 </RemoteButton>
@@ -101,14 +100,15 @@ export const RemoteContainer = () => {
             >
                 <RemoteButton
                     $active={shuffle || false}
+                    onClick={() => send({ event: 'shuffle' })}
                     tooltip={shuffle ? 'Shuffle tracks' : 'Shuffle disabled'}
                     variant="default"
-                    onClick={() => send({ event: 'shuffle' })}
                 >
                     <RiShuffleFill size={25} />
                 </RemoteButton>
                 <RemoteButton
                     $active={repeat !== undefined && repeat !== PlayerRepeat.NONE}
+                    onClick={() => send({ event: 'repeat' })}
                     tooltip={`Repeat ${
                         repeat === PlayerRepeat.ONE
                             ? 'One'
@@ -117,7 +117,6 @@ export const RemoteContainer = () => {
                               : 'none'
                     }`}
                     variant="default"
-                    onClick={() => send({ event: 'repeat' })}
                 >
                     {repeat === undefined || repeat === PlayerRepeat.ONE ? (
                         <RiRepeatOneLine size={25} />
@@ -128,13 +127,13 @@ export const RemoteContainer = () => {
                 <RemoteButton
                     $active={song?.userFavorite}
                     disabled={!id}
-                    tooltip={song?.userFavorite ? 'Unfavorite' : 'Favorite'}
-                    variant="default"
                     onClick={() => {
                         if (!id) return;
 
                         send({ event: 'favorite', favorite: !song.userFavorite, id });
                     }}
+                    tooltip={song?.userFavorite ? 'Unfavorite' : 'Favorite'}
+                    variant="default"
                 >
                     <RiHeartLine size={25} />
                 </RemoteButton>
@@ -145,10 +144,10 @@ export const RemoteContainer = () => {
                             openDelay={1000}
                         >
                             <Rating
-                                sx={{ margin: 'auto' }}
-                                value={song.userRating ?? 0}
                                 onChange={debouncedSetRating}
                                 onDoubleClick={() => debouncedSetRating(0)}
+                                sx={{ margin: 'auto' }}
+                                value={song.userRating ?? 0}
                             />
                         </Tooltip>
                     </div>
@@ -159,14 +158,15 @@ export const RemoteContainer = () => {
                     label={(value) => formatDuration(value * 1e3)}
                     leftLabel={formatDuration(position * 1e3)}
                     max={song.duration / 1e3}
+                    onChangeEnd={(e) => send({ event: 'position', position: e })}
                     rightLabel={formatDuration(song.duration)}
                     value={position}
-                    onChangeEnd={(e) => send({ event: 'position', position: e })}
                 />
             )}
             <WrapperSlider
                 leftLabel={<RiVolumeUpFill size={20} />}
                 max={100}
+                onChangeEnd={(e) => send({ event: 'volume', volume: e })}
                 rightLabel={
                     <Text
                         size="xs"
@@ -176,12 +176,11 @@ export const RemoteContainer = () => {
                     </Text>
                 }
                 value={volume ?? 0}
-                onChangeEnd={(e) => send({ event: 'volume', volume: e })}
             />
             {showImage && (
                 <Image
-                    src={song?.imageUrl?.replaceAll(/&(size|width|height=\d+)/g, '')}
                     onError={() => send({ event: 'proxy' })}
+                    src={song?.imageUrl?.replaceAll(/&(size|width|height=\d+)/g, '')}
                 />
             )}
         </>

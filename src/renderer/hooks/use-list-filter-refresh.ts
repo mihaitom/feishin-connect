@@ -7,8 +7,8 @@ import { MutableRefObject, useCallback, useMemo } from 'react';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { BasePaginatedResponse, LibraryItem, ServerListItem } from '/@/renderer/api/types';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
+import { BasePaginatedResponse, LibraryItem, ServerListItem } from '/@/shared/types/domain-types';
 
 export interface UseHandleListFilterChangeProps {
     isClientSideSort?: boolean;

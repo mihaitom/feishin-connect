@@ -5,7 +5,6 @@ import { generatePath, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { AlbumDetailResponse, LibraryItem, ServerType } from '/@/renderer/api/types';
 import { Rating, Text } from '/@/renderer/components';
 import { useAlbumDetail } from '/@/renderer/features/albums/queries/album-detail-query';
 import { LibraryHeader, useSetRating } from '/@/renderer/features/shared';
@@ -15,6 +14,7 @@ import { queryClient } from '/@/renderer/lib/react-query';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
+import { AlbumDetailResponse, LibraryItem, ServerType } from '/@/shared/types/domain-types';
 
 interface AlbumDetailHeaderProps {
     background: {

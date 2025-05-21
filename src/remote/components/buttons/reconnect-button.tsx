@@ -1,6 +1,7 @@
+import { RiRestartLine } from 'react-icons/ri';
+
 import { RemoteButton } from '/@/remote/components/buttons/remote-button';
 import { useConnected, useReconnect } from '/@/remote/store';
-import { RiRestartLine } from 'react-icons/ri';
 
 export const ReconnectButton = () => {
     const connected = useConnected();
@@ -10,10 +11,10 @@ export const ReconnectButton = () => {
         <RemoteButton
             $active={!connected}
             mr={5}
+            onClick={() => reconnect()}
             size="xl"
             tooltip={connected ? 'Reconnect' : 'Not connected. Reconnect.'}
             variant="default"
-            onClick={() => reconnect()}
         >
             <RiRestartLine size={30} />
         </RemoteButton>

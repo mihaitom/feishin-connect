@@ -6,18 +6,17 @@ import { RiCloseFill, RiSearchLine } from 'react-icons/ri';
 import { generatePath, useNavigate } from 'react-router';
 import styled from 'styled-components';
 
-import { GoToCommands } from './go-to-commands';
-import { HomeCommands } from './home-commands';
-
-import { LibraryItem } from '/@/renderer/api/types';
 import { Button, Modal, Paper, Spinner, TextInput } from '/@/renderer/components';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
+import { GoToCommands } from '/@/renderer/features/search/components/go-to-commands';
+import { HomeCommands } from '/@/renderer/features/search/components/home-commands';
 import { LibraryCommandItem } from '/@/renderer/features/search/components/library-command-item';
 import { ServerCommands } from '/@/renderer/features/search/components/server-commands';
 import { useSearch } from '/@/renderer/features/search/queries/search-query';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface CommandPaletteProps {
     modalProps: (typeof useDisclosure)['arguments'];

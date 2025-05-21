@@ -1,5 +1,4 @@
-import { electronApp, is, optimizer } from '@electron-toolkit/utils';
-import { constants } from 'buffer';
+import { is } from '@electron-toolkit/utils';
 import {
     app,
     BrowserWindow,
@@ -19,7 +18,7 @@ import {
 import electronLocalShortcut from 'electron-localshortcut';
 import log from 'electron-log/main';
 import { autoUpdater } from 'electron-updater';
-import { access, readFile, writeFile } from 'fs';
+import { access, constants, readFile, writeFile } from 'fs';
 import path, { join } from 'path';
 import { deflate, inflate } from 'zlib';
 
@@ -35,6 +34,8 @@ import {
     isWindows,
 } from './utils';
 import './features';
+
+import { TitleTheme } from '/@/shared/types/types';
 
 export default class AppUpdater {
     constructor() {
@@ -66,27 +67,31 @@ let exitFromTray = false;
 let forceQuit = false;
 
 if (process.env.NODE_ENV === 'production') {
-    const sourceMapSupport = require('source-map-support');
-    sourceMapSupport.install();
+    import('source-map-support').then((sourceMapSupport) => {
+        sourceMapSupport.install();
+    });
 }
 
 const isDevelopment = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDevelopment) {
-    require('electron-debug')();
+    import('electron-debug').then((electronDebug) => {
+        electronDebug.default();
+    });
 }
 
 const installExtensions = async () => {
-    const installer = require('electron-devtools-installer');
-    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-    const extensions = ['REACT_DEVELOPER_TOOLS', 'REDUX_DEVTOOLS'];
+    import('electron-devtools-installer').then((installer) => {
+        const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+        const extensions = ['REACT_DEVELOPER_TOOLS', 'REDUX_DEVTOOLS'];
 
-    return installer
-        .default(
-            extensions.map((name) => installer[name]),
-            forceDownload,
-        )
-        .catch(console.log);
+        return installer
+            .default(
+                extensions.map((name) => installer[name]),
+                forceDownload,
+            )
+            .catch(console.log);
+    });
 };
 
 const RESOURCES_PATH = app.isPackaged
@@ -393,7 +398,7 @@ async function createWindow(first = true): Promise<void> {
         mainWindow = null;
     });
 
-    const saved = false;
+    let saved = false;
 
     mainWindow.on('close', (event) => {
         store.set('bounds', mainWindow?.getNormalBounds());
@@ -446,7 +451,7 @@ async function createWindow(first = true): Promise<void> {
         }
     });
 
-    mainWindow.on('minimize', (event: any) => {
+    (mainWindow as any).on('minimize', (event: any) => {
         if (store.get('window_minimize_to_tray') === true) {
             event.preventDefault();
             mainWindow?.hide();
@@ -632,22 +637,22 @@ if (!singleInstance) {
 
     app.whenReady()
         .then(() => {
-            //   protocol.handle('feishin', async (request) => {
-            //     const filePath = `file://${request.url.slice('feishin://'.length)}`
-            //     const response = await net.fetch(filePath)
-            //     const contentType = response.headers.get('content-type')
+            protocol.handle('feishin', async (request) => {
+                const filePath = `file://${request.url.slice('feishin://'.length)}`;
+                const response = await net.fetch(filePath);
+                const contentType = response.headers.get('content-type');
 
-            //     if (!contentType || !FONT_HEADERS.includes(contentType)) {
-            //       getMainWindow()?.webContents.send('custom-font-error', filePath)
+                if (!contentType || !FONT_HEADERS.includes(contentType)) {
+                    getMainWindow()?.webContents.send('custom-font-error', filePath);
 
-            //       return new Response(null, {
-            //         status: 403,
-            //         statusText: 'Forbidden'
-            //       })
-            //     }
+                    return new Response(null, {
+                        status: 403,
+                        statusText: 'Forbidden',
+                    });
+                }
 
-            //     return response
-            //   })
+                return response;
+            });
 
             createWindow();
             if (store.get('window_enable_tray', true)) {

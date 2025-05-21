@@ -6,7 +6,7 @@ import { Spinner } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useListStoreByKey } from '/@/renderer/store';
-import { ListDisplayType } from '/@/renderer/types';
+import { ListDisplayType } from '/@/shared/types/types';
 
 const SongListTableView = lazy(() =>
     import('/@/renderer/features/songs/components/song-list-table-view').then((module) => ({

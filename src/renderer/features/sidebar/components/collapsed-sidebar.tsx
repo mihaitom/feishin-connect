@@ -12,7 +12,7 @@ import { CollapsedSidebarItem } from '/@/renderer/features/sidebar/components/co
 import { SidebarIcon } from '/@/renderer/features/sidebar/components/sidebar-icon';
 import { AppMenu } from '/@/renderer/features/titlebar/components/app-menu';
 import { SidebarItemType, useGeneralSettings, useWindowSettings } from '/@/renderer/store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const SidebarContainer = styled(motion.div)<{ $windowBarStyle: Platform }>`
     display: flex;

@@ -11,7 +11,7 @@ import {
     useGeneralSettings,
     useSettingsStoreActions,
 } from '/@/renderer/store/settings.store';
-import { Play } from '/@/renderer/types';
+import { Play } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

@@ -7,15 +7,14 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import i18n from '/@/i18n/i18n';
+import { ScrollArea, Spinner, Text, TextInput } from '/@/renderer/components';
+import { useLyricSearch } from '/@/renderer/features/lyrics/queries/lyric-search-query';
 import {
     InternetProviderLyricSearchResponse,
     LyricSource,
     LyricsOverride,
-} from '../../../api/types';
-import { useLyricSearch } from '../queries/lyric-search-query';
-
-import i18n from '/@/i18n/i18n';
-import { ScrollArea, Spinner, Text, TextInput } from '/@/renderer/components';
+} from '/@/shared/types/domain-types';
 
 const SearchItem = styled.button`
     all: unset;

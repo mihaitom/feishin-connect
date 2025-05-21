@@ -1,3 +1,12 @@
+import { ndApiClient } from '/@/renderer/api/navidrome/navidrome-api';
+import { ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
+import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
+import { NDSongListSort } from '/@/shared/api/navidrome.types';
+import { ndNormalize } from '/@/shared/api/navidrome/navidrome-normalize';
+import { ndType } from '/@/shared/api/navidrome/navidrome-types';
+import { ssNormalize } from '/@/shared/api/subsonic/subsonic-normalize';
+import { SubsonicExtensions } from '/@/shared/api/subsonic/subsonic-types';
+import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
 import {
     albumArtistListSortMap,
     albumListSortMap,
@@ -12,18 +21,8 @@ import {
     songListSortMap,
     sortOrderMap,
     userListSortMap,
-} from '../types';
-
-import { ServerFeature, ServerFeatures } from '/@/renderer/api/features-types';
-import { NDSongListSort } from '/@/renderer/api/navidrome.types';
-import { ndApiClient } from '/@/renderer/api/navidrome/navidrome-api';
-import { ndNormalize } from '/@/renderer/api/navidrome/navidrome-normalize';
-import { ndType } from '/@/renderer/api/navidrome/navidrome-types';
-import { ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
-import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
-import { ssNormalize } from '/@/renderer/api/subsonic/subsonic-normalize';
-import { SubsonicExtensions } from '/@/renderer/api/subsonic/subsonic-types';
-import { getFeatures, hasFeature, VersionInfo } from '/@/renderer/api/utils';
+} from '/@/shared/types/domain-types';
+import { ServerFeature, ServerFeatures } from '/@/shared/types/features-types';
 
 const VERSION_INFO: VersionInfo = [
     ['0.55.0', { [ServerFeature.BFR]: [1] }],

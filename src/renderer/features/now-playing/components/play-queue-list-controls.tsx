@@ -14,16 +14,15 @@ import {
     RiShuffleLine,
 } from 'react-icons/ri';
 
-import { usePlayerStore, useSetCurrentTime } from '../../../store/player.store';
-
-import { Song } from '/@/renderer/api/types';
 import { Button, Popover } from '/@/renderer/components';
 import { TableConfigDropdown } from '/@/renderer/components/virtual-table';
 import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { usePlayerControls, useQueueControls } from '/@/renderer/store';
+import { usePlayerStore, useSetCurrentTime } from '/@/renderer/store/player.store';
 import { usePlaybackType } from '/@/renderer/store/settings.store';
-import { PlaybackType, TableType } from '/@/renderer/types';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
+import { Song } from '/@/shared/types/domain-types';
+import { PlaybackType, TableType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 

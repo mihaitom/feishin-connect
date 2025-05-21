@@ -13,37 +13,6 @@ const LYRICS_URL = 'https://music.163.com/api/song/lyric';
 
 // Adapted from https://github.com/NyaomiDEV/Sunamu/blob/master/src/main/lyricproviders/netease.ts
 
-export interface Album {
-    artist: Artist;
-    copyrightId: number;
-    id: number;
-    mark: number;
-    name: string;
-    picId: number;
-    publishTime: number;
-    size: number;
-    status: number;
-    transNames?: string[];
-}
-
-export interface Artist {
-    albumSize: number;
-    alias: any[];
-    fansGroup: null;
-    id: number;
-    img1v1: number;
-    img1v1Url: string;
-    name: string;
-    picId: number;
-    picUrl: null;
-    trans: null;
-}
-
-export interface NetEaseResponse {
-    code: number;
-    result: Result;
-}
-
 export interface Result {
     hasMore: boolean;
     songCount: number;
@@ -66,6 +35,37 @@ export interface Song {
     rUrl: null;
     status: number;
     transNames?: string[];
+}
+
+interface Album {
+    artist: Artist;
+    copyrightId: number;
+    id: number;
+    mark: number;
+    name: string;
+    picId: number;
+    publishTime: number;
+    size: number;
+    status: number;
+    transNames?: string[];
+}
+
+interface Artist {
+    albumSize: number;
+    alias: any[];
+    fansGroup: null;
+    id: number;
+    img1v1: number;
+    img1v1Url: string;
+    name: string;
+    picId: number;
+    picUrl: null;
+    trans: null;
+}
+
+interface NetEaseResponse {
+    code: number;
+    result: Result;
 }
 
 export async function getLyricsBySongId(songId: string): Promise<null | string> {

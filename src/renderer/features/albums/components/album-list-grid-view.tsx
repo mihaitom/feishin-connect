@@ -6,13 +6,6 @@ import { ListOnScrollProps } from 'react-window';
 
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    Album,
-    AlbumListQuery,
-    AlbumListResponse,
-    AlbumListSort,
-    LibraryItem,
-} from '/@/renderer/api/types';
 import { ALBUM_CARD_ROWS } from '/@/renderer/components';
 import {
     VirtualGridAutoSizerContainer,
@@ -23,7 +16,14 @@ import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
-import { CardRow, ListDisplayType } from '/@/renderer/types';
+import {
+    Album,
+    AlbumListQuery,
+    AlbumListResponse,
+    AlbumListSort,
+    LibraryItem,
+} from '/@/shared/types/domain-types';
+import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 export const AlbumListGridView = ({ gridRef, itemCount }: any) => {
     const queryClient = useQueryClient();
@@ -134,7 +134,7 @@ export const AlbumListGridView = ({ gridRef, itemCount }: any) => {
             stale: false,
         });
 
-        const itemData = [];
+        const itemData: Album[] = [];
 
         for (const [, data] of queriesFromCache) {
             const { items, startIndex } = data || {};

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-cycle */
 import type { ICellRendererParams } from '@ag-grid-community/core';
 
 import { RiHeartFill, RiHeartLine } from 'react-icons/ri';

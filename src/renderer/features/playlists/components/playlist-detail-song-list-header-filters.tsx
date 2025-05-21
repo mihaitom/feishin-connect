@@ -22,13 +22,6 @@ import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import {
-    LibraryItem,
-    PlaylistSongListQuery,
-    ServerType,
-    SongListSort,
-    SortOrder,
-} from '/@/renderer/api/types';
-import {
     Button,
     ConfirmModal,
     DropdownMenu,
@@ -55,7 +48,14 @@ import {
     useSetPlaylistStore,
     useSetPlaylistTablePagination,
 } from '/@/renderer/store';
-import { ListDisplayType, Play, TableColumn } from '/@/renderer/types';
+import {
+    LibraryItem,
+    PlaylistSongListQuery,
+    ServerType,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, Play, TableColumn } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [

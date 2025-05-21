@@ -7,10 +7,11 @@ import { z } from 'zod';
 import packageJson from '../../../../package.json';
 
 import i18n from '/@/i18n/i18n';
-import { jfType } from '/@/renderer/api/jellyfin/jellyfin-types';
-import { ServerListItem } from '/@/renderer/api/types';
-import { authenticationFailure, getClientType } from '/@/renderer/api/utils';
+import { authenticationFailure } from '/@/renderer/api/utils';
 import { useAuthStore } from '/@/renderer/store';
+import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
+import { getClientType } from '/@/shared/api/utils';
+import { ServerListItem } from '/@/shared/types/domain-types';
 
 const c = initContract();
 

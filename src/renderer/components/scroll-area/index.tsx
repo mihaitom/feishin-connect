@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import type { ScrollAreaProps as MantineScrollAreaProps } from '@mantine/core';
 
 import { ScrollArea as MantineScrollArea } from '@mantine/core';
@@ -10,7 +9,7 @@ import styled from 'styled-components';
 
 import { PageHeader, PageHeaderProps } from '/@/renderer/components/page-header';
 import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const DragContainer = styled.div`
     position: absolute;

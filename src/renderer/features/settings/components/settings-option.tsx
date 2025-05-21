@@ -62,8 +62,3 @@ export const SettingsOptions = ({ control, description, note, title }: SettingsO
         </>
     );
 };
-
-SettingsOptions.defaultProps = {
-    description: undefined,
-    note: undefined,
-};

@@ -3,15 +3,14 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 import { useMemo, useRef } from 'react';
 import { useParams } from 'react-router';
 
-import { LibraryItem } from '../../../api/types';
-import { useCurrentServer } from '../../../store/auth.store';
-
 import { ListContext } from '/@/renderer/context/list-context';
 import { AlbumArtistDetailTopSongsListContent } from '/@/renderer/features/artists/components/album-artist-detail-top-songs-list-content';
 import { AlbumArtistDetailTopSongsListHeader } from '/@/renderer/features/artists/components/album-artist-detail-top-songs-list-header';
 import { useAlbumArtistDetail } from '/@/renderer/features/artists/queries/album-artist-detail-query';
 import { useTopSongsList } from '/@/renderer/features/artists/queries/top-songs-list-query';
 import { AnimatedPage } from '/@/renderer/features/shared';
+import { useCurrentServer } from '/@/renderer/store/auth.store';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 const AlbumArtistDetailTopSongsListRoute = () => {
     const tableRef = useRef<AgGridReactType | null>(null);

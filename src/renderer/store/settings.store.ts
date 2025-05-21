@@ -9,11 +9,12 @@ import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 
 import i18n from '/@/i18n/i18n';
-import { LibraryItem, LyricSource } from '/@/renderer/api/types';
 import { AppRoute } from '/@/renderer/router/routes';
 import { usePlayerStore } from '/@/renderer/store/player.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
-import { AppTheme } from '/@/renderer/themes/types';
+import { randomString } from '/@/renderer/utils';
+import { AppTheme } from '/@/shared/types/domain-types';
+import { LibraryItem, LyricSource } from '/@/shared/types/domain-types';
 import {
     CrossfadeStyle,
     FontType,
@@ -23,8 +24,7 @@ import {
     PlaybackType,
     TableColumn,
     TableType,
-} from '/@/renderer/types';
-import { randomString } from '/@/renderer/utils';
+} from '/@/shared/types/types';
 
 const utils = isElectron() ? window.api.utils : null;
 
@@ -110,7 +110,6 @@ const homeItems = Object.values(HomeItem).map((item) => ({
     id: item,
 }));
 
-/* eslint-disable typescript-sort-keys/string-enum */
 export enum ArtistItem {
     BIOGRAPHY = 'biography',
     COMPILATIONS = 'compilations',
@@ -118,7 +117,6 @@ export enum ArtistItem {
     SIMILAR_ARTISTS = 'similarArtists',
     TOP_SONGS = 'topSongs',
 }
-/* eslint-enable typescript-sort-keys/string-enum */
 
 const artistItems = Object.values(ArtistItem).map((item) => ({
     disabled: false,

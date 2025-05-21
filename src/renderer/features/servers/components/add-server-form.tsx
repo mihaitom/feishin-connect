@@ -8,10 +8,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { api } from '/@/renderer/api';
-import { AuthenticationResponse } from '/@/renderer/api/types';
 import { Button, PasswordInput, SegmentedControl, TextInput, toast } from '/@/renderer/components';
 import { useAuthStoreActions } from '/@/renderer/store';
-import { ServerType, toServerType } from '/@/renderer/types';
+import { AuthenticationResponse } from '/@/shared/types/domain-types';
+import { ServerType, toServerType } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

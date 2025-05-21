@@ -5,16 +5,14 @@ import { Flex, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
 import { useTranslation } from 'react-i18next';
 
-import { FilterBar } from '../../shared/components/filter-bar';
-
-import { ArtistListQuery, LibraryItem } from '/@/renderer/api/types';
 import { PageHeader, SearchInput } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ArtistListHeaderFilters } from '/@/renderer/features/artists/components/artist-list-header-filters';
-import { LibraryHeaderBar } from '/@/renderer/features/shared';
+import { FilterBar, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
 import { ArtistListFilter, useCurrentServer } from '/@/renderer/store';
+import { ArtistListQuery, LibraryItem } from '/@/shared/types/domain-types';
 
 interface ArtistListHeaderProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

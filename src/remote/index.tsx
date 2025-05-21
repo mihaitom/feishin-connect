@@ -1,5 +1,6 @@
 import { Notifications } from '@mantine/notifications';
 import { createRoot } from 'react-dom/client';
+
 import { App } from '/@/remote/app';
 
 const container = document.getElementById('root')! as HTMLElement;

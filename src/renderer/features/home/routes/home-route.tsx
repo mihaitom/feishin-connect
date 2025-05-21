@@ -5,13 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { RiRefreshLine } from 'react-icons/ri';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    AlbumListSort,
-    LibraryItem,
-    ServerType,
-    SongListSort,
-    SortOrder,
-} from '/@/renderer/api/types';
 import { FeatureCarousel, NativeScrollArea, Spinner, TextTitle } from '/@/renderer/components';
 import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel';
 import { useAlbumList } from '/@/renderer/features/albums';
@@ -25,7 +18,14 @@ import {
     useGeneralSettings,
     useWindowSettings,
 } from '/@/renderer/store';
-import { Platform } from '/@/renderer/types';
+import {
+    AlbumListSort,
+    LibraryItem,
+    ServerType,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { Platform } from '/@/shared/types/types';
 
 const HomeRoute = () => {
     const { t } = useTranslation();

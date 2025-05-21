@@ -3,12 +3,12 @@ import debounce from 'lodash/debounce';
 import { ChangeEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/renderer/api/types';
 import { NumberInput, Switch, Text } from '/@/renderer/components';
 import { SelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 import { useGenreList } from '/@/renderer/features/genres';
 import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
 import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
+import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/shared/types/domain-types';
 
 interface NavidromeSongFiltersProps {
     customFilters?: Partial<SongListFilter>;

@@ -13,7 +13,7 @@ import macMin from './assets/min-mac.png';
 
 import { useCurrentStatus, useQueueStatus } from '/@/renderer/store';
 import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform, PlayerStatus } from '/@/renderer/types';
+import { Platform, PlayerStatus } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

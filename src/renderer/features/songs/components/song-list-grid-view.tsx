@@ -6,13 +6,6 @@ import { ListOnScrollProps } from 'react-window';
 
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    LibraryItem,
-    Song,
-    SongListQuery,
-    SongListResponse,
-    SongListSort,
-} from '/@/renderer/api/types';
 import { SONG_CARD_ROWS } from '/@/renderer/components';
 import {
     VirtualGridAutoSizerContainer,
@@ -25,7 +18,14 @@ import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
 import { useEventStore } from '/@/renderer/store/event.store';
-import { CardRow, ListDisplayType } from '/@/renderer/types';
+import {
+    LibraryItem,
+    Song,
+    SongListQuery,
+    SongListResponse,
+    SongListSort,
+} from '/@/shared/types/domain-types';
+import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 interface SongListGridViewProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
@@ -145,7 +145,7 @@ export const SongListGridView = ({ gridRef, itemCount }: SongListGridViewProps) 
             stale: false,
         });
 
-        const itemData = [];
+        const itemData: Song[] = [];
 
         for (const [, data] of queriesFromCache) {
             const { items, startIndex } = data || {};

@@ -4,11 +4,11 @@ import { generatePath, Link } from 'react-router-dom';
 import { SimpleImg } from 'react-simple-img';
 import styled, { css } from 'styled-components';
 
-import { Album, AlbumArtist, Artist, LibraryItem } from '/@/renderer/api/types';
 import { CardRows } from '/@/renderer/components/card';
 import { Skeleton } from '/@/renderer/components/skeleton';
 import { GridCardControls } from '/@/renderer/components/virtual-grid/grid-card/grid-card-controls';
-import { CardRoute, CardRow, Play, PlayQueueAddOptions } from '/@/renderer/types';
+import { Album, AlbumArtist, Artist, LibraryItem } from '/@/shared/types/domain-types';
+import { CardRoute, CardRow, Play, PlayQueueAddOptions } from '/@/shared/types/types';
 
 interface BaseGridCardProps {
     controls: {
@@ -109,7 +109,7 @@ export const PosterCard = ({
 }: BaseGridCardProps & { uniqueId: string }) => {
     if (!isLoading) {
         const path = generatePath(
-            controls.route.route,
+            controls.route.route as string,
             controls.route.slugs?.reduce((acc, slug) => {
                 return {
                     ...acc,

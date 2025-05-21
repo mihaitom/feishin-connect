@@ -4,10 +4,9 @@ import { useState } from 'react';
 import { RiCheckboxBlankLine, RiCheckboxLine } from 'react-icons/ri';
 import styled from 'styled-components';
 
-import { getNodesByDiscNumber, setNodeSelection } from '../utils';
-
 import { Button } from '/@/renderer/components/button';
 import { Paper } from '/@/renderer/components/paper';
+import { getNodesByDiscNumber, setNodeSelection } from '/@/renderer/components/virtual-table/utils';
 
 const Container = styled(Paper)`
     display: flex;

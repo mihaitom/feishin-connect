@@ -7,26 +7,21 @@ import { generatePath } from 'react-router';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { QueueSong } from '/@/renderer/api/types';
 import { Badge, Text, TextTitle } from '/@/renderer/components';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import { AppRoute } from '/@/renderer/router/routes';
-import {
-    PlayerData,
-    useFullScreenPlayerStore,
-    usePlayerData,
-    usePlayerStore,
-} from '/@/renderer/store';
+import { useFullScreenPlayerStore, usePlayerData, usePlayerStore } from '/@/renderer/store';
 import { useSettingsStore } from '/@/renderer/store/settings.store';
+import { PlayerData, QueueSong } from '/@/shared/types/domain-types';
 
 const Image = styled(motion.img)<{ $useAspectRatio: boolean }>`
     position: absolute;
     max-width: 100%;
     height: 100%;
-    filter: drop-shadow(0 0 5px rgb(0 0 0 / 40%)) drop-shadow(0 0 5px rgb(0 0 0 / 40%));
-    border-radius: 5px;
     object-fit: ${({ $useAspectRatio }) => ($useAspectRatio ? 'contain' : 'cover')};
     object-position: 50% 100%;
+    filter: drop-shadow(0 0 5px rgb(0 0 0 / 40%)) drop-shadow(0 0 5px rgb(0 0 0 / 40%));
+    border-radius: 5px;
 `;
 
 const ImageContainer = styled(motion.div)`
@@ -41,7 +36,7 @@ const ImageContainer = styled(motion.div)`
 `;
 
 interface TransparentMetadataContainer {
-    opacity: number;
+    opacity?: number;
 }
 
 const MetadataContainer = styled(Stack)<TransparentMetadataContainer>`
@@ -101,7 +96,7 @@ const scaleImageUrl = (imageSize: number, url?: null | string) => {
 const ImageWithPlaceholder = ({
     useAspectRatio,
     ...props
-}: HTMLMotionProps<'img'> & { useAspectRatio: boolean }) => {
+}: HTMLMotionProps<'img'> & { placeholder?: string; useAspectRatio: boolean }) => {
     if (!props.src) {
         return (
             <Center

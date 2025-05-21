@@ -330,7 +330,8 @@ ipcMain.on('player-set-queue', async (_event, current?: string, next?: string, p
         if (current) {
             try {
                 await getMpvInstance()?.load(current, 'replace');
-            } catch (error) {
+            } catch (error: any | NodeMpvError) {
+                mpvLog({ action: `Failed to load current song` }, error);
                 await getMpvInstance()?.play();
             }
 

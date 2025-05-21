@@ -1,3 +1,2 @@
 import './core';
-
-// require(`./${process.platform}`)
+import(`./${process.platform}`);

@@ -7,15 +7,24 @@ import { join } from 'path';
 import { WebSocket, WebSocketServer, Server as WsServer } from 'ws';
 import { deflate, gzip } from 'zlib';
 
-import { getMainWindow } from '../../..';
-import { isLinux } from '../../../utils';
 import manifest from './manifest.json';
+
+import { getMainWindow } from '/@/main/index';
+import { isLinux } from '/@/main/utils';
+import { QueueSong } from '/@/shared/types/domain-types';
+import { ClientEvent, ServerEvent } from '/@/shared/types/remote-types';
+import { PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/types';
 
 let mprisPlayer: any | undefined;
 
-if (isLinux()) {
-    mprisPlayer = require('../../linux/mpris').mprisPlayer;
+async function initMpris() {
+    if (isLinux()) {
+        const mpris = await import('../../linux/mpris');
+        mprisPlayer = mpris.mprisPlayer;
+    }
 }
+
+initMpris();
 
 interface MimeType {
     css: string;
@@ -630,8 +639,8 @@ if (mprisPlayer) {
     mprisPlayer.on('loopStatus', (event: string) => {
         const repeat = event === 'Playlist' ? 'all' : event === 'Track' ? 'one' : 'none';
 
-        currentState.repeat = repeat;
-        broadcast({ data: repeat, event: 'repeat' });
+        currentState.repeat = repeat as PlayerRepeat;
+        broadcast({ data: repeat, event: 'repeat' } as ServerEvent);
     });
 
     mprisPlayer.on('shuffle', (shuffle: boolean) => {

@@ -7,11 +7,8 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "/@/renderer/*": [
-        "src/renderer/*"
-      ],
       "/@/main/*": [
-        "src/main/src/*"
+        "src/main/*"
       ],
       "/@/preload/*": [
         "src/preload/*"

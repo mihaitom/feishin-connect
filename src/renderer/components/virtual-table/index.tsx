@@ -40,16 +40,16 @@ import { useTableChange } from '/@/renderer/hooks/use-song-change';
 import { AppRoute } from '/@/renderer/router/routes';
 import { PersistedTableColumn } from '/@/renderer/store/settings.store';
 import {
-    PlayerStatus,
-    TableColumn,
-    TablePagination as TablePaginationType,
-} from '/@/renderer/types';
-import {
     formatDateAbsolute,
     formatDateAbsoluteUTC,
     formatDateRelative,
     formatSizeString,
 } from '/@/renderer/utils/format';
+import {
+    PlayerStatus,
+    TableColumn,
+    TablePagination as TablePaginationType,
+} from '/@/shared/types/types';
 
 export * from './hooks/use-click-outside-deselect';
 export * from './hooks/use-fixed-table-header';

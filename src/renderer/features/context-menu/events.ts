@@ -1,7 +1,7 @@
 import { GridOptions, RowNode } from '@ag-grid-community/core';
 import { createUseExternalEvents } from '@mantine/utils';
 
-import { LibraryItem } from '/@/renderer/api/types';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 export type ContextMenuEvents = {
     closeContextMenu: () => void;

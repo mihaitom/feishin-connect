@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { languages } from '/@/i18n/i18n';
-import { LyricSource } from '/@/renderer/api/types';
 import {
     MultiSelect,
     MultiSelectProps,
@@ -17,6 +16,7 @@ import {
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
 import { useLyricsSettings, useSettingsStoreActions } from '/@/renderer/store';
+import { LyricSource } from '/@/shared/types/domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

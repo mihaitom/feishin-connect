@@ -3,9 +3,6 @@ import { useForm } from '@mantine/form';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ServerFeature } from '/@/renderer/api/features-types';
-import { CreatePlaylistBody, ServerType, SongListSort } from '/@/renderer/api/types';
-import { hasFeature } from '/@/renderer/api/utils';
 import { Button, Switch, Text, TextInput, toast } from '/@/renderer/components';
 import {
     PlaylistQueryBuilder,
@@ -14,6 +11,9 @@ import {
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
 import { convertQueryGroupToNDQuery } from '/@/renderer/features/playlists/utils';
 import { useCurrentServer } from '/@/renderer/store';
+import { hasFeature } from '/@/shared/api/utils';
+import { CreatePlaylistBody, ServerType, SongListSort } from '/@/shared/types/domain-types';
+import { ServerFeature } from '/@/shared/types/features-types';
 
 interface CreatePlaylistFormProps {
     onCancel: () => void;

@@ -2,16 +2,15 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 
 import { useMemo, useRef } from 'react';
 
-import { useCurrentServer } from '../../../store/auth.store';
-import { useListFilterByKey } from '../../../store/list.store';
-
-import { AlbumArtistListQuery, LibraryItem } from '/@/renderer/api/types';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { AlbumArtistListContent } from '/@/renderer/features/artists/components/album-artist-list-content';
 import { AlbumArtistListHeader } from '/@/renderer/features/artists/components/album-artist-list-header';
 import { useAlbumArtistListCount } from '/@/renderer/features/artists/queries/album-artist-list-count-query';
 import { AnimatedPage } from '/@/renderer/features/shared';
+import { useCurrentServer } from '/@/renderer/store/auth.store';
+import { useListFilterByKey } from '/@/renderer/store/list.store';
+import { AlbumArtistListQuery, LibraryItem } from '/@/shared/types/domain-types';
 
 const AlbumArtistListRoute = () => {
     const gridRef = useRef<null | VirtualInfiniteGridRef>(null);

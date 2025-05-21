@@ -1,7 +1,10 @@
-import { MouseEvent, ReactNode, Ref, forwardRef } from 'react';
-import { Button, type ButtonProps as MantineButtonProps } from '@mantine/core';
-import { Tooltip } from '/@/renderer/components/tooltip';
+import { Button, type ButtonProps as MantineButtonProps, Tooltip } from '@mantine/core';
+import { forwardRef, MouseEvent, ReactNode, Ref } from 'react';
 import styled from 'styled-components';
+
+export interface ButtonProps extends StyledButtonProps {
+    tooltip: string;
+}
 
 interface StyledButtonProps extends MantineButtonProps {
     $active?: boolean;
@@ -9,10 +12,6 @@ interface StyledButtonProps extends MantineButtonProps {
     onClick?: (e: MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     onMouseDown?: (e: MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     ref: Ref<HTMLButtonElement>;
-}
-
-export interface ButtonProps extends StyledButtonProps {
-    tooltip: string;
 }
 
 const StyledButton = styled(Button)<StyledButtonProps>`
@@ -35,12 +34,12 @@ const StyledButton = styled(Button)<StyledButtonProps>`
     }
 `;
 
-export const RemoteButton = forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ children, tooltip, ...props }: ButtonProps, ref) => {
+export const RemoteButton = forwardRef<HTMLButtonElement, any>(
+    ({ children, tooltip, ...props }: any, ref) => {
         return (
             <Tooltip
-                withinPortal
                 label={tooltip}
+                withinPortal
             >
                 <StyledButton
                     {...props}
@@ -52,9 +51,3 @@ export const RemoteButton = forwardRef<HTMLButtonElement, ButtonProps>(
         );
     },
 );
-
-RemoteButton.defaultProps = {
-    $active: false,
-    onClick: undefined,
-    onMouseDown: undefined,
-};

@@ -1,7 +1,7 @@
 import type { IpcRendererEvent } from 'electron';
 
 import isElectron from 'is-electron';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import i18n, { languages } from '/@/i18n/i18n';
@@ -15,7 +15,7 @@ import {
     useGeneralSettings,
     useSettingsStoreActions,
 } from '/@/renderer/store/settings.store';
-import { FontType } from '/@/renderer/types';
+import { FontType } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 const ipc = isElectron() ? window.api.ipc : null;
@@ -68,12 +68,12 @@ export const ApplicationSettings = () => {
     const { setSettings } = useSettingsStoreActions();
     const [localFonts, setLocalFonts] = useState<Font[]>([]);
 
-    const fontList = useMemo(() => {
-        if (fontSettings.custom) {
-            return fontSettings.custom.split(/(\\|\/)/g).pop()!;
-        }
-        return '';
-    }, [fontSettings.custom]);
+    // const fontList = useMemo(() => {
+    //     if (fontSettings.custom) {
+    //         return fontSettings.custom.split(/(\\|\/)/g).pop()!;
+    //     }
+    //     return '';
+    // }, [fontSettings.custom]);
 
     const onFontError = useCallback(
         (_: IpcRendererEvent, file: string) => {
@@ -113,8 +113,9 @@ export const ApplicationSettings = () => {
                 try {
                     // WARNING (Oct 17 2023): while this query is valid for chromium-based
                     // browsers, it is still experimental, and so Typescript will complain
-                    // @ts-ignore
-                    const status = await navigator.permissions.query({ name: 'local-fonts' });
+                    const status = await navigator.permissions.query({
+                        name: 'local-fonts' as any,
+                    });
 
                     if (status.state === 'denied') {
                         throw new Error(
@@ -130,6 +131,7 @@ export const ApplicationSettings = () => {
                         })),
                     );
                 } catch (error) {
+                    console.error('Failed to get local fonts', error);
                     toast.error({
                         message: t('error.systemFontError', { postProcess: 'sentenceCase' }),
                     });
@@ -249,7 +251,6 @@ export const ApplicationSettings = () => {
                             },
                         })
                     }
-                    placeholder={fontList}
                     w={300}
                 />
             ),

@@ -1,4 +1,4 @@
-import type { TitleTheme } from '/@/renderer/types';
+import type { TitleTheme } from '/@/shared/types/types';
 
 import { ipcMain, nativeTheme, safeStorage } from 'electron';
 import Store from 'electron-store';

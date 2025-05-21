@@ -367,39 +367,3 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         );
     },
 );
-
-TextInput.defaultProps = {
-    children: undefined,
-    maxWidth: undefined,
-    width: undefined,
-};
-
-NumberInput.defaultProps = {
-    children: undefined,
-    maxWidth: undefined,
-    width: undefined,
-};
-
-PasswordInput.defaultProps = {
-    children: undefined,
-    maxWidth: undefined,
-    width: undefined,
-};
-
-FileInput.defaultProps = {
-    children: undefined,
-    maxWidth: undefined,
-    width: undefined,
-};
-
-JsonInput.defaultProps = {
-    children: undefined,
-    maxWidth: undefined,
-    width: undefined,
-};
-
-Textarea.defaultProps = {
-    children: undefined,
-    maxWidth: undefined,
-    width: undefined,
-};

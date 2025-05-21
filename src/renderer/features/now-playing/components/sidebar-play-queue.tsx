@@ -5,12 +5,12 @@ import { useRef } from 'react';
 
 import { PlayQueueListControls } from './play-queue-list-controls';
 
-import { Song } from '/@/renderer/api/types';
 import { PageHeader, Paper } from '/@/renderer/components';
 import { VirtualGridContainer } from '/@/renderer/components/virtual-grid';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform } from '/@/renderer/types';
+import { Song } from '/@/shared/types/domain-types';
+import { Platform } from '/@/shared/types/types';
 
 export const SidebarPlayQueue = () => {
     const queueRef = useRef<null | { grid: AgGridReactType<Song> }>(null);

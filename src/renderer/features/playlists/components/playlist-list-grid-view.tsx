@@ -3,29 +3,28 @@ import { MutableRefObject, useCallback, useMemo } from 'react';
 import AutoSizer, { Size } from 'react-virtualized-auto-sizer';
 import { ListOnScrollProps } from 'react-window';
 
-import { useListContext } from '../../../context/list-context';
-import { useListStoreActions } from '../../../store/list.store';
-
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    LibraryItem,
-    Playlist,
-    PlaylistListQuery,
-    PlaylistListResponse,
-    PlaylistListSort,
-} from '/@/renderer/api/types';
 import { PLAYLIST_CARD_ROWS } from '/@/renderer/components';
 import {
     VirtualGridAutoSizerContainer,
     VirtualInfiniteGrid,
     VirtualInfiniteGridRef,
 } from '/@/renderer/components/virtual-grid';
+import { useListContext } from '/@/renderer/context/list-context';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreByKey } from '/@/renderer/store';
-import { CardRow, ListDisplayType } from '/@/renderer/types';
+import { useListStoreActions } from '/@/renderer/store/list.store';
+import {
+    LibraryItem,
+    Playlist,
+    PlaylistListQuery,
+    PlaylistListResponse,
+    PlaylistListSort,
+} from '/@/shared/types/domain-types';
+import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 interface PlaylistListGridViewProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
@@ -86,7 +85,7 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
             stale: false,
         });
 
-        const itemData = [];
+        const itemData: Playlist[] = [];
 
         for (const [, data] of queriesFromCache) {
             const { items, startIndex } = data || {};

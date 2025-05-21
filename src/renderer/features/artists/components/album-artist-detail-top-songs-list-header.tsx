@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { RiAddBoxFill, RiAddCircleFill, RiMoreFill, RiPlayFill } from 'react-icons/ri';
 
-import { QueueSong } from '/@/renderer/api/types';
 import { Button, DropdownMenu, PageHeader, Paper, SpinnerIcon } from '/@/renderer/components';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { LibraryHeaderBar } from '/@/renderer/features/shared';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { Play } from '/@/renderer/types';
+import { QueueSong } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 interface AlbumArtistDetailTopSongsListHeaderProps {
     data: QueueSong[];

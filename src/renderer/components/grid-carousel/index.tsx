@@ -18,14 +18,20 @@ import 'swiper/css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperCore } from 'swiper/types';
 
-import { Album, AlbumArtist, Artist, LibraryItem, RelatedArtist } from '/@/renderer/api/types';
 import { Button } from '/@/renderer/components/button';
 import { PosterCard } from '/@/renderer/components/card/poster-card';
 import { TextTitle } from '/@/renderer/components/text-title';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { useCreateFavorite, useDeleteFavorite } from '/@/renderer/features/shared';
 import { usePlayButtonBehavior } from '/@/renderer/store';
-import { CardRoute, CardRow } from '/@/renderer/types';
+import {
+    Album,
+    AlbumArtist,
+    Artist,
+    LibraryItem,
+    RelatedArtist,
+} from '/@/shared/types/domain-types';
+import { CardRoute, CardRow } from '/@/shared/types/types';
 
 const getSlidesPerView = (windowWidth: number) => {
     if (windowWidth < 400) return 2;
@@ -178,6 +184,7 @@ export const SwiperGridCarousel = ({
                 }}
                 data={el}
                 isLoading={isLoading}
+                key={`${uniqueId}-${el.id}`}
                 uniqueId={uniqueId}
             />
         ));

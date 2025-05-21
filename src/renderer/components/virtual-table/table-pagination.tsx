@@ -7,16 +7,15 @@ import { MutableRefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiHashtag } from 'react-icons/ri';
 
-import { MotionFlex } from '../motion';
-
 import { Button } from '/@/renderer/components/button';
 import { NumberInput } from '/@/renderer/components/input';
+import { MotionFlex } from '/@/renderer/components/motion';
 import { Pagination } from '/@/renderer/components/pagination';
 import { Popover } from '/@/renderer/components/popover';
 import { Text } from '/@/renderer/components/text';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { ListKey } from '/@/renderer/store';
-import { TablePagination as TablePaginationType } from '/@/renderer/types';
+import { TablePagination as TablePaginationType } from '/@/shared/types/types';
 
 interface TablePaginationProps {
     pageKey: ListKey;

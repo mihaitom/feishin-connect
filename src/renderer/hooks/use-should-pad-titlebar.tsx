@@ -3,7 +3,7 @@ import { useLocation } from 'react-router';
 
 import { AppRoute } from '/@/renderer/router/routes';
 import { useGeneralSettings, useSidebarRightExpanded, useWindowSettings } from '/@/renderer/store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 export const useShouldPadTitlebar = () => {
     const location = useLocation();

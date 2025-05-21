@@ -7,19 +7,24 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { AlbumListQuery, GenreListSort, LibraryItem, SortOrder } from '/@/renderer/api/types';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { AlbumListContent } from '/@/renderer/features/albums/components/album-list-content';
 import { AlbumListHeader } from '/@/renderer/features/albums/components/album-list-header';
+import { useAlbumListCount } from '/@/renderer/features/albums/queries/album-list-count-query';
+import { useGenreList } from '/@/renderer/features/genres';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentServer, useListFilterByKey } from '/@/renderer/store';
-import { Play } from '/@/renderer/types';
-import { useGenreList } from '/@/renderer/features/genres';
 import { sentenceCase, titleCase } from '/@/renderer/utils';
-import { useAlbumListCount } from '/@/renderer/features/albums/queries/album-list-count-query';
+import {
+    AlbumListQuery,
+    GenreListSort,
+    LibraryItem,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 const AlbumListRoute = () => {
     const { t } = useTranslation();

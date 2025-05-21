@@ -3,10 +3,10 @@ import debounce from 'lodash/debounce';
 import { ChangeEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/renderer/api/types';
 import { Select, Switch, Text } from '/@/renderer/components';
 import { useGenreList } from '/@/renderer/features/genres';
 import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
+import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/shared/types/domain-types';
 
 interface SubsonicSongFiltersProps {
     customFilters?: Partial<SongListFilter>;

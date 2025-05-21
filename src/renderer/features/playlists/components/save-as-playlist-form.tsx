@@ -2,12 +2,16 @@ import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useTranslation } from 'react-i18next';
 
-import { ServerFeature } from '/@/renderer/api/features-types';
-import { CreatePlaylistBody, CreatePlaylistResponse, ServerType } from '/@/renderer/api/types';
-import { hasFeature } from '/@/renderer/api/utils';
 import { Button, Switch, TextInput, toast } from '/@/renderer/components';
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
 import { useCurrentServer } from '/@/renderer/store';
+import { hasFeature } from '/@/shared/api/utils';
+import {
+    CreatePlaylistBody,
+    CreatePlaylistResponse,
+    ServerType,
+} from '/@/shared/types/domain-types';
+import { ServerFeature } from '/@/shared/types/features-types';
 
 interface SaveAsPlaylistFormProps {
     body: Partial<CreatePlaylistBody>;

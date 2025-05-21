@@ -7,7 +7,7 @@ import { DrawerPlayQueue, SidebarPlayQueue } from '/@/renderer/features/now-play
 import { ResizeHandle } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useGeneralSettings, useSidebarStore, useWindowSettings } from '/@/renderer/store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const RightSidebarContainer = styled(motion.aside)`
     position: relative;

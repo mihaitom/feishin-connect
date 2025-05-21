@@ -49,13 +49,3 @@ export const _Text = ({ $noSelect, $secondary, children, font, overflow, ...rest
 };
 
 export const Text = createPolymorphicComponent<'div', TextProps>(_Text);
-
-_Text.defaultProps = {
-    $link: false,
-    $noSelect: false,
-    $secondary: false,
-    font: undefined,
-    overflow: 'visible',
-    to: '',
-    weight: 400,
-};

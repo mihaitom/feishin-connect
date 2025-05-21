@@ -5,7 +5,7 @@ module.exports = {
     createOldCatalogs: true,
     customValueTemplate: null,
     defaultNamespace: 'translation',
-    defaultValue: function (locale, namespace, key, value) {
+    defaultValue: function (locale, namespace, key) {
         return key;
     },
     failOnUpdate: false,

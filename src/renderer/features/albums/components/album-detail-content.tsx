@@ -13,13 +13,6 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    AlbumListQuery,
-    AlbumListSort,
-    LibraryItem,
-    QueueSong,
-    SortOrder,
-} from '/@/renderer/api/types';
 import { Button, Popover, Spoiler } from '/@/renderer/components';
 import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel';
 import {
@@ -47,13 +40,21 @@ import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useCurrentSong, useCurrentStatus } from '/@/renderer/store';
 import {
+    PersistedTableColumn,
     useGeneralSettings,
     usePlayButtonBehavior,
     useSettingsStoreActions,
     useTableSettings,
 } from '/@/renderer/store/settings.store';
-import { Play } from '/@/renderer/types';
 import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
+import {
+    AlbumListQuery,
+    AlbumListSort,
+    LibraryItem,
+    QueueSong,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 const isFullWidthRow = (node: RowNode) => {
     return node.id?.startsWith('disc-');
@@ -305,7 +306,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
         if (!columnsOrder) return;
 
         const columnsInSettings = tableConfig.columns;
-        const updatedColumns = [];
+        const updatedColumns: PersistedTableColumn[] = [];
         for (const column of columnsOrder) {
             const columnInSettings = columnsInSettings.find(
                 (c) => c.column === column.getColDef().colId,

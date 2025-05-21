@@ -8,18 +8,9 @@ import { ChangeEvent, MouseEvent, MutableRefObject, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiFolder2Line, RiMoreFill, RiRefreshLine, RiSettings3Fill } from 'react-icons/ri';
 
-import { useListContext } from '../../../context/list-context';
-
 import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    ArtistListQuery,
-    ArtistListSort,
-    LibraryItem,
-    ServerType,
-    SortOrder,
-} from '/@/renderer/api/types';
 import {
     Button,
     DropdownMenu,
@@ -31,6 +22,7 @@ import {
 } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ALBUMARTIST_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
+import { useListContext } from '/@/renderer/context/list-context';
 import { useRoles } from '/@/renderer/features/artists/queries/roles-query';
 import { OrderToggleButton, useMusicFolders } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
@@ -40,7 +32,14 @@ import {
     useListStoreActions,
     useListStoreByKey,
 } from '/@/renderer/store';
-import { ListDisplayType, TableColumn } from '/@/renderer/types';
+import {
+    ArtistListQuery,
+    ArtistListSort,
+    LibraryItem,
+    ServerType,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [
@@ -291,7 +290,7 @@ export const ArtistListHeaderFilters = ({ gridRef, tableRef }: ArtistListHeaderF
         (e: MouseEvent<HTMLButtonElement>) => {
             if (!e.currentTarget?.value) return;
 
-            let updatedFilters = null;
+            let updatedFilters: ArtistListFilter | null = null;
             if (e.currentTarget.value === String(filter.musicFolderId)) {
                 updatedFilters = setFilter({
                     data: { musicFolderId: undefined },

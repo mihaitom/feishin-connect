@@ -1,11 +1,14 @@
-import type { AuthenticationResponse, ControllerEndpoint, ServerType } from '/@/renderer/api/types';
-
 import i18n from '/@/i18n/i18n';
 import { JellyfinController } from '/@/renderer/api/jellyfin/jellyfin-controller';
 import { NavidromeController } from '/@/renderer/api/navidrome/navidrome-controller';
 import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
 import { toast } from '/@/renderer/components/toast/index';
 import { useAuthStore } from '/@/renderer/store';
+import {
+    AuthenticationResponse,
+    ControllerEndpoint,
+    ServerType,
+} from '/@/shared/types/domain-types';
 
 type ApiController = {
     jellyfin: ControllerEndpoint;

@@ -70,8 +70,3 @@ export const SidebarItem = ({ children, to, ...props }: ListItemProps) => {
 };
 
 SidebarItem.Link = ItemLink;
-
-SidebarItem.defaultProps = {
-    disabled: false,
-    to: undefined,
-};

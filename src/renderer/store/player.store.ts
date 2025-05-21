@@ -7,23 +7,8 @@ import { devtools, persist, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 
-import { QueueSong } from '/@/renderer/api/types';
-import { Play, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/renderer/types';
-
-export interface PlayerData {
-    current: {
-        index: number;
-        nextIndex?: number;
-        player: 1 | 2;
-        previousIndex?: number;
-        shuffledIndex: number;
-        song?: QueueSong;
-        status: PlayerStatus;
-    };
-    player1?: QueueSong;
-    player2?: QueueSong;
-    queue: QueueData;
-}
+import { PlayerData, QueueData, QueueSong } from '/@/shared/types/domain-types';
+import { Play, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
 export interface PlayerSlice extends PlayerState {
     actions: {
@@ -92,13 +77,6 @@ export interface PlayerState {
     shuffle: PlayerShuffle;
     speed: number;
     volume: number;
-}
-
-export interface QueueData {
-    current?: QueueSong;
-    length: number;
-    next?: QueueSong;
-    previous?: QueueSong;
 }
 
 export const usePlayerStore = create<PlayerSlice>()(
@@ -491,7 +469,7 @@ export const usePlayerStore = create<PlayerSlice>()(
                         },
                         incrementPlayCount: (ids) => {
                             const { default: queue } = get().queue;
-                            const foundUniqueIds = [];
+                            const foundUniqueIds: string[] = [];
 
                             for (const id of ids) {
                                 const foundIndex = queue.findIndex((song) => song.id === id);
@@ -887,7 +865,7 @@ export const usePlayerStore = create<PlayerSlice>()(
                         },
                         setFavorite: (ids, favorite) => {
                             const { default: queue } = get().queue;
-                            const foundUniqueIds = [];
+                            const foundUniqueIds: string[] = [];
 
                             for (const id of ids) {
                                 const foundIndex = queue.findIndex((song) => song.id === id);
@@ -926,7 +904,7 @@ export const usePlayerStore = create<PlayerSlice>()(
                         },
                         setRating: (ids, rating) => {
                             const { default: queue } = get().queue;
-                            const foundUniqueIds = [];
+                            const foundUniqueIds: string[] = [];
 
                             for (const id of ids) {
                                 const foundIndex = queue.findIndex((song) => song.id === id);

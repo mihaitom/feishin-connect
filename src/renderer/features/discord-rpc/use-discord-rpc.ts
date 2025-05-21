@@ -3,7 +3,6 @@ import isElectron from 'is-electron';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { controller } from '/@/renderer/api/controller';
-import { ServerType } from '/@/renderer/api/types';
 import {
     getServerById,
     useCurrentSong,
@@ -12,7 +11,8 @@ import {
     useGeneralSettings,
     usePlayerStore,
 } from '/@/renderer/store';
-import { PlayerStatus } from '/@/renderer/types';
+import { ServerType } from '/@/shared/types/domain-types';
+import { PlayerStatus } from '/@/shared/types/types';
 
 const discordRpc = isElectron() ? window.api.discordRpc : null;
 

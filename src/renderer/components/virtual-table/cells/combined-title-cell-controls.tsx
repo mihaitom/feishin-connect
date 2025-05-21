@@ -4,10 +4,10 @@ import React, { MouseEvent } from 'react';
 import { RiPlayFill } from 'react-icons/ri';
 import styled from 'styled-components';
 
-import { LibraryItem } from '/@/renderer/api/types';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { Play } from '/@/renderer/types';
+import { LibraryItem } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 type PlayButtonType = React.ComponentPropsWithoutRef<'button'> & UnstyledButtonProps;
 

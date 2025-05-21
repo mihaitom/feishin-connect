@@ -1,6 +1,8 @@
 import { ipcRenderer, IpcRendererEvent, webFrame } from 'electron';
 import Store from 'electron-store';
 
+import { TitleTheme } from '/@/shared/types/types';
+
 const store = new Store();
 
 const set = (

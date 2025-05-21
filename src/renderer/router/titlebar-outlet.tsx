@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { Titlebar } from '/@/renderer/features/titlebar/components/titlebar';
 import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const TitlebarContainer = styled.header`
     position: absolute;

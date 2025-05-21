@@ -9,7 +9,7 @@ import {
     useListFilterRefresh,
 } from '/@/renderer/hooks/use-list-filter-refresh';
 import { useListStoreActions, useListStoreByKey } from '/@/renderer/store';
-import { ListDisplayType } from '/@/renderer/types';
+import { ListDisplayType } from '/@/shared/types/types';
 
 export type UseDisplayRefreshProps = UseHandleListFilterChangeProps & {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

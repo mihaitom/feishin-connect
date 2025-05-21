@@ -5,13 +5,6 @@ import { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    instanceOfCancellationError,
-    LibraryItem,
-    QueueSong,
-    Song,
-    SongListResponse,
-} from '/@/renderer/api/types';
 import { toast } from '/@/renderer/components/toast/index';
 import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
 import { updateSong } from '/@/renderer/features/player/update-remote-song';
@@ -26,8 +19,15 @@ import {
 } from '/@/renderer/features/player/utils';
 import { useCurrentServer, usePlayerControls, usePlayerStore } from '/@/renderer/store';
 import { useGeneralSettings, usePlaybackType } from '/@/renderer/store/settings.store';
-import { Play, PlaybackType, PlayQueueAddOptions } from '/@/renderer/types';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
+import {
+    instanceOfCancellationError,
+    LibraryItem,
+    QueueSong,
+    Song,
+    SongListResponse,
+} from '/@/shared/types/domain-types';
+import { Play, PlaybackType, PlayQueueAddOptions } from '/@/shared/types/types';
 
 const getRootQueryKey = (itemType: LibraryItem, serverId: string) => {
     let queryKey;

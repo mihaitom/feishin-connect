@@ -3,9 +3,9 @@ import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { DeletePlaylistArgs, DeletePlaylistResponse } from '/@/renderer/api/types';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById, useCurrentServer } from '/@/renderer/store';
+import { DeletePlaylistArgs, DeletePlaylistResponse } from '/@/shared/types/domain-types';
 
 export const useDeletePlaylist = (args: MutationHookArgs) => {
     const { options } = args || {};

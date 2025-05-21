@@ -5,9 +5,6 @@ import { MutableRefObject } from 'react';
 import { generatePath, useNavigate } from 'react-router';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import { AppRoute } from '../../../router/routes';
-
-import { LibraryItem, QueueSong, SongListQuery } from '/@/renderer/api/types';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
 import { useCurrentSongRowStyles } from '/@/renderer/components/virtual-table/hooks/use-current-song-row-styles';
@@ -18,7 +15,9 @@ import {
     SONG_CONTEXT_MENU_ITEMS,
 } from '/@/renderer/features/context-menu/context-menu-items';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreByKey, usePlayButtonBehavior } from '/@/renderer/store';
+import { LibraryItem, QueueSong, SongListQuery } from '/@/shared/types/domain-types';
 
 interface SearchContentProps {
     tableRef: MutableRefObject<AgGridReactType | null>;

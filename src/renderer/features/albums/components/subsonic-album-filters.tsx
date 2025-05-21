@@ -3,10 +3,15 @@ import debounce from 'lodash/debounce';
 import { ChangeEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AlbumListQuery, GenreListSort, LibraryItem, SortOrder } from '/@/renderer/api/types';
 import { NumberInput, Select, Switch, Text } from '/@/renderer/components';
 import { useGenreList } from '/@/renderer/features/genres';
 import { AlbumListFilter, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
+import {
+    AlbumListQuery,
+    GenreListSort,
+    LibraryItem,
+    SortOrder,
+} from '/@/shared/types/domain-types';
 
 interface SubsonicAlbumFiltersProps {
     onFilterChange: (filters: AlbumListFilter) => void;

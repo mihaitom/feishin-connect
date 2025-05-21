@@ -5,11 +5,11 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiDeleteBin2Line, RiEdit2Fill } from 'react-icons/ri';
 
-import { ServerListItem as ServerItem } from '/@/renderer/api/types';
 import { Button, Text, TimeoutButton } from '/@/renderer/components';
 import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
 import { ServerSection } from '/@/renderer/features/servers/components/server-section';
 import { useAuthStoreActions } from '/@/renderer/store';
+import { ServerListItem as ServerItem } from '/@/shared/types/domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

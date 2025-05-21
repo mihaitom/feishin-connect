@@ -6,13 +6,18 @@ import { useTranslation } from 'react-i18next';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { PlaylistListSort, SongListQuery, SongListSort, SortOrder } from '/@/renderer/api/types';
 import { Button, MultiSelect, Switch, toast } from '/@/renderer/components';
 import { getGenreSongsById } from '/@/renderer/features/player';
 import { useAddToPlaylist } from '/@/renderer/features/playlists/mutations/add-to-playlist-mutation';
 import { usePlaylistList } from '/@/renderer/features/playlists/queries/playlist-list-query';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentServer } from '/@/renderer/store';
+import {
+    PlaylistListSort,
+    SongListQuery,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
 
 export const AddToPlaylistContextModal = ({
     id,

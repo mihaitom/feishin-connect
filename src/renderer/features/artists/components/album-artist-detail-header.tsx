@@ -3,14 +3,13 @@ import { forwardRef, Fragment, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
-import { useCurrentServer } from '../../../store/auth.store';
-
-import { LibraryItem, ServerType } from '/@/renderer/api/types';
 import { Text } from '/@/renderer/components';
 import { useAlbumArtistDetail } from '/@/renderer/features/artists/queries/album-artist-detail-query';
 import { LibraryHeader, useSetRating } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
+import { useCurrentServer } from '/@/renderer/store';
 import { formatDurationString } from '/@/renderer/utils';
+import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
 
 interface AlbumArtistDetailHeaderProps {
     background: string;

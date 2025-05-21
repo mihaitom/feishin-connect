@@ -1,4 +1,4 @@
-import type { AlbumArtist, Artist } from '/@/renderer/api/types';
+import type { AlbumArtist, Artist } from '/@/shared/types/domain-types';
 import type { ICellRendererParams } from '@ag-grid-community/core';
 
 import React from 'react';

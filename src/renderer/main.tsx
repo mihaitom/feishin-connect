@@ -9,9 +9,9 @@ import { createRoot } from 'react-dom/client';
 import 'overlayscrollbars/overlayscrollbars.css';
 
 import './styles/overlayscrollbars.css';
-import { queryClient } from './lib/react-query';
 
 import { App } from '/@/renderer/app';
+import { queryClient } from '/@/renderer/lib/react-query';
 
 function createIDBPersister(idbValidKey: IDBValidKey = 'reactQuery') {
     return {

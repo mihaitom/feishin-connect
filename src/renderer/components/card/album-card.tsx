@@ -1,4 +1,4 @@
-import type { CardRoute, CardRow, Play, PlayQueueAddOptions } from '/@/renderer/types';
+import type { CardRoute, CardRow, Play, PlayQueueAddOptions } from '/@/shared/types/types';
 
 import { Center } from '@mantine/core';
 import { useCallback } from 'react';
@@ -7,10 +7,10 @@ import { generatePath, useNavigate } from 'react-router';
 import { SimpleImg } from 'react-simple-img';
 import styled from 'styled-components';
 
-import { Album, AlbumArtist, Artist, LibraryItem } from '/@/renderer/api/types';
 import { CardControls } from '/@/renderer/components/card/card-controls';
 import { CardRows } from '/@/renderer/components/card/card-rows';
 import { Skeleton } from '/@/renderer/components/skeleton';
+import { Album, AlbumArtist, Artist, LibraryItem } from '/@/shared/types/domain-types';
 
 const CardWrapper = styled.div<{
     link?: boolean;
@@ -130,7 +130,7 @@ export const AlbumCard = ({
     const handleNavigate = useCallback(() => {
         navigate(
             generatePath(
-                route.route,
+                route.route as string,
                 route.slugs?.reduce((acc, slug) => {
                     return {
                         ...acc,
@@ -207,6 +207,7 @@ export const AlbumCard = ({
                     {(cardRows || []).map((_row: CardRow<Album>, index: number) => (
                         <Skeleton
                             height={15}
+                            key={`skeleton-${data?.id}-${index}`}
                             my={3}
                             radius="md"
                             visible

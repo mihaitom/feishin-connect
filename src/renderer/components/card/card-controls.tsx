@@ -1,4 +1,4 @@
-import type { PlayQueueAddOptions } from '/@/renderer/types';
+import type { PlayQueueAddOptions } from '/@/shared/types/types';
 import type { UnstyledButtonProps } from '@mantine/core';
 import type { MouseEvent } from 'react';
 
@@ -7,7 +7,6 @@ import React from 'react';
 import { RiHeartFill, RiHeartLine, RiMore2Fill, RiPlayFill } from 'react-icons/ri';
 import styled from 'styled-components';
 
-import { LibraryItem } from '/@/renderer/api/types';
 import { _Button } from '/@/renderer/components/button';
 import {
     ALBUM_CONTEXT_MENU_ITEMS,
@@ -15,7 +14,8 @@ import {
 } from '/@/renderer/features/context-menu/context-menu-items';
 import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { Play } from '/@/renderer/types';
+import { LibraryItem } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 type PlayButtonType = React.ComponentPropsWithoutRef<'button'> & UnstyledButtonProps;
 

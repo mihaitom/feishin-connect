@@ -2,12 +2,11 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 
 import { lazy, MutableRefObject, Suspense } from 'react';
 
-import { useListContext } from '../../../context/list-context';
-import { useListStoreByKey } from '../../../store/list.store';
-
 import { Spinner } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
-import { ListDisplayType } from '/@/renderer/types';
+import { useListContext } from '/@/renderer/context/list-context';
+import { useListStoreByKey } from '/@/renderer/store/list.store';
+import { ListDisplayType } from '/@/shared/types/types';
 
 const PlaylistListTableView = lazy(() =>
     import('/@/renderer/features/playlists/components/playlist-list-table-view').then((module) => ({

@@ -12,13 +12,11 @@ import {
     RiVolumeUpFill,
 } from 'react-icons/ri';
 
-import { useRightControls } from '../hooks/use-right-controls';
-import { PlayerButton } from './player-button';
-
-import { LibraryItem, QueueSong, ServerType, Song } from '/@/renderer/api/types';
 import { DropdownMenu, Rating } from '/@/renderer/components';
 import { Slider } from '/@/renderer/components/slider';
+import { PlayerButton } from '/@/renderer/features/player/components/player-button';
 import { PlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
+import { useRightControls } from '/@/renderer/features/player/hooks/use-right-controls';
 import { useCreateFavorite, useDeleteFavorite, useSetRating } from '/@/renderer/features/shared';
 import {
     useAppStoreActions,
@@ -32,6 +30,7 @@ import {
     useSpeed,
     useVolume,
 } from '/@/renderer/store';
+import { LibraryItem, QueueSong, ServerType, Song } from '/@/shared/types/domain-types';
 
 const ipc = isElectron() ? window.api.ipc : null;
 const remote = isElectron() ? window.api.remote : null;

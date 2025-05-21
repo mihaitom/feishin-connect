@@ -9,7 +9,7 @@ import {
 } from '/@/renderer/features/settings/components/settings-section';
 import { THEME_DATA } from '/@/renderer/hooks';
 import { useGeneralSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
-import { AppTheme } from '/@/renderer/themes/types';
+import { AppTheme } from '/@/shared/types/domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

@@ -15,7 +15,7 @@ import {
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
 } from '/@/renderer/store/full-screen-player.store';
-import { PlaybackType } from '/@/renderer/types';
+import { PlaybackType } from '/@/shared/types/types';
 
 const Visualizer = lazy(() =>
     import('/@/renderer/features/player/components/visualizer').then((module) => ({

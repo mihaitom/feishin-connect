@@ -43,6 +43,7 @@ export default tseslint.config(
             'no-unused-vars': 'off',
             'no-use-before-define': 'off',
             quotes: ['error', 'single'],
+            'react-refresh/only-export-components': 'off',
             'react/display-name': 'off',
             semi: ['error', 'always'],
         },

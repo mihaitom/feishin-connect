@@ -2,9 +2,6 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 
 import { useMemo, useRef } from 'react';
 
-import { useListStoreByKey } from '../../../store/list.store';
-
-import { GenreListQuery } from '/@/renderer/api/types';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { GenreListContent } from '/@/renderer/features/genres/components/genre-list-content';
@@ -12,6 +9,8 @@ import { GenreListHeader } from '/@/renderer/features/genres/components/genre-li
 import { useGenreList } from '/@/renderer/features/genres/queries/genre-list-query';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { useCurrentServer } from '/@/renderer/store';
+import { useListStoreByKey } from '/@/renderer/store/list.store';
+import { GenreListQuery } from '/@/shared/types/domain-types';
 
 const GenreListRoute = () => {
     const gridRef = useRef<null | VirtualInfiniteGridRef>(null);

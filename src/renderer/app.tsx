@@ -6,23 +6,13 @@ import isElectron from 'is-electron';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { initSimpleImg } from 'react-simple-img';
 
-import i18n from '../i18n/i18n';
-import { toast } from './components';
-import { useTheme } from './hooks';
-import { AppRouter } from './router/app-router';
 import './styles/global.scss';
 
 import '@ag-grid-community/styles/ag-grid.css';
 import 'overlayscrollbars/overlayscrollbars.css';
 
-import {
-    useCssSettings,
-    useHotkeySettings,
-    usePlaybackSettings,
-    useRemoteSettings,
-    useSettingsStore,
-} from './store/settings.store';
-
+import i18n from '/@/i18n/i18n';
+import { toast } from '/@/renderer/components';
 import { ContextMenuProvider } from '/@/renderer/features/context-menu';
 import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
 import { PlayQueueHandlerContext } from '/@/renderer/features/player';
@@ -30,12 +20,23 @@ import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-co
 import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-handle-playqueue-add';
 import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { getMpvProperties } from '/@/renderer/features/settings/components/playback/mpv-settings';
+import { useTheme } from '/@/renderer/hooks';
 import { useServerVersion } from '/@/renderer/hooks/use-server-version';
 import { IsUpdatedDialog } from '/@/renderer/is-updated-dialog';
-import { PlayerState, usePlayerStore, useQueueControls } from '/@/renderer/store';
-import { FontType, PlaybackType, PlayerStatus, WebAudio } from '/@/renderer/types';
+import { AppRouter } from '/@/renderer/router/app-router';
+import {
+    PlayerState,
+    useCssSettings,
+    useHotkeySettings,
+    usePlaybackSettings,
+    usePlayerStore,
+    useQueueControls,
+    useRemoteSettings,
+    useSettingsStore,
+} from '/@/renderer/store';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
 import { setQueue } from '/@/renderer/utils/set-transcoded-queue-data';
+import { FontType, PlaybackType, PlayerStatus, WebAudio } from '/@/shared/types/types';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, InfiniteRowModelModule]);
 
@@ -58,8 +59,8 @@ export const App = () => {
     const handlePlayQueueAdd = useHandlePlayQueueAdd();
     const { clearQueue, restoreQueue } = useQueueControls();
     const remoteSettings = useRemoteSettings();
-    const textStyleRef = useRef<HTMLStyleElement>();
-    const cssRef = useRef<HTMLStyleElement>();
+    const textStyleRef = useRef<HTMLStyleElement | null>(null);
+    const cssRef = useRef<HTMLStyleElement | null>(null);
     useDiscordRpc();
     useServerVersion();
 

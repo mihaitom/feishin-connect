@@ -1,11 +1,10 @@
 import { MouseEvent, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { CenterControls } from './center-controls';
-import { LeftControls } from './left-controls';
-import { RightControls } from './right-controls';
-
 import { AudioPlayer } from '/@/renderer/components';
+import { CenterControls } from '/@/renderer/features/player/components/center-controls';
+import { LeftControls } from '/@/renderer/features/player/components/left-controls';
+import { RightControls } from '/@/renderer/features/player/components/right-controls';
 import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
 import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import {
@@ -24,7 +23,7 @@ import {
     usePlaybackType,
     useSettingsStore,
 } from '/@/renderer/store/settings.store';
-import { PlaybackType } from '/@/renderer/types';
+import { PlaybackType } from '/@/shared/types/types';
 
 const PlayerbarContainer = styled.div`
     width: 100vw;
@@ -119,7 +118,7 @@ export const Playerbar = () => {
                     player2={player2}
                     ref={playersRef}
                     status={status}
-                    style={settings.style}
+                    style={settings.style as any}
                     volume={(volume / 100) ** 2}
                 />
             )}

@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
 
-import { SettingOption, SettingsSection } from '../settings-section';
-
 import { NumberInput, Slider, Switch } from '/@/renderer/components';
+import {
+    SettingOption,
+    SettingsSection,
+} from '/@/renderer/features/settings/components/settings-section';
 import { usePlaybackSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 
 export const ScrobbleSettings = () => {

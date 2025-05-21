@@ -10,7 +10,7 @@ import {
     SongListResponse,
     SongListSort,
     SortOrder,
-} from '/@/renderer/api/types';
+} from '/@/shared/types/domain-types';
 
 export const getPlaylistSongsById = async (args: {
     id: string;

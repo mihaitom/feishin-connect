@@ -10,15 +10,6 @@ import { useTranslation } from 'react-i18next';
 import { RiMore2Fill, RiSaveLine } from 'react-icons/ri';
 
 import {
-    NDSongQueryBooleanOperators,
-    NDSongQueryDateOperators,
-    NDSongQueryFields,
-    NDSongQueryNumberOperators,
-    NDSongQueryPlaylistOperators,
-    NDSongQueryStringOperators,
-} from '/@/renderer/api/navidrome.types';
-import { PlaylistListSort, SongListSort, SortOrder } from '/@/renderer/api/types';
-import {
     Button,
     DropdownMenu,
     MotionFlex,
@@ -34,7 +25,16 @@ import {
 } from '/@/renderer/features/playlists/utils';
 import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
 import { useCurrentServer } from '/@/renderer/store';
-import { QueryBuilderGroup, QueryBuilderRule } from '/@/renderer/types';
+import {
+    NDSongQueryBooleanOperators,
+    NDSongQueryDateOperators,
+    NDSongQueryFields,
+    NDSongQueryNumberOperators,
+    NDSongQueryPlaylistOperators,
+    NDSongQueryStringOperators,
+} from '/@/shared/api/navidrome.types';
+import { PlaylistListSort, SongListSort, SortOrder } from '/@/shared/types/domain-types';
+import { QueryBuilderGroup, QueryBuilderRule } from '/@/shared/types/types';
 
 type AddArgs = {
     groupIndex: number[];
@@ -184,7 +184,7 @@ export const PlaylistQueryBuilder = forwardRef(
             const getPath = (level: number) => {
                 if (level === 0) return 'group';
 
-                const str = [];
+                const str: string[] = [];
                 for (const index of groupIndex) {
                     str.push(`group[${index}]`);
                 }
@@ -225,7 +225,7 @@ export const PlaylistQueryBuilder = forwardRef(
             const getPath = (level: number) => {
                 if (level === 0) return 'group';
 
-                const str = [];
+                const str: string[] = [];
                 for (let i = 0; i < groupIndex.length; i += 1) {
                     if (i !== groupIndex.length - 1) {
                         str.push(`group[${groupIndex[i]}]`);
@@ -256,7 +256,7 @@ export const PlaylistQueryBuilder = forwardRef(
         const getRulePath = (level: number, groupIndex: number[]) => {
             if (level === 0) return 'rules';
 
-            const str = [];
+            const str: string[] = [];
             for (const index of groupIndex) {
                 str.push(`group[${index}]`);
             }
@@ -337,7 +337,7 @@ export const PlaylistQueryBuilder = forwardRef(
             }
 
             const getTypePath = () => {
-                const str = [];
+                const str: string[] = [];
                 for (let i = 0; i < groupIndex.length; i += 1) {
                     str.push(`group[${groupIndex[i]}]`);
                 }

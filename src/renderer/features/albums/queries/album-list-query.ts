@@ -1,5 +1,5 @@
-import type { AlbumListQuery, AlbumListResponse } from '/@/renderer/api/types';
 import type { QueryHookArgs } from '/@/renderer/lib/react-query';
+import type { AlbumListQuery, AlbumListResponse } from '/@/shared/types/domain-types';
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
