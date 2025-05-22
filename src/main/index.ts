@@ -90,7 +90,13 @@ const installExtensions = async () => {
                 extensions.map((name) => installer[name]),
                 forceDownload,
             )
-            .catch(console.log);
+            .then((installedExtensions) => {
+                createLog({
+                    message: `Installed extension: ${installedExtensions}`,
+                    type: 'info',
+                });
+            })
+            .catch(console.error);
     });
 };
 

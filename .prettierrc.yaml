@@ -10,3 +10,5 @@ htmlWhitespaceSensitivity: strict
 endOfLine: lf
 singleAttributePerLine: true
 bracketSpacing: true
+plugins:
+    - prettier-plugin-packagejson

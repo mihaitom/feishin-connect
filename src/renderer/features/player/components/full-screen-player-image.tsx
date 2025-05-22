@@ -14,7 +14,7 @@ import { useFullScreenPlayerStore, usePlayerData, usePlayerStore } from '/@/rend
 import { useSettingsStore } from '/@/renderer/store/settings.store';
 import { PlayerData, QueueSong } from '/@/shared/types/domain-types';
 
-const Image = styled(motion.img)<{ $useAspectRatio: boolean }>`
+const Image = styled(motion.img)<any>`
     position: absolute;
     max-width: 100%;
     height: 100%;

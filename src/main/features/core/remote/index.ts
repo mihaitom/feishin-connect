@@ -42,7 +42,6 @@ interface RemoteConfig {
 
 declare class StatefulWebSocket extends WebSocket {
     alive: boolean;
-
     auth: boolean;
 }
 
