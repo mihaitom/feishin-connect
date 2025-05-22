@@ -504,7 +504,9 @@
         "webAudio_description": "käytä web-ääntä. tämä mahdollistaa edistyneet ominaisuudet, kuten replaygainin. poista käytöstä, jos koet ongelmia",
         "startMinimized": "käynnistä pienennettynä",
         "useSystemTheme": "käytä järjestelmän teemaa",
-        "volumeWheelStep": "äänenvoimakkuusrullan askel"
+        "volumeWheelStep": "äänenvoimakkuusrullan askel",
+        "discordServeImage": "jaa {{discord}} kuvat palvelimelta",
+        "discordServeImage_description": "jaa kansikuvat {{discord}}n rich presenceä varten suoraan palvelimelta. saatavilla vain jellyfinille ja navidromelle"
     },
     "page": {
         "itemDetail": {
