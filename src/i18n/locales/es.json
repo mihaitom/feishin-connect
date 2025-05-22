@@ -257,7 +257,9 @@
         "translationTargetLanguage": "idioma final de la traducción",
         "translationTargetLanguage_description": "lengua de destino de la traducción",
         "lastfmApiKey_description": "la clave API para {{lastfm}}. Requerida para la portada",
-        "lastfmApiKey": "Clave API para {{lastfm}}"
+        "lastfmApiKey": "Clave API para {{lastfm}}",
+        "discordServeImage": "Servir imágenes de {{discord}} desde el servidor",
+        "discordServeImage_description": "Comparte el arte de la portada para el estado de actividad de {{discord}} desde el propio servidor, solo disponible para Jellyfin y Navidrome"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
@@ -375,7 +377,9 @@
         "share": "Compartir",
         "trackGain": "Ganancia de pista",
         "preview": "Vista previa",
-        "translation": "traducción"
+        "translation": "traducción",
+        "additionalParticipants": "Participantes adicionales",
+        "tags": "Etiquetas"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",
@@ -399,7 +403,8 @@
         "loginRateError": "demasiados intentos de inicio de sesión, por favor inténtalo en unos segundos",
         "badAlbum": "Estás viendo esta página porque esta canción no forma parte de un álbum. Este problema puede ocurrir si tienes una canción en el nivel superior de tu carpeta de música. Jellyfin solo agrupa pistas si están en una carpeta.",
         "networkError": "Ocurrió un error de red",
-        "openError": "No se pudo abrir el archivo"
+        "openError": "No se pudo abrir el archivo",
+        "badValue": "Opción inválida \"{{value}}\". Este valor ya no existe"
     },
     "filter": {
         "mostPlayed": "más reproducido",
