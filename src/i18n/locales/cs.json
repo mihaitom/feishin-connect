@@ -257,7 +257,9 @@
         "translationTargetLanguage": "cílový jazyk překladu",
         "translationTargetLanguage_description": "cílový jazyk pro překlad",
         "lastfmApiKey": "klíč API {{lastfm}}",
-        "lastfmApiKey_description": "klíč API pro {{lastfm}}. vyžadováno pro obaly alb"
+        "lastfmApiKey_description": "klíč API pro {{lastfm}}. vyžadováno pro obaly alb",
+        "discordServeImage": "načítat obrázky {{discord}} ze serveru",
+        "discordServeImage_description": "sdílet obaly alb pro {{discord}} rich presence ze samotného serveru, dostupné pouze pro jellyfin a navidrome"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist_one)",
@@ -375,7 +377,9 @@
         "codec": "kodek",
         "trackPeak": "vrchol skladby",
         "preview": "náhled",
-        "translation": "překlad"
+        "translation": "překlad",
+        "additionalParticipants": "další přispívající",
+        "tags": "štítky"
     },
     "table": {
         "config": {
@@ -474,7 +478,8 @@
         "loginRateError": "příliš mnoho pokusů o přihlášení, zkuste to znovu za pár vteřin",
         "badAlbum": "tuto stránku vidíte, protože tato skladba není součástí alba. tento problém může nastat, pokud máte skladbu na nejvyšší úrovni vaší složky s hudbou. jellyfin seskupuje skladby pouze, pokud se nacházejí ve složce.",
         "networkError": "vyskytla se chyba sítě",
-        "openError": "nepodařilo se otevřít soubor"
+        "openError": "nepodařilo se otevřít soubor",
+        "badValue": "neplatná možnost „{{value}}“. tato možnost již neexistuje"
     },
     "filter": {
         "mostPlayed": "nejvíce přehráváno",
