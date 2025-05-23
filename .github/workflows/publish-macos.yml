@@ -14,17 +14,15 @@ jobs:
             - name: Checkout git repo
               uses: actions/checkout@v1
 
-            - name: Install Node and NPM
-              uses: actions/setup-node@v1
+            - name: Install Node and PNPM
+              uses: pnpm/action-setup@v4
               with:
-                  node-version: 18
-                  cache: npm
+                  version: 9
 
             - name: Install dependencies
-              run: |
-                  npm install --legacy-peer-deps
+              run: pnpm install
 
-            - name: Publish releases
+            - name: Build and Publish releases
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               uses: nick-invision/retry@v2.8.2
@@ -33,7 +31,6 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      npm run postinstall
-                      npm run build
-                      npm exec electron-builder -- --publish always --mac
-                  on_retry_command: npm cache clean --force
+                      pnpm run package:mac
+                      pnpm run publish:mac
+                  on_retry_command: pnpm cache delete

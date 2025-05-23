@@ -9,7 +9,6 @@ const currentOSEnv = process.platform;
 const config: UserConfig = {
     main: {
         build: {
-            outDir: './release/app/dist/main',
             rollupOptions: {
                 external: ['source-map-support'],
             },
@@ -35,9 +34,6 @@ const config: UserConfig = {
         },
     },
     preload: {
-        build: {
-            outDir: './release/app/dist/preload',
-        },
         plugins: [externalizeDepsPlugin()],
         resolve: {
             alias: {
@@ -47,9 +43,6 @@ const config: UserConfig = {
         },
     },
     renderer: {
-        build: {
-            outDir: './release/app/dist/web',
-        },
         css: {
             modules: {
                 generateScopedName: '[name]__[local]__[hash:base64:5]',
