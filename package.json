@@ -164,5 +164,5 @@
         "vite-plugin-conditional-import": "^0.1.7",
         "vite-plugin-dynamic-import": "^1.6.0"
     },
-    "productName": "Feishin"
+    "productName": "feishin"
 }
