@@ -11,8 +11,6 @@
     "package.json"
   ],
   "compilerOptions": {
-    "typeRoots": ["./node_modules/@types"],
-    "outDir": "./out",
     "composite": true,
     "jsx": "react-jsx",
     "baseUrl": ".",

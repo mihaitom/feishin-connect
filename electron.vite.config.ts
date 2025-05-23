@@ -10,6 +10,9 @@ const config: UserConfig = {
     main: {
         build: {
             outDir: './release/app/dist/main',
+            rollupOptions: {
+                external: ['source-map-support'],
+            },
         },
         define: {
             'import.meta.env.IS_LINUX': JSON.stringify(currentOSEnv === 'linux'),
