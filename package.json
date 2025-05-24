@@ -20,9 +20,10 @@
     },
     "main": "./out/main/index.js",
     "scripts": {
-        "build": "pnpm run typecheck && pnpm run build:app && pnpm run build:remote",
-        "build:app": "electron-vite build",
+        "build": "pnpm run typecheck && pnpm run build:electron && pnpm run build:remote",
+        "build:electron": "electron-vite build",
         "build:remote": "vite build --config remote.vite.config.ts",
+        "build:web": "vite build --config web.vite.config.ts",
         "dev": "electron-vite dev",
         "dev:watch": "electron-vite dev --watch",
         "format": "prettier --write .",

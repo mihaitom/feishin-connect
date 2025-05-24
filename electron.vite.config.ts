@@ -3,6 +3,7 @@ import { externalizeDepsPlugin, UserConfig } from 'electron-vite';
 import { resolve } from 'path';
 import conditionalImportPlugin from 'vite-plugin-conditional-import';
 import dynamicImportPlugin from 'vite-plugin-dynamic-import';
+import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
 const currentOSEnv = process.platform;
 
@@ -49,7 +50,7 @@ const config: UserConfig = {
                 localsConvention: 'camelCase',
             },
         },
-        plugins: [react()],
+        plugins: [react(), ViteEjsPlugin({ web: false })],
         resolve: {
             alias: {
                 '/@/i18n': resolve('src/i18n'),

@@ -6,7 +6,10 @@
     <meta http-equiv="Content-Security-Policy" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Feishin</title>
-    <script src="settings.js"></script>
+    <% if (web) { %>
+        <link rel="icon" href="./assets/favicon.ico">
+        <script src="settings.js"></script>
+        <% } %>
 </head>
 
 <body>
