@@ -42,7 +42,9 @@
         "npm-debug.log.*": true,
         "test/**/__snapshots__": true,
         "package-lock.json": true,
-        "*.{css,sass,scss}.d.ts": true
+        "*.{css,sass,scss}.d.ts": true,
+        "out/**/*": true,
+        "dist/**/*": true
     },
     "i18n-ally.localesPaths": ["src/i18n", "src/i18n/locales"],
     "typescript.tsdk": "node_modules\\typescript\\lib",

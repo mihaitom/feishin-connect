@@ -120,7 +120,6 @@
         "@electron-toolkit/eslint-config-prettier": "^3.0.0",
         "@electron-toolkit/eslint-config-ts": "^3.0.0",
         "@electron-toolkit/tsconfig": "^1.0.1",
-        "@stylelint/postcss-css-in-js": "^0.38.0",
         "@types/electron-localshortcut": "^3.1.0",
         "@types/lodash": "^4.14.188",
         "@types/md5": "^2.3.2",
