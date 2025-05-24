@@ -148,7 +148,7 @@ async function serveFile(
     const fileName = `${file}.${extension}`;
     const path = app.isPackaged
         ? join(__dirname, '../remote', fileName)
-        : join(__dirname, '../../../../../.erb/dll', fileName);
+        : join(__dirname, '../../dist/remote', fileName);
 
     let stats: Stats;
 

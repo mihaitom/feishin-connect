@@ -20,7 +20,9 @@
     },
     "main": "./out/main/index.js",
     "scripts": {
-        "build": "pnpm run typecheck && electron-vite build",
+        "build": "pnpm run typecheck && pnpm run build:app && pnpm run build:remote",
+        "build:app": "electron-vite build",
+        "build:remote": "vite build --config remote.vite.config.ts",
         "dev": "electron-vite dev",
         "dev:watch": "electron-vite dev --watch",
         "format": "prettier --write .",
@@ -130,8 +132,6 @@
         "@types/source-map-support": "^0.5.10",
         "@types/styled-components": "^5.1.26",
         "@types/ws": "^8.18.1",
-        "@typescript-eslint/eslint-plugin": "^5.47.0",
-        "@typescript-eslint/parser": "^5.47.0",
         "@vitejs/plugin-react": "^4.3.4",
         "concurrently": "^7.1.0",
         "cross-env": "^7.0.3",
@@ -162,7 +162,8 @@
         "typescript-plugin-styled-components": "^3.0.0",
         "vite": "^6.3.5",
         "vite-plugin-conditional-import": "^0.1.7",
-        "vite-plugin-dynamic-import": "^1.6.0"
+        "vite-plugin-dynamic-import": "^1.6.0",
+        "vite-plugin-ejs": "^1.7.0"
     },
     "productName": "feishin"
 }

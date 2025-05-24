@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Feishin Remote</title>
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            const version = encodeURIComponent("<%= version %>");
+            const prod = encodeURIComponent("<%= prod %>");
+            navigator.serviceWorker.register(`/worker.js?version=${version}&prod=${prod}`);
+        }
+    </script>
+    <link rel="icon" href="./favicon.ico">
+    <script defer="defer" src="./remote.js"></script>
+    <script defer="defer" src="./worker.js"></script>
+    <link rel="stylesheet" href="./remote.css">
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+
+</html>
