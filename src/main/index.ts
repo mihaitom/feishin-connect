@@ -100,6 +100,13 @@ const installExtensions = async () => {
     });
 };
 
+const userDataPath = app.getPath('userData');
+
+if (isDevelopment) {
+    const devUserDataPath = `${userDataPath}-dev`;
+    app.setPath('userData', devUserDataPath);
+}
+
 const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
     : path.join(__dirname, '../../assets');
@@ -624,7 +631,7 @@ const FONT_HEADERS = [
     'font/woff2',
 ];
 
-const singleInstance = app.requestSingleInstanceLock();
+const singleInstance = isDevelopment ? true : app.requestSingleInstanceLock();
 
 if (!singleInstance) {
     app.quit();
