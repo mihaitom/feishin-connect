@@ -12,7 +12,7 @@ import { SongListContent } from '/@/renderer/features/songs/components/song-list
 import { SongListHeader } from '/@/renderer/features/songs/components/song-list-header';
 import { useCurrentServer, useListFilterByKey } from '/@/renderer/store';
 import { Play } from '/@/renderer/types';
-import { titleCase } from '/@/renderer/utils';
+import { sentenceCase, titleCase } from '/@/renderer/utils';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { useSongListCount } from '/@/renderer/features/songs/queries/song-list-count-query';
 
@@ -122,12 +122,13 @@ const TrackListRoute = () => {
 
     const artist = searchParams.get('artistName');
     const title = artist
-        ? t('page.trackList.artistTracks', { artist, postProcess: 'sentenceCase' })
+        ? sentenceCase(t('page.trackList.artistTracks', { artist }))
         : genreId
-          ? t('page.trackList.genreTracks', {
-                genre: titleCase(genreTitle),
-                postProcess: 'sentenceCase',
-            })
+          ? sentenceCase(
+                t('page.trackList.genreTracks', {
+                    genre: titleCase(genreTitle),
+                }),
+            )
           : undefined;
 
     return (

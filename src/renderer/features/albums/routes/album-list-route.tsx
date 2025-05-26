@@ -16,7 +16,7 @@ import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentServer, useListFilterByKey } from '/@/renderer/store';
 import { Play } from '/@/renderer/types';
 import { useGenreList } from '/@/renderer/features/genres';
-import { titleCase } from '/@/renderer/utils';
+import { sentenceCase, titleCase } from '/@/renderer/utils';
 import { useAlbumListCount } from '/@/renderer/features/albums/queries/album-list-count-query';
 
 const AlbumListRoute = () => {
@@ -129,9 +129,9 @@ const AlbumListRoute = () => {
 
     const artist = searchParams.get('artistName');
     const title = artist
-        ? t('page.albumList.artistAlbums', { artist, postProcess: 'sentenceCase' })
+        ? sentenceCase(t('page.albumList.artistAlbums', { artist }))
         : genreId
-          ? t('page.albumList.genreAlbums', { genre: titleCase(genreTitle) })
+          ? sentenceCase(t('page.albumList.genreAlbums', { genre: titleCase(genreTitle) }))
           : undefined;
 
     return (
