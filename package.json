@@ -165,5 +165,11 @@
         "vite-plugin-dynamic-import": "^1.6.0",
         "vite-plugin-ejs": "^1.7.0"
     },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "electron",
+            "esbuild"
+        ]
+    },
     "productName": "feishin"
 }
