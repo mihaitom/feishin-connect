@@ -243,12 +243,12 @@ const normalizeAlbum = (
         originalDate: item.originalDate
             ? new Date(item.originalDate).toISOString()
             : item.originalYear
-              ? new Date(item.originalYear, 0, 1).toISOString()
+              ? new Date(Date.UTC(item.originalYear, 0, 1)).toISOString()
               : null,
         playCount: item.playCount || 0,
         releaseDate: (item.releaseDate
             ? new Date(item.releaseDate)
-            : new Date(item.minYear, 0, 1)
+            : new Date(Date.UTC(item.minYear, 0, 1))
         ).toISOString(),
         releaseYear: item.minYear,
         serverId: server?.id || 'unknown',
