@@ -1,11 +1,12 @@
-import { useCallback } from 'react';
 import { Group, Stack } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
+import { useCallback } from 'react';
 import { RiExternalLinkLine } from 'react-icons/ri';
-import { Button, Dialog, Text } from './components';
-import packageJson from '../../package.json';
 
-export const IsUpdatedDialog = () => {
+import packageJson from '../../package.json';
+import { Button, Dialog, Text } from './components';
+
+export function IsUpdatedDialog() {
     const { version } = packageJson;
 
     const [value, setValue] = useLocalStorage({ key: 'version' });
@@ -31,16 +32,16 @@ export const IsUpdatedDialog = () => {
                     <Button
                         component="a"
                         href={`https://github.com/jeffvli/feishin/releases/tag/v${version}`}
+                        onClick={handleDismiss}
                         rightIcon={<RiExternalLinkLine />}
                         target="_blank"
                         variant="filled"
-                        onClick={handleDismiss}
                     >
                         View release notes
                     </Button>
                     <Button
-                        variant="default"
                         onClick={handleDismiss}
+                        variant="default"
                     >
                         Dismiss
                     </Button>
@@ -48,4 +49,4 @@ export const IsUpdatedDialog = () => {
             </Stack>
         </Dialog>
     );
-};
+}

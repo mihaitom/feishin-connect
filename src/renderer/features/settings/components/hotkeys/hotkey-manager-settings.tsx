@@ -1,17 +1,18 @@
-import { useCallback, useMemo, useState, KeyboardEvent, ChangeEvent } from 'react';
 import { Group } from '@mantine/core';
 import isElectron from 'is-electron';
 import debounce from 'lodash/debounce';
+import { ChangeEvent, KeyboardEvent, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiDeleteBinLine, RiEditLine, RiKeyboardBoxLine } from 'react-icons/ri';
 import styled from 'styled-components';
-import { Button, TextInput, Checkbox } from '/@/renderer/components';
-import { BindingActions, useHotkeySettings, useSettingsStoreActions } from '/@/renderer/store';
-import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
-import i18n from '/@/i18n/i18n';
-import { useSettingSearchContext } from '/@/renderer/features/settings/context/search-context';
 
-const ipc = isElectron() ? window.electron.ipc : null;
+import i18n from '/@/i18n/i18n';
+import { Button, Checkbox, TextInput } from '/@/renderer/components';
+import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
+import { useSettingSearchContext } from '/@/renderer/features/settings/context/search-context';
+import { BindingActions, useHotkeySettings, useSettingsStoreActions } from '/@/renderer/store';
+
+const ipc = isElectron() ? window.api.ipc : null;
 
 const BINDINGS_MAP: Record<BindingActions, string> = {
     browserBack: i18n.t('setting.hotkey', { context: 'browserBack', postProcess: 'sentenceCase' }),
@@ -114,7 +115,7 @@ export const HotkeyManagerSettings = () => {
         (binding: BindingActions, e: KeyboardEvent<HTMLInputElement>) => {
             e.preventDefault();
             const IGNORED_KEYS = ['Control', 'Alt', 'Shift', 'Meta', ' ', 'Escape'];
-            const keys = [];
+            const keys: string[] = [];
             if (e.ctrlKey) keys.push('mod');
             if (e.altKey) keys.push('alt');
             if (e.shiftKey) keys.push('shift');
@@ -258,9 +259,15 @@ export const HotkeyManagerSettings = () => {
                             value={BINDINGS_MAP[binding as keyof typeof BINDINGS_MAP]}
                         />
                         <TextInput
-                            readOnly
                             icon={<RiKeyboardBoxLine />}
                             id={`hotkey-${binding}`}
+                            onBlur={() => setSelected(null)}
+                            onChange={() => {}}
+                            onKeyDownCapture={(e) => {
+                                if (selected !== (binding as BindingActions)) return;
+                                handleSetHotkey(binding as BindingActions, e);
+                            }}
+                            readOnly
                             style={{
                                 opacity: selected === (binding as BindingActions) ? 0.8 : 1,
                                 outline: duplicateHotkeyMap.includes(
@@ -270,18 +277,15 @@ export const HotkeyManagerSettings = () => {
                                     : undefined,
                             }}
                             value={bindings[binding as keyof typeof BINDINGS_MAP].hotkey}
-                            onBlur={() => setSelected(null)}
-                            onChange={() => {}}
-                            onKeyDownCapture={(e) => {
-                                if (selected !== (binding as BindingActions)) return;
-                                handleSetHotkey(binding as BindingActions, e);
-                            }}
                         />
                         {isElectron() && (
                             <Checkbox
                                 checked={bindings[binding as keyof typeof BINDINGS_MAP].isGlobal}
                                 disabled={
                                     bindings[binding as keyof typeof BINDINGS_MAP].hotkey === ''
+                                }
+                                onChange={(e) =>
+                                    handleSetGlobalHotkey(binding as BindingActions, e)
                                 }
                                 size="xl"
                                 style={{
@@ -290,24 +294,21 @@ export const HotkeyManagerSettings = () => {
                                         ? 1
                                         : 0,
                                 }}
-                                onChange={(e) =>
-                                    handleSetGlobalHotkey(binding as BindingActions, e)
-                                }
                             />
                         )}
                         <Button
-                            variant="default"
-                            w={100}
                             onClick={() => {
                                 setSelected(binding as BindingActions);
                                 document.getElementById(`hotkey-${binding}`)?.focus();
                             }}
+                            variant="default"
+                            w={100}
                         >
                             <RiEditLine />
                         </Button>
                         <Button
-                            variant="default"
                             onClick={() => handleClearHotkey(binding as BindingActions)}
+                            variant="default"
                         >
                             <RiDeleteBinLine />
                         </Button>

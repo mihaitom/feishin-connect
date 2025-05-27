@@ -1,4 +1,5 @@
 import type { SkeletonProps as MantineSkeletonProps } from '@mantine/core';
+
 import { Skeleton as MantineSkeleton } from '@mantine/core';
 import styled from 'styled-components';
 

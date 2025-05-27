@@ -1,7 +1,8 @@
 import { useInView } from 'framer-motion';
 import { useEffect, useRef } from 'react';
+
 import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 export const useFixedTableHeader = ({ enabled }: { enabled: boolean }) => {
     const tableHeaderRef = useRef<HTMLDivElement | null>(null);

@@ -1,9 +1,5 @@
-import {
-    useSettingsStoreActions,
-    useGeneralSettings,
-    HomeItem,
-} from '../../../../store/settings.store';
 import { DraggableItems } from '/@/renderer/features/settings/components/general/draggable-items';
+import { HomeItem, useGeneralSettings, useSettingsStoreActions } from '/@/renderer/store';
 
 const HOME_ITEMS: Array<[string, string]> = [
     [HomeItem.RANDOM, 'page.home.explore'],

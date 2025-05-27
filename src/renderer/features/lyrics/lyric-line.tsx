@@ -1,10 +1,11 @@
-import { ComponentPropsWithoutRef } from 'react';
-import { TextTitle } from '/@/renderer/components/text-title';
 import { TitleProps } from '@mantine/core';
+import { ComponentPropsWithoutRef } from 'react';
 import styled from 'styled-components';
 
+import { TextTitle } from '/@/renderer/components/text-title';
+
 interface LyricLineProps extends ComponentPropsWithoutRef<'div'> {
-    alignment: 'left' | 'center' | 'right';
+    alignment: 'center' | 'left' | 'right';
     fontSize: number;
     text: string;
 }
@@ -34,7 +35,7 @@ const StyledText = styled(TextTitle)<TitleProps & { $alignment: string; $fontSiz
     }
 `;
 
-export const LyricLine = ({ text, alignment, fontSize, ...props }: LyricLineProps) => {
+export const LyricLine = ({ alignment, fontSize, text, ...props }: LyricLineProps) => {
     return (
         <StyledText
             $alignment={alignment}

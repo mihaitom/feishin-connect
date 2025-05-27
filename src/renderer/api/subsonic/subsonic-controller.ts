@@ -2,44 +2,45 @@ import dayjs from 'dayjs';
 import filter from 'lodash/filter';
 import orderBy from 'lodash/orderBy';
 import md5 from 'md5';
+
 import { ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
-import { ssNormalize } from '/@/renderer/api/subsonic/subsonic-normalize';
-import { AlbumListSortType, SubsonicExtensions } from '/@/renderer/api/subsonic/subsonic-types';
+import { randomString } from '/@/renderer/utils';
+import { ssNormalize } from '/@/shared/api/subsonic/subsonic-normalize';
+import { AlbumListSortType, SubsonicExtensions } from '/@/shared/api/subsonic/subsonic-types';
 import {
-    LibraryItem,
-    Song,
-    ControllerEndpoint,
-    sortSongList,
-    sortAlbumArtistList,
-    PlaylistListSort,
-    GenreListSort,
     AlbumListSort,
+    ControllerEndpoint,
+    GenreListSort,
+    LibraryItem,
+    PlaylistListSort,
+    Song,
+    sortAlbumArtistList,
     sortAlbumList,
     SortOrder,
-} from '/@/renderer/api/types';
-import { randomString } from '/@/renderer/utils';
-import { ServerFeatures } from '/@/renderer/api/features-types';
+    sortSongList,
+} from '/@/shared/types/domain-types';
+import { ServerFeatures } from '/@/shared/types/features-types';
 
 const ALBUM_LIST_SORT_MAPPING: Record<AlbumListSort, AlbumListSortType | undefined> = {
-    [AlbumListSort.RANDOM]: AlbumListSortType.RANDOM,
     [AlbumListSort.ALBUM_ARTIST]: AlbumListSortType.ALPHABETICAL_BY_ARTIST,
-    [AlbumListSort.PLAY_COUNT]: AlbumListSortType.FREQUENT,
-    [AlbumListSort.RECENTLY_ADDED]: AlbumListSortType.NEWEST,
-    [AlbumListSort.FAVORITED]: AlbumListSortType.STARRED,
-    [AlbumListSort.YEAR]: AlbumListSortType.BY_YEAR,
-    [AlbumListSort.NAME]: AlbumListSortType.ALPHABETICAL_BY_NAME,
-    [AlbumListSort.COMMUNITY_RATING]: undefined,
-    [AlbumListSort.DURATION]: undefined,
-    [AlbumListSort.CRITIC_RATING]: undefined,
-    [AlbumListSort.RATING]: undefined,
     [AlbumListSort.ARTIST]: undefined,
+    [AlbumListSort.COMMUNITY_RATING]: undefined,
+    [AlbumListSort.CRITIC_RATING]: undefined,
+    [AlbumListSort.DURATION]: undefined,
+    [AlbumListSort.FAVORITED]: AlbumListSortType.STARRED,
+    [AlbumListSort.NAME]: AlbumListSortType.ALPHABETICAL_BY_NAME,
+    [AlbumListSort.PLAY_COUNT]: AlbumListSortType.FREQUENT,
+    [AlbumListSort.RANDOM]: AlbumListSortType.RANDOM,
+    [AlbumListSort.RATING]: undefined,
+    [AlbumListSort.RECENTLY_ADDED]: AlbumListSortType.NEWEST,
     [AlbumListSort.RECENTLY_PLAYED]: AlbumListSortType.RECENT,
     [AlbumListSort.RELEASE_DATE]: undefined,
     [AlbumListSort.SONG_COUNT]: undefined,
+    [AlbumListSort.YEAR]: AlbumListSortType.BY_YEAR,
 };
 
 export const SubsonicController: ControllerEndpoint = {
-    addToPlaylist: async ({ body, query, apiClientProps }) => {
+    addToPlaylist: async ({ apiClientProps, body, query }) => {
         const res = await ssApiClient(apiClientProps).updatePlaylist({
             query: {
                 playlistId: query.id,
@@ -98,7 +99,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     createFavorite: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).createFavorite({
             query: {
@@ -114,7 +115,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return null;
     },
-    createPlaylist: async ({ body, apiClientProps }) => {
+    createPlaylist: async ({ apiClientProps, body }) => {
         const res = await ssApiClient(apiClientProps).createPlaylist({
             query: {
                 name: body.name,
@@ -131,7 +132,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     deleteFavorite: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).removeFavorite({
             query: {
@@ -148,7 +149,7 @@ export const SubsonicController: ControllerEndpoint = {
         return null;
     },
     deletePlaylist: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).deletePlaylist({
             query: {
@@ -163,7 +164,7 @@ export const SubsonicController: ControllerEndpoint = {
         return null;
     },
     getAlbumArtistDetail: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const artistInfoRes = await ssApiClient(apiClientProps).getArtistInfo({
             query: {
@@ -198,7 +199,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     getAlbumArtistList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).getArtists({
             query: {
@@ -237,7 +238,7 @@ export const SubsonicController: ControllerEndpoint = {
     getAlbumArtistListCount: (args) =>
         SubsonicController.getAlbumArtistList(args).then((res) => res!.totalRecordCount!),
     getAlbumDetail: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).getAlbum({
             query: {
@@ -252,7 +253,7 @@ export const SubsonicController: ControllerEndpoint = {
         return ssNormalize.album(res.body.album, apiClientProps.server);
     },
     getAlbumList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         if (query.searchTerm) {
             const res = await ssApiClient(apiClientProps).search3({
@@ -286,7 +287,7 @@ export const SubsonicController: ControllerEndpoint = {
         let type = ALBUM_LIST_SORT_MAPPING[query.sortBy] ?? AlbumListSortType.ALPHABETICAL_BY_NAME;
 
         if (query.artistIds) {
-            const promises = [];
+            const promises: any[] = [];
 
             for (const artistId of query.artistIds) {
                 promises.push(
@@ -398,7 +399,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     getAlbumListCount: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         if (query.searchTerm) {
             let fetchNextPage = true;
@@ -516,7 +517,7 @@ export const SubsonicController: ControllerEndpoint = {
         return totalRecordCount;
     },
     getArtistList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).getArtists({
             query: {
@@ -570,7 +571,7 @@ export const SubsonicController: ControllerEndpoint = {
             '&c=Feishin'
         );
     },
-    getGenreList: async ({ query, apiClientProps }) => {
+    getGenreList: async ({ apiClientProps, query }) => {
         const sortOrder = query.sortOrder.toLowerCase() as 'asc' | 'desc';
 
         const res = await ssApiClient(apiClientProps).getGenres({});
@@ -624,7 +625,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     getPlaylistDetail: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).getPlaylist({
             query: {
@@ -638,7 +639,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return ssNormalize.playlist(res.body.playlist, apiClientProps.server);
     },
-    getPlaylistList: async ({ query, apiClientProps }) => {
+    getPlaylistList: async ({ apiClientProps, query }) => {
         const sortOrder = query.sortOrder.toLowerCase() as 'asc' | 'desc';
 
         const res = await ssApiClient(apiClientProps).getPlaylists({});
@@ -686,7 +687,7 @@ export const SubsonicController: ControllerEndpoint = {
             totalRecordCount: results.length,
         };
     },
-    getPlaylistListCount: async ({ query, apiClientProps }) => {
+    getPlaylistListCount: async ({ apiClientProps, query }) => {
         const res = await ssApiClient(apiClientProps).getPlaylists({});
 
         if (res.status !== 200) {
@@ -705,7 +706,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return results.length;
     },
-    getPlaylistSongList: async ({ query, apiClientProps }) => {
+    getPlaylistSongList: async ({ apiClientProps, query }) => {
         const res = await ssApiClient(apiClientProps).getPlaylist({
             query: {
                 id: query.id,
@@ -731,7 +732,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     getRandomSongList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).getRandomSongList({
             query: {
@@ -842,7 +843,7 @@ export const SubsonicController: ControllerEndpoint = {
         }, []);
     },
     getSongDetail: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).getSong({
             query: {
@@ -856,9 +857,9 @@ export const SubsonicController: ControllerEndpoint = {
 
         return ssNormalize.song(res.body.song, apiClientProps.server);
     },
-    getSongList: async ({ query, apiClientProps }) => {
-        const fromAlbumPromises = [];
-        const artistDetailPromises = [];
+    getSongList: async ({ apiClientProps, query }) => {
+        const fromAlbumPromises: any[] = [];
+        const artistDetailPromises: any[] = [];
         let results: any[] = [];
 
         if (query.searchTerm) {
@@ -1028,7 +1029,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     getSongListCount: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         let fetchNextPage = true;
         let startIndex = 0;
@@ -1196,7 +1197,7 @@ export const SubsonicController: ControllerEndpoint = {
         return totalRecordCount;
     },
     getStructuredLyrics: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).getStructuredLyrics({
             query: {
@@ -1238,7 +1239,7 @@ export const SubsonicController: ControllerEndpoint = {
         });
     },
     getTopSongs: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).getTopSongsList({
             query: {
@@ -1261,7 +1262,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     getTranscodingUrl: (args) => {
-        const { base, format, bitrate } = args.query;
+        const { base, bitrate, format } = args.query;
         let url = base;
         if (format) {
             url += `&format=${format}`;
@@ -1272,7 +1273,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return url;
     },
-    removeFromPlaylist: async ({ query, apiClientProps }) => {
+    removeFromPlaylist: async ({ apiClientProps, query }) => {
         const res = await ssApiClient(apiClientProps).updatePlaylist({
             query: {
                 playlistId: query.id,
@@ -1287,7 +1288,7 @@ export const SubsonicController: ControllerEndpoint = {
         return null;
     },
     scrobble: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).scrobble({
             query: {
@@ -1304,7 +1305,7 @@ export const SubsonicController: ControllerEndpoint = {
     },
 
     search: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ssApiClient(apiClientProps).search3({
             query: {
@@ -1335,7 +1336,7 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     setRating: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const itemIds = query.item.map((item) => item.id);
 
@@ -1351,7 +1352,7 @@ export const SubsonicController: ControllerEndpoint = {
         return null;
     },
     updatePlaylist: async (args) => {
-        const { body, query, apiClientProps } = args;
+        const { apiClientProps, body, query } = args;
 
         const res = await ssApiClient(apiClientProps).updatePlaylist({
             query: {

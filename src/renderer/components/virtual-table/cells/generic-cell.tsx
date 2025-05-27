@@ -1,10 +1,12 @@
 import type { ICellRendererParams } from '@ag-grid-community/core';
+
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+
 import { Skeleton } from '/@/renderer/components/skeleton';
 import { Text } from '/@/renderer/components/text';
 
-export const CellContainer = styled.div<{ $position?: 'left' | 'center' | 'right' }>`
+export const CellContainer = styled.div<{ $position?: 'center' | 'left' | 'right' }>`
     display: flex;
     align-items: center;
     justify-content: ${(props) =>
@@ -22,13 +24,13 @@ type Options = {
     array?: boolean;
     isArray?: boolean;
     isLink?: boolean;
-    position?: 'left' | 'center' | 'right';
+    position?: 'center' | 'left' | 'right';
     primary?: boolean;
 };
 
 export const GenericCell = (
     { value, valueFormatted }: ICellRendererParams,
-    { position, primary, isLink }: Options,
+    { isLink, position, primary }: Options,
 ) => {
     const displayedValue = valueFormatted || value;
 
@@ -68,8 +70,4 @@ export const GenericCell = (
             )}
         </CellContainer>
     );
-};
-
-GenericCell.defaultProps = {
-    position: undefined,
 };

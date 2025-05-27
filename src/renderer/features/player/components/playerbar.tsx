@@ -1,28 +1,29 @@
-import { useCallback, MouseEvent } from 'react';
+import { MouseEvent, useCallback } from 'react';
 import styled from 'styled-components';
-import {
-    usePlaybackType,
-    useSettingsStore,
-    useGeneralSettings,
-} from '/@/renderer/store/settings.store';
-import { PlaybackType } from '/@/renderer/types';
+
 import { AudioPlayer } from '/@/renderer/components';
+import { CenterControls } from '/@/renderer/features/player/components/center-controls';
+import { LeftControls } from '/@/renderer/features/player/components/left-controls';
+import { RightControls } from '/@/renderer/features/player/components/right-controls';
+import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
+import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import {
     useCurrentPlayer,
     useCurrentStatus,
+    useFullScreenPlayerStore,
     useMuted,
     usePlayer1Data,
     usePlayer2Data,
     usePlayerControls,
-    useVolume,
     useSetFullScreenPlayerStore,
-    useFullScreenPlayerStore,
+    useVolume,
 } from '/@/renderer/store';
-import { CenterControls } from './center-controls';
-import { LeftControls } from './left-controls';
-import { RightControls } from './right-controls';
-import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
-import { updateSong } from '/@/renderer/features/player/update-remote-song';
+import {
+    useGeneralSettings,
+    usePlaybackType,
+    useSettingsStore,
+} from '/@/renderer/store/settings.store';
+import { PlaybackType } from '/@/shared/types/types';
 
 const PlayerbarContainer = styled.div`
     width: 100vw;
@@ -80,7 +81,7 @@ export const Playerbar = () => {
     const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
     const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
 
-    const handleToggleFullScreenPlayer = (e?: MouseEvent<HTMLDivElement> | KeyboardEvent) => {
+    const handleToggleFullScreenPlayer = (e?: KeyboardEvent | MouseEvent<HTMLDivElement>) => {
         e?.stopPropagation();
         setFullScreenPlayerStore({ expanded: !isFullScreenPlayerExpanded });
     };
@@ -107,7 +108,6 @@ export const Playerbar = () => {
             </PlayerbarControlsGrid>
             {playbackType === PlaybackType.WEB && (
                 <AudioPlayer
-                    ref={playersRef}
                     autoNext={autoNextFn}
                     crossfadeDuration={settings.crossfadeDuration}
                     crossfadeStyle={settings.crossfadeStyle}
@@ -116,8 +116,9 @@ export const Playerbar = () => {
                     playbackStyle={settings.style}
                     player1={player1}
                     player2={player2}
+                    ref={playersRef}
                     status={status}
-                    style={settings.style}
+                    style={settings.style as any}
                     volume={(volume / 100) ** 2}
                 />
             )}

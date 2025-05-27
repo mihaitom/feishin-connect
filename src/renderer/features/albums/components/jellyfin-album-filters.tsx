@@ -1,21 +1,21 @@
-import { ChangeEvent, useMemo, useState } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
+import { ChangeEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useListFilterByKey } from '../../../store/list.store';
+
+import { NumberInput, SpinnerIcon, Switch, Text } from '/@/renderer/components';
+import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
+import { useAlbumArtistList } from '/@/renderer/features/artists/queries/album-artist-list-query';
+import { useGenreList } from '/@/renderer/features/genres';
+import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
+import { AlbumListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
 import {
     AlbumArtistListSort,
     AlbumListQuery,
     GenreListSort,
     LibraryItem,
     SortOrder,
-} from '/@/renderer/api/types';
-import { NumberInput, SpinnerIcon, Switch, Text } from '/@/renderer/components';
-import { useAlbumArtistList } from '/@/renderer/features/artists/queries/album-artist-list-query';
-import { useGenreList } from '/@/renderer/features/genres';
-import { AlbumListFilter, useListStoreActions } from '/@/renderer/store';
-import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
-import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
+} from '/@/shared/types/domain-types';
 
 interface JellyfinAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
@@ -151,7 +151,7 @@ export const JellyfinAlbumFilters = ({
         }));
     }, [albumArtistListQuery?.data?.items]);
 
-    const handleAlbumArtistFilter = (e: string[] | null) => {
+    const handleAlbumArtistFilter = (e: null | string[]) => {
         const updatedFilters = setFilter({
             customFilters,
             data: {
@@ -192,8 +192,8 @@ export const JellyfinAlbumFilters = ({
                     <Text>{filter.label}</Text>
                     <Switch
                         checked={filter?.value || false}
-                        size="xs"
                         onChange={filter.onChange}
+                        size="xs"
                     />
                 </Group>
             ))}
@@ -205,8 +205,8 @@ export const JellyfinAlbumFilters = ({
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    required={!!filter?.maxYear}
                     onChange={(e) => handleMinYearFilter(e)}
+                    required={!!filter?.maxYear}
                 />
                 <NumberInput
                     defaultValue={filter?.maxYear}
@@ -214,47 +214,47 @@ export const JellyfinAlbumFilters = ({
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    required={!!filter?.minYear}
                     onChange={(e) => handleMaxYearFilter(e)}
+                    required={!!filter?.minYear}
                 />
             </Group>
             <Group grow>
                 <MultiSelectWithInvalidData
                     clearable
-                    searchable
                     data={genreList}
                     defaultValue={filter.genres}
                     label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
                     onChange={handleGenresFilter}
+                    searchable
                 />
             </Group>
 
             <Group grow>
                 <MultiSelectWithInvalidData
                     clearable
-                    searchable
                     data={selectableAlbumArtists}
                     defaultValue={filter?._custom?.jellyfin?.AlbumArtistIds?.split(',')}
                     disabled={disableArtistFilter}
                     label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
                     limit={300}
-                    placeholder="Type to search for an artist"
-                    rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
-                    searchValue={albumArtistSearchTerm}
                     onChange={handleAlbumArtistFilter}
                     onSearchChange={setAlbumArtistSearchTerm}
+                    placeholder="Type to search for an artist"
+                    rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
+                    searchable
+                    searchValue={albumArtistSearchTerm}
                 />
             </Group>
             {tagsQuery.data?.boolTags?.length && (
                 <Group grow>
                     <MultiSelectWithInvalidData
                         clearable
-                        searchable
                         data={tagsQuery.data.boolTags}
                         defaultValue={selectedTags}
                         label={t('common.tags', { postProcess: 'sentenceCase' })}
-                        width={250}
                         onChange={handleTagFilter}
+                        searchable
+                        width={250}
                     />
                 </Group>
             )}

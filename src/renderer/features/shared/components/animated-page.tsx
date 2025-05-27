@@ -1,6 +1,8 @@
 import type { ReactNode, Ref } from 'react';
-import { forwardRef } from 'react';
+
 import { motion } from 'framer-motion';
+import { forwardRef } from 'react';
+
 import styles from './animated-page.module.scss';
 
 interface AnimatedPageProps {
@@ -17,9 +19,9 @@ export const AnimatedPage = forwardRef(
     ({ children }: AnimatedPageProps, ref: Ref<HTMLDivElement>) => {
         return (
             <motion.main
-                ref={ref}
                 // animate="animate"
                 className={styles.animatedPage}
+                ref={ref}
                 // exit="exit"
                 // initial="initial"
                 // transition={{ duration: 0.3, ease: 'easeIn' }}

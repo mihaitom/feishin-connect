@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { AnyLibraryItems, ShareItemResponse, ShareItemArgs } from '/@/renderer/api/types';
 import { AxiosError } from 'axios';
+
 import { api } from '/@/renderer/api';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
+import { AnyLibraryItems, ShareItemArgs, ShareItemResponse } from '/@/shared/types/domain-types';
 
 export const useShareItem = (args: MutationHookArgs) => {
     const { options } = args || {};
@@ -11,8 +12,8 @@ export const useShareItem = (args: MutationHookArgs) => {
     return useMutation<
         ShareItemResponse,
         AxiosError,
-        Omit<ShareItemArgs, 'server' | 'apiClientProps'>,
-        { previous: { items: AnyLibraryItems } | undefined }
+        Omit<ShareItemArgs, 'apiClientProps' | 'server'>,
+        { previous: undefined | { items: AnyLibraryItems } }
     >({
         mutationFn: (args) => {
             const server = getServerById(args.serverId);

@@ -1,14 +1,15 @@
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
-import { useWindowSettings, useSettingsStoreActions } from '../../../../store/settings.store';
-import {
-    SettingsSection,
-    SettingOption,
-} from '/@/renderer/features/settings/components/settings-section';
-import { Switch } from '/@/renderer/components';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
-const utils = isElectron() ? window.electron.utils : null;
+import { Switch } from '/@/renderer/components';
+import {
+    SettingOption,
+    SettingsSection,
+} from '/@/renderer/features/settings/components/settings-section';
+import { useSettingsStoreActions, useWindowSettings } from '/@/renderer/store';
+
+const localSettings = isElectron() ? window.api.localSettings : null;
+const utils = isElectron() ? window.api.utils : null;
 
 export const UpdateSettings = () => {
     const { t } = useTranslation();

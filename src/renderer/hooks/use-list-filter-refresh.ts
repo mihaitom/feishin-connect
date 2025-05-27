@@ -1,27 +1,29 @@
-import { MutableRefObject, useCallback, useMemo } from 'react';
-import { IDatasource } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { IDatasource } from '@ag-grid-community/core';
 import { QueryKey, useQueryClient } from '@tanstack/react-query';
+import orderBy from 'lodash/orderBy';
+import { MutableRefObject, useCallback, useMemo } from 'react';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { BasePaginatedResponse, LibraryItem, ServerListItem } from '/@/renderer/api/types';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
-import orderBy from 'lodash/orderBy';
+import { BasePaginatedResponse, LibraryItem, ServerListItem } from '/@/shared/types/domain-types';
 
 export interface UseHandleListFilterChangeProps {
     isClientSideSort?: boolean;
     itemCount?: number;
     itemType: LibraryItem;
-    server: ServerListItem | null;
+    server: null | ServerListItem;
 }
 
 const BLOCK_SIZE = 500;
 
 export const useListFilterRefresh = ({
-    server,
+    isClientSideSort,
     itemCount,
     itemType,
-    isClientSideSort,
+    server,
 }: UseHandleListFilterChangeProps) => {
     const queryClient = useQueryClient();
 
@@ -134,7 +136,7 @@ export const useListFilterRefresh = ({
     );
 
     const handleRefreshGrid = useCallback(
-        async (gridRef: MutableRefObject<VirtualInfiniteGridRef | null>, filter: any) => {
+        async (gridRef: MutableRefObject<null | VirtualInfiniteGridRef>, filter: any) => {
             if (!gridRef || !queryKeyFn || !queryFn) {
                 return;
             }

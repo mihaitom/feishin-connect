@@ -1,8 +1,9 @@
 import { Grid, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
-import { RiSearchLine, RiMenuFill, RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri';
+import { RiArrowLeftSLine, RiArrowRightSLine, RiMenuFill, RiSearchLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router';
 import styled from 'styled-components';
+
 import { Button, DropdownMenu, TextInput } from '/@/renderer/components';
 import { AppMenu } from '/@/renderer/features/titlebar/components/app-menu';
 import { useContainerQuery } from '/@/renderer/hooks';
@@ -36,16 +37,16 @@ export const ActionBar = () => {
                 >
                     <Grid.Col span={6}>
                         <TextInput
-                            readOnly
                             icon={<RiSearchLine />}
-                            placeholder={t('common.search', { postProcess: 'titleCase' })}
-                            size="md"
                             onClick={open}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                     open();
                                 }
                             }}
+                            placeholder={t('common.search', { postProcess: 'titleCase' })}
+                            readOnly
+                            size="md"
                         />
                     </Grid.Col>
                     <Grid.Col span={6}>
@@ -69,18 +70,18 @@ export const ActionBar = () => {
                                 </DropdownMenu.Dropdown>
                             </DropdownMenu>
                             <Button
+                                onClick={() => navigate(-1)}
                                 p="0.5rem"
                                 size="md"
                                 variant="default"
-                                onClick={() => navigate(-1)}
                             >
                                 <RiArrowLeftSLine size="1.5rem" />
                             </Button>
                             <Button
+                                onClick={() => navigate(1)}
                                 p="0.5rem"
                                 size="md"
                                 variant="default"
-                                onClick={() => navigate(1)}
                             >
                                 <RiArrowRightSLine size="1.5rem" />
                             </Button>
@@ -95,10 +96,10 @@ export const ActionBar = () => {
                     w="100%"
                 >
                     <Button
+                        onClick={open}
                         p="0.5rem"
                         size="md"
                         variant="default"
-                        onClick={open}
                     >
                         <RiSearchLine size="1rem" />
                     </Button>
@@ -117,18 +118,18 @@ export const ActionBar = () => {
                         </DropdownMenu.Dropdown>
                     </DropdownMenu>
                     <Button
+                        onClick={() => navigate(-1)}
                         p="0.5rem"
                         size="md"
                         variant="default"
-                        onClick={() => navigate(-1)}
                     >
                         <RiArrowLeftSLine size="1.5rem" />
                     </Button>
                     <Button
+                        onClick={() => navigate(1)}
                         p="0.5rem"
                         size="md"
                         variant="default"
-                        onClick={() => navigate(1)}
                     >
                         <RiArrowRightSLine size="1.5rem" />
                     </Button>

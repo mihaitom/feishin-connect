@@ -1,3 +1,5 @@
+import { Group, Stack } from '@mantine/core';
+import throttle from 'lodash/throttle';
 import {
     isValidElement,
     memo,
@@ -9,22 +11,27 @@ import {
     useRef,
     useState,
 } from 'react';
-import { Group, Stack } from '@mantine/core';
-import throttle from 'lodash/throttle';
 import { RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri';
 import styled from 'styled-components';
 import { SwiperOptions, Virtual } from 'swiper';
 import 'swiper/css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperCore } from 'swiper/types';
-import { Album, AlbumArtist, Artist, LibraryItem, RelatedArtist } from '/@/renderer/api/types';
+
 import { Button } from '/@/renderer/components/button';
 import { PosterCard } from '/@/renderer/components/card/poster-card';
 import { TextTitle } from '/@/renderer/components/text-title';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { useCreateFavorite, useDeleteFavorite } from '/@/renderer/features/shared';
 import { usePlayButtonBehavior } from '/@/renderer/store';
-import { CardRoute, CardRow } from '/@/renderer/types';
+import {
+    Album,
+    AlbumArtist,
+    Artist,
+    LibraryItem,
+    RelatedArtist,
+} from '/@/shared/types/domain-types';
+import { CardRoute, CardRow } from '/@/shared/types/types';
 
 const getSlidesPerView = (windowWidth: number) => {
     if (windowWidth < 400) return 2;
@@ -44,14 +51,14 @@ const CarouselContainer = styled(Stack)`
 interface TitleProps {
     handleNext?: () => void;
     handlePrev?: () => void;
-    label?: string | ReactNode;
+    label?: ReactNode | string;
     pagination: {
         hasNextPage: boolean;
         hasPreviousPage: boolean;
     };
 }
 
-const Title = ({ label, handleNext, handlePrev, pagination }: TitleProps) => {
+const Title = ({ handleNext, handlePrev, label, pagination }: TitleProps) => {
     return (
         <Group position="apart">
             {isValidElement(label) ? (
@@ -69,18 +76,18 @@ const Title = ({ label, handleNext, handlePrev, pagination }: TitleProps) => {
                 <Button
                     compact
                     disabled={!pagination.hasPreviousPage}
+                    onClick={handlePrev}
                     size="lg"
                     variant="default"
-                    onClick={handlePrev}
                 >
                     <RiArrowLeftSLine />
                 </Button>
                 <Button
                     compact
                     disabled={!pagination.hasNextPage}
+                    onClick={handleNext}
                     size="lg"
                     variant="default"
-                    onClick={handleNext}
                 >
                     <RiArrowRightSLine />
                 </Button>
@@ -90,7 +97,7 @@ const Title = ({ label, handleNext, handlePrev, pagination }: TitleProps) => {
 };
 
 export interface SwiperGridCarouselProps {
-    cardRows: CardRow<Album>[] | CardRow<Artist>[] | CardRow<AlbumArtist>[];
+    cardRows: CardRow<Album>[] | CardRow<AlbumArtist>[] | CardRow<Artist>[];
     data: Album[] | AlbumArtist[] | Artist[] | RelatedArtist[] | undefined;
     isLoading?: boolean;
     itemType: LibraryItem;
@@ -100,7 +107,7 @@ export interface SwiperGridCarouselProps {
         children?: ReactNode;
         hasPagination?: boolean;
         icon?: ReactNode;
-        label: string | ReactNode;
+        label: ReactNode | string;
     };
     uniqueId: string;
 }
@@ -108,15 +115,15 @@ export interface SwiperGridCarouselProps {
 export const SwiperGridCarousel = ({
     cardRows,
     data,
+    isLoading,
     itemType,
     route,
     swiperProps,
     title,
-    isLoading,
     uniqueId,
 }: SwiperGridCarouselProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const swiperRef = useRef<SwiperCore | any>(null);
+    const swiperRef = useRef<any | SwiperCore>(null);
     const playButtonBehavior = usePlayButtonBehavior();
     const handlePlayQueueAdd = usePlayQueueAdd();
     const [slideCount, setSlideCount] = useState(4);
@@ -140,7 +147,7 @@ export const SwiperGridCarousel = ({
             itemType: LibraryItem;
             serverId: string;
         }) => {
-            const { id, itemType, isFavorite, serverId } = options;
+            const { id, isFavorite, itemType, serverId } = options;
             if (isFavorite) {
                 deleteFavoriteMutation.mutate({
                     query: {
@@ -177,6 +184,7 @@ export const SwiperGridCarousel = ({
                 }}
                 data={el}
                 isLoading={isLoading}
+                key={`${uniqueId}-${el.id}`}
                 uniqueId={uniqueId}
             />
         ));
@@ -205,7 +213,7 @@ export const SwiperGridCarousel = ({
     }, [slideCount, swiperProps?.slidesPerView]);
 
     const handleOnSlideChange = useCallback((e: SwiperCore) => {
-        const { slides, isEnd, isBeginning, params } = e;
+        const { isBeginning, isEnd, params, slides } = e;
         if (isEnd || isBeginning) return;
 
         const slideCount = (params.slidesPerView as number | undefined) || 4;
@@ -216,7 +224,7 @@ export const SwiperGridCarousel = ({
     }, []);
 
     const handleOnZoomChange = useCallback((e: SwiperCore) => {
-        const { slides, isEnd, isBeginning, params } = e;
+        const { isBeginning, isEnd, params, slides } = e;
         if (isEnd || isBeginning) return;
 
         const slideCount = (params.slidesPerView as number | undefined) || 4;
@@ -227,7 +235,7 @@ export const SwiperGridCarousel = ({
     }, []);
 
     const handleOnReachEnd = useCallback((e: SwiperCore) => {
-        const { slides, params } = e;
+        const { params, slides } = e;
 
         const slideCount = (params.slidesPerView as number | undefined) || 4;
         setPagination({
@@ -237,7 +245,7 @@ export const SwiperGridCarousel = ({
     }, []);
 
     const handleOnReachBeginning = useCallback((e: SwiperCore) => {
-        const { slides, params } = e;
+        const { params, slides } = e;
 
         const slideCount = (params.slidesPerView as number | undefined) || 4;
         setPagination({
@@ -279,8 +287,8 @@ export const SwiperGridCarousel = ({
 
     return (
         <CarouselContainer
-            ref={containerRef}
             className="grid-carousel"
+            ref={containerRef}
             spacing="md"
         >
             {title ? (
@@ -292,12 +300,7 @@ export const SwiperGridCarousel = ({
                 />
             ) : null}
             <Swiper
-                ref={swiperRef}
-                resizeObserver
                 modules={[Virtual]}
-                slidesPerView={slideCount}
-                spaceBetween={20}
-                style={{ height: '100%', width: '100%' }}
                 onBeforeInit={(swiper) => {
                     swiperRef.current = swiper;
                 }}
@@ -305,6 +308,11 @@ export const SwiperGridCarousel = ({
                 onReachEnd={handleOnReachEnd}
                 onSlideChange={handleOnSlideChange}
                 onZoomChange={handleOnZoomChange}
+                ref={swiperRef}
+                resizeObserver
+                slidesPerView={slideCount}
+                spaceBetween={20}
+                style={{ height: '100%', width: '100%' }}
                 {...swiperProps}
             >
                 {slides.map((slideContent, index) => {

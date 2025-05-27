@@ -1,20 +1,21 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import isElectron from 'is-electron';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { getServerById, useSetAlbumListItemDataById, useSetQueueFavorite } from '/@/renderer/store';
+import { useFavoriteEvent } from '/@/renderer/store/event.store';
 import {
     AlbumArtistDetailResponse,
     AlbumDetailResponse,
     FavoriteArgs,
     FavoriteResponse,
     LibraryItem,
-} from '/@/renderer/api/types';
-import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById, useSetAlbumListItemDataById, useSetQueueFavorite } from '/@/renderer/store';
-import isElectron from 'is-electron';
-import { useFavoriteEvent } from '/@/renderer/store/event.store';
+} from '/@/shared/types/domain-types';
 
-const remote = isElectron() ? window.electron.remote : null;
+const remote = isElectron() ? window.api.remote : null;
 
 export const useDeleteFavorite = (args: MutationHookArgs) => {
     const { options } = args || {};
@@ -26,7 +27,7 @@ export const useDeleteFavorite = (args: MutationHookArgs) => {
     return useMutation<
         FavoriteResponse,
         AxiosError,
-        Omit<FavoriteArgs, 'server' | 'apiClientProps'>,
+        Omit<FavoriteArgs, 'apiClientProps' | 'server'>,
         null
     >({
         mutationFn: (args) => {

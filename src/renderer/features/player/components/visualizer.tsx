@@ -1,7 +1,8 @@
-import { createRef, useCallback, useEffect, useState } from 'react';
-import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import AudioMotionAnalyzer from 'audiomotion-analyzer';
+import { createRef, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+
+import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { useSettingsStore } from '/@/renderer/store';
 
 const StyledContainer = styled.div`

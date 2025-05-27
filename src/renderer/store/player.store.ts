@@ -6,56 +6,9 @@ import { create } from 'zustand';
 import { devtools, persist, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
-import { QueueSong } from '/@/renderer/api/types';
-import { PlayerStatus, PlayerRepeat, PlayerShuffle, Play } from '/@/renderer/types';
 
-export interface PlayerState {
-    current: {
-        index: number;
-        nextIndex: number;
-        player: 1 | 2;
-        previousIndex: number;
-        seek: boolean;
-        shuffledIndex: number;
-        song?: QueueSong;
-        status: PlayerStatus;
-        time: number;
-    };
-    fallback: boolean | null;
-    muted: boolean;
-    queue: {
-        default: QueueSong[];
-        previousNode?: QueueSong;
-        shuffled: string[];
-        sorted: QueueSong[];
-    };
-    repeat: PlayerRepeat;
-    shuffle: PlayerShuffle;
-    speed: number;
-    volume: number;
-}
-
-export interface PlayerData {
-    current: {
-        index: number;
-        nextIndex?: number;
-        player: 1 | 2;
-        previousIndex?: number;
-        shuffledIndex: number;
-        song?: QueueSong;
-        status: PlayerStatus;
-    };
-    player1?: QueueSong;
-    player2?: QueueSong;
-    queue: QueueData;
-}
-
-export interface QueueData {
-    current?: QueueSong;
-    length: number;
-    next?: QueueSong;
-    previous?: QueueSong;
-}
+import { PlayerData, QueueData, QueueSong } from '/@/shared/types/domain-types';
+import { Play, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
 export interface PlayerSlice extends PlayerState {
     actions: {
@@ -90,7 +43,7 @@ export interface PlayerSlice extends PlayerState {
         setFallback: (fallback: boolean | null) => boolean;
         setFavorite: (ids: string[], favorite: boolean) => string[];
         setMuted: (muted: boolean) => void;
-        setRating: (ids: string[], rating: number | null) => string[];
+        setRating: (ids: string[], rating: null | number) => string[];
         setRepeat: (type: PlayerRepeat) => PlayerData;
         setShuffle: (type: PlayerShuffle) => PlayerData;
         setShuffledIndex: (index: number) => PlayerData;
@@ -98,6 +51,32 @@ export interface PlayerSlice extends PlayerState {
         setVolume: (volume: number) => void;
         shuffleQueue: () => PlayerData;
     };
+}
+
+export interface PlayerState {
+    current: {
+        index: number;
+        nextIndex: number;
+        player: 1 | 2;
+        previousIndex: number;
+        seek: boolean;
+        shuffledIndex: number;
+        song?: QueueSong;
+        status: PlayerStatus;
+        time: number;
+    };
+    fallback: boolean | null;
+    muted: boolean;
+    queue: {
+        default: QueueSong[];
+        previousNode?: QueueSong;
+        shuffled: string[];
+        sorted: QueueSong[];
+    };
+    repeat: PlayerRepeat;
+    shuffle: PlayerShuffle;
+    speed: number;
+    volume: number;
 }
 
 export const usePlayerStore = create<PlayerSlice>()(
@@ -490,7 +469,7 @@ export const usePlayerStore = create<PlayerSlice>()(
                         },
                         incrementPlayCount: (ids) => {
                             const { default: queue } = get().queue;
-                            const foundUniqueIds = [];
+                            const foundUniqueIds: string[] = [];
 
                             for (const id of ids) {
                                 const foundIndex = queue.findIndex((song) => song.id === id);
@@ -886,7 +865,7 @@ export const usePlayerStore = create<PlayerSlice>()(
                         },
                         setFavorite: (ids, favorite) => {
                             const { default: queue } = get().queue;
-                            const foundUniqueIds = [];
+                            const foundUniqueIds: string[] = [];
 
                             for (const id of ids) {
                                 const foundIndex = queue.findIndex((song) => song.id === id);
@@ -925,7 +904,7 @@ export const usePlayerStore = create<PlayerSlice>()(
                         },
                         setRating: (ids, rating) => {
                             const { default: queue } = get().queue;
-                            const foundUniqueIds = [];
+                            const foundUniqueIds: string[] = [];
 
                             for (const id of ids) {
                                 const foundIndex = queue.findIndex((song) => song.id === id);

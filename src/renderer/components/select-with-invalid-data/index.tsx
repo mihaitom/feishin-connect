@@ -1,6 +1,7 @@
-import { MultiSelect, MultiSelectProps, Select, SelectProps } from '/@/renderer/components/select';
-import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { MultiSelect, MultiSelectProps, Select, SelectProps } from '/@/renderer/components/select';
 
 export const SelectWithInvalidData = ({ data, defaultValue, ...props }: SelectProps) => {
     const { t } = useTranslation();

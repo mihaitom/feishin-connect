@@ -1,10 +1,3 @@
 {
-    "recommendations": [
-        "dbaeumer.vscode-eslint",
-        "EditorConfig.EditorConfig",
-        "stylelint.vscode-stylelint",
-        "esbenp.prettier-vscode",
-        "clinyong.vscode-css-modules",
-        "Huuums.vscode-fast-folder-structure"
-    ]
+  "recommendations": ["dbaeumer.vscode-eslint"]
 }

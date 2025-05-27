@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
 import { FastAverageColor } from 'fast-average-color';
+import { useEffect, useRef, useState } from 'react';
 
 export const useFastAverageColor = (args: {
     algorithm?: 'dominant' | 'simple' | 'sqrt';
     id?: string;
-    src?: string | null;
+    src?: null | string;
     srcLoaded?: boolean;
 }) => {
-    const { algorithm, src, srcLoaded, id } = args;
+    const { algorithm, id, src, srcLoaded } = args;
     const idRef = useRef<string | undefined>(id);
 
     const [color, setColor] = useState<string | undefined>(undefined);

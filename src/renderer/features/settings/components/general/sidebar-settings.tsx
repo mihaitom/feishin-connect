@@ -1,11 +1,12 @@
 import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { Switch } from '/@/renderer/components';
-import { useSettingsStoreActions, useGeneralSettings } from '../../../../store/settings.store';
 import {
     SettingOption,
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
+import { useGeneralSettings, useSettingsStoreActions } from '/@/renderer/store';
 
 export const SidebarSettings = () => {
     const { t } = useTranslation();

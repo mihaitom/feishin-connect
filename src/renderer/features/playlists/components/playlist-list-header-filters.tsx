@@ -1,23 +1,30 @@
-import { ChangeEvent, MouseEvent, MutableRefObject, useCallback } from 'react';
-import { IDatasource } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { IDatasource } from '@ag-grid-community/core';
 import { Divider, Flex, Group, Stack } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
+import { ChangeEvent, MouseEvent, MutableRefObject, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiMoreFill, RiRefreshLine, RiSettings3Fill } from 'react-icons/ri';
-import { useListContext } from '../../../context/list-context';
-import { useListStoreByKey } from '../../../store/list.store';
+
+import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { LibraryItem, PlaylistListQuery, PlaylistListSort, SortOrder } from '/@/renderer/api/types';
 import { Button, DropdownMenu, MultiSelect, Slider, Switch, Text } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { PLAYLIST_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
+import { useListContext } from '/@/renderer/context/list-context';
 import { OrderToggleButton } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { PlaylistListFilter, useCurrentServer, useListStoreActions } from '/@/renderer/store';
-import { ListDisplayType, TableColumn } from '/@/renderer/types';
-import i18n from '/@/i18n/i18n';
+import { useListStoreByKey } from '/@/renderer/store/list.store';
+import {
+    LibraryItem,
+    PlaylistListQuery,
+    PlaylistListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [
@@ -104,7 +111,7 @@ const FILTERS = {
 };
 
 interface PlaylistListHeaderFiltersProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
@@ -116,9 +123,9 @@ export const PlaylistListHeaderFilters = ({
     const { pageKey } = useListContext();
     const queryClient = useQueryClient();
     const server = useCurrentServer();
-    const { setFilter, setTable, setTablePagination, setGrid, setDisplayType } =
+    const { setDisplayType, setFilter, setGrid, setTable, setTablePagination } =
         useListStoreActions();
-    const { display, filter, table, grid } = useListStoreByKey<PlaylistListQuery>({ key: pageKey });
+    const { display, filter, grid, table } = useListStoreByKey<PlaylistListQuery>({ key: pageKey });
     const cq = useContainerQuery();
 
     const isGrid = display === ListDisplayType.CARD || display === ListDisplayType.POSTER;
@@ -337,10 +344,10 @@ export const PlaylistListHeaderFilters = ({
                     <DropdownMenu.Dropdown>
                         {FILTERS[server?.type as keyof typeof FILTERS].map((f) => (
                             <DropdownMenu.Item
-                                key={`filter-${f.name}`}
                                 $isActive={f.value === filter.sortBy}
-                                value={f.value}
+                                key={`filter-${f.name}`}
                                 onClick={handleSetSortBy}
+                                value={f.value}
                             >
                                 {f.name}
                             </DropdownMenu.Item>
@@ -349,16 +356,16 @@ export const PlaylistListHeaderFilters = ({
                 </DropdownMenu>
                 <Divider orientation="vertical" />
                 <OrderToggleButton
-                    sortOrder={filter.sortOrder}
                     onToggle={handleToggleSortOrder}
+                    sortOrder={filter.sortOrder}
                 />
                 <Divider orientation="vertical" />
                 <Button
                     compact
+                    onClick={handleRefresh}
                     size="md"
                     tooltip={{ label: t('common.refresh', { postProcess: 'titleCase' }) }}
                     variant="subtle"
-                    onClick={handleRefresh}
                 >
                     <RiRefreshLine size="1.3rem" />
                 </Button>
@@ -404,22 +411,22 @@ export const PlaylistListHeaderFilters = ({
                         </DropdownMenu.Label>
                         <DropdownMenu.Item
                             $isActive={display === ListDisplayType.CARD}
-                            value={ListDisplayType.CARD}
                             onClick={handleSetViewType}
+                            value={ListDisplayType.CARD}
                         >
                             {t('table.config.view.card', { postProcess: 'titleCase' })}
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
                             $isActive={display === ListDisplayType.POSTER}
-                            value={ListDisplayType.POSTER}
                             onClick={handleSetViewType}
+                            value={ListDisplayType.POSTER}
                         >
                             {t('table.config.view.poster', { postProcess: 'titleCase' })}
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
                             $isActive={display === ListDisplayType.TABLE}
-                            value={ListDisplayType.TABLE}
                             onClick={handleSetViewType}
+                            value={ListDisplayType.TABLE}
                         >
                             {t('table.config.view.table', { postProcess: 'titleCase' })}
                         </DropdownMenu.Item>
@@ -478,8 +485,8 @@ export const PlaylistListHeaderFilters = ({
                                             defaultValue={table?.columns.map(
                                                 (column) => column.column,
                                             )}
-                                            width={300}
                                             onChange={handleTableColumns}
+                                            width={300}
                                         />
                                         <Group position="apart">
                                             <Text>

@@ -1,24 +1,26 @@
-import { LibraryItem } from '/@/renderer/api/types';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { RowDoubleClickedEvent } from '@ag-grid-community/core';
+import { MutableRefObject, useCallback } from 'react';
+import { generatePath, useNavigate } from 'react-router';
+
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
 import { useVirtualTable } from '/@/renderer/components/virtual-table/hooks/use-virtual-table';
 import { useListContext } from '/@/renderer/context/list-context';
 import { GENRE_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
-import { useCurrentServer } from '/@/renderer/store';
-import { MutableRefObject, useCallback } from 'react';
-import { RowDoubleClickedEvent } from '@ag-grid-community/core';
-import { generatePath, useNavigate } from 'react-router';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
+import { useCurrentServer } from '/@/renderer/store';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface GenreListTableViewProps {
     itemCount?: number;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const GenreListTableView = ({ tableRef, itemCount }: GenreListTableViewProps) => {
+export const GenreListTableView = ({ itemCount, tableRef }: GenreListTableViewProps) => {
     const server = useCurrentServer();
-    const { pageKey, customFilters } = useListContext();
+    const { customFilters, pageKey } = useListContext();
     const navigate = useNavigate();
     const genrePath = useGenreRoute();
 

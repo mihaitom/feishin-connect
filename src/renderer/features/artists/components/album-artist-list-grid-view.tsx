@@ -2,43 +2,46 @@ import { QueryKey, useQueryClient } from '@tanstack/react-query';
 import { MutableRefObject, useCallback, useMemo } from 'react';
 import AutoSizer, { Size } from 'react-virtualized-auto-sizer';
 import { ListOnScrollProps } from 'react-window';
-import { VirtualGridAutoSizerContainer } from '../../../components/virtual-grid/virtual-grid-wrapper';
-import { useListStoreByKey } from '../../../store/list.store';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { ALBUMARTIST_CARD_ROWS } from '/@/renderer/components';
+import {
+    VirtualGridAutoSizerContainer,
+    VirtualInfiniteGrid,
+    VirtualInfiniteGridRef,
+} from '/@/renderer/components/virtual-grid';
+import { useListContext } from '/@/renderer/context/list-context';
+import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
+import { AppRoute } from '/@/renderer/router/routes';
+import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
 import {
     AlbumArtist,
     AlbumArtistListQuery,
     AlbumArtistListResponse,
     AlbumArtistListSort,
     LibraryItem,
-} from '/@/renderer/api/types';
-import { ALBUMARTIST_CARD_ROWS } from '/@/renderer/components';
-import { VirtualInfiniteGrid, VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
-import { useListContext } from '/@/renderer/context/list-context';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer, useListStoreActions } from '/@/renderer/store';
-import { CardRow, ListDisplayType } from '/@/renderer/types';
-import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
+} from '/@/shared/types/domain-types';
+import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 interface AlbumArtistListGridViewProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
 }
 
-export const AlbumArtistListGridView = ({ itemCount, gridRef }: AlbumArtistListGridViewProps) => {
+export const AlbumArtistListGridView = ({ gridRef, itemCount }: AlbumArtistListGridViewProps) => {
     const queryClient = useQueryClient();
     const server = useCurrentServer();
     const handlePlayQueueAdd = usePlayQueueAdd();
 
     const { pageKey } = useListContext();
-    const { grid, display, filter } = useListStoreByKey<AlbumArtistListQuery>({ key: pageKey });
+    const { display, filter, grid } = useListStoreByKey<AlbumArtistListQuery>({ key: pageKey });
     const { setGrid } = useListStoreActions();
     const handleFavorite = useHandleFavorite({ gridRef, server });
 
     const fetchInitialData = useCallback(() => {
-        const query: Omit<AlbumArtistListQuery, 'startIndex' | 'limit'> = {
+        const query: Omit<AlbumArtistListQuery, 'limit' | 'startIndex'> = {
             ...filter,
         };
 
@@ -49,7 +52,7 @@ export const AlbumArtistListGridView = ({ itemCount, gridRef }: AlbumArtistListG
             stale: false,
         });
 
-        const itemData = [];
+        const itemData: AlbumArtist[] = [];
 
         for (const [, data] of queriesFromCache) {
             const { items, startIndex } = data || {};
@@ -109,15 +112,15 @@ export const AlbumArtistListGridView = ({ itemCount, gridRef }: AlbumArtistListG
         const rows: CardRow<AlbumArtist>[] = [ALBUMARTIST_CARD_ROWS.name];
 
         switch (filter.sortBy) {
+            case AlbumArtistListSort.ALBUM_COUNT:
+                rows.push(ALBUMARTIST_CARD_ROWS.albumCount);
+                break;
             case AlbumArtistListSort.DURATION:
                 rows.push(ALBUMARTIST_CARD_ROWS.duration);
                 break;
             case AlbumArtistListSort.FAVORITED:
                 break;
             case AlbumArtistListSort.NAME:
-                break;
-            case AlbumArtistListSort.ALBUM_COUNT:
-                rows.push(ALBUMARTIST_CARD_ROWS.albumCount);
                 break;
             case AlbumArtistListSort.PLAY_COUNT:
                 rows.push(ALBUMARTIST_CARD_ROWS.playCount);
@@ -129,10 +132,10 @@ export const AlbumArtistListGridView = ({ itemCount, gridRef }: AlbumArtistListG
                 break;
             case AlbumArtistListSort.RECENTLY_ADDED:
                 break;
+            case AlbumArtistListSort.RELEASE_DATE:
+                break;
             case AlbumArtistListSort.SONG_COUNT:
                 rows.push(ALBUMARTIST_CARD_ROWS.songCount);
-                break;
-            case AlbumArtistListSort.RELEASE_DATE:
                 break;
         }
 
@@ -144,7 +147,6 @@ export const AlbumArtistListGridView = ({ itemCount, gridRef }: AlbumArtistListG
             <AutoSizer>
                 {({ height, width }: Size) => (
                     <VirtualInfiniteGrid
-                        ref={gridRef}
                         cardRows={cardRows}
                         display={display || ListDisplayType.CARD}
                         fetchFn={fetch}
@@ -159,12 +161,13 @@ export const AlbumArtistListGridView = ({ itemCount, gridRef }: AlbumArtistListG
                         itemType={LibraryItem.ALBUM_ARTIST}
                         loading={itemCount === undefined || itemCount === null}
                         minimumBatchSize={40}
+                        onScroll={handleGridScroll}
+                        ref={gridRef}
                         route={{
                             route: AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL,
                             slugs: [{ idProperty: 'id', slugProperty: 'albumArtistId' }],
                         }}
                         width={width}
-                        onScroll={handleGridScroll}
                     />
                 )}
             </AutoSizer>

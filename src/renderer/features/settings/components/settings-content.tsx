@@ -1,9 +1,10 @@
-import { lazy } from 'react';
-import { Tabs } from '/@/renderer/components';
-import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import isElectron from 'is-electron';
+import { lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import { Tabs } from '/@/renderer/components';
+import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 
 const GeneralTab = lazy(() =>
     import('/@/renderer/features/settings/components/general/general-tab').then((module) => ({
@@ -51,10 +52,10 @@ export const SettingsContent = () => {
         <TabContainer>
             <Tabs
                 keepMounted={false}
+                onTabChange={(e) => e && setSettings({ tab: e })}
                 orientation="horizontal"
                 value={currentTab}
                 variant="default"
-                onTabChange={(e) => e && setSettings({ tab: e })}
             >
                 <Tabs.List>
                     <Tabs.Tab value="general">

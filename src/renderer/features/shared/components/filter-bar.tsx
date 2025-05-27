@@ -1,5 +1,6 @@
 import { PaperProps } from '@mantine/core';
 import styled from 'styled-components';
+
 import { Paper } from '/@/renderer/components';
 
 const StyledFilterBar = styled(Paper)`

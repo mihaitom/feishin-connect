@@ -1,10 +1,10 @@
-/* eslint-disable import/no-cycle */
 import type { ICellRendererParams } from '@ag-grid-community/core';
+
 import { Rating } from '/@/renderer/components/rating';
 import { CellContainer } from '/@/renderer/components/virtual-table/cells/generic-cell';
 import { useSetRating } from '/@/renderer/features/shared';
 
-export const RatingCell = ({ value, node }: ICellRendererParams) => {
+export const RatingCell = ({ node, value }: ICellRendererParams) => {
     const updateRatingMutation = useSetRating({});
 
     const handleUpdateRating = (rating: number) => {
@@ -27,9 +27,9 @@ export const RatingCell = ({ value, node }: ICellRendererParams) => {
     return (
         <CellContainer $position="center">
             <Rating
+                onChange={handleUpdateRating}
                 size="xs"
                 value={value?.userRating}
-                onChange={handleUpdateRating}
             />
         </CellContainer>
     );

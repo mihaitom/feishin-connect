@@ -1,12 +1,13 @@
-import { useCallback, Dispatch } from 'react';
 import { openModal } from '@mantine/modals';
-import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
-import { ServerList } from '/@/renderer/features/servers';
-import { useAuthStoreActions, useServerList } from '/@/renderer/store';
-import { ServerListItem } from '/@/renderer/api/types';
+import { Dispatch, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
+
+import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
+import { ServerList } from '/@/renderer/features/servers';
 import { AppRoute } from '/@/renderer/router/routes';
+import { useAuthStoreActions, useServerList } from '/@/renderer/store';
+import { ServerListItem } from '/@/shared/types/domain-types';
 
 interface ServerCommandsProps {
     handleClose: () => void;
@@ -14,7 +15,7 @@ interface ServerCommandsProps {
     setQuery: Dispatch<string>;
 }
 
-export const ServerCommands = ({ setQuery, setPages, handleClose }: ServerCommandsProps) => {
+export const ServerCommands = ({ handleClose, setPages, setQuery }: ServerCommandsProps) => {
     const { t } = useTranslation();
     const serverList = useServerList();
     const navigate = useNavigate();

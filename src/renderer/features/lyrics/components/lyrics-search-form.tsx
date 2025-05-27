@@ -1,19 +1,20 @@
-import { useMemo } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDebouncedValue } from '@mantine/hooks';
 import { openModal } from '@mantine/modals';
 import orderBy from 'lodash/orderBy';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import i18n from '/@/i18n/i18n';
+import { ScrollArea, Spinner, Text, TextInput } from '/@/renderer/components';
+import { useLyricSearch } from '/@/renderer/features/lyrics/queries/lyric-search-query';
 import {
     InternetProviderLyricSearchResponse,
     LyricSource,
     LyricsOverride,
-} from '../../../api/types';
-import { useLyricSearch } from '../queries/lyric-search-query';
-import { ScrollArea, Spinner, Text, TextInput } from '/@/renderer/components';
-import i18n from '/@/i18n/i18n';
+} from '/@/shared/types/domain-types';
 
 const SearchItem = styled.button`
     all: unset;
@@ -34,7 +35,7 @@ interface SearchResultProps {
     onClick?: () => void;
 }
 const SearchResult = ({ data, onClick }: SearchResultProps) => {
-    const { artist, name, source, score, id } = data;
+    const { artist, id, name, score, source } = data;
 
     const percentageScore = useMemo(() => {
         if (!score) return 0;
@@ -140,8 +141,8 @@ export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearch
                 <Spinner container />
             ) : (
                 <ScrollArea
-                    offsetScrollbars
                     h={400}
+                    offsetScrollbars
                     pr="1rem"
                     type="auto"
                     w="100%"
@@ -149,8 +150,8 @@ export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearch
                     <Stack spacing="md">
                         {searchResults.map((result) => (
                             <SearchResult
-                                key={`${result.source}-${result.id}`}
                                 data={result}
+                                key={`${result.source}-${result.id}`}
                                 onClick={() => {
                                     onSearchOverride?.({
                                         artist: result.artist,

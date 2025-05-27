@@ -1,20 +1,21 @@
 import { Group } from '@mantine/core';
 import { motion } from 'framer-motion';
+import { lazy, Suspense, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HiOutlineQueueList } from 'react-icons/hi2';
 import { RiFileMusicLine, RiFileTextLine } from 'react-icons/ri';
 import styled from 'styled-components';
+
 import { Button } from '/@/renderer/components';
+import { Lyrics } from '/@/renderer/features/lyrics/lyrics';
 import { PlayQueue } from '/@/renderer/features/now-playing';
+import { FullScreenSimilarSongs } from '/@/renderer/features/player/components/full-screen-similar-songs';
+import { usePlaybackSettings } from '/@/renderer/store';
 import {
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
 } from '/@/renderer/store/full-screen-player.store';
-import { Lyrics } from '/@/renderer/features/lyrics/lyrics';
-import { lazy, Suspense, useMemo } from 'react';
-import { usePlaybackSettings } from '/@/renderer/store';
-import { PlaybackType } from '/@/renderer/types';
-import { FullScreenSimilarSongs } from '/@/renderer/features/player/components/full-screen-similar-songs';
+import { PlaybackType } from '/@/shared/types/types';
 
 const Visualizer = lazy(() =>
     import('/@/renderer/features/player/components/visualizer').then((module) => ({
@@ -112,17 +113,17 @@ export const FullScreenPlayerQueue = () => {
             opacity={opacity}
         >
             <Group
-                grow
                 align="center"
                 className="full-screen-player-queue-header"
+                grow
                 position="center"
             >
                 {headerItems.map((item) => (
                     <HeaderItemWrapper key={`tab-${item.label}`}>
                         <Button
                             fullWidth
-                            uppercase
                             fw="600"
+                            onClick={item.onClick}
                             pos="relative"
                             size="lg"
                             sx={{
@@ -132,8 +133,8 @@ export const FullScreenPlayerQueue = () => {
                                     : 'var(--main-fg-secondary) !important',
                                 letterSpacing: '1px',
                             }}
+                            uppercase
                             variant="subtle"
-                            onClick={item.onClick}
                         >
                             {item.label}
                         </Button>

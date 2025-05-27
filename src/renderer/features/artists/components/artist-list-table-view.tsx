@@ -1,12 +1,14 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { MutableRefObject } from 'react';
-import { useListContext } from '../../../context/list-context';
-import { ARTIST_CONTEXT_MENU_ITEMS } from '../../context-menu/context-menu-items';
-import { LibraryItem } from '/@/renderer/api/types';
+
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
 import { VirtualTable } from '/@/renderer/components/virtual-table';
 import { useVirtualTable } from '/@/renderer/components/virtual-table/hooks/use-virtual-table';
+import { useListContext } from '/@/renderer/context/list-context';
+import { ARTIST_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
 import { useCurrentServer } from '/@/renderer/store';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface ArtistListTableViewProps {
     itemCount?: number;

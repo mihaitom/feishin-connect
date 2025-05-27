@@ -1,15 +1,26 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { AlbumArtistListArgs, AlbumArtistListSort, SortOrder } from '/@/renderer/api/types';
-import { DataTableProps } from '/@/renderer/store/settings.store';
-import { ListDisplayType, TableColumn, TablePagination } from '/@/renderer/types';
-import { mergeOverridingColumns } from '/@/renderer/store/utils';
 
-type TableProps = {
-    pagination: TablePagination;
-    scrollOffset: number;
-} & DataTableProps;
+import { DataTableProps } from '/@/renderer/store/settings.store';
+import { mergeOverridingColumns } from '/@/renderer/store/utils';
+import { AlbumArtistListArgs, AlbumArtistListSort, SortOrder } from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
+
+export type AlbumArtistListFilter = Omit<AlbumArtistListArgs['query'], 'limit' | 'startIndex'>;
+
+export interface AlbumArtistSlice extends AlbumArtistState {
+    actions: {
+        setFilters: (data: Partial<AlbumArtistListFilter>) => AlbumArtistListFilter;
+        setStore: (data: Partial<AlbumArtistSlice>) => void;
+        setTable: (data: Partial<TableProps>) => void;
+        setTablePagination: (data: Partial<TableProps['pagination']>) => void;
+    };
+}
+
+export interface AlbumArtistState {
+    list: ListProps<AlbumArtistListFilter>;
+}
 
 type ListProps<T> = {
     display: ListDisplayType;
@@ -21,20 +32,10 @@ type ListProps<T> = {
     table: TableProps;
 };
 
-export type AlbumArtistListFilter = Omit<AlbumArtistListArgs['query'], 'startIndex' | 'limit'>;
-
-export interface AlbumArtistState {
-    list: ListProps<AlbumArtistListFilter>;
-}
-
-export interface AlbumArtistSlice extends AlbumArtistState {
-    actions: {
-        setFilters: (data: Partial<AlbumArtistListFilter>) => AlbumArtistListFilter;
-        setStore: (data: Partial<AlbumArtistSlice>) => void;
-        setTable: (data: Partial<TableProps>) => void;
-        setTablePagination: (data: Partial<TableProps['pagination']>) => void;
-    };
-}
+type TableProps = DataTableProps & {
+    pagination: TablePagination;
+    scrollOffset: number;
+};
 
 export const useAlbumArtistStore = create<AlbumArtistSlice>()(
     persist(

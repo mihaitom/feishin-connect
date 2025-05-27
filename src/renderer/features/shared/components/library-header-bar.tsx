@@ -1,8 +1,9 @@
-import { ReactNode } from 'react';
 import { Box } from '@mantine/core';
+import { ReactNode } from 'react';
+import styled from 'styled-components';
+
 import { Paper, PaperProps, SpinnerIcon, TextTitle } from '/@/renderer/components';
 import { PlayButton as PlayBtn } from '/@/renderer/features/shared/components/play-button';
-import styled from 'styled-components';
 
 interface LibraryHeaderBarProps {
     children: ReactNode;
@@ -47,8 +48,8 @@ const PlayButton = ({ onClick }: PlayButtonProps) => {
         <Box>
             <PlayBtn
                 h="45px"
-                w="45px"
                 onClick={onClick}
+                w="45px"
             />
         </Box>
     );

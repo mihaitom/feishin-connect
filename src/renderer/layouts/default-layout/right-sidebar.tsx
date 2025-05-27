@@ -2,11 +2,12 @@ import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { forwardRef, Ref } from 'react';
 import { useLocation } from 'react-router';
 import styled from 'styled-components';
-import { SidebarPlayQueue, DrawerPlayQueue } from '/@/renderer/features/now-playing';
+
+import { DrawerPlayQueue, SidebarPlayQueue } from '/@/renderer/features/now-playing';
 import { ResizeHandle } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useGeneralSettings, useSidebarStore, useWindowSettings } from '/@/renderer/store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const RightSidebarContainer = styled(motion.aside)`
     position: relative;
@@ -93,49 +94,49 @@ export const RightSidebar = forwardRef(
         ref: Ref<HTMLDivElement>,
     ) => {
         const { windowBarStyle } = useWindowSettings();
-        const { rightWidth, rightExpanded } = useSidebarStore();
+        const { rightExpanded, rightWidth } = useSidebarStore();
         const { sideQueueType } = useGeneralSettings();
         const location = useLocation();
         const showSideQueue = rightExpanded && location.pathname !== AppRoute.NOW_PLAYING;
 
         return (
             <AnimatePresence
-                key="queue-sidebar"
-                presenceAffectsLayout
                 initial={false}
+                key="queue-sidebar"
                 mode="sync"
+                presenceAffectsLayout
             >
                 {showSideQueue && (
                     <>
                         {sideQueueType === 'sideQueue' ? (
                             <RightSidebarContainer
-                                key="queue-sidebar"
                                 animate="open"
                                 custom={rightWidth}
                                 exit="closed"
                                 id="sidebar-queue"
                                 initial="closed"
+                                key="queue-sidebar"
                                 variants={queueSidebarVariants}
                             >
                                 <ResizeHandle
-                                    ref={ref}
                                     $isResizing={isResizingRight}
                                     $placement="left"
                                     onMouseDown={(e) => {
                                         e.preventDefault();
                                         startResizing('right');
                                     }}
+                                    ref={ref}
                                 />
                                 <SidebarPlayQueue />
                             </RightSidebarContainer>
                         ) : (
                             <QueueDrawer
-                                key="queue-drawer"
                                 animate="open"
                                 custom={windowBarStyle}
                                 exit="closed"
                                 id="drawer-queue"
                                 initial="closed"
+                                key="queue-drawer"
                                 variants={queueDrawerVariants}
                             >
                                 <DrawerPlayQueue />

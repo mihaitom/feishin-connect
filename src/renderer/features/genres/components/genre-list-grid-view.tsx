@@ -3,9 +3,9 @@ import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AutoSizer, { Size } from 'react-virtualized-auto-sizer';
 import { ListOnScrollProps } from 'react-window';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { Album, GenreListQuery, GenreListResponse, LibraryItem } from '/@/renderer/api/types';
 import { ALBUM_CARD_ROWS } from '/@/renderer/components';
 import {
     VirtualGridAutoSizerContainer,
@@ -13,16 +13,23 @@ import {
 } from '/@/renderer/components/virtual-grid';
 import { useListContext } from '/@/renderer/context/list-context';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
-import { CardRow, ListDisplayType } from '/@/renderer/types';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
+import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
+import {
+    Album,
+    Genre,
+    GenreListQuery,
+    GenreListResponse,
+    LibraryItem,
+} from '/@/shared/types/domain-types';
+import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 export const GenreListGridView = ({ gridRef, itemCount }: any) => {
     const queryClient = useQueryClient();
     const server = useCurrentServer();
     const handlePlayQueueAdd = usePlayQueueAdd();
-    const { pageKey, id } = useListContext();
-    const { grid, display, filter } = useListStoreByKey<GenreListQuery>({ key: pageKey });
+    const { id, pageKey } = useListContext();
+    const { display, filter, grid } = useListStoreByKey<GenreListQuery>({ key: pageKey });
     const { setGrid } = useListStoreActions();
     const genrePath = useGenreRoute();
 
@@ -53,7 +60,7 @@ export const GenreListGridView = ({ gridRef, itemCount }: any) => {
     );
 
     const fetchInitialData = useCallback(() => {
-        const query: Omit<GenreListQuery, 'startIndex' | 'limit'> = {
+        const query: Omit<GenreListQuery, 'limit' | 'startIndex'> = {
             ...filter,
         };
 
@@ -64,7 +71,7 @@ export const GenreListGridView = ({ gridRef, itemCount }: any) => {
             stale: false,
         });
 
-        const itemData = [];
+        const itemData: Genre[] = [];
 
         for (const [, data] of queriesFromCache) {
             const { items, startIndex } = data || {};
@@ -122,8 +129,6 @@ export const GenreListGridView = ({ gridRef, itemCount }: any) => {
             <AutoSizer>
                 {({ height, width }: Size) => (
                     <VirtualInfiniteGrid
-                        key={`album-list-${server?.id}-${display}`}
-                        ref={gridRef}
                         cardRows={cardRows}
                         display={display || ListDisplayType.CARD}
                         fetchFn={fetch}
@@ -135,14 +140,16 @@ export const GenreListGridView = ({ gridRef, itemCount }: any) => {
                         itemGap={grid?.itemGap ?? 10}
                         itemSize={grid?.itemSize || 200}
                         itemType={LibraryItem.GENRE}
+                        key={`album-list-${server?.id}-${display}`}
                         loading={itemCount === undefined || itemCount === null}
                         minimumBatchSize={40}
+                        onScroll={handleGridScroll}
+                        ref={gridRef}
                         route={{
                             route: genrePath,
                             slugs: [{ idProperty: 'id', slugProperty: 'genreId' }],
                         }}
                         width={width}
-                        onScroll={handleGridScroll}
                     />
                 )}
             </AutoSizer>

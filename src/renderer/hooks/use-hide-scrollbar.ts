@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
 import { useTimeout } from '@mantine/hooks';
+import { useEffect, useState } from 'react';
 
 export const useHideScrollbar = (timeout: number) => {
     const [hideScrollbar, setHideScrollbar] = useState(false);
-    const { start, clear } = useTimeout(() => setHideScrollbar(true), timeout);
+    const { clear, start } = useTimeout(() => setHideScrollbar(true), timeout);
 
     // Automatically hide the scrollbar after the timeout duration
     useEffect(() => {

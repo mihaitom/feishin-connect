@@ -1,5 +1,5 @@
-import { forwardRef, ReactNode } from 'react';
 import { createPolymorphicComponent, Flex } from '@mantine/core';
+import { forwardRef, ReactNode } from 'react';
 import styled from 'styled-components';
 
 const Container = styled(Flex)<{ $active?: boolean; $disabled?: boolean }>`
@@ -48,9 +48,9 @@ const _CollapsedSidebarButton = forwardRef<HTMLDivElement, CollapsedSidebarButto
     ({ children, ...props }: CollapsedSidebarButtonProps, ref) => {
         return (
             <Container
-                ref={ref}
                 align="center"
                 direction="column"
+                ref={ref}
                 {...props}
             >
                 {children}

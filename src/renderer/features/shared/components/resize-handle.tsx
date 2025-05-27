@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const ResizeHandle = styled.div<{
     $isResizing: boolean;
-    $placement: 'top' | 'left' | 'bottom' | 'right';
+    $placement: 'bottom' | 'left' | 'right' | 'top';
 }>`
     position: absolute;
     top: ${(props) => props.$placement === 'top' && 0};

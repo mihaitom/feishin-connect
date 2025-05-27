@@ -11,7 +11,7 @@ const regex = /(url\("?)(?!data:)/gim;
 
 const addStyles = (output: string[], styles: CSSStyleDeclaration) => {
     for (let prop = styles.length - 1; prop >= 0; prop -= 1) {
-        const key = styles[prop] as keyof CSSStyleDeclaration;
+        const key = styles[prop] as string;
         if (key !== 'content' && styles[key]) {
             const value = styles[key];
             const priority = styles.getPropertyPriority(key as string);
@@ -75,7 +75,7 @@ DomPurify.addHook('afterSanitizeAttributes', (node: Element) => {
     }
 });
 
-DomPurify.addHook('uponSanitizeElement', (node: Element) => {
+(DomPurify as any).addHook('uponSanitizeElement', (node: Element) => {
     if (node.tagName === 'STYLE') {
         const rules = (node as HTMLStyleElement).sheet?.cssRules;
         if (rules) {
@@ -91,7 +91,7 @@ export const sanitize = (text: string): string => {
 };
 
 export const sanitizeCss = (text: string): string => {
-    return DomPurify.sanitize(text, {
+    return (DomPurify as any).sanitize(text, {
         ALLOWED_ATTR: [],
         ALLOWED_TAGS: ['style'],
         RETURN_DOM: true,

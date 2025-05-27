@@ -1,25 +1,26 @@
-import type { ChangeEvent, MutableRefObject } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+import type { ChangeEvent, MutableRefObject } from 'react';
+
 import { Flex, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
 import { useTranslation } from 'react-i18next';
-import { FilterBar } from '../../shared/components/filter-bar';
-import { ArtistListQuery, LibraryItem } from '/@/renderer/api/types';
+
 import { PageHeader, SearchInput } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
-import { LibraryHeaderBar } from '/@/renderer/features/shared';
-import { useContainerQuery } from '/@/renderer/hooks';
-import { ArtistListFilter, useCurrentServer } from '/@/renderer/store';
-import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
 import { ArtistListHeaderFilters } from '/@/renderer/features/artists/components/artist-list-header-filters';
+import { FilterBar, LibraryHeaderBar } from '/@/renderer/features/shared';
+import { useContainerQuery } from '/@/renderer/hooks';
+import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
+import { ArtistListFilter, useCurrentServer } from '/@/renderer/store';
+import { ArtistListQuery, LibraryItem } from '/@/shared/types/domain-types';
 
 interface ArtistListHeaderProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const ArtistListHeader = ({ itemCount, gridRef, tableRef }: ArtistListHeaderProps) => {
+export const ArtistListHeader = ({ gridRef, itemCount, tableRef }: ArtistListHeaderProps) => {
     const { t } = useTranslation();
     const server = useCurrentServer();
     const cq = useContainerQuery();
@@ -60,8 +61,8 @@ export const ArtistListHeader = ({ itemCount, gridRef, tableRef }: ArtistListHea
                     <Group>
                         <SearchInput
                             defaultValue={filter.searchTerm}
-                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                             onChange={handleSearch}
+                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                         />
                     </Group>
                 </Flex>

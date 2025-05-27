@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useCurrentServer } from '/@/renderer/store';
-import { AuthState, ServerListItem, ServerType } from '/@/renderer/types';
-import { api } from '/@/renderer/api';
-import { SongListSort, SortOrder } from '/@/renderer/api/types';
 import { debounce } from 'lodash';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { api } from '/@/renderer/api';
 import { toast } from '/@/renderer/components';
+import { useCurrentServer } from '/@/renderer/store';
+import { SongListSort, SortOrder } from '/@/shared/types/domain-types';
+import { AuthState, ServerListItem, ServerType } from '/@/shared/types/types';
 
 export const useServerAuthenticated = () => {
-    const priorServerId = useRef<string>();
+    const priorServerId = useRef<string | undefined>(undefined);
     const server = useCurrentServer();
     const [ready, setReady] = useState(
         server?.type === ServerType.NAVIDROME ? AuthState.LOADING : AuthState.VALID,

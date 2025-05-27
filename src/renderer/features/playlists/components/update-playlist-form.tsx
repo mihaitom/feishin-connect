@@ -1,8 +1,16 @@
 import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { openModal, closeAllModals } from '@mantine/modals';
+import { closeAllModals, openModal } from '@mantine/modals';
+import { useTranslation } from 'react-i18next';
+
+import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { Button, Select, Switch, TextInput, toast } from '/@/renderer/components';
+import { useUpdatePlaylist } from '/@/renderer/features/playlists/mutations/update-playlist-mutation';
+import { queryClient } from '/@/renderer/lib/react-query';
+import { useCurrentServer } from '/@/renderer/store';
+import { hasFeature } from '/@/shared/api/utils';
 import {
     PlaylistDetailResponse,
     ServerListItem,
@@ -13,15 +21,8 @@ import {
     User,
     UserListQuery,
     UserListSort,
-} from '/@/renderer/api/types';
-import { Button, Select, Switch, TextInput, toast } from '/@/renderer/components';
-import { useUpdatePlaylist } from '/@/renderer/features/playlists/mutations/update-playlist-mutation';
-import { queryClient } from '/@/renderer/lib/react-query';
-import { useCurrentServer } from '/@/renderer/store';
-import { useTranslation } from 'react-i18next';
-import i18n from '/@/i18n/i18n';
-import { hasFeature } from '/@/renderer/api/utils';
-import { ServerFeature } from '/@/renderer/api/features-types';
+} from '/@/shared/types/domain-types';
+import { ServerFeature } from '/@/shared/types/features-types';
 
 interface UpdatePlaylistFormProps {
     body: Partial<UpdatePlaylistBody>;
@@ -30,7 +31,7 @@ interface UpdatePlaylistFormProps {
     users?: User[];
 }
 
-export const UpdatePlaylistForm = ({ users, query, body, onCancel }: UpdatePlaylistFormProps) => {
+export const UpdatePlaylistForm = ({ body, onCancel, query, users }: UpdatePlaylistFormProps) => {
     const { t } = useTranslation();
     const mutation = useUpdatePlaylist({});
     const server = useCurrentServer();
@@ -89,11 +90,11 @@ export const UpdatePlaylistForm = ({ users, query, body, onCancel }: UpdatePlayl
             <Stack>
                 <TextInput
                     data-autofocus
-                    required
                     label={t('form.createPlaylist.input', {
                         context: 'name',
                         postProcess: 'titleCase',
                     })}
+                    required
                     {...form.getInputProps('name')}
                 />
                 {server?.type === ServerType.NAVIDROME && (
@@ -135,8 +136,8 @@ export const UpdatePlaylistForm = ({ users, query, body, onCancel }: UpdatePlayl
                 )}
                 <Group position="right">
                     <Button
-                        variant="subtle"
                         onClick={onCancel}
+                        variant="subtle"
                     >
                         {t('common.cancel', { postProcess: 'titleCase' })}
                     </Button>
@@ -200,9 +201,9 @@ export const openUpdatePlaylistModal = async (args: {
                     name: playlist?.name,
                     public: playlist?.public || false,
                 }}
+                onCancel={closeAllModals}
                 query={{ id: playlist?.id }}
                 users={users?.items}
-                onCancel={closeAllModals}
             />
         ),
         title: i18n.t('form.editPlaylist.title', { postProcess: 'titleCase' }) as string,

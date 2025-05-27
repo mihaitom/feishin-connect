@@ -1,12 +1,13 @@
-import { useTranslation } from 'react-i18next';
-import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
-import { useState } from 'react';
-import { Button, Checkbox } from '/@/renderer/components';
 import { Divider, Stack } from '@mantine/core';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { Button, Checkbox } from '/@/renderer/components';
 import {
     CONFIGURABLE_CONTEXT_MENU_ITEMS,
     CONTEXT_MENU_ITEM_MAPPING,
 } from '/@/renderer/features/context-menu';
+import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
 import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store';
 
 export const ContextMenuSettings = () => {
@@ -21,8 +22,8 @@ export const ContextMenuSettings = () => {
                 control={
                     <Button
                         compact
-                        variant="filled"
                         onClick={() => setOpen(!open)}
+                        variant="filled"
                     >
                         {t(open ? 'common.close' : 'common.edit', { postProcess: 'titleCase' })}
                     </Button>
@@ -39,8 +40,8 @@ export const ContextMenuSettings = () => {
                 <Stack>
                     {CONFIGURABLE_CONTEXT_MENU_ITEMS.map((item) => (
                         <Checkbox
-                            key={item}
                             checked={!disabledItems[item]}
+                            key={item}
                             label={t(
                                 `page.contextMenu.${CONTEXT_MENU_ITEM_MAPPING[item] || item}`,
                                 {

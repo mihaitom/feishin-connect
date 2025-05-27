@@ -1,8 +1,10 @@
+import type { QueryHookArgs } from '/@/renderer/lib/react-query';
+import type { AlbumListQuery } from '/@/shared/types/domain-types';
+
 import { useQuery } from '@tanstack/react-query';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import type { AlbumListQuery } from '/@/renderer/api/types';
-import type { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
 
 export const useAlbumListCount = (args: QueryHookArgs<AlbumListQuery>) => {

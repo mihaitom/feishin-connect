@@ -1,9 +1,10 @@
-import { useEffect, useCallback, useState, useRef } from 'react';
-import { QueueSong, ServerType } from '/@/renderer/api/types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import { useSendScrobble } from '/@/renderer/features/player/mutations/scrobble-mutation';
 import { usePlayerStore } from '/@/renderer/store';
 import { usePlaybackSettings } from '/@/renderer/store/settings.store';
-import { PlayerStatus } from '/@/renderer/types';
+import { QueueSong, ServerType } from '/@/shared/types/domain-types';
+import { PlayerStatus } from '/@/shared/types/types';
 
 /*
  Scrobble Conditions (match any):
@@ -82,12 +83,12 @@ export const useScrobble = () => {
         [isScrobbleEnabled, sendScrobble],
     );
 
-    const progressIntervalId = useRef<ReturnType<typeof setInterval> | null>(null);
-    const songChangeTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const progressIntervalId = useRef<null | ReturnType<typeof setInterval>>(null);
+    const songChangeTimeoutId = useRef<null | ReturnType<typeof setTimeout>>(null);
     const handleScrobbleFromSongChange = useCallback(
         (
-            current: (QueueSong | number | undefined)[],
-            previous: (QueueSong | number | undefined)[],
+            current: (number | QueueSong | undefined)[],
+            previous: (number | QueueSong | undefined)[],
         ) => {
             if (!isScrobbleEnabled) return;
 
@@ -179,8 +180,8 @@ export const useScrobble = () => {
 
     const handleScrobbleFromStatusChange = useCallback(
         (
-            current: (PlayerStatus | number | undefined)[],
-            previous: (PlayerStatus | number | undefined)[],
+            current: (number | PlayerStatus | undefined)[],
+            previous: (number | PlayerStatus | undefined)[],
         ) => {
             if (!isScrobbleEnabled) return;
 

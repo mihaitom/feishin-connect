@@ -8,23 +8,18 @@ import type {
     RowDragEvent,
 } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence } from 'framer-motion';
 import debounce from 'lodash/debounce';
 import { MutableRefObject, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    LibraryItem,
-    PlaylistSongListQuery,
-    QueueSong,
-    Song,
-    SongListSort,
-    SortOrder,
-} from '/@/renderer/api/types';
+import { toast } from '/@/renderer/components';
 import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
-import { TablePagination, VirtualTable, getColumnDefs } from '/@/renderer/components/virtual-table';
+import { getColumnDefs, TablePagination, VirtualTable } from '/@/renderer/components/virtual-table';
 import { useCurrentSongRowStyles } from '/@/renderer/components/virtual-table/hooks/use-current-song-row-styles';
 import { useHandleTableContextMenu } from '/@/renderer/features/context-menu';
 import {
@@ -34,6 +29,7 @@ import {
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { usePlaylistDetail } from '/@/renderer/features/playlists/queries/playlist-detail-query';
 import { usePlaylistSongList } from '/@/renderer/features/playlists/queries/playlist-song-list-query';
+import { useAppFocus } from '/@/renderer/hooks';
 import {
     useCurrentServer,
     useCurrentSong,
@@ -43,10 +39,16 @@ import {
     useSetPlaylistDetailTable,
     useSetPlaylistDetailTablePagination,
 } from '/@/renderer/store';
-import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { ListDisplayType, ServerType } from '/@/renderer/types';
-import { useAppFocus } from '/@/renderer/hooks';
-import { toast } from '/@/renderer/components';
+import { PersistedTableColumn, usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import {
+    LibraryItem,
+    PlaylistSongListQuery,
+    QueueSong,
+    Song,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, ServerType } from '/@/shared/types/types';
 
 interface PlaylistDetailContentProps {
     songs?: Song[];
@@ -230,7 +232,7 @@ export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetai
         if (!columnsOrder) return;
 
         const columnsInSettings = page.table.columns;
-        const updatedColumns = [];
+        const updatedColumns: PersistedTableColumn[] = [];
         for (const column of columnsOrder) {
             const columnInSettings = columnsInSettings.find(
                 (c) => c.column === column.getColDef().colId,
@@ -290,12 +292,7 @@ export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetai
         <>
             <VirtualGridAutoSizerContainer>
                 <VirtualTable
-                    // https://github.com/ag-grid/ag-grid/issues/5284
-                    // Key is used to force remount of table when display, rowHeight, or server changes
-                    key={`table-${page.display}-${page.table.rowHeight}-${server?.id}`}
-                    ref={tableRef}
                     alwaysShowHorizontalScroll
-                    shouldUpdateSong
                     autoFitColumns={page.table.autoFit}
                     columnDefs={columnDefs}
                     context={{
@@ -309,14 +306,9 @@ export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetai
                     infiniteInitialRowCount={
                         iSClientSide ? undefined : checkPlaylistList.data?.totalRecordCount || 100
                     }
-                    pagination={isPaginationEnabled}
-                    paginationAutoPageSize={isPaginationEnabled}
-                    paginationPageSize={pagination.itemsPerPage || 100}
-                    rowClassRules={rowClassRules}
-                    rowData={songs}
-                    rowDragEntireRow={canDrag}
-                    rowHeight={page.table.rowHeight || 40}
-                    rowModelType={iSClientSide ? 'clientSide' : 'infinite'}
+                    // https://github.com/ag-grid/ag-grid/issues/5284
+                    // Key is used to force remount of table when display, rowHeight, or server changes
+                    key={`table-${page.display}-${page.table.rowHeight}-${server?.id}`}
                     onBodyScrollEnd={handleScroll}
                     onCellContextMenu={handleContextMenu}
                     onColumnMoved={handleColumnChange}
@@ -326,13 +318,23 @@ export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetai
                     onPaginationChanged={onPaginationChanged}
                     onRowDoubleClicked={handleRowDoubleClick}
                     onRowDragEnd={handleDragEnd}
+                    pagination={isPaginationEnabled}
+                    paginationAutoPageSize={isPaginationEnabled}
+                    paginationPageSize={pagination.itemsPerPage || 100}
+                    ref={tableRef}
+                    rowClassRules={rowClassRules}
+                    rowData={songs}
+                    rowDragEntireRow={canDrag}
+                    rowHeight={page.table.rowHeight || 40}
+                    rowModelType={iSClientSide ? 'clientSide' : 'infinite'}
+                    shouldUpdateSong
                 />
             </VirtualGridAutoSizerContainer>
             {isPaginationEnabled && (
                 <AnimatePresence
-                    presenceAffectsLayout
                     initial={false}
                     mode="wait"
+                    presenceAffectsLayout
                 >
                     {page.display === ListDisplayType.TABLE_PAGINATED && (
                         <TablePagination

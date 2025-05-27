@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { AddToPlaylistArgs, AddToPlaylistResponse } from '/@/renderer/api/types';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
+import { AddToPlaylistArgs, AddToPlaylistResponse } from '/@/shared/types/domain-types';
 
 export const useAddToPlaylist = (args: MutationHookArgs) => {
     const { options } = args || {};
@@ -13,7 +14,7 @@ export const useAddToPlaylist = (args: MutationHookArgs) => {
     return useMutation<
         AddToPlaylistResponse,
         AxiosError,
-        Omit<AddToPlaylistArgs, 'server' | 'apiClientProps'>,
+        Omit<AddToPlaylistArgs, 'apiClientProps' | 'server'>,
         null
     >({
         mutationFn: (args) => {

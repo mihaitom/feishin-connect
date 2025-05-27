@@ -1,12 +1,13 @@
 // Credits to https://github.com/tranxuanthang/lrcget for API implementation
 import axios, { AxiosResponse } from 'axios';
-import { orderSearchResults } from './shared';
+
 import {
     InternetProviderLyricResponse,
     InternetProviderLyricSearchResponse,
     LyricSearchQuery,
     LyricSource,
-} from '../../../../renderer/api/types';
+} from '.';
+import { orderSearchResults } from './shared';
 
 const FETCH_URL = 'https://lrclib.net/api/get';
 const SEEARCH_URL = 'https://lrclib.net/api/search';
@@ -29,10 +30,23 @@ export interface LrcLibTrackResponse {
     isrc: string;
     lang: string;
     name: string;
-    plainLyrics: string | null;
+    plainLyrics: null | string;
     releaseDate: string;
     spotifyId: string;
-    syncedLyrics: string | null;
+    syncedLyrics: null | string;
+}
+
+export async function getLyricsBySongId(songId: string): Promise<null | string> {
+    let result: AxiosResponse<LrcLibTrackResponse, any>;
+
+    try {
+        result = await axios.get<LrcLibTrackResponse>(`${FETCH_URL}/${songId}`);
+    } catch (e) {
+        console.error('LrcLib lyrics request got an error!', e);
+        return null;
+    }
+
+    return result.data.syncedLyrics || result.data.plainLyrics || null;
 }
 
 export async function getSearchResults(
@@ -67,19 +81,6 @@ export async function getSearchResults(
     });
 
     return orderSearchResults({ params, results: songResults });
-}
-
-export async function getLyricsBySongId(songId: string): Promise<string | null> {
-    let result: AxiosResponse<LrcLibTrackResponse, any>;
-
-    try {
-        result = await axios.get<LrcLibTrackResponse>(`${FETCH_URL}/${songId}`);
-    } catch (e) {
-        console.error('LrcLib lyrics request got an error!', e);
-        return null;
-    }
-
-    return result.data.syncedLyrics || result.data.plainLyrics || null;
 }
 
 export async function query(

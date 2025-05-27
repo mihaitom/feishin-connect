@@ -1,12 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 import { load } from 'cheerio';
-import { orderSearchResults } from './shared';
+
 import {
-    LyricSource,
     InternetProviderLyricResponse,
     InternetProviderLyricSearchResponse,
     LyricSearchQuery,
-} from '../../../../renderer/api/types';
+    LyricSource,
+} from '.';
+import { orderSearchResults } from './shared';
 
 const SEARCH_URL = 'https://genius.com/api/search/song';
 
@@ -17,25 +18,40 @@ export interface GeniusResponse {
     response: Response;
 }
 
-export interface Meta {
-    status: number;
-}
-
-export interface Response {
-    next_page: number;
-    sections: Section[];
-}
-
-export interface Section {
-    hits: Hit[];
-    type: string;
-}
-
 export interface Hit {
     highlights: any[];
     index: string;
     result: Result;
     type: string;
+}
+
+export interface Meta {
+    status: number;
+}
+
+export interface PrimaryArtist {
+    _type: string;
+    api_path: string;
+    header_image_url: string;
+    id: number;
+    image_url: string;
+    index_character: string;
+    is_meme_verified: boolean;
+    is_verified: boolean;
+    name: string;
+    slug: string;
+    url: string;
+}
+
+export interface ReleaseDateComponents {
+    day: number;
+    month: number;
+    year: number;
+}
+
+export interface Response {
+    next_page: number;
+    sections: Section[];
 }
 
 export interface Result {
@@ -69,29 +85,35 @@ export interface Result {
     url: string;
 }
 
-export interface PrimaryArtist {
-    _type: string;
-    api_path: string;
-    header_image_url: string;
-    id: number;
-    image_url: string;
-    index_character: string;
-    is_meme_verified: boolean;
-    is_verified: boolean;
-    name: string;
-    slug: string;
-    url: string;
-}
-
-export interface ReleaseDateComponents {
-    day: number;
-    month: number;
-    year: number;
+export interface Section {
+    hits: Hit[];
+    type: string;
 }
 
 export interface Stats {
     hot: boolean;
     unreviewed_annotations: number;
+}
+
+export async function getLyricsBySongId(url: string): Promise<null | string> {
+    let result: AxiosResponse<string, any>;
+    try {
+        result = await axios.get<string>(url, { responseType: 'text' });
+    } catch (e) {
+        console.error('Genius lyrics request got an error!', e);
+        return null;
+    }
+
+    const $ = load(result.data.split('<br/>').join('\n'));
+    const lyricsDiv = $('div.lyrics');
+
+    if (lyricsDiv.length > 0) return lyricsDiv.text().trim();
+
+    const lyricSections = $('div[class^=Lyrics__Container]')
+        .map((_, e) => $(e).text())
+        .toArray()
+        .join('\n');
+    return lyricSections;
 }
 
 export async function getSearchResults(
@@ -133,9 +155,33 @@ export async function getSearchResults(
     return orderSearchResults({ params, results: songResults });
 }
 
+export async function query(
+    params: LyricSearchQuery,
+): Promise<InternetProviderLyricResponse | null> {
+    const response = await getSongId(params);
+    if (!response) {
+        console.error('Could not find the song on Genius!');
+        return null;
+    }
+
+    const lyrics = await getLyricsBySongId(response.id);
+    if (!lyrics) {
+        console.error('Could not get lyrics on Genius!');
+        return null;
+    }
+
+    return {
+        artist: response.artist,
+        id: response.id,
+        lyrics,
+        name: response.name,
+        source: LyricSource.GENIUS,
+    };
+}
+
 async function getSongId(
     params: LyricSearchQuery,
-): Promise<Omit<InternetProviderLyricResponse, 'lyrics'> | null> {
+): Promise<null | Omit<InternetProviderLyricResponse, 'lyrics'>> {
     let result: AxiosResponse<GeniusResponse>;
     try {
         result = await axios.get(SEARCH_URL, {
@@ -159,51 +205,6 @@ async function getSongId(
         artist: hit.artist_names,
         id: hit.url,
         name: hit.full_title,
-        source: LyricSource.GENIUS,
-    };
-}
-
-export async function getLyricsBySongId(url: string): Promise<string | null> {
-    let result: AxiosResponse<string, any>;
-    try {
-        result = await axios.get<string>(url, { responseType: 'text' });
-    } catch (e) {
-        console.error('Genius lyrics request got an error!', e);
-        return null;
-    }
-
-    const $ = load(result.data.split('<br/>').join('\n'));
-    const lyricsDiv = $('div.lyrics');
-
-    if (lyricsDiv.length > 0) return lyricsDiv.text().trim();
-
-    const lyricSections = $('div[class^=Lyrics__Container]')
-        .map((_, e) => $(e).text())
-        .toArray()
-        .join('\n');
-    return lyricSections;
-}
-
-export async function query(
-    params: LyricSearchQuery,
-): Promise<InternetProviderLyricResponse | null> {
-    const response = await getSongId(params);
-    if (!response) {
-        console.error('Could not find the song on Genius!');
-        return null;
-    }
-
-    const lyrics = await getLyricsBySongId(response.id);
-    if (!lyrics) {
-        console.error('Could not get lyrics on Genius!');
-        return null;
-    }
-
-    return {
-        artist: response.artist,
-        id: response.id,
-        lyrics,
-        name: response.name,
         source: LyricSource.GENIUS,
     };
 }

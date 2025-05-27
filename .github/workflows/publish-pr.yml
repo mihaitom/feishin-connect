@@ -17,15 +17,13 @@ jobs:
             - name: Checkout git repo
               uses: actions/checkout@v3
 
-            - name: Install Node and NPM
-              uses: actions/setup-node@v3
+            - name: Install Node and PNPM
+              uses: pnpm/action-setup@v4
               with:
-                  node-version: 18
-                  cache: npm
+                  version: 9
 
             - name: Install dependencies
-              run: |
-                  npm install --legacy-peer-deps
+              run: pnpm install
 
             - name: Build for Windows
               if: ${{ matrix.os == 'windows-latest' }}
@@ -35,7 +33,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      npm run package:pr:windows
+                      pnpm run package:win:pr
 
             - name: Build for Linux
               if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -45,7 +43,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      npm run package:pr:linux
+                      pnpm run package:linux:pr
 
             - name: Build for MacOS
               if: ${{ matrix.os == 'macos-latest' }}
@@ -55,41 +53,41 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      npm run package:pr:macos
+                      pnpm run package:mac:pr
 
             - name: Zip Windows Binaries
               if: ${{ matrix.os == 'windows-latest' }}
               shell: pwsh
               run: |
-                  Compress-Archive -Path "release/build/*.exe" -DestinationPath "release/build/windows-binaries.zip" -Force
+                  Compress-Archive -Path "dist/*.exe" -DestinationPath "dist/windows-binaries.zip" -Force
 
             - name: Zip Linux Binaries
               if: ${{ matrix.os == 'ubuntu-latest' }}
               run: |
-                  zip -r release/build/linux-binaries.zip release/build/*.{AppImage,deb,rpm}
+                  zip -r dist/linux-binaries.zip dist/*.{AppImage,deb,rpm}
 
             - name: Zip MacOS Binaries
               if: ${{ matrix.os == 'macos-latest' }}
               run: |
-                  zip -r release/build/macos-binaries.zip release/build/*.dmg
+                  zip -r dist/macos-binaries.zip dist/*.dmg
 
             - name: Upload Windows Binaries
               if: ${{ matrix.os == 'windows-latest' }}
               uses: actions/upload-artifact@v4
               with:
                   name: windows-binaries
-                  path: release/build/windows-binaries.zip
+                  path: dist/windows-binaries.zip
 
             - name: Upload Linux Binaries
               if: ${{ matrix.os == 'ubuntu-latest' }}
               uses: actions/upload-artifact@v4
               with:
                   name: linux-binaries
-                  path: release/build/linux-binaries.zip
+                  path: dist/linux-binaries.zip
 
             - name: Upload MacOS Binaries
               if: ${{ matrix.os == 'macos-latest' }}
               uses: actions/upload-artifact@v4
               with:
                   name: macos-binaries
-                  path: release/build/macos-binaries.zip
+                  path: dist/macos-binaries.zip

@@ -1,26 +1,27 @@
-import React, { MouseEvent } from 'react';
 import { Center, Group } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
+import React, { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiArrowUpSLine, RiDiscLine, RiMore2Fill } from 'react-icons/ri';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
+
 import { Button, Text, Tooltip } from '/@/renderer/components';
+import { Separator } from '/@/renderer/components/separator';
+import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
+import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
     useAppStoreActions,
     useCurrentSong,
-    useSetFullScreenPlayerStore,
     useFullScreenPlayerStore,
-    useSidebarStore,
     useHotkeySettings,
+    useSetFullScreenPlayerStore,
+    useSidebarStore,
 } from '/@/renderer/store';
 import { fadeIn } from '/@/renderer/styles';
-import { LibraryItem } from '/@/renderer/api/types';
-import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
-import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
-import { Separator } from '/@/renderer/components/separator';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 const ImageWrapper = styled.div`
     position: relative;
@@ -98,7 +99,7 @@ export const LeftControls = () => {
     const { setSideBar } = useAppStoreActions();
     const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
     const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
-    const { image, collapsed } = useSidebarStore();
+    const { collapsed, image } = useSidebarStore();
     const hideImage = image && !collapsed;
     const currentSong = useCurrentSong();
     const title = currentSong?.name;
@@ -112,7 +113,7 @@ export const LeftControls = () => {
         SONG_CONTEXT_MENU_ITEMS,
     );
 
-    const handleToggleFullScreenPlayer = (e?: MouseEvent<HTMLDivElement> | KeyboardEvent) => {
+    const handleToggleFullScreenPlayer = (e?: KeyboardEvent | MouseEvent<HTMLDivElement>) => {
         e?.stopPropagation();
         setFullScreenPlayerStore({ expanded: !isFullScreenPlayerExpanded });
     };
@@ -143,13 +144,13 @@ export const LeftControls = () => {
                     {!hideImage && (
                         <ImageWrapper>
                             <Image
-                                key="playerbar-image"
                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -50 }}
                                 initial={{ opacity: 0, x: -50 }}
+                                key="playerbar-image"
+                                onClick={handleToggleFullScreenPlayer}
                                 role="button"
                                 transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                onClick={handleToggleFullScreenPlayer}
                             >
                                 <Tooltip
                                     label={t('player.toggleFullscreenPlayer', {
@@ -180,6 +181,7 @@ export const LeftControls = () => {
                                 {!collapsed && (
                                     <Button
                                         compact
+                                        onClick={handleToggleSidebarImage}
                                         opacity={0.8}
                                         radius={50}
                                         size="md"
@@ -196,7 +198,6 @@ export const LeftControls = () => {
                                             openDelay: 500,
                                         }}
                                         variant="default"
-                                        onClick={handleToggleSidebarImage}
                                     >
                                         <RiArrowUpSLine
                                             color="white"
@@ -211,8 +212,8 @@ export const LeftControls = () => {
                 <MetadataStack layout="position">
                     <LineItem onClick={stopPropagation}>
                         <Group
-                            noWrap
                             align="flex-start"
+                            noWrap
                             spacing="xs"
                         >
                             <Text
@@ -228,8 +229,8 @@ export const LeftControls = () => {
                             {isSongDefined && (
                                 <Button
                                     compact
-                                    variant="subtle"
                                     onClick={(e) => handleGeneralContextMenu(e, [currentSong!])}
+                                    variant="subtle"
                                 >
                                     <RiMore2Fill size="1.2rem" />
                                 </Button>

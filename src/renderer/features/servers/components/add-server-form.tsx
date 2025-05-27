@@ -1,18 +1,19 @@
-import { useState } from 'react';
-import { Stack, Group, Checkbox } from '@mantine/core';
-import { Button, PasswordInput, SegmentedControl, TextInput, toast } from '/@/renderer/components';
+import { Checkbox, Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useFocusTrap } from '@mantine/hooks';
 import { closeAllModals } from '@mantine/modals';
 import isElectron from 'is-electron';
 import { nanoid } from 'nanoid/non-secure';
-import { AuthenticationResponse } from '/@/renderer/api/types';
-import { useAuthStoreActions } from '/@/renderer/store';
-import { ServerType, toServerType } from '/@/renderer/types';
-import { api } from '/@/renderer/api';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+import { api } from '/@/renderer/api';
+import { Button, PasswordInput, SegmentedControl, TextInput, toast } from '/@/renderer/components';
+import { useAuthStoreActions } from '/@/renderer/store';
+import { AuthenticationResponse } from '/@/shared/types/domain-types';
+import { ServerType, toServerType } from '/@/shared/types/types';
+
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 const SERVER_TYPES = [
     { label: 'Jellyfin', value: ServerType.JELLYFIN },
@@ -124,8 +125,8 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     return (
         <form onSubmit={handleSubmit}>
             <Stack
-                ref={focusTrapRef}
                 m={5}
+                ref={focusTrapRef}
             >
                 <SegmentedControl
                     data={SERVER_TYPES}
@@ -187,8 +188,8 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                 )}
                 <Group position="right">
                     <Button
-                        variant="subtle"
                         onClick={onCancel}
+                        variant="subtle"
                     >
                         {t('common.cancel', { postProcess: 'titleCase' })}
                     </Button>

@@ -1,5 +1,5 @@
-import { SEPARATOR_STRING } from '/@/renderer/api/utils';
 import { Text } from '/@/renderer/components/text';
+import { SEPARATOR_STRING } from '/@/shared/api/utils';
 
 export const Separator = () => {
     return (

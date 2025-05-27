@@ -2,6 +2,19 @@ import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
+export interface EventSlice extends EventState {
+    actions: {
+        favorite: (ids: string[], favorite: boolean) => void;
+        play: (id: string) => void;
+        rate: (ids: string[], rating: null | number) => void;
+    };
+}
+
+export interface EventState {
+    event: null | UserEvent;
+    ids: string[];
+}
+
 export type FavoriteEvent = {
     event: 'favorite';
     favorite: boolean;
@@ -14,23 +27,10 @@ export type PlayEvent = {
 
 export type RatingEvent = {
     event: 'rating';
-    rating: number | null;
+    rating: null | number;
 };
 
 export type UserEvent = FavoriteEvent | PlayEvent | RatingEvent;
-
-export interface EventState {
-    event: UserEvent | null;
-    ids: string[];
-}
-
-export interface EventSlice extends EventState {
-    actions: {
-        favorite: (ids: string[], favorite: boolean) => void;
-        play: (id: string) => void;
-        rate: (ids: string[], rating: number | null) => void;
-    };
-}
 
 export const useEventStore = create<EventSlice>()(
     subscribeWithSelector(

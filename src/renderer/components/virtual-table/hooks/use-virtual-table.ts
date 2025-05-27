@@ -1,4 +1,5 @@
-import { MutableRefObject, useCallback, useMemo } from 'react';
+import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import {
     BodyScrollEvent,
     ColDef,
@@ -8,26 +9,27 @@ import {
     PaginationChangedEvent,
     RowDoubleClickedEvent,
 } from '@ag-grid-community/core';
-import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 import { QueryKey, useQueryClient } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import orderBy from 'lodash/orderBy';
+import { MutableRefObject, useCallback, useMemo } from 'react';
 import { generatePath, useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
+
 import { api } from '/@/renderer/api';
-import { QueryPagination, queryKeys } from '/@/renderer/api/query-keys';
+import { queryKeys, QueryPagination } from '/@/renderer/api/query-keys';
+import { getColumnDefs, VirtualTableProps } from '/@/renderer/components/virtual-table';
+import { SetContextMenuItems, useHandleTableContextMenu } from '/@/renderer/features/context-menu';
+import { AppRoute } from '/@/renderer/router/routes';
+import { PersistedTableColumn, useListStoreActions } from '/@/renderer/store';
+import { ListKey, useListStoreByKey } from '/@/renderer/store/list.store';
 import {
     BasePaginatedResponse,
     BaseQuery,
     LibraryItem,
     ServerListItem,
-} from '/@/renderer/api/types';
-import { getColumnDefs, VirtualTableProps } from '/@/renderer/components/virtual-table';
-import { SetContextMenuItems, useHandleTableContextMenu } from '/@/renderer/features/context-menu';
-import { AppRoute } from '/@/renderer/router/routes';
-import { useListStoreActions } from '/@/renderer/store';
-import { ListDisplayType, TablePagination } from '/@/renderer/types';
-import { useSearchParams } from 'react-router-dom';
-import { ListKey, useListStoreByKey } from '../../../store/list.store';
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, TablePagination } from '/@/shared/types/types';
 
 export type AgGridFetchFn<TResponse, TFilter> = (
     args: { filter: TFilter; limit: number; startIndex: number },
@@ -44,24 +46,24 @@ interface UseAgGridProps<TFilter> {
     itemCount?: number;
     itemType: LibraryItem;
     pageKey: string;
-    server: ServerListItem | null;
+    server: null | ServerListItem;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
 const BLOCK_SIZE = 500;
 
 export const useVirtualTable = <TFilter extends BaseQuery<any>>({
-    server,
-    tableRef,
-    pageKey,
-    itemType,
+    columnType,
     contextMenu,
-    itemCount,
     customFilters,
-    isSearchParams,
     isClientSide,
     isClientSideSort,
-    columnType,
+    isSearchParams,
+    itemCount,
+    itemType,
+    pageKey,
+    server,
+    tableRef,
 }: UseAgGridProps<TFilter>) => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -292,7 +294,7 @@ export const useVirtualTable = <TFilter extends BaseQuery<any>>({
         if (!columnsOrder) return;
 
         const columnsInSettings = properties.table.columns;
-        const updatedColumns = [];
+        const updatedColumns: PersistedTableColumn[] = [];
         for (const column of columnsOrder) {
             const columnInSettings = columnsInSettings.find(
                 (c) => c.column === column.getColDef().colId,

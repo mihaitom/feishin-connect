@@ -1,23 +1,24 @@
-import { UseQueryResult, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-    LyricsQuery,
-    QueueSong,
-    SynchronizedLyricsArray,
-    InternetProviderLyricResponse,
-    FullLyricsMetadata,
-    LyricGetQuery,
-    StructuredLyric,
-    ServerType,
-} from '/@/renderer/api/types';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import isElectron from 'is-electron';
+
+import { api } from '/@/renderer/api';
+import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById, useLyricsSettings } from '/@/renderer/store';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import { api } from '/@/renderer/api';
-import isElectron from 'is-electron';
-import { hasFeature } from '/@/renderer/api/utils';
-import { ServerFeature } from '/@/renderer/api/features-types';
+import { hasFeature } from '/@/shared/api/utils';
+import {
+    FullLyricsMetadata,
+    InternetProviderLyricResponse,
+    LyricGetQuery,
+    LyricsQuery,
+    QueueSong,
+    ServerType,
+    StructuredLyric,
+    SynchronizedLyricsArray,
+} from '/@/shared/types/domain-types';
+import { ServerFeature } from '/@/shared/types/features-types';
 
-const lyricsIpc = isElectron() ? window.electron.lyrics : null;
+const lyricsIpc = isElectron() ? window.api.lyrics : null;
 
 // Match LRC lyrics format by https://github.com/ustbhuangyi/lyric-parser
 // [mm:ss.SSS] text
@@ -62,7 +63,7 @@ const formatLyrics = (lyrics: string) => {
 
 export const useServerLyrics = (
     args: QueryHookArgs<LyricsQuery>,
-): UseQueryResult<string | null> => {
+): UseQueryResult<null | string> => {
     const { query, serverId } = args;
     const server = getServerById(serverId);
 
@@ -92,7 +93,7 @@ export const useSongLyricsBySong = (
         cacheTime: Infinity,
         enabled: !!song && !!server,
         onError: () => {},
-        queryFn: async ({ signal }): Promise<FullLyricsMetadata | StructuredLyric[] | null> => {
+        queryFn: async ({ signal }): Promise<FullLyricsMetadata | null | StructuredLyric[]> => {
             if (!server) throw new Error('Server not found');
             if (!song) return null;
 
@@ -156,7 +157,7 @@ export const useSongLyricsBySong = (
 
 export const useSongLyricsByRemoteId = (
     args: QueryHookArgs<Partial<LyricGetQuery>>,
-): UseQueryResult<string | null> => {
+): UseQueryResult<null | string> => {
     const queryClient = useQueryClient();
     const { query, serverId } = args;
 

@@ -1,48 +1,12 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { PlaylistListSort, SortOrder } from '/@/renderer/api/types';
+
 import { PlaylistListFilter, SongListFilter } from '/@/renderer/store/list.store';
 import { DataTableProps } from '/@/renderer/store/settings.store';
-import { ListDisplayType, TableColumn, TablePagination } from '/@/renderer/types';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
-
-type TableProps = {
-    pagination: TablePagination;
-    scrollOffset: number;
-} & DataTableProps;
-
-type ListProps<T> = {
-    display: ListDisplayType;
-    filter: T;
-    table: TableProps;
-};
-
-type DetailPaginationProps = TablePagination & {
-    scrollOffset: number;
-};
-
-type DetailTableProps = DataTableProps & {
-    id: {
-        [key: string]: DetailPaginationProps & { filter: SongListFilter };
-    };
-};
-
-type DetailProps = {
-    display: ListDisplayType;
-    table: DetailTableProps;
-};
-
-type ListGridProps = {
-    itemsPerRow?: number;
-    scrollOffset?: number;
-};
-
-interface PlaylistState {
-    detail: DetailProps;
-    grid: ListGridProps;
-    list: ListProps<PlaylistListFilter>;
-}
+import { PlaylistListSort, SortOrder } from '/@/shared/types/domain-types';
+import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
 
 export interface PlaylistSlice extends PlaylistState {
     actions: {
@@ -56,6 +20,43 @@ export interface PlaylistSlice extends PlaylistState {
         setTablePagination: (args: { data: Partial<TablePagination> }) => void;
     };
 }
+
+type DetailPaginationProps = TablePagination & {
+    scrollOffset: number;
+};
+
+type DetailProps = {
+    display: ListDisplayType;
+    table: DetailTableProps;
+};
+
+type DetailTableProps = DataTableProps & {
+    id: {
+        [key: string]: DetailPaginationProps & { filter: SongListFilter };
+    };
+};
+
+type ListGridProps = {
+    itemsPerRow?: number;
+    scrollOffset?: number;
+};
+
+type ListProps<T> = {
+    display: ListDisplayType;
+    filter: T;
+    table: TableProps;
+};
+
+interface PlaylistState {
+    detail: DetailProps;
+    grid: ListGridProps;
+    list: ListProps<PlaylistListFilter>;
+}
+
+type TableProps = DataTableProps & {
+    pagination: TablePagination;
+    scrollOffset: number;
+};
 
 export const usePlaylistStore = create<PlaylistSlice>()(
     persist(

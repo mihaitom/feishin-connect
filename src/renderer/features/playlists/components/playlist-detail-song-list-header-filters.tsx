@@ -1,59 +1,61 @@
-import { useCallback, ChangeEvent, MutableRefObject, MouseEvent } from 'react';
-import { IDatasource } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { IDatasource } from '@ag-grid-community/core';
 import { Divider, Flex, Group, Stack } from '@mantine/core';
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQueryClient } from '@tanstack/react-query';
+import { ChangeEvent, MouseEvent, MutableRefObject, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    RiMoreFill,
-    RiSettings3Fill,
-    RiPlayFill,
-    RiAddCircleFill,
     RiAddBoxFill,
-    RiEditFill,
+    RiAddCircleFill,
     RiDeleteBinFill,
+    RiEditFill,
+    RiMoreFill,
+    RiPlayFill,
     RiRefreshLine,
+    RiSettings3Fill,
 } from 'react-icons/ri';
+import { useNavigate, useParams } from 'react-router';
+
+import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import {
-    LibraryItem,
-    PlaylistSongListQuery,
-    ServerType,
-    SongListSort,
-    SortOrder,
-} from '/@/renderer/api/types';
-import {
-    DropdownMenu,
     Button,
-    Slider,
+    ConfirmModal,
+    DropdownMenu,
     MultiSelect,
+    Slider,
     Switch,
     Text,
-    ConfirmModal,
     toast,
 } from '/@/renderer/components';
+import { SONG_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { openUpdatePlaylistModal } from '/@/renderer/features/playlists/components/update-playlist-form';
+import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
+import { usePlaylistDetail } from '/@/renderer/features/playlists/queries/playlist-detail-query';
+import { OrderToggleButton } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
+import { AppRoute } from '/@/renderer/router/routes';
 import {
-    useCurrentServer,
     SongListFilter,
+    useCurrentServer,
     usePlaylistDetailStore,
     useSetPlaylistDetailFilters,
     useSetPlaylistDetailTable,
     useSetPlaylistStore,
     useSetPlaylistTablePagination,
 } from '/@/renderer/store';
-import { ListDisplayType, Play, TableColumn } from '/@/renderer/types';
-import { usePlaylistDetail } from '/@/renderer/features/playlists/queries/playlist-detail-query';
-import { useParams, useNavigate } from 'react-router';
-import { SONG_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
-import { openUpdatePlaylistModal } from '/@/renderer/features/playlists/components/update-playlist-form';
-import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
-import { AppRoute } from '/@/renderer/router/routes';
-import { OrderToggleButton } from '/@/renderer/features/shared';
-import i18n from '/@/i18n/i18n';
+import {
+    LibraryItem,
+    PlaylistSongListQuery,
+    ServerType,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ListDisplayType, Play, TableColumn } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [
@@ -265,8 +267,8 @@ interface PlaylistDetailSongListHeaderFiltersProps {
 }
 
 export const PlaylistDetailSongListHeaderFilters = ({
-    tableRef,
     handleToggleShowQueryBuilder,
+    tableRef,
 }: PlaylistDetailSongListHeaderFiltersProps) => {
     const { t } = useTranslation();
     const { playlistId } = useParams() as { playlistId: string };
@@ -493,10 +495,10 @@ export const PlaylistDetailSongListHeaderFilters = ({
                     <DropdownMenu.Dropdown>
                         {FILTERS[server?.type as keyof typeof FILTERS].map((filter) => (
                             <DropdownMenu.Item
-                                key={`filter-${filter.name}`}
                                 $isActive={filter.value === filters.sortBy}
-                                value={filter.value}
+                                key={`filter-${filter.name}`}
                                 onClick={handleSetSortBy}
+                                value={filter.value}
                             >
                                 {filter.name}
                             </DropdownMenu.Item>
@@ -506,8 +508,8 @@ export const PlaylistDetailSongListHeaderFilters = ({
 
                 <Divider orientation="vertical" />
                 <OrderToggleButton
-                    sortOrder={filters.sortOrder || SortOrder.ASC}
                     onToggle={handleToggleSortOrder}
+                    sortOrder={filters.sortOrder || SortOrder.ASC}
                 />
                 <Divider orientation="vertical" />
                 <DropdownMenu position="bottom-start">
@@ -601,8 +603,8 @@ export const PlaylistDetailSongListHeaderFilters = ({
                         </DropdownMenu.Label>
                         <DropdownMenu.Item
                             $isActive={page.display === ListDisplayType.TABLE}
-                            value={ListDisplayType.TABLE}
                             onClick={handleSetViewType}
+                            value={ListDisplayType.TABLE}
                         >
                             Table
                         </DropdownMenu.Item>
@@ -642,8 +644,8 @@ export const PlaylistDetailSongListHeaderFilters = ({
                                             defaultValue={page.table?.columns.map(
                                                 (column) => column.column,
                                             )}
-                                            width={300}
                                             onChange={handleTableColumns}
+                                            width={300}
                                         />
                                         <Group position="apart">
                                             <Text>Auto Fit Columns</Text>

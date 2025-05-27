@@ -1,4 +1,13 @@
 {
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "files.associations": {
         ".eslintrc": "jsonc",
         ".prettierrc": "jsonc",
@@ -9,7 +18,7 @@
         { "directory": "./", "changeProcessCWD": true },
         { "directory": "./server", "changeProcessCWD": true }
     ],
-    "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
         "source.fixAll.stylelint": "explicit",
@@ -33,14 +42,15 @@
         "npm-debug.log.*": true,
         "test/**/__snapshots__": true,
         "package-lock.json": true,
-        "*.{css,sass,scss}.d.ts": true
+        "*.{css,sass,scss}.d.ts": true,
+        "out/**/*": true,
+        "dist/**/*": true
     },
     "i18n-ally.localesPaths": ["src/i18n", "src/i18n/locales"],
     "typescript.tsdk": "node_modules\\typescript\\lib",
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "stylelint.validate": ["css", "scss", "typescript", "typescriptreact"],
     "typescript.updateImportsOnFileMove.enabled": "always",
-    "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
     "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
     "typescript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
     "folderTemplates.structures": [

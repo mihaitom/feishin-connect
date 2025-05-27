@@ -1,8 +1,9 @@
-import { MutableRefObject, useCallback, useMemo } from 'react';
-import { RowDoubleClickedEvent, RowHeightParams, RowNode } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { RowDoubleClickedEvent, RowHeightParams, RowNode } from '@ag-grid-community/core';
 import { Box, Group, Stack } from '@mantine/core';
 import { useSetState } from '@mantine/hooks';
+import { MutableRefObject, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaLastfmSquare } from 'react-icons/fa';
 import { RiHeartFill, RiHeartLine, RiMoreFill, RiSettings2Fill } from 'react-icons/ri';
@@ -10,20 +11,14 @@ import { SiMusicbrainz } from 'react-icons/si';
 import { generatePath, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+
 import { queryKeys } from '/@/renderer/api/query-keys';
-import {
-    AlbumListQuery,
-    AlbumListSort,
-    LibraryItem,
-    QueueSong,
-    SortOrder,
-} from '/@/renderer/api/types';
 import { Button, Popover, Spoiler } from '/@/renderer/components';
 import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel';
 import {
+    getColumnDefs,
     TableConfigDropdown,
     VirtualTable,
-    getColumnDefs,
 } from '/@/renderer/components/virtual-table';
 import { FullWidthDiscCell } from '/@/renderer/components/virtual-table/cells/full-width-disc-cell';
 import { useCurrentSongRowStyles } from '/@/renderer/components/virtual-table/hooks/use-current-song-row-styles';
@@ -41,17 +36,25 @@ import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { PlayButton, useCreateFavorite, useDeleteFavorite } from '/@/renderer/features/shared';
 import { LibraryBackgroundOverlay } from '/@/renderer/features/shared/components/library-background-overlay';
 import { useAppFocus, useContainerQuery } from '/@/renderer/hooks';
+import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useCurrentSong, useCurrentStatus } from '/@/renderer/store';
 import {
+    PersistedTableColumn,
     useGeneralSettings,
     usePlayButtonBehavior,
     useSettingsStoreActions,
     useTableSettings,
 } from '/@/renderer/store/settings.store';
-import { Play } from '/@/renderer/types';
 import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
-import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
+import {
+    AlbumListQuery,
+    AlbumListSort,
+    LibraryItem,
+    QueueSong,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 const isFullWidthRow = (node: RowNode) => {
     return node.id?.startsWith('disc-');
@@ -75,7 +78,7 @@ interface AlbumDetailContentProps {
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
-export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentProps) => {
+export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentProps) => {
     const { t } = useTranslation();
     const { albumId } = useParams() as { albumId: string };
     const server = useCurrentServer();
@@ -112,7 +115,7 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
         }
 
         let discNumber = -1;
-        let discSubtitle: string | null = null;
+        let discSubtitle: null | string = null;
 
         const rowData: (QueueSong | { id: string; name: string })[] = [];
         const discTranslated = t('common.disc', { postProcess: 'upperCase' });
@@ -303,7 +306,7 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
         if (!columnsOrder) return;
 
         const columnsInSettings = tableConfig.columns;
-        const updatedColumns = [];
+        const updatedColumns: PersistedTableColumn[] = [];
         for (const column of columnsOrder) {
             const columnInSettings = columnsInSettings.find(
                 (c) => c.column === column.getColDef().colId,
@@ -343,8 +346,8 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
                                     createFavoriteMutation.isLoading ||
                                     deleteFavoriteMutation.isLoading
                                 }
-                                variant="subtle"
                                 onClick={handleFavorite}
+                                variant="subtle"
                             >
                                 {detailQuery?.data?.userFavorite ? (
                                     <RiHeartFill
@@ -357,11 +360,11 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
                             </Button>
                             <Button
                                 compact
-                                variant="subtle"
                                 onClick={(e) => {
                                     if (!detailQuery?.data) return;
                                     handleGeneralContextMenu(e, [detailQuery.data!]);
                                 }}
+                                variant="subtle"
                             >
                                 <RiMoreFill size={20} />
                             </Button>
@@ -388,9 +391,9 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
                         <Group spacing="sm">
                             {detailQuery?.data?.genres?.map((genre) => (
                                 <Button
-                                    key={`genre-${genre.id}`}
                                     compact
                                     component={Link}
+                                    key={`genre-${genre.id}`}
                                     radius={0}
                                     size="md"
                                     to={generatePath(genreRoute, {
@@ -451,15 +454,8 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
                 )}
                 <Box style={{ minHeight: '300px' }}>
                     <VirtualTable
-                        key={`table-${tableConfig.rowHeight}`}
-                        ref={tableRef}
-                        autoHeight
-                        shouldUpdateSong
-                        stickyHeader
-                        suppressCellFocus
-                        suppressLoadingOverlay
-                        suppressRowDrag
                         autoFitColumns={tableConfig.autoFit}
+                        autoHeight
                         columnDefs={columnDefs}
                         context={{
                             currentSong,
@@ -479,17 +475,24 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
                             if (isFullWidthRow(data.data)) return false;
                             return true;
                         }}
-                        rowClassRules={rowClassRules}
-                        rowData={songsRowData}
-                        rowSelection="multiple"
+                        key={`table-${tableConfig.rowHeight}`}
                         onCellContextMenu={onCellContextMenu}
                         onColumnMoved={onColumnMoved}
                         onRowDoubleClicked={handleRowDoubleClick}
+                        ref={tableRef}
+                        rowClassRules={rowClassRules}
+                        rowData={songsRowData}
+                        rowSelection="multiple"
+                        shouldUpdateSong
+                        stickyHeader
+                        suppressCellFocus
+                        suppressLoadingOverlay
+                        suppressRowDrag
                     />
                 </Box>
                 <Stack
-                    ref={cq.ref}
                     mt="3rem"
+                    ref={cq.ref}
                     spacing="lg"
                 >
                     {cq.height || cq.width ? (
@@ -498,7 +501,6 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
                                 .filter((c) => !c.isHidden)
                                 .map((carousel, index) => (
                                     <MemoizedSwiperGridCarousel
-                                        key={`carousel-${carousel.uniqueId}-${index}`}
                                         cardRows={[
                                             {
                                                 property: 'name',
@@ -529,6 +531,7 @@ export const AlbumDetailContent = ({ tableRef, background }: AlbumDetailContentP
                                         data={carousel.data}
                                         isLoading={carousel.loading}
                                         itemType={LibraryItem.ALBUM}
+                                        key={`carousel-${carousel.uniqueId}-${index}`}
                                         route={{
                                             route: AppRoute.LIBRARY_ALBUMS_DETAIL,
                                             slugs: [{ idProperty: 'id', slugProperty: 'albumId' }],

@@ -1,13 +1,15 @@
-import React from 'react';
+import type { AlbumArtist, Artist } from '/@/shared/types/domain-types';
 import type { ICellRendererParams } from '@ag-grid-community/core';
+
+import React from 'react';
 import { generatePath, Link } from 'react-router-dom';
-import type { AlbumArtist, Artist } from '/@/renderer/api/types';
+
+import { Separator } from '/@/renderer/components/separator';
 import { Text } from '/@/renderer/components/text';
 import { CellContainer } from '/@/renderer/components/virtual-table/cells/generic-cell';
-import { Separator } from '/@/renderer/components/separator';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 
-export const GenreCell = ({ value, data }: ICellRendererParams) => {
+export const GenreCell = ({ data, value }: ICellRendererParams) => {
     const genrePath = useGenreRoute();
     return (
         <CellContainer $position="left">
@@ -16,7 +18,7 @@ export const GenreCell = ({ value, data }: ICellRendererParams) => {
                 overflow="hidden"
                 size="md"
             >
-                {value?.map((item: Artist | AlbumArtist, index: number) => (
+                {value?.map((item: AlbumArtist | Artist, index: number) => (
                     <React.Fragment key={`row-${item.id}-${data.uniqueId}`}>
                         {index > 0 && <Separator />}
                         <Text

@@ -2,13 +2,14 @@
 FROM node:18-alpine as builder
 WORKDIR /app
 
-#Copy package.json first to cache node_modules
+# Copy package.json first to cache node_modules
 COPY package.json package-lock.json .
-# Scripts include electron-specific dependencies, which we don't need
-RUN npm install --legacy-peer-deps --ignore-scripts
-#Copy code and build with cached modules
+
+RUN pnpm install
+
+# Copy code and build with cached modules
 COPY . .
-RUN npm run build:web
+RUN pnpm run build:web
 
 # --- Production stage
 FROM nginx:alpine-slim

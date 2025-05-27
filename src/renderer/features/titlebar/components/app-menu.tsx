@@ -1,39 +1,41 @@
 import { Group } from '@mantine/core';
-import { openModal, closeAllModals } from '@mantine/modals';
+import { closeAllModals, openModal } from '@mantine/modals';
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 import {
-    RiLockLine,
-    RiWindowFill,
     RiArrowLeftSLine,
     RiArrowRightSLine,
-    RiLayoutRightLine,
-    RiLayoutLeftLine,
-    RiEdit2Line,
-    RiSettings3Line,
-    RiServerLine,
-    RiGithubLine,
-    RiExternalLinkLine,
     RiCloseCircleLine,
+    RiEdit2Line,
+    RiExternalLinkLine,
+    RiGithubLine,
+    RiLayoutLeftLine,
+    RiLayoutRightLine,
+    RiLockLine,
+    RiServerLine,
+    RiSettings3Line,
+    RiWindowFill,
 } from 'react-icons/ri';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
+
+import packageJson from '../../../../../package.json';
+
 import { DropdownMenu } from '/@/renderer/components';
 import { ServerList } from '/@/renderer/features/servers';
 import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
+    useAppStoreActions,
+    useAuthStoreActions,
     useCurrentServer,
     useServerList,
-    useAuthStoreActions,
     useSidebarStore,
-    useAppStoreActions,
 } from '/@/renderer/store';
-import { ServerListItem, ServerType } from '/@/renderer/api/types';
-import packageJson from '../../../../../package.json';
+import { ServerListItem, ServerType } from '/@/shared/types/domain-types';
 
-const browser = isElectron() ? window.electron.browser : null;
-const localSettings = isElectron() ? window.electron.localSettings : null;
+const browser = isElectron() ? window.api.browser : null;
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 export const AppMenu = () => {
     const { t } = useTranslation();
@@ -50,7 +52,7 @@ export const AppMenu = () => {
     };
 
     const handleCredentialsModal = async (server: ServerListItem) => {
-        let password: string | null = null;
+        let password: null | string = null;
 
         try {
             if (localSettings && server.savePassword) {
@@ -63,9 +65,9 @@ export const AppMenu = () => {
             children: server && (
                 <EditServerForm
                     isUpdate
+                    onCancel={closeAllModals}
                     password={password}
                     server={server}
-                    onCancel={closeAllModals}
                 />
             ),
             size: 'sm',
@@ -153,7 +155,6 @@ export const AppMenu = () => {
 
                 return (
                     <DropdownMenu.Item
-                        key={`server-${server.id}`}
                         $isActive={server.id === currentServer?.id}
                         icon={
                             isSessionExpired ? (
@@ -162,6 +163,7 @@ export const AppMenu = () => {
                                 <RiServerLine />
                             )
                         }
+                        key={`server-${server.id}`}
                         onClick={() => {
                             if (!isSessionExpired) return handleSetCurrentServer(server);
                             return handleCredentialsModal(server);

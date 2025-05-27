@@ -1,29 +1,31 @@
-import { ChangeEvent, MutableRefObject, useCallback } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { ChangeEvent, MutableRefObject, useCallback } from 'react';
+
+import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
+import { useListContext } from '/@/renderer/context/list-context';
 import {
     UseHandleListFilterChangeProps,
     useListFilterRefresh,
 } from '/@/renderer/hooks/use-list-filter-refresh';
-import { useListContext } from '/@/renderer/context/list-context';
-import { ListDisplayType } from '/@/renderer/types';
-import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { useListStoreActions, useListStoreByKey } from '/@/renderer/store';
+import { ListDisplayType } from '/@/shared/types/types';
 
-export type UseDisplayRefreshProps = {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+export type UseDisplayRefreshProps = UseHandleListFilterChangeProps & {
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
     tableRef: MutableRefObject<AgGridReactType | null>;
-} & UseHandleListFilterChangeProps;
+};
 
 export const useDisplayRefresh = <TFilter>({
+    gridRef,
     isClientSideSort,
     itemCount,
-    gridRef,
     itemType,
     server,
     tableRef,
 }: UseDisplayRefreshProps) => {
-    const { customFilters, pageKey, handlePlay } = useListContext();
+    const { customFilters, handlePlay, pageKey } = useListContext();
     const { display, filter } = useListStoreByKey<TFilter>({ key: pageKey });
 
     const { handleRefreshGrid, handleRefreshTable } = useListFilterRefresh({

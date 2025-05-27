@@ -1,12 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import type { UserListQuery } from '/@/renderer/api/types';
-import { getServerById } from '/@/renderer/store';
-import { api } from '/@/renderer/api';
 import type { QueryHookArgs } from '/@/renderer/lib/react-query';
+import type { UserListQuery } from '/@/shared/types/domain-types';
+
+import { useQuery } from '@tanstack/react-query';
+
+import { api } from '/@/renderer/api';
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { getServerById } from '/@/renderer/store';
 
 export const useUserList = (args: QueryHookArgs<UserListQuery>) => {
-    const { query, serverId, options } = args || {};
+    const { options, query, serverId } = args || {};
     const server = getServerById(serverId);
 
     return useQuery({

@@ -1,24 +1,25 @@
-import { ReactNode } from 'react';
 import type {
-    MenuProps as MantineMenuProps,
-    MenuItemProps as MantineMenuItemProps,
-    MenuLabelProps as MantineMenuLabelProps,
     MenuDividerProps as MantineMenuDividerProps,
     MenuDropdownProps as MantineMenuDropdownProps,
+    MenuItemProps as MantineMenuItemProps,
+    MenuLabelProps as MantineMenuLabelProps,
+    MenuProps as MantineMenuProps,
 } from '@mantine/core';
-import { Menu as MantineMenu, createPolymorphicComponent } from '@mantine/core';
+
+import { createPolymorphicComponent, Menu as MantineMenu } from '@mantine/core';
+import { ReactNode } from 'react';
 import { RiArrowLeftSFill } from 'react-icons/ri';
 import styled from 'styled-components';
 
-type MenuProps = MantineMenuProps;
-type MenuLabelProps = MantineMenuLabelProps;
+type MenuDividerProps = MantineMenuDividerProps;
+type MenuDropdownProps = MantineMenuDropdownProps;
 interface MenuItemProps extends MantineMenuItemProps {
     $danger?: boolean;
     $isActive?: boolean;
     children: ReactNode;
 }
-type MenuDividerProps = MantineMenuDividerProps;
-type MenuDropdownProps = MantineMenuDropdownProps;
+type MenuLabelProps = MantineMenuLabelProps;
+type MenuProps = MantineMenuProps;
 
 const StyledMenu = styled(MantineMenu)<MenuProps>``;
 
@@ -81,7 +82,6 @@ const StyledMenuDivider = styled(MantineMenu.Divider)`
 export const DropdownMenu = ({ children, ...props }: MenuProps) => {
     return (
         <StyledMenu
-            withinPortal
             styles={{
                 dropdown: {
                     filter: 'drop-shadow(0 0 5px rgb(0, 0, 0, 50%))',
@@ -90,6 +90,7 @@ export const DropdownMenu = ({ children, ...props }: MenuProps) => {
             transitionProps={{
                 transition: 'fade',
             }}
+            withinPortal
             {...props}
         >
             {children}
@@ -101,7 +102,7 @@ const MenuLabel = ({ children, ...props }: MenuLabelProps) => {
     return <StyledMenuLabel {...props}>{children}</StyledMenuLabel>;
 };
 
-const pMenuItem = ({ $isActive, $danger, children, ...props }: MenuItemProps) => {
+const pMenuItem = ({ $danger, $isActive, children, ...props }: MenuItemProps) => {
     return (
         <StyledMenuItem
             $danger={$danger}

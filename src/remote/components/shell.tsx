@@ -9,10 +9,11 @@ import {
     Skeleton,
     Title,
 } from '@mantine/core';
-import { ThemeButton } from '/@/remote/components/buttons/theme-button';
+
 import { ImageButton } from '/@/remote/components/buttons/image-button';
-import { RemoteContainer } from '/@/remote/components/remote-container';
 import { ReconnectButton } from '/@/remote/components/buttons/reconnect-button';
+import { ThemeButton } from '/@/remote/components/buttons/theme-button';
+import { RemoteContainer } from '/@/remote/components/remote-container';
 import { useConnected } from '/@/remote/store';
 
 export const Shell = () => {

@@ -1,4 +1,5 @@
 import type { ICellRendererParams } from '@ag-grid-community/core';
+
 import { Text } from '/@/renderer/components/text';
 import { CellContainer } from '/@/renderer/components/virtual-table/cells/generic-cell';
 
@@ -132,7 +133,7 @@ const StaticSvg = () => {
     );
 };
 
-export const RowIndexCell = ({ value, eGridCell }: ICellRendererParams) => {
+export const RowIndexCell = ({ eGridCell, value }: ICellRendererParams) => {
     const classList = eGridCell.classList;
     // const isFocused = classList.contains('focused');
     const isPlaying = classList.contains('playing');

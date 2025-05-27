@@ -1,23 +1,36 @@
-import { Stats, promises } from 'fs';
-import { readFile } from 'fs/promises';
-import { IncomingMessage, Server, ServerResponse, createServer } from 'http';
-import { join } from 'path';
-import { deflate, gzip } from 'zlib';
 import axios from 'axios';
 import { app, ipcMain } from 'electron';
-import { Server as WsServer, WebSocketServer, WebSocket } from 'ws';
+import { promises, Stats } from 'fs';
+import { readFile } from 'fs/promises';
+import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
+import { join } from 'path';
+import { WebSocket, WebSocketServer, Server as WsServer } from 'ws';
+import { deflate, gzip } from 'zlib';
+
 import manifest from './manifest.json';
-import { ClientEvent, ServerEvent } from '../../../../remote/types';
-import { PlayerRepeat, PlayerStatus, SongState } from '../../../../renderer/types';
-import { getMainWindow } from '../../../main';
-import { isLinux } from '../../../utils';
-import type { QueueSong } from '/@/renderer/api/types';
+
+import { getMainWindow } from '/@/main/index';
+import { isLinux } from '/@/main/utils';
+import { QueueSong } from '/@/shared/types/domain-types';
+import { ClientEvent, ServerEvent } from '/@/shared/types/remote-types';
+import { PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/types';
 
 let mprisPlayer: any | undefined;
 
-if (isLinux()) {
-    // eslint-disable-next-line global-require
-    mprisPlayer = require('../../linux/mpris').mprisPlayer;
+async function initMpris() {
+    if (isLinux()) {
+        const mpris = await import('../../linux/mpris');
+        mprisPlayer = mpris.mprisPlayer;
+    }
+}
+
+initMpris();
+
+interface MimeType {
+    css: string;
+    html: string;
+    ico: string;
+    js: string;
 }
 
 interface RemoteConfig {
@@ -27,21 +40,13 @@ interface RemoteConfig {
     username: string;
 }
 
-interface MimeType {
-    css: string;
-    html: string;
-    ico: string;
-    js: string;
-}
-
 declare class StatefulWebSocket extends WebSocket {
     alive: boolean;
-
     auth: boolean;
 }
 
 let server: Server | undefined;
-let wsServer: WsServer<typeof StatefulWebSocket> | undefined;
+let wsServer: undefined | WsServer<typeof StatefulWebSocket>;
 
 const settings: RemoteConfig = {
     enabled: false,
@@ -54,18 +59,18 @@ type SendData = ServerEvent & {
     client: StatefulWebSocket;
 };
 
-function send({ client, event, data }: SendData): void {
-    if (client.readyState === WebSocket.OPEN) {
-        if (client.alive && client.auth) {
-            client.send(JSON.stringify({ data, event }));
-        }
-    }
-}
-
 function broadcast(message: ServerEvent): void {
     if (wsServer) {
         for (const client of wsServer.clients) {
             send({ client, ...message });
+        }
+    }
+}
+
+function send({ client, data, event }: SendData): void {
+    if (client.readyState === WebSocket.OPEN) {
+        if (client.alive && client.auth) {
+            client.send(JSON.stringify({ data, event }));
         }
     }
 }
@@ -121,21 +126,17 @@ const getEncoding = (encoding: string | string[]): Encoding => {
 
 const cache = new Map<string, Map<Encoding, [number, Buffer]>>();
 
-function setOk(
-    res: ServerResponse,
-    mtimeMs: number,
-    extension: keyof MimeType,
-    encoding: Encoding,
-    data?: Buffer,
-) {
-    res.statusCode = data ? 200 : 304;
+function authorize(req: IncomingMessage): boolean {
+    if (settings.username || settings.password) {
+        // https://stackoverflow.com/questions/23616371/basic-http-authentication-with-node-and-express-4
 
-    res.setHeader('Content-Type', MIME_TYPES[extension]);
-    res.setHeader('ETag', `"${mtimeMs}"`);
-    res.setHeader('Cache-Control', 'public');
+        const authorization = req.headers.authorization?.split(' ')[1] || '';
+        const [login, password] = Buffer.from(authorization, 'base64').toString().split(':');
 
-    if (encoding !== 'none') res.setHeader('Content-Encoding', encoding);
-    res.end(data);
+        return login === settings.username && password === settings.password;
+    }
+
+    return true;
 }
 
 async function serveFile(
@@ -147,7 +148,7 @@ async function serveFile(
     const fileName = `${file}.${extension}`;
     const path = app.isPackaged
         ? join(__dirname, '../remote', fileName)
-        : join(__dirname, '../../../../../.erb/dll', fileName);
+        : join(__dirname, '../../dist/remote', fileName);
 
     let stats: Stats;
 
@@ -252,17 +253,21 @@ async function serveFile(
     return Promise.resolve();
 }
 
-function authorize(req: IncomingMessage): boolean {
-    if (settings.username || settings.password) {
-        // https://stackoverflow.com/questions/23616371/basic-http-authentication-with-node-and-express-4
+function setOk(
+    res: ServerResponse,
+    mtimeMs: number,
+    extension: keyof MimeType,
+    encoding: Encoding,
+    data?: Buffer,
+) {
+    res.statusCode = data ? 200 : 304;
 
-        const authorization = req.headers.authorization?.split(' ')[1] || '';
-        const [login, password] = Buffer.from(authorization, 'base64').toString().split(':');
+    res.setHeader('Content-Type', MIME_TYPES[extension]);
+    res.setHeader('ETag', `"${mtimeMs}"`);
+    res.setHeader('Cache-Control', 'public');
 
-        return login === settings.username && password === settings.password;
-    }
-
-    return true;
+    if (encoding !== 'none') res.setHeader('Content-Encoding', encoding);
+    res.end(data);
 }
 
 const enableServer = (config: RemoteConfig): Promise<void> => {
@@ -286,16 +291,14 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                             await serveFile(req, 'index', 'html', res);
                             break;
                         }
+                        case '/credentials': {
+                            res.statusCode = 200;
+                            res.setHeader('Content-Type', 'text/plain');
+                            res.end(req.headers.authorization);
+                            break;
+                        }
                         case '/favicon.ico': {
                             await serveFile(req, 'favicon', 'ico', res);
-                            break;
-                        }
-                        case '/remote.css': {
-                            await serveFile(req, 'remote', 'css', res);
-                            break;
-                        }
-                        case '/remote.js': {
-                            await serveFile(req, 'remote', 'js', res);
                             break;
                         }
                         case '/manifest.json': {
@@ -304,10 +307,12 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                             res.end(JSON.stringify(manifest));
                             break;
                         }
-                        case '/credentials': {
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'text/plain');
-                            res.end(req.headers.authorization);
+                        case '/remote.css': {
+                            await serveFile(req, 'remote', 'css', res);
+                            break;
+                        }
+                        case '/remote.js': {
+                            await serveFile(req, 'remote', 'js', res);
                             break;
                         }
                         default: {
@@ -371,16 +376,27 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                         }
 
                         switch (event) {
+                            case 'favorite': {
+                                const { favorite, id } = json;
+                                if (id && id === currentState.song?.id) {
+                                    getMainWindow()?.webContents.send('request-favorite', {
+                                        favorite,
+                                        id,
+                                        serverId: currentState.song.serverId,
+                                    });
+                                }
+                                break;
+                            }
+                            case 'next': {
+                                getMainWindow()?.webContents.send('renderer-player-next');
+                                break;
+                            }
                             case 'pause': {
                                 getMainWindow()?.webContents.send('renderer-player-pause');
                                 break;
                             }
                             case 'play': {
                                 getMainWindow()?.webContents.send('renderer-player-play');
-                                break;
-                            }
-                            case 'next': {
-                                getMainWindow()?.webContents.send('renderer-player-next');
                                 break;
                             }
                             case 'previous': {
@@ -421,6 +437,17 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
 
                                 break;
                             }
+                            case 'rating': {
+                                const { id, rating } = json;
+                                if (id && id === currentState.song?.id) {
+                                    getMainWindow()?.webContents.send('request-rating', {
+                                        id,
+                                        rating,
+                                        serverId: currentState.song.serverId,
+                                    });
+                                }
+                                break;
+                            }
                             case 'repeat': {
                                 getMainWindow()?.webContents.send('renderer-player-toggle-repeat');
                                 break;
@@ -447,28 +474,6 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
 
                                 if (mprisPlayer) {
                                     mprisPlayer.volume = volume / 100;
-                                }
-                                break;
-                            }
-                            case 'favorite': {
-                                const { favorite, id } = json;
-                                if (id && id === currentState.song?.id) {
-                                    getMainWindow()?.webContents.send('request-favorite', {
-                                        favorite,
-                                        id,
-                                        serverId: currentState.song.serverId,
-                                    });
-                                }
-                                break;
-                            }
-                            case 'rating': {
-                                const { rating, id } = json;
-                                if (id && id === currentState.song?.id) {
-                                    getMainWindow()?.webContents.send('request-rating', {
-                                        id,
-                                        rating,
-                                        serverId: currentState.song.serverId,
-                                    });
                                 }
                                 break;
                             }
@@ -631,15 +636,10 @@ ipcMain.on('update-volume', (_event, volume: number) => {
 
 if (mprisPlayer) {
     mprisPlayer.on('loopStatus', (event: string) => {
-        const repeat =
-            event === 'Playlist'
-                ? PlayerRepeat.ALL
-                : event === 'Track'
-                  ? PlayerRepeat.ONE
-                  : PlayerRepeat.NONE;
+        const repeat = event === 'Playlist' ? 'all' : event === 'Track' ? 'one' : 'none';
 
-        currentState.repeat = repeat;
-        broadcast({ data: repeat, event: 'repeat' });
+        currentState.repeat = repeat as PlayerRepeat;
+        broadcast({ data: repeat, event: 'repeat' } as ServerEvent);
     });
 
     mprisPlayer.on('shuffle', (shuffle: boolean) => {

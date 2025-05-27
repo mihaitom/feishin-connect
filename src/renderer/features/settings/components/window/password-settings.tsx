@@ -1,14 +1,15 @@
 import { SelectItem } from '@mantine/core';
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
-import { useSettingsStoreActions, useGeneralSettings } from '../../../../store/settings.store';
-import {
-    SettingsSection,
-    SettingOption,
-} from '/@/renderer/features/settings/components/settings-section';
-import { Select } from '/@/renderer/components';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+import { Select } from '/@/renderer/components';
+import {
+    SettingOption,
+    SettingsSection,
+} from '/@/renderer/features/settings/components/settings-section';
+import { useGeneralSettings, useSettingsStoreActions } from '/@/renderer/store';
+
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 const PASSWORD_SETTINGS: SelectItem[] = [
     { label: 'libsecret', value: 'gnome_libsecret' },

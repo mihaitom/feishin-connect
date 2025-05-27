@@ -1,13 +1,14 @@
 import { MutableRefObject, useCallback } from 'react';
-import { LibraryItem } from '/@/renderer/api/types';
+
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
-import { ServerListItem } from '/@/renderer/types';
+import { LibraryItem } from '/@/shared/types/domain-types';
+import { ServerListItem } from '/@/shared/types/types';
 
 interface HandleFavoriteProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
-    server: ServerListItem | null;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
+    server: null | ServerListItem;
 }
 
 export const useHandleFavorite = ({ gridRef, server }: HandleFavoriteProps) => {
@@ -16,7 +17,7 @@ export const useHandleFavorite = ({ gridRef, server }: HandleFavoriteProps) => {
 
     const handleFavorite = useCallback(
         async (options: { id: string[]; isFavorite: boolean; itemType: LibraryItem }) => {
-            const { id, itemType, isFavorite } = options;
+            const { id, isFavorite, itemType } = options;
             try {
                 if (isFavorite) {
                     await deleteFavoriteMutation.mutateAsync({

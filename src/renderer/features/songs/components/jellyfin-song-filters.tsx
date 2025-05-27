@@ -1,13 +1,14 @@
-import { ChangeEvent, useMemo } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
-import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/renderer/api/types';
-import { NumberInput, Switch, Text } from '/@/renderer/components';
-import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
+import { ChangeEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
-import { useGenreList } from '/@/renderer/features/genres';
+
+import { NumberInput, Switch, Text } from '/@/renderer/components';
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
+import { useGenreList } from '/@/renderer/features/genres';
+import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
+import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
+import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/shared/types/domain-types';
 
 interface JellyfinSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
@@ -18,8 +19,8 @@ interface JellyfinSongFiltersProps {
 
 export const JellyfinSongFilters = ({
     customFilters,
-    pageKey,
     onFilterChange,
+    pageKey,
     serverId,
 }: JellyfinSongFiltersProps) => {
     const { t } = useTranslation();
@@ -188,28 +189,28 @@ export const JellyfinSongFilters = ({
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    required={!!filter?.minYear}
                     onChange={handleMinYearFilter}
+                    required={!!filter?.minYear}
                 />
                 <NumberInput
                     defaultValue={filter?.maxYear}
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    required={!!filter?.minYear}
                     onChange={handleMaxYearFilter}
+                    required={!!filter?.minYear}
                 />
             </Group>
             {!isGenrePage && (
                 <Group grow>
                     <MultiSelectWithInvalidData
                         clearable
-                        searchable
                         data={genreList}
                         defaultValue={selectedGenres}
                         label={t('entity.genre', { count: 1, postProcess: 'sentenceCase' })}
-                        width={250}
                         onChange={handleGenresFilter}
+                        searchable
+                        width={250}
                     />
                 </Group>
             )}
@@ -217,12 +218,12 @@ export const JellyfinSongFilters = ({
                 <Group grow>
                     <MultiSelectWithInvalidData
                         clearable
-                        searchable
                         data={tagsQuery.data.boolTags}
                         defaultValue={selectedTags}
                         label={t('common.tags', { postProcess: 'sentenceCase' })}
-                        width={250}
                         onChange={handleTagFilter}
+                        searchable
+                        width={250}
                     />
                 </Group>
             )}

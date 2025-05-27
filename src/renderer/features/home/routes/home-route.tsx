@@ -1,16 +1,16 @@
-import { useMemo, useRef } from 'react';
 import { ActionIcon, Group, Stack } from '@mantine/core';
-import {
-    AlbumListSort,
-    LibraryItem,
-    ServerType,
-    SongListSort,
-    SortOrder,
-} from '/@/renderer/api/types';
+import { useQueryClient } from '@tanstack/react-query';
+import { useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RiRefreshLine } from 'react-icons/ri';
+
+import { queryKeys } from '/@/renderer/api/query-keys';
 import { FeatureCarousel, NativeScrollArea, Spinner, TextTitle } from '/@/renderer/components';
+import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel';
 import { useAlbumList } from '/@/renderer/features/albums';
 import { useRecentlyPlayed } from '/@/renderer/features/home/queries/recently-played-query';
 import { AnimatedPage, LibraryHeaderBar } from '/@/renderer/features/shared';
+import { useSongList } from '/@/renderer/features/songs';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
     HomeItem,
@@ -18,13 +18,14 @@ import {
     useGeneralSettings,
     useWindowSettings,
 } from '/@/renderer/store';
-import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel';
-import { Platform } from '/@/renderer/types';
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import { useTranslation } from 'react-i18next';
-import { RiRefreshLine } from 'react-icons/ri';
-import { useSongList } from '/@/renderer/features/songs';
+import {
+    AlbumListSort,
+    LibraryItem,
+    ServerType,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { Platform } from '/@/shared/types/types';
 
 const HomeRoute = () => {
     const { t } = useTranslation();
@@ -137,33 +138,6 @@ const HomeRoute = () => {
     }
 
     const carousels = {
-        [HomeItem.RANDOM]: {
-            data: random?.data?.items,
-            itemType: LibraryItem.ALBUM,
-            sortBy: AlbumListSort.RANDOM,
-            sortOrder: SortOrder.ASC,
-            title: t('page.home.explore', { postProcess: 'sentenceCase' }),
-        },
-        [HomeItem.RECENTLY_PLAYED]: {
-            data: recentlyPlayed?.data?.items,
-            itemType: LibraryItem.ALBUM,
-            pagination: {
-                itemsPerPage,
-            },
-            sortBy: AlbumListSort.RECENTLY_PLAYED,
-            sortOrder: SortOrder.DESC,
-            title: t('page.home.recentlyPlayed', { postProcess: 'sentenceCase' }),
-        },
-        [HomeItem.RECENTLY_ADDED]: {
-            data: recentlyAdded?.data?.items,
-            itemType: LibraryItem.ALBUM,
-            pagination: {
-                itemsPerPage,
-            },
-            sortBy: AlbumListSort.RECENTLY_ADDED,
-            sortOrder: SortOrder.DESC,
-            title: t('page.home.newlyAdded', { postProcess: 'sentenceCase' }),
-        },
         [HomeItem.MOST_PLAYED]: {
             data:
                 server?.type === ServerType.JELLYFIN
@@ -179,6 +153,33 @@ const HomeRoute = () => {
                     : AlbumListSort.PLAY_COUNT,
             sortOrder: SortOrder.DESC,
             title: t('page.home.mostPlayed', { postProcess: 'sentenceCase' }),
+        },
+        [HomeItem.RANDOM]: {
+            data: random?.data?.items,
+            itemType: LibraryItem.ALBUM,
+            sortBy: AlbumListSort.RANDOM,
+            sortOrder: SortOrder.ASC,
+            title: t('page.home.explore', { postProcess: 'sentenceCase' }),
+        },
+        [HomeItem.RECENTLY_ADDED]: {
+            data: recentlyAdded?.data?.items,
+            itemType: LibraryItem.ALBUM,
+            pagination: {
+                itemsPerPage,
+            },
+            sortBy: AlbumListSort.RECENTLY_ADDED,
+            sortOrder: SortOrder.DESC,
+            title: t('page.home.newlyAdded', { postProcess: 'sentenceCase' }),
+        },
+        [HomeItem.RECENTLY_PLAYED]: {
+            data: recentlyPlayed?.data?.items,
+            itemType: LibraryItem.ALBUM,
+            pagination: {
+                itemsPerPage,
+            },
+            sortBy: AlbumListSort.RECENTLY_PLAYED,
+            sortOrder: SortOrder.DESC,
+            title: t('page.home.recentlyPlayed', { postProcess: 'sentenceCase' }),
         },
     };
 
@@ -200,7 +201,7 @@ const HomeRoute = () => {
 
     const invalidateCarouselQuery = (carousel: {
         itemType: LibraryItem;
-        sortBy: SongListSort | AlbumListSort;
+        sortBy: AlbumListSort | SongListSort;
         sortOrder: SortOrder;
     }) => {
         if (carousel.itemType === LibraryItem.ALBUM) {
@@ -231,7 +232,6 @@ const HomeRoute = () => {
     return (
         <AnimatedPage>
             <NativeScrollArea
-                ref={scrollAreaRef}
                 pageHeaderProps={{
                     backgroundColor: 'var(--titlebar-bg)',
                     children: (
@@ -243,6 +243,7 @@ const HomeRoute = () => {
                     ),
                     offset: 200,
                 }}
+                ref={scrollAreaRef}
             >
                 <Stack
                     mb="5rem"
@@ -253,7 +254,6 @@ const HomeRoute = () => {
                     {homeFeature && <FeatureCarousel data={featureItemsWithImage} />}
                     {sortedCarousel.map((carousel) => (
                         <MemoizedSwiperGridCarousel
-                            key={`carousel-${carousel.uniqueId}`}
                             cardRows={[
                                 {
                                     property: 'name',
@@ -287,6 +287,7 @@ const HomeRoute = () => {
                             ]}
                             data={carousel.data}
                             itemType={carousel.itemType}
+                            key={`carousel-${carousel.uniqueId}`}
                             route={{
                                 route: AppRoute.LIBRARY_ALBUMS_DETAIL,
                                 slugs: [

@@ -1,4 +1,10 @@
+import isElectron from 'is-electron';
 import { useCallback, useEffect, useRef } from 'react';
+import styled from 'styled-components';
+
+import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
+import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
+import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
 import {
     useCurrentPlayer,
     useCurrentStatus,
@@ -9,17 +15,12 @@ import {
     useSeeked,
     useSetCurrentTime,
 } from '/@/renderer/store';
-import { PlaybackType, PlayerStatus } from '/@/renderer/types';
-import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
-import isElectron from 'is-electron';
-import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
-import { FullLyricsMetadata, SynchronizedLyricsArray } from '/@/renderer/api/types';
-import styled from 'styled-components';
-import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
+import { FullLyricsMetadata, SynchronizedLyricsArray } from '/@/shared/types/domain-types';
+import { PlaybackType, PlayerStatus } from '/@/shared/types/types';
 
-const mpvPlayer = isElectron() ? window.electron.mpvPlayer : null;
-const utils = isElectron() ? window.electron.utils : null;
-const mpris = isElectron() && utils?.isLinux() ? window.electron.mpris : null;
+const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
+const utils = isElectron() ? window.api.utils : null;
+const mpris = isElectron() && utils?.isLinux() ? window.api.mpris : null;
 
 const SynchronizedLyricsContainer = styled.div<{ $gap: number }>`
     display: flex;
@@ -30,7 +31,6 @@ const SynchronizedLyricsContainer = styled.div<{ $gap: number }>`
     padding: 10vh 0 50vh;
     overflow: scroll;
     word-break: break-word;
-    transform: translateY(-2rem);
 
     -webkit-mask-image: linear-gradient(
         180deg,
@@ -47,6 +47,7 @@ const SynchronizedLyricsContainer = styled.div<{ $gap: number }>`
         rgb(0 0 0 / 100%) 85%,
         transparent 95%
     );
+    transform: translateY(-2rem);
 
     @media screen and (orientation: portrait) {
         padding: 5vh 0;
@@ -55,7 +56,7 @@ const SynchronizedLyricsContainer = styled.div<{ $gap: number }>`
 
 export interface SynchronizedLyricsProps extends Omit<FullLyricsMetadata, 'lyrics'> {
     lyrics: SynchronizedLyricsArray;
-    translatedLyrics?: string | null;
+    translatedLyrics?: null | string;
 }
 
 export const SynchronizedLyrics = ({
@@ -95,12 +96,12 @@ export const SynchronizedLyrics = ({
     const seeked = useSeeked();
 
     // A reference to the timeout handler
-    const lyricTimer = useRef<ReturnType<typeof setTimeout>>();
+    const lyricTimer = useRef<null | ReturnType<typeof setTimeout>>(null);
 
     // A reference to the lyrics. This is necessary for the
     // timers, which are not part of react necessarily, to always
     // have the most updated values
-    const lyricRef = useRef<SynchronizedLyricsArray>();
+    const lyricRef = useRef<null | SynchronizedLyricsArray>(null);
 
     // A constantly increasing value, used to tell timers that may be out of date
     // whether to proceed or stop
@@ -177,7 +178,7 @@ export const SynchronizedLyrics = ({
                 .forEach((node) => node.classList.remove('active'));
 
             if (index === -1) {
-                lyricRef.current = undefined;
+                lyricRef.current = null;
                 return;
             }
 
@@ -185,11 +186,11 @@ export const SynchronizedLyrics = ({
                 'sychronized-lyrics-scroll-container',
             ) as HTMLElement;
             const currentLyric = document.querySelector(`#lyric-${index}`) as HTMLElement;
-            // eslint-disable-next-line no-unsafe-optional-chaining
-            const offsetTop = currentLyric?.offsetTop - doc?.clientHeight / 2 ?? 0;
+
+            const offsetTop = currentLyric?.offsetTop - doc?.clientHeight / 2 || 0;
 
             if (currentLyric === null) {
-                lyricRef.current = undefined;
+                lyricRef.current = null;
                 return;
             }
 
@@ -372,16 +373,16 @@ export const SynchronizedLyrics = ({
                         className="lyric-line synchronized"
                         fontSize={settings.fontSize}
                         id={`lyric-${idx}`}
-                        text={text}
                         onClick={() => handleSeek(time / 1000)}
+                        text={text}
                     />
                     {translatedLyrics && (
                         <LyricLine
                             alignment={settings.alignment}
                             className="lyric-line synchronized translation"
                             fontSize={settings.fontSize * 0.8}
-                            text={translatedLyrics.split('\n')[idx]}
                             onClick={() => handleSeek(time / 1000)}
+                            text={translatedLyrics.split('\n')[idx]}
                         />
                     )}
                 </div>

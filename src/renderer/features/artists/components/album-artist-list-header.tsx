@@ -1,27 +1,28 @@
-import type { ChangeEvent, MutableRefObject } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+import type { ChangeEvent, MutableRefObject } from 'react';
+
 import { Flex, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
 import { useTranslation } from 'react-i18next';
-import { FilterBar } from '../../shared/components/filter-bar';
-import { AlbumArtistListQuery, LibraryItem } from '/@/renderer/api/types';
+
 import { PageHeader, SearchInput } from '/@/renderer/components';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { AlbumArtistListHeaderFilters } from '/@/renderer/features/artists/components/album-artist-list-header-filters';
-import { LibraryHeaderBar } from '/@/renderer/features/shared';
+import { FilterBar, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useContainerQuery } from '/@/renderer/hooks';
-import { AlbumArtistListFilter, useCurrentServer } from '/@/renderer/store';
 import { useDisplayRefresh } from '/@/renderer/hooks/use-display-refresh';
+import { AlbumArtistListFilter, useCurrentServer } from '/@/renderer/store';
+import { AlbumArtistListQuery, LibraryItem } from '/@/shared/types/domain-types';
 
 interface AlbumArtistListHeaderProps {
-    gridRef: MutableRefObject<VirtualInfiniteGridRef | null>;
+    gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
     tableRef: MutableRefObject<AgGridReactType | null>;
 }
 
 export const AlbumArtistListHeader = ({
-    itemCount,
     gridRef,
+    itemCount,
     tableRef,
 }: AlbumArtistListHeaderProps) => {
     const { t } = useTranslation();
@@ -64,8 +65,8 @@ export const AlbumArtistListHeader = ({
                     <Group>
                         <SearchInput
                             defaultValue={filter.searchTerm}
-                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                             onChange={handleSearch}
+                            openedWidth={cq.isMd ? 250 : cq.isSm ? 200 : 150}
                         />
                     </Group>
                 </Flex>

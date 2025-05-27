@@ -1,0 +1,75 @@
+appId: org.jeffvli.feishin
+productName: Feishin
+artifactName: ${productName}-${version}-${os}-setup.${ext}
+electronVersion: 35.1.5
+directories:
+    buildResources: assets
+files:
+    - 'out/**/*'
+    - 'package.json'
+extraResources:
+    - assets/**
+asarUnpack:
+    - resources/**
+win:
+    target:
+        - zip
+        - nsis
+    icon: assets/icons/icon.png
+nsis:
+    shortcutName: ${productName}
+    uninstallDisplayName: ${productName}
+    createDesktopShortcut: always
+mac:
+    target:
+        target: default
+        arch:
+            - arm64
+            - x64
+    icon: assets/icons/icon.icns
+    type: distribution
+    hardenedRuntime: true
+    entitlements: assets/entitlements.mac.plist
+    entitlementsInherit: assets/entitlements.mac.plist
+    gatekeeperAssess: false
+    notarize: false
+dmg:
+    contents: [{ x: 130, y: 220 }, { x: 410, y: 220, type: link, path: /Applications }]
+deb:
+    depends:
+        - libgssapi_krb5.so.2
+        - libavahi-common.so.3
+        - libavahi-client.so.3
+        - libkrb5.so.3
+        - libkrb5support.so.0
+        - libkeyutils.so.1
+        - libcups.so.2
+rpm:
+    depends:
+        - libgssapi_krb5.so.2
+        - libavahi-common.so.3
+        - libavahi-client.so.3
+        - libkrb5.so.3
+        - libkrb5support.so.0
+        - libkeyutils.so.1
+        - libcups.so.2
+freebsd:
+    depends:
+        - libgssapi_krb5.so.2
+        - libavahi-common.so.3
+        - libavahi-client.so.3
+        - libkrb5.so.3
+        - libkrb5support.so.0
+        - libkeyutils.so.1
+        - libcups.so.2
+linux:
+    target:
+        - AppImage
+        - tar.xz
+    category: AudioVideo;Audio;Player
+    icon: assets/icons/icon.png
+npmRebuild: false
+publish:
+    provider: github
+    owner: jeffvli
+    repo: feishin

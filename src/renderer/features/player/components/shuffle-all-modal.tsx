@@ -1,28 +1,29 @@
-import { useMemo } from 'react';
 import { Divider, Group, SelectItem, Stack } from '@mantine/core';
 import { closeAllModals, openModal } from '@mantine/modals';
 import { QueryClient } from '@tanstack/react-query';
 import merge from 'lodash/merge';
-import { RiAddBoxFill, RiPlayFill, RiAddCircleFill } from 'react-icons/ri';
-import { Button, Checkbox, NumberInput, Select } from '/@/renderer/components';
+import { useMemo } from 'react';
+import { RiAddBoxFill, RiAddCircleFill, RiPlayFill } from 'react-icons/ri';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+
+import i18n from '/@/i18n/i18n';
+import { api } from '/@/renderer/api';
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { Button, Checkbox, NumberInput, Select } from '/@/renderer/components';
+import { useAuthStore } from '/@/renderer/store';
 import {
     GenreListResponse,
-    RandomSongListQuery,
-    MusicFolderListResponse,
-    ServerType,
     GenreListSort,
-    SortOrder,
-    ServerListItem,
+    MusicFolderListResponse,
     Played,
-} from '/@/renderer/api/types';
-import { api } from '/@/renderer/api';
-import { useAuthStore } from '/@/renderer/store';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import { Play, PlayQueueAddOptions } from '/@/renderer/types';
-import i18n from '/@/i18n/i18n';
+    RandomSongListQuery,
+    ServerListItem,
+    ServerType,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { Play, PlayQueueAddOptions } from '/@/shared/types/types';
 
 interface ShuffleAllSlice extends RandomSongListQuery {
     actions: {
@@ -70,17 +71,17 @@ interface ShuffleAllModalProps {
     handlePlayQueueAdd: ((options: PlayQueueAddOptions) => void) | undefined;
     musicFolders: MusicFolderListResponse | undefined;
     queryClient: QueryClient;
-    server: ServerListItem | null;
+    server: null | ServerListItem;
 }
 
 export const ShuffleAllModal = ({
+    genres,
     handlePlayQueueAdd,
+    musicFolders,
     queryClient,
     server,
-    genres,
-    musicFolders,
 }: ShuffleAllModalProps) => {
-    const { genre, limit, maxYear, minYear, enableMaxYear, enableMinYear, musicFolderId, played } =
+    const { enableMaxYear, enableMinYear, genre, limit, maxYear, minYear, musicFolderId, played } =
         useShuffleAllStore();
     const { setStore } = useShuffleAllStoreActions();
 
@@ -140,18 +141,19 @@ export const ShuffleAllModal = ({
     return (
         <Stack spacing="md">
             <NumberInput
-                required
                 label="How many tracks?"
                 max={500}
                 min={1}
-                value={limit}
                 onChange={(e) => setStore({ limit: e ? Number(e) : 500 })}
+                required
+                value={limit}
             />
             <Group grow>
                 <NumberInput
                     label="From year"
                     max={2050}
                     min={1850}
+                    onChange={(e) => setStore({ minYear: e ? Number(e) : 0 })}
                     rightSection={
                         <Checkbox
                             checked={enableMinYear}
@@ -160,13 +162,13 @@ export const ShuffleAllModal = ({
                         />
                     }
                     value={minYear}
-                    onChange={(e) => setStore({ minYear: e ? Number(e) : 0 })}
                 />
 
                 <NumberInput
                     label="To year"
                     max={2050}
                     min={1850}
+                    onChange={(e) => setStore({ maxYear: e ? Number(e) : 0 })}
                     rightSection={
                         <Checkbox
                             checked={enableMaxYear}
@@ -175,34 +177,33 @@ export const ShuffleAllModal = ({
                         />
                     }
                     value={maxYear}
-                    onChange={(e) => setStore({ maxYear: e ? Number(e) : 0 })}
                 />
             </Group>
             <Select
                 clearable
                 data={genreData}
                 label="Genre"
-                value={genre}
                 onChange={(e) => setStore({ genre: e || '' })}
+                value={genre}
             />
             <Select
                 clearable
                 data={musicFolderData}
                 label="Music folder"
-                value={musicFolderId}
                 onChange={(e) => {
                     setStore({ musicFolderId: e ? String(e) : '' });
                 }}
+                value={musicFolderId}
             />
             {server?.type === ServerType.JELLYFIN && (
                 <Select
                     clearable
                     data={PLAYED_DATA}
                     label="Play filter"
-                    value={played}
                     onChange={(e) => {
                         setStore({ played: e as Played });
                     }}
+                    value={played}
                 />
             )}
             <Divider />
@@ -210,18 +211,18 @@ export const ShuffleAllModal = ({
                 <Button
                     disabled={!limit}
                     leftIcon={<RiAddBoxFill size="1rem" />}
+                    onClick={() => handlePlay(Play.LAST)}
                     type="submit"
                     variant="default"
-                    onClick={() => handlePlay(Play.LAST)}
                 >
                     Add
                 </Button>
                 <Button
                     disabled={!limit}
                     leftIcon={<RiAddCircleFill size="1rem" />}
+                    onClick={() => handlePlay(Play.NEXT)}
                     type="submit"
                     variant="default"
-                    onClick={() => handlePlay(Play.NEXT)}
                 >
                     Add next
                 </Button>
@@ -229,9 +230,9 @@ export const ShuffleAllModal = ({
             <Button
                 disabled={!limit}
                 leftIcon={<RiPlayFill size="1rem" />}
+                onClick={() => handlePlay(Play.NOW)}
                 type="submit"
                 variant="filled"
-                onClick={() => handlePlay(Play.NOW)}
             >
                 Play
             </Button>

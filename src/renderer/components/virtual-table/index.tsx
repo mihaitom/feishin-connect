@@ -1,58 +1,60 @@
-import { Ref, forwardRef, useRef, useEffect, useCallback, useMemo } from 'react';
 import type {
-    ICellRendererParams,
-    ValueGetterParams,
-    IHeaderParams,
-    ValueFormatterParams,
     ColDef,
     ColumnMovedEvent,
-    NewColumnsLoadedEvent,
     GridReadyEvent,
     GridSizeChangedEvent,
+    ICellRendererParams,
+    IHeaderParams,
     ModelUpdatedEvent,
+    NewColumnsLoadedEvent,
+    ValueFormatterParams,
+    ValueGetterParams,
 } from '@ag-grid-community/core';
 import type { AgGridReactProps } from '@ag-grid-community/react';
-import { AgGridReact } from '@ag-grid-community/react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
+import { AgGridReact } from '@ag-grid-community/react';
 import { useClickOutside, useMergedRef } from '@mantine/hooks';
 import formatDuration from 'format-duration';
 import { AnimatePresence } from 'framer-motion';
+import { forwardRef, Ref, useCallback, useEffect, useMemo, useRef } from 'react';
 import { generatePath } from 'react-router';
 import styled from 'styled-components';
+
+import i18n from '/@/i18n/i18n';
+import { ActionsCell } from '/@/renderer/components/virtual-table/cells/actions-cell';
 import { AlbumArtistCell } from '/@/renderer/components/virtual-table/cells/album-artist-cell';
 import { ArtistCell } from '/@/renderer/components/virtual-table/cells/artist-cell';
 import { CombinedTitleCell } from '/@/renderer/components/virtual-table/cells/combined-title-cell';
+import { FavoriteCell } from '/@/renderer/components/virtual-table/cells/favorite-cell';
 import { GenericCell } from '/@/renderer/components/virtual-table/cells/generic-cell';
 import { GenreCell } from '/@/renderer/components/virtual-table/cells/genre-cell';
+import { NoteCell } from '/@/renderer/components/virtual-table/cells/note-cell';
+import { RatingCell } from '/@/renderer/components/virtual-table/cells/rating-cell';
+import { RowIndexCell } from '/@/renderer/components/virtual-table/cells/row-index-cell';
+import { TitleCell } from '/@/renderer/components/virtual-table/cells/title-cell';
 import { GenericTableHeader } from '/@/renderer/components/virtual-table/headers/generic-table-header';
+import { useFixedTableHeader } from '/@/renderer/components/virtual-table/hooks/use-fixed-table-header';
+import { TablePagination } from '/@/renderer/components/virtual-table/table-pagination';
+import { useTableChange } from '/@/renderer/hooks/use-song-change';
 import { AppRoute } from '/@/renderer/router/routes';
 import { PersistedTableColumn } from '/@/renderer/store/settings.store';
-import {
-    PlayerStatus,
-    TableColumn,
-    TablePagination as TablePaginationType,
-} from '/@/renderer/types';
-import { FavoriteCell } from '/@/renderer/components/virtual-table/cells/favorite-cell';
-import { RatingCell } from '/@/renderer/components/virtual-table/cells/rating-cell';
-import { TablePagination } from '/@/renderer/components/virtual-table/table-pagination';
-import { ActionsCell } from '/@/renderer/components/virtual-table/cells/actions-cell';
-import { TitleCell } from '/@/renderer/components/virtual-table/cells/title-cell';
-import { useFixedTableHeader } from '/@/renderer/components/virtual-table/hooks/use-fixed-table-header';
-import { NoteCell } from '/@/renderer/components/virtual-table/cells/note-cell';
-import { RowIndexCell } from '/@/renderer/components/virtual-table/cells/row-index-cell';
-import i18n from '/@/i18n/i18n';
 import {
     formatDateAbsolute,
     formatDateAbsoluteUTC,
     formatDateRelative,
     formatSizeString,
 } from '/@/renderer/utils/format';
-import { useTableChange } from '/@/renderer/hooks/use-song-change';
+import {
+    PlayerStatus,
+    TableColumn,
+    TablePagination as TablePaginationType,
+} from '/@/shared/types/types';
 
+export * from './hooks/use-click-outside-deselect';
+export * from './hooks/use-fixed-table-header';
 export * from './table-config-dropdown';
 export * from './table-pagination';
-export * from './hooks/use-fixed-table-header';
-export * from './hooks/use-click-outside-deselect';
 export * from './utils';
 
 const TableWrapper = styled.div`
@@ -491,16 +493,16 @@ export const VirtualTable = forwardRef(
     (
         {
             autoFitColumns,
-            deselectOnClickOutside,
             autoHeight,
-            stickyHeader,
-            transparentHeader,
+            deselectOnClickOutside,
             onColumnMoved,
-            onNewColumnsLoaded,
             onGridReady,
             onGridSizeChanged,
+            onNewColumnsLoaded,
             paginationProps,
             shouldUpdateSong,
+            stickyHeader,
+            transparentHeader,
             ...rest
         }: VirtualTableProps,
         ref: Ref<AgGridReactType | null>,
@@ -584,7 +586,7 @@ export const VirtualTable = forwardRef(
             [autoFitColumns],
         );
 
-        const { tableHeaderRef, tableContainerRef } = useFixedTableHeader({
+        const { tableContainerRef, tableHeaderRef } = useFixedTableHeader({
             enabled: stickyHeader || false,
         });
 
@@ -592,32 +594,32 @@ export const VirtualTable = forwardRef(
 
         return (
             <TableWrapper
-                ref={mergedWrapperRef}
                 className={
                     transparentHeader
                         ? 'ag-theme-alpine-dark ag-header-transparent'
                         : 'ag-theme-alpine-dark'
                 }
+                ref={mergedWrapperRef}
             >
                 <DummyHeader ref={tableHeaderRef} />
                 <AgGridReact
-                    ref={mergedRef}
                     animateRows
-                    maintainColumnOrder
-                    suppressAsyncEvents
-                    suppressContextMenu
-                    suppressCopyRowsToClipboard
-                    suppressMoveWhenRowDragging
-                    suppressPaginationPanel
-                    suppressScrollOnNewData
                     blockLoadDebounceMillis={200}
                     cacheBlockSize={300}
                     cacheOverflowSize={1}
                     defaultColDef={defaultColumnDefs}
                     enableCellChangeFlash={false}
                     headerHeight={36}
+                    maintainColumnOrder
+                    ref={mergedRef}
                     rowBuffer={30}
                     rowSelection="multiple"
+                    suppressAsyncEvents
+                    suppressContextMenu
+                    suppressCopyRowsToClipboard
+                    suppressMoveWhenRowDragging
+                    suppressPaginationPanel
+                    suppressScrollOnNewData
                     {...rest}
                     onColumnMoved={handleColumnMoved}
                     onGridReady={handleGridReady}
@@ -627,9 +629,9 @@ export const VirtualTable = forwardRef(
                 />
                 {paginationProps && (
                     <AnimatePresence
-                        presenceAffectsLayout
                         initial={false}
                         mode="wait"
+                        presenceAffectsLayout
                     >
                         <TablePagination
                             {...paginationProps}

@@ -1,6 +1,11 @@
-import { useCallback, useEffect } from 'react';
 import isElectron from 'is-electron';
-import { PlaybackType, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/renderer/types';
+import debounce from 'lodash/debounce';
+import { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { toast } from '/@/renderer/components';
+import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
+import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import {
     useCurrentPlayer,
     useCurrentStatus,
@@ -12,19 +17,15 @@ import {
     useShuffleStatus,
 } from '/@/renderer/store';
 import { usePlaybackType } from '/@/renderer/store/settings.store';
-import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
-import debounce from 'lodash/debounce';
-import { toast } from '/@/renderer/components';
-import { useTranslation } from 'react-i18next';
-import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { setAutoNext, setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
+import { PlaybackType, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
-const mpvPlayer = isElectron() ? window.electron.mpvPlayer : null;
-const mpvPlayerListener = isElectron() ? window.electron.mpvPlayerListener : null;
-const ipc = isElectron() ? window.electron.ipc : null;
-const utils = isElectron() ? window.electron.utils : null;
-const mpris = isElectron() && utils?.isLinux() ? window.electron.mpris : null;
-const remote = isElectron() ? window.electron.remote : null;
+const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
+const mpvPlayerListener = isElectron() ? window.api.mpvPlayerListener : null;
+const ipc = isElectron() ? window.api.ipc : null;
+const utils = isElectron() ? window.api.utils : null;
+const mpris = isElectron() && utils?.isLinux() ? window.api.mpris : null;
+const remote = isElectron() ? window.api.remote : null;
 const mediaSession = navigator.mediaSession;
 
 export const useCenterControls = (args: { playersRef: any }) => {
@@ -32,7 +33,7 @@ export const useCenterControls = (args: { playersRef: any }) => {
     const { playersRef } = args;
 
     const currentPlayer = useCurrentPlayer();
-    const { setShuffle, setRepeat, play, pause, previous, next, setCurrentIndex, autoNext } =
+    const { autoNext, next, pause, play, previous, setCurrentIndex, setRepeat, setShuffle } =
         usePlayerControls();
     const setCurrentTime = useSetCurrentTime();
     const queue = useDefaultQueue();
@@ -45,7 +46,7 @@ export const useCenterControls = (args: { playersRef: any }) => {
     const currentPlayerRef = currentPlayer === 1 ? player1Ref : player2Ref;
     const nextPlayerRef = currentPlayer === 1 ? player2Ref : player1Ref;
 
-    const { handleScrobbleFromSongRestart, handleScrobbleFromSeek } = useScrobble();
+    const { handleScrobbleFromSeek, handleScrobbleFromSongRestart } = useScrobble();
 
     useEffect(() => {
         if (mediaSession) {
@@ -226,11 +227,11 @@ export const useCenterControls = (args: { playersRef: any }) => {
         };
 
         switch (repeatStatus) {
-            case PlayerRepeat.NONE:
-                handleRepeatNone[playbackType]();
-                break;
             case PlayerRepeat.ALL:
                 handleRepeatAll[playbackType]();
+                break;
+            case PlayerRepeat.NONE:
+                handleRepeatNone[playbackType]();
                 break;
             case PlayerRepeat.ONE:
                 handleRepeatOne[playbackType]();
@@ -310,11 +311,11 @@ export const useCenterControls = (args: { playersRef: any }) => {
         };
 
         switch (repeatStatus) {
-            case PlayerRepeat.NONE:
-                handleRepeatNone[playbackType]();
-                break;
             case PlayerRepeat.ALL:
                 handleRepeatAll[playbackType]();
+                break;
+            case PlayerRepeat.NONE:
+                handleRepeatNone[playbackType]();
                 break;
             case PlayerRepeat.ONE:
                 handleRepeatOne[playbackType]();
@@ -418,11 +419,11 @@ export const useCenterControls = (args: { playersRef: any }) => {
         };
 
         switch (repeatStatus) {
-            case PlayerRepeat.NONE:
-                handleRepeatNone[playbackType]();
-                break;
             case PlayerRepeat.ALL:
                 handleRepeatAll[playbackType]();
+                break;
+            case PlayerRepeat.NONE:
+                handleRepeatNone[playbackType]();
                 break;
             case PlayerRepeat.ONE:
                 handleRepeatOne[playbackType]();
@@ -510,7 +511,7 @@ export const useCenterControls = (args: { playersRef: any }) => {
     }, 100);
 
     const handleSeekSlider = useCallback(
-        (e: number | any) => {
+        (e: any | number) => {
             setCurrentTime(e, true);
             handleScrobbleFromSeek(e);
             debouncedSeek(e);

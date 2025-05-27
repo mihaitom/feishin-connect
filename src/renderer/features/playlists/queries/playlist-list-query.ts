@@ -1,9 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import type { PlaylistListQuery } from '/@/renderer/api/types';
 import type { QueryOptions } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
+import type { PlaylistListQuery } from '/@/shared/types/domain-types';
+
+import { useQuery } from '@tanstack/react-query';
+
 import { api } from '/@/renderer/api';
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { getServerById } from '/@/renderer/store';
 
 export const usePlaylistList = (args: {
     options?: QueryOptions;

@@ -1,27 +1,29 @@
-import { memo } from 'react';
 import type { ListChildComponentProps } from 'react-window';
+
+import { memo } from 'react';
 import { areEqual } from 'react-window';
+
 import { DefaultCard } from '/@/renderer/components/virtual-grid/grid-card/default-card';
 import { PosterCard } from '/@/renderer/components/virtual-grid/grid-card/poster-card';
-import { GridCardData, ListDisplayType } from '/@/renderer/types';
+import { CardRow, GridCardData, ListDisplayType } from '/@/shared/types/types';
 
 export const GridCard = memo(({ data, index, style }: ListChildComponentProps) => {
     const {
-        columnCount,
-        itemCount,
         cardRows,
-        itemData,
-        itemType,
-        itemGap,
-        playButtonBehavior,
-        handlePlayQueueAdd,
-        handleFavorite,
-        route,
+        columnCount,
         display,
+        handleFavorite,
+        handlePlayQueueAdd,
+        itemCount,
+        itemData,
+        itemGap,
+        itemType,
+        playButtonBehavior,
         resetInfiniteLoaderCache,
+        route,
     } = data as GridCardData;
 
-    const cards = [];
+    const cards: React.ReactNode[] = [];
     const startIndex = index * columnCount;
     const stopIndex = Math.min(itemCount - 1, startIndex + columnCount - 1);
 
@@ -35,10 +37,9 @@ export const GridCard = memo(({ data, index, style }: ListChildComponentProps) =
     for (let i = startIndex; i <= stopIndex + columnCountToAdd; i += 1) {
         cards.push(
             <View
-                key={`card-${i}-${index}`}
                 columnIndex={i}
                 controls={{
-                    cardRows,
+                    cardRows: cardRows as CardRow<any>[],
                     handleFavorite,
                     handlePlayQueueAdd,
                     itemGap,
@@ -49,6 +50,7 @@ export const GridCard = memo(({ data, index, style }: ListChildComponentProps) =
                 }}
                 data={itemData[i]}
                 isHidden={i > stopIndex}
+                key={`card-${i}-${index}`}
                 listChildProps={{ index }}
             />,
         );

@@ -1,9 +1,11 @@
-import type { Ref } from 'react';
-import React, { useRef, useCallback, useState, forwardRef } from 'react';
 import type { ButtonProps as MantineButtonProps, TooltipProps } from '@mantine/core';
-import { Button as MantineButton, createPolymorphicComponent } from '@mantine/core';
+import type { Ref } from 'react';
+
+import { createPolymorphicComponent, Button as MantineButton } from '@mantine/core';
 import { useTimeout } from '@mantine/hooks';
+import React, { forwardRef, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
+
 import { Spinner } from '/@/renderer/components/spinner';
 import { Tooltip } from '/@/renderer/components/tooltip';
 
@@ -94,8 +96,8 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     {...tooltip}
                 >
                     <StyledButton
-                        ref={ref}
                         loaderPosition="center"
+                        ref={ref}
                         {...props}
                     >
                         <ButtonChildWrapper $loading={props.loading}>{children}</ButtonChildWrapper>
@@ -111,8 +113,8 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         return (
             <StyledButton
-                ref={ref}
                 loaderPosition="center"
+                ref={ref}
                 {...props}
             >
                 <ButtonChildWrapper $loading={props.loading}>{children}</ButtonChildWrapper>
@@ -127,12 +129,6 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 export const Button = createPolymorphicComponent<'button', ButtonProps>(_Button);
-
-_Button.defaultProps = {
-    loading: undefined,
-    onClick: undefined,
-    tooltip: undefined,
-};
 
 interface HoldButtonProps extends ButtonProps {
     timeoutProps: {
@@ -153,7 +149,7 @@ export const TimeoutButton = ({ timeoutProps, ...props }: HoldButtonProps) => {
         setIsRunning(false);
     };
 
-    const { start, clear } = useTimeout(callback, timeoutProps.duration);
+    const { clear, start } = useTimeout(callback, timeoutProps.duration);
 
     const startTimeout = useCallback(() => {
         if (isRunning) {
@@ -174,8 +170,8 @@ export const TimeoutButton = ({ timeoutProps, ...props }: HoldButtonProps) => {
 
     return (
         <Button
-            sx={{ color: 'var(--danger-color)' }}
             onClick={startTimeout}
+            sx={{ color: 'var(--danger-color)' }}
             {...props}
         >
             {isRunning ? 'Cancel' : props.children}

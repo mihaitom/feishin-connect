@@ -9,7 +9,7 @@ interface UseContainerQueryProps {
 
 export const useContainerQuery = (props?: UseContainerQueryProps) => {
     const { lg, md, sm, xl } = props || {};
-    const { ref, width, height } = useElementSize();
+    const { height, ref, width } = useElementSize();
 
     const isXs = width >= 0;
     const isSm = width >= (sm || 600);

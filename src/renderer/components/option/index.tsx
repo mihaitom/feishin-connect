@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
 import { Flex, Group } from '@mantine/core';
+import { ReactNode } from 'react';
 
 export const Option = ({ children }: any) => {
     return (

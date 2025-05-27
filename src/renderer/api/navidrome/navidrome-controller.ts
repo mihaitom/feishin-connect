@@ -1,28 +1,28 @@
 import { ndApiClient } from '/@/renderer/api/navidrome/navidrome-api';
-import { ndNormalize } from '/@/renderer/api/navidrome/navidrome-normalize';
-import { ndType } from '/@/renderer/api/navidrome/navidrome-types';
 import { ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
+import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
+import { NDSongListSort } from '/@/shared/api/navidrome.types';
+import { ndNormalize } from '/@/shared/api/navidrome/navidrome-normalize';
+import { ndType } from '/@/shared/api/navidrome/navidrome-types';
+import { ssNormalize } from '/@/shared/api/subsonic/subsonic-normalize';
+import { SubsonicExtensions } from '/@/shared/api/subsonic/subsonic-types';
+import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
 import {
     albumArtistListSortMap,
-    sortOrderMap,
-    AuthenticationResponse,
-    userListSortMap,
     albumListSortMap,
-    songListSortMap,
+    AuthenticationResponse,
+    ControllerEndpoint,
+    genreListSortMap,
     playlistListSortMap,
     PlaylistSongListArgs,
     PlaylistSongListResponse,
-    genreListSortMap,
-    Song,
-    ControllerEndpoint,
     ServerListItem,
-} from '../types';
-import { VersionInfo, getFeatures, hasFeature } from '/@/renderer/api/utils';
-import { ServerFeature, ServerFeatures } from '/@/renderer/api/features-types';
-import { SubsonicExtensions } from '/@/renderer/api/subsonic/subsonic-types';
-import { NDSongListSort } from '/@/renderer/api/navidrome.types';
-import { ssNormalize } from '/@/renderer/api/subsonic/subsonic-normalize';
-import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
+    Song,
+    songListSortMap,
+    sortOrderMap,
+    userListSortMap,
+} from '/@/shared/types/domain-types';
+import { ServerFeature, ServerFeatures } from '/@/shared/types/features-types';
 
 const VERSION_INFO: VersionInfo = [
     ['0.55.0', { [ServerFeature.BFR]: [1] }],
@@ -48,7 +48,7 @@ const NAVIDROME_ROLES: Array<string | { label: string; value: string }> = [
 
 const EXCLUDED_TAGS = new Set<string>(['disctotal', 'genre', 'tracktotal']);
 
-const excludeMissing = (server: ServerListItem | null) => {
+const excludeMissing = (server: null | ServerListItem) => {
     if (hasFeature(server, ServerFeature.BFR)) {
         return { missing: false };
     }
@@ -58,7 +58,7 @@ const excludeMissing = (server: ServerListItem | null) => {
 
 export const NavidromeController: ControllerEndpoint = {
     addToPlaylist: async (args) => {
-        const { body, query, apiClientProps } = args;
+        const { apiClientProps, body, query } = args;
 
         const res = await ndApiClient(apiClientProps).addToPlaylist({
             body: {
@@ -98,7 +98,7 @@ export const NavidromeController: ControllerEndpoint = {
     },
     createFavorite: SubsonicController.createFavorite,
     createPlaylist: async (args) => {
-        const { body, apiClientProps } = args;
+        const { apiClientProps, body } = args;
 
         const res = await ndApiClient(apiClientProps).createPlaylist({
             body: {
@@ -120,7 +120,7 @@ export const NavidromeController: ControllerEndpoint = {
     },
     deleteFavorite: SubsonicController.deleteFavorite,
     deletePlaylist: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).deletePlaylist({
             params: {
@@ -135,7 +135,7 @@ export const NavidromeController: ControllerEndpoint = {
         return null;
     },
     getAlbumArtistDetail: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getAlbumArtistDetail({
             params: {
@@ -176,7 +176,7 @@ export const NavidromeController: ControllerEndpoint = {
         );
     },
     getAlbumArtistList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getAlbumArtistList({
             query: {
@@ -217,7 +217,7 @@ export const NavidromeController: ControllerEndpoint = {
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
     getAlbumDetail: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const albumRes = await ndApiClient(apiClientProps).getAlbumDetail({
             params: {
@@ -245,7 +245,7 @@ export const NavidromeController: ControllerEndpoint = {
         );
     },
     getAlbumInfo: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const albumInfo = await ssApiClient(apiClientProps).getAlbumInfo2({
             query: {
@@ -265,7 +265,7 @@ export const NavidromeController: ControllerEndpoint = {
         };
     },
     getAlbumList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getAlbumList({
             query: {
@@ -299,7 +299,7 @@ export const NavidromeController: ControllerEndpoint = {
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
     getArtistList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getAlbumArtistList({
             query: {
@@ -341,7 +341,7 @@ export const NavidromeController: ControllerEndpoint = {
         }).then((result) => result!.totalRecordCount!),
     getDownloadUrl: SubsonicController.getDownloadUrl,
     getGenreList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getGenreList({
             query: {
@@ -366,7 +366,7 @@ export const NavidromeController: ControllerEndpoint = {
     getLyrics: SubsonicController.getLyrics,
     getMusicFolderList: SubsonicController.getMusicFolderList,
     getPlaylistDetail: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getPlaylistDetail({
             params: {
@@ -381,7 +381,7 @@ export const NavidromeController: ControllerEndpoint = {
         return ndNormalize.playlist(res.body.data, apiClientProps.server);
     },
     getPlaylistList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
         const customQuery = query._custom?.navidrome;
 
         // Smart playlists only became available in 0.48.0. Do not filter for previous versions
@@ -420,7 +420,7 @@ export const NavidromeController: ControllerEndpoint = {
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
     getPlaylistSongList: async (args: PlaylistSongListArgs): Promise<PlaylistSongListResponse> => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getPlaylistSongList({
             params: {
@@ -548,7 +548,7 @@ export const NavidromeController: ControllerEndpoint = {
         }, []);
     },
     getSongDetail: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getSongDetail({
             params: {
@@ -563,7 +563,7 @@ export const NavidromeController: ControllerEndpoint = {
         return ndNormalize.song(res.body.data, apiClientProps.server);
     },
     getSongList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getSongList({
             query: {
@@ -642,7 +642,7 @@ export const NavidromeController: ControllerEndpoint = {
     getTopSongs: SubsonicController.getTopSongs,
     getTranscodingUrl: SubsonicController.getTranscodingUrl,
     getUserList: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getUserList({
             query: {
@@ -682,7 +682,7 @@ export const NavidromeController: ControllerEndpoint = {
         }
     },
     removeFromPlaylist: async (args) => {
-        const { query, apiClientProps } = args;
+        const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).removeFromPlaylist({
             params: {
@@ -703,7 +703,7 @@ export const NavidromeController: ControllerEndpoint = {
     search: SubsonicController.search,
     setRating: SubsonicController.setRating,
     shareItem: async (args) => {
-        const { body, apiClientProps } = args;
+        const { apiClientProps, body } = args;
 
         const res = await ndApiClient(apiClientProps).shareItem({
             body: {
@@ -724,7 +724,7 @@ export const NavidromeController: ControllerEndpoint = {
         };
     },
     updatePlaylist: async (args) => {
-        const { query, body, apiClientProps } = args;
+        const { apiClientProps, body, query } = args;
 
         const res = await ndApiClient(apiClientProps).updatePlaylist({
             body: {

@@ -1,27 +1,34 @@
-import { useCallback, useMemo, useRef } from 'react';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+
 import isEmpty from 'lodash/isEmpty';
+import { useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
+
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { AlbumListQuery, GenreListSort, LibraryItem, SortOrder } from '/@/renderer/api/types';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { AlbumListContent } from '/@/renderer/features/albums/components/album-list-content';
 import { AlbumListHeader } from '/@/renderer/features/albums/components/album-list-header';
+import { useAlbumListCount } from '/@/renderer/features/albums/queries/album-list-count-query';
+import { useGenreList } from '/@/renderer/features/genres';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentServer, useListFilterByKey } from '/@/renderer/store';
-import { Play } from '/@/renderer/types';
-import { useGenreList } from '/@/renderer/features/genres';
 import { sentenceCase, titleCase } from '/@/renderer/utils';
-import { useAlbumListCount } from '/@/renderer/features/albums/queries/album-list-count-query';
+import {
+    AlbumListQuery,
+    GenreListSort,
+    LibraryItem,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 const AlbumListRoute = () => {
     const { t } = useTranslation();
-    const gridRef = useRef<VirtualInfiniteGridRef | null>(null);
+    const gridRef = useRef<null | VirtualInfiniteGridRef>(null);
     const tableRef = useRef<AgGridReactType | null>(null);
     const server = useCurrentServer();
     const [searchParams] = useSearchParams();

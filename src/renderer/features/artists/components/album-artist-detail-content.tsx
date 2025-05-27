@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
 import { ColDef, RowDoubleClickedEvent } from '@ag-grid-community/core';
 import { Box, Grid, Group, Stack } from '@mantine/core';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaLastfmSquare } from 'react-icons/fa';
 import { RiHeartFill, RiHeartLine, RiMoreFill } from 'react-icons/ri';
@@ -8,15 +8,7 @@ import { SiMusicbrainz } from 'react-icons/si';
 import { generatePath, useParams } from 'react-router';
 import { createSearchParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-    Album,
-    AlbumArtist,
-    AlbumListSort,
-    LibraryItem,
-    QueueSong,
-    ServerType,
-    SortOrder,
-} from '/@/renderer/api/types';
+
 import { Button, Spoiler, TextTitle } from '/@/renderer/components';
 import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel';
 import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-table';
@@ -35,12 +27,21 @@ import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { PlayButton, useCreateFavorite, useDeleteFavorite } from '/@/renderer/features/shared';
 import { LibraryBackgroundOverlay } from '/@/renderer/features/shared/components/library-background-overlay';
 import { useContainerQuery } from '/@/renderer/hooks';
+import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
 import { ArtistItem, useCurrentServer } from '/@/renderer/store';
 import { useGeneralSettings, usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { CardRow, Play, TableColumn } from '/@/renderer/types';
 import { sanitize } from '/@/renderer/utils/sanitize';
-import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
+import {
+    Album,
+    AlbumArtist,
+    AlbumListSort,
+    LibraryItem,
+    QueueSong,
+    ServerType,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { CardRow, Play, TableColumn } from '/@/shared/types/types';
 
 const ContentContainer = styled.div`
     position: relative;
@@ -224,9 +225,9 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                         </TextTitle>
                         <Button
                             compact
-                            uppercase
                             component={Link}
                             to={artistDiscographyLink}
+                            uppercase
                             variant="subtle"
                         >
                             {t('page.albumArtistDetail.viewDiscography')}
@@ -385,8 +386,8 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                             loading={
                                 createFavoriteMutation.isLoading || deleteFavoriteMutation.isLoading
                             }
-                            variant="subtle"
                             onClick={handleFavorite}
+                            variant="subtle"
                         >
                             {detailQuery?.data?.userFavorite ? (
                                 <RiHeartFill
@@ -399,11 +400,11 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                         </Button>
                         <Button
                             compact
-                            variant="subtle"
                             onClick={(e) => {
                                 if (!detailQuery?.data) return;
                                 handleGeneralContextMenu(e, [detailQuery.data!]);
                             }}
+                            variant="subtle"
                         >
                             <RiMoreFill size={20} />
                         </Button>
@@ -412,18 +413,18 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                 <Group spacing="md">
                     <Button
                         compact
-                        uppercase
                         component={Link}
                         to={artistDiscographyLink}
+                        uppercase
                         variant="subtle"
                     >
                         {t('page.albumArtistDetail.viewDiscography')}
                     </Button>
                     <Button
                         compact
-                        uppercase
                         component={Link}
                         to={artistSongsLink}
+                        uppercase
                         variant="subtle"
                     >
                         {t('page.albumArtistDetail.viewAllTracks')}
@@ -434,9 +435,9 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                         <Group spacing="sm">
                             {detailQuery?.data?.genres?.map((genre) => (
                                 <Button
-                                    key={`genre-${genre.id}`}
                                     compact
                                     component={Link}
+                                    key={`genre-${genre.id}`}
                                     radius="md"
                                     size="md"
                                     to={generatePath(genrePath, {
@@ -523,8 +524,8 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                                     position="apart"
                                 >
                                     <Group
-                                        noWrap
                                         align="flex-end"
+                                        noWrap
                                     >
                                         <TextTitle
                                             order={2}
@@ -536,7 +537,6 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                                         </TextTitle>
                                         <Button
                                             compact
-                                            uppercase
                                             component={Link}
                                             to={generatePath(
                                                 AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_TOP_SONGS,
@@ -544,6 +544,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                                                     albumArtistId: routeId,
                                                 },
                                             )}
+                                            uppercase
                                             variant="subtle"
                                         >
                                             {t('page.albumArtistDetail.viewAll', {
@@ -555,24 +556,24 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                                 <VirtualTable
                                     autoFitColumns
                                     autoHeight
+                                    columnDefs={topSongsColumnDefs}
+                                    context={{
+                                        itemType: LibraryItem.SONG,
+                                    }}
                                     deselectOnClickOutside
+                                    enableCellChangeFlash={false}
+                                    getRowId={(data) => data.data.uniqueId}
+                                    onCellContextMenu={handleContextMenu}
+                                    onRowDoubleClicked={handleRowDoubleClick}
+                                    rowData={topSongs}
+                                    rowHeight={60}
+                                    rowSelection="multiple"
                                     shouldUpdateSong
                                     stickyHeader
                                     suppressCellFocus
                                     suppressHorizontalScroll
                                     suppressLoadingOverlay
                                     suppressRowDrag
-                                    columnDefs={topSongsColumnDefs}
-                                    context={{
-                                        itemType: LibraryItem.SONG,
-                                    }}
-                                    enableCellChangeFlash={false}
-                                    getRowId={(data) => data.data.uniqueId}
-                                    rowData={topSongs}
-                                    rowHeight={60}
-                                    rowSelection="multiple"
-                                    onCellContextMenu={handleContextMenu}
-                                    onRowDoubleClicked={handleRowDoubleClick}
                                 />
                             </Box>
                         </Grid.Col>

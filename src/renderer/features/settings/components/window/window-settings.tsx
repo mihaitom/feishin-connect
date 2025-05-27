@@ -1,12 +1,13 @@
 import isElectron from 'is-electron';
-import { Platform } from '/@/renderer/types';
 import { useTranslation } from 'react-i18next';
-import { useWindowSettings, useSettingsStoreActions } from '../../../../store/settings.store';
-import {
-    SettingsSection,
-    SettingOption,
-} from '/@/renderer/features/settings/components/settings-section';
+
 import { Select, Switch, toast } from '/@/renderer/components';
+import {
+    SettingOption,
+    SettingsSection,
+} from '/@/renderer/features/settings/components/settings-section';
+import { useSettingsStoreActions, useWindowSettings } from '/@/renderer/store';
+import { Platform } from '/@/shared/types/types';
 
 const WINDOW_BAR_OPTIONS = [
     { label: 'Web (hidden)', value: Platform.WEB },
@@ -15,7 +16,7 @@ const WINDOW_BAR_OPTIONS = [
     { label: 'Native', value: Platform.LINUX },
 ];
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 export const WindowSettings = () => {
     const { t } = useTranslation();
@@ -28,7 +29,6 @@ export const WindowSettings = () => {
                 <Select
                     data={WINDOW_BAR_OPTIONS}
                     disabled={!isElectron()}
-                    value={settings.windowBarStyle}
                     onChange={(e) => {
                         if (!e) return;
 
@@ -49,7 +49,7 @@ export const WindowSettings = () => {
                                     postProcess: 'sentenceCase',
                                 }),
                                 onClose: () => {
-                                    window.electron.ipc!.send('app-restart');
+                                    window.api.ipc!.send('app-restart');
                                 },
                                 title: t('common.restartRequired', {
                                     postProcess: 'sentenceCase',
@@ -72,6 +72,7 @@ export const WindowSettings = () => {
                             },
                         });
                     }}
+                    value={settings.windowBarStyle}
                 />
             ),
             description: t('setting.windowBarStyle', {

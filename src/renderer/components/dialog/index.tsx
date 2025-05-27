@@ -1,4 +1,5 @@
 import type { DialogProps as MantineDialogProps } from '@mantine/core';
+
 import { Dialog as MantineDialog } from '@mantine/core';
 import styled from 'styled-components';
 

@@ -1,4 +1,3 @@
-import { createContext, Fragment, ReactNode, useState, useMemo, useCallback } from 'react';
 import { RowNode } from '@ag-grid-community/core';
 import { Divider, Group, Portal, Stack } from '@mantine/core';
 import {
@@ -11,8 +10,7 @@ import {
 import { closeAllModals, openContextModal, openModal } from '@mantine/modals';
 import { AnimatePresence } from 'framer-motion';
 import isElectron from 'is-electron';
-import { ServerFeature } from '/@/renderer/api/features-types';
-import { hasFeature } from '/@/renderer/api/utils';
+import { createContext, Fragment, ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     RiAddBoxFill,
@@ -21,20 +19,22 @@ import {
     RiArrowGoForwardLine,
     RiArrowRightSFill,
     RiArrowUpLine,
+    RiCloseCircleLine,
     RiDeleteBinFill,
     RiDislikeFill,
+    RiDownload2Line,
     RiHeartFill,
+    RiInformationFill,
     RiPlayFill,
     RiPlayListAddFill,
-    RiStarFill,
-    RiCloseCircleLine,
-    RiShareForwardFill,
-    RiInformationFill,
     RiRadio2Fill,
-    RiDownload2Line,
+    RiShareForwardFill,
     RiShuffleFill,
+    RiStarFill,
 } from 'react-icons/ri';
-import { AnyLibraryItems, LibraryItem, ServerType, AnyLibraryItem } from '/@/renderer/api/types';
+
+import { api } from '/@/renderer/api';
+import { controller } from '/@/renderer/api/controller';
 import {
     ConfirmModal,
     ContextMenu,
@@ -49,7 +49,9 @@ import {
     OpenContextMenuProps,
     useContextMenuEvents,
 } from '/@/renderer/features/context-menu/events';
+import { ItemDetailsModal } from '/@/renderer/features/item-details/components/item-details-modal';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { useDeletePlaylist } from '/@/renderer/features/playlists';
 import { useRemoveFromPlaylist } from '/@/renderer/features/playlists/mutations/remove-from-playlist-mutation';
 import { useCreateFavorite, useDeleteFavorite, useSetRating } from '/@/renderer/features/shared';
@@ -62,12 +64,16 @@ import {
     useSettingsStore,
 } from '/@/renderer/store';
 import { usePlaybackType } from '/@/renderer/store/settings.store';
-import { Play, PlaybackType } from '/@/renderer/types';
-import { ItemDetailsModal } from '/@/renderer/features/item-details/components/item-details-modal';
-import { updateSong } from '/@/renderer/features/player/update-remote-song';
-import { controller } from '/@/renderer/api/controller';
-import { api } from '/@/renderer/api';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
+import { hasFeature } from '/@/shared/api/utils';
+import {
+    AnyLibraryItem,
+    AnyLibraryItems,
+    LibraryItem,
+    ServerType,
+} from '/@/shared/types/domain-types';
+import { ServerFeature } from '/@/shared/types/features-types';
+import { Play, PlaybackType } from '/@/shared/types/types';
 
 type ContextMenuContextProps = {
     closeContextMenu: () => void;
@@ -78,7 +84,7 @@ type ContextMenuItem = {
     children?: ContextMenuItem[];
     disabled?: boolean;
     id: string;
-    label: string | ReactNode;
+    label: ReactNode | string;
     leftIcon?: ReactNode;
     onClick?: (...args: any) => any;
     rightIcon?: ReactNode;
@@ -95,7 +101,11 @@ const JELLYFIN_IGNORED_MENU_ITEMS: ContextMenuItemType[] = ['setRating', 'shareI
 // const NAVIDROME_IGNORED_MENU_ITEMS: ContextMenuItemType[] = [];
 // const SUBSONIC_IGNORED_MENU_ITEMS: ContextMenuItemType[] = [];
 
-const utils = isElectron() ? window.electron.utils : null;
+const utils = isElectron() ? window.api.utils : null;
+
+export interface ContextMenuProviderProps {
+    children: ReactNode;
+}
 
 function RatingIcon({ rating }: { rating: number }) {
     return (
@@ -107,10 +117,6 @@ function RatingIcon({ rating }: { rating: number }) {
             value={rating}
         />
     );
-}
-
-export interface ContextMenuProviderProps {
-    children: ReactNode;
 }
 
 export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
@@ -139,15 +145,15 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     const openContextMenu = useCallback(
         (args: OpenContextMenuProps) => {
             const {
+                context,
+                data,
+                dataNodes,
+                menuItems,
+                resetGridCache,
+                tableApi,
+                type,
                 xPos,
                 yPos,
-                menuItems,
-                data,
-                type,
-                tableApi,
-                dataNodes,
-                context,
-                resetGridCache,
             } = args;
 
             const serverType = data[0]?.serverType || useAuthStore.getState().currentServer?.type;
@@ -213,13 +219,13 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                         playType,
                     });
                     break;
-                case LibraryItem.ARTIST:
+                case LibraryItem.ALBUM_ARTIST:
                     handlePlayQueueAdd?.({
                         byItemType: { id: ctx.data.map((item) => item.id), type: ctx.type },
                         playType,
                     });
                     break;
-                case LibraryItem.ALBUM_ARTIST:
+                case LibraryItem.ARTIST:
                     handlePlayQueueAdd?.({
                         byItemType: { id: ctx.data.map((item) => item.id), type: ctx.type },
                         playType,
@@ -231,9 +237,6 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                         playType,
                     });
                     break;
-                case LibraryItem.SONG:
-                    handlePlayQueueAdd?.({ byData: ctx.data, playType });
-                    break;
                 case LibraryItem.PLAYLIST:
                     for (const item of ctx.data) {
                         handlePlayQueueAdd?.({
@@ -242,6 +245,9 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                         });
                     }
 
+                    break;
+                case LibraryItem.SONG:
+                    handlePlayQueueAdd?.({ byData: ctx.data, playType });
                     break;
             }
         },
@@ -510,8 +516,8 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         let songId: string[] | undefined;
 
         switch (serverType) {
-            case ServerType.NAVIDROME:
             case ServerType.JELLYFIN:
+            case ServerType.NAVIDROME:
                 songId = ctx.dataNodes?.map((node) => node.data.playlistItemId);
                 break;
             case ServerType.SUBSONIC:
@@ -622,7 +628,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     );
 
     const playbackType = usePlaybackType();
-    const { moveToNextOfQueue, moveToBottomOfQueue, moveToTopOfQueue, removeFromQueue } =
+    const { moveToBottomOfQueue, moveToNextOfQueue, moveToTopOfQueue, removeFromQueue } =
         useQueueControls();
 
     const handleMoveToNext = useCallback(() => {
@@ -935,15 +941,15 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                 <AnimatePresence>
                     {opened && (
                         <ContextMenu
-                            ref={mergedRef}
                             minWidth={125}
+                            ref={mergedRef}
                             xPos={ctx.xPos}
                             yPos={ctx.yPos}
                         >
                             <Stack spacing={0}>
                                 <Stack
-                                    spacing={0}
                                     onClick={closeContextMenu}
+                                    spacing={0}
                                 >
                                     {ctx.menuItems?.map((item) => {
                                         return (
@@ -960,13 +966,13 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                                                                         contextMenuItems[item.id]
                                                                             .leftIcon
                                                                     }
-                                                                    rightIcon={
-                                                                        contextMenuItems[item.id]
-                                                                            .rightIcon
-                                                                    }
                                                                     onClick={
                                                                         contextMenuItems[item.id]
                                                                             .onClick
+                                                                    }
+                                                                    rightIcon={
+                                                                        contextMenuItems[item.id]
+                                                                            .rightIcon
                                                                     }
                                                                 >
                                                                     {
@@ -985,10 +991,10 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                                                                             leftIcon={
                                                                                 child.leftIcon
                                                                             }
+                                                                            onClick={child.onClick}
                                                                             rightIcon={
                                                                                 child.rightIcon
                                                                             }
-                                                                            onClick={child.onClick}
                                                                         >
                                                                             {child.label}
                                                                         </ContextMenuButton>
@@ -1001,11 +1007,11 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                                                             leftIcon={
                                                                 contextMenuItems[item.id].leftIcon
                                                             }
-                                                            rightIcon={
-                                                                contextMenuItems[item.id].rightIcon
-                                                            }
                                                             onClick={
                                                                 contextMenuItems[item.id].onClick
+                                                            }
+                                                            rightIcon={
+                                                                contextMenuItems[item.id].rightIcon
                                                             }
                                                         >
                                                             {contextMenuItems[item.id].label}
@@ -1014,8 +1020,8 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
 
                                                     {item.divider && (
                                                         <Divider
-                                                            key={`context-menu-divider-${item.id}`}
                                                             color="rgb(62, 62, 62)"
+                                                            key={`context-menu-divider-${item.id}`}
                                                             size="sm"
                                                         />
                                                     )}

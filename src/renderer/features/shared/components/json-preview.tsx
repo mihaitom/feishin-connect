@@ -1,5 +1,5 @@
 interface JsonPreviewProps {
-    value: string | Record<string, any>;
+    value: Record<string, any> | string;
 }
 
 export const JsonPreview = ({ value }: JsonPreviewProps) => {

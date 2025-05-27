@@ -4,10 +4,11 @@ import { useCallback } from 'react';
 import { TbArrowBarLeft } from 'react-icons/tb';
 import { useLocation } from 'react-router';
 import styled from 'styled-components';
+
 import { DrawerPlayQueue } from '/@/renderer/features/now-playing';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAppStore, useSidebarStore } from '/@/renderer/store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const QueueDrawerArea = styled(motion.div)`
     position: absolute;
@@ -104,14 +105,14 @@ export const SideDrawerQueue = () => {
             >
                 {isQueueDrawerButtonVisible && (
                     <QueueDrawerArea
-                        key="queue-drawer-button"
                         animate="visible"
                         exit="hidden"
                         initial="hidden"
-                        variants={queueDrawerButtonVariants}
-                        whileHover={{ opacity: 1, scale: 2, transition: { duration: 0.5 } }}
+                        key="queue-drawer-button"
                         onMouseEnter={handleEnterDrawerButton}
                         onMouseLeave={handleLeaveDrawerButton}
+                        variants={queueDrawerButtonVariants}
+                        whileHover={{ opacity: 1, scale: 2, transition: { duration: 0.5 } }}
                     >
                         <TbArrowBarLeft size={12} />
                     </QueueDrawerArea>
@@ -119,11 +120,10 @@ export const SideDrawerQueue = () => {
 
                 {drawer && (
                     <QueueDrawer
-                        key="queue-drawer"
                         animate="open"
                         exit="closed"
                         initial="closed"
-                        variants={queueDrawerVariants}
+                        key="queue-drawer"
                         onMouseLeave={() => {
                             // The drawer will close due to the delay when setting isReorderingQueue
                             setTimeout(() => {
@@ -131,6 +131,7 @@ export const SideDrawerQueue = () => {
                                 drawerHandler.close();
                             }, 50);
                         }}
+                        variants={queueDrawerVariants}
                     >
                         <DrawerPlayQueue />
                     </QueueDrawer>

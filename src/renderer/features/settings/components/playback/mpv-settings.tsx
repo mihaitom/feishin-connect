@@ -1,32 +1,33 @@
-import { useEffect, useState } from 'react';
 import { Group, Stack } from '@mantine/core';
 import isElectron from 'is-electron';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RiCloseLine, RiRestartLine } from 'react-icons/ri';
+
 import {
-    FileInput,
-    Textarea,
-    Text,
-    Select,
-    NumberInput,
-    Switch,
     Button,
+    FileInput,
+    NumberInput,
+    Select,
+    Switch,
+    Text,
+    Textarea,
 } from '/@/renderer/components';
 import {
-    SettingsSection,
     SettingOption,
+    SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
+import { usePlayerControls, usePlayerStore, useQueueControls } from '/@/renderer/store';
 import {
     SettingsState,
     usePlaybackSettings,
     useSettingsStore,
     useSettingsStoreActions,
 } from '/@/renderer/store/settings.store';
-import { PlaybackType } from '/@/renderer/types';
-import { useTranslation } from 'react-i18next';
-import { RiCloseLine, RiRestartLine } from 'react-icons/ri';
-import { usePlayerControls, usePlayerStore, useQueueControls } from '/@/renderer/store';
+import { PlaybackType } from '/@/shared/types/types';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
-const mpvPlayer = isElectron() ? window.electron.mpvPlayer : null;
+const localSettings = isElectron() ? window.api.localSettings : null;
+const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 
 export const getMpvSetting = (
     key: keyof SettingsState['playback']['mpvProperties'],
@@ -39,12 +40,12 @@ export const getMpvSetting = (
             return { 'audio-samplerate': value };
         case 'gaplessAudio':
             return { 'gapless-audio': value || 'weak' };
-        case 'replayGainMode':
-            return { replaygain: value || 'no' };
         case 'replayGainClip':
             return { 'replaygain-clip': value || 'no' };
         case 'replayGainFallbackDB':
             return { 'replaygain-fallback': value };
+        case 'replayGainMode':
+            return { replaygain: value || 'no' };
         case 'replayGainPreampDB':
             return { 'replaygain-preamp': value || 0 };
         default:
@@ -126,7 +127,7 @@ export const MpvSettings = () => {
 
         const extraParameters = useSettingsStore.getState().playback.mpvExtraParameters;
         const properties: Record<string, any> = {
-            speed: usePlayerStore.getState().current.speed,
+            speed: usePlayerStore.getState().speed,
             ...getMpvProperties(useSettingsStore.getState().playback.mpvProperties),
         };
         mpvPlayer?.restart({
@@ -150,34 +151,33 @@ export const MpvSettings = () => {
             control: (
                 <Group spacing="sm">
                     <Button
+                        onClick={handleReloadMpv}
                         tooltip={{
                             label: t('common.reload', { postProcess: 'titleCase' }),
                             openDelay: 0,
                         }}
                         variant="subtle"
-                        onClick={handleReloadMpv}
                     >
                         <RiRestartLine />
                     </Button>
                     <FileInput
-                        placeholder={mpvPath}
+                        onChange={handleSetMpvPath}
                         rightSection={
                             mpvPath && (
                                 <Button
                                     compact
+                                    onClick={() => handleSetMpvPath(null)}
                                     tooltip={{
                                         label: t('common.clear', { postProcess: 'titleCase' }),
                                         openDelay: 0,
                                     }}
                                     variant="subtle"
-                                    onClick={() => handleSetMpvPath(null)}
                                 >
                                     <RiCloseLine />
                                 </Button>
                             )
                         }
                         width={200}
-                        onChange={handleSetMpvPath}
                     />
                 </Group>
             ),
@@ -196,14 +196,14 @@ export const MpvSettings = () => {
                         autosize
                         defaultValue={settings.mpvExtraParameters.join('\n')}
                         minRows={4}
+                        onBlur={(e) => {
+                            handleSetExtraParameters(e.currentTarget.value.split('\n'));
+                        }}
                         placeholder={`(${t('setting.mpvExtraParameters', {
                             context: 'help',
                             postProcess: 'sentenceCase',
                         })}):\n--gapless-audio=weak\n--prefetch-playlist=yes`}
                         width={225}
-                        onBlur={(e) => {
-                            handleSetExtraParameters(e.currentTarget.value.split('\n'));
-                        }}
                     />
                 </Stack>
             ),
@@ -272,14 +272,14 @@ export const MpvSettings = () => {
                     defaultValue={settings.mpvProperties.audioSampleRateHz || undefined}
                     max={192000}
                     min={0}
-                    placeholder="48000"
-                    rightSection="Hz"
-                    width={100}
                     onBlur={(e) => {
                         const value = Number(e.currentTarget.value);
                         // Setting a value of `undefined` causes an error for MPV. Use 0 instead
                         handleSetMpvProperty('audioSampleRateHz', value >= 8000 ? value : value);
                     }}
+                    placeholder="48000"
+                    rightSection="Hz"
+                    width={100}
                 />
             ),
             description: t('setting.sampleRate', {
@@ -343,32 +343,32 @@ export const MpvSettings = () => {
                 />
             ),
             description: t('setting.replayGainMode', {
-                ReplayGain: 'ReplayGain',
                 context: 'description',
                 postProcess: 'sentenceCase',
+                ReplayGain: 'ReplayGain',
             }),
             note: t('common.restartRequired', { postProcess: 'sentenceCase' }),
             title: t('setting.replayGainMode', {
-                ReplayGain: 'ReplayGain',
                 postProcess: 'sentenceCase',
+                ReplayGain: 'ReplayGain',
             }),
         },
         {
             control: (
                 <NumberInput
                     defaultValue={settings.mpvProperties.replayGainPreampDB}
-                    width={75}
                     onChange={(e) => handleSetMpvProperty('replayGainPreampDB', e)}
+                    width={75}
                 />
             ),
             description: t('setting.replayGainMode', {
-                ReplayGain: 'ReplayGain',
                 context: 'description',
                 postProcess: 'sentenceCase',
+                ReplayGain: 'ReplayGain',
             }),
             title: t('setting.replayGainPreamp', {
-                ReplayGain: 'ReplayGain',
                 postProcess: 'sentenceCase',
+                ReplayGain: 'ReplayGain',
             }),
         },
         {
@@ -381,32 +381,32 @@ export const MpvSettings = () => {
                 />
             ),
             description: t('setting.replayGainClipping', {
-                ReplayGain: 'ReplayGain',
                 context: 'description',
                 postProcess: 'sentenceCase',
+                ReplayGain: 'ReplayGain',
             }),
             title: t('setting.replayGainClipping', {
-                ReplayGain: 'ReplayGain',
                 postProcess: 'sentenceCase',
+                ReplayGain: 'ReplayGain',
             }),
         },
         {
             control: (
                 <NumberInput
                     defaultValue={settings.mpvProperties.replayGainFallbackDB}
-                    width={75}
                     onBlur={(e) =>
                         handleSetMpvProperty('replayGainFallbackDB', Number(e.currentTarget.value))
                     }
+                    width={75}
                 />
             ),
             description: t('setting.replayGainFallback', {
-                ReplayGain: 'ReplayGain',
                 postProcess: 'sentenceCase',
+                ReplayGain: 'ReplayGain',
             }),
             title: t('setting.replayGainFallback', {
-                ReplayGain: 'ReplayGain',
                 postProcess: 'sentenceCase',
+                ReplayGain: 'ReplayGain',
             }),
         },
     ];

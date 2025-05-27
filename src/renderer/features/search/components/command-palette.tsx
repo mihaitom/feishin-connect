@@ -1,22 +1,22 @@
-/* eslint-disable react/no-unknown-property */
-import { useCallback, useState, Fragment, useRef } from 'react';
 import { ActionIcon, Group, Kbd, ScrollArea } from '@mantine/core';
-import { useDisclosure, useDebouncedValue } from '@mantine/hooks';
+import { useDebouncedValue, useDisclosure } from '@mantine/hooks';
+import { Fragment, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RiSearchLine, RiCloseFill } from 'react-icons/ri';
+import { RiCloseFill, RiSearchLine } from 'react-icons/ri';
 import { generatePath, useNavigate } from 'react-router';
 import styled from 'styled-components';
-import { GoToCommands } from './go-to-commands';
-import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
+
 import { Button, Modal, Paper, Spinner, TextInput } from '/@/renderer/components';
-import { HomeCommands } from './home-commands';
+import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
+import { GoToCommands } from '/@/renderer/features/search/components/go-to-commands';
+import { HomeCommands } from '/@/renderer/features/search/components/home-commands';
+import { LibraryCommandItem } from '/@/renderer/features/search/components/library-command-item';
 import { ServerCommands } from '/@/renderer/features/search/components/server-commands';
 import { useSearch } from '/@/renderer/features/search/queries/search-query';
-import { useCurrentServer } from '/@/renderer/store';
 import { AppRoute } from '/@/renderer/router/routes';
-import { LibraryCommandItem } from '/@/renderer/features/search/components/library-command-item';
-import { LibraryItem } from '/@/renderer/api/types';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { useCurrentServer } from '/@/renderer/store';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface CommandPaletteProps {
     modalProps: (typeof useDisclosure)['arguments'];
@@ -118,13 +118,14 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                     return 0;
                 }}
                 label="Global Command Menu"
-                value={value}
                 onValueChange={setValue}
+                value={value}
             >
                 <TextInput
-                    ref={searchInputRef}
                     data-autofocus
                     icon={<RiSearchLine />}
+                    onChange={(e) => setQuery(e.currentTarget.value)}
+                    ref={searchInputRef}
                     rightSection={
                         <ActionIcon
                             onClick={() => {
@@ -137,7 +138,6 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                     }
                     size="lg"
                     value={query}
-                    onChange={(e) => setQuery(e.currentTarget.value)}
                 />
                 <Command.Separator />
                 <Command.List>
@@ -147,7 +147,6 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                             {data?.albums?.map((album) => (
                                 <Command.Item
                                     key={`search-album-${album.id}`}
-                                    value={`search-${album.id}`}
                                     onSelect={() => {
                                         navigate(
                                             generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
@@ -157,6 +156,7 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                         modalProps.handlers.close();
                                         setQuery('');
                                     }}
+                                    value={`search-${album.id}`}
                                 >
                                     <LibraryCommandItem
                                         handlePlayQueueAdd={handlePlayQueueAdd}
@@ -177,7 +177,6 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                             {data?.albumArtists.map((artist) => (
                                 <Command.Item
                                     key={`artist-${artist.id}`}
-                                    value={`search-${artist.id}`}
                                     onSelect={() => {
                                         navigate(
                                             generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
@@ -187,6 +186,7 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                         modalProps.handlers.close();
                                         setQuery('');
                                     }}
+                                    value={`search-${artist.id}`}
                                 >
                                     <LibraryCommandItem
                                         disabled={artist?.albumCount === 0}
@@ -213,7 +213,6 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                             {data?.songs.map((song) => (
                                 <Command.Item
                                     key={`artist-${song.id}`}
-                                    value={`search-${song.id}`}
                                     onSelect={() => {
                                         navigate(
                                             generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
@@ -223,6 +222,7 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                         modalProps.handlers.close();
                                         setQuery('');
                                     }}
+                                    value={`search-${song.id}`}
                                 >
                                     <LibraryCommandItem
                                         handlePlayQueueAdd={handlePlayQueueAdd}

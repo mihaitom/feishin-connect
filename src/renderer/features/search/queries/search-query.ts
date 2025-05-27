@@ -1,9 +1,10 @@
-import { SearchQuery } from '/@/renderer/api/types';
-import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '/@/renderer/api/query-keys';
-import { getServerById } from '/@/renderer/store';
+
 import { api } from '/@/renderer/api';
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { QueryHookArgs } from '/@/renderer/lib/react-query';
+import { getServerById } from '/@/renderer/store';
+import { SearchQuery } from '/@/shared/types/domain-types';
 
 export const useSearch = (args: QueryHookArgs<SearchQuery>) => {
     const { options, query, serverId } = args;

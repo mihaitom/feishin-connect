@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+
 import { useSettingsStore } from '/@/renderer/store/settings.store';
-import { AppTheme } from '/@/renderer/themes/types';
+import { AppTheme } from '/@/shared/types/domain-types';
 
 export const THEME_DATA = [
     { label: 'Default Dark', type: 'dark', value: AppTheme.DEFAULT_DARK },

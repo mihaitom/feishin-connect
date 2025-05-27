@@ -3,25 +3,26 @@ import { nanoid } from 'nanoid/non-secure';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+
 import { useAlbumArtistListDataStore } from '/@/renderer/store/album-artist-list-data.store';
 import { useAlbumListDataStore } from '/@/renderer/store/album-list-data.store';
 import { useListStore } from '/@/renderer/store/list.store';
-import { ServerListItem } from '/@/renderer/api/types';
-
-export interface AuthState {
-    currentServer: ServerListItem | null;
-    deviceId: string;
-    serverList: Record<string, ServerListItem>;
-}
+import { ServerListItem } from '/@/shared/types/domain-types';
 
 export interface AuthSlice extends AuthState {
     actions: {
         addServer: (args: ServerListItem) => void;
         deleteServer: (id: string) => void;
-        getServer: (id: string) => ServerListItem | null;
-        setCurrentServer: (server: ServerListItem | null) => void;
+        getServer: (id: string) => null | ServerListItem;
+        setCurrentServer: (server: null | ServerListItem) => void;
         updateServer: (id: string, args: Partial<ServerListItem>) => void;
     };
+}
+
+export interface AuthState {
+    currentServer: null | ServerListItem;
+    deviceId: string;
+    serverList: Record<string, ServerListItem>;
 }
 
 export const useAuthStore = create<AuthSlice>()(

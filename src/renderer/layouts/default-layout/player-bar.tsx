@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { Playerbar } from '/@/renderer/features/player';
 import { useGeneralSettings } from '/@/renderer/store/settings.store';
 

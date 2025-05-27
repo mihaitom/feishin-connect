@@ -1,8 +1,10 @@
-import { Box, Center, Group, Stack } from '@mantine/core';
 import type { FallbackProps } from 'react-error-boundary';
+
+import { Box, Center, Group, Stack } from '@mantine/core';
 import { RiErrorWarningLine } from 'react-icons/ri';
 import { useRouteError } from 'react-router';
 import styled from 'styled-components';
+
 import { Button, Text } from '/@/renderer/components';
 
 const Container = styled(Box)`
@@ -25,8 +27,8 @@ export const ErrorFallback = ({ resetErrorBoundary }: FallbackProps) => {
                     </Group>
                     <Text>{error?.message}</Text>
                     <Button
-                        variant="filled"
                         onClick={resetErrorBoundary}
+                        variant="filled"
                     >
                         Reload
                     </Button>

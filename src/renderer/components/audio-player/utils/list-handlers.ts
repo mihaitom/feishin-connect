@@ -1,6 +1,6 @@
-/* eslint-disable no-nested-ternary */
 import type { Dispatch } from 'react';
-import { CrossfadeStyle } from '/@/renderer/types';
+
+import { CrossfadeStyle } from '/@/shared/types/types';
 
 export const gaplessHandler = (args: {
     currentTime: number;
@@ -10,7 +10,7 @@ export const gaplessHandler = (args: {
     nextPlayerRef: any;
     setIsTransitioning: Dispatch<boolean>;
 }) => {
-    const { nextPlayerRef, currentTime, duration, isTransitioning, setIsTransitioning, isFlac } =
+    const { currentTime, duration, isFlac, isTransitioning, nextPlayerRef, setIsTransitioning } =
         args;
 
     if (!isTransitioning) {
@@ -46,17 +46,17 @@ export const crossfadeHandler = (args: {
     volume: number;
 }) => {
     const {
-        currentTime,
-        player,
         currentPlayer,
         currentPlayerRef,
-        nextPlayerRef,
+        currentTime,
+        duration,
         fadeDuration,
         fadeType,
-        duration,
-        volume,
         isTransitioning,
+        nextPlayerRef,
+        player,
         setIsTransitioning,
+        volume,
     } = args;
 
     if (!isTransitioning || currentPlayer !== player) {
@@ -79,21 +79,17 @@ export const crossfadeHandler = (args: {
     let percentageOfFadeLeft;
     let n;
     switch (fadeType) {
-        case 'equalPower':
-            // https://dsp.stackexchange.com/a/14755
-            percentageOfFadeLeft = (timeLeft / fadeDuration) * 2;
-            currentPlayerVolumeCalculation = Math.sqrt(0.5 * percentageOfFadeLeft) * volume;
-            nextPlayerVolumeCalculation = Math.sqrt(0.5 * (2 - percentageOfFadeLeft)) * volume;
-            break;
-        case 'linear':
-            currentPlayerVolumeCalculation = (timeLeft / fadeDuration) * volume;
-            nextPlayerVolumeCalculation = ((fadeDuration - timeLeft) / fadeDuration) * volume;
-            break;
         case 'dipped':
             // https://math.stackexchange.com/a/4622
             percentageOfFadeLeft = timeLeft / fadeDuration;
             currentPlayerVolumeCalculation = percentageOfFadeLeft ** 2 * volume;
             nextPlayerVolumeCalculation = (percentageOfFadeLeft - 1) ** 2 * volume;
+            break;
+        case 'equalPower':
+            // https://dsp.stackexchange.com/a/14755
+            percentageOfFadeLeft = (timeLeft / fadeDuration) * 2;
+            currentPlayerVolumeCalculation = Math.sqrt(0.5 * percentageOfFadeLeft) * volume;
+            nextPlayerVolumeCalculation = Math.sqrt(0.5 * (2 - percentageOfFadeLeft)) * volume;
             break;
         case fadeType.match(/constantPower.*/)?.input:
             // https://math.stackexchange.com/a/26159
@@ -113,6 +109,10 @@ export const crossfadeHandler = (args: {
             nextPlayerVolumeCalculation =
                 Math.cos((Math.PI / 4) * ((2 * percentageOfFadeLeft - 1) ** (2 * n + 1) + 1)) *
                 volume;
+            break;
+        case 'linear':
+            currentPlayerVolumeCalculation = (timeLeft / fadeDuration) * volume;
+            nextPlayerVolumeCalculation = ((fadeDuration - timeLeft) / fadeDuration) * volume;
             break;
 
         default:

@@ -1,4 +1,6 @@
 import isElectron from 'is-electron';
+import { useTranslation } from 'react-i18next';
+
 import { NumberInput, Switch, TextInput } from '/@/renderer/components';
 import {
     SettingOption,
@@ -6,10 +8,9 @@ import {
 } from '/@/renderer/features/settings/components/settings-section';
 import {
     useDiscordSetttings,
-    useSettingsStoreActions,
     useGeneralSettings,
+    useSettingsStoreActions,
 } from '/@/renderer/store';
-import { useTranslation } from 'react-i18next';
 
 export const DiscordSettings = () => {
     const { t } = useTranslation();
@@ -75,7 +76,6 @@ export const DiscordSettings = () => {
         {
             control: (
                 <NumberInput
-                    value={settings.updateInterval}
                     onChange={(e) => {
                         let value = e ? Number(e) : 0;
                         if (value < 15) {
@@ -89,6 +89,7 @@ export const DiscordSettings = () => {
                             },
                         });
                     }}
+                    value={settings.updateInterval}
                 />
             ),
             description: t('setting.discordUpdateInterval', {

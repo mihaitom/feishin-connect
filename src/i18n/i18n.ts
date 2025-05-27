@@ -1,52 +1,53 @@
-import { PostProcessorModule, TOptions, StringMap } from 'i18next';
+import { PostProcessorModule, StringMap, TOptions } from 'i18next';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+
+import cs from './locales/cs.json';
+import de from './locales/de.json';
 import en from './locales/en.json';
 import es from './locales/es.json';
+import fa from './locales/fa.json';
+import fi from './locales/fi.json';
 import fr from './locales/fr.json';
-import ja from './locales/ja.json';
-import pl from './locales/pl.json';
-import zhHans from './locales/zh-Hans.json';
-import de from './locales/de.json';
+import hu from './locales/hu.json';
+import id from './locales/id.json';
 import it from './locales/it.json';
-import ru from './locales/ru.json';
-import ptBr from './locales/pt-BR.json';
-import sr from './locales/sr.json';
-import sv from './locales/sv.json';
-import cs from './locales/cs.json';
+import ja from './locales/ja.json';
+import ko from './locales/ko.json';
 import nbNO from './locales/nb-NO.json';
 import nl from './locales/nl.json';
-import zhHant from './locales/zh-Hant.json';
-import fa from './locales/fa.json';
-import ko from './locales/ko.json';
+import pl from './locales/pl.json';
+import ptBr from './locales/pt-BR.json';
+import ru from './locales/ru.json';
+import sr from './locales/sr.json';
+import sv from './locales/sv.json';
 import ta from './locales/ta.json';
-import id from './locales/id.json';
-import fi from './locales/fi.json';
-import hu from './locales/hu.json';
+import zhHans from './locales/zh-Hans.json';
+import zhHant from './locales/zh-Hant.json';
 
 const resources = {
+    cs: { translation: cs },
+    de: { translation: de },
     en: { translation: en },
     es: { translation: es },
-    de: { translation: de },
-    it: { translation: it },
-    ru: { translation: ru },
-    'pt-BR': { translation: ptBr },
     fa: { translation: fa },
+    fi: { translation: fi },
     fr: { translation: fr },
+    hu: { translation: hu },
+    id: { translation: id },
+    it: { translation: it },
     ja: { translation: ja },
     ko: { translation: ko },
+    'nb-NO': { translation: nbNO },
+    nl: { translation: nl },
     pl: { translation: pl },
-    'zh-Hans': { translation: zhHans },
-    'zh-Hant': { translation: zhHant },
+    'pt-BR': { translation: ptBr },
+    ru: { translation: ru },
     sr: { translation: sr },
     sv: { translation: sv },
-    cs: { translation: cs },
-    nl: { translation: nl },
-    'nb-NO': { translation: nbNO },
     ta: { translation: ta },
-    id: { translation: id },
-    fi: { translation: fi },
-    hu: { translation: hu },
+    'zh-Hans': { translation: zhHans },
+    'zh-Hant': { translation: zhHant },
 };
 
 export const languages = [
@@ -141,35 +142,34 @@ export const languages = [
 ];
 
 const lowerCasePostProcessor: PostProcessorModule = {
-    type: 'postProcessor',
     name: 'lowerCase',
     process: (value: string) => {
         return value.toLocaleLowerCase();
     },
+    type: 'postProcessor',
 };
 
 const upperCasePostProcessor: PostProcessorModule = {
-    type: 'postProcessor',
     name: 'upperCase',
     process: (value: string) => {
         return value.toLocaleUpperCase();
     },
+    type: 'postProcessor',
 };
 
 const titleCasePostProcessor: PostProcessorModule = {
-    type: 'postProcessor',
     name: 'titleCase',
     process: (value: string) => {
         return value.replace(/\S\S*/g, (txt) => {
             return txt.charAt(0).toLocaleUpperCase() + txt.slice(1).toLowerCase();
         });
     },
+    type: 'postProcessor',
 };
 
 const ignoreSentenceCaseLanguages = ['de'];
 
 const sentenceCasePostProcessor: PostProcessorModule = {
-    type: 'postProcessor',
     name: 'sentenceCase',
     process: (value: string, _key: string, _options: TOptions<StringMap>, translator: any) => {
         const sentences = value.split('. ');
@@ -185,6 +185,7 @@ const sentenceCasePostProcessor: PostProcessorModule = {
             })
             .join('. ');
     },
+    type: 'postProcessor',
 };
 i18n.use(lowerCasePostProcessor)
     .use(upperCasePostProcessor)

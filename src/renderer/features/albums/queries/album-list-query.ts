@@ -1,9 +1,11 @@
+import type { QueryHookArgs } from '/@/renderer/lib/react-query';
+import type { AlbumListQuery, AlbumListResponse } from '/@/shared/types/domain-types';
+
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+
 import { api } from '/@/renderer/api';
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import type { AlbumListQuery, AlbumListResponse } from '/@/renderer/api/types';
-import type { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
 
 export const useAlbumList = (args: QueryHookArgs<AlbumListQuery>) => {

@@ -1,16 +1,17 @@
 import type {
-    SelectProps as MantineSelectProps,
     MultiSelectProps as MantineMultiSelectProps,
+    SelectProps as MantineSelectProps,
 } from '@mantine/core';
-import { Select as MantineSelect, MultiSelect as MantineMultiSelect } from '@mantine/core';
+
+import { MultiSelect as MantineMultiSelect, Select as MantineSelect } from '@mantine/core';
 import styled from 'styled-components';
 
-export interface SelectProps extends MantineSelectProps {
+export interface MultiSelectProps extends MantineMultiSelectProps {
     maxWidth?: number | string;
     width?: number | string;
 }
 
-export interface MultiSelectProps extends MantineMultiSelectProps {
+export interface SelectProps extends MantineSelectProps {
     maxWidth?: number | string;
     width?: number | string;
 }
@@ -37,10 +38,9 @@ const StyledSelect = styled(MantineSelect)`
     }
 `;
 
-export const Select = ({ width, maxWidth, ...props }: SelectProps) => {
+export const Select = ({ maxWidth, width, ...props }: SelectProps) => {
     return (
         <StyledSelect
-            withinPortal
             styles={{
                 dropdown: {
                     background: 'var(--dropdown-menu-bg)',
@@ -70,6 +70,7 @@ export const Select = ({ width, maxWidth, ...props }: SelectProps) => {
             }}
             sx={{ maxWidth, width }}
             transitionProps={{ duration: 100, transition: 'fade' }}
+            withinPortal
             {...props}
         />
     );
@@ -92,10 +93,9 @@ const StyledMultiSelect = styled(MantineMultiSelect)`
     }
 `;
 
-export const MultiSelect = ({ width, maxWidth, ...props }: MultiSelectProps) => {
+export const MultiSelect = ({ maxWidth, width, ...props }: MultiSelectProps) => {
     return (
         <StyledMultiSelect
-            withinPortal
             styles={{
                 dropdown: {
                     background: 'var(--dropdown-menu-bg)',
@@ -131,17 +131,8 @@ export const MultiSelect = ({ width, maxWidth, ...props }: MultiSelectProps) => 
             }}
             sx={{ maxWidth, width }}
             transitionProps={{ duration: 100, transition: 'fade' }}
+            withinPortal
             {...props}
         />
     );
-};
-
-Select.defaultProps = {
-    maxWidth: undefined,
-    width: undefined,
-};
-
-MultiSelect.defaultProps = {
-    maxWidth: undefined,
-    width: undefined,
 };

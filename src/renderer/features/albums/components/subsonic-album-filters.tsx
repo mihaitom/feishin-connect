@@ -2,10 +2,16 @@ import { Divider, Group, Stack } from '@mantine/core';
 import debounce from 'lodash/debounce';
 import { ChangeEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlbumListQuery, GenreListSort, LibraryItem, SortOrder } from '/@/renderer/api/types';
+
 import { NumberInput, Select, Switch, Text } from '/@/renderer/components';
 import { useGenreList } from '/@/renderer/features/genres';
 import { AlbumListFilter, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
+import {
+    AlbumListQuery,
+    GenreListSort,
+    LibraryItem,
+    SortOrder,
+} from '/@/shared/types/domain-types';
 
 interface SubsonicAlbumFiltersProps {
     onFilterChange: (filters: AlbumListFilter) => void;
@@ -39,7 +45,7 @@ export const SubsonicAlbumFilters = ({
         }));
     }, [genreListQuery.data]);
 
-    const handleGenresFilter = debounce((e: string | null) => {
+    const handleGenresFilter = debounce((e: null | string) => {
         const updatedFilters = setFilter({
             data: {
                 genres: e ? [e] : undefined,
@@ -68,7 +74,7 @@ export const SubsonicAlbumFilters = ({
         },
     ];
 
-    const handleYearFilter = debounce((e: number | string, type: 'min' | 'max') => {
+    const handleYearFilter = debounce((e: number | string, type: 'max' | 'min') => {
         let data: Partial<AlbumListQuery> = {};
 
         if (type === 'min') {
@@ -128,12 +134,12 @@ export const SubsonicAlbumFilters = ({
             <Group grow>
                 <Select
                     clearable
-                    searchable
                     data={genreList}
                     defaultValue={filter.genres?.length ? filter.genres[0] : undefined}
                     disabled={Boolean(filter.minYear || filter.maxYear)}
                     label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
                     onChange={handleGenresFilter}
+                    searchable
                 />
             </Group>
         </Stack>

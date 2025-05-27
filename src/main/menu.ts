@@ -1,4 +1,4 @@
-import { app, Menu, shell, BrowserWindow, MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell } from 'electron';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
     selector?: string;
@@ -10,37 +10,6 @@ export default class MenuBuilder {
 
     constructor(mainWindow: BrowserWindow) {
         this.mainWindow = mainWindow;
-    }
-
-    buildMenu(): Menu {
-        if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
-            this.setupDevelopmentEnvironment();
-        }
-
-        const template =
-            process.platform === 'darwin'
-                ? this.buildDarwinTemplate()
-                : this.buildDefaultTemplate();
-
-        const menu = Menu.buildFromTemplate(template);
-        Menu.setApplicationMenu(menu);
-
-        return menu;
-    }
-
-    setupDevelopmentEnvironment(): void {
-        this.mainWindow.webContents.on('context-menu', (_, props) => {
-            const { x, y } = props;
-
-            Menu.buildFromTemplate([
-                {
-                    click: () => {
-                        this.mainWindow.webContents.inspectElement(x, y);
-                    },
-                    label: 'Inspect element',
-                },
-            ]).popup({ window: this.mainWindow });
-        });
     }
 
     buildDarwinTemplate(): MenuItemConstructorOptions[] {
@@ -275,5 +244,36 @@ export default class MenuBuilder {
         ];
 
         return templateDefault;
+    }
+
+    buildMenu(): Menu {
+        if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
+            this.setupDevelopmentEnvironment();
+        }
+
+        const template =
+            process.platform === 'darwin'
+                ? this.buildDarwinTemplate()
+                : this.buildDefaultTemplate();
+
+        const menu = Menu.buildFromTemplate(template);
+        Menu.setApplicationMenu(menu);
+
+        return menu;
+    }
+
+    setupDevelopmentEnvironment(): void {
+        this.mainWindow.webContents.on('context-menu', (_, props) => {
+            const { x, y } = props;
+
+            Menu.buildFromTemplate([
+                {
+                    click: () => {
+                        this.mainWindow.webContents.inspectElement(x, y);
+                    },
+                    label: 'Inspect element',
+                },
+            ]).popup({ window: this.mainWindow });
+        });
     }
 }

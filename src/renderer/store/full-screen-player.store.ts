@@ -3,20 +3,20 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
+export interface FullScreenPlayerSlice extends FullScreenPlayerState {
+    actions: {
+        setStore: (data: Partial<FullScreenPlayerSlice>) => void;
+    };
+}
+
 interface FullScreenPlayerState {
-    activeTab: string | 'queue' | 'related' | 'lyrics';
+    activeTab: 'lyrics' | 'queue' | 'related' | string;
     dynamicBackground?: boolean;
     dynamicImageBlur: number;
     dynamicIsImage?: boolean;
     expanded: boolean;
     opacity: number;
     useImageAspectRatio: boolean;
-}
-
-export interface FullScreenPlayerSlice extends FullScreenPlayerState {
-    actions: {
-        setStore: (data: Partial<FullScreenPlayerSlice>) => void;
-    };
 }
 
 export const useFullScreenPlayerStore = create<FullScreenPlayerSlice>()(

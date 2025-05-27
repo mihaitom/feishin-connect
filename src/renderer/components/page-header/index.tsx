@@ -2,9 +2,10 @@ import { Flex, FlexProps } from '@mantine/core';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { ReactNode, useRef } from 'react';
 import styled from 'styled-components';
+
 import { useShouldPadTitlebar, useTheme } from '/@/renderer/hooks';
 import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform } from '/@/renderer/types';
+import { Platform } from '/@/shared/types/types';
 
 const Container = styled(motion(Flex))<{
     $height?: string;
@@ -49,7 +50,7 @@ const BackgroundImage = styled.div<{ $background: string }>`
     background: ${(props) => props.$background || 'var(--titlebar-bg)'};
 `;
 
-const BackgroundImageOverlay = styled.div<{ theme: 'light' | 'dark' }>`
+const BackgroundImageOverlay = styled.div<{ theme: 'dark' | 'light' }>`
     position: absolute;
     top: 0;
     left: 0;
@@ -63,7 +64,7 @@ const BackgroundImageOverlay = styled.div<{ theme: 'light' | 'dark' }>`
 `;
 
 export interface PageHeaderProps
-    extends Omit<FlexProps, 'onAnimationStart' | 'onDragStart' | 'onDragEnd' | 'onDrag'> {
+    extends Omit<FlexProps, 'onAnimationStart' | 'onDrag' | 'onDragEnd' | 'onDragStart'> {
     animated?: boolean;
     backgroundColor?: string;
     children?: ReactNode;
@@ -93,11 +94,11 @@ const variants: Variants = {
 
 export const PageHeader = ({
     animated,
-    position,
-    height,
     backgroundColor,
-    isHidden,
     children,
+    height,
+    isHidden,
+    position,
     ...props
 }: PageHeaderProps) => {
     const ref = useRef(null);
@@ -108,9 +109,9 @@ export const PageHeader = ({
     return (
         <>
             <Container
-                ref={ref}
                 $height={height}
                 $position={position}
+                ref={ref}
                 {...props}
             >
                 <Header
@@ -132,7 +133,7 @@ export const PageHeader = ({
                 {backgroundColor && (
                     <>
                         <BackgroundImage $background={backgroundColor || 'var(--titlebar-bg)'} />
-                        <BackgroundImageOverlay theme={theme as 'light' | 'dark'} />
+                        <BackgroundImageOverlay theme={theme as 'dark' | 'light'} />
                     </>
                 )}
             </Container>

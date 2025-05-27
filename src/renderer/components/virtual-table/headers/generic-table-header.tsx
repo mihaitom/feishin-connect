@@ -1,18 +1,20 @@
-import type { ReactNode } from 'react';
 import type { IHeaderParams } from '@ag-grid-community/core';
+import type { ReactNode } from 'react';
+
 import { AiOutlineNumber } from 'react-icons/ai';
 import { FiClock } from 'react-icons/fi';
 import { RiHeartLine, RiMoreFill, RiStarLine } from 'react-icons/ri';
 import styled from 'styled-components';
-import { _Text } from '/@/renderer/components/text';
 
-type Presets = 'duration' | 'rowIndex' | 'userFavorite' | 'userRating' | 'actions';
+import { _Text } from '/@/renderer/components/text';
 
 type Options = {
     children?: ReactNode;
-    position?: 'left' | 'center' | 'right';
+    position?: 'center' | 'left' | 'right';
     preset?: Presets;
 };
+
+type Presets = 'actions' | 'duration' | 'rowIndex' | 'userFavorite' | 'userRating';
 
 export const HeaderWrapper = styled.div<{ $position: Options['position'] }>`
     display: flex;
@@ -77,7 +79,7 @@ const headerPresets = {
 
 export const GenericTableHeader = (
     { displayName }: IHeaderParams,
-    { preset, children, position }: Options,
+    { children, position, preset }: Options,
 ) => {
     if (preset) {
         return <HeaderWrapper $position={position}>{headerPresets[preset]}</HeaderWrapper>;
@@ -94,9 +96,4 @@ export const GenericTableHeader = (
             </HeaderText>
         </HeaderWrapper>
     );
-};
-
-GenericTableHeader.defaultProps = {
-    position: 'left',
-    preset: undefined,
 };

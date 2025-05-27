@@ -1,44 +1,51 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
 import { ModuleRegistry } from '@ag-grid-community/core';
 import { InfiniteRowModelModule } from '@ag-grid-community/infinite-row-model';
 import { MantineProvider } from '@mantine/core';
 import isElectron from 'is-electron';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { initSimpleImg } from 'react-simple-img';
-import { toast } from './components';
-import { useTheme } from './hooks';
-import { IsUpdatedDialog } from './is-updated-dialog';
-import { AppRouter } from './router/app-router';
+
+import './styles/global.scss';
+
+import '@ag-grid-community/styles/ag-grid.css';
+import 'overlayscrollbars/overlayscrollbars.css';
+
+import i18n from '/@/i18n/i18n';
+import { toast } from '/@/renderer/components';
+import { ContextMenuProvider } from '/@/renderer/features/context-menu';
+import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
+import { PlayQueueHandlerContext } from '/@/renderer/features/player';
+import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
+import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-handle-playqueue-add';
+import { updateSong } from '/@/renderer/features/player/update-remote-song';
+import { getMpvProperties } from '/@/renderer/features/settings/components/playback/mpv-settings';
+import { useTheme } from '/@/renderer/hooks';
+import { useServerVersion } from '/@/renderer/hooks/use-server-version';
+import { IsUpdatedDialog } from '/@/renderer/is-updated-dialog';
+import { AppRouter } from '/@/renderer/router/app-router';
 import {
+    PlayerState,
+    useCssSettings,
     useHotkeySettings,
     usePlaybackSettings,
+    usePlayerStore,
+    useQueueControls,
     useRemoteSettings,
     useSettingsStore,
-} from './store/settings.store';
-import './styles/global.scss';
-import { ContextMenuProvider } from '/@/renderer/features/context-menu';
-import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-handle-playqueue-add';
-import { PlayQueueHandlerContext } from '/@/renderer/features/player';
-import { getMpvProperties } from '/@/renderer/features/settings/components/playback/mpv-settings';
-import { PlayerState, useCssSettings, usePlayerStore, useQueueControls } from '/@/renderer/store';
-import { FontType, PlaybackType, PlayerStatus, WebAudio } from '/@/renderer/types';
-import '@ag-grid-community/styles/ag-grid.css';
-import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
-import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
-import i18n from '/@/i18n/i18n';
-import { useServerVersion } from '/@/renderer/hooks/use-server-version';
-import { updateSong } from '/@/renderer/features/player/update-remote-song';
+} from '/@/renderer/store';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
 import { setQueue } from '/@/renderer/utils/set-transcoded-queue-data';
+import { FontType, PlaybackType, PlayerStatus, WebAudio } from '/@/shared/types/types';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, InfiniteRowModelModule]);
 
 initSimpleImg({ threshold: 0.05 }, true);
 
-const mpvPlayer = isElectron() ? window.electron.mpvPlayer : null;
-const ipc = isElectron() ? window.electron.ipc : null;
-const remote = isElectron() ? window.electron.remote : null;
-const utils = isElectron() ? window.electron.utils : null;
+const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
+const ipc = isElectron() ? window.api.ipc : null;
+const remote = isElectron() ? window.api.remote : null;
+const utils = isElectron() ? window.api.utils : null;
 
 export const App = () => {
     const theme = useTheme();
@@ -46,14 +53,14 @@ export const App = () => {
     const language = useSettingsStore((store) => store.general.language);
     const nativeImageAspect = useSettingsStore((store) => store.general.nativeAspectRatio);
     const { builtIn, custom, system, type } = useSettingsStore((state) => state.font);
-    const { enabled, content } = useCssSettings();
+    const { content, enabled } = useCssSettings();
     const { type: playbackType } = usePlaybackSettings();
     const { bindings } = useHotkeySettings();
     const handlePlayQueueAdd = useHandlePlayQueueAdd();
     const { clearQueue, restoreQueue } = useQueueControls();
     const remoteSettings = useRemoteSettings();
-    const textStyleRef = useRef<HTMLStyleElement>();
-    const cssRef = useRef<HTMLStyleElement>();
+    const textStyleRef = useRef<HTMLStyleElement | null>(null);
+    const cssRef = useRef<HTMLStyleElement | null>(null);
     useDiscordRpc();
     useServerVersion();
 
@@ -230,10 +237,8 @@ export const App = () => {
 
     return (
         <MantineProvider
-            withGlobalStyles
-            withNormalizeCSS
             theme={{
-                colorScheme: theme as 'light' | 'dark',
+                colorScheme: theme as 'dark' | 'light',
                 components: {
                     Modal: {
                         styles: {
@@ -282,6 +287,8 @@ export const App = () => {
                     xs: '0rem',
                 },
             }}
+            withGlobalStyles
+            withNormalizeCSS
         >
             <PlayQueueHandlerContext.Provider value={providerValue}>
                 <ContextMenuProvider>

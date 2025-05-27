@@ -1,4 +1,4 @@
-import { HoverCard as MantineHoverCard, HoverCardProps } from '@mantine/core';
+import { HoverCardProps, HoverCard as MantineHoverCard } from '@mantine/core';
 
 export const HoverCard = ({ children, ...props }: HoverCardProps) => {
     return (

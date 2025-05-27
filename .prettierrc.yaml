@@ -1,0 +1,14 @@
+singleQuote: true
+semi: true
+printWidth: 100
+tabWidth: 4
+trailingComma: all
+useTabs: false
+arrowParens: always
+proseWrap: never
+htmlWhitespaceSensitivity: strict
+endOfLine: lf
+singleAttributePerLine: true
+bracketSpacing: true
+plugins:
+    - prettier-plugin-packagejson

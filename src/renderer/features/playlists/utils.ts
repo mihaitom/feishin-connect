@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid/non-secure';
-import { NDSongQueryFields } from '/@/renderer/api/navidrome.types';
-import { QueryBuilderGroup } from '/@/renderer/types';
+
+import { NDSongQueryFields } from '/@/shared/api/navidrome.types';
+import { QueryBuilderGroup } from '/@/shared/types/types';
 
 export const parseQueryBuilderChildren = (groups: QueryBuilderGroup[], data: any[]) => {
     if (groups.length === 0) {
@@ -93,7 +94,7 @@ export const convertNDQueryToQueryGroup = (query: Record<string, any>) => {
     const rootGroup: QueryBuilderGroup = {
         group: [],
         rules: [],
-        type: rootType as 'any' | 'all',
+        type: rootType as 'all' | 'any',
         uniqueId: nanoid(),
     };
 

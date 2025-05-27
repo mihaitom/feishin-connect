@@ -1,25 +1,26 @@
-import { useState } from 'react';
-import { Stack, Group } from '@mantine/core';
-import { Button, Checkbox, PasswordInput, TextInput, toast, Tooltip } from '/@/renderer/components';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useFocusTrap } from '@mantine/hooks';
 import { closeAllModals } from '@mantine/modals';
 import isElectron from 'is-electron';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RiInformationLine } from 'react-icons/ri';
-import { AuthenticationResponse, ServerListItem, ServerType } from '/@/renderer/api/types';
-import { useAuthStoreActions } from '/@/renderer/store';
-import { api } from '/@/renderer/api';
-import i18n from '/@/i18n/i18n';
-import { queryClient } from '/@/renderer/lib/react-query';
-import { queryKeys } from '/@/renderer/api/query-keys';
 
-const localSettings = isElectron() ? window.electron.localSettings : null;
+import i18n from '/@/i18n/i18n';
+import { api } from '/@/renderer/api';
+import { queryKeys } from '/@/renderer/api/query-keys';
+import { Button, Checkbox, PasswordInput, TextInput, toast, Tooltip } from '/@/renderer/components';
+import { queryClient } from '/@/renderer/lib/react-query';
+import { useAuthStoreActions } from '/@/renderer/store';
+import { AuthenticationResponse, ServerListItem, ServerType } from '/@/shared/types/domain-types';
+
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 interface EditServerFormProps {
     isUpdate?: boolean;
     onCancel: () => void;
-    password: string | null;
+    password: null | string;
     server: ServerListItem;
 }
 
@@ -33,7 +34,7 @@ const ModifiedFieldIndicator = () => {
     );
 };
 
-export const EditServerForm = ({ isUpdate, password, server, onCancel }: EditServerFormProps) => {
+export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditServerFormProps) => {
     const { t } = useTranslation();
     const { updateServer } = useAuthStoreActions();
     const focusTrapRef = useFocusTrap();
@@ -127,29 +128,29 @@ export const EditServerForm = ({ isUpdate, password, server, onCancel }: EditSer
         <form onSubmit={handleSubmit}>
             <Stack ref={focusTrapRef}>
                 <TextInput
-                    required
                     label={t('form.addServer.input', {
                         context: 'name',
                         postProcess: 'titleCase',
                     })}
+                    required
                     rightSection={form.isDirty('name') && <ModifiedFieldIndicator />}
                     {...form.getInputProps('name')}
                 />
                 <TextInput
-                    required
                     label={t('form.addServer.input', {
                         context: 'url',
                         postProcess: 'titleCase',
                     })}
+                    required
                     rightSection={form.isDirty('url') && <ModifiedFieldIndicator />}
                     {...form.getInputProps('url')}
                 />
                 <TextInput
-                    required
                     label={t('form.addServer.input', {
                         context: 'username',
                         postProcess: 'titleCase',
                     })}
+                    required
                     rightSection={form.isDirty('username') && <ModifiedFieldIndicator />}
                     {...form.getInputProps('username')}
                 />
@@ -186,8 +187,8 @@ export const EditServerForm = ({ isUpdate, password, server, onCancel }: EditSer
                 )}
                 <Group position="right">
                     <Button
-                        variant="subtle"
                         onClick={onCancel}
+                        variant="subtle"
                     >
                         {t('common.cancel', { postProcess: 'titleCase' })}
                     </Button>

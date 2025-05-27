@@ -1,6 +1,7 @@
 import { Center, Group, Stack } from '@mantine/core';
 import { RiQuestionLine } from 'react-icons/ri';
 import { useLocation, useNavigate } from 'react-router-dom';
+
 import { Button, Text } from '/@/renderer/components';
 import { AnimatedPage } from '/@/renderer/features/shared';
 
@@ -24,8 +25,8 @@ const InvalidRoute = () => {
                     </Group>
                     <Text>{location.pathname}</Text>
                     <Button
-                        variant="filled"
                         onClick={() => navigate(-1)}
+                        variant="filled"
                     >
                         Go back
                     </Button>

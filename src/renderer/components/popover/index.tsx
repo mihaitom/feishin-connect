@@ -1,12 +1,13 @@
 import type {
-    PopoverProps as MantinePopoverProps,
     PopoverDropdownProps as MantinePopoverDropdownProps,
+    PopoverProps as MantinePopoverProps,
 } from '@mantine/core';
+
 import { Popover as MantinePopover } from '@mantine/core';
 import styled from 'styled-components';
 
-type PopoverProps = MantinePopoverProps;
 type PopoverDropdownProps = MantinePopoverDropdownProps;
+type PopoverProps = MantinePopoverProps;
 
 const StyledPopover = styled(MantinePopover)``;
 
@@ -21,13 +22,13 @@ const StyledDropdown = styled(MantinePopover.Dropdown)<PopoverDropdownProps>`
 export const Popover = ({ children, ...props }: PopoverProps) => {
     return (
         <StyledPopover
-            withinPortal
             styles={{
                 dropdown: {
                     filter: 'drop-shadow(0 0 5px rgb(0, 0, 0, 50%))',
                 },
             }}
             transitionProps={{ transition: 'fade' }}
+            withinPortal
             {...props}
         >
             {children}

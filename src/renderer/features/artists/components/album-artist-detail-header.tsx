@@ -1,14 +1,15 @@
-import { forwardRef, Fragment, Ref } from 'react';
 import { Group, Rating, Stack } from '@mantine/core';
+import { forwardRef, Fragment, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
-import { LibraryItem, ServerType } from '/@/renderer/api/types';
+
 import { Text } from '/@/renderer/components';
 import { useAlbumArtistDetail } from '/@/renderer/features/artists/queries/album-artist-detail-query';
 import { LibraryHeader, useSetRating } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
+import { useCurrentServer } from '/@/renderer/store';
 import { formatDurationString } from '/@/renderer/utils';
-import { useCurrentServer } from '../../../store/auth.store';
+import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
 
 interface AlbumArtistDetailHeaderProps {
     background: string;
@@ -72,10 +73,10 @@ export const AlbumArtistDetailHeader = forwardRef(
 
         return (
             <LibraryHeader
-                ref={ref}
                 background={background}
                 imageUrl={detailQuery?.data?.imageUrl}
                 item={{ route: AppRoute.LIBRARY_ALBUM_ARTISTS, type: LibraryItem.ALBUM_ARTIST }}
+                ref={ref}
                 title={detailQuery?.data?.name || ''}
             >
                 <Stack>
@@ -92,11 +93,11 @@ export const AlbumArtistDetailHeader = forwardRef(
                             <>
                                 <Text $noSelect>•</Text>
                                 <Rating
+                                    onChange={handleUpdateRating}
                                     readOnly={
                                         detailQuery?.isFetching || updateRatingMutation.isLoading
                                     }
                                     value={detailQuery?.data?.userRating || 0}
-                                    onChange={handleUpdateRating}
                                 />
                             </>
                         )}

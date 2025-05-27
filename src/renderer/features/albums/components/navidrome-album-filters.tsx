@@ -1,20 +1,21 @@
-import { ChangeEvent, useMemo, useState } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
-import { NumberInput, Switch, Text, SpinnerIcon } from '/@/renderer/components';
-import { AlbumListFilter, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
 import debounce from 'lodash/debounce';
-import { useGenreList } from '/@/renderer/features/genres';
+import { ChangeEvent, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { NumberInput, SpinnerIcon, Switch, Text } from '/@/renderer/components';
+import { SelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 import { useAlbumArtistList } from '/@/renderer/features/artists/queries/album-artist-list-query';
+import { useGenreList } from '/@/renderer/features/genres';
+import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
+import { AlbumListFilter, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
 import {
     AlbumArtistListSort,
     AlbumListQuery,
     GenreListSort,
     LibraryItem,
     SortOrder,
-} from '/@/renderer/api/types';
-import { useTranslation } from 'react-i18next';
-import { useTagList } from '/@/renderer/features/tag/queries/use-tag-list';
-import { SelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
+} from '/@/shared/types/domain-types';
 
 interface NavidromeAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
@@ -26,8 +27,8 @@ interface NavidromeAlbumFiltersProps {
 
 export const NavidromeAlbumFilters = ({
     customFilters,
-    onFilterChange,
     disableArtistFilter,
+    onFilterChange,
     pageKey,
     serverId,
 }: NavidromeAlbumFiltersProps) => {
@@ -52,7 +53,7 @@ export const NavidromeAlbumFilters = ({
         }));
     }, [genreListQuery.data]);
 
-    const handleGenresFilter = debounce((e: string | null) => {
+    const handleGenresFilter = debounce((e: null | string) => {
         const updatedFilters = setFilter({
             customFilters,
             data: {
@@ -192,7 +193,7 @@ export const NavidromeAlbumFilters = ({
         }));
     }, [albumArtistListQuery?.data?.items]);
 
-    const handleAlbumArtistFilter = (e: string | null) => {
+    const handleAlbumArtistFilter = (e: null | string) => {
         const updatedFilters = setFilter({
             data: {
                 _custom: {
@@ -209,7 +210,7 @@ export const NavidromeAlbumFilters = ({
         onFilterChange(updatedFilters);
     };
 
-    const handleTagFilter = debounce((tag: string, e: string | null) => {
+    const handleTagFilter = debounce((tag: string, e: null | string) => {
         const updatedFilters = setFilter({
             customFilters,
             data: {
@@ -254,44 +255,44 @@ export const NavidromeAlbumFilters = ({
                 />
                 <SelectWithInvalidData
                     clearable
-                    searchable
                     data={genreList}
                     defaultValue={filter._custom?.navidrome?.genre_id}
                     label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
                     onChange={handleGenresFilter}
+                    searchable
                 />
             </Group>
             <Group grow>
                 <SelectWithInvalidData
                     clearable
-                    searchable
                     data={selectableAlbumArtists}
                     defaultValue={filter._custom?.navidrome?.artist_id}
                     disabled={disableArtistFilter}
                     label={t('entity.artist', { count: 1, postProcess: 'titleCase' })}
                     limit={300}
-                    rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
-                    searchValue={albumArtistSearchTerm}
                     onChange={handleAlbumArtistFilter}
                     onSearchChange={setAlbumArtistSearchTerm}
+                    rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
+                    searchable
+                    searchValue={albumArtistSearchTerm}
                 />
             </Group>
             {tagsQuery.data?.enumTags?.length &&
                 tagsQuery.data.enumTags.map((tag) => (
                     <Group
-                        key={tag.name}
                         grow
+                        key={tag.name}
                     >
                         <SelectWithInvalidData
                             clearable
-                            searchable
                             data={tag.options}
                             defaultValue={
                                 filter._custom?.navidrome?.[tag.name] as string | undefined
                             }
                             label={tag.name}
-                            width={150}
                             onChange={(value) => handleTagFilter(tag.name, value)}
+                            searchable
+                            width={150}
                         />
                     </Group>
                 ))}

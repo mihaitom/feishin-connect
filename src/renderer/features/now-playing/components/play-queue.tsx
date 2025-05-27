@@ -1,5 +1,3 @@
-import type { Ref } from 'react';
-import { useState, forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import type {
     CellDoubleClickedEvent,
     RowClassRules,
@@ -7,7 +5,23 @@ import type {
     RowNode,
 } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
+import type { Ref } from 'react';
+
+import { useMergedRef } from '@mantine/hooks';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
+import isElectron from 'is-electron';
+import debounce from 'lodash/debounce';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+
+import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
+import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-table';
+import { ErrorFallback } from '/@/renderer/features/action-required';
+import { useHandleTableContextMenu } from '/@/renderer/features/context-menu';
+import { QUEUE_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
+import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
+import { updateSong } from '/@/renderer/features/player/update-remote-song';
+import { useAppFocus } from '/@/renderer/hooks';
 import {
     useAppStoreActions,
     useCurrentSong,
@@ -19,28 +33,17 @@ import {
     useVolume,
 } from '/@/renderer/store';
 import {
+    PersistedTableColumn,
     usePlaybackType,
     useSettingsStore,
     useSettingsStoreActions,
     useTableSettings,
 } from '/@/renderer/store/settings.store';
-import { useMergedRef } from '@mantine/hooks';
-import isElectron from 'is-electron';
-import debounce from 'lodash/debounce';
-import { ErrorBoundary } from 'react-error-boundary';
-import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-table';
-import { ErrorFallback } from '/@/renderer/features/action-required';
-import { PlaybackType, TableType } from '/@/renderer/types';
-import { LibraryItem, QueueSong } from '/@/renderer/api/types';
-import { useHandleTableContextMenu } from '/@/renderer/features/context-menu';
-import { QUEUE_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
-import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
-import { useAppFocus } from '/@/renderer/hooks';
-import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
-import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
+import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { PlaybackType, TableType } from '/@/shared/types/types';
 
-const mpvPlayer = isElectron() ? window.electron.mpvPlayer : null;
+const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 
 type QueueProps = {
     type: TableType;
@@ -148,7 +151,7 @@ export const PlayQueue = forwardRef(({ type }: QueueProps, ref: Ref<any>) => {
 
         const columnsInSettings = useSettingsStore.getState().tables[type].columns;
 
-        const updatedColumns = [];
+        const updatedColumns: PersistedTableColumn[] = [];
         for (const column of columnsOrder) {
             const columnInSettings = columnsInSettings.find(
                 (c) => c.column === column.getColDef().colId,
@@ -248,10 +251,7 @@ export const PlayQueue = forwardRef(({ type }: QueueProps, ref: Ref<any>) => {
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <VirtualGridAutoSizerContainer>
                 <VirtualTable
-                    ref={mergedRef}
                     alwaysShowHorizontalScroll
-                    rowDragEntireRow
-                    rowDragMultiRow
                     autoFitColumns={tableConfig.autoFit}
                     columnDefs={columnDefs}
                     context={{
@@ -265,11 +265,6 @@ export const PlayQueue = forwardRef(({ type }: QueueProps, ref: Ref<any>) => {
                     }}
                     deselectOnClickOutside={type === 'fullScreen'}
                     getRowId={(data) => data.data.uniqueId}
-                    rowBuffer={50}
-                    rowClassRules={rowClassRules}
-                    rowData={queue}
-                    rowHeight={tableConfig.rowHeight || 40}
-                    suppressCellFocus={type === 'fullScreen'}
                     onCellContextMenu={onCellContextMenu}
                     onCellDoubleClicked={handleDoubleClick}
                     onColumnMoved={handleColumnChange}
@@ -278,6 +273,14 @@ export const PlayQueue = forwardRef(({ type }: QueueProps, ref: Ref<any>) => {
                     onGridReady={handleGridReady}
                     onGridSizeChanged={handleGridSizeChange}
                     onRowDragEnd={handleDragEnd}
+                    ref={mergedRef}
+                    rowBuffer={50}
+                    rowClassRules={rowClassRules}
+                    rowData={queue}
+                    rowDragEntireRow
+                    rowDragMultiRow
+                    rowHeight={tableConfig.rowHeight || 40}
+                    suppressCellFocus={type === 'fullScreen'}
                 />
             </VirtualGridAutoSizerContainer>
         </ErrorBoundary>

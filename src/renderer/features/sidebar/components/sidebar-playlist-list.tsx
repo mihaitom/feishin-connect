@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from 'react';
 import { Box, Flex, Group } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     RiAddBoxFill,
@@ -11,20 +11,21 @@ import {
 } from 'react-icons/ri';
 import { generatePath } from 'react-router';
 import { Link } from 'react-router-dom';
-import { LibraryItem, Playlist, PlaylistListSort, SortOrder } from '/@/renderer/api/types';
-import { Button, Text } from '/@/renderer/components';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { usePlaylistList } from '/@/renderer/features/playlists';
-import { AppRoute } from '/@/renderer/router/routes';
-import { Play } from '/@/renderer/types';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { useHideScrollbar } from '/@/renderer/hooks';
-import { useCurrentServer, useGeneralSettings, useSettingsStoreActions } from '/@/renderer/store';
+
+import { Button, Text } from '/@/renderer/components';
 import { openContextMenu } from '/@/renderer/features/context-menu';
 import { PLAYLIST_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
+import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { usePlaylistList } from '/@/renderer/features/playlists';
+import { useHideScrollbar } from '/@/renderer/hooks';
+import { AppRoute } from '/@/renderer/router/routes';
+import { useCurrentServer, useGeneralSettings, useSettingsStoreActions } from '/@/renderer/store';
+import { LibraryItem, Playlist, PlaylistListSort, SortOrder } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
-const PlaylistRow = ({ index, data, style }: ListChildComponentProps) => {
+const PlaylistRow = ({ data, index, style }: ListChildComponentProps) => {
     const { t } = useTranslation();
 
     if (Array.isArray(data?.items[index])) {
@@ -40,6 +41,7 @@ const PlaylistRow = ({ index, data, style }: ListChildComponentProps) => {
                         <Text>{t('page.sidebar.shared', { postProcess: 'titleCase' })}</Text>
                         <Button
                             compact
+                            onClick={() => setCollapse()}
                             tooltip={{
                                 label: t(collapse ? 'common.expand' : 'common.collapse', {
                                     postProcess: 'titleCase',
@@ -47,7 +49,6 @@ const PlaylistRow = ({ index, data, style }: ListChildComponentProps) => {
                                 openDelay: 500,
                             }}
                             variant="default"
-                            onClick={() => setCollapse()}
                         >
                             {collapse ? (
                                 <RiArrowUpSLine size={20} />
@@ -67,7 +68,6 @@ const PlaylistRow = ({ index, data, style }: ListChildComponentProps) => {
 
     return (
         <div
-            style={{ margin: '0.5rem 0', padding: '0 1.5rem', ...style }}
             onContextMenu={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -83,10 +83,11 @@ const PlaylistRow = ({ index, data, style }: ListChildComponentProps) => {
                     yPos: e.clientY + 5,
                 });
             }}
+            style={{ margin: '0.5rem 0', padding: '0 1.5rem', ...style }}
         >
             <Group
-                noWrap
                 className="sidebar-playlist-item"
+                noWrap
                 pos="relative"
                 position="apart"
                 sx={{
@@ -115,55 +116,55 @@ const PlaylistRow = ({ index, data, style }: ListChildComponentProps) => {
                     {data?.items[index].name}
                 </Text>
                 <Group
-                    noWrap
                     className="sidebar-playlist-controls"
                     display="none"
+                    noWrap
                     pos="absolute"
                     right="0"
                     spacing="sm"
                 >
                     <Button
                         compact
+                        onClick={() => {
+                            if (!data?.items?.[index].id) return;
+                            data.handlePlay(data?.items[index].id, Play.NOW);
+                        }}
                         size="md"
                         tooltip={{
                             label: t('player.play', { postProcess: 'sentenceCase' }),
                             openDelay: 500,
                         }}
                         variant="default"
-                        onClick={() => {
-                            if (!data?.items?.[index].id) return;
-                            data.handlePlay(data?.items[index].id, Play.NOW);
-                        }}
                     >
                         <RiPlayFill />
                     </Button>
                     <Button
                         compact
+                        onClick={() => {
+                            if (!data?.items?.[index].id) return;
+                            data.handlePlay(data?.items[index].id, Play.LAST);
+                        }}
                         size="md"
                         tooltip={{
                             label: t('player.addLast', { postProcess: 'sentenceCase' }),
                             openDelay: 500,
                         }}
                         variant="default"
-                        onClick={() => {
-                            if (!data?.items?.[index].id) return;
-                            data.handlePlay(data?.items[index].id, Play.LAST);
-                        }}
                     >
                         <RiAddBoxFill />
                     </Button>
                     <Button
                         compact
+                        onClick={() => {
+                            if (!data?.items?.[index].id) return;
+                            data.handlePlay(data?.items[index].id, Play.NEXT);
+                        }}
                         size="md"
                         tooltip={{
                             label: t('player.addNext', { postProcess: 'sentenceCase' }),
                             openDelay: 500,
                         }}
                         variant="default"
-                        onClick={() => {
-                            if (!data?.items?.[index].id) return;
-                            data.handlePlay(data?.items[index].id, Play.NEXT);
-                        }}
                     >
                         <RiAddCircleFill />
                     </Button>
@@ -174,7 +175,7 @@ const PlaylistRow = ({ index, data, style }: ListChildComponentProps) => {
 };
 
 export const SidebarPlaylistList = () => {
-    const { isScrollbarHidden, hideScrollbarElementProps } = useHideScrollbar(0);
+    const { hideScrollbarElementProps, isScrollbarHidden } = useHideScrollbar(0);
     const handlePlayQueueAdd = usePlayQueueAdd();
     const { sidebarCollapseShared } = useGeneralSettings();
     const { toggleSidebarCollapseShare } = useSettingsStoreActions();
@@ -218,7 +219,7 @@ export const SidebarPlaylistList = () => {
             return { ...base, items: data?.items };
         }
 
-        const owned: Array<Playlist | [boolean, () => void]> = [];
+        const owned: Array<[boolean, () => void] | Playlist> = [];
         const shared: Playlist[] = [];
 
         for (const playlist of data.items) {

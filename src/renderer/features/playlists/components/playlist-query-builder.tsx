@@ -1,4 +1,3 @@
-import { forwardRef, Ref, useImperativeHandle, useMemo, useState } from 'react';
 import { Group } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { openModal } from '@mantine/modals';
@@ -6,6 +5,10 @@ import clone from 'lodash/clone';
 import get from 'lodash/get';
 import setWith from 'lodash/setWith';
 import { nanoid } from 'nanoid';
+import { forwardRef, Ref, useImperativeHandle, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RiMore2Fill, RiSaveLine } from 'react-icons/ri';
+
 import {
     Button,
     DropdownMenu,
@@ -15,14 +18,13 @@ import {
     ScrollArea,
     Select,
 } from '/@/renderer/components';
+import { usePlaylistList } from '/@/renderer/features/playlists/queries/playlist-list-query';
 import {
     convertNDQueryToQueryGroup,
     convertQueryGroupToNDQuery,
 } from '/@/renderer/features/playlists/utils';
-import { QueryBuilderGroup, QueryBuilderRule } from '/@/renderer/types';
-import { useTranslation } from 'react-i18next';
-import { RiMore2Fill, RiSaveLine } from 'react-icons/ri';
-import { PlaylistListSort, SongListSort, SortOrder } from '/@/renderer/api/types';
+import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
+import { useCurrentServer } from '/@/renderer/store';
 import {
     NDSongQueryBooleanOperators,
     NDSongQueryDateOperators,
@@ -30,10 +32,9 @@ import {
     NDSongQueryNumberOperators,
     NDSongQueryPlaylistOperators,
     NDSongQueryStringOperators,
-} from '/@/renderer/api/navidrome.types';
-import { usePlaylistList } from '/@/renderer/features/playlists/queries/playlist-list-query';
-import { useCurrentServer } from '/@/renderer/store';
-import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
+} from '/@/shared/api/navidrome.types';
+import { PlaylistListSort, SongListSort, SortOrder } from '/@/shared/types/domain-types';
+import { QueryBuilderGroup, QueryBuilderRule } from '/@/shared/types/types';
 
 type AddArgs = {
     groupIndex: number[];
@@ -91,14 +92,14 @@ export type PlaylistQueryBuilderRef = {
 export const PlaylistQueryBuilder = forwardRef(
     (
         {
-            sortOrder,
-            sortBy,
-            limit,
             isSaving,
-            query,
+            limit,
             onSave,
             onSaveAs,
             playlistId,
+            query,
+            sortBy,
+            sortOrder,
         }: PlaylistQueryBuilderProps,
         ref: Ref<PlaylistQueryBuilderRef>,
     ) => {
@@ -177,13 +178,13 @@ export const PlaylistQueryBuilder = forwardRef(
         };
 
         const handleAddRuleGroup = (args: AddArgs) => {
-            const { level, groupIndex } = args;
+            const { groupIndex, level } = args;
             const filtersCopy = clone(filters);
 
             const getPath = (level: number) => {
                 if (level === 0) return 'group';
 
-                const str = [];
+                const str: string[] = [];
                 for (const index of groupIndex) {
                     str.push(`group[${index}]`);
                 }
@@ -218,13 +219,13 @@ export const PlaylistQueryBuilder = forwardRef(
         };
 
         const handleDeleteRuleGroup = (args: DeleteArgs) => {
-            const { uniqueId, level, groupIndex } = args;
+            const { groupIndex, level, uniqueId } = args;
             const filtersCopy = clone(filters);
 
             const getPath = (level: number) => {
                 if (level === 0) return 'group';
 
-                const str = [];
+                const str: string[] = [];
                 for (let i = 0; i < groupIndex.length; i += 1) {
                     if (i !== groupIndex.length - 1) {
                         str.push(`group[${groupIndex[i]}]`);
@@ -255,7 +256,7 @@ export const PlaylistQueryBuilder = forwardRef(
         const getRulePath = (level: number, groupIndex: number[]) => {
             if (level === 0) return 'rules';
 
-            const str = [];
+            const str: string[] = [];
             for (const index of groupIndex) {
                 str.push(`group[${index}]`);
             }
@@ -264,7 +265,7 @@ export const PlaylistQueryBuilder = forwardRef(
         };
 
         const handleAddRule = (args: AddArgs) => {
-            const { level, groupIndex } = args;
+            const { groupIndex, level } = args;
             const filtersCopy = clone(filters);
 
             const path = getRulePath(level, groupIndex);
@@ -287,7 +288,7 @@ export const PlaylistQueryBuilder = forwardRef(
         };
 
         const handleDeleteRule = (args: DeleteArgs) => {
-            const { uniqueId, level, groupIndex } = args;
+            const { groupIndex, level, uniqueId } = args;
             const filtersCopy = clone(filters);
 
             const path = getRulePath(level, groupIndex);
@@ -304,7 +305,7 @@ export const PlaylistQueryBuilder = forwardRef(
         };
 
         const handleChangeField = (args: any) => {
-            const { uniqueId, level, groupIndex, value } = args;
+            const { groupIndex, level, uniqueId, value } = args;
             const filtersCopy = clone(filters);
 
             const path = getRulePath(level, groupIndex);
@@ -327,7 +328,7 @@ export const PlaylistQueryBuilder = forwardRef(
         };
 
         const handleChangeType = (args: any) => {
-            const { level, groupIndex, value } = args;
+            const { groupIndex, level, value } = args;
 
             const filtersCopy = clone(filters);
 
@@ -336,7 +337,7 @@ export const PlaylistQueryBuilder = forwardRef(
             }
 
             const getTypePath = () => {
-                const str = [];
+                const str: string[] = [];
                 for (let i = 0; i < groupIndex.length; i += 1) {
                     str.push(`group[${groupIndex[i]}]`);
                 }
@@ -359,7 +360,7 @@ export const PlaylistQueryBuilder = forwardRef(
         };
 
         const handleChangeOperator = (args: any) => {
-            const { uniqueId, level, groupIndex, value } = args;
+            const { groupIndex, level, uniqueId, value } = args;
             const filtersCopy = clone(filters);
 
             const path = getRulePath(level, groupIndex);
@@ -380,7 +381,7 @@ export const PlaylistQueryBuilder = forwardRef(
         };
 
         const handleChangeValue = (args: any) => {
-            const { uniqueId, level, groupIndex, value } = args;
+            const { groupIndex, level, uniqueId, value } = args;
             const filtersCopy = clone(filters);
 
             const path = getRulePath(level, groupIndex);
@@ -424,15 +425,6 @@ export const PlaylistQueryBuilder = forwardRef(
                         filters={NDSongQueryFields}
                         groupIndex={[]}
                         level={0}
-                        operators={{
-                            boolean: NDSongQueryBooleanOperators,
-                            date: NDSongQueryDateOperators,
-                            number: NDSongQueryNumberOperators,
-                            playlist: NDSongQueryPlaylistOperators,
-                            string: NDSongQueryStringOperators,
-                        }}
-                        playlists={playlistData}
-                        uniqueId={filters.uniqueId}
                         onAddRule={handleAddRule}
                         onAddRuleGroup={handleAddRuleGroup}
                         onChangeField={handleChangeField}
@@ -443,12 +435,21 @@ export const PlaylistQueryBuilder = forwardRef(
                         onDeleteRule={handleDeleteRule}
                         onDeleteRuleGroup={handleDeleteRuleGroup}
                         onResetFilters={handleResetFilters}
+                        operators={{
+                            boolean: NDSongQueryBooleanOperators,
+                            date: NDSongQueryDateOperators,
+                            number: NDSongQueryNumberOperators,
+                            playlist: NDSongQueryPlaylistOperators,
+                            string: NDSongQueryStringOperators,
+                        }}
+                        playlists={playlistData}
+                        uniqueId={filters.uniqueId}
                     />
                 </ScrollArea>
                 <Group
-                    noWrap
                     align="flex-end"
                     m="1rem"
+                    noWrap
                     position="apart"
                 >
                     <Group
@@ -457,10 +458,10 @@ export const PlaylistQueryBuilder = forwardRef(
                         w="100%"
                     >
                         <Select
-                            searchable
                             data={sortOptions}
                             label="Sort"
                             maxWidth="20%"
+                            searchable
                             width={150}
                             {...extraFiltersForm.getInputProps('sortBy')}
                         />
@@ -494,15 +495,15 @@ export const PlaylistQueryBuilder = forwardRef(
                         >
                             <Button
                                 loading={isSaving}
-                                variant="filled"
                                 onClick={handleSaveAs}
+                                variant="filled"
                             >
                                 {t('common.saveAs', { postProcess: 'titleCase' })}
                             </Button>
                             <Button
+                                onClick={openPreviewModal}
                                 p="0.5em"
                                 variant="default"
-                                onClick={openPreviewModal}
                             >
                                 {t('common.preview', { postProcess: 'titleCase' })}
                             </Button>

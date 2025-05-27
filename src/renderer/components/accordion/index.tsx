@@ -1,4 +1,5 @@
 import type { AccordionProps as MantineAccordionProps } from '@mantine/core';
+
 import { Accordion as MantineAccordion } from '@mantine/core';
 import styled from 'styled-components';
 
