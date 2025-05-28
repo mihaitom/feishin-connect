@@ -29,14 +29,6 @@
 
 ---
 
-## MAINTENANCE NOTICE
-
-Feishin is currently undergoing a major rewrite. New feature requests will not be accepted. The rewrite is being actively developed at the [audioling](https://github.com/audioling/audioling) repository.
-
-Follow the repository or join the discord/matrix server for updates.
-
----
-
 Rewrite of [Sonixd](https://github.com/jeffvli/sonixd).
 
 ## Features
