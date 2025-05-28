@@ -3,8 +3,16 @@ import type { CrossfadeStyle } from '/@/shared/types/types';
 import type { ReactPlayerProps } from 'react-player';
 
 import isElectron from 'is-electron';
-import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import ReactPlayer from 'react-player/lazy';
+import {
+    forwardRef,
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+import ReactPlayer from 'react-player';
 
 import { api } from '/@/renderer/api';
 import {
@@ -87,7 +95,12 @@ const useSongUrl = (transcode: TranscodingConfig, current: boolean, song?: Song)
     }, [current, song?.uniqueId, song?.serverId, song?.streamUrl, transcode]);
 };
 
-export const AudioPlayer = ({ ref, ...props }: AudioPlayerProps) => {
+export interface AudioPlayerRef {
+    player1: null | ReactPlayer;
+    player2: null | ReactPlayer;
+}
+
+export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>((props, ref) => {
     const {
         autoNext,
         crossfadeDuration,
@@ -443,4 +456,4 @@ export const AudioPlayer = ({ ref, ...props }: AudioPlayerProps) => {
             />
         </>
     );
-};
+});

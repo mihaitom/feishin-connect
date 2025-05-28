@@ -168,8 +168,8 @@ importers:
         specifier: ^4.10.1
         version: 4.12.0(react@18.3.1)
       react-player:
-        specifier: ^2.11.0
-        version: 2.16.0(react@18.3.1)
+        specifier: 3.0.0-canary.4
+        version: 3.0.0-canary.4(@types/react@18.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-router:
         specifier: ^6.16.0
         version: 6.30.1(react@18.3.1)
@@ -263,7 +263,7 @@ importers:
         version: 35.4.0
       electron-builder:
         specifier: ^26.0.12
-        version: 26.0.12(electron-builder-squirrel-windows@26.0.12(dmg-builder@26.0.12))
+        version: 26.0.12(electron-builder-squirrel-windows@26.0.12)
       electron-devtools-installer:
         specifier: ^3.2.0
         version: 3.2.1
@@ -3802,10 +3802,12 @@ packages:
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
-  react-player@2.16.0:
-    resolution: {integrity: sha512-mAIPHfioD7yxO0GNYVFD1303QFtI3lyyQZLY229UEAp/a10cSW+hPcakg0Keq8uWJxT2OiT/4Gt+Lc9bD6bJmQ==}
+  react-player@3.0.0-canary.4:
+    resolution: {integrity: sha512-qaBI01hUzNic+TAbPOUMI0x2XItmmRsmRMWogescsb2RSsKVRnDJHFHmFqeO8Qvx+7RwWVw+p78JR0dTvBdHsQ==}
     peerDependencies:
-      react: '>=16.6.0'
+      '@types/react': ^17.0.0 || ^18
+      react: ^17.0.2 || ^18
+      react-dom: ^17.0.2 || ^18
 
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
@@ -6302,7 +6304,7 @@ snapshots:
 
   app-builder-bin@5.0.0-alpha.12: {}
 
-  app-builder-lib@26.0.12(dmg-builder@26.0.12(electron-builder-squirrel-windows@26.0.12))(electron-builder-squirrel-windows@26.0.12(dmg-builder@26.0.12)):
+  app-builder-lib@26.0.12(dmg-builder@26.0.12)(electron-builder-squirrel-windows@26.0.12):
     dependencies:
       '@develar/schema-utils': 2.6.5
       '@electron/asar': 3.2.18
@@ -6985,7 +6987,7 @@ snapshots:
 
   dmg-builder@26.0.12(electron-builder-squirrel-windows@26.0.12):
     dependencies:
-      app-builder-lib: 26.0.12(dmg-builder@26.0.12(electron-builder-squirrel-windows@26.0.12))(electron-builder-squirrel-windows@26.0.12(dmg-builder@26.0.12))
+      app-builder-lib: 26.0.12(dmg-builder@26.0.12)(electron-builder-squirrel-windows@26.0.12)
       builder-util: 26.0.11
       builder-util-runtime: 9.3.1
       fs-extra: 10.1.0
@@ -7067,7 +7069,7 @@ snapshots:
 
   electron-builder-squirrel-windows@26.0.12(dmg-builder@26.0.12):
     dependencies:
-      app-builder-lib: 26.0.12(dmg-builder@26.0.12(electron-builder-squirrel-windows@26.0.12))(electron-builder-squirrel-windows@26.0.12(dmg-builder@26.0.12))
+      app-builder-lib: 26.0.12(dmg-builder@26.0.12)(electron-builder-squirrel-windows@26.0.12)
       builder-util: 26.0.11
       electron-winstaller: 5.4.0
     transitivePeerDependencies:
@@ -7075,9 +7077,9 @@ snapshots:
       - dmg-builder
       - supports-color
 
-  electron-builder@26.0.12(electron-builder-squirrel-windows@26.0.12(dmg-builder@26.0.12)):
+  electron-builder@26.0.12(electron-builder-squirrel-windows@26.0.12):
     dependencies:
-      app-builder-lib: 26.0.12(dmg-builder@26.0.12(electron-builder-squirrel-windows@26.0.12))(electron-builder-squirrel-windows@26.0.12(dmg-builder@26.0.12))
+      app-builder-lib: 26.0.12(dmg-builder@26.0.12)(electron-builder-squirrel-windows@26.0.12)
       builder-util: 26.0.11
       builder-util-runtime: 9.3.1
       chalk: 4.1.2
@@ -8904,13 +8906,15 @@ snapshots:
 
   react-is@16.13.1: {}
 
-  react-player@2.16.0(react@18.3.1):
+  react-player@3.0.0-canary.4(@types/react@18.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
+      '@types/react': 18.3.22
       deepmerge: 4.3.1
       load-script: 1.0.0
       memoize-one: 5.2.1
       prop-types: 15.8.1
       react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
       react-fast-compare: 3.2.2
 
   react-refresh@0.17.0: {}
