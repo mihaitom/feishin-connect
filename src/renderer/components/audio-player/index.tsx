@@ -12,7 +12,7 @@ import {
     useRef,
     useState,
 } from 'react';
-import ReactPlayer from 'react-player';
+import ReactPlayer from 'react-player/lazy';
 
 import { api } from '/@/renderer/api';
 import {
