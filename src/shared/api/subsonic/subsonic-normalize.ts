@@ -285,7 +285,7 @@ const normalizePlaylist = (
 ): Playlist => {
     return {
         description: item.comment || null,
-        duration: item.duration,
+        duration: item.duration * 1000,
         genres: [],
         id: item.id.toString(),
         imagePlaceholderUrl: null,

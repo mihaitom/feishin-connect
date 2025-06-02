@@ -20,12 +20,13 @@ import {
     AlbumArtist,
     AnyLibraryItem,
     LibraryItem,
+    Playlist,
     RelatedArtist,
     Song,
 } from '/@/shared/types/domain-types';
 
 export type ItemDetailsModalProps = {
-    item: Album | AlbumArtist | Song;
+    item: Album | AlbumArtist | Playlist | Song;
 };
 
 type ItemDetailRow<T> = {
@@ -90,8 +91,12 @@ const formatArtists = (artists: null | RelatedArtist[] | undefined) =>
 const formatComment = (item: Album | Song) =>
     item.comment ? <Spoiler maxHeight={50}>{replaceURLWithHTMLLinks(item.comment)}</Spoiler> : null;
 
-const FormatGenre = (item: Album | AlbumArtist | Song) => {
+const FormatGenre = (item: Album | AlbumArtist | Playlist | Song) => {
     const genreRoute = useGenreRoute();
+
+    if (!item.genres?.length) {
+        return null;
+    }
 
     return item.genres?.map((genre, index) => (
         <span key={genre.id}>
@@ -158,6 +163,7 @@ const AlbumPropertyMapping: ItemDetailRow<Album>[] = [
                 </a>
             ) : null,
     },
+    { key: 'id', label: 'filter.id' },
 ];
 
 const AlbumArtistPropertyMapping: ItemDetailRow<AlbumArtist>[] = [
@@ -202,6 +208,30 @@ const AlbumArtistPropertyMapping: ItemDetailRow<AlbumArtist>[] = [
                 />
             ) : null,
     },
+    { key: 'id', label: 'filter.id' },
+];
+
+const PlaylistPropertyMapping: ItemDetailRow<Playlist>[] = [
+    { key: 'name', label: 'common.title' },
+    { key: 'description', label: 'common.description' },
+    { label: 'entity.genre_other', render: FormatGenre },
+    {
+        label: 'common.duration',
+        render: (playlist) => playlist.duration && formatDurationString(playlist.duration),
+    },
+    { key: 'songCount', label: 'filter.songCount' },
+    {
+        key: 'size',
+        label: 'common.size',
+        render: (playlist) => playlist.size && formatSizeString(playlist.size),
+    },
+    { key: 'owner', label: 'common.owner' },
+    { key: 'public', label: 'form.createPlaylist.input_public' },
+    {
+        label: 'entity.smartPlaylist',
+        render: (playlist) => (playlist.rules ? BoolField(true) : null),
+    },
+    { key: 'id', label: 'filter.id' },
 ];
 
 const SongPropertyMapping: ItemDetailRow<Song>[] = [
@@ -277,6 +307,7 @@ const SongPropertyMapping: ItemDetailRow<Song>[] = [
         render: (song) => (song.peak?.track !== undefined ? `${song.peak.track}` : null),
     },
     { label: 'filter.comment', render: formatComment },
+    { key: 'id', label: 'filter.id' },
 ];
 
 const handleTags = (item: Album | Song, t: TFunction) => {
@@ -358,6 +389,9 @@ export const ItemDetailsModal = ({ item }: ItemDetailsModalProps) => {
         case LibraryItem.ALBUM_ARTIST:
             body = AlbumArtistPropertyMapping.map((rule) => handleRow(t, item, rule));
             break;
+        case LibraryItem.PLAYLIST:
+            body = PlaylistPropertyMapping.map((rule) => handleRow(t, item, rule));
+            break;
         case LibraryItem.SONG:
             body = SongPropertyMapping.map((rule) => handleRow(t, item, rule));
             body.push(...handleParticipants(item, t));
@@ -372,7 +406,7 @@ export const ItemDetailsModal = ({ item }: ItemDetailsModalProps) => {
             <Table
                 highlightOnHover
                 horizontalSpacing="sm"
-                sx={{ userSelect: 'text' }}
+                sx={{ userSelect: 'text', whiteSpace: 'pre-line' }}
                 verticalSpacing="sm"
             >
                 <tbody>{body}</tbody>

@@ -109,5 +109,6 @@ export const PLAYLIST_CONTEXT_MENU_ITEMS: SetContextMenuItems = [
     { id: 'playNext' },
     { divider: true, id: 'playShuffled' },
     { divider: true, id: 'shareItem' },
-    { id: 'deletePlaylist' },
+    { divider: true, id: 'deletePlaylist' },
+    { divider: true, id: 'showDetails' },
 ];
