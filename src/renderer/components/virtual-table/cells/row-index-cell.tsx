@@ -1,5 +1,7 @@
 import type { ICellRendererParams } from '@ag-grid-community/core';
 
+import { RiPlayFill } from 'react-icons/ri';
+
 import { Text } from '/@/renderer/components/text';
 import { CellContainer } from '/@/renderer/components/virtual-table/cells/generic-cell';
 
@@ -93,45 +95,45 @@ import { CellContainer } from '/@/renderer/components/virtual-table/cells/generi
 //     );
 // };
 
-const StaticSvg = () => {
-    return (
-        <div style={{ height: '1rem', transform: 'rotate(180deg)', width: '1rem' }}>
-            <svg
-                viewBox="100 130 57 80"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <rect
-                    fill="var(--primary-color)"
-                    height="20"
-                    width="12"
-                    x="100"
-                    y="130"
-                />
-                <rect
-                    fill="var(--primary-color)"
-                    height="60"
-                    width="12"
-                    x="115"
-                    y="130"
-                />
-                <rect
-                    fill="var(--primary-color)"
-                    height="80"
-                    width="12"
-                    x="130"
-                    y="130"
-                />
-                <rect
-                    fill="var(--primary-color)"
-                    height="45"
-                    width="12"
-                    x="145"
-                    y="130"
-                />
-            </svg>
-        </div>
-    );
-};
+// const StaticSvg = () => {
+//     return (
+//         <div style={{ height: '1rem', transform: 'rotate(180deg)', width: '1rem' }}>
+//             <svg
+//                 viewBox="100 130 57 80"
+//                 xmlns="http://www.w3.org/2000/svg"
+//             >
+//                 <rect
+//                     fill="var(--primary-color)"
+//                     height="20"
+//                     width="12"
+//                     x="100"
+//                     y="130"
+//                 />
+//                 <rect
+//                     fill="var(--primary-color)"
+//                     height="60"
+//                     width="12"
+//                     x="115"
+//                     y="130"
+//                 />
+//                 <rect
+//                     fill="var(--primary-color)"
+//                     height="80"
+//                     width="12"
+//                     x="130"
+//                     y="130"
+//                 />
+//                 <rect
+//                     fill="var(--primary-color)"
+//                     height="45"
+//                     width="12"
+//                     x="145"
+//                     y="130"
+//                 />
+//             </svg>
+//         </div>
+//     );
+// };
 
 export const RowIndexCell = ({ eGridCell, value }: ICellRendererParams) => {
     const classList = eGridCell.classList;
@@ -142,7 +144,13 @@ export const RowIndexCell = ({ eGridCell, value }: ICellRendererParams) => {
 
     return (
         <CellContainer $position="right">
-            {isPlaying && (isCurrentSong ? <StaticSvg /> : null)}
+            {isPlaying &&
+                (isCurrentSong ? (
+                    <RiPlayFill
+                        color="var(--primary-color)"
+                        size="1.2rem"
+                    />
+                ) : null)}
             <Text
                 $secondary
                 align="right"
