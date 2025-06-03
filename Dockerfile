@@ -14,7 +14,7 @@ RUN pnpm run build:web
 # --- Production stage
 FROM nginx:alpine-slim
 
-COPY --chown=nginx:nginx --from=builder /app/release/app/dist/web /usr/share/nginx/html
+COPY --chown=nginx:nginx --from=builder /app/out/web /usr/share/nginx/html
 COPY ./settings.js.template /etc/nginx/templates/settings.js.template
 COPY ng.conf.template /etc/nginx/templates/default.conf.template
 
