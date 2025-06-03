@@ -1,5 +1,5 @@
 # --- Builder stage
-FROM node:18-alpine as builder
+FROM node:23-alpine as builder
 WORKDIR /app
 
 # Copy package.json first to cache node_modules
