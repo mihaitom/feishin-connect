@@ -414,9 +414,14 @@ export const AlbumListHeaderFilters = ({
 
         const isSubsonicFilterApplied =
             server?.type === ServerType.SUBSONIC &&
-            (filter.maxYear || filter.minYear || filter.genres?.length || filter.favorite);
+            (filter.maxYear || filter.minYear || filter.favorite);
 
-        return isNavidromeFilterApplied || isJellyfinFilterApplied || isSubsonicFilterApplied;
+        return (
+            isNavidromeFilterApplied ||
+            isJellyfinFilterApplied ||
+            isSubsonicFilterApplied ||
+            filter.genres?.length
+        );
     }, [
         filter?._custom?.jellyfin,
         filter?._custom?.navidrome,

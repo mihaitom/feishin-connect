@@ -256,7 +256,7 @@ export const NavidromeAlbumFilters = ({
                 <SelectWithInvalidData
                     clearable
                     data={genreList}
-                    defaultValue={filter._custom?.navidrome?.genre_id}
+                    defaultValue={filter.genres && filter.genres[0]}
                     label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
                     onChange={handleGenresFilter}
                     searchable
