@@ -75,7 +75,7 @@ function send({ client, data, event }: SendData): void {
     }
 }
 
-const shutdownServer = () => {
+export const shutdownServer = () => {
     if (wsServer) {
         wsServer.clients.forEach((client) => client.close(4000));
         wsServer.close();

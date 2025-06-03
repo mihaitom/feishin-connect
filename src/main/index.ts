@@ -23,6 +23,7 @@ import path, { join } from 'path';
 import { deflate, inflate } from 'zlib';
 
 import { disableMediaKeys, enableMediaKeys } from './features/core/player/media-keys';
+import { shutdownServer } from './features/core/remote';
 import { store } from './features/core/settings';
 import MenuBuilder from './menu';
 import {
@@ -310,6 +311,7 @@ async function createWindow(first = true): Promise<void> {
     });
 
     ipcMain.on('window-quit', () => {
+        shutdownServer();
         mainWindow?.close();
         app.exit();
     });
