@@ -6,12 +6,12 @@ import { RiCloseLine, RiRestartLine } from 'react-icons/ri';
 
 import {
     Button,
-    FileInput,
     NumberInput,
     Select,
     Switch,
     Text,
     Textarea,
+    TextInput,
 } from '/@/renderer/components';
 import {
     SettingOption,
@@ -81,15 +81,23 @@ export const MpvSettings = () => {
 
     const [mpvPath, setMpvPath] = useState('');
 
-    const handleSetMpvPath = (e: File | null) => {
-        if (e === null) {
+    const handleSetMpvPath = async (clear?: boolean) => {
+        if (clear) {
             localSettings?.set('mpv_path', undefined);
             setMpvPath('');
             return;
         }
 
-        localSettings?.set('mpv_path', e.path);
-        setMpvPath(e.path);
+        const result = await localSettings?.openFileSelector();
+
+        if (result === null) {
+            localSettings?.set('mpv_path', undefined);
+            setMpvPath('');
+            return;
+        }
+
+        localSettings?.set('mpv_path', result);
+        setMpvPath(result);
     };
 
     useEffect(() => {
@@ -160,13 +168,13 @@ export const MpvSettings = () => {
                     >
                         <RiRestartLine />
                     </Button>
-                    <FileInput
-                        onChange={handleSetMpvPath}
+                    <TextInput
+                        onClick={() => handleSetMpvPath()}
                         rightSection={
                             mpvPath && (
                                 <Button
                                     compact
-                                    onClick={() => handleSetMpvPath(null)}
+                                    onClick={() => handleSetMpvPath(true)}
                                     tooltip={{
                                         label: t('common.clear', { postProcess: 'titleCase' }),
                                         openDelay: 0,
@@ -177,6 +185,8 @@ export const MpvSettings = () => {
                                 </Button>
                             )
                         }
+                        type="button"
+                        value={mpvPath}
                         width={200}
                     />
                 </Group>

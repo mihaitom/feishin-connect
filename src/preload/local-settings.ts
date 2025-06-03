@@ -1,4 +1,4 @@
-import { ipcRenderer, IpcRendererEvent, webFrame } from 'electron';
+import { ipcRenderer, IpcRendererEvent, OpenDialogOptions, webFrame } from 'electron';
 import Store from 'electron-store';
 
 import { TitleTheme } from '/@/shared/types/types';
@@ -57,6 +57,11 @@ const themeSet = (theme: TitleTheme): void => {
     ipcRenderer.send('theme-set', theme);
 };
 
+const openFileSelector = async (options?: OpenDialogOptions) => {
+    const result = await ipcRenderer.invoke('open-file-selector', options);
+    return result;
+};
+
 export const toServerType = (value?: string): null | string => {
     switch (value?.toLowerCase()) {
         case 'jellyfin':
@@ -87,6 +92,7 @@ export const localSettings = {
     env,
     fontError,
     get,
+    openFileSelector,
     passwordGet,
     passwordRemove,
     passwordSet,

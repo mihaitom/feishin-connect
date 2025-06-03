@@ -1,6 +1,6 @@
 import type { TitleTheme } from '/@/shared/types/types';
 
-import { ipcMain, nativeTheme, safeStorage } from 'electron';
+import { dialog, ipcMain, nativeTheme, OpenDialogOptions, safeStorage } from 'electron';
 import Store from 'electron-store';
 
 export const store = new Store();
@@ -54,4 +54,13 @@ ipcMain.handle('password-set', (_event, password: string, server: string) => {
 ipcMain.on('theme-set', (_event, theme: TitleTheme) => {
     store.set('theme', theme);
     nativeTheme.themeSource = theme;
+});
+
+ipcMain.handle('open-file-selector', async (_event, options: OpenDialogOptions) => {
+    const result = await dialog.showOpenDialog({
+        ...options,
+        properties: ['openFile'],
+    });
+
+    return result.filePaths[0] || null;
 });
