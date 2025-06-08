@@ -66,7 +66,7 @@ interface AlbumArtistDetailContentProps {
 
 export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailContentProps) => {
     const { t } = useTranslation();
-    const { artistItems, lastFM, musicBrainz } = useGeneralSettings();
+    const { artistItems, externalLinks, lastFM, musicBrainz } = useGeneralSettings();
     const { albumArtistId, artistId } = useParams() as {
         albumArtistId?: string;
         artistId?: string;
@@ -451,7 +451,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                         </Group>
                     </Box>
                 ) : null}
-                {lastFM || musicBrainz ? (
+                {externalLinks && (lastFM || musicBrainz) ? (
                     <Box component="section">
                         <Group spacing="sm">
                             {lastFM && (

@@ -90,7 +90,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
     const status = useCurrentStatus();
     const isFocused = useAppFocus();
     const currentSong = useCurrentSong();
-    const { lastFM, musicBrainz } = useGeneralSettings();
+    const { externalLinks, lastFM, musicBrainz } = useGeneralSettings();
     const genreRoute = useGenreRoute();
 
     const columnDefs = useMemo(
@@ -407,7 +407,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
                         </Group>
                     </Box>
                 )}
-                {lastFM || musicBrainz ? (
+                {externalLinks && (lastFM || musicBrainz) ? (
                     <Box component="section">
                         <Group spacing="sm">
                             {lastFM && (
