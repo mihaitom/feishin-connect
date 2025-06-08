@@ -66,7 +66,7 @@ interface AlbumArtistDetailContentProps {
 
 export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailContentProps) => {
     const { t } = useTranslation();
-    const { artistItems, externalLinks } = useGeneralSettings();
+    const { artistItems, lastFM, musicBrainz } = useGeneralSettings();
     const { albumArtistId, artistId } = useParams() as {
         albumArtistId?: string;
         artistId?: string;
@@ -451,27 +451,29 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                         </Group>
                     </Box>
                 ) : null}
-                {externalLinks ? (
+                {lastFM || musicBrainz ? (
                     <Box component="section">
                         <Group spacing="sm">
-                            <Button
-                                compact
-                                component="a"
-                                href={`https://www.last.fm/music/${encodeURIComponent(
-                                    detailQuery?.data?.name || '',
-                                )}`}
-                                radius="md"
-                                rel="noopener noreferrer"
-                                size="md"
-                                target="_blank"
-                                tooltip={{
-                                    label: t('action.openIn.lastfm'),
-                                }}
-                                variant="subtle"
-                            >
-                                <FaLastfmSquare size={25} />
-                            </Button>
-                            {mbzId ? (
+                            {lastFM && (
+                                <Button
+                                    compact
+                                    component="a"
+                                    href={`https://www.last.fm/music/${encodeURIComponent(
+                                        detailQuery?.data?.name || '',
+                                    )}`}
+                                    radius="md"
+                                    rel="noopener noreferrer"
+                                    size="md"
+                                    target="_blank"
+                                    tooltip={{
+                                        label: t('action.openIn.lastfm'),
+                                    }}
+                                    variant="subtle"
+                                >
+                                    <FaLastfmSquare size={25} />
+                                </Button>
+                            )}
+                            {musicBrainz && mbzId ? (
                                 <Button
                                     compact
                                     component="a"

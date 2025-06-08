@@ -4,7 +4,10 @@ import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 
 import { NumberInput, Select, Slider, Switch, Tooltip } from '/@/renderer/components';
-import { SettingsSection } from '/@/renderer/features/settings/components/settings-section';
+import {
+    SettingOption,
+    SettingsSection,
+} from '/@/renderer/features/settings/components/settings-section';
 import {
     GenreTarget,
     SideQueueType,
@@ -37,7 +40,7 @@ export const ControlSettings = () => {
     const settings = useGeneralSettings();
     const { setSettings } = useSettingsStoreActions();
 
-    const controlOptions = [
+    const controlOptions: SettingOption[] = [
         {
             control: (
                 <NumberInput
@@ -395,6 +398,48 @@ export const ControlSettings = () => {
                 postProcess: 'sentenceCase',
             }),
             title: t('setting.externalLinks', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Switch
+                    defaultChecked={settings.lastFM}
+                    onChange={(e) => {
+                        setSettings({
+                            general: {
+                                ...settings,
+                                lastFM: e.currentTarget.checked,
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.lastfm', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: !settings.externalLinks,
+            title: t('setting.lastfm', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Switch
+                    defaultChecked={settings.musicBrainz}
+                    onChange={(e) => {
+                        setSettings({
+                            general: {
+                                ...settings,
+                                musicBrainz: e.currentTarget.checked,
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.musicbrainz', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: !settings.externalLinks,
+            title: t('setting.musicbrainz', { postProcess: 'sentenceCase' }),
         },
         {
             control: (
