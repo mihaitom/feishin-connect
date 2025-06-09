@@ -88,7 +88,9 @@
         "albumGain": "albumin vahvistus (gain)",
         "albumPeak": "albumin huippu (peak)",
         "trackGain": "raidan vahvistus (gain)",
-        "trackPeak": "kappaleen huippu (peak)"
+        "trackPeak": "kappaleen huippu (peak)",
+        "additionalParticipants": "muut osallistujat",
+        "tags": "tägit"
     },
     "entity": {
         "album_one": "albumi",
@@ -173,7 +175,8 @@
         "localFontAccessDenied": "paikallisiin fontteihin pääsy on kielletty",
         "playbackError": "mediaa toistaessa tapahtui virhe",
         "remotePortWarning": "käynnistä palvelin uudestaan ottaaksesi uuden portin käyttöön",
-        "endpointNotImplementedError": "päätepiste {{endpoint}} ei ole toteutettu {{serverType}} varten"
+        "endpointNotImplementedError": "päätepiste {{endpoint}} ei ole toteutettu {{serverType}} varten",
+        "badValue": "kelpaamaton optio \"{{value}}\". tätä arvoa ei ole enää olemassa"
     },
     "filter": {
         "album": "$t(entity.album_one)",
@@ -506,7 +509,11 @@
         "useSystemTheme": "käytä järjestelmän teemaa",
         "volumeWheelStep": "äänenvoimakkuusrullan askel",
         "discordServeImage": "jaa {{discord}} kuvat palvelimelta",
-        "discordServeImage_description": "jaa kansikuvat {{discord}}n rich presenceä varten suoraan palvelimelta. saatavilla vain jellyfinille ja navidromelle"
+        "discordServeImage_description": "jaa kansikuvat {{discord}}n rich presenceä varten suoraan palvelimelta. saatavilla vain jellyfinille ja navidromelle",
+        "musicbrainz_description": "näytä linkit musicbrainz sivulle artistin/albumin sivuilla, jos musicbrainz-id löytyy",
+        "lastfm": "näytä last.fm linkit",
+        "lastfm_description": "näytä linkit last.fm sivulle artistin/albumin sivuilla",
+        "musicbrainz": "näytä musicbrainz linkit"
     },
     "page": {
         "itemDetail": {
