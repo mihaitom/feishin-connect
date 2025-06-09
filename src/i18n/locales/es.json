@@ -259,7 +259,11 @@
         "lastfmApiKey_description": "la clave API para {{lastfm}}. Requerida para la portada",
         "lastfmApiKey": "Clave API para {{lastfm}}",
         "discordServeImage": "Servir imágenes de {{discord}} desde el servidor",
-        "discordServeImage_description": "Comparte el arte de la portada para el estado de actividad de {{discord}} desde el propio servidor, solo disponible para Jellyfin y Navidrome"
+        "discordServeImage_description": "Comparte el arte de la portada para el estado de actividad de {{discord}} desde el propio servidor, solo disponible para Jellyfin y Navidrome",
+        "lastfm": "Mostrar enlaces de last.fm",
+        "lastfm_description": "Muestra enlaces a last.fm en las páginas de artistas/álbumes",
+        "musicbrainz": "Mostrar enlaces de MusicBrainz",
+        "musicbrainz_description": "Muestra enlaces a MusicBrainz en las páginas de artistas/álbumes, donde exista mbid"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
