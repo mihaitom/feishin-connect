@@ -393,7 +393,11 @@
         "lastfmApiKey": "{{lastfm}} API 密钥",
         "lastfmApiKey_description": "{{lastfm}} 的 API 密钥。封面艺术图所需",
         "discordServeImage": "从服务器提供 {{discord}} 图像",
-        "discordServeImage_description": "分享 {{discord}} 封面艺术图，来自 rich presence 服务器，仅适用于 jellyfin 和 navidrome"
+        "discordServeImage_description": "分享 {{discord}} 封面艺术图，来自 rich presence 服务器，仅适用于 jellyfin 和 navidrome",
+        "musicbrainz": "显示 musicbrainz 链接",
+        "musicbrainz_description": "在 mbid 的艺术家/专辑页面上显示 musicbrainz 的链接",
+        "lastfm": "显示 last.fm 链接",
+        "lastfm_description": "在艺术家/专辑页面上显示 last.fm 的链接"
     },
     "error": {
         "remotePortWarning": "重启服务器使新端口生效",
