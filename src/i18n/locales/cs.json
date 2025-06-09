@@ -259,7 +259,11 @@
         "lastfmApiKey": "klíč API {{lastfm}}",
         "lastfmApiKey_description": "klíč API pro {{lastfm}}. vyžadováno pro obaly alb",
         "discordServeImage": "načítat obrázky {{discord}} ze serveru",
-        "discordServeImage_description": "sdílet obaly alb pro {{discord}} rich presence ze samotného serveru, dostupné pouze pro jellyfin a navidrome"
+        "discordServeImage_description": "sdílet obaly alb pro {{discord}} rich presence ze samotného serveru, dostupné pouze pro jellyfin a navidrome",
+        "lastfm": "zobrazit odkazy na last.fm",
+        "lastfm_description": "na stránkách umělců a alb zobrazit odkazy na last.fm",
+        "musicbrainz": "zobrazit odkazy na musicbrainz",
+        "musicbrainz_description": "na stránkách umělců a alb, kde existuje mbid, zobrazit odkazy na musicbrainz"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist_one)",
