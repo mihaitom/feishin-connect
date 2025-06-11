@@ -1,4 +1,4 @@
-import { Box, Group, UnstyledButton, UnstyledButtonProps } from '@mantine/core';
+import { Box, Flex, Group, UnstyledButton, UnstyledButtonProps } from '@mantine/core';
 import { motion, Variants } from 'framer-motion';
 import { ComponentPropsWithoutRef, forwardRef, ReactNode, Ref } from 'react';
 import styled from 'styled-components';
@@ -81,8 +81,8 @@ export const ContextMenuButton = forwardRef(
                 ref={ref}
             >
                 <Group position="apart">
-                    <Group spacing="md">
-                        <Box>{leftIcon}</Box>
+                    <Group align="center">
+                        <Flex>{leftIcon}</Flex>
                         <Box mr="2rem">{children}</Box>
                     </Group>
                     <Box>{rightIcon}</Box>
