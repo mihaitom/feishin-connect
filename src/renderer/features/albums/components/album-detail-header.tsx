@@ -18,8 +18,9 @@ import { AlbumDetailResponse, LibraryItem, ServerType } from '/@/shared/types/do
 
 interface AlbumDetailHeaderProps {
     background: {
-        background: string;
+        background?: string;
         blur: number;
+        loading: boolean;
     };
 }
 

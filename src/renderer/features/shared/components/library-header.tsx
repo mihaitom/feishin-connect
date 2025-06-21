@@ -14,18 +14,19 @@ import { useGeneralSettings } from '/@/renderer/store';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface LibraryHeaderProps {
-    background: string;
+    background?: string;
     blur?: number;
     children?: ReactNode;
     imagePlaceholderUrl?: null | string;
     imageUrl?: null | string;
     item: { route: string; type: LibraryItem };
+    loading?: boolean;
     title: string;
 }
 
 export const LibraryHeader = forwardRef(
     (
-        { background, blur, children, imageUrl, item, title }: LibraryHeaderProps,
+        { background, blur, children, imageUrl, item, loading, title }: LibraryHeaderProps,
         ref: Ref<HTMLDivElement>,
     ) => {
         const { t } = useTranslation();
@@ -106,38 +107,41 @@ export const LibraryHeader = forwardRef(
                     style={{ cursor: 'pointer' }}
                     tabIndex={0}
                 >
-                    {imageUrl && !isImageError ? (
-                        <img
-                            alt="cover"
-                            className={styles.image}
-                            onError={onImageError}
-                            // placeholder={imagePlaceholderUrl || 'var(--placeholder-bg)'}
-                            src={imageUrl}
-                            style={{ height: '' }}
-                        />
-                    ) : (
-                        <ItemImagePlaceholder itemType={item.type} />
-                    )}
+                    {!loading &&
+                        (imageUrl && !isImageError ? (
+                            <img
+                                alt="cover"
+                                className={styles.image}
+                                onError={onImageError}
+                                // placeholder={imagePlaceholderUrl || 'var(--placeholder-bg)'}
+                                src={imageUrl}
+                                style={{ height: '' }}
+                            />
+                        ) : (
+                            <ItemImagePlaceholder itemType={item.type} />
+                        ))}
                 </div>
-                <div className={styles.metadataSection}>
-                    <Group>
-                        <h2>
-                            <Text
-                                $link
-                                component={Link}
-                                to={item.route}
-                                tt="uppercase"
-                                weight={600}
-                            >
-                                {itemTypeString()}
-                            </Text>
-                        </h2>
-                    </Group>
-                    <h1 className={styles.title}>
-                        <AutoTextSize mode="box">{title}</AutoTextSize>
-                    </h1>
-                    {children}
-                </div>
+                {title && (
+                    <div className={styles.metadataSection}>
+                        <Group>
+                            <h2>
+                                <Text
+                                    $link
+                                    component={Link}
+                                    to={item.route}
+                                    tt="uppercase"
+                                    weight={600}
+                                >
+                                    {itemTypeString()}
+                                </Text>
+                            </h2>
+                        </Group>
+                        <h1 className={styles.title}>
+                            <AutoTextSize mode="box">{title}</AutoTextSize>
+                        </h1>
+                        {children}
+                    </div>
+                )}
             </div>
         );
     },

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useParams } from 'react-router';
 
-import { NativeScrollArea, Spinner } from '/@/renderer/components';
+import { NativeScrollArea } from '/@/renderer/components';
 import { AlbumArtistDetailContent } from '/@/renderer/features/artists/components/album-artist-detail-content';
 import { AlbumArtistDetailHeader } from '/@/renderer/features/artists/components/album-artist-detail-header';
 import { useAlbumArtistDetail } from '/@/renderer/features/artists/queries/album-artist-detail-query';
@@ -30,7 +30,7 @@ const AlbumArtistDetailRoute = () => {
         query: { id: routeId },
         serverId: server?.id,
     });
-    const { color: background, colorId } = useFastAverageColor({
+    const { background, colorId } = useFastAverageColor({
         id: routeId,
         src: detailQuery.data?.imageUrl,
         srcLoaded: !detailQuery.isLoading,
@@ -45,10 +45,6 @@ const AlbumArtistDetailRoute = () => {
             playType: playButtonBehavior,
         });
     };
-
-    if (!background || colorId !== routeId) {
-        return <Spinner container />;
-    }
 
     return (
         <AnimatedPage key={`album-artist-detail-${routeId}`}>
@@ -70,6 +66,7 @@ const AlbumArtistDetailRoute = () => {
             >
                 <AlbumArtistDetailHeader
                     background={background}
+                    loading={!background || colorId !== routeId}
                     ref={headerRef}
                 />
                 <AlbumArtistDetailContent background={background} />

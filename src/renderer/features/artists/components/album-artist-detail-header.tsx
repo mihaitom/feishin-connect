@@ -12,11 +12,12 @@ import { formatDurationString } from '/@/renderer/utils';
 import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
 
 interface AlbumArtistDetailHeaderProps {
-    background: string;
+    background?: string;
+    loading: boolean;
 }
 
 export const AlbumArtistDetailHeader = forwardRef(
-    ({ background }: AlbumArtistDetailHeaderProps, ref: Ref<HTMLDivElement>) => {
+    ({ background, loading }: AlbumArtistDetailHeaderProps, ref: Ref<HTMLDivElement>) => {
         const { albumArtistId, artistId } = useParams() as {
             albumArtistId?: string;
             artistId?: string;
@@ -76,6 +77,7 @@ export const AlbumArtistDetailHeader = forwardRef(
                 background={background}
                 imageUrl={detailQuery?.data?.imageUrl}
                 item={{ route: AppRoute.LIBRARY_ALBUM_ARTISTS, type: LibraryItem.ALBUM_ARTIST }}
+                loading={loading}
                 ref={ref}
                 title={detailQuery?.data?.name || ''}
             >

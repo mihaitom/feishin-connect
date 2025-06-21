@@ -9,7 +9,7 @@ import { styled } from 'styled-components';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { Button, Spinner, Spoiler, Text } from '/@/renderer/components';
+import { Button, Spoiler, Text } from '/@/renderer/components';
 import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu';
 import { SONG_ALBUM_PAGE } from '/@/renderer/features/context-menu/context-menu-items';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
@@ -55,7 +55,7 @@ const DummyAlbumDetailRoute = () => {
         queryKey,
     });
 
-    const { color: background, colorId } = useFastAverageColor({
+    const { background, colorId } = useFastAverageColor({
         id: albumId,
         src: detailQuery.data?.imageUrl,
         srcLoaded: !detailQuery.isLoading,
@@ -114,10 +114,6 @@ const DummyAlbumDetailRoute = () => {
         });
     };
 
-    if (!background || colorId !== albumId) {
-        return <Spinner container />;
-    }
-
     const metadataItems = [
         {
             id: 'releaseYear',
@@ -138,6 +134,7 @@ const DummyAlbumDetailRoute = () => {
                     background={background}
                     imageUrl={detailQuery?.data?.imageUrl}
                     item={{ route: AppRoute.LIBRARY_SONGS, type: LibraryItem.SONG }}
+                    loading={!background || colorId !== albumId}
                     title={detailQuery?.data?.name || ''}
                 >
                     <Stack spacing="sm">

@@ -10,7 +10,7 @@ export const useFastAverageColor = (args: {
     const { algorithm, id, src, srcLoaded } = args;
     const idRef = useRef<string | undefined>(id);
 
-    const [color, setColor] = useState<string | undefined>(undefined);
+    const [background, setBackground] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         const fac = new FastAverageColor();
@@ -27,16 +27,16 @@ export const useFastAverageColor = (args: {
             })
                 .then((color) => {
                     idRef.current = id;
-                    return setColor(color.rgb);
+                    return setBackground(color.rgb);
                 })
                 .catch((e) => {
                     console.log('Error fetching average color', e);
                     idRef.current = id;
-                    return setColor('rgba(0, 0, 0, 0)');
+                    return setBackground('rgba(0, 0, 0, 0)');
                 });
         } else if (srcLoaded) {
             idRef.current = id;
-            return setColor('var(--placeholder-bg)');
+            return setBackground('var(--placeholder-bg)');
         }
 
         return () => {
@@ -44,5 +44,5 @@ export const useFastAverageColor = (args: {
         };
     }, [algorithm, srcLoaded, src, id]);
 
-    return { color, colorId: idRef.current };
+    return { background, colorId: idRef.current };
 };
