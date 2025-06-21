@@ -347,8 +347,8 @@ export const SubsonicController: ControllerEndpoint = {
             type = AlbumListSortType.BY_YEAR;
         }
 
-        let fromYear;
-        let toYear;
+        let fromYear: number | undefined;
+        let toYear: number | undefined;
 
         if (query.minYear) {
             fromYear = query.minYear;
@@ -398,124 +398,8 @@ export const SubsonicController: ControllerEndpoint = {
             totalRecordCount: null,
         };
     },
-    getAlbumListCount: async (args) => {
-        const { apiClientProps, query } = args;
-
-        if (query.searchTerm) {
-            let fetchNextPage = true;
-            let startIndex = 0;
-            let totalRecordCount = 0;
-
-            while (fetchNextPage) {
-                const res = await ssApiClient(apiClientProps).search3({
-                    query: {
-                        albumCount: 500,
-                        albumOffset: startIndex,
-                        artistCount: 0,
-                        artistOffset: 0,
-                        query: query.searchTerm || '""',
-                        songCount: 0,
-                        songOffset: 0,
-                    },
-                });
-
-                if (res.status !== 200) {
-                    throw new Error('Failed to get album list count');
-                }
-
-                const albumCount = (res.body.searchResult3?.album || [])?.length;
-
-                totalRecordCount += albumCount;
-                startIndex += albumCount;
-
-                // The max limit size for Subsonic is 500
-                fetchNextPage = albumCount === 500;
-            }
-
-            return totalRecordCount;
-        }
-
-        if (query.favorite) {
-            const res = await ssApiClient(apiClientProps).getStarred({
-                query: {
-                    musicFolderId: query.musicFolderId,
-                },
-            });
-
-            if (res.status !== 200) {
-                throw new Error('Failed to get album list');
-            }
-
-            return (res.body.starred?.album || []).length || 0;
-        }
-
-        let type = AlbumListSortType.ALPHABETICAL_BY_NAME;
-
-        let fetchNextPage = true;
-        let startIndex = 0;
-        let totalRecordCount = 0;
-
-        if (query.genres?.length) {
-            type = AlbumListSortType.BY_GENRE;
-        }
-
-        if (query.minYear || query.maxYear) {
-            type = AlbumListSortType.BY_YEAR;
-        }
-
-        let fromYear;
-        let toYear;
-
-        if (query.minYear) {
-            fromYear = query.minYear;
-            toYear = dayjs().year();
-        }
-
-        if (query.maxYear) {
-            toYear = query.maxYear;
-
-            if (!query.minYear) {
-                fromYear = 0;
-            }
-        }
-
-        while (fetchNextPage) {
-            const res = await ssApiClient(apiClientProps).getAlbumList2({
-                query: {
-                    fromYear,
-                    genre: query.genres?.length ? query.genres[0] : undefined,
-                    musicFolderId: query.musicFolderId,
-                    offset: startIndex,
-                    size: 500,
-                    toYear,
-                    type,
-                },
-            });
-
-            const headers = res.headers;
-
-            // Navidrome returns the total count in the header
-            if (headers.get('x-total-count')) {
-                fetchNextPage = false;
-                totalRecordCount = Number(headers.get('x-total-count'));
-                break;
-            }
-
-            if (res.status !== 200) {
-                throw new Error('Failed to get album list count');
-            }
-
-            const albumCount = res.body.albumList2.album.length;
-
-            totalRecordCount += albumCount;
-            startIndex += albumCount;
-
-            // The max limit size for Subsonic is 500
-            fetchNextPage = albumCount === 500;
-        }
-
-        return totalRecordCount;
-    },
+    getAlbumListCount: async (args) =>
+        SubsonicController.getAlbumList(args).then((res) => res!.totalRecordCount!),
     getArtistList: async (args) => {
         const { apiClientProps, query } = args;
 
