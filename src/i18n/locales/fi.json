@@ -513,7 +513,9 @@
         "musicbrainz_description": "näytä linkit musicbrainz sivulle artistin/albumin sivuilla, jos musicbrainz-id löytyy",
         "lastfm": "näytä last.fm linkit",
         "lastfm_description": "näytä linkit last.fm sivulle artistin/albumin sivuilla",
-        "musicbrainz": "näytä musicbrainz linkit"
+        "musicbrainz": "näytä musicbrainz linkit",
+        "neteaseTranslation": "Ota NetEasen käännökset käyttöön",
+        "neteaseTranslation_description": "Käytöss ollessa noutaa ja näyttää käännetyt sanat NetEasesta, jos ne ovat saatavilla."
     },
     "page": {
         "itemDetail": {
