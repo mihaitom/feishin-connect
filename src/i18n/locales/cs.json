@@ -263,7 +263,9 @@
         "lastfm": "zobrazit odkazy na last.fm",
         "lastfm_description": "na stránkách umělců a alb zobrazit odkazy na last.fm",
         "musicbrainz": "zobrazit odkazy na musicbrainz",
-        "musicbrainz_description": "na stránkách umělců a alb, kde existuje mbid, zobrazit odkazy na musicbrainz"
+        "musicbrainz_description": "na stránkách umělců a alb, kde existuje mbid, zobrazit odkazy na musicbrainz",
+        "neteaseTranslation": "Povolit překlady NetEase",
+        "neteaseTranslation_description": "Pokud je povoleno, načte a zobrazí přeložené texty ze služby NetEase, pokud jsou dostupné."
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist_one)",
