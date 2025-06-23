@@ -263,7 +263,9 @@
         "lastfm": "Mostrar enlaces de last.fm",
         "lastfm_description": "Muestra enlaces a last.fm en las páginas de artistas/álbumes",
         "musicbrainz": "Mostrar enlaces de MusicBrainz",
-        "musicbrainz_description": "Muestra enlaces a MusicBrainz en las páginas de artistas/álbumes, donde exista mbid"
+        "musicbrainz_description": "Muestra enlaces a MusicBrainz en las páginas de artistas/álbumes, donde exista mbid",
+        "neteaseTranslation": "Activar traducciones de NetEase",
+        "neteaseTranslation_description": "Cuando se habilita, busca y muestra letras traducidas desde NetEase si está disponible."
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
