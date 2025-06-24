@@ -61,7 +61,6 @@ export const Visualizer = () => {
         <div
             className={styles.container}
             ref={canvasRef}
-            style={{ height: length, width: length }}
         />
     );
 };
