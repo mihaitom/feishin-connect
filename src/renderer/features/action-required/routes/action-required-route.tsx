@@ -1,10 +1,8 @@
-import { Center, Group, Stack } from '@mantine/core';
 import { openModal } from '@mantine/modals';
 import { useTranslation } from 'react-i18next';
-import { RiCheckFill, RiEdit2Line, RiHome4Line } from 'react-icons/ri';
-import { Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
-import { Button, PageHeader, Text } from '/@/renderer/components';
+import { PageHeader } from '/@/renderer/components/page-header/page-header';
 import { ActionRequiredContainer } from '/@/renderer/features/action-required/components/action-required-container';
 import { ServerCredentialRequired } from '/@/renderer/features/action-required/components/server-credential-required';
 import { ServerRequired } from '/@/renderer/features/action-required/components/server-required';
@@ -12,6 +10,11 @@ import { ServerList } from '/@/renderer/features/servers';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
+import { Button } from '/@/shared/components/button/button';
+import { Center } from '/@/shared/components/center/center';
+import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
+import { Stack } from '/@/shared/components/stack/stack';
 
 const ActionRequiredRoute = () => {
     const { t } = useTranslation();
@@ -45,12 +48,12 @@ const ActionRequiredRoute = () => {
     return (
         <AnimatedPage>
             <PageHeader />
-            <Center sx={{ height: '100%', width: '100vw' }}>
+            <Center style={{ height: '100%', width: '100vw' }}>
                 <Stack
-                    spacing="xl"
-                    sx={{ maxWidth: '50%' }}
+                    gap="xl"
+                    style={{ maxWidth: '50%' }}
                 >
-                    <Group noWrap>
+                    <Group wrap="nowrap">
                         {displayedCheck && (
                             <ActionRequiredContainer title={displayedCheck.title}>
                                 {displayedCheck?.component}
@@ -58,37 +61,15 @@ const ActionRequiredRoute = () => {
                         )}
                     </Group>
                     <Stack mt="2rem">
-                        {canReturnHome && (
-                            <>
-                                <Group
-                                    noWrap
-                                    position="center"
-                                >
-                                    <RiCheckFill
-                                        color="var(--success-color)"
-                                        size={30}
-                                    />
-                                    <Text size="xl">No issues found</Text>
-                                </Group>
-                                <Button
-                                    component={Link}
-                                    disabled={!canReturnHome}
-                                    leftIcon={<RiHome4Line />}
-                                    to={AppRoute.HOME}
-                                    variant="filled"
-                                >
-                                    Go back
-                                </Button>
-                            </>
-                        )}
+                        {canReturnHome && <Navigate to={AppRoute.HOME} />}
                         {!displayedCheck && (
                             <Group
-                                noWrap
-                                position="center"
+                                justify="center"
+                                wrap="nowrap"
                             >
                                 <Button
                                     fullWidth
-                                    leftIcon={<RiEdit2Line />}
+                                    leftSection={<Icon icon="edit" />}
                                     onClick={handleManageServersModal}
                                     variant="filled"
                                 >

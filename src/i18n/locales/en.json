@@ -28,6 +28,8 @@
         "action_other": "actions",
         "add": "add",
         "additionalParticipants": "additional participants",
+        "newVersion": "a new version has been installed ({{version}})",
+        "viewReleaseNotes": "view release notes",
         "albumGain": "album gain",
         "albumPeak": "album peak",
         "areYouSure": "are you sure?",
@@ -268,6 +270,7 @@
             "title": "lyric search"
         },
         "queryEditor": {
+            "title": "query editor",
             "input_optionMatchAll": "match all",
             "input_optionMatchAny": "match any"
         },
@@ -421,6 +424,7 @@
             "folders": "$t(entity.folder_other)",
             "genres": "$t(entity.genre_other)",
             "home": "$t(common.home)",
+            "myLibrary": "my library",
             "nowPlaying": "now playing",
             "playlists": "$t(entity.playlist_other)",
             "search": "$t(common.search)",
@@ -774,6 +778,8 @@
             },
             "view": {
                 "card": "card",
+                "grid": "grid",
+                "list": "list",
                 "poster": "poster",
                 "table": "table"
             }
