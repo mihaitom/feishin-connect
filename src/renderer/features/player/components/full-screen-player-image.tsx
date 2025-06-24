@@ -270,12 +270,10 @@ export const FullScreenPlayerImage = () => {
                     mt="sm"
                 >
                     {currentSong?.container && (
-                        <Badge size="lg">
-                            {currentSong?.container} {currentSong?.bitRate}
-                        </Badge>
+                        <Badge variant="transparent">{currentSong?.container}</Badge>
                     )}
                     {currentSong?.releaseYear && (
-                        <Badge size="lg">{currentSong?.releaseYear}</Badge>
+                        <Badge variant="transparent">{currentSong?.releaseYear}</Badge>
                     )}
                 </Group>
             </Stack>
