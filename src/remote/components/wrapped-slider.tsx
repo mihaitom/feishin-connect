@@ -1,7 +1,8 @@
 import { rem, Slider, SliderProps } from '@mantine/core';
 import { ReactNode, useState } from 'react';
 
-import styles from './wrapped-slider.module.css';
+import { Group } from '/@/shared/components/group/group';
+import { Text } from '/@/shared/components/text/text';
 
 const PlayerbarSlider = ({ ...props }: SliderProps) => {
     return (
@@ -37,6 +38,7 @@ const PlayerbarSlider = ({ ...props }: SliderProps) => {
                     '&::before': {
                         right: 'calc(0.1rem * -1)',
                     },
+                    height: '1rem',
                 },
             }}
             {...props}
@@ -54,31 +56,32 @@ export interface WrappedProps extends Omit<SliderProps, 'onChangeEnd'> {
     value: number;
 }
 
-export const WrapperSlider = ({ leftLabel, rightLabel, value, ...props }: WrappedProps) => {
+export const WrappedSlider = ({ leftLabel, rightLabel, value, ...props }: WrappedProps) => {
     const [isSeeking, setIsSeeking] = useState(false);
     const [seek, setSeek] = useState(0);
 
     return (
-        <div className={styles.container}>
-            {leftLabel && <div className={styles.valueWrapper}>{leftLabel}</div>}
-            <div className={styles.wrapper}>
-                <PlayerbarSlider
-                    {...props}
-                    min={0}
-                    onChange={(e) => {
-                        setIsSeeking(true);
-                        setSeek(e);
-                    }}
-                    onChangeEnd={(e) => {
-                        props.onChangeEnd(e);
-                        setIsSeeking(false);
-                    }}
-                    size={6}
-                    value={!isSeeking ? (value ?? 0) : seek}
-                    w="100%"
-                />
-            </div>
-            {rightLabel && <div className={styles.valueWrapper}>{rightLabel}</div>}
-        </div>
+        <Group
+            align="center"
+            wrap="nowrap"
+        >
+            {leftLabel && <Text size="sm">{leftLabel}</Text>}
+            <PlayerbarSlider
+                {...props}
+                min={0}
+                onChange={(e) => {
+                    setIsSeeking(true);
+                    setSeek(e);
+                }}
+                onChangeEnd={(e) => {
+                    props.onChangeEnd(e);
+                    setIsSeeking(false);
+                }}
+                size={6}
+                value={!isSeeking ? (value ?? 0) : seek}
+                w="100%"
+            />
+            {rightLabel && <Text size="sm">{rightLabel}</Text>}
+        </Group>
     );
 };

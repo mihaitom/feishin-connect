@@ -12,7 +12,7 @@ export const THEME_DATA = [
     { label: 'Default Light', type: 'light', value: AppTheme.DEFAULT_LIGHT },
 ];
 
-export const useAppTheme = () => {
+export const useAppTheme = (overrideTheme?: AppTheme) => {
     const accent = useSettingsStore((store) => store.general.accent);
     const nativeImageAspect = useSettingsStore((store) => store.general.nativeAspectRatio);
     const { builtIn, custom, system, type } = useSettingsStore((state) => state.font);
@@ -28,6 +28,10 @@ export const useAppTheme = () => {
     };
 
     const getSelectedTheme = () => {
+        if (overrideTheme) {
+            return overrideTheme;
+        }
+
         if (followSystemTheme) {
             return isDarkTheme ? themeDark : themeLight;
         }

@@ -9,13 +9,12 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/dates/styles.css';
 
-import './styles/global.css';
+import '/@/shared/styles/global.css';
 
 import '@ag-grid-community/styles/ag-grid.css';
 import 'overlayscrollbars/overlayscrollbars.css';
 
-import './styles/overlayscrollbars.css';
-
+import '/styles/overlayscrollbars.css';
 import i18n from '/@/i18n/i18n';
 import { ContextMenuProvider } from '/@/renderer/features/context-menu';
 import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';

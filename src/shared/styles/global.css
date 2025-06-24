@@ -122,56 +122,59 @@ button {
 @font-face {
     font-family: Archivo;
     font-weight: 100 1000;
-    src: url('../fonts/Archivo-VariableFont_wdth,wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/Archivo-VariableFont_wdth,wght.ttf')
+        format('truetype-variations');
 }
 
 @font-face {
     font-family: Raleway;
     font-weight: 100 1000;
-    src: url('../fonts/Raleway-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/Raleway-VariableFont_wght.ttf') format('truetype-variations');
 }
 
 @font-face {
     font-family: Fredoka;
     font-weight: 100 1000;
-    src: url('../fonts/Fredoka-VariableFont_wdth,wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/Fredoka-VariableFont_wdth,wght.ttf')
+        format('truetype-variations');
 }
 
 @font-face {
     font-family: 'League Spartan';
     font-weight: 100 1000;
-    src: url('../fonts/LeagueSpartan-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/LeagueSpartan-VariableFont_wght.ttf')
+        format('truetype-variations');
 }
 
 @font-face {
     font-family: Lexend;
     font-weight: 100 1000;
-    src: url('../fonts/Lexend-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/Lexend-VariableFont_wght.ttf') format('truetype-variations');
 }
 
 @font-face {
     font-family: Inter;
     font-weight: 100 1000;
-    src: url('../fonts/Inter-VariableFont_slnt,wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/Inter-VariableFont_slnt,wght.ttf') format('truetype-variations');
 }
 
 @font-face {
     font-family: Sora;
     font-weight: 100 1000;
-    src: url('../fonts/Sora-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/Sora-VariableFont_wght.ttf') format('truetype-variations');
 }
 
 @font-face {
     font-family: 'Work Sans';
     font-weight: 100 1000;
-    src: url('../fonts/WorkSans-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/WorkSans-VariableFont_wght.ttf') format('truetype-variations');
 }
 
 @font-face {
     font-family: Poppins;
     font-style: normal;
     font-weight: 400;
-    src: url('../fonts/Poppins-Regular.ttf') format('truetype');
+    src: url('../../renderer/fonts/Poppins-Regular.ttf') format('truetype');
     font-display: swap;
 }
 
@@ -179,7 +182,7 @@ button {
     font-family: Poppins;
     font-style: normal;
     font-weight: 600;
-    src: url('../fonts/Poppins-SemiBold.ttf') format('truetype');
+    src: url('../../renderer/fonts/Poppins-SemiBold.ttf') format('truetype');
     font-display: swap;
 }
 
@@ -187,7 +190,7 @@ button {
     font-family: Poppins;
     font-style: normal;
     font-weight: 700;
-    src: url('../fonts/Poppins-Bold.ttf') format('truetype');
+    src: url('../../renderer/fonts/Poppins-Bold.ttf') format('truetype');
     font-display: swap;
 }
 
@@ -195,7 +198,7 @@ button {
     font-family: Poppins;
     font-style: normal;
     font-weight: 800;
-    src: url('../fonts/Poppins-ExtraBold.ttf') format('truetype');
+    src: url('../../renderer/fonts/Poppins-ExtraBold.ttf') format('truetype');
     font-display: swap;
 }
 
@@ -203,14 +206,14 @@ button {
     font-family: Poppins;
     font-style: normal;
     font-weight: 900;
-    src: url('../fonts/Poppins-Black.ttf') format('truetype');
+    src: url('../../renderer/fonts/Poppins-Black.ttf') format('truetype');
     font-display: swap;
 }
 
 @font-face {
     font-family: Raleway;
     font-weight: 100 1000;
-    src: url('../fonts/Raleway-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../renderer/fonts/Raleway-VariableFont_wght.ttf') format('truetype-variations');
 }
 
 @font-face {
