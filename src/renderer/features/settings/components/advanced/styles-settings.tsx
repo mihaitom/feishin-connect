@@ -116,6 +116,7 @@ export const StylesSettings = () => {
                             <Textarea
                                 autosize
                                 defaultValue={css}
+                                minRows={8}
                                 onBlur={(e) =>
                                     setCss(sanitizeCss(`<style>${e.currentTarget.value}`))
                                 }
