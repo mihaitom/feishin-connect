@@ -450,7 +450,7 @@ export const FullScreenPlayer = () => {
                     className={styles.backgroundImageOverlay}
                     style={
                         {
-                            '--image-blur': `${dynamicImageBlur}`,
+                            '--image-blur': `${dynamicImageBlur}rem`,
                         } as CSSProperties
                     }
                 />
