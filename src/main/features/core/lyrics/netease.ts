@@ -84,7 +84,7 @@ export async function getLyricsBySongId(songId: string): Promise<null | string> 
         console.error('NetEase lyrics request got an error!', e);
         return null;
     }
-    const enableTranslation = store.get('enableNeteaseTranslation', true) as boolean;
+    const enableTranslation = store.get('enableNeteaseTranslation', false) as boolean;
     const originalLrc = result.data.lrc?.lyric;
     if (!enableTranslation) {
         return originalLrc || null;
