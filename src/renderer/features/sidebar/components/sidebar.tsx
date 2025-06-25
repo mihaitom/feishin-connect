@@ -19,13 +19,18 @@ import {
     useSetFullScreenPlayerStore,
     useSidebarStore,
 } from '/@/renderer/store';
-import { SidebarItemType, useGeneralSettings } from '/@/renderer/store/settings.store';
+import {
+    SidebarItemType,
+    useGeneralSettings,
+    useWindowSettings,
+} from '/@/renderer/store/settings.store';
 import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Text } from '/@/shared/components/text/text';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
+import { Platform } from '/@/shared/types/types';
 
 export const Sidebar = () => {
     const { t } = useTranslation();
@@ -64,6 +69,7 @@ export const Sidebar = () => {
     };
 
     const { sidebarItems } = useGeneralSettings();
+    const { windowBarStyle } = useWindowSettings();
 
     const sidebarItemsWithRoute: SidebarItemType[] = useMemo(() => {
         if (!sidebarItems) return [];
@@ -80,6 +86,18 @@ export const Sidebar = () => {
         return items;
     }, [sidebarItems, translatedSidebarItemMap]);
 
+    const scrollAreaHeight = useMemo(() => {
+        if (showImage) {
+            if (windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS) {
+                return `calc(100% - 105px - ${sidebar.leftWidth})`;
+            }
+
+            return `calc(100% - ${sidebar.leftWidth})`;
+        }
+
+        return '100%';
+    }, [showImage, sidebar.leftWidth, windowBarStyle]);
+
     return (
         <div
             className={styles.container}
@@ -95,7 +113,7 @@ export const Sidebar = () => {
                 allowDragScroll
                 className={styles.scrollArea}
                 style={{
-                    maxHeight: showImage ? `calc(100vh - 90px - ${sidebar.leftWidth})` : '100%',
+                    height: scrollAreaHeight,
                 }}
             >
                 <Accordion

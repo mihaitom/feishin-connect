@@ -24,6 +24,7 @@
 
 .image-container {
     position: relative;
+    width: var(--sidebar-image-height);
     height: var(--sidebar-image-height);
     cursor: pointer;
     animation: fade-in 0.2s ease-in-out;
