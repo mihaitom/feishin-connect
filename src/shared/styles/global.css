@@ -321,6 +321,7 @@ button {
     }
 
     .ag-header {
+        width: auto;
         border-bottom: 2px solid var(--theme-colors-border);
     }
 

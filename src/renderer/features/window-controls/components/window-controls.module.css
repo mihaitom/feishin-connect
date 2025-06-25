@@ -3,6 +3,7 @@
     width: 130px;
     height: 100%;
     -webkit-app-region: no-drag;
+    background-color: var(--theme-colors-background);
 }
 
 .windows-button {
@@ -25,5 +26,7 @@
 }
 
 .windows-button.exit-button {
-    background: var(--theme-colors-state-error);
+    &:hover {
+        background: var(--theme-colors-state-error);
+    }
 }
