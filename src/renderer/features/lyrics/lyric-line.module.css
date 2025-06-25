@@ -6,16 +6,16 @@
     transition:
         opacity 0.3s ease-in-out,
         transform 0.3s ease-in-out;
+}
 
-    &.active {
-        opacity: 1;
-    }
+.lyric-line:global(.active) {
+    opacity: 1 !important;
+}
 
-    &.unsynchronized {
-        opacity: 1;
-    }
+.lyric-line:global(.unsynchronized) {
+    opacity: 1;
+}
 
-    &.synchronized {
-        cursor: pointer;
-    }
+.lyric-line:global(.synchronized) {
+    cursor: pointer;
 }
