@@ -181,7 +181,9 @@ export const SidebarPlaylistList = () => {
         const owned: Array<[boolean, () => void] | Playlist> = [];
 
         for (const playlist of data.items) {
-            owned.push(playlist);
+            if (!playlist.owner || playlist.owner === server.username) {
+                owned.push(playlist);
+            }
         }
 
         return { ...base, items: owned };
