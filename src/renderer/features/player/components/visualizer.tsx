@@ -12,7 +12,7 @@ export const Visualizer = () => {
     const accent = useSettingsStore((store) => store.general.accent);
     const [motion, setMotion] = useState<AudioMotionAnalyzer>();
 
-    const [length, setLength] = useState(500);
+    const [, setLength] = useState(500);
 
     useEffect(() => {
         const { context, gain } = webAudio || {};
