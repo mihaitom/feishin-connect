@@ -23,7 +23,6 @@ import { SidebarItemType, useGeneralSettings } from '/@/renderer/store/settings.
 import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
-import { Image } from '/@/shared/components/image/image';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Text } from '/@/shared/components/text/text';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
@@ -170,10 +169,8 @@ export const Sidebar = () => {
                             })}
                             openDelay={500}
                         >
-                            <Image
+                            <img
                                 className={styles.sidebarImage}
-                                includeLoader={false}
-                                includeUnloader={false}
                                 loading="eager"
                                 src={upsizedImageUrl || ''}
                             />
