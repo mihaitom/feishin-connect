@@ -63,6 +63,9 @@ export const PlayButton = ({ isPaused, ...props }: PlayButtonProps) => {
         <ActionIcon
             className={styles.main}
             icon={isPaused ? 'mediaPlay' : 'mediaPause'}
+            iconProps={{
+                size: 'lg',
+            }}
             tooltip={
                 isPaused
                     ? t('player.play', { postProcess: 'sentenceCase' })
