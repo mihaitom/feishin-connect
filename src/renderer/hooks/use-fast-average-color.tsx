@@ -1,16 +1,35 @@
 import { FastAverageColor } from 'fast-average-color';
 import { useEffect, useRef, useState } from 'react';
 
+export const getFastAverageColor = async (args: {
+    algorithm?: 'dominant' | 'simple' | 'sqrt';
+    src: string;
+}) => {
+    const fac = new FastAverageColor();
+    const background = await fac.getColorAsync(args.src, {
+        algorithm: args.algorithm || 'dominant',
+        ignoredColor: [
+            [255, 255, 255, 255, 90], // White
+            [0, 0, 0, 255, 30], // Black
+            [0, 0, 0, 0, 40], // Transparent
+        ],
+        mode: 'speed',
+    });
+
+    return background.rgb;
+};
+
 export const useFastAverageColor = (args: {
     algorithm?: 'dominant' | 'simple' | 'sqrt';
+    default?: string;
     id?: string;
     src?: null | string;
     srcLoaded?: boolean;
 }) => {
-    const { algorithm, id, src, srcLoaded } = args;
+    const { algorithm, default: defaultColor, id, src, srcLoaded } = args;
     const idRef = useRef<string | undefined>(id);
 
-    const [background, setBackground] = useState<string | undefined>(undefined);
+    const [background, setBackground] = useState<string | undefined>(defaultColor);
 
     useEffect(() => {
         const fac = new FastAverageColor();
@@ -23,7 +42,7 @@ export const useFastAverageColor = (args: {
                     [0, 0, 0, 255, 30], // Black
                     [0, 0, 0, 0, 40], // Transparent
                 ],
-                mode: 'precision',
+                mode: 'speed',
             })
                 .then((color) => {
                     idRef.current = id;
@@ -43,6 +62,8 @@ export const useFastAverageColor = (args: {
             fac.destroy();
         };
     }, [algorithm, srcLoaded, src, id]);
+
+    console.log('background :>> ', background);
 
     return { background, colorId: idRef.current };
 };
