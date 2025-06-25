@@ -50,7 +50,7 @@ export function Image({
                         </ImageContainer>
                     ) : null
                 }
-                loading="eager"
+                loading="lazy"
                 src={src}
                 unloader={
                     includeUnloader ? (
