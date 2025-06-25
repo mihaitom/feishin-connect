@@ -66,7 +66,7 @@ const formatArtists = (artists: null | RelatedArtist[] | undefined) =>
             {artist.id ? (
                 <Text
                     component={Link}
-                    fw={500}
+                    fw={700}
                     isLink
                     overflow="visible"
                     size="md"
@@ -106,7 +106,7 @@ const FormatGenre = (item: Album | AlbumArtist | Playlist | Song) => {
             {index > 0 && <Separator />}
             <Text
                 component={Link}
-                fw={500}
+                fw={700}
                 isLink
                 overflow="visible"
                 size="md"
@@ -260,7 +260,7 @@ const SongPropertyMapping: ItemDetailRow<Song>[] = [
             song.album && (
                 <Text
                     component={Link}
-                    fw={500}
+                    fw={700}
                     isLink
                     overflow="visible"
                     size="md"
