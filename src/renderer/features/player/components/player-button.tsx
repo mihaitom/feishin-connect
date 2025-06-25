@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { motion } from 'motion/react';
+import { t } from 'i18next';
 import { forwardRef, ReactNode } from 'react';
 
 import styles from './player-button.module.css';
@@ -14,59 +14,62 @@ interface PlayerButtonProps extends Omit<ActionIconProps, 'icon' | 'variant'> {
     variant: 'main' | 'secondary' | 'tertiary';
 }
 
-export const PlayerButton = forwardRef<HTMLDivElement, PlayerButtonProps>(
-    ({ icon, isActive, tooltip, variant, ...rest }: PlayerButtonProps, ref) => {
+export const PlayerButton = forwardRef<HTMLButtonElement, PlayerButtonProps>(
+    ({ icon, isActive, tooltip, variant, ...rest }: PlayerButtonProps) => {
         if (tooltip) {
             return (
                 <Tooltip {...tooltip}>
-                    <motion.div
+                    <ActionIcon
                         className={clsx({
-                            [styles.main]: variant === 'main',
-                            [styles.motionWrapper]: true,
+                            [styles.active]: isActive,
                         })}
-                        ref={ref}
+                        {...rest}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            rest.onClick?.(e);
+                        }}
+                        variant="subtle"
                     >
-                        <ActionIcon
-                            className={clsx(styles.playerButton, styles[variant], {
-                                [styles.active]: isActive,
-                            })}
-                            {...rest}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                rest.onClick?.(e);
-                            }}
-                            variant="transparent"
-                        >
-                            {icon}
-                        </ActionIcon>
-                    </motion.div>
+                        {icon}
+                    </ActionIcon>
                 </Tooltip>
             );
         }
 
         return (
-            <motion.div
-                className={clsx({
-                    [styles.main]: variant === 'main',
-                    [styles.motionWrapper]: true,
+            <ActionIcon
+                className={clsx(styles.playerButton, styles[variant], {
+                    [styles.active]: isActive,
                 })}
-                ref={ref}
+                {...rest}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    rest.onClick?.(e);
+                }}
+                variant="subtle"
             >
-                <ActionIcon
-                    className={clsx(styles.playerButton, styles[variant], {
-                        [styles.active]: isActive,
-                    })}
-                    {...rest}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        rest.onClick?.(e);
-                    }}
-                    size="compact-md"
-                    variant="transparent"
-                >
-                    {icon}
-                </ActionIcon>
-            </motion.div>
+                {icon}
+            </ActionIcon>
         );
     },
 );
+
+interface PlayButtonProps extends Omit<ActionIconProps, 'icon' | 'variant'> {
+    isPaused?: boolean;
+}
+
+export const PlayButton = ({ isPaused, ...props }: PlayButtonProps) => {
+    return (
+        <ActionIcon
+            className={styles.main}
+            icon={isPaused ? 'mediaPlay' : 'mediaPause'}
+            tooltip={
+                isPaused
+                    ? t('player.play', { postProcess: 'sentenceCase' })
+                    : t('player.pause', { postProcess: 'sentenceCase' })
+            }
+            variant="white"
+            {...props}
+        />
+    );
+};
