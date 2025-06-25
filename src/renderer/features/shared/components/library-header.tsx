@@ -26,7 +26,7 @@ interface LibraryHeaderProps {
 
 export const LibraryHeader = forwardRef(
     (
-        { background, blur, children, imageUrl, item, loading, title }: LibraryHeaderProps,
+        { background, blur, children, imageUrl, item, title }: LibraryHeaderProps,
         ref: Ref<HTMLDivElement>,
     ) => {
         const { t } = useTranslation();
@@ -107,10 +107,11 @@ export const LibraryHeader = forwardRef(
                     style={{ cursor: 'pointer' }}
                     tabIndex={0}
                 >
-                    {!loading && imageUrl && !isImageError && (
+                    {!isImageError && (
                         <Image
                             alt="cover"
                             className={styles.image}
+                            loading="eager"
                             onError={onImageError}
                             src={imageUrl || ''}
                         />

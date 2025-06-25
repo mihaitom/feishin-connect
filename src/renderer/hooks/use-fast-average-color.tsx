@@ -63,7 +63,5 @@ export const useFastAverageColor = (args: {
         };
     }, [algorithm, srcLoaded, src, id]);
 
-    console.log('background :>> ', background);
-
     return { background, colorId: idRef.current };
 };

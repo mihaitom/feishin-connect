@@ -303,7 +303,6 @@ export const SidebarSharedPlaylistList = () => {
 
         for (const playlist of data.items) {
             if (playlist.owner && playlist.owner !== server.username) {
-                console.log(playlist.owner, server.username);
                 shared.push(playlist);
             }
         }

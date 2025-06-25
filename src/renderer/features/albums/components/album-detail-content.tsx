@@ -221,10 +221,10 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
                 (a) => a.id !== detailQuery?.data?.id,
             ).length,
             loading: relatedAlbumGenresQuery?.isLoading || relatedAlbumGenresQuery.isFetching,
-            title: t('page.albumDetail.moreFromGeneric', {
-                item: detailQuery?.data?.genres?.[0]?.name,
+            title: `${t('page.albumDetail.moreFromGeneric', {
+                item: '',
                 postProcess: 'sentenceCase',
-            }),
+            })} ${detailQuery?.data?.genres?.[0]?.name}`,
             uniqueId: 'relatedGenres',
         },
     ];
