@@ -66,12 +66,11 @@ export const PlayButton = ({ isPaused, ...props }: PlayButtonProps) => {
             iconProps={{
                 size: 'lg',
             }}
-            tooltip={
-                isPaused
-                    ? t('player.play', { postProcess: 'sentenceCase' })
-                    : t('player.pause', { postProcess: 'sentenceCase' })
-            }
-            variant="white"
+            tooltip={{
+                label: isPaused
+                    ? (t('player.play', { postProcess: 'sentenceCase' }) as string)
+                    : (t('player.pause', { postProcess: 'sentenceCase' }) as string),
+            }}
             {...props}
         />
     );
