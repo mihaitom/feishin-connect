@@ -400,25 +400,27 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
                 {externalLinks && (lastFM || musicBrainz) ? (
                     <section>
                         <Group gap="sm">
-                            <ActionIcon
-                                component="a"
-                                href={`https://www.last.fm/music/${encodeURIComponent(
-                                    detailQuery?.data?.albumArtist || '',
-                                )}/${encodeURIComponent(detailQuery.data?.name || '')}`}
-                                icon="brandLastfm"
-                                iconProps={{
-                                    fill: 'default',
-                                    size: 'xl',
-                                }}
-                                radius="md"
-                                rel="noopener noreferrer"
-                                target="_blank"
-                                tooltip={{
-                                    label: t('action.openIn.lastfm'),
-                                }}
-                                variant="subtle"
-                            />
-                            {mbzId ? (
+                            {lastFM && (
+                                <ActionIcon
+                                    component="a"
+                                    href={`https://www.last.fm/music/${encodeURIComponent(
+                                        detailQuery?.data?.albumArtist || '',
+                                    )}/${encodeURIComponent(detailQuery.data?.name || '')}`}
+                                    icon="brandLastfm"
+                                    iconProps={{
+                                        fill: 'default',
+                                        size: 'xl',
+                                    }}
+                                    radius="md"
+                                    rel="noopener noreferrer"
+                                    target="_blank"
+                                    tooltip={{
+                                        label: t('action.openIn.lastfm'),
+                                    }}
+                                    variant="subtle"
+                                />
+                            )}
+                            {mbzId && musicBrainz ? (
                                 <ActionIcon
                                     component="a"
                                     href={`https://musicbrainz.org/release/${mbzId}`}
