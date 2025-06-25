@@ -85,7 +85,10 @@ export const Sidebar = () => {
             className={styles.container}
             id="left-sidebar"
         >
-            <Group id="global-search-container">
+            <Group
+                grow
+                id="global-search-container"
+            >
                 <ActionBar />
             </Group>
             <ScrollArea
