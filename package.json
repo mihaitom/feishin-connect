@@ -170,9 +170,7 @@
     },
     "pnpm": {
         "onlyBuiltDependencies": [
-            "abstract-socket",
             "electron",
-            "electron-winstaller",
             "esbuild"
         ]
     },
