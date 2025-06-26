@@ -14,8 +14,7 @@ export const PlayButton = ({ className, ...props }: PlayButtonProps) => {
             className={clsx(styles.button, className)}
             icon="mediaPlay"
             iconProps={{
-                fill: 'default',
-                size: 'lg',
+                size: 'xl',
             }}
             variant="filled"
             {...props}

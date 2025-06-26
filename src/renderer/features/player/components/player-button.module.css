@@ -37,8 +37,8 @@
 }
 
 .main {
-    border-radius: 50%;
     background: var(--theme-colors-foreground) !important;
+    border-radius: 50%;
 
     svg {
         display: flex;

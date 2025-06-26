@@ -70,6 +70,10 @@
     fill: var(--theme-colors-foreground);
 }
 
+.fill-contrast {
+    fill: var(--theme-colors-primary-contrast);
+}
+
 .fill-inherit {
     fill: inherit;
 }

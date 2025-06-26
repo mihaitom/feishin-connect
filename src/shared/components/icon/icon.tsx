@@ -224,11 +224,21 @@ export const AppIcon = {
 
 export interface IconProps extends Omit<IconBaseProps, 'color' | 'fill' | 'size'> {
     animate?: 'pulse' | 'spin';
-    color?: 'default' | 'error' | 'info' | 'inherit' | 'muted' | 'primary' | 'success' | 'warn';
-    fill?: 'default' | 'error' | 'info' | 'inherit' | 'muted' | 'primary' | 'success' | 'warn';
+    color?: IconColor;
+    fill?: IconColor;
     icon: keyof typeof AppIcon;
     size?: '2xl' | '3xl' | '4xl' | '5xl' | 'lg' | 'md' | 'sm' | 'xl' | 'xs' | number | string;
 }
+type IconColor =
+    | 'contrast'
+    | 'default'
+    | 'error'
+    | 'info'
+    | 'inherit'
+    | 'muted'
+    | 'primary'
+    | 'success'
+    | 'warn';
 
 export const Icon = forwardRef<HTMLDivElement, IconProps>((props, ref) => {
     const { animate, className, color, fill, icon, size = 'md' } = props;

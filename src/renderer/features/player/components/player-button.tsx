@@ -15,7 +15,7 @@ interface PlayerButtonProps extends Omit<ActionIconProps, 'icon' | 'variant'> {
 }
 
 export const PlayerButton = forwardRef<HTMLButtonElement, PlayerButtonProps>(
-    ({ icon, isActive, tooltip, variant, ...rest }: PlayerButtonProps) => {
+    ({ icon, isActive, tooltip, variant, ...rest }: PlayerButtonProps, ref) => {
         if (tooltip) {
             return (
                 <Tooltip {...tooltip}>
@@ -23,6 +23,7 @@ export const PlayerButton = forwardRef<HTMLButtonElement, PlayerButtonProps>(
                         className={clsx({
                             [styles.active]: isActive,
                         })}
+                        ref={ref}
                         {...rest}
                         onClick={(e) => {
                             e.stopPropagation();
@@ -41,6 +42,7 @@ export const PlayerButton = forwardRef<HTMLButtonElement, PlayerButtonProps>(
                 className={clsx(styles.playerButton, styles[variant], {
                     [styles.active]: isActive,
                 })}
+                ref={ref}
                 {...rest}
                 onClick={(e) => {
                     e.stopPropagation();
@@ -58,20 +60,23 @@ interface PlayButtonProps extends Omit<ActionIconProps, 'icon' | 'variant'> {
     isPaused?: boolean;
 }
 
-export const PlayButton = ({ isPaused, ...props }: PlayButtonProps) => {
-    return (
-        <ActionIcon
-            className={styles.main}
-            icon={isPaused ? 'mediaPlay' : 'mediaPause'}
-            iconProps={{
-                size: 'lg',
-            }}
-            tooltip={{
-                label: isPaused
-                    ? (t('player.play', { postProcess: 'sentenceCase' }) as string)
-                    : (t('player.pause', { postProcess: 'sentenceCase' }) as string),
-            }}
-            {...props}
-        />
-    );
-};
+export const PlayButton = forwardRef<HTMLButtonElement, PlayButtonProps>(
+    ({ isPaused, ...props }: PlayButtonProps, ref) => {
+        return (
+            <ActionIcon
+                className={styles.main}
+                icon={isPaused ? 'mediaPlay' : 'mediaPause'}
+                iconProps={{
+                    size: 'lg',
+                }}
+                ref={ref}
+                tooltip={{
+                    label: isPaused
+                        ? (t('player.play', { postProcess: 'sentenceCase' }) as string)
+                        : (t('player.pause', { postProcess: 'sentenceCase' }) as string),
+                }}
+                {...props}
+            />
+        );
+    },
+);

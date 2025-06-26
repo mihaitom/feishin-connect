@@ -53,6 +53,11 @@
         &:focus-visible {
             background: darken(var(--theme-colors-primary-filled), 10%);
         }
+
+        svg {
+            color: var(--theme-colors-primary-contrast);
+            fill: var(--theme-colors-primary-contrast);
+        }
     }
 
     &[data-variant='subtle'] {
@@ -60,8 +65,15 @@
         background: transparent;
 
         &:hover,
+        &:active,
         &:focus-visible {
-            background: lighten(var(--theme-colors-surface), 10%);
+            @mixin dark {
+                background: lighten(var(--theme-colors-background), 5%);
+            }
+
+            @mixin light {
+                background: darken(var(--theme-colors-background), 5%);
+            }
         }
     }
 

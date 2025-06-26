@@ -92,7 +92,13 @@
         &:hover,
         &:active,
         &:focus-visible {
-            background-color: lighten(var(--button-bg), 10%);
+            @mixin dark {
+                background-color: lighten(var(--theme-colors-background), 10%);
+            }
+
+            @mixin light {
+                background-color: darken(var(--theme-colors-background), 5%);
+            }
         }
     }
 
@@ -100,11 +106,11 @@
         border: 1px solid transparent;
 
         &:hover {
-            background-color: darken(var(--button-bg), 5%);
+            background-color: darken(var(--theme-colors-background), 5%);
         }
 
         &:focus-visible {
-            background-color: darken(var(--button-bg), 10%);
+            background-color: darken(var(--theme-colors-background), 10%);
         }
     }
 
