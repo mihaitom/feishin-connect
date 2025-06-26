@@ -111,7 +111,9 @@
         "preview": "预览",
         "translation": "翻译",
         "additionalParticipants": "其他参与者",
-        "tags": "标签"
+        "tags": "标签",
+        "viewReleaseNotes": "查看发行说明",
+        "newVersion": "已安装新版本 ({{version}})"
     },
     "entity": {
         "albumArtist_other": "专辑艺术家",
@@ -483,7 +485,8 @@
             "home": "$t(common.home)",
             "artists": "$t(entity.artist_other)",
             "albumArtists": "$t(entity.albumArtist_other)",
-            "shared": "共享$t(entity.playlist_other)"
+            "shared": "共享$t(entity.playlist_other)",
+            "myLibrary": "我的媒体库"
         },
         "fullscreenPlayer": {
             "config": {
@@ -659,7 +662,8 @@
         },
         "queryEditor": {
             "input_optionMatchAll": "匹配全部",
-            "input_optionMatchAny": "匹配任何"
+            "input_optionMatchAny": "匹配任何",
+            "title": "查询编辑器"
         },
         "editPlaylist": {
             "title": "编辑$t(entity.playlist_one)",
@@ -695,7 +699,9 @@
             "view": {
                 "table": "表格",
                 "poster": "海报",
-                "card": "卡片"
+                "card": "卡片",
+                "grid": "网格",
+                "list": "列表"
             },
             "label": {
                 "releaseDate": "发布日期",
