@@ -90,7 +90,9 @@
         "trackGain": "raidan vahvistus (gain)",
         "trackPeak": "kappaleen huippu (peak)",
         "additionalParticipants": "muut osallistujat",
-        "tags": "tägit"
+        "tags": "tägit",
+        "newVersion": "uusi versio on asennettu ({{version}})",
+        "viewReleaseNotes": "katsele julkaisutietoja"
     },
     "entity": {
         "album_one": "albumi",
@@ -279,7 +281,8 @@
         },
         "queryEditor": {
             "input_optionMatchAny": "sovita joku",
-            "input_optionMatchAll": "sovita kaikki"
+            "input_optionMatchAll": "sovita kaikki",
+            "title": "kyselyeditori"
         }
     },
     "setting": {
@@ -515,7 +518,9 @@
         "lastfm_description": "näytä linkit last.fm sivulle artistin/albumin sivuilla",
         "musicbrainz": "näytä musicbrainz linkit",
         "neteaseTranslation": "Ota NetEasen käännökset käyttöön",
-        "neteaseTranslation_description": "Käytöss ollessa noutaa ja näyttää käännetyt sanat NetEasesta, jos ne ovat saatavilla."
+        "neteaseTranslation_description": "Käytöss ollessa noutaa ja näyttää käännetyt sanat NetEasesta, jos ne ovat saatavilla.",
+        "preferLocalLyrics_description": "suosi paikallisia sanoituksia ulkoisten sijasta, kun saatavilla",
+        "preferLocalLyrics": "suosi paikallisia sanoituksia"
     },
     "page": {
         "itemDetail": {
@@ -584,7 +589,8 @@
             "home": "$t(common.home)",
             "nowPlaying": "nyt soi",
             "playlists": "$t(entity.playlist_other)",
-            "search": "$t(common.search)"
+            "search": "$t(common.search)",
+            "myLibrary": "oma kirjasto"
         },
         "setting": {
             "generalTab": "yleinen",
@@ -745,7 +751,9 @@
             "view": {
                 "table": "taulukko",
                 "card": "kortti",
-                "poster": "juliste"
+                "poster": "juliste",
+                "grid": "ruudukko",
+                "list": "lista"
             }
         },
         "column": {
