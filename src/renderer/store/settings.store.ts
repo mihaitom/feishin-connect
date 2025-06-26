@@ -266,6 +266,7 @@ export interface SettingsState {
         fontSizeUnsync: number;
         gap: number;
         gapUnsync: number;
+        preferLocalLyrics: boolean;
         showMatch: boolean;
         showProvider: boolean;
         sources: LyricSource[];
@@ -448,6 +449,7 @@ const initialState: SettingsState = {
         fontSizeUnsync: 24,
         gap: 24,
         gapUnsync: 24,
+        preferLocalLyrics: true,
         showMatch: true,
         showProvider: true,
         sources: [LyricSource.NETEASE, LyricSource.LRCLIB],

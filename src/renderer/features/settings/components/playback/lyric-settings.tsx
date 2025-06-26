@@ -46,6 +46,28 @@ export const LyricSettings = () => {
         {
             control: (
                 <Switch
+                    aria-label="Prefer local lyrics"
+                    defaultChecked={settings.preferLocalLyrics}
+                    onChange={(e) => {
+                        setSettings({
+                            lyrics: {
+                                ...settings,
+                                preferLocalLyrics: e.currentTarget.checked,
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.preferLocalLyrics', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: !isElectron(),
+            title: t('setting.preferLocalLyrics', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Switch
                     aria-label="Enable fetching lyrics"
                     defaultChecked={settings.fetch}
                     onChange={(e) => {

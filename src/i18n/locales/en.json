@@ -536,6 +536,8 @@
         "floatingQueueArea_description": "display a hover icon on the right side of the screen to view the play queue",
         "followLyric": "follow current lyric",
         "followLyric_description": "scroll the lyric to the current playing position",
+        "preferLocalLyrics": "prefer local lyrics",
+        "preferLocalLyrics_description": "prefer local lyrics over remote lyrics when available",
         "font": "font",
         "font_description": "sets the font to use for the application",
         "fontType": "font type",
