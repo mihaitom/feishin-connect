@@ -3,7 +3,7 @@ import { AppThemeConfiguration } from './app-theme-types';
 export const defaultTheme: AppThemeConfiguration = {
     app: {
         'overlay-header':
-            'linear-gradient(transparent 0%, rgb(0 0 0 / 75%) 100%), var(--theme-background-noise)',
+            'linear-gradient(transparent 0%, rgb(0 0 0 / 85%) 100%), var(--theme-background-noise)',
         'overlay-subheader':
             'linear-gradient(180deg, rgb(0 0 0 / 5%) 0%, var(--theme-colors-background) 100%), var(--theme-background-noise)',
         'root-font-size': '16px',
