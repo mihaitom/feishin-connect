@@ -150,7 +150,9 @@
         "codec": "codec",
         "translation": "traduction",
         "additionalParticipants": "participants additionnels",
-        "tags": "tags"
+        "tags": "tags",
+        "newVersion": "une nouvelle version vient d'être installé ({{version}})",
+        "viewReleaseNotes": "voir la note de version"
     },
     "error": {
         "remotePortWarning": "redémarrer le serveur pour appliquer le nouveau port",
@@ -234,7 +236,8 @@
             "home": "$t(common.home)",
             "artists": "$t(entity.artist_other)",
             "albumArtists": "$t(entity.albumArtist_other)",
-            "shared": "partagé $t(entity.playlist_other)"
+            "shared": "partagé $t(entity.playlist_other)",
+            "myLibrary": "ma bibliothèque"
         },
         "fullscreenPlayer": {
             "config": {
@@ -602,7 +605,9 @@
         "lastfm": "affiche les liens de last.fm",
         "musicbrainz_description": "affiches les liens vers musicbrainz sur les pages des artistes/albums, quand mbid existes",
         "lastfm_description": "affiche les liens vers last.fm sur les pages des artistes/albums",
-        "musicbrainz": "affiches les liens musicbrainz"
+        "musicbrainz": "affiches les liens musicbrainz",
+        "neteaseTranslation": "Activer les traductions NetEase",
+        "neteaseTranslation_description": "Lorsque cette option est activée, récupère et affiche les paroles traduites de NetEase si elles sont disponibles."
     },
     "form": {
         "deletePlaylist": {
@@ -643,7 +648,8 @@
         },
         "queryEditor": {
             "input_optionMatchAll": "correspondre à tous",
-            "input_optionMatchAny": "correspondre à n'importe quel"
+            "input_optionMatchAny": "correspondre à n'importe quel",
+            "title": "éditeur de requête"
         },
         "editPlaylist": {
             "title": "modifier $t(entity.playlist_one)",
@@ -733,7 +739,9 @@
             "view": {
                 "table": "liste",
                 "poster": "poster",
-                "card": "Carte"
+                "card": "Carte",
+                "grid": "grille",
+                "list": "liste"
             },
             "label": {
                 "releaseDate": "date de sortie",
