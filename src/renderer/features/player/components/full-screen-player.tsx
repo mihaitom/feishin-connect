@@ -1,6 +1,6 @@
 import { useHotkeys } from '@mantine/hooks';
 import { motion, Variants } from 'motion/react';
-import { CSSProperties, useLayoutEffect, useRef } from 'react';
+import { CSSProperties, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -32,7 +32,11 @@ import { Platform } from '/@/shared/types/types';
 
 const mainBackground = 'var(--theme-colors-background)';
 
-const Controls = () => {
+interface ControlsProps {
+    isPageHovered: boolean;
+}
+
+const Controls = ({ isPageHovered }: ControlsProps) => {
     const { t } = useTranslation();
     const {
         dynamicBackground,
@@ -77,7 +81,7 @@ const Controls = () => {
                 iconProps={{ size: 'lg' }}
                 onClick={handleToggleFullScreenPlayer}
                 tooltip={{ label: t('common.minimize', { postProcess: 'titleCase' }) }}
-                variant="subtle"
+                variant={isPageHovered ? 'default' : 'subtle'}
             />
             <Popover position="bottom-start">
                 <Popover.Target>
@@ -85,7 +89,7 @@ const Controls = () => {
                         icon="settings"
                         iconProps={{ size: 'lg' }}
                         tooltip={{ label: t('common.configure', { postProcess: 'titleCase' }) }}
-                        variant="subtle"
+                        variant={isPageHovered ? 'default' : 'subtle'}
                     />
                 </Popover.Target>
                 <Popover.Dropdown>
@@ -410,6 +414,8 @@ export const FullScreenPlayer = () => {
     const { setStore } = useFullScreenPlayerStoreActions();
     const { windowBarStyle } = useWindowSettings();
 
+    const [isPageHovered, setIsPageHovered] = useState(false);
+
     const location = useLocation();
     const isOpenedRef = useRef<boolean | null>(null);
 
@@ -441,10 +447,12 @@ export const FullScreenPlayer = () => {
             custom={{ background, backgroundImage, dynamicBackground, windowBarStyle }}
             exit="closed"
             initial="closed"
+            onMouseEnter={() => setIsPageHovered(true)}
+            onMouseLeave={() => setIsPageHovered(false)}
             transition={{ duration: 2 }}
             variants={containerVariants}
         >
-            <Controls />
+            <Controls isPageHovered={isPageHovered} />
             {dynamicBackground && (
                 <div
                     className={styles.backgroundImageOverlay}
