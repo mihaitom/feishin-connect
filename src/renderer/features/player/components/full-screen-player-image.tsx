@@ -208,7 +208,7 @@ export const FullScreenPlayerImage = () => {
             </div>
             <Stack
                 className={styles.metadataContainer}
-                gap="2px"
+                gap="md"
                 maw="100%"
             >
                 <Text
@@ -222,7 +222,6 @@ export const FullScreenPlayerImage = () => {
                 </Text>
                 <Text
                     component={Link}
-                    fw={600}
                     isLink
                     overflow="hidden"
                     size="xl"
@@ -238,7 +237,6 @@ export const FullScreenPlayerImage = () => {
                         <Fragment key={`fs-artist-${artist.id}`}>
                             {index > 0 && (
                                 <Text
-                                    isMuted
                                     style={{
                                         display: 'inline-block',
                                         padding: '0 0.5rem',
@@ -249,9 +247,7 @@ export const FullScreenPlayerImage = () => {
                             )}
                             <Text
                                 component={Link}
-                                fw={600}
                                 isLink
-                                isMuted
                                 to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
                                     albumArtistId: artist.id,
                                 })}
