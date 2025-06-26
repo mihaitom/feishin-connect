@@ -2,7 +2,6 @@
     position: absolute;
     max-width: 100%;
     height: 100%;
-    object-fit: var(--theme-image-fit);
     object-position: 50% 100%;
     border-radius: 5px;
     filter: drop-shadow(0 0 5px rgb(0 0 0 / 40%)) drop-shadow(0 0 5px rgb(0 0 0 / 40%));
@@ -24,7 +23,12 @@
     justify-content: center;
     padding: 1rem;
     text-align: center;
+    cursor: default;
     border-radius: 5px;
+
+    a {
+        cursor: pointer;
+    }
 
     h1 {
         font-size: 3.5vh;

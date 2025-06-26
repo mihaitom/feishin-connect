@@ -1,16 +1,18 @@
-import type { ImgHTMLAttributes } from 'react';
-
 import clsx from 'clsx';
+import { motion, MotionConfigProps } from 'motion/react';
+import { type ImgHTMLAttributes } from 'react';
 import { Img } from 'react-image';
 
 import styles from './image.module.css';
 
+import { animationProps } from '/@/shared/components/animations/animation-props';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 
-interface ImageContainerProps {
+interface ImageContainerProps extends MotionConfigProps {
     children: React.ReactNode;
     className?: string;
+    enableAnimation?: boolean;
 }
 
 interface ImageLoaderProps {
@@ -19,6 +21,8 @@ interface ImageLoaderProps {
 
 interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
     containerClassName?: string;
+    enableAnimation?: boolean;
+    imageContainerProps?: Omit<ImageContainerProps, 'children'>;
     includeLoader?: boolean;
     includeUnloader?: boolean;
     src: string | string[] | undefined;
@@ -32,6 +36,8 @@ interface ImageUnloaderProps {
 export function Image({
     className,
     containerClassName,
+    enableAnimation,
+    imageContainerProps,
     includeLoader = true,
     includeUnloader = true,
     src,
@@ -41,7 +47,13 @@ export function Image({
             <Img
                 className={clsx(styles.image, className)}
                 container={(children) => (
-                    <ImageContainer className={containerClassName}>{children}</ImageContainer>
+                    <ImageContainer
+                        className={containerClassName}
+                        enableAnimation={enableAnimation}
+                        {...imageContainerProps}
+                    >
+                        {children}
+                    </ImageContainer>
                 )}
                 loader={
                     includeLoader ? (
@@ -50,7 +62,6 @@ export function Image({
                         </ImageContainer>
                     ) : null
                 }
-                loading="lazy"
                 src={src}
                 unloader={
                     includeUnloader ? (
@@ -66,8 +77,27 @@ export function Image({
     return <ImageUnloader />;
 }
 
-function ImageContainer({ children, className }: ImageContainerProps) {
-    return <div className={clsx(styles.imageContainer, className)}>{children}</div>;
+function ImageContainer({ children, className, enableAnimation, ...props }: ImageContainerProps) {
+    if (!enableAnimation) {
+        return (
+            <div
+                className={clsx(styles.imageContainer, className)}
+                {...props}
+            >
+                {children}
+            </div>
+        );
+    }
+
+    return (
+        <motion.div
+            className={clsx(styles.imageContainer, className)}
+            {...animationProps.fadeIn}
+            {...props}
+        >
+            {children}
+        </motion.div>
+    );
 }
 
 function ImageLoader({ className }: ImageLoaderProps) {

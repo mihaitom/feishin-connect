@@ -16,9 +16,7 @@ import { Center } from '/@/shared/components/center/center';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
-import { Image } from '/@/shared/components/image/image';
 import { Stack } from '/@/shared/components/stack/stack';
-import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
 import { PlayerData, QueueSong } from '/@/shared/types/domain-types';
 
@@ -52,9 +50,14 @@ const scaleImageUrl = (imageSize: number, url?: null | string) => {
         .replace(/&height=\d+/, `&height=${imageSize}`);
 };
 
-const MotionImage = motion.create(Image);
+const MotionImage = motion.img;
 
-const ImageWithPlaceholder = ({ ...props }: HTMLMotionProps<'img'> & { placeholder?: string }) => {
+const ImageWithPlaceholder = ({
+    className,
+    ...props
+}: HTMLMotionProps<'img'> & { placeholder?: string }) => {
+    const nativeAspectRatio = useSettingsStore((store) => store.general.nativeAspectRatio);
+
     if (!props.src) {
         return (
             <Center
@@ -76,7 +79,11 @@ const ImageWithPlaceholder = ({ ...props }: HTMLMotionProps<'img'> & { placehold
 
     return (
         <MotionImage
-            className={styles.image}
+            className={clsx(styles.image, className)}
+            style={{
+                objectFit: nativeAspectRatio ? 'contain' : 'cover',
+                width: nativeAspectRatio ? 'auto' : '100%',
+            }}
             {...props}
         />
     );
@@ -201,40 +208,32 @@ export const FullScreenPlayerImage = () => {
             </div>
             <Stack
                 className={styles.metadataContainer}
-                gap="xs"
+                gap="2px"
                 maw="100%"
             >
-                <TextTitle
+                <Text
                     fw={900}
-                    order={1}
+                    lh="1.2"
                     overflow="hidden"
+                    size="4xl"
                     w="100%"
                 >
                     {currentSong?.name}
-                </TextTitle>
-                <TextTitle
+                </Text>
+                <Text
                     component={Link}
                     fw={600}
                     isLink
-                    order={3}
                     overflow="hidden"
-                    style={{
-                        textShadow: 'var(--theme-fullscreen-player-text-shadow)',
-                    }}
+                    size="xl"
                     to={generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
                         albumId: currentSong?.albumId || '',
                     })}
                     w="100%"
                 >
-                    {currentSong?.album}{' '}
-                </TextTitle>
-                <TextTitle
-                    key="fs-artists"
-                    order={3}
-                    style={{
-                        textShadow: 'var(--theme-fullscreen-player-text-shadow)',
-                    }}
-                >
+                    {currentSong?.album}
+                </Text>
+                <Text key="fs-artists">
                     {currentSong?.artists?.map((artist, index) => (
                         <Fragment key={`fs-artist-${artist.id}`}>
                             {index > 0 && (
@@ -253,9 +252,6 @@ export const FullScreenPlayerImage = () => {
                                 fw={600}
                                 isLink
                                 isMuted
-                                style={{
-                                    textShadow: 'var(--theme-fullscreen-player-text-shadow)',
-                                }}
                                 to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
                                     albumArtistId: artist.id,
                                 })}
@@ -264,7 +260,7 @@ export const FullScreenPlayerImage = () => {
                             </Text>
                         </Fragment>
                     ))}
-                </TextTitle>
+                </Text>
                 <Group
                     justify="center"
                     mt="sm"
