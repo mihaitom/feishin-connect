@@ -50,7 +50,10 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
     useEffect(() => {
         if (type === FontType.SYSTEM && system) {
             const root = document.documentElement;
-            root.style.setProperty('--theme-content-font-family', 'dynamic-font');
+            root.style.setProperty(
+                '--theme-content-font-family',
+                'dynamic-font, "Noto Sans JP", sans-serif',
+            );
 
             if (!textStyleRef.current) {
                 textStyleRef.current = document.createElement('style');
@@ -64,7 +67,10 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
             }`;
         } else if (type === FontType.CUSTOM && custom) {
             const root = document.documentElement;
-            root.style.setProperty('--theme-content-font-family', 'dynamic-font');
+            root.style.setProperty(
+                '--theme-content-font-family',
+                'dynamic-font, "Noto Sans JP", sans-serif',
+            );
 
             if (!textStyleRef.current) {
                 textStyleRef.current = document.createElement('style');
@@ -78,7 +84,10 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
             }`;
         } else {
             const root = document.documentElement;
-            root.style.setProperty('--theme-content-font-family', builtIn);
+            root.style.setProperty(
+                '--theme-content-font-family',
+                `${builtIn}, "Noto Sans JP", sans-serif`,
+            );
         }
     }, [builtIn, custom, system, type]);
 

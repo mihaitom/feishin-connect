@@ -11,7 +11,8 @@
     text-rendering: optimizelegibility;
     -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
     text-size-adjust: none;
-    outline: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -122,59 +123,56 @@ button {
 @font-face {
     font-family: Archivo;
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/Archivo-VariableFont_wdth,wght.ttf')
-        format('truetype-variations');
+    src: url('../../../assets/fonts/Archivo-VariableFont_wdth,wght.ttf');
 }
 
 @font-face {
     font-family: Raleway;
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/Raleway-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../../assets/fonts/Raleway-VariableFont_wght.ttf');
 }
 
 @font-face {
     font-family: Fredoka;
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/Fredoka-VariableFont_wdth,wght.ttf')
-        format('truetype-variations');
+    src: url('../../../assets/fonts/Fredoka-VariableFont_wdth,wght.ttf');
 }
 
 @font-face {
     font-family: 'League Spartan';
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/LeagueSpartan-VariableFont_wght.ttf')
-        format('truetype-variations');
+    src: url('../../../assets/fonts/LeagueSpartan-VariableFont_wght.ttf');
 }
 
 @font-face {
     font-family: Lexend;
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/Lexend-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../../assets/fonts/Lexend-VariableFont_wght.ttf');
 }
 
 @font-face {
     font-family: Inter;
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/Inter-VariableFont_slnt,wght.ttf') format('truetype-variations');
+    src: url('../../../assets/fonts/Inter-VariableFont_slnt,wght.ttf');
 }
 
 @font-face {
     font-family: Sora;
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/Sora-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../../assets/fonts/Sora-VariableFont_wght.ttf');
 }
 
 @font-face {
     font-family: 'Work Sans';
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/WorkSans-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../../assets/fonts/WorkSans-VariableFont_wght.ttf');
 }
 
 @font-face {
     font-family: Poppins;
     font-style: normal;
     font-weight: 400;
-    src: url('../../renderer/fonts/Poppins-Regular.ttf') format('truetype');
+    src: url('../../../assets/fonts/Poppins-Regular.ttf');
     font-display: swap;
 }
 
@@ -182,7 +180,7 @@ button {
     font-family: Poppins;
     font-style: normal;
     font-weight: 600;
-    src: url('../../renderer/fonts/Poppins-SemiBold.ttf') format('truetype');
+    src: url('../../../assets/fonts/Poppins-SemiBold.ttf');
     font-display: swap;
 }
 
@@ -190,7 +188,7 @@ button {
     font-family: Poppins;
     font-style: normal;
     font-weight: 700;
-    src: url('../../renderer/fonts/Poppins-Bold.ttf') format('truetype');
+    src: url('../../../assets/fonts/Poppins-Bold.ttf');
     font-display: swap;
 }
 
@@ -198,7 +196,7 @@ button {
     font-family: Poppins;
     font-style: normal;
     font-weight: 800;
-    src: url('../../renderer/fonts/Poppins-ExtraBold.ttf') format('truetype');
+    src: url('../../../assets/fonts/Poppins-ExtraBold.ttf');
     font-display: swap;
 }
 
@@ -206,28 +204,21 @@ button {
     font-family: Poppins;
     font-style: normal;
     font-weight: 900;
-    src: url('../../renderer/fonts/Poppins-Black.ttf') format('truetype');
+    src: url('../../../assets/fonts/Poppins-Black.ttf');
     font-display: swap;
 }
 
 @font-face {
     font-family: Raleway;
     font-weight: 100 1000;
-    src: url('../../renderer/fonts/Raleway-VariableFont_wght.ttf') format('truetype-variations');
+    src: url('../../../assets/fonts/Raleway-VariableFont_wght.ttf');
 }
 
 @font-face {
-    font-family: DroidSerif;
-    src: url('https://rawgit.com/google/fonts/master/ufl/ubuntumono/UbuntuMono-Italic.ttf')
-        format('truetype');
-    unicode-range: U+000-5FF; /* Latin glyphs */
-}
-
-@font-face {
-    font-family: DroidSerif;
-    src: url('https://fonts.gstatic.com/ea/notosansjp/v5/NotoSansJP-Regular.woff2')
-        format('truetype');
-    unicode-range: U+3000-9FFF, U+ff??; /* Japanese glyphs */
+    font-family: 'Noto Sans JP';
+    font-weight: 100 900;
+    src: url('../../../assets/fonts/NotoSansJP-VariableFont_wght.ttf');
+    unicode-range: U+3000-9FFF, U+FF00-FFEF; /* Japanese characters */
 }
 
 :root {
