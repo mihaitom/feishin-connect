@@ -385,7 +385,9 @@
         "preview": "Vista previa",
         "translation": "traducción",
         "additionalParticipants": "Participantes adicionales",
-        "tags": "Etiquetas"
+        "tags": "Etiquetas",
+        "newVersion": "Una nueva versión ha sido instalada ({{version}})",
+        "viewReleaseNotes": "Ver notas de lanzamiento"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",
@@ -469,7 +471,8 @@
             "home": "$t(common.home)",
             "artists": "$t(entity.artist_other)",
             "albumArtists": "$t(entity.albumArtist_other)",
-            "shared": "compartido $t(entity.playlist_other)"
+            "shared": "compartido $t(entity.playlist_other)",
+            "myLibrary": "Mi biblioteca"
         },
         "appMenu": {
             "selectServer": "seleccionar servidor",
@@ -655,7 +658,8 @@
         },
         "queryEditor": {
             "input_optionMatchAll": "coincidir todos",
-            "input_optionMatchAny": "coincidir cualquiera"
+            "input_optionMatchAny": "coincidir cualquiera",
+            "title": "Editor de consultas"
         },
         "shareItem": {
             "createFailed": "No se pudo crear el recurso compartido (¿está habilitado el uso compartido?)",
@@ -737,7 +741,9 @@
             "view": {
                 "card": "tarjeta",
                 "table": "tabla",
-                "poster": "cartel"
+                "poster": "cartel",
+                "list": "Lista",
+                "grid": "Cuadrícula"
             }
         }
     },
