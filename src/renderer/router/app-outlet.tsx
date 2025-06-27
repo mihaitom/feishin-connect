@@ -19,6 +19,8 @@ export const AppOutlet = () => {
     const setFallback = useSetPlayerFallback();
     const authState = useServerAuthenticated();
 
+    console.log(authState);
+
     const isActionsRequired = useMemo(() => {
         const isServerRequired = !currentServer;
 
@@ -55,6 +57,7 @@ export const AppOutlet = () => {
     }
 
     if (isActionsRequired || authState === AuthState.INVALID) {
+        console.log('required', isActionsRequired);
         return (
             <Navigate
                 replace
