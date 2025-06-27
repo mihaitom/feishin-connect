@@ -49,7 +49,7 @@ export const useFastAverageColor = (args: {
                     return setBackground(color.rgb);
                 })
                 .catch((e) => {
-                    console.log('Error fetching average color', e);
+                    console.error('Error fetching average color', e);
                     idRef.current = id;
                     return setBackground('rgba(0, 0, 0, 0)');
                 });

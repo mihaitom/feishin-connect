@@ -207,7 +207,7 @@ export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetai
                 const currentPageStartIndex = pagination.currentPage * pagination.itemsPerPage;
                 event.api?.ensureIndexVisible(currentPageStartIndex, 'top');
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
 
             setPagination(playlistId, {

@@ -17,7 +17,7 @@ const RouteErrorBoundary = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const error = useRouteError() as any;
-    console.log('error', error);
+    console.error('error', error);
 
     const handleReload = () => {
         navigate(0);

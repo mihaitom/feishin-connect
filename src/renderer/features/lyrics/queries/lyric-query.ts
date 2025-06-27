@@ -117,7 +117,7 @@ export const useSongLyricsBySong = (
                         apiClientProps: { server, signal },
                         query: { songId: song.id },
                     })
-                    .catch((err) => console.log(err));
+                    .catch((err) => console.error(err));
 
                 if (jfLyrics) {
                     localLyrics = {
