@@ -281,6 +281,7 @@ export interface SettingsState {
         mpvExtraParameters: string[];
         mpvProperties: MpvSettings;
         muted: boolean;
+        preservePitch: boolean;
         scrobble: {
             enabled: boolean;
             scrobbleAtDuration: number;
@@ -473,6 +474,7 @@ const initialState: SettingsState = {
             replayGainPreampDB: 0,
         },
         muted: false,
+        preservePitch: true,
         scrobble: {
             enabled: true,
             scrobbleAtDuration: 240,

@@ -705,6 +705,8 @@
         "volumeWidth_description": "the width of the volume slider",
         "webAudio": "use web audio",
         "webAudio_description": "use web audio. this enables advanced features like replaygain. disable if you experience otherwise",
+        "preservePitch": "preserve pitch",
+        "preservePitch_description": "preserves pitch when modifying playback speed",
         "windowBarStyle": "window bar style",
         "windowBarStyle_description": "select the style of the window bar",
         "zoom": "zoom percentage",

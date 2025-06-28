@@ -157,6 +157,26 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
         },
         {
             control: (
+                <Switch
+                    defaultChecked={settings.preservePitch}
+                    onChange={(e) => {
+                        setSettings({
+                            playback: { ...settings, preservePitch: e.currentTarget.checked },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.preservePitch', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: settings.type !== PlaybackType.WEB,
+            title: t('setting.preservePitch', {
+                postProcess: 'sentenceCase',
+            }),
+        },
+        {
+            control: (
                 <Slider
                     defaultValue={settings.crossfadeDuration}
                     disabled={

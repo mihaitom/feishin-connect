@@ -120,6 +120,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>((props, 
     const audioDeviceId = useSettingsStore((state) => state.playback.audioDeviceId);
     const playback = useSettingsStore((state) => state.playback.mpvProperties);
     const shouldUseWebAudio = useSettingsStore((state) => state.playback.webAudio);
+    const preservesPitch = useSettingsStore((state) => state.playback.preservePitch);
     const { resetSampleRate } = useSettingsStoreActions();
     const playbackSpeed = useSpeed();
     const { transcode } = usePlaybackSettings();
@@ -230,21 +231,23 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>((props, 
                 // calling play() is not necessarily a safe option (https://developer.chrome.com/blog/play-request-was-interrupted)
                 // In practice, this failure is only likely to happen when using the 0-second wav:
                 // play() + play() in rapid succession will cause problems as the frist one ends the track.
-                player1Ref.current
-                    ?.getInternalPlayer()
-                    ?.play()
-                    .catch(() => {});
+                const internalPlayer = player1Ref.current?.getInternalPlayer();
+                if (internalPlayer) {
+                    internalPlayer.preservesPitch = preservesPitch;
+                    internalPlayer.play().catch(() => {});
+                }
             } else {
-                player2Ref.current
-                    ?.getInternalPlayer()
-                    ?.play()
-                    .catch(() => {});
+                const internalPlayer = player2Ref.current?.getInternalPlayer();
+                if (internalPlayer) {
+                    internalPlayer.preservesPitch = preservesPitch;
+                    internalPlayer.play().catch(() => {});
+                }
             }
         } else {
             player1Ref.current?.getInternalPlayer()?.pause();
             player2Ref.current?.getInternalPlayer()?.pause();
         }
-    }, [currentPlayer, status]);
+    }, [currentPlayer, status, preservesPitch]);
 
     const handleCrossfade1 = useCallback(
         (e: AudioPlayerProgress) => {
