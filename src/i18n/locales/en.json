@@ -514,6 +514,8 @@
         "disableLibraryUpdateOnStartup": "disable checking for new versions on startup",
         "discordApplicationId": "{{discord}} application id",
         "discordApplicationId_description": "the application id for {{discord}} rich presence (defaults to {{defaultId}})",
+        "discordPausedStatus": "show rich presence when paused",
+        "discordPausedStatus_description": "when enabled, status will show when player is paused",
         "discordIdleStatus": "show rich presence idle status",
         "discordIdleStatus_description": "when enabled, update status while player is idle",
         "discordListening": "show status as listening",

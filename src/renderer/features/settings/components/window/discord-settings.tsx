@@ -77,6 +77,29 @@ export const DiscordSettings = () => {
         {
             control: (
                 <Switch
+                    checked={settings.showPaused}
+                    onChange={(e) => {
+                        setSettings({
+                            discord: {
+                                ...settings,
+                                showPaused: e.currentTarget.checked,
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.discordPausedStatus', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: !isElectron(),
+            title: t('setting.discordPausedStatus', {
+                postProcess: 'sentenceCase',
+            }),
+        },
+        {
+            control: (
+                <Switch
                     checked={settings.showAsListening}
                     onChange={(e) => {
                         setSettings({

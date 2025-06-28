@@ -200,6 +200,7 @@ export interface SettingsState {
         clientId: string;
         enabled: boolean;
         showAsListening: boolean;
+        showPaused: boolean;
         showServerImage: boolean;
     };
     font: {
@@ -353,6 +354,7 @@ const initialState: SettingsState = {
         clientId: '1165957668758900787',
         enabled: false,
         showAsListening: false,
+        showPaused: true,
         showServerImage: false,
     },
     font: {

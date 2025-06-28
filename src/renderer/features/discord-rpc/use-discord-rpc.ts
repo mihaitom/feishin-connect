@@ -24,8 +24,13 @@ export const useDiscordRpc = () => {
             current: (number | PlayerStatus | QueueSong | undefined)[],
             previous: (number | PlayerStatus | QueueSong | undefined)[],
         ) => {
-            // No current song, or we switched to a new track and the player was paused (end of album, etc.)
-            if (!current[0] || (current[0] && current[2] === 'paused' && current[1] === 0))
+            if (
+                !current[0] || // No track
+                (current[0] &&
+                    current[2] === 'paused' && // Track paused
+                    (discordSettings.showPaused ? current[1] === 0 : true)) || // Beginning of track (only if show paused setting enabled)
+                (discordSettings.showPaused ? false : current[1] === 0) // Beginning of track (only if show paused setting disabled)
+            )
                 return discordRpc?.clearActivity();
 
             // Handle change detection
@@ -122,6 +127,7 @@ export const useDiscordRpc = () => {
         [
             discordSettings.showAsListening,
             discordSettings.showServerImage,
+            discordSettings.showPaused,
             generalSettings.lastfmApiKey,
             lastUniqueId,
         ],
