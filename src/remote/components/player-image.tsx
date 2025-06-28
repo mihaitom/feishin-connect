@@ -12,7 +12,7 @@ export const PlayerImage = ({ src }: PlayerImageProps) => {
         <img
             className={styles.container}
             onError={() => send({ event: 'proxy' })}
-            src={src?.replaceAll(/&(size|width|height=\d+)/g, '')}
+            src={src?.replaceAll(/&(size|width|height)=\d+/g, '')}
         />
     );
 };
