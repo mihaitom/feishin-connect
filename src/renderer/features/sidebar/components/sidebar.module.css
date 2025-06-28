@@ -8,6 +8,10 @@
     background: var(--theme-colors-background-alternate);
 }
 
+.container.custom-bar {
+    max-height: calc(100vh - 120px);
+}
+
 .scroll-area {
     padding: 0 var(--theme-spacing-md) var(--theme-spacing-md) var(--theme-spacing-md);
 }

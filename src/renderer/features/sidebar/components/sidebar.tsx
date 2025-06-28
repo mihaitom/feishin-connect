@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { AnimatePresence, motion } from 'motion/react';
 import { CSSProperties, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -98,9 +99,14 @@ export const Sidebar = () => {
         return '100%';
     }, [showImage, sidebar.leftWidth, windowBarStyle]);
 
+    const isCustomWindowBar =
+        windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS;
+
     return (
         <div
-            className={styles.container}
+            className={clsx(styles.container, {
+                [styles.customBar]: isCustomWindowBar,
+            })}
             id="left-sidebar"
         >
             <Group
