@@ -103,6 +103,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
         },
         query: {
             artistIds: [routeId],
+            compilation: false,
             limit: 15,
             sortBy: AlbumListSort.RELEASE_DATE,
             sortOrder: SortOrder.DESC,

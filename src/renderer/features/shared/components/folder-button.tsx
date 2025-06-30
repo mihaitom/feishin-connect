@@ -18,7 +18,7 @@ export const FolderButton = ({ isActive, ...props }: FolderButtonProps) => {
                 ...props.iconProps,
             }}
             tooltip={{
-                label: t('entity.folder', { postProcess: 'sentenceCase' }),
+                label: t('entity.folder', { count: 1, postProcess: 'sentenceCase' }),
                 ...props.tooltip,
             }}
             variant="subtle"

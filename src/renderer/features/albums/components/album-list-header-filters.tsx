@@ -414,18 +414,23 @@ export const AlbumListHeaderFilters = ({
             Object.values(filter?._custom?.jellyfin).some((value) => value !== undefined);
 
         const isSubsonicFilterApplied =
-            server?.type === ServerType.SUBSONIC &&
-            (filter.maxYear || filter.minYear || filter.favorite);
+            server?.type === ServerType.SUBSONIC && (filter.maxYear || filter.minYear);
+
+        const isCompilationFilterApplied =
+            server?.type === ServerType.NAVIDROME && filter.compilation !== undefined;
 
         return (
             isNavidromeFilterApplied ||
             isJellyfinFilterApplied ||
             isSubsonicFilterApplied ||
-            filter.genres?.length
+            filter.genres?.length ||
+            filter.favorite !== undefined ||
+            isCompilationFilterApplied
         );
     }, [
         filter?._custom?.jellyfin,
         filter?._custom?.navidrome,
+        filter.compilation,
         filter.favorite,
         filter.genres?.length,
         filter.maxYear,

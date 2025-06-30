@@ -467,7 +467,7 @@ export const SongListHeaderFilters = ({
                 .filter((value) => value !== 'Audio') // Don't account for includeItemTypes: Audio
                 .some((value) => value !== undefined);
 
-        const isGenericFilterApplied = filter?.favorite || filter?.genreIds?.length;
+        const isGenericFilterApplied = filter?.favorite !== undefined || filter?.genreIds?.length;
 
         return isNavidromeFilterApplied || isJellyfinFilterApplied || isGenericFilterApplied;
     }, [

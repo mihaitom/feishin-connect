@@ -69,7 +69,7 @@ export const SubsonicSongFilters = ({
                 const updatedFilters = setFilter({
                     customFilters,
                     data: {
-                        favorite: e.target.checked,
+                        favorite: e.target.checked ? true : undefined,
                     },
                     itemType: LibraryItem.SONG,
                     key: pageKey,
