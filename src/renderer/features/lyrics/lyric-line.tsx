@@ -3,7 +3,8 @@ import { ComponentPropsWithoutRef } from 'react';
 
 import styles from './lyric-line.module.css';
 
-import { TextTitle } from '/@/shared/components/text-title/text-title';
+import { Box } from '/@/shared/components/box/box';
+import { Stack } from '/@/shared/components/stack/stack';
 
 interface LyricLineProps extends ComponentPropsWithoutRef<'div'> {
     alignment: 'center' | 'left' | 'right';
@@ -12,8 +13,10 @@ interface LyricLineProps extends ComponentPropsWithoutRef<'div'> {
 }
 
 export const LyricLine = ({ alignment, className, fontSize, text, ...props }: LyricLineProps) => {
+    const lines = text.split('_BREAK_');
+
     return (
-        <TextTitle
+        <Box
             className={clsx(styles.lyricLine, className)}
             style={{
                 fontSize,
@@ -21,7 +24,11 @@ export const LyricLine = ({ alignment, className, fontSize, text, ...props }: Ly
             }}
             {...props}
         >
-            {text}
-        </TextTitle>
+            <Stack gap={0}>
+                {lines.map((line, index) => (
+                    <span key={index}>{line}</span>
+                ))}
+            </Stack>
+        </Box>
     );
 };

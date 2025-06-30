@@ -201,25 +201,23 @@ function mergeLyrics(original: string | undefined, translated: string | undefine
         return original;
     }
 
-    // Iterate through each line of the original LRC. If a translation exists for
-    // the same timestamp, insert it as a new, fully-formatted LRC line.
-    const finalLines = original.split('\n').flatMap((line) => {
+    // Iterate through each line of the original LRC. If a translation exists for the same timestamp, append the translated text after the original text.
+    const finalLines = original.split('\n').map((line) => {
         const match = line.match(lrcLineRegex);
 
         if (match) {
             const timestamp = match[1];
+            const originalText = match[2].trim();
             const translatedText = translatedMap.get(timestamp);
 
-            if (translatedText) {
-                // Return an array containing both the original line and the new translated line.
-                // flatMap will flatten this into the final array of lines.
-                const translatedLine = `[${timestamp}]${translatedText}`;
-                return [line, translatedLine];
+            if (translatedText && originalText) {
+                // Append and add a break delimiter to separate the original and translated text
+                return [`[${timestamp}]${originalText}`, translatedText].join('_BREAK_');
             }
         }
 
-        // If no match or no translation is found, return only the original line.
-        return [line];
+        // If no match or no translation is found, return the original line unchanged.
+        return line;
     });
 
     return finalLines.join('\n');
