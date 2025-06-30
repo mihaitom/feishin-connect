@@ -325,7 +325,7 @@
         "discordUpdateInterval": "{{discord}} rich presence 更新间隔",
         "discordApplicationId_description": "{{discord}} rich presence 应用 id（默认为 {{defaultId}}）",
         "discordUpdateInterval_description": "更新间隔秒数（至少 15 秒）",
-        "discordRichPresence_description": "在 {{discord}} rich presence 中显示播放状态。图片键为：{{icon}}、{{playing}} 和 {{paused}} ",
+        "discordRichPresence_description": "在 {{discord}} rich presence 中显示播放状态。图片键为：{{icon}}、{{playing}} 和 {{paused}}",
         "accentColor": "强调色",
         "accentColor_description": "设置应用的强调色",
         "replayGainPreamp_description": "调整应用在{{ReplayGain}}值上的前置放大增益",
@@ -401,7 +401,13 @@
         "musicbrainz": "显示 musicbrainz 链接",
         "musicbrainz_description": "在 mbid 的艺术家/专辑页面上显示 musicbrainz 的链接",
         "lastfm": "显示 last.fm 链接",
-        "lastfm_description": "在艺术家/专辑页面上显示 last.fm 的链接"
+        "lastfm_description": "在艺术家/专辑页面上显示 last.fm 的链接",
+        "preferLocalLyrics_description": "优先选择本地歌词（如有），而不是远程歌词",
+        "preferLocalLyrics": "首选本地歌词",
+        "discordPausedStatus": "暂停时显示rich presence",
+        "discordPausedStatus_description": "启用后将在播放器暂停时显示状态",
+        "preservePitch": "保持音高",
+        "preservePitch_description": "在调整播放速度时保持音高"
     },
     "error": {
         "remotePortWarning": "重启服务器使新端口生效",
