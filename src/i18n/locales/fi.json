@@ -362,7 +362,7 @@
         "doubleClickBehavior": "lisää kaikki haetut kappaleet soittojonoon tuplaklikkauksella",
         "discordUpdateInterval_description": "päivitysväli sekunnteina (vähintään 15 sekunttia)",
         "discordRichPresence": "{{discord}} rich presence",
-        "discordRichPresence_description": "ota toiston tila käyttöön {{discord}}n rich presence-toiminnossa. Kuvakkeiden avaimet ovat {{icon}}, {{playing}} ja {{paused}}. ",
+        "discordRichPresence_description": "ota toiston tila käyttöön {{discord}}n rich presence-toiminnossa. Kuvakkeiden avaimet ovat {{icon}}, {{playing}} ja {{paused}}",
         "discordUpdateInterval": "{{discord}} rich presencen päivitysväli",
         "enableRemote": "aktivoi etäohjauspalvelin",
         "externalLinks_description": "ottaa ulkoiset linkit (Last.fm, MusicBrainz) artistien/albumien sivuilla",
@@ -520,7 +520,11 @@
         "neteaseTranslation": "Ota NetEasen käännökset käyttöön",
         "neteaseTranslation_description": "Käytöss ollessa noutaa ja näyttää käännetyt sanat NetEasesta, jos ne ovat saatavilla.",
         "preferLocalLyrics_description": "suosi paikallisia sanoituksia ulkoisten sijasta, kun saatavilla",
-        "preferLocalLyrics": "suosi paikallisia sanoituksia"
+        "preferLocalLyrics": "suosi paikallisia sanoituksia",
+        "discordPausedStatus": "näytä rich presence tauotettuna",
+        "discordPausedStatus_description": "ollessak käytössä, status näyttää milloin soitin on tautotettuna",
+        "preservePitch": "säilytä sävelkorkeus",
+        "preservePitch_description": "säilytä sävelkorkeus toistonopeutta muokatessa"
     },
     "page": {
         "itemDetail": {
