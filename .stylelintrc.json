@@ -10,7 +10,7 @@
         "selector-type-no-unknown": [true, { "ignoreTypes": ["/-styled-mixin/", "/^\\$\\w+/"] }],
         "declaration-block-no-shorthand-property-overrides": null,
         "declaration-block-no-redundant-longhand-properties": null,
-        "at-rule-no-unknown": [true, { "ignoreAtRules": ["mixin"] }],
+        "at-rule-no-unknown": [true, { "ignoreAtRules": ["mixin", "value"] }],
         "function-no-unknown": [true, { "ignoreFunctions": ["darken", "alpha", "lighten"] }],
         "declaration-property-value-no-unknown": null,
         "no-descending-specificity": null,

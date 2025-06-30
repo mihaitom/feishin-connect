@@ -1,3 +1,5 @@
+@value label from './sidebar-item.module.css';
+
 .list {
     padding: var(--theme-spacing-sm) var(--theme-spacing-md);
 }
@@ -6,6 +8,12 @@
     position: relative;
     display: flex;
     width: 100%;
+}
+
+.row-hover {
+    :global(.label) {
+        margin-right: 135px;
+    }
 }
 
 .controls {

@@ -1,4 +1,5 @@
 import { closeAllModals, openModal } from '@mantine/modals';
+import clsx from 'clsx';
 import { MouseEvent, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath } from 'react-router';
@@ -43,6 +44,9 @@ const PlaylistRowButton = ({ name, onPlay, to, ...props }: PlaylistRowButtonProp
             onMouseLeave={() => setIsHovered(false)}
         >
             <SidebarItem
+                className={clsx({
+                    [styles.rowHover]: isHovered,
+                })}
                 to={url}
                 variant="subtle"
                 {...props}

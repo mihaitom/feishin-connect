@@ -10,13 +10,20 @@ interface SidebarItemProps extends ButtonProps {
     to: LinkProps['to'];
 }
 
-export const SidebarItem = ({ children, to, ...props }: SidebarItemProps) => {
+export const SidebarItem = ({ children, className, to, ...props }: SidebarItemProps) => {
     return (
         <Button
-            className={clsx({
-                [styles.disabled]: props.disabled,
-                [styles.link]: true,
-            })}
+            className={clsx(
+                {
+                    [styles.disabled]: props.disabled,
+                    [styles.link]: true,
+                },
+                className,
+            )}
+            classNames={{
+                inner: styles.inner,
+                label: styles.label,
+            }}
             component={Link}
             to={to}
             variant="subtle"
