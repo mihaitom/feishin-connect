@@ -34,7 +34,10 @@ export function IsUpdatedDialog() {
         >
             <Stack>
                 <Text>{t('common.newVersion', { postProcess: 'sentenceCase', version })}</Text>
-                <Group wrap="nowrap">
+                <Group
+                    justify="flex-end"
+                    wrap="nowrap"
+                >
                     <Button
                         component="a"
                         href={`https://github.com/jeffvli/feishin/releases/tag/v${version}`}
