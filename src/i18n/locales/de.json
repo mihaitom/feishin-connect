@@ -520,7 +520,7 @@
         "playSimilarSongs": "Ähnliche Lieder abspielen"
     },
     "setting": {
-        "audioDevice_description": "Wählen Sie das Audiogerät aus, das für die Wiedergabe verwendet werden soll (nur Webplayer).",
+        "audioDevice_description": "Wählen Sie das Audiogerät aus, das für die Wiedergabe verwendet werden soll (nur Webplayer)",
         "audioExclusiveMode": "Audio-Exklusivmodus",
         "audioDevice": "Audiogerät",
         "accentColor": "Akzentfarbe",
@@ -674,7 +674,7 @@
         "windowBarStyle_description": "Wähle den Stil der Windows-Leiste",
         "hotkey_toggleCurrentSongFavorite": "$t(common.currentSong) zu Favoriten hinzufügen",
         "clearQueryCache_description": "\"Weiches\" Zurücksetzen. Dies wird Playlisten, Musik-Metadaten und gespeicherte Liedtexte zurücksetzen, Zugangsinformationen und zwischengespeicherte Bilder werden behalten",
-        "discordRichPresence_description": "Zeige deinen Wiedergabe-Status in {{discord}} als rich presence an. Angezeigte Bilder sind: {{icon}}, {{playing}}, und {{paused}} ",
+        "discordRichPresence_description": "Zeige deinen Wiedergabe-Status in {{discord}} als rich presence an. Angezeigte Bilder sind: {{icon}}, {{playing}}, und {{paused}}",
         "clearCache": "Browser-Zwischenspeicher löschen",
         "clearQueryCache": "feishins Zwischenspeicher leeren",
         "clearCache_description": "Hartes Zurücksetzen. Neben feishins Zwischenspeicher wird auch der des Browsers gelöscht (Bilder und andere Daten). Zugangsinformationen und Einstellungen werden behalten",

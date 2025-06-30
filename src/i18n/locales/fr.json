@@ -449,7 +449,7 @@
         "playbackStyle": "style de lecture",
         "hotkey_toggleShuffle": "basculer la lecture aléatoire",
         "playbackStyle_description": "sélectionnez le style de lecture à utiliser pour le lecteur audio",
-        "discordRichPresence_description": "active l'état de lecteur dans le status d'activité {{discord}}. Les images clés sont : {{icon}}, {{playing}}, et {{paused}} ",
+        "discordRichPresence_description": "active l'état de lecteur dans le status d'activité {{discord}}. Les images clés sont : {{icon}}, {{playing}}, et {{paused}}",
         "mpvExecutablePath": "chemin de l'exécutable mpv",
         "hotkey_rate2": "noter 2 étoiles",
         "playButtonBehavior_description": "définit le comportement par défaut du bouton play, lors de l'ajout de chanson à la file d'attente",
@@ -607,7 +607,13 @@
         "lastfm_description": "affiche les liens vers last.fm sur les pages des artistes/albums",
         "musicbrainz": "affiches les liens musicbrainz",
         "neteaseTranslation": "Activer les traductions NetEase",
-        "neteaseTranslation_description": "Lorsque cette option est activée, récupère et affiche les paroles traduites de NetEase si elles sont disponibles."
+        "neteaseTranslation_description": "Lorsque cette option est activée, récupère et affiche les paroles traduites de NetEase si elles sont disponibles.",
+        "preferLocalLyrics_description": "privilégier les paroles locales aux paroles distantes lorsqu'elles sont disponibles",
+        "preferLocalLyrics": "privilégier les paroles locales",
+        "discordPausedStatus_description": "quand activé, le status s'affichera lorsque le lecteur est en pause",
+        "discordPausedStatus": "afficher le status d'activité en pause",
+        "preservePitch": "préserver la hauteur",
+        "preservePitch_description": "préserver la hauteur lors du changement de la vitesse de lecture"
     },
     "form": {
         "deletePlaylist": {

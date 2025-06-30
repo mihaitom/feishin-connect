@@ -120,7 +120,7 @@
         "hotkey_toggleShuffle": "alterna aleatorio",
         "theme": "tema",
         "playbackStyle_description": "selecciona el estilo de reproducción a usar por el reproductor de audio",
-        "discordRichPresence_description": "activa el estado de reproducción en el estado de actividad de {{discord}}. Las teclas de imagen son: {{icon}}, {{playing}}, y {{paused}} ",
+        "discordRichPresence_description": "activa el estado de reproducción en el estado de actividad de {{discord}}. Las teclas de imagen son: {{icon}}, {{playing}}, y {{paused}}",
         "mpvExecutablePath": "ruta del ejecutable mpv",
         "audioDevice": "dispositivo de audio",
         "hotkey_rate2": "calificar con 2 estrellas",
@@ -265,7 +265,13 @@
         "musicbrainz": "Mostrar enlaces de MusicBrainz",
         "musicbrainz_description": "Muestra enlaces a MusicBrainz en las páginas de artistas/álbumes, donde exista mbid",
         "neteaseTranslation": "Activar traducciones de NetEase",
-        "neteaseTranslation_description": "Cuando se habilita, busca y muestra letras traducidas desde NetEase si está disponible."
+        "neteaseTranslation_description": "Cuando se habilita, busca y muestra letras traducidas desde NetEase si está disponible.",
+        "preferLocalLyrics_description": "Prefiere letras locales sobre letras remotas cuando esté disponible",
+        "preferLocalLyrics": "Preferir letras locales",
+        "discordPausedStatus": "Mostrar estado de actividad cuando esté en pausa",
+        "discordPausedStatus_description": "Cuando está activado, el estado mostrará cuando el reproductor esté en pausa",
+        "preservePitch": "Mantener el tono",
+        "preservePitch_description": "Mantiene el tono cuando se modifica la velocidad de reproducción"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
