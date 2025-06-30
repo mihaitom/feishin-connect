@@ -521,7 +521,7 @@
         "discordListening": "show status as listening",
         "discordListening_description": "show status as listening instead of playing",
         "discordRichPresence": "{{discord}} rich presence",
-        "discordRichPresence_description": "enable playback status in {{discord}} rich presence. Image keys are: {{icon}}, {{playing}}, and {{paused}} ",
+        "discordRichPresence_description": "enable playback status in {{discord}} rich presence. Image keys are: {{icon}}, {{playing}}, and {{paused}}",
         "discordServeImage": "serve {{discord}} images from server",
         "discordServeImage_description": "share cover art for {{discord}} rich presence from server itself, only available for jellyfin and navidrome",
         "discordUpdateInterval": "{{discord}} rich presence update interval",
