@@ -26,7 +26,7 @@ export const YesNoSelect = ({ onChange, value, ...props }: YesNoSelectProps) => 
             onChange={(e) => {
                 onChange(e ? e === 'true' : undefined);
             }}
-            value={value !== undefined ? value.toString() : undefined}
+            value={value !== undefined ? value.toString() : null}
             {...props}
         />
     );
