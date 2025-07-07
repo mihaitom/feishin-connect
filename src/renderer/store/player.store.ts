@@ -151,7 +151,7 @@ export const usePlayerStore = createWithEqualityFn<PlayerSlice>()(
                                     const index =
                                         initialIndex !== undefined
                                             ? initialIndex
-                                            : random(0, songsToAddToQueue.length, false);
+                                            : random(0, songsToAddToQueue.length - 1, false);
 
                                     const initialSong = songsToAddToQueue[index];
                                     const queueCopy = [...songsToAddToQueue];
