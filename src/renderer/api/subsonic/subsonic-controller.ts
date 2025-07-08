@@ -94,7 +94,7 @@ export const SubsonicController: ControllerEndpoint = {
             };
         }
 
-        await ssApiClient({ server: null, url: cleanServerUrl }).authenticate({
+        const resp = await ssApiClient({ server: null, url: cleanServerUrl }).authenticate({
             query: {
                 c: 'Feishin',
                 f: 'json',
@@ -102,6 +102,10 @@ export const SubsonicController: ControllerEndpoint = {
                 ...credentialParams,
             },
         });
+
+        if (resp.status !== 200) {
+            throw new Error('Failed to log in');
+        }
 
         return {
             credential,
