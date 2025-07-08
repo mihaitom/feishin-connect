@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import { motion, MotionConfigProps } from 'motion/react';
 import { type ImgHTMLAttributes } from 'react';
 import { Img } from 'react-image';
+import { InView } from 'react-intersection-observer';
 
 import styles from './image.module.css';
 
@@ -44,33 +45,41 @@ export function Image({
 }: ImageProps) {
     if (src) {
         return (
-            <Img
-                className={clsx(styles.image, className)}
-                container={(children) => (
-                    <ImageContainer
-                        className={containerClassName}
-                        enableAnimation={enableAnimation}
-                        {...imageContainerProps}
-                    >
-                        {children}
-                    </ImageContainer>
+            <InView>
+                {({ inView, ref }) => (
+                    <div ref={ref}>
+                        {inView && (
+                            <Img
+                                className={clsx(styles.image, className)}
+                                container={(children) => (
+                                    <ImageContainer
+                                        className={containerClassName}
+                                        enableAnimation={enableAnimation}
+                                        {...imageContainerProps}
+                                    >
+                                        {children}
+                                    </ImageContainer>
+                                )}
+                                loader={
+                                    includeLoader ? (
+                                        <ImageContainer className={containerClassName}>
+                                            <ImageLoader className={className} />
+                                        </ImageContainer>
+                                    ) : null
+                                }
+                                src={src}
+                                unloader={
+                                    includeUnloader ? (
+                                        <ImageContainer className={containerClassName}>
+                                            <ImageUnloader className={className} />
+                                        </ImageContainer>
+                                    ) : null
+                                }
+                            />
+                        )}
+                    </div>
                 )}
-                loader={
-                    includeLoader ? (
-                        <ImageContainer className={containerClassName}>
-                            <ImageLoader className={className} />
-                        </ImageContainer>
-                    ) : null
-                }
-                src={src}
-                unloader={
-                    includeUnloader ? (
-                        <ImageContainer className={containerClassName}>
-                            <ImageUnloader className={className} />
-                        </ImageContainer>
-                    ) : null
-                }
-            />
+            </InView>
         );
     }
 
