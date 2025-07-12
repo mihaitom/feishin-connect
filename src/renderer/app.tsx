@@ -197,7 +197,7 @@ export const App = () => {
             <Notifications
                 containerWidth="300px"
                 position="bottom-center"
-                zIndex={5}
+                zIndex={50000}
             />
             <PlayQueueHandlerContext.Provider value={providerValue}>
                 <ContextMenuProvider>
