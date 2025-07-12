@@ -31,15 +31,8 @@ interface AddServerFormProps {
 
 function ServerIconWithLabel({ icon, label }: { icon: string; label: string }) {
     return (
-        <Stack
-            align="center"
-            justify="center"
-        >
-            <img
-                height="50"
-                src={icon}
-                width="50"
-            />
+        <Stack align="center" justify="center">
+            <img height="50" src={icon} width="50" />
             <Text>{label}</Text>
         </Stack>
     );
@@ -47,30 +40,15 @@ function ServerIconWithLabel({ icon, label }: { icon: string; label: string }) {
 
 const SERVER_TYPES = [
     {
-        label: (
-            <ServerIconWithLabel
-                icon={JellyfinIcon}
-                label="Jellyfin"
-            />
-        ),
+        label: <ServerIconWithLabel icon={JellyfinIcon} label="Jellyfin" />,
         value: ServerType.JELLYFIN,
     },
     {
-        label: (
-            <ServerIconWithLabel
-                icon={NavidromeIcon}
-                label="Navidrome"
-            />
-        ),
+        label: <ServerIconWithLabel icon={NavidromeIcon} label="Navidrome" />,
         value: ServerType.NAVIDROME,
     },
     {
-        label: (
-            <ServerIconWithLabel
-                icon={SubsonicIcon}
-                label="OpenSubsonic"
-            />
-        ),
+        label: <ServerIconWithLabel icon={SubsonicIcon} label="OpenSubsonic" />,
         value: ServerType.SUBSONIC,
     },
 ];
@@ -174,10 +152,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <Stack
-                m={5}
-                ref={focusTrapRef}
-            >
+            <Stack m={5} ref={focusTrapRef}>
                 <SegmentedControl
                     data={SERVER_TYPES}
                     disabled={Boolean(serverLock)}
@@ -238,15 +213,9 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                         {...form.getInputProps('legacyAuth', { type: 'checkbox' })}
                     />
                 )}
-                <Group
-                    grow
-                    justify="flex-end"
-                >
+                <Group grow justify="flex-end">
                     {onCancel && (
-                        <Button
-                            onClick={onCancel}
-                            variant="subtle"
-                        >
+                        <Button onClick={onCancel} variant="subtle">
                             {t('common.cancel', { postProcess: 'titleCase' })}
                         </Button>
                     )}
