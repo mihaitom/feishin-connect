@@ -10,6 +10,7 @@ import { ServerList } from '/@/renderer/features/servers';
 import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
+    useAppStore,
     useAppStoreActions,
     useAuthStoreActions,
     useCurrentServer,
@@ -30,7 +31,8 @@ export const AppMenu = () => {
     const serverList = useServerList();
     const { setCurrentServer } = useAuthStoreActions();
     const { collapsed } = useSidebarStore();
-    const { setSideBar } = useAppStoreActions();
+    const { privateMode } = useAppStore();
+    const { setPrivateMode, setSideBar } = useAppStoreActions();
 
     const handleSetCurrentServer = (server: ServerListItem) => {
         navigate(AppRoute.HOME);
@@ -80,6 +82,14 @@ export const AppMenu = () => {
         setSideBar({ collapsed: false });
     };
 
+    const handlePrivateModeOff = () => {
+        setPrivateMode(false);
+    };
+
+    const handlePrivateModeOn = () => {
+        setPrivateMode(true);
+    };
+
     const handleQuit = () => {
         browser?.quit();
     };
@@ -127,7 +137,18 @@ export const AppMenu = () => {
             >
                 {t('page.appMenu.manageServers', { postProcess: 'sentenceCase' })}
             </DropdownMenu.Item>
-
+            {privateMode ? (
+                <DropdownMenu.Item
+                    leftSection={<Icon icon="lockOpen" />}
+                    onClick={handlePrivateModeOff}
+                >
+                    {t('page.appMenu.privateModeOff', { postProcess: 'sentenceCase' })}
+                </DropdownMenu.Item>
+            ) : (
+                <DropdownMenu.Item leftSection={<Icon icon="lock" />} onClick={handlePrivateModeOn}>
+                    {t('page.appMenu.privateModeOn', { postProcess: 'sentenceCase' })}
+                </DropdownMenu.Item>
+            )}
             <DropdownMenu.Divider />
             <DropdownMenu.Label>
                 {t('page.appMenu.selectServer', { postProcess: 'sentenceCase' })}

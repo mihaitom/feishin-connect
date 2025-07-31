@@ -321,6 +321,8 @@
             "goBack": "go back",
             "goForward": "go forward",
             "manageServers": "manage servers",
+            "privateModeOff": "turn private mode off",
+            "privateModeOn": "turn private mode on",
             "openBrowserDevtools": "open browser devtools",
             "quit": "$t(common.quit)",
             "selectServer": "select server",

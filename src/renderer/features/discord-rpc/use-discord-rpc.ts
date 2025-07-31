@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { controller } from '/@/renderer/api/controller';
 import {
     getServerById,
+    useAppStore,
     useDiscordSetttings,
     useGeneralSettings,
     usePlayerStore,
@@ -17,6 +18,7 @@ const discordRpc = isElectron() ? window.api.discordRpc : null;
 export const useDiscordRpc = () => {
     const discordSettings = useDiscordSetttings();
     const generalSettings = useGeneralSettings();
+    const { privateMode } = useAppStore();
     const [lastUniqueId, setlastUniqueId] = useState('');
 
     const setActivity = useCallback(
@@ -139,15 +141,15 @@ export const useDiscordRpc = () => {
     );
 
     useEffect(() => {
-        if (!discordSettings.enabled) return discordRpc?.quit();
+        if (!discordSettings.enabled || privateMode) return discordRpc?.quit();
 
         return () => {
             discordRpc?.quit();
         };
-    }, [discordSettings.clientId, discordSettings.enabled]);
+    }, [discordSettings.clientId, privateMode, discordSettings.enabled]);
 
     useEffect(() => {
-        if (!discordSettings.enabled) return;
+        if (!discordSettings.enabled || privateMode) return;
         const unsubSongChange = usePlayerStore.subscribe(
             (state) => [state.current.song, state.current.time, state.current.status],
             setActivity,
@@ -155,5 +157,5 @@ export const useDiscordRpc = () => {
         return () => {
             unsubSongChange();
         };
-    }, [discordSettings.enabled, setActivity]);
+    }, [discordSettings.enabled, privateMode, setActivity]);
 };
