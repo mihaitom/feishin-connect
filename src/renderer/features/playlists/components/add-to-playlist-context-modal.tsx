@@ -36,6 +36,7 @@ export const AddToPlaylistContextModal = ({
     const { albumId, artistId, genreId, songId } = innerProps;
     const server = useCurrentServer();
     const [isLoading, setIsLoading] = useState(false);
+    const [isDropdownOpened, setIsDropdownOpened] = useState(true);
 
     const addToPlaylistMutation = useAddToPlaylist({});
 
@@ -235,7 +236,13 @@ export const AddToPlaylistContextModal = ({
                         })}
                         searchable
                         size="md"
+                        dropdownOpened={isDropdownOpened}
                         {...form.getInputProps('playlistId')}
+                        onClick={() => setIsDropdownOpened(true)}
+                        onChange={(e) => {
+                            setIsDropdownOpened(false);
+                            form.getInputProps('playlistId').onChange(e);
+                        }}
                     />
                     <Switch
                         label={t('form.addToPlaylist.input', {
