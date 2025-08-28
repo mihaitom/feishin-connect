@@ -19,6 +19,7 @@ import {
 } from '/@/renderer/store';
 import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Icon } from '/@/shared/components/icon/icon';
+import { toast } from '/@/shared/components/toast/toast';
 import { ServerListItem, ServerType } from '/@/shared/types/domain-types';
 
 const browser = isElectron() ? window.api.browser : null;
@@ -84,10 +85,18 @@ export const AppMenu = () => {
 
     const handlePrivateModeOff = () => {
         setPrivateMode(false);
+        toast.info({
+            message: t('form.privateMode.disabled', { postProcess: 'sentenceCase' }),
+            title: t('form.privateMode.title', { postProcess: 'sentenceCase' }),
+        });
     };
 
     const handlePrivateModeOn = () => {
         setPrivateMode(true);
+        toast.info({
+            message: t('form.privateMode.enabled', { postProcess: 'sentenceCase' }),
+            title: t('form.privateMode.title', { postProcess: 'sentenceCase' }),
+        });
     };
 
     const handleQuit = () => {
@@ -139,13 +148,16 @@ export const AppMenu = () => {
             </DropdownMenu.Item>
             {privateMode ? (
                 <DropdownMenu.Item
-                    leftSection={<Icon icon="lockOpen" />}
+                    leftSection={<Icon color="error" icon="lock" />}
                     onClick={handlePrivateModeOff}
                 >
                     {t('page.appMenu.privateModeOff', { postProcess: 'sentenceCase' })}
                 </DropdownMenu.Item>
             ) : (
-                <DropdownMenu.Item leftSection={<Icon icon="lock" />} onClick={handlePrivateModeOn}>
+                <DropdownMenu.Item
+                    leftSection={<Icon icon="lockOpen" />}
+                    onClick={handlePrivateModeOn}
+                >
                     {t('page.appMenu.privateModeOn', { postProcess: 'sentenceCase' })}
                 </DropdownMenu.Item>
             )}
