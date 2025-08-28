@@ -288,6 +288,11 @@
         "updateServer": {
             "success": "server updated successfully",
             "title": "update server"
+        },
+        "privateMode": {
+            "enabled": "private mode enabled, playback status is now hidden from external integrations",
+            "disabled": "private mode disabled, playback status is now visible to enabled external integrations",
+            "title": "private mode"
         }
     },
     "page": {
@@ -321,6 +326,8 @@
             "goBack": "go back",
             "goForward": "go forward",
             "manageServers": "manage servers",
+            "privateModeOff": "turn off private mode",
+            "privateModeOn": "turn on private mode",
             "openBrowserDevtools": "open browser devtools",
             "quit": "$t(common.quit)",
             "selectServer": "select server",
