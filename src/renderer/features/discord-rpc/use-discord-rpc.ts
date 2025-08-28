@@ -1,9 +1,10 @@
-import { SetActivity } from '@xhayper/discord-rpc';
+import { SetActivity, StatusDisplayType } from '@xhayper/discord-rpc';
 import isElectron from 'is-electron';
 import { useCallback, useEffect, useState } from 'react';
 
 import { controller } from '/@/renderer/api/controller';
 import {
+    DiscordDisplayType,
     getServerById,
     useDiscordSetttings,
     useGeneralSettings,
@@ -54,6 +55,12 @@ export const useDiscordRpc = () => {
 
                 const artists = song?.artists.map((artist) => artist.name).join(', ');
 
+                const statusDisplayMap = {
+                    [DiscordDisplayType.ARTIST_NAME]: StatusDisplayType.STATE,
+                    [DiscordDisplayType.FEISHIN]: StatusDisplayType.NAME,
+                    [DiscordDisplayType.SONG_NAME]: StatusDisplayType.DETAILS,
+                };
+
                 const activity: SetActivity = {
                     details: song?.name.padEnd(2, ' ') || 'Idle',
                     instance: false,
@@ -61,7 +68,8 @@ export const useDiscordRpc = () => {
                     largeImageText: song?.album || 'Unknown album',
                     smallImageKey: undefined,
                     smallImageText: current[2] as string,
-                    state: (artists && `By ${artists}`) || 'Unknown artist',
+                    state: artists || 'Unknown artist',
+                    statusDisplayType: statusDisplayMap[discordSettings.displayType],
                     // I would love to use the actual type as opposed to hardcoding to 2,
                     // but manually installing the discord-types package appears to break things
                     type: discordSettings.showAsListening ? 2 : 0,
@@ -134,6 +142,7 @@ export const useDiscordRpc = () => {
             discordSettings.showPaused,
             generalSettings.lastfmApiKey,
             discordSettings.clientId,
+            discordSettings.displayType,
             lastUniqueId,
         ],
     );
