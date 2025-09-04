@@ -157,6 +157,12 @@ export enum BindingActions {
     ZOOM_OUT = 'zoomOut',
 }
 
+export enum DiscordDisplayType {
+    ARTIST_NAME = 'artist',
+    FEISHIN = 'feishin',
+    SONG_NAME = 'song',
+}
+
 export enum GenreTarget {
     ALBUM = 'album',
     TRACK = 'track',
@@ -198,6 +204,7 @@ export interface SettingsState {
     };
     discord: {
         clientId: string;
+        displayType: DiscordDisplayType;
         enabled: boolean;
         showAsListening: boolean;
         showPaused: boolean;
@@ -353,6 +360,7 @@ const initialState: SettingsState = {
     },
     discord: {
         clientId: '1165957668758900787',
+        displayType: DiscordDisplayType.FEISHIN,
         enabled: false,
         showAsListening: false,
         showPaused: true,

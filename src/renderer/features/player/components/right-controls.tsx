@@ -193,13 +193,7 @@ export const RightControls = () => {
     }, [addToFavoritesMutation, removeFromFavoritesMutation, updateRatingMutation]);
 
     return (
-        <Flex
-            align="flex-end"
-            direction="column"
-            h="100%"
-            px="1rem"
-            py="0.5rem"
-        >
+        <Flex align="flex-end" direction="column" h="100%" px="1rem" py="0.5rem">
             <Group h="calc(100% / 3)">
                 {showRating && (
                     <Rating
@@ -209,23 +203,16 @@ export const RightControls = () => {
                     />
                 )}
             </Group>
-            <Group
-                align="center"
-                gap="xs"
-                wrap="nowrap"
-            >
-                <DropdownMenu
-                    arrowOffset={12}
-                    offset={0}
-                    position="top-end"
-                    width={425}
-                    withArrow
-                >
+            <Group align="center" gap="xs" wrap="nowrap">
+                <DropdownMenu arrowOffset={12} offset={0} position="top-end" width={425} withArrow>
                     <DropdownMenu.Target>
                         <ActionIcon
                             icon="mediaSpeed"
                             iconProps={{
                                 size: 'lg',
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
                             }}
                             size="sm"
                             tooltip={{
@@ -268,7 +255,10 @@ export const RightControls = () => {
                         fill: currentSong?.userFavorite ? 'primary' : undefined,
                         size: 'lg',
                     }}
-                    onClick={() => handleToggleFavorite(currentSong)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleFavorite(currentSong);
+                    }}
                     size="sm"
                     tooltip={{
                         label: currentSong?.userFavorite
@@ -283,7 +273,10 @@ export const RightControls = () => {
                     iconProps={{
                         size: 'lg',
                     }}
-                    onClick={handleToggleQueue}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleQueue();
+                    }}
                     size="sm"
                     tooltip={{
                         label: t('player.viewQueue', { postProcess: 'titleCase' }),
@@ -297,7 +290,10 @@ export const RightControls = () => {
                         color: muted ? 'muted' : undefined,
                         size: 'xl',
                     }}
-                    onClick={handleMute}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleMute();
+                    }}
                     onWheel={handleVolumeWheel}
                     size="sm"
                     tooltip={{

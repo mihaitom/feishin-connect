@@ -81,10 +81,7 @@ const formatArtists = (artists: null | RelatedArtist[] | undefined) =>
                     {artist.name || '—'}
                 </Text>
             ) : (
-                <Text
-                    overflow="visible"
-                    size="md"
-                >
+                <Text overflow="visible" size="md">
                     {artist.name || '-'}
                 </Text>
             )}
@@ -119,17 +116,7 @@ const FormatGenre = (item: Album | AlbumArtist | Playlist | Song) => {
 };
 
 const BoolField = (key: boolean) =>
-    key ? (
-        <Icon
-            color="success"
-            icon="check"
-        />
-    ) : (
-        <Icon
-            color="error"
-            icon="x"
-        />
-    );
+    key ? <Icon color="success" icon="check" /> : <Icon color="error" icon="x" />;
 
 const AlbumPropertyMapping: ItemDetailRow<Album>[] = [
     { key: 'name', label: 'common.title' },
@@ -287,6 +274,8 @@ const SongPropertyMapping: ItemDetailRow<Song>[] = [
     { label: 'filter.isCompilation', render: (song) => BoolField(song.compilation || false) },
     { key: 'container', label: 'common.codec' },
     { key: 'bitRate', label: 'common.bitrate', render: (song) => `${song.bitRate} kbps` },
+    { key: 'sampleRate', label: 'common.sampleRate' },
+    { key: 'bitDepth', label: 'common.bitDepth' },
     { key: 'channels', label: 'common.channel_other' },
     { key: 'size', label: 'common.size', render: (song) => formatSizeString(song.size) },
     {
@@ -409,12 +398,7 @@ export const ItemDetailsModal = ({ item }: ItemDetailsModalProps) => {
     }
 
     return (
-        <Table
-            highlightOnHover
-            variant="vertical"
-            withRowBorders={false}
-            withTableBorder
-        >
+        <Table highlightOnHover variant="vertical" withRowBorders={false} withTableBorder>
             <Table.Tbody>{body}</Table.Tbody>
         </Table>
     );

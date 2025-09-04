@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useSendScrobble } from '/@/renderer/features/player/mutations/scrobble-mutation';
-import { usePlayerStore } from '/@/renderer/store';
-import { usePlaybackSettings } from '/@/renderer/store/settings.store';
+import { useAppStore, usePlaybackSettings, usePlayerStore } from '/@/renderer/store';
 import { QueueSong, ServerType } from '/@/shared/types/domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
@@ -34,6 +33,8 @@ Progress Events (Jellyfin only):
     - Sends the 'progress' scrobble event on an interval
 */
 
+type PlayerEvent = [PlayerStatus, number];
+
 type SongEvent = [QueueSong | undefined, number, 1 | 2];
 
 const checkScrobbleConditions = (args: {
@@ -57,13 +58,14 @@ const checkScrobbleConditions = (args: {
 export const useScrobble = () => {
     const scrobbleSettings = usePlaybackSettings().scrobble;
     const isScrobbleEnabled = scrobbleSettings?.enabled;
+    const isPrivateModeEnabled = useAppStore().privateMode;
     const sendScrobble = useSendScrobble();
 
     const [isCurrentSongScrobbled, setIsCurrentSongScrobbled] = useState(false);
 
     const handleScrobbleFromSeek = useCallback(
         (currentTime: number) => {
-            if (!isScrobbleEnabled) return;
+            if (!isScrobbleEnabled || isPrivateModeEnabled) return;
 
             const currentSong = usePlayerStore.getState().current.song;
 
@@ -82,35 +84,48 @@ export const useScrobble = () => {
                 serverId: currentSong?.serverId,
             });
         },
-        [isScrobbleEnabled, sendScrobble],
+        [isScrobbleEnabled, isPrivateModeEnabled, sendScrobble],
     );
 
     const progressIntervalId = useRef<null | ReturnType<typeof setInterval>>(null);
-    const songChangeTimeoutId = useRef<null | ReturnType<typeof setTimeout>>(null);
+    const songChangeTimeoutId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const notifyTimeoutId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
     const handleScrobbleFromSongChange = useCallback(
         (current: SongEvent, previous: SongEvent) => {
-            if (scrobbleSettings?.notify && current[0]) {
+            if (scrobbleSettings?.notify && current[0]?.id) {
+                clearTimeout(notifyTimeoutId.current);
                 const currentSong = current[0];
 
-                const artists =
-                    currentSong.artists?.length > 0
-                        ? currentSong.artists.map((artist) => artist.name).join(', ')
-                        : currentSong.artistName;
+                // Set a delay so that quickly (within a second) switching songs doesn't trigger multiple
+                // notifications
+                notifyTimeoutId.current = setTimeout(() => {
+                    // Only trigger if the song changed, or the player changed. This should be the case
+                    // anyways, but who knows
+                    if (
+                        currentSong.uniqueId !== previous[0]?.uniqueId ||
+                        current[2] !== previous[2]
+                    ) {
+                        const artists =
+                            currentSong.artists?.length > 0
+                                ? currentSong.artists.map((artist) => artist.name).join(', ')
+                                : currentSong.artistName;
 
-                new Notification(`Now playing ${currentSong.name}`, {
-                    body: `by ${artists} on ${currentSong.album}`,
-                    icon: currentSong.imageUrl || undefined,
-                });
+                        new Notification(`Now playing ${currentSong.name}`, {
+                            body: `by ${artists} on ${currentSong.album}`,
+                            icon: currentSong.imageUrl || undefined,
+                        });
+                    }
+                }, 1000);
             }
 
-            if (!isScrobbleEnabled) return;
+            if (!isScrobbleEnabled || isPrivateModeEnabled) return;
 
             if (progressIntervalId.current) {
                 clearInterval(progressIntervalId.current);
                 progressIntervalId.current = null;
             }
 
-            // const currentSong = current[0] as QueueSong | undefined;
             const previousSong = previous[0];
             const previousSongTimeSec = previous[1];
 
@@ -146,7 +161,7 @@ export const useScrobble = () => {
             setIsCurrentSongScrobbled(false);
 
             // Use a timeout to prevent spamming the server with scrobble events when switching through songs quickly
-            clearTimeout(songChangeTimeoutId.current as ReturnType<typeof setTimeout>);
+            clearTimeout(songChangeTimeoutId.current);
             songChangeTimeoutId.current = setTimeout(() => {
                 const currentSong = current[0];
                 // Get the current status from the state, not variable. This is because
@@ -186,6 +201,7 @@ export const useScrobble = () => {
             scrobbleSettings?.scrobbleAtDuration,
             scrobbleSettings?.scrobbleAtPercentage,
             isScrobbleEnabled,
+            isPrivateModeEnabled,
             isCurrentSongScrobbled,
             sendScrobble,
             handleScrobbleFromSeek,
@@ -193,11 +209,8 @@ export const useScrobble = () => {
     );
 
     const handleScrobbleFromStatusChange = useCallback(
-        (
-            current: (number | PlayerStatus | undefined)[],
-            previous: (number | PlayerStatus | undefined)[],
-        ) => {
-            if (!isScrobbleEnabled) return;
+        (current: PlayerEvent, previous: PlayerEvent) => {
+            if (!isScrobbleEnabled || isPrivateModeEnabled) return;
 
             const currentSong = usePlayerStore.getState().current.song;
 
@@ -208,8 +221,8 @@ export const useScrobble = () => {
                     ? usePlayerStore.getState().current.time * 1e7
                     : undefined;
 
-            const currentStatus = current[0] as PlayerStatus;
-            const currentTimeSec = current[1] as number;
+            const currentStatus = current[0];
+            const currentTimeSec = current[1];
 
             // Whenever the player is restarted, send a 'start' scrobble
             if (currentStatus === PlayerStatus.PLAYING) {
@@ -249,12 +262,12 @@ export const useScrobble = () => {
                 });
 
                 if (progressIntervalId.current) {
-                    clearInterval(progressIntervalId.current as ReturnType<typeof setInterval>);
+                    clearInterval(progressIntervalId.current);
                     progressIntervalId.current = null;
                 }
             } else {
                 const isLastTrackInQueue = usePlayerStore.getState().actions.checkIsLastTrack();
-                const previousTimeSec = previous[1] as number;
+                const previousTimeSec = previous[1];
 
                 // If not already scrobbled, send a 'submission' scrobble if conditions are met
                 const shouldSubmitScrobble = checkScrobbleConditions({
@@ -281,6 +294,7 @@ export const useScrobble = () => {
         },
         [
             isScrobbleEnabled,
+            isPrivateModeEnabled,
             sendScrobble,
             handleScrobbleFromSeek,
             scrobbleSettings?.scrobbleAtDuration,
@@ -294,7 +308,7 @@ export const useScrobble = () => {
     // need to perform another check to see if the scrobble conditions are met
     const handleScrobbleFromSongRestart = useCallback(
         (currentTime: number) => {
-            if (!isScrobbleEnabled) return;
+            if (!isScrobbleEnabled || isPrivateModeEnabled) return;
 
             const currentSong = usePlayerStore.getState().current.song;
 
@@ -337,6 +351,7 @@ export const useScrobble = () => {
         },
         [
             isScrobbleEnabled,
+            isPrivateModeEnabled,
             scrobbleSettings?.scrobbleAtDuration,
             scrobbleSettings?.scrobbleAtPercentage,
             isCurrentSongScrobbled,
@@ -358,17 +373,17 @@ export const useScrobble = () => {
                 //    multiple times in a row and playback goes normally (no next/previous)
                 equalityFn: (a, b) =>
                     // compute whether the song changed
-                    (a[0] as QueueSong)?.uniqueId === (b[0] as QueueSong)?.uniqueId &&
+                    a[0]?.uniqueId === b[0]?.uniqueId &&
                     // compute whether the same player: relevant for repeat one and repeat all (one track)
                     a[2] === b[2],
             },
         );
 
         const unsubStatusChange = usePlayerStore.subscribe(
-            (state) => [state.current.status, state.current.time],
+            (state): PlayerEvent => [state.current.status, state.current.time],
             handleScrobbleFromStatusChange,
             {
-                equalityFn: (a, b) => (a[0] as PlayerStatus) === (b[0] as PlayerStatus),
+                equalityFn: (a, b) => a[0] === b[0],
             },
         );
 

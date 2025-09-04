@@ -89,10 +89,7 @@ export function Image({
 function ImageContainer({ children, className, enableAnimation, ...props }: ImageContainerProps) {
     if (!enableAnimation) {
         return (
-            <div
-                className={clsx(styles.imageContainer, className)}
-                {...props}
-            >
+            <div className={clsx(styles.imageContainer, className)} {...props}>
                 {children}
             </div>
         );
@@ -112,10 +109,7 @@ function ImageContainer({ children, className, enableAnimation, ...props }: Imag
 function ImageLoader({ className }: ImageLoaderProps) {
     return (
         <div className={clsx(styles.loader, className)}>
-            <Skeleton
-                className={clsx(styles.skeleton, className)}
-                enableAnimation={true}
-            />
+            <Skeleton className={clsx(styles.skeleton, className)} enableAnimation={true} />
         </div>
     );
 }
@@ -123,10 +117,7 @@ function ImageLoader({ className }: ImageLoaderProps) {
 function ImageUnloader({ className }: ImageUnloaderProps) {
     return (
         <div className={clsx(styles.unloader, className)}>
-            <Icon
-                icon="emptyImage"
-                size="xl"
-            />
+            <Icon icon="emptyImage" size="xl" />
         </div>
     );
 }

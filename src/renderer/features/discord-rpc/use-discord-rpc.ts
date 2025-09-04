@@ -1,10 +1,12 @@
-import { SetActivity } from '@xhayper/discord-rpc';
+import { SetActivity, StatusDisplayType } from '@xhayper/discord-rpc';
 import isElectron from 'is-electron';
 import { useCallback, useEffect, useState } from 'react';
 
 import { controller } from '/@/renderer/api/controller';
 import {
+    DiscordDisplayType,
     getServerById,
+    useAppStore,
     useDiscordSetttings,
     useGeneralSettings,
     usePlayerStore,
@@ -17,6 +19,7 @@ const discordRpc = isElectron() ? window.api.discordRpc : null;
 export const useDiscordRpc = () => {
     const discordSettings = useDiscordSetttings();
     const generalSettings = useGeneralSettings();
+    const { privateMode } = useAppStore();
     const [lastUniqueId, setlastUniqueId] = useState('');
 
     const setActivity = useCallback(
@@ -26,10 +29,8 @@ export const useDiscordRpc = () => {
         ) => {
             if (
                 !current[0] || // No track
-                (current[0] &&
-                    current[2] === 'paused' && // Track paused
-                    (discordSettings.showPaused ? current[1] === 0 : true)) || // Beginning of track (only if show paused setting enabled)
-                (discordSettings.showPaused ? false : current[1] === 0) // Beginning of track (only if show paused setting disabled)
+                current[1] === 0 || // Start of track
+                (current[2] === 'paused' && !discordSettings.showPaused) // Track paused with show paused setting disabled
             )
                 return discordRpc?.clearActivity();
 
@@ -38,11 +39,13 @@ export const useDiscordRpc = () => {
             const trackChanged = lastUniqueId !== song.uniqueId;
 
             /*
-                1. If we jump more then 1.2 seconds from last state, update status to match
-                2. If the current song id is completely different, update status
-                3. If the player state changed, update status
+                1. If the song has just started, update status
+                2. If we jump more then 1.2 seconds from last state, update status to match
+                3. If the current song id is completely different, update status
+                4. If the player state changed, update status
             */
             if (
+                previous[1] === 0 ||
                 Math.abs((current[1] as number) - (previous[1] as number)) > 1.2 ||
                 trackChanged ||
                 current[2] !== previous[2]
@@ -54,6 +57,12 @@ export const useDiscordRpc = () => {
 
                 const artists = song?.artists.map((artist) => artist.name).join(', ');
 
+                const statusDisplayMap = {
+                    [DiscordDisplayType.ARTIST_NAME]: StatusDisplayType.STATE,
+                    [DiscordDisplayType.FEISHIN]: StatusDisplayType.NAME,
+                    [DiscordDisplayType.SONG_NAME]: StatusDisplayType.DETAILS,
+                };
+
                 const activity: SetActivity = {
                     details: song?.name.padEnd(2, ' ') || 'Idle',
                     instance: false,
@@ -61,7 +70,8 @@ export const useDiscordRpc = () => {
                     largeImageText: song?.album || 'Unknown album',
                     smallImageKey: undefined,
                     smallImageText: current[2] as string,
-                    state: (artists && `By ${artists}`) || 'Unknown artist',
+                    state: artists || 'Unknown artist',
+                    statusDisplayType: statusDisplayMap[discordSettings.displayType],
                     // I would love to use the actual type as opposed to hardcoding to 2,
                     // but manually installing the discord-types package appears to break things
                     type: discordSettings.showAsListening ? 2 : 0,
@@ -134,20 +144,21 @@ export const useDiscordRpc = () => {
             discordSettings.showPaused,
             generalSettings.lastfmApiKey,
             discordSettings.clientId,
+            discordSettings.displayType,
             lastUniqueId,
         ],
     );
 
     useEffect(() => {
-        if (!discordSettings.enabled) return discordRpc?.quit();
+        if (!discordSettings.enabled || privateMode) return discordRpc?.quit();
 
         return () => {
             discordRpc?.quit();
         };
-    }, [discordSettings.clientId, discordSettings.enabled]);
+    }, [discordSettings.clientId, privateMode, discordSettings.enabled]);
 
     useEffect(() => {
-        if (!discordSettings.enabled) return;
+        if (!discordSettings.enabled || privateMode) return;
         const unsubSongChange = usePlayerStore.subscribe(
             (state) => [state.current.song, state.current.time, state.current.status],
             setActivity,
@@ -155,5 +166,5 @@ export const useDiscordRpc = () => {
         return () => {
             unsubSongChange();
         };
-    }, [discordSettings.enabled, setActivity]);
+    }, [discordSettings.enabled, privateMode, setActivity]);
 };
