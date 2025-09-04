@@ -230,19 +230,19 @@ export const AddToPlaylistContextModal = ({
                         clearable
                         data={playlistSelect}
                         disabled={playlistList.isLoading}
+                        dropdownOpened={isDropdownOpened}
                         label={t('form.addToPlaylist.input', {
                             context: 'playlists',
                             postProcess: 'titleCase',
                         })}
                         searchable
                         size="md"
-                        dropdownOpened={isDropdownOpened}
                         {...form.getInputProps('playlistId')}
-                        onClick={() => setIsDropdownOpened(true)}
                         onChange={(e) => {
                             setIsDropdownOpened(false);
                             form.getInputProps('playlistId').onChange(e);
                         }}
+                        onClick={() => setIsDropdownOpened(true)}
                     />
                     <Switch
                         label={t('form.addToPlaylist.input', {
