@@ -78,7 +78,7 @@ export const useHandlePlayQueueAdd = () => {
             // Allow this to be undefined for "play shuffled". If undefined, default to 0,
             // otherwise, choose the selected item in the queue
             let initialSongIndex: number | undefined;
-            let toastId: string | null = null;
+            let toastId: null | string = null;
 
             if (byItemType) {
                 let songList: SongListResponse | undefined;
@@ -148,9 +148,9 @@ export const useHandlePlayQueueAdd = () => {
 
                     clearTimeout(timeoutIds.current[fetchId] as ReturnType<typeof setTimeout>);
                     delete timeoutIds.current[fetchId];
-                    if(toastId){
+                    if (toastId) {
                         toast.hide(toastId);
-                    }                 
+                    }
                 } catch (err: any) {
                     if (instanceOfCancellationError(err)) {
                         return null;
