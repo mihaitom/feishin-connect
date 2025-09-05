@@ -23,6 +23,7 @@ import sl from './locales/sl.json';
 import sr from './locales/sr.json';
 import sv from './locales/sv.json';
 import ta from './locales/ta.json';
+import tr from './locales/tr.json';
 import zhHans from './locales/zh-Hans.json';
 import zhHant from './locales/zh-Hant.json';
 
@@ -48,6 +49,7 @@ const resources = {
     sr: { translation: sr },
     sv: { translation: sv },
     ta: { translation: ta },
+    tr: { translation: tr },
     'zh-Hans': { translation: zhHans },
     'zh-Hant': { translation: zhHant },
 };
@@ -136,6 +138,10 @@ export const languages = [
     {
         label: 'Tamil',
         value: 'ta',
+    },
+    {
+        label: 'Türkçe',
+        value: 'tr',
     },
     {
         label: '简体中文',
