@@ -803,6 +803,6 @@ export const useRemoteSettings = () => useSettingsStore((state) => state.remote,
 
 export const useFontSettings = () => useSettingsStore((state) => state.font, shallow);
 
-export const useDiscordSetttings = () => useSettingsStore((state) => state.discord, shallow);
+export const useDiscordSettings = () => useSettingsStore((state) => state.discord, shallow);
 
 export const useCssSettings = () => useSettingsStore((state) => state.css, shallow);
