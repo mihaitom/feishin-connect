@@ -105,7 +105,14 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     const disabledItems = useSettingsStore((state) => state.general.disabledContextMenu);
     const { t } = useTranslation();
     const [opened, setOpened] = useState(false);
-    const clickOutsideRef = useClickOutside(() => setOpened(false));
+
+    const [ratingsRef, setRatingsRef] = useState<HTMLDivElement | null>(null);
+
+    const clickOutsideRef = useClickOutside(
+        () => setOpened(false),
+        ['mousedown', 'touchstart'],
+        [ratingsRef],
+    );
 
     const viewport = useViewportSize();
     const server = useCurrentServer();
@@ -950,12 +957,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                                                                 </ContextMenuButton>
                                                             </HoverCard.Target>
                                                             <HoverCard.Dropdown>
-                                                                <Stack
-                                                                    gap={0}
-                                                                    // Pass in this ref to the stack component as well
-                                                                    // so that it is treated as "inside" for clickOutsideRef
-                                                                    ref={mergedRef}
-                                                                >
+                                                                <Stack gap={0} ref={setRatingsRef}>
                                                                     {contextMenuItems[
                                                                         item.id
                                                                     ].children?.map((child) => (
