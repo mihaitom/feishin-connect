@@ -101,6 +101,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     const { t } = useTranslation();
     const [opened, setOpened] = useState(false);
 
+    const [contextMenuRef, setContextMenuRef] = useState<HTMLDivElement | null>(null);
     const [ratingsRef, setRatingsRef] = useState<HTMLDivElement | null>(null);
     const [rating, setRating] = useState<number>(0);
 
@@ -111,7 +112,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     const clickOutsideRef = useClickOutside(
         () => setOpened(false),
         ['mousedown', 'touchstart'],
-        [ratingsRef],
+        [contextMenuRef, ratingsRef],
     );
 
     const viewport = useViewportSize();
@@ -908,7 +909,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                 <AnimatePresence>
                     {opened && (
                         <ContextMenu minWidth={125} ref={mergedRef} xPos={ctx.xPos} yPos={ctx.yPos}>
-                            <Stack gap={0}>
+                            <Stack gap={0} ref={setContextMenuRef}>
                                 <Stack gap={0} onClick={closeContextMenu}>
                                     {ctx.menuItems?.map((item) => {
                                         return (
