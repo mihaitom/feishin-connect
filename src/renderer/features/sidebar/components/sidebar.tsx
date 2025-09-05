@@ -100,8 +100,6 @@ export const Sidebar = () => {
         return '100%';
     }, [showImage, sidebar.leftWidth, windowBarStyle]);
 
-    console.log('scrollAreaHeight', scrollAreaHeight);
-
     const isCustomWindowBar =
         windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS;
 
