@@ -27,7 +27,8 @@
 }
 
 .image-container {
-    position: relative;
+    position: absolute;
+    bottom: 0;
     width: var(--sidebar-image-height);
     height: var(--sidebar-image-height);
     cursor: pointer;
