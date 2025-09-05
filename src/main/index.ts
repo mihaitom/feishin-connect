@@ -487,6 +487,7 @@ async function createWindow(first = true): Promise<void> {
 
     const menuBuilder = new MenuBuilder(mainWindow);
     menuBuilder.buildMenu();
+    Menu.setApplicationMenu(null);
 
     // Open URLs in the user's browser
     mainWindow.webContents.setWindowOpenHandler((edata) => {
