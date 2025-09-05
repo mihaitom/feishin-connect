@@ -2,6 +2,7 @@ import { PostProcessorModule, StringMap, TOptions } from 'i18next';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import ca from './locales/ca.json';
 import cs from './locales/cs.json';
 import de from './locales/de.json';
 import en from './locales/en.json';
@@ -29,6 +30,7 @@ import zhHans from './locales/zh-Hans.json';
 import zhHant from './locales/zh-Hant.json';
 
 const resources = {
+    ca: { translation: ca },
     cs: { translation: cs },
     de: { translation: de },
     en: { translation: en },
@@ -60,6 +62,10 @@ export const languages = [
     {
         label: 'English',
         value: 'en',
+    },
+    {
+        label: 'Català',
+        value: 'ca',
     },
     {
         label: 'Čeština',
