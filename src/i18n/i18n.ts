@@ -18,6 +18,7 @@ import nbNO from './locales/nb-NO.json';
 import nl from './locales/nl.json';
 import pl from './locales/pl.json';
 import ptBr from './locales/pt-BR.json';
+import pt from './locales/pt.json';
 import ru from './locales/ru.json';
 import sl from './locales/sl.json';
 import sr from './locales/sr.json';
@@ -43,6 +44,7 @@ const resources = {
     'nb-NO': { translation: nbNO },
     nl: { translation: nl },
     pl: { translation: pl },
+    pt: { translation: pt },
     'pt-BR': { translation: ptBr },
     ru: { translation: ru },
     sl: { translation: sl },
@@ -110,6 +112,10 @@ export const languages = [
     {
         label: 'فارسی',
         value: 'fa',
+    },
+    {
+        label: 'Português',
+        value: 'pt',
     },
     {
         label: 'Português (Brasil)',
