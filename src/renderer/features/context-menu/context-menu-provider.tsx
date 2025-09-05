@@ -846,12 +846,12 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                 rightIcon: (
                     <Group ref={setRatingsRef as any}>
                         <Rating
-                            value={rating}
                             onChange={(e) => {
                                 handleUpdateRating(e);
                                 setRating(e);
                             }}
                             size="xs"
+                            value={rating}
                         />
                     </Group>
                 ),
@@ -891,6 +891,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         handleOpenItemDetails,
         handlePlay,
         handleUpdateRating,
+        rating,
     ]);
 
     const mergedRef = useMergedRef(ref, clickOutsideRef);
