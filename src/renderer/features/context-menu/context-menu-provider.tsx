@@ -19,6 +19,7 @@ import {
     useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { generatePath, useNavigate } from 'react-router-dom';
 
 import { api } from '/@/renderer/api';
 import { controller } from '/@/renderer/api/controller';
@@ -34,6 +35,7 @@ import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { useDeletePlaylist } from '/@/renderer/features/playlists';
 import { useRemoveFromPlaylist } from '/@/renderer/features/playlists/mutations/remove-from-playlist-mutation';
 import { useCreateFavorite, useDeleteFavorite, useSetRating } from '/@/renderer/features/shared';
+import { AppRoute } from '/@/renderer/router/routes';
 import {
     getServerById,
     useAuthStore,
@@ -131,6 +133,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     });
 
     const handlePlayQueueAdd = usePlayQueueAdd();
+    const navigate = useNavigate();
 
     const openContextMenu = useCallback(
         (args: OpenContextMenuProps) => {
@@ -734,6 +737,24 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         }
     }, [ctx.data, server]);
 
+    const handleGoToAlbum = useCallback(() => {
+        const item = ctx.data[0];
+        if (item.albumId) {
+            navigate(generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, { albumId: item.albumId }));
+        }
+    }, [ctx.data, navigate]);
+
+    const handleGoToAlbumArtist = useCallback(() => {
+        const item = ctx.data[0];
+        if (item.albumArtists && item.albumArtists.length > 0) {
+            navigate(
+                generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
+                    albumArtistId: item.albumArtists[0].id,
+                }),
+            );
+        }
+    }, [ctx.data, navigate]);
+
     const contextMenuItems: Record<ContextMenuItemType, ContextMenuItem> = useMemo(() => {
         return {
             addToFavorites: {
@@ -771,6 +792,23 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
                 label: t('page.contextMenu.download', { postProcess: 'sentenceCase' }),
                 leftIcon: <Icon icon="download" />,
                 onClick: handleDownload,
+            },
+            goToAlbum: {
+                disabled: ctx.data?.length !== 1 || !ctx.data[0]?.albumId,
+                id: 'goToAlbum',
+                label: t('page.contextMenu.goToAlbum', { postProcess: 'sentenceCase' }),
+                leftIcon: <Icon icon="album" />,
+                onClick: handleGoToAlbum,
+            },
+            goToAlbumArtist: {
+                disabled:
+                    ctx.data?.length !== 1 ||
+                    !ctx.data[0]?.albumArtists ||
+                    ctx.data[0]?.albumArtists?.length === 0,
+                id: 'goToAlbumArtist',
+                label: t('page.contextMenu.goToAlbumArtist', { postProcess: 'sentenceCase' }),
+                leftIcon: <Icon icon="artist" />,
+                onClick: handleGoToAlbumArtist,
             },
             moveToBottomOfQueue: {
                 id: 'moveToBottomOfQueue',
@@ -888,6 +926,8 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         handleRemoveSelected,
         server,
         handleShareItem,
+        handleGoToAlbum,
+        handleGoToAlbumArtist,
         handleOpenItemDetails,
         handlePlay,
         handleUpdateRating,

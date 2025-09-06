@@ -364,6 +364,8 @@
             "setRating": "$t(action.setRating)",
             "playShuffled": "$t(player.shuffle)",
             "shareItem": "share item",
+            "goToAlbum": "go to $t(entity.album_one)",
+            "goToAlbumArtist": "go to $t(entity.albumArtist_one)",
             "showDetails": "get info"
         },
         "fullscreenPlayer": {

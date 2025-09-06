@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router';
 
 import styles from './default-layout.module.css';
 
+import { ContextMenuProvider } from '/@/renderer/features/context-menu';
 import { CommandPalette } from '/@/renderer/features/search/components/command-palette';
 import { MainContent } from '/@/renderer/layouts/default-layout/main-content';
 import { PlayerBar } from '/@/renderer/layouts/default-layout/player-bar';
@@ -73,7 +74,7 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
     ]);
 
     return (
-        <>
+        <ContextMenuProvider>
             <div
                 className={clsx(styles.layout, {
                     [styles.macos]: windowBarStyle === Platform.MACOS,
@@ -86,6 +87,6 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
                 <PlayerBar />
             </div>
             <CommandPalette modalProps={{ handlers, opened }} />
-        </>
+        </ContextMenuProvider>
     );
 };
