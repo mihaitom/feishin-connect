@@ -10,6 +10,7 @@ import { ContextMenuProvider } from '/@/renderer/features/context-menu';
 import { CommandPalette } from '/@/renderer/features/search/components/command-palette';
 import { MainContent } from '/@/renderer/layouts/default-layout/main-content';
 import { PlayerBar } from '/@/renderer/layouts/default-layout/player-bar';
+import { AppRoute } from '/@/renderer/router/routes';
 import { useCommandPalette } from '/@/renderer/store';
 import {
     useGeneralSettings,
@@ -70,6 +71,7 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
         [bindings.globalSearch.hotkey, () => handlers.open()],
         [bindings.browserBack.hotkey, () => navigate(-1)],
         [bindings.browserForward.hotkey, () => navigate(1)],
+        [bindings.navigateHome.hotkey, () => navigate(AppRoute.HOME)],
         ...(isElectron() ? zoomHotkeys : []),
     ]);
 

@@ -580,6 +580,7 @@
         "hotkey_favoritePreviousSong": "favorite $t(common.previousSong)",
         "hotkey_globalSearch": "global search",
         "hotkey_localSearch": "in-page search",
+        "hotkey_navigateHome": "navigate to home",
         "hotkey_playbackNext": "next track",
         "hotkey_playbackPause": "pause",
         "hotkey_playbackPlay": "play",
