@@ -696,6 +696,8 @@
         "skipPlaylistPage_description": "when navigating to a playlist, go to the playlist song list page instead of the default page",
         "startMinimized": "start minimized",
         "startMinimized_description": "start the application in system tray",
+        "preventSleepOnPlayback": "prevent sleep on playback",
+        "preventSleepOnPlayback_description": "prevent the display from sleeping while music is playing",
         "theme": "theme",
         "theme_description": "sets the theme to use for the application",
         "themeDark": "theme (dark)",

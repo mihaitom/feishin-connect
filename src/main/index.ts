@@ -9,6 +9,7 @@ import {
     nativeImage,
     nativeTheme,
     net,
+    powerSaveBlocker,
     protocol,
     Rectangle,
     screen,
@@ -66,6 +67,7 @@ let mainWindow: BrowserWindow | null = null;
 let tray: null | Tray = null;
 let exitFromTray = false;
 let forceQuit = false;
+let powerSaveBlockerId: null | number = null;
 
 if (process.env.NODE_ENV === 'production') {
     import('source-map-support').then((sourceMapSupport) => {
@@ -615,6 +617,28 @@ ipcMain.on(
         createLog(data);
     },
 );
+
+ipcMain.handle('power-save-blocker-start', () => {
+    if (powerSaveBlockerId !== null) {
+        return powerSaveBlockerId;
+    }
+
+    powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
+    return powerSaveBlockerId;
+});
+
+ipcMain.handle('power-save-blocker-stop', () => {
+    if (powerSaveBlockerId !== null) {
+        const stopped = powerSaveBlocker.stop(powerSaveBlockerId);
+        powerSaveBlockerId = null;
+        return stopped;
+    }
+    return false;
+});
+
+ipcMain.handle('power-save-blocker-is-started', () => {
+    return powerSaveBlockerId !== null && powerSaveBlocker.isStarted(powerSaveBlockerId);
+});
 
 app.on('window-all-closed', () => {
     globalShortcut.unregisterAll();

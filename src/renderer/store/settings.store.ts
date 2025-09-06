@@ -320,6 +320,7 @@ export interface SettingsState {
         disableAutoUpdate: boolean;
         exitToTray: boolean;
         minimizeToTray: boolean;
+        preventSleepOnPlayback: boolean;
         startMinimized: boolean;
         tray: boolean;
         windowBarStyle: Platform;
@@ -664,6 +665,7 @@ const initialState: SettingsState = {
         disableAutoUpdate: false,
         exitToTray: false,
         minimizeToTray: false,
+        preventSleepOnPlayback: false,
         startMinimized: false,
         tray: true,
         windowBarStyle: platformDefaultWindowBarStyle,
