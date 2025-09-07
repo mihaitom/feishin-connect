@@ -277,7 +277,10 @@
         "discordDisplayType_songname": "Nombre de la canción",
         "discordDisplayType_artistname": "Nombre(s) del artista(s)",
         "discordDisplayType_description": "Cambia qué estás escuchando en tu estado",
-        "discordDisplayType": "Tipo de pantalla de actividad de {{discord}}"
+        "discordDisplayType": "Tipo de pantalla de actividad de {{discord}}",
+        "hotkey_navigateHome": "Navegar a inicio",
+        "preventSleepOnPlayback": "Evitar entrar en reposo durante la reproducción",
+        "preventSleepOnPlayback_description": "Evita que la pantalla entre en reposo mientras se está reproduciendo música"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
@@ -525,7 +528,9 @@
             "playSimilarSongs": "$t(player.playSimilarSongs)",
             "download": "descargar",
             "playShuffled": "$t(player.shuffle)",
-            "moveToNext": "$t(action.moveToNext)"
+            "moveToNext": "$t(action.moveToNext)",
+            "goToAlbum": "Ir a $t(entity.album_one)",
+            "goToAlbumArtist": "Ir a $t(entity.albumArtist_one)"
         },
         "home": {
             "mostPlayed": "más reproducidos",
