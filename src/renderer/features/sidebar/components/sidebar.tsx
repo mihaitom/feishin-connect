@@ -89,16 +89,12 @@ export const Sidebar = () => {
 
     const scrollAreaHeight = useMemo(() => {
         if (showImage) {
-            if (windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS) {
-                // Subtract the height of the top bar and padding
-                return `calc(100% - 65px - var(--mantine-spacing-xs) - ${sidebar.leftWidth})`;
-            }
-
-            return `calc(100% - ${sidebar.leftWidth})`;
+            // Subtract the height of the top bar and padding
+            return `calc(100% - 65px - var(--mantine-spacing-xs) - ${sidebar.leftWidth})`;
         }
 
         return '100%';
-    }, [showImage, sidebar.leftWidth, windowBarStyle]);
+    }, [showImage, sidebar.leftWidth]);
 
     const isCustomWindowBar =
         windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS;
