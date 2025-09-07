@@ -415,7 +415,10 @@
         "discordDisplayType": "{{discord}} 存在显示类型",
         "discordDisplayType_description": "改变您在状态中收听的内容",
         "discordDisplayType_songname": "歌曲名称",
-        "discordDisplayType_artistname": "艺术家名称"
+        "discordDisplayType_artistname": "艺术家名称",
+        "hotkey_navigateHome": "导航到主页",
+        "preventSleepOnPlayback": "防止播放时进入睡眠状态",
+        "preventSleepOnPlayback_description": "播放音乐时防止显示器进入睡眠状态"
     },
     "error": {
         "remotePortWarning": "重启服务器使新端口生效",
@@ -589,7 +592,9 @@
             "playSimilarSongs": "$t(player.playSimilarSongs)",
             "download": "下载",
             "playShuffled": "$t(player.shuffle)",
-            "moveToNext": "$t(action.moveToNext)"
+            "moveToNext": "$t(action.moveToNext)",
+            "goToAlbum": "转到 $t(entity.album_one)",
+            "goToAlbumArtist": "转到 $t(entity.albumArtist_one)"
         },
         "trackList": {
             "title": "$t(entity.track_other)",
