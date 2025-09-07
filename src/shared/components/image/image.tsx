@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { motion, MotionConfigProps } from 'motion/react';
-import { type ImgHTMLAttributes } from 'react';
+import { ForwardedRef, forwardRef, type ImgHTMLAttributes } from 'react';
 import { Img } from 'react-image';
 import { InView } from 'react-intersection-observer';
 
@@ -50,35 +50,34 @@ export function Image({
         return (
             <InView>
                 {({ inView, ref }) => (
-                    <div ref={ref}>
-                        <Img
-                            className={clsx(styles.image, className)}
-                            container={(children) => (
-                                <ImageContainer
-                                    className={containerClassName}
-                                    enableAnimation={enableAnimation}
-                                    {...imageContainerProps}
-                                >
-                                    {children}
+                    <Img
+                        className={clsx(styles.image, className)}
+                        container={(children) => (
+                            <ImageContainer
+                                className={containerClassName}
+                                enableAnimation={enableAnimation}
+                                ref={ref}
+                                {...imageContainerProps}
+                            >
+                                {children}
+                            </ImageContainer>
+                        )}
+                        loader={
+                            includeLoader ? (
+                                <ImageContainer className={containerClassName}>
+                                    <ImageLoader className={className} />
                                 </ImageContainer>
-                            )}
-                            loader={
-                                includeLoader ? (
-                                    <ImageContainer className={containerClassName}>
-                                        <ImageLoader className={className} />
-                                    </ImageContainer>
-                                ) : null
-                            }
-                            src={inView ? src : FALLBACK_SVG}
-                            unloader={
-                                includeUnloader ? (
-                                    <ImageContainer className={containerClassName}>
-                                        <ImageUnloader className={className} />
-                                    </ImageContainer>
-                                ) : null
-                            }
-                        />
-                    </div>
+                            ) : null
+                        }
+                        src={inView ? src : FALLBACK_SVG}
+                        unloader={
+                            includeUnloader ? (
+                                <ImageContainer className={containerClassName}>
+                                    <ImageUnloader className={className} />
+                                </ImageContainer>
+                            ) : null
+                        }
+                    />
                 )}
             </InView>
         );
@@ -87,25 +86,31 @@ export function Image({
     return <ImageUnloader />;
 }
 
-function ImageContainer({ children, className, enableAnimation, ...props }: ImageContainerProps) {
-    if (!enableAnimation) {
-        return (
-            <div className={clsx(styles.imageContainer, className)} {...props}>
-                {children}
-            </div>
-        );
-    }
+const ImageContainer = forwardRef(
+    (
+        { children, className, enableAnimation, ...props }: ImageContainerProps,
+        ref: ForwardedRef<HTMLDivElement>,
+    ) => {
+        if (!enableAnimation) {
+            return (
+                <div className={clsx(styles.imageContainer, className)} ref={ref} {...props}>
+                    {children}
+                </div>
+            );
+        }
 
-    return (
-        <motion.div
-            className={clsx(styles.imageContainer, className)}
-            {...animationProps.fadeIn}
-            {...props}
-        >
-            {children}
-        </motion.div>
-    );
-}
+        return (
+            <motion.div
+                className={clsx(styles.imageContainer, className)}
+                ref={ref}
+                {...animationProps.fadeIn}
+                {...props}
+            >
+                {children}
+            </motion.div>
+        );
+    },
+);
 
 function ImageLoader({ className }: ImageLoaderProps) {
     return (
@@ -118,7 +123,7 @@ function ImageLoader({ className }: ImageLoaderProps) {
 function ImageUnloader({ className }: ImageUnloaderProps) {
     return (
         <div className={clsx(styles.unloader, className)}>
-            <Icon icon="emptyImage" size="xl" />
+            <Icon color="default" icon="emptyImage" size="xl" />
         </div>
     );
 }
