@@ -283,10 +283,10 @@
             "privateModeOn": "activer le mode privé"
         },
         "home": {
-            "mostPlayed": "plus joués",
-            "newlyAdded": "versions récemment ajoutés",
-            "explore": "explorer depuis votre bibliothèque",
-            "recentlyPlayed": "récemment joué",
+            "mostPlayed": "Les plus joués",
+            "newlyAdded": "Ajoutés récemment",
+            "explore": "explorer depuis la bibliothèque",
+            "recentlyPlayed": "Joués récemment",
             "title": "$t(common.home)"
         },
         "albumDetail": {
@@ -461,13 +461,13 @@
         "mpvExecutablePath": "chemin de l'exécutable mpv",
         "hotkey_rate2": "noter 2 étoiles",
         "playButtonBehavior_description": "définit le comportement par défaut du bouton Jouer/Pause, lors de l'ajout de titres à la file d'attente",
-        "minimumScrobblePercentage_description": "le pourcentage minimum de la chanson qui doit être joué avant qu'elle ne soit scrobbleée",
+        "minimumScrobblePercentage_description": "le pourcentage minimum de la chanson qui doit être joué avant qu'elle ne soit scrobblée",
         "exitToTray": "quitter vers la barre des tâches",
         "hotkey_rate4": "noter 4 étoiles",
         "enableRemote": "activer le serveur de contrôle à distance",
         "showSkipButton_description": "affiche ou cache les boutons suivants et précédents de la barre de lecture",
         "savePlayQueue": "sauvegarder la liste de lecture",
-        "minimumScrobbleSeconds_description": "la durée minimale en secondes de la chanson qui doit être jouée avant qu'elle ne soit scrobbleée",
+        "minimumScrobbleSeconds_description": "la durée minimale en secondes de la chanson qui doit être jouée avant qu'elle ne soit scrobblée",
         "fontType_description": "police intégré vous permet de sélectionner une des polices fourni par Feishin. Police système vous permet de sélectionner une des polices fourni par votre système d'éxploitation. personnalisé vous permet de fournir votre propre police",
         "playButtonBehavior": "comportement du bouton play",
         "playbackStyle_optionNormal": "normale",
@@ -655,7 +655,7 @@
             "input_playlists": "$t(entity.playlist_other)"
         },
         "createPlaylist": {
-            "title": "créer $t(entity.playlist_one)",
+            "title": "créer une $t(entity.playlist_one)",
             "input_public": "publique",
             "success": "$t(entity.playlist_one) créée avec succès",
             "input_description": "$t(common.description)",
