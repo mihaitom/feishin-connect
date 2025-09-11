@@ -103,12 +103,6 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     const { t } = useTranslation();
     const [opened, setOpened] = useState(false);
 
-    const [rating, setRating] = useState<number>(0);
-
-    useEffect(() => {
-        setRating(0);
-    }, [opened]);
-
     const clickOutsideRef = useClickOutside(() => setOpened(false), ['mousedown', 'touchstart']);
 
     const viewport = useViewportSize();
@@ -125,6 +119,16 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         xPos: 0,
         yPos: 0,
     });
+
+    const [rating, setRating] = useState<number>(0);
+
+    useEffect(() => {
+        if (opened && ctx.data.length === 1) {
+            setRating(ctx.data[0].userRating ?? 0);
+        } else {
+            setRating(0);
+        }
+    }, [ctx.data, opened]);
 
     const handlePlayQueueAdd = usePlayQueueAdd();
     const navigate = useNavigate();
