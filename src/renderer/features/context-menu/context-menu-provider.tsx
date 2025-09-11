@@ -123,8 +123,16 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     const [rating, setRating] = useState<number>(0);
 
     useEffect(() => {
-        if (opened && ctx.data.length === 1) {
-            setRating(ctx.data[0].userRating ?? 0);
+        if (opened && ctx.data.length > 0) {
+            if (ctx.data.length === 1) {
+                setRating(ctx.data[0].userRating ?? 0);
+            } else {
+                const firstRating = ctx.data[0].userRating ?? 0;
+                const allSameRating = ctx.data.every(
+                    (item) => (item.userRating ?? 0) === firstRating,
+                );
+                setRating(allSameRating ? firstRating : 0);
+            }
         } else {
             setRating(0);
         }
