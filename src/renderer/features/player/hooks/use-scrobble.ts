@@ -114,6 +114,7 @@ export const useScrobble = () => {
                         new Notification(`${currentSong.name}`, {
                             body: `${artists}\n${currentSong.album}`,
                             icon: currentSong.imageUrl || undefined,
+                            silent: true,
                         });
                     }
                 }, 1000);
