@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import styles from './lyrics.module.css';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { ErrorFallback } from '/@/renderer/features/action-required';
+import { ErrorFallback } from '/@/renderer/features/action-required/components/error-fallback';
 import { translateLyrics } from '/@/renderer/features/lyrics/api/lyric-translate';
 import { lyricsQueries } from '/@/renderer/features/lyrics/api/lyrics-api';
 import { LyricsActions } from '/@/renderer/features/lyrics/lyrics-actions';

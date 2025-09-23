@@ -7,7 +7,8 @@ import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { homeQueries } from '/@/renderer/features/home/api/home-api';
-import { AnimatedPage, LibraryHeaderBar } from '/@/renderer/features/shared';
+import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { AppRoute } from '/@/renderer/router/routes';
 import {

@@ -8,9 +8,9 @@ import { Link } from 'react-router-dom';
 
 import styles from './sidebar-playlist-list.module.css';
 
-import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { CreatePlaylistForm } from '/@/renderer/features/playlists';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
+import { CreatePlaylistForm } from '/@/renderer/features/playlists/components/create-playlist-form';
 import { SidebarItem } from '/@/renderer/features/sidebar/components/sidebar-item';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';

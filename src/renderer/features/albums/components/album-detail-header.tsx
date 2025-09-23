@@ -6,7 +6,8 @@ import { Link } from 'react-router-dom';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
-import { LibraryHeader, useSetRating } from '/@/renderer/features/shared';
+import { LibraryHeader } from '/@/renderer/features/shared/components/library-header';
+import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useSongChange } from '/@/renderer/hooks/use-song-change';
 import { queryClient } from '/@/renderer/lib/react-query';

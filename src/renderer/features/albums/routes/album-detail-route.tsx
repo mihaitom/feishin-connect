@@ -8,8 +8,9 @@ import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/nati
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumDetailContent } from '/@/renderer/features/albums/components/album-detail-content';
 import { AlbumDetailHeader } from '/@/renderer/features/albums/components/album-detail-header';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { AnimatedPage, LibraryHeaderBar } from '/@/renderer/features/shared';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
+import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import { useCurrentServer, useGeneralSettings } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';

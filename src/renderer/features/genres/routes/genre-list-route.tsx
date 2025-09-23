@@ -3,12 +3,12 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useRef } from 'react';
 
-import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
+import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid/virtual-infinite-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
 import { GenreListContent } from '/@/renderer/features/genres/components/genre-list-content';
 import { GenreListHeader } from '/@/renderer/features/genres/components/genre-list-header';
-import { AnimatedPage } from '/@/renderer/features/shared';
+import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { useCurrentServer } from '/@/renderer/store';
 import { useListStoreByKey } from '/@/renderer/store/list.store';
 import { GenreListQuery } from '/@/shared/types/domain-types';

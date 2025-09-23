@@ -16,15 +16,15 @@ import { useParams } from 'react-router';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
+import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid/virtual-grid-wrapper';
 import { getColumnDefs, TablePagination, VirtualTable } from '/@/renderer/components/virtual-table';
 import { useCurrentSongRowStyles } from '/@/renderer/components/virtual-table/hooks/use-current-song-row-styles';
-import { useHandleTableContextMenu } from '/@/renderer/features/context-menu';
 import {
     PLAYLIST_SONG_CONTEXT_MENU_ITEMS,
     SMART_PLAYLIST_SONG_CONTEXT_MENU_ITEMS,
 } from '/@/renderer/features/context-menu/context-menu-items';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { useHandleTableContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { useAppFocus } from '/@/renderer/hooks';
 import {

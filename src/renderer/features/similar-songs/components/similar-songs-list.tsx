@@ -4,11 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid';
+import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid/virtual-grid-wrapper';
 import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-table';
-import { ErrorFallback } from '/@/renderer/features/action-required';
-import { useHandleTableContextMenu } from '/@/renderer/features/context-menu';
+import { ErrorFallback } from '/@/renderer/features/action-required/components/error-fallback';
 import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
+import { useHandleTableContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
 import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-handle-playqueue-add';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { usePlayButtonBehavior, useTableSettings } from '/@/renderer/store';

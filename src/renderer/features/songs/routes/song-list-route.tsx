@@ -5,11 +5,11 @@ import isEmpty from 'lodash/isEmpty';
 import { useCallback, useMemo, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
+import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid/virtual-infinite-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { AnimatedPage } from '/@/renderer/features/shared';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
+import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { SongListContent } from '/@/renderer/features/songs/components/song-list-content';
 import { SongListHeader } from '/@/renderer/features/songs/components/song-list-header';

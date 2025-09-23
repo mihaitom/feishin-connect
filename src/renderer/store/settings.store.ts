@@ -1,5 +1,3 @@
-import type { ContextMenuItemType } from '/@/renderer/features/context-menu';
-
 import isElectron from 'is-electron';
 import { generatePath } from 'react-router';
 import { z } from 'zod';
@@ -9,6 +7,7 @@ import { shallow } from 'zustand/shallow';
 import { createWithEqualityFn } from 'zustand/traditional';
 
 import i18n from '/@/i18n/i18n';
+import { ContextMenuItemType } from '/@/renderer/features/context-menu/events';
 import { AppRoute } from '/@/renderer/router/routes';
 import { usePlayerStore } from '/@/renderer/store/player.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';

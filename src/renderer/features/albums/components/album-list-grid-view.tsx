@@ -7,12 +7,10 @@ import { ListOnScrollProps } from 'react-window';
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { ALBUM_CARD_ROWS } from '/@/renderer/components/card/card-rows';
-import {
-    VirtualGridAutoSizerContainer,
-    VirtualInfiniteGrid,
-} from '/@/renderer/components/virtual-grid';
+import { VirtualGridAutoSizerContainer } from '/@/renderer/components/virtual-grid/virtual-grid-wrapper';
+import { VirtualInfiniteGrid } from '/@/renderer/components/virtual-grid/virtual-infinite-grid';
 import { useListContext } from '/@/renderer/context/list-context';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';

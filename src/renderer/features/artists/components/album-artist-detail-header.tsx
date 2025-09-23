@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
-import { LibraryHeader, useSetRating } from '/@/renderer/features/shared';
+import { LibraryHeader } from '/@/renderer/features/shared/components/library-header';
+import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
 import { formatDurationString } from '/@/renderer/utils';

@@ -16,7 +16,7 @@ import { PlaylistQueryBuilder } from '/@/renderer/features/playlists/components/
 import { SaveAsPlaylistForm } from '/@/renderer/features/playlists/components/save-as-playlist-form';
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
 import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
-import { AnimatedPage } from '/@/renderer/features/shared';
+import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, usePlaylistDetailStore } from '/@/renderer/store';
 import { searchSongs } from '/@/renderer/utils/search-songs';
@@ -215,7 +215,7 @@ const PlaylistDetailSongListRoute = () => {
                         </Group>
                         {isQueryBuilderExpanded && (
                             <PlaylistQueryBuilder
-                                isSaving={createPlaylistMutation?.isLoading}
+                                isSaving={createPlaylistMutation?.isPending}
                                 key={JSON.stringify(detailQuery?.data?.rules)}
                                 limit={detailQuery?.data?.rules?.limit}
                                 onSave={handleSave}

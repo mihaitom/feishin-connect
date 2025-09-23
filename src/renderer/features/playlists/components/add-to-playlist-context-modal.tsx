@@ -8,7 +8,7 @@ import styles from './add-to-playlist-context-modal.module.css';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { getGenreSongsById } from '/@/renderer/features/player';
+import { getGenreSongsById } from '/@/renderer/features/player/utils';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { useAddToPlaylist } from '/@/renderer/features/playlists/mutations/add-to-playlist-mutation';
 import { queryClient } from '/@/renderer/lib/react-query';

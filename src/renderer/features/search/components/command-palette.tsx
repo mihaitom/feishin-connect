@@ -4,7 +4,7 @@ import { Fragment, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate } from 'react-router';
 
-import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { searchQueries } from '/@/renderer/features/search/api/search-api';
 import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
 import { CommandItemSelectable } from '/@/renderer/features/search/components/command-item-selectable';

@@ -21,16 +21,18 @@ import { FullWidthDiscCell } from '/@/renderer/components/virtual-table/cells/fu
 import { useCurrentSongRowStyles } from '/@/renderer/components/virtual-table/hooks/use-current-song-row-styles';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import {
-    useHandleGeneralContextMenu,
-    useHandleTableContextMenu,
-} from '/@/renderer/features/context-menu';
-import {
     ALBUM_CONTEXT_MENU_ITEMS,
     SONG_CONTEXT_MENU_ITEMS,
 } from '/@/renderer/features/context-menu/context-menu-items';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { PlayButton, useCreateFavorite, useDeleteFavorite } from '/@/renderer/features/shared';
+import {
+    useHandleGeneralContextMenu,
+    useHandleTableContextMenu,
+} from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { LibraryBackgroundOverlay } from '/@/renderer/features/shared/components/library-background-overlay';
+import { PlayButton } from '/@/renderer/features/shared/components/play-button';
+import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
+import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { useAppFocus, useContainerQuery } from '/@/renderer/hooks';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';

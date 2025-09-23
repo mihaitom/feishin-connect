@@ -7,14 +7,14 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
+import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid/virtual-infinite-grid';
 import { ListContext } from '/@/renderer/context/list-context';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumListContent } from '/@/renderer/features/albums/components/album-list-content';
 import { AlbumListHeader } from '/@/renderer/features/albums/components/album-list-header';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
-import { AnimatedPage } from '/@/renderer/features/shared';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
+import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentServer, useListFilterByKey } from '/@/renderer/store';
 import {
