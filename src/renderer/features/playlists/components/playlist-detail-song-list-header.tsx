@@ -11,6 +11,7 @@ import { usePlaylistDetail } from '/@/renderer/features/playlists/queries/playli
 import { FilterBar, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useCurrentServer, usePlaylistDetailStore } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import { formatDurationString } from '/@/renderer/utils';
 import { Badge } from '/@/shared/components/badge/badge';
 import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -56,6 +57,7 @@ export const PlaylistDetailSongListHeader = ({
 
     if (detailQuery.isLoading) return null;
     const isSmartPlaylist = detailQuery?.data?.rules;
+    const playlistDuration = detailQuery?.data?.duration;
 
     return (
         <Stack gap={0}>
@@ -63,6 +65,7 @@ export const PlaylistDetailSongListHeader = ({
                 <LibraryHeaderBar>
                     <LibraryHeaderBar.PlayButton onClick={() => handlePlay(playButtonBehavior)} />
                     <LibraryHeaderBar.Title>{detailQuery?.data?.name}</LibraryHeaderBar.Title>
+                    {!!playlistDuration && <Badge>{formatDurationString(playlistDuration)}</Badge>}
                     <Badge>
                         {itemCount === null || itemCount === undefined ? (
                             <SpinnerIcon />
