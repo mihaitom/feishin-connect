@@ -24,6 +24,7 @@ import { Image } from '/@/shared/components/image/image';
 import { Separator } from '/@/shared/components/separator/separator';
 import { Text } from '/@/shared/components/text/text';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
+import { PlaybackSelectors } from '/@/shared/constants/playback-selectors';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
 export const LeftControls = () => {
@@ -104,7 +105,10 @@ export const LeftControls = () => {
                                     openDelay={500}
                                 >
                                     <Image
-                                        className={styles.playerbarImage}
+                                        className={clsx(
+                                            styles.playerbarImage,
+                                            PlaybackSelectors.playerCoverArt,
+                                        )}
                                         loading="eager"
                                         src={currentSong?.imageUrl ?? ''}
                                     />
@@ -139,6 +143,7 @@ export const LeftControls = () => {
                     <div className={styles.lineItem} onClick={stopPropagation}>
                         <Group align="center" gap="xs" wrap="nowrap">
                             <Text
+                                className={PlaybackSelectors.songTitle}
                                 component={Link}
                                 fw={500}
                                 isLink
@@ -164,7 +169,11 @@ export const LeftControls = () => {
                         </Group>
                     </div>
                     <div
-                        className={clsx(styles.lineItem, styles.secondary)}
+                        className={clsx(
+                            styles.lineItem,
+                            styles.secondary,
+                            PlaybackSelectors.songArtist,
+                        )}
                         onClick={stopPropagation}
                     >
                         {artists?.map((artist, index) => (
@@ -190,7 +199,11 @@ export const LeftControls = () => {
                         ))}
                     </div>
                     <div
-                        className={clsx(styles.lineItem, styles.secondary)}
+                        className={clsx(
+                            styles.lineItem,
+                            styles.secondary,
+                            PlaybackSelectors.songAlbum,
+                        )}
                         onClick={stopPropagation}
                     >
                         <Text
