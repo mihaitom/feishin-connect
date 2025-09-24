@@ -277,7 +277,7 @@ export interface GenreListQuery extends BaseQuery<GenreListSort> {
 }
 
 // Genre List
-export type GenreListResponse = BasePaginatedResponse<Genre[]> | null | undefined;
+export type GenreListResponse = BasePaginatedResponse<Genre[]>;
 
 export type GenresResponse = Genre[];
 
@@ -434,7 +434,7 @@ export interface AlbumListQuery extends BaseQuery<AlbumListSort> {
 }
 
 // Album List
-export type AlbumListResponse = BasePaginatedResponse<Album[]> | null | undefined;
+export type AlbumListResponse = BasePaginatedResponse<Album[]>;
 
 type AlbumListSortMap = {
     jellyfin: Record<AlbumListSort, JFAlbumListSort | undefined>;
@@ -527,7 +527,7 @@ export type AlbumDetailArgs = BaseEndpointArgs & { query: AlbumDetailQuery };
 export type AlbumDetailQuery = { id: string };
 
 // Album Detail
-export type AlbumDetailResponse = Album | null | undefined;
+export type AlbumDetailResponse = Album;
 
 export type AlbumInfo = {
     imageUrl: null | string;
@@ -557,7 +557,7 @@ export interface SongListQuery extends BaseQuery<SongListSort> {
 }
 
 // Song List
-export type SongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+export type SongListResponse = BasePaginatedResponse<Song[]>;
 
 type SongListSortMap = {
     jellyfin: Record<SongListSort, JFSongListSort | undefined>;
@@ -659,14 +659,14 @@ export interface AlbumArtistListQuery extends BaseQuery<AlbumArtistListSort> {
 }
 
 // Album Artist List
-export type AlbumArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
+export type AlbumArtistListResponse = BasePaginatedResponse<AlbumArtist[]>;
 
 export type SongDetailArgs = BaseEndpointArgs & { query: SongDetailQuery };
 
 export type SongDetailQuery = { id: string };
 
 // Song Detail
-export type SongDetailResponse = null | Song | undefined;
+export type SongDetailResponse = Song;
 
 type AlbumArtistListSortMap = {
     jellyfin: Record<AlbumArtistListSort, JFAlbumArtistListSort | undefined>;
@@ -753,7 +753,7 @@ export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
 }
 
 // Artist List
-export type ArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
+export type ArtistListResponse = BasePaginatedResponse<AlbumArtist[]>;
 
 type ArtistListSortMap = {
     jellyfin: Record<ArtistListSort, JFArtistListSort | undefined>;
@@ -883,7 +883,7 @@ export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
 }
 
 // Playlist List
-export type PlaylistListResponse = BasePaginatedResponse<Playlist[]> | null | undefined;
+export type PlaylistListResponse = BasePaginatedResponse<Playlist[]>;
 
 export type RatingQuery = {
     item: AnyLibraryItems;
@@ -991,7 +991,7 @@ export type MusicFolderListArgs = BaseEndpointArgs;
 export type MusicFolderListQuery = null;
 
 // Music Folder List
-export type MusicFolderListResponse = BasePaginatedResponse<MusicFolder[]> | null | undefined;
+export type MusicFolderListResponse = BasePaginatedResponse<MusicFolder[]>;
 
 export type PlaylistDetailArgs = BaseEndpointArgs & { query: PlaylistDetailQuery };
 
@@ -1014,7 +1014,7 @@ export type PlaylistSongListQueryClientSide = {
 };
 
 // Playlist Songs
-export type PlaylistSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+export type PlaylistSongListResponse = BasePaginatedResponse<Song[]>;
 
 export type UserListArgs = BaseEndpointArgs & { query: UserListQuery };
 
@@ -1031,7 +1031,7 @@ export interface UserListQuery extends BaseQuery<UserListSort> {
 
 // User list
 // Playlist List
-export type UserListResponse = BasePaginatedResponse<User[]> | null | undefined;
+export type UserListResponse = BasePaginatedResponse<User[]>;
 
 type UserListSortMap = {
     jellyfin: Record<UserListSort, undefined>;
@@ -1128,7 +1128,7 @@ export type ScrobbleQuery = {
 };
 
 // Scrobble
-export type ScrobbleResponse = null | undefined;
+export type ScrobbleResponse = null;
 
 export type SearchAlbumArtistsQuery = {
     albumArtistLimit?: number;
@@ -1183,7 +1183,7 @@ export type TopSongListQuery = {
 };
 
 // Top Songs List
-export type TopSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+export type TopSongListResponse = BasePaginatedResponse<Song[]>;
 
 export const instanceOfCancellationError = (error: any) => {
     return 'revert' in error;
