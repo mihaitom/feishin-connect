@@ -88,7 +88,8 @@ const getSongCoverArtUrl = (args: {
             `/${args.item.Id}` +
             '/Images/Primary' +
             `?width=${size}` +
-            '&quality=96'
+            '&quality=96' +
+            `&tag=${args.item.ImageTags.Primary}`
         );
     }
 

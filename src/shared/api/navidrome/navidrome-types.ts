@@ -80,6 +80,7 @@ const stats = z.object({
 const albumArtist = z.object({
     albumCount: z.number(),
     biography: z.string(),
+    createdAt: z.string().optional(),
     externalInfoUpdatedAt: z.string(),
     externalUrl: z.string(),
     fullText: z.string(),
@@ -99,6 +100,7 @@ const albumArtist = z.object({
     starred: z.boolean(),
     starredAt: z.string(),
     stats: z.record(z.string(), stats).optional(),
+    updatedAt: z.string().optional(),
 });
 
 const albumArtistList = z.array(albumArtist);
