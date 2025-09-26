@@ -5,7 +5,7 @@ import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { SimilarSongsQuery, SongListQuery } from '/@/shared/types/domain-types';
+import { ListCountQuery, SimilarSongsQuery, SongListQuery } from '/@/shared/types/domain-types';
 
 export const songsQueries = {
     list: (args: QueryHookArgs<SongListQuery>, imageSize?: number) => {
@@ -22,7 +22,7 @@ export const songsQueries = {
             ...args.options,
         });
     },
-    listCount: (args: QueryHookArgs<SongListQuery>) => {
+    listCount: (args: QueryHookArgs<ListCountQuery<SongListQuery>>) => {
         return queryOptions({
             queryFn: ({ signal }) => {
                 const server = getServerById(args.serverId);

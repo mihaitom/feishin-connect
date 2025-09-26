@@ -4,7 +4,7 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { AlbumDetailQuery, AlbumListQuery } from '/@/shared/types/domain-types';
+import { AlbumDetailQuery, AlbumListQuery, ListCountQuery } from '/@/shared/types/domain-types';
 
 export const albumQueries = {
     detail: (args: QueryHookArgs<AlbumDetailQuery>) => {
@@ -35,7 +35,7 @@ export const albumQueries = {
             ...args.options,
         });
     },
-    listCount: (args: QueryHookArgs<AlbumListQuery>) => {
+    listCount: (args: QueryHookArgs<ListCountQuery<AlbumListQuery>>) => {
         return queryOptions({
             queryFn: ({ signal }) => {
                 return api.controller.getAlbumListCount({

@@ -8,6 +8,7 @@ import {
     AlbumArtistDetailQuery,
     AlbumArtistListQuery,
     ArtistListQuery,
+    ListCountQuery,
     TopSongListQuery,
 } from '/@/shared/types/domain-types';
 
@@ -36,7 +37,7 @@ export const artistsQueries = {
             ...args.options,
         });
     },
-    albumArtistListCount: (args: QueryHookArgs<AlbumArtistListQuery>) => {
+    albumArtistListCount: (args: QueryHookArgs<ListCountQuery<AlbumArtistListQuery>>) => {
         return queryOptions({
             queryFn: ({ signal }) => {
                 return api.controller.getAlbumArtistListCount({
@@ -51,7 +52,7 @@ export const artistsQueries = {
             ...args.options,
         });
     },
-    artistListCount: (args: QueryHookArgs<ArtistListQuery>) => {
+    artistListCount: (args: QueryHookArgs<ListCountQuery<ArtistListQuery>>) => {
         return queryOptions({
             queryFn: ({ signal }) => {
                 return api.controller.getArtistListCount({
