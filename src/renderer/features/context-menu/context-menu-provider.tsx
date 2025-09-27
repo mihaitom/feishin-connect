@@ -557,7 +557,6 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         });
     }, [
         ctx.context?.playlistId,
-        ctx.context?.tableRef,
         ctx.data,
         ctx.dataNodes,
         removeFromPlaylistMutation,
