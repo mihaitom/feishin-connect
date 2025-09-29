@@ -21,7 +21,7 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { AuthenticationResponse } from '/@/shared/types/domain-types';
+import { AuthenticationResponse, ServerListItem } from '/@/shared/types/domain-types';
 import { DiscoveredServerItem, ServerType, toServerType } from '/@/shared/types/types';
 
 const autodiscover = isElectron() ? window.api.autodiscover : null;
@@ -99,7 +99,8 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
             legacyAuth: false,
             name: (localSettings ? localSettings.env.SERVER_NAME : window.SERVER_NAME) ?? '',
             password: '',
-            savePassword: false,
+            preferInstantMix: undefined,
+            savePassword: undefined,
             type:
                 (localSettings
                     ? localSettings.env.SERVER_TYPE
@@ -151,16 +152,27 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                 });
             }
 
-            const serverItem = {
+            const serverItem: ServerListItem = {
                 credential: data.credential,
                 id: nanoid(),
                 name: values.name,
-                ndCredential: data.ndCredential,
                 type: values.type as ServerType,
                 url: values.url.replace(/\/$/, ''),
                 userId: data.userId,
                 username: data.username,
             };
+
+            if (values.preferInstantMix !== undefined) {
+                serverItem.preferInstantMix = values.preferInstantMix;
+            }
+
+            if (values.savePassword !== undefined) {
+                serverItem.savePassword = values.savePassword;
+            }
+
+            if (data.ndCredential !== undefined) {
+                serverItem.ndCredential = data.ndCredential;
+            }
 
             addServer(serverItem);
             setCurrentServer(serverItem);
@@ -269,6 +281,21 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                                 postProcess: 'titleCase',
                             })}
                             {...form.getInputProps('legacyAuth', { type: 'checkbox' })}
+                        />
+                    )}
+                    {form.values.type === ServerType.JELLYFIN && (
+                        <Checkbox
+                            description={t('form.addServer.input', {
+                                context: 'preferInstantMixDescription',
+                                postProcess: 'sentenceCase',
+                            })}
+                            label={t('form.addServer.input', {
+                                context: 'preferInstantMix',
+                                postProcess: 'titleCase',
+                            })}
+                            {...form.getInputProps('preferInstantMix', {
+                                type: 'checkbox',
+                            })}
                         />
                     )}
                     <Group grow justify="flex-end">

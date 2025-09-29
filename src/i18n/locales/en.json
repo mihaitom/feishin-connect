@@ -237,6 +237,8 @@
             "input_legacyAuthentication": "enable legacy authentication",
             "input_name": "server name",
             "input_password": "password",
+            "input_preferInstantMix": "prefer instant mix",
+            "input_preferInstantMixDescription": "only use instant mix to get similar songs. useful if you have plugins that modify this behavior",
             "input_savePassword": "save password",
             "input_url": "url",
             "input_username": "username",

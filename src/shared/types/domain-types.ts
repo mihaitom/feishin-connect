@@ -89,6 +89,7 @@ export type ServerListItem = {
     id: string;
     name: string;
     ndCredential?: string;
+    preferInstantMix?: boolean;
     savePassword?: boolean;
     type: ServerType;
     url: string;
