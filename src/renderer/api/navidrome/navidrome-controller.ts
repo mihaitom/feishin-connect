@@ -271,6 +271,10 @@ export const NavidromeController: ControllerEndpoint = {
     getAlbumList: async (args) => {
         const { apiClientProps, query } = args;
 
+        const genres = hasFeature(apiClientProps.server, ServerFeature.BFR)
+            ? query.genres
+            : query.genres?.[0];
+
         const res = await ndApiClient(apiClientProps).getAlbumList({
             query: {
                 _end: query.startIndex + (query.limit || 0),
@@ -279,7 +283,7 @@ export const NavidromeController: ControllerEndpoint = {
                 _start: query.startIndex,
                 artist_id: query.artistIds?.[0],
                 compilation: query.compilation,
-                genre_id: query.genres?.[0],
+                genre_id: genres,
                 name: query.searchTerm,
                 ...query._custom?.navidrome,
                 starred: query.favorite,
