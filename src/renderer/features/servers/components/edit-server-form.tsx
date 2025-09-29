@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 
 import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
-import { queryKeys } from '/@/renderer/api/query-keys';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useAuthStoreActions } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
@@ -118,7 +117,7 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
                 }
             }
 
-            queryClient.invalidateQueries({ queryKey: queryKeys.server.root(server.id) });
+            queryClient.removeQueries();
         } catch (err: any) {
             setIsLoading(false);
             return toast.error({ message: err?.message });
