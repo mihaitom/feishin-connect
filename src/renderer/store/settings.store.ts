@@ -96,6 +96,7 @@ export enum HomeItem {
     RANDOM = 'random',
     RECENTLY_ADDED = 'recentlyAdded',
     RECENTLY_PLAYED = 'recentlyPlayed',
+    RECENTLY_RELEASED = 'recentlyReleased',
 }
 
 export type SortableItem<T> = {

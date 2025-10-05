@@ -411,6 +411,7 @@
             "mostPlayed": "most played",
             "newlyAdded": "newly added releases",
             "recentlyPlayed": "recently played",
+            "recentlyReleased": "recently released",
             "title": "$t(common.home)"
         },
         "itemDetail": {
