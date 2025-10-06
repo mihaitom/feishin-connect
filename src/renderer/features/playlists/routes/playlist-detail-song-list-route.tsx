@@ -159,7 +159,7 @@ const PlaylistDetailSongListRoute = () => {
         let items = playlistSongs.data?.items;
 
         if (items) {
-            const searchTerm = page?.table.id[playlistId]?.filter.searchTerm;
+            const searchTerm = page?.table.id[playlistId]?.filter?.searchTerm;
 
             if (searchTerm) {
                 const fuse = new Fuse(items, {
