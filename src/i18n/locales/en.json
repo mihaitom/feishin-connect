@@ -542,7 +542,7 @@
         "discordRichPresence": "{{discord}} rich presence",
         "discordRichPresence_description": "enable playback status in {{discord}} rich presence. Image keys are: {{icon}}, {{playing}}, and {{paused}}",
         "discordServeImage": "serve {{discord}} images from server",
-        "discordServeImage_description": "share cover art for {{discord}} rich presence from server itself, only available for jellyfin and navidrome",
+        "discordServeImage_description": "share cover art for {{discord}} rich presence from server itself, only available for jellyfin and navidrome. {{discord}} uses a bot to fetch images, so your server must be reachable from the public internet.",
         "discordUpdateInterval": "{{discord}} rich presence update interval",
         "discordUpdateInterval_description": "the time in seconds between each update (minimum 15 seconds)",
         "discordDisplayType": "{{discord}} presence display type",
