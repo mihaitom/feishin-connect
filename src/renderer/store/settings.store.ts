@@ -231,6 +231,8 @@ export interface SettingsState {
         albumArtRes?: null | number;
         albumBackground: boolean;
         albumBackgroundBlur: number;
+        artistBackground: boolean;
+        artistBackgroundBlur: number;
         artistItems: SortableItem<ArtistItem>[];
         buttonSize: number;
         disabledContextMenu: { [k in ContextMenuItemType]?: boolean };
@@ -389,6 +391,8 @@ const initialState: SettingsState = {
         albumArtRes: undefined,
         albumBackground: false,
         albumBackgroundBlur: 6,
+        artistBackground: false,
+        artistBackgroundBlur: 6,
         artistItems,
         buttonSize: 15,
         disabledContextMenu: {},
