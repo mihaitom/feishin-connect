@@ -176,5 +176,9 @@
             "esbuild"
         ]
     },
+    "build": {
+        "generateUpdateFilesForAllChannels": true,
+        "allowDowngrade": true
+    },
     "productName": "feishin"
 }
