@@ -333,6 +333,7 @@ export interface SettingsState {
         exitToTray: boolean;
         minimizeToTray: boolean;
         preventSleepOnPlayback: boolean;
+        releaseChannel: 'beta' | 'latest';
         startMinimized: boolean;
         tray: boolean;
         windowBarStyle: Platform;
@@ -682,6 +683,7 @@ const initialState: SettingsState = {
         exitToTray: false,
         minimizeToTray: false,
         preventSleepOnPlayback: false,
+        releaseChannel: 'latest',
         startMinimized: false,
         tray: true,
         windowBarStyle: platformDefaultWindowBarStyle,

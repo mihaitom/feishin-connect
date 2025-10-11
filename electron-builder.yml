@@ -49,3 +49,4 @@ publish:
     provider: github
     owner: jeffvli
     repo: feishin
+generateUpdatesFilesForAllChannels: true

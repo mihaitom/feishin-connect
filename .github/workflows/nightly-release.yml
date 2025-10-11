@@ -52,58 +52,58 @@ jobs:
 
                   Write-Host "Updated package.json version to: $newVersion"
 
-            # - name: Build and Publish releases (Windows)
-            #   if: matrix.os == 'windows-latest'
-            #   env:
-            #       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            #   uses: nick-invision/retry@v2.8.2
-            #   with:
-            #       timeout_minutes: 30
-            #       max_attempts: 3
-            #       retry_on: error
-            #       command: |
-            #           pnpm run package:win
-            #           pnpm run publish:win
-            #       on_retry_command: pnpm cache delete
+            - name: Build and Publish releases (Windows)
+              if: matrix.os == 'windows-latest'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              uses: nick-invision/retry@v2.8.2
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run package:win
+                      pnpm run publish:win
+                  on_retry_command: pnpm cache delete
 
-            # - name: Build and Publish releases (macOS)
-            #   if: matrix.os == 'macos-latest'
-            #   env:
-            #       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            #   uses: nick-invision/retry@v2.8.2
-            #   with:
-            #       timeout_minutes: 30
-            #       max_attempts: 3
-            #       retry_on: error
-            #       command: |
-            #           pnpm run package:mac
-            #           pnpm run publish:mac
-            #       on_retry_command: pnpm cache delete
+            - name: Build and Publish releases (macOS)
+              if: matrix.os == 'macos-latest'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              uses: nick-invision/retry@v2.8.2
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run package:mac
+                      pnpm run publish:mac
+                  on_retry_command: pnpm cache delete
 
-            # - name: Build and Publish releases (Linux)
-            #   if: matrix.os == 'ubuntu-latest'
-            #   env:
-            #       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            #   uses: nick-invision/retry@v2.8.2
-            #   with:
-            #       timeout_minutes: 30
-            #       max_attempts: 3
-            #       retry_on: error
-            #       command: |
-            #           pnpm run package:linux
-            #           pnpm run publish:linux
-            #       on_retry_command: pnpm cache delete
+            - name: Build and Publish releases (Linux)
+              if: matrix.os == 'ubuntu-latest'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              uses: nick-invision/retry@v2.8.2
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run package:linux
+                      pnpm run publish:linux
+                  on_retry_command: pnpm cache delete
 
-            # - name: Build and Publish releases (Linux ARM64)
-            #   if: matrix.os == 'ubuntu-latest'
-            #   env:
-            #       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            #   uses: nick-invision/retry@v2.8.2
-            #   with:
-            #       timeout_minutes: 30
-            #       max_attempts: 3
-            #       retry_on: error
-            #       command: |
-            #           pnpm run package:linux-arm64
-            #           pnpm run publish:linux-arm64
-            #       on_retry_command: pnpm cache delete
+            - name: Build and Publish releases (Linux ARM64)
+              if: matrix.os == 'ubuntu-latest'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              uses: nick-invision/retry@v2.8.2
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run package:linux-arm64
+                      pnpm run publish:linux-arm64
+                  on_retry_command: pnpm cache delete
