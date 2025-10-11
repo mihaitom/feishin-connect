@@ -26,30 +26,31 @@ jobs:
               run: pnpm install
 
             - name: Bump version and add beta suffix
+              shell: pwsh
               run: |
                   # Get current version from package.json
-                  CURRENT_VERSION=$(node -p "require('./package.json').version")
-                  echo "Current version: $CURRENT_VERSION"
+                  $currentVersion = (Get-Content package.json | ConvertFrom-Json).version
+                  Write-Host "Current version: $currentVersion"
 
                   # Extract major, minor, patch components
-                  IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+                  $versionParts = $currentVersion.Split('.')
+                  $major = [int]$versionParts[0]
+                  $minor = [int]$versionParts[1]
+                  $patch = [int]$versionParts[2]
 
                   # Increment patch version
-                  NEW_PATCH=$((PATCH + 1))
+                  $newPatch = $patch + 1
 
                   # Create new version with beta suffix
-                  NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}-beta"
-                  echo "New version: $NEW_VERSION"
+                  $newVersion = "$major.$minor.$newPatch-beta"
+                  Write-Host "New version: $newVersion"
 
                   # Update package.json
-                  node -e "
-                  const fs = require('fs');
-                  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-                  pkg.version = '$NEW_VERSION';
-                  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4) + '\n');
-                  "
+                  $packageJson = Get-Content package.json | ConvertFrom-Json
+                  $packageJson.version = $newVersion
+                  $packageJson | ConvertTo-Json -Depth 10 | Set-Content package.json
 
-                  echo "Updated package.json version to: $NEW_VERSION"
+                  Write-Host "Updated package.json version to: $newVersion"
 
             # - name: Build and Publish releases (Windows)
             #   if: matrix.os == 'windows-latest'
