@@ -530,7 +530,7 @@
         "customFontPath": "custom font path",
         "customFontPath_description": "sets the path to the custom font to use for the application",
         "disableAutomaticUpdates": "disable automatic updates",
-        "releaseChannel_optionLatest": "latest",
+        "releaseChannel_optionLatest": "stable",
         "releaseChannel_optionBeta": "beta",
         "releaseChannel": "release channel",
         "releaseChannel_description": "choose between stable releases or beta releases for automatic updates",
