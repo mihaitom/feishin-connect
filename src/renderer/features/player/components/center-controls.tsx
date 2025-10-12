@@ -11,6 +11,7 @@ import { PlayButton, PlayerButton } from '/@/renderer/features/player/components
 import { PlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 import { openShuffleAllModal } from '/@/renderer/features/player/components/shuffle-all-modal';
 import { useCenterControls } from '/@/renderer/features/player/hooks/use-center-controls';
+import { useMediaSession } from '/@/renderer/features/player/hooks/use-media-session';
 import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import {
     useAppStore,
@@ -82,6 +83,8 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
             () => handleSkipForward(skip?.skipForwardSeconds || 5),
         ],
     ]);
+
+    useMediaSession();
 
     return (
         <>
