@@ -16,7 +16,6 @@ win:
         - zip
         - nsis
     icon: assets/icons/icon.png
-    generateUpdatesFilesForAllChannels: true
 
 nsis:
     allowToChangeInstallationDirectory: true
@@ -38,7 +37,6 @@ mac:
     entitlementsInherit: assets/entitlements.mac.plist
     gatekeeperAssess: false
     notarize: false
-    generateUpdatesFilesForAllChannels: true
 
 dmg:
     contents: [{ x: 130, y: 220 }, { x: 410, y: 220, type: link, path: /Applications }]
@@ -50,10 +48,10 @@ linux:
     category: AudioVideo;Audio;Player
     icon: assets/icons/icon.png
     artifactName: ${productName}-${os}-${arch}.${ext}
-    generateUpdatesFilesForAllChannels: true
 
 npmRebuild: false
 publish:
     provider: github
     owner: jeffvli
     repo: feishin
+    channel: latest

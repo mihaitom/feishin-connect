@@ -151,8 +151,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run package:win
-                      pnpm run publish:win
+                      pnpm run publish:win:beta
                   on_retry_command: pnpm cache delete
 
             - name: Build and Publish releases (macOS)
@@ -166,8 +165,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run package:mac
-                      pnpm run publish:mac
+                      pnpm run publish:mac:beta
                   on_retry_command: pnpm cache delete
 
             - name: Build and Publish releases (Linux)
@@ -181,8 +179,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run package:linux
-                      pnpm run publish:linux
+                      pnpm run publish:linux:beta
                   on_retry_command: pnpm cache delete
 
             - name: Build and Publish releases (Linux ARM64)
@@ -196,8 +193,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run package:linux-arm64
-                      pnpm run publish:linux-arm64
+                      pnpm run publish:linux-arm64:beta
                   on_retry_command: pnpm cache delete
 
     edit-release:
