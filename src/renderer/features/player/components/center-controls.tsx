@@ -84,7 +84,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
         ],
     ]);
 
-    useMediaSession();
+    useMediaSession(playersRef);
 
     return (
         <>
