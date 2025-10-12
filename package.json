@@ -51,7 +51,7 @@
         "publish:mac": "pnpm run build && electron-builder --publish always --mac",
         "publish:mac:beta": "pnpm run build && electron-builder --config electron-builder-beta.yml --publish always --mac",
         "publish:win": "pnpm run build && electron-builder --publish always --win",
-        "publish:win:beta": "pnpm run build && electron-builder --config electron-builder-beta.yml --publish never --win",
+        "publish:win:beta": "pnpm run build && electron-builder --config electron-builder-beta.yml --publish always --win",
         "start": "electron-vite preview",
         "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
         "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
