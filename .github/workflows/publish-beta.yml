@@ -218,7 +218,7 @@ jobs:
 
                       # Find the latest non-prerelease tag
                       Write-Host "Finding latest non-prerelease tag..."
-                      $latestNonPrerelease = gh release list --limit 100 --json tagName,isPrerelease | ConvertFrom-Json | Where-Object { $_.isPrerelease -eq $false } | Select-Object -First 1
+                      $latestNonPrerelease = gh release list --limit 100 --json tagName,isPrerelease | ConvertFrom-Json | Where-Object { $_.isPrerelease -eq $false -and $_.tagName -ne $tagVersion } | Select-Object -First 1
 
                         if ($latestNonPrerelease) {
                             $latestTag = $latestNonPrerelease.tagName
@@ -316,10 +316,10 @@ jobs:
                             $releaseNotes = "## Beta Release`n`nThis is a beta release."
                         }
 
-                      # Update the release with new title and notes and set as prerelease
-                      Write-Host "Updating release with title 'Beta' and new notes and set as prerelease..."
-                      gh release edit $tagVersion --title "Beta" --notes "$releaseNotes" --prerelease
-                      Write-Host "Successfully updated release title to 'Beta' and added commit notes and set as prerelease"
+                      # Update the release with new title and notes
+                      Write-Host "Updating release with title 'Beta' and new notes..."
+                      gh release edit $tagVersion --title "Beta" --notes "$releaseNotes"
+                      Write-Host "Successfully updated release title to 'Beta' and added commit notes"
                   } else {
                       Write-Host "No release found with tag $tagVersion"
                   }
