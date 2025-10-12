@@ -144,7 +144,6 @@ jobs:
               if: matrix.os == 'windows-latest'
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  EP_PRE_RELEASE: true
               uses: nick-invision/retry@v2.8.2
               with:
                   timeout_minutes: 30
@@ -158,7 +157,6 @@ jobs:
               if: matrix.os == 'macos-latest'
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  EP_PRE_RELEASE: true
               uses: nick-invision/retry@v2.8.2
               with:
                   timeout_minutes: 30
@@ -172,7 +170,6 @@ jobs:
               if: matrix.os == 'ubuntu-latest'
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  EP_PRE_RELEASE: true
               uses: nick-invision/retry@v2.8.2
               with:
                   timeout_minutes: 30
@@ -186,7 +183,6 @@ jobs:
               if: matrix.os == 'ubuntu-latest'
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  EP_PRE_RELEASE: true
               uses: nick-invision/retry@v2.8.2
               with:
                   timeout_minutes: 30
