@@ -99,19 +99,19 @@ jobs:
                       Write-Host "No existing release found with tag $versionWithBeta"
                   }
 
-                  # Find and delete any releases with title "Beta"
-                  Write-Host "Searching for releases with title 'Beta'..."
-                  $betaReleases = gh release list --limit 100 --json tagName,title | ConvertFrom-Json | Where-Object { $_.title -eq "Beta" }
+                  # Find and delete any releases with isPrerelease "true"
+                  Write-Host "Searching for releases with isPrerelease 'true'..."
+                  $betaReleases = gh release list --limit 30 --json tagName,isPrerelease,name | ConvertFrom-Json | Where-Object { $_.isPrerelease -eq $true }
 
                   if ($betaReleases) {
-                      Write-Host "Found $($betaReleases.Count) release(s) with title 'Beta':"
+                      Write-Host "Found $($betaReleases.Count) release(s) with isPrerelease 'true':"
                       foreach ($release in $betaReleases) {
-                          Write-Host "  - Tag: $($release.tagName), Title: $($release.title)"
+                          Write-Host "  - Tag: $($release.tagName), Title: $($release.name)"
                           gh release delete $release.tagName --yes
                           Write-Host "  Deleted release with tag: $($release.tagName)"
                       }
                   } else {
-                      Write-Host "No releases found with title 'Beta'"
+                      Write-Host "No releases found with isPrerelease 'true'"
                   }
 
                   # Delete the tag if it exists (in case release was deleted but tag remained)
