@@ -85,22 +85,10 @@ jobs:
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  # Get the version that was set in the previous step
-                  $versionWithBeta = (Get-Content package.json | ConvertFrom-Json).version
-                  Write-Host "Checking for existing releases with tag: $versionWithBeta"
-
-                  # Delete release by tag if it exists
-                  $releaseExists = gh release view $versionWithBeta 2>$null
-                  if ($LASTEXITCODE -eq 0) {
-                      Write-Host "Found existing release with tag $versionWithBeta, deleting it..."
-                      gh release delete $versionWithBeta --yes
-                      Write-Host "Successfully deleted existing release with tag $versionWithBeta"
-                  } else {
-                      Write-Host "No existing release found with tag $versionWithBeta"
-                  }
-
                   # Find and delete any releases with isPrerelease "true"
+                  Write-Host "Deleting existing prereleases..."
                   Write-Host "Searching for releases with isPrerelease 'true'..."
+
                   $betaReleases = gh release list --limit 30 --json tagName,isPrerelease,name | ConvertFrom-Json | Where-Object { $_.isPrerelease -eq $true }
 
                   if ($betaReleases) {
@@ -112,16 +100,6 @@ jobs:
                       }
                   } else {
                       Write-Host "No releases found with isPrerelease 'true'"
-                  }
-
-                  # Delete the tag if it exists (in case release was deleted but tag remained)
-                  $tagExists = gh api repos/:owner/:repo/git/refs/tags/$versionWithBeta 2>$null
-                  if ($LASTEXITCODE -eq 0) {
-                      Write-Host "Found existing tag $versionWithBeta, deleting it..."
-                      gh api -X DELETE repos/:owner/:repo/git/refs/tags/$versionWithBeta
-                      Write-Host "Successfully deleted tag $versionWithBeta"
-                  } else {
-                      Write-Host "No existing tag found: $versionWithBeta"
                   }
 
             - name: Build and Publish releases (Windows)
