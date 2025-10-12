@@ -67,7 +67,7 @@ Rename the icon to `Feishin-linux-x86_64.png`.
 
 Save the [example desktop file](https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/feishin.desktop) as `~/.local/share/applications/feishin.desktop`.
 
-You will now see Feishin show up in your menu.
+You will now see Feishin show up in your menu. The properties in the example desktop file may need to be modified to match your system.
 
 ### Web and Docker
 
