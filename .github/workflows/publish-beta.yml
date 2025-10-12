@@ -200,14 +200,14 @@ jobs:
                       pnpm run publish:linux-arm64
                   on_retry_command: pnpm cache delete
 
-    rename-release:
+    edit-release:
         needs: [prepare, publish]
         runs-on: ubuntu-latest
         steps:
             - name: Checkout git repo
               uses: actions/checkout@v1
 
-            - name: Rename release title to Beta
+            - name: Edit release with commits and title
               shell: pwsh
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -215,19 +215,119 @@ jobs:
                   # Get the version from the prepare job
                   $versionWithBeta = "${{ needs.prepare.outputs.version }}"
                   $tagVersion = "v" + $versionWithBeta
-                  Write-Host "Renaming release title for tag: $tagVersion"
+                  Write-Host "Editing release for tag: $tagVersion"
 
                   # Check if release exists
                   $releaseExists = gh release view $tagVersion 2>$null
                   if ($LASTEXITCODE -eq 0) {
-                      Write-Host "Found release with tag $tagVersion, renaming title to 'Beta'..."
+                      Write-Host "Found release with tag $tagVersion"
 
                       # Get current release notes
-                      $releaseNotes = gh release view $tagVersion --json body --jq '.body'
 
-                      # Update the release with new title
+                      # Find the latest non-prerelease tag
+                      Write-Host "Finding latest non-prerelease tag..."
+                      $latestNonPrerelease = gh release list --limit 100 --json tagName,isPrerelease | ConvertFrom-Json | Where-Object { $_.isPrerelease -eq $false } | Select-Object -First 1
+
+                        if ($latestNonPrerelease) {
+                            $latestTag = $latestNonPrerelease.tagName
+                            Write-Host "Latest non-prerelease tag: $latestTag"
+
+                            # Get commits between latest non-prerelease and current HEAD
+                            Write-Host "Getting commits between $latestTag and HEAD..."
+
+                            # Use proper git range syntax and handle PowerShell string interpolation
+                            $gitRange = "$latestTag..HEAD"
+                            Write-Host "Git range: $gitRange"
+
+                            # Get commits using proper git command with datetime
+                            $commits = git log --oneline --pretty=format:"%ad|%s|%h" --date=short $gitRange
+
+                            # Check if commits exist
+                            if ($commits -and $commits.Trim() -ne "") {
+                                Write-Host "Found commits:"
+                                Write-Host $commits
+
+                                # Group commits by date
+                                $groupedCommits = @{}
+                                foreach ($line in $commits) {
+                                    if ($line.Trim() -ne "") {
+                                        $parts = $line.Split('|')
+                                        $date = $parts[0]
+                                        $message = $parts[1]
+                                        $hash = $parts[2]
+
+                                        if (-not $groupedCommits.ContainsKey($date)) {
+                                            $groupedCommits[$date] = @()
+                                        }
+                                        $groupedCommits[$date] += "- $message ($hash)"
+                                    }
+                                }
+
+                                # Build formatted release notes grouped by date
+                                $commitNotes = "## Changes since $latestTag`n`n"
+                                $sortedDates = $groupedCommits.Keys | Sort-Object -Descending
+                                foreach ($date in $sortedDates) {
+                                    $commitNotes += "### $date`n"
+                                    foreach ($commit in $groupedCommits[$date]) {
+                                        $commitNotes += "$commit`n"
+                                    }
+                                    $commitNotes += "`n"
+                                }
+
+                                $releaseNotes = $commitNotes
+                            } else {
+                                Write-Host "No commits found between $latestTag and HEAD"
+                                Write-Host "Trying alternative approach..."
+
+                                # Alternative: get commits since the tag (not range) with datetime
+                                $commits = git log --oneline --pretty=format:"%ad|%s|%h" --date=short $latestTag.. --not $latestTag
+
+                                if ($commits -and $commits.Trim() -ne "") {
+                                    Write-Host "Found commits with alternative method:"
+                                    Write-Host $commits
+
+                                    # Group commits by date
+                                    $groupedCommits = @{}
+                                    foreach ($line in $commits) {
+                                        if ($line.Trim() -ne "") {
+                                            $parts = $line.Split('|')
+                                            $date = $parts[0]
+                                            $message = $parts[1]
+                                            $hash = $parts[2]
+
+                                            if (-not $groupedCommits.ContainsKey($date)) {
+                                                $groupedCommits[$date] = @()
+                                            }
+                                            $groupedCommits[$date] += "- $message ($hash)"
+                                        }
+                                    }
+
+                                    # Build formatted release notes grouped by date
+                                    $commitNotes = "## Changes since $latestTag`n`n"
+                                    $sortedDates = $groupedCommits.Keys | Sort-Object -Descending
+                                    foreach ($date in $sortedDates) {
+                                        $commitNotes += "### $date`n"
+                                        foreach ($commit in $groupedCommits[$date]) {
+                                            $commitNotes += "$commit`n"
+                                        }
+                                        $commitNotes += "`n"
+                                    }
+
+                                    $releaseNotes = $commitNotes
+                                } else {
+                                    Write-Host "Still no commits found, using basic release notes"
+                                    $releaseNotes = "## Beta Release`n`nThis is a beta release."
+                                }
+                            }
+                        } else {
+                            Write-Host "No non-prerelease tags found, using basic release notes"
+                            $releaseNotes = "## Beta Release`n`nThis is a beta release."
+                        }
+
+                      # Update the release with new title and notes
+                      Write-Host "Updating release with title 'Beta' and new notes..."
                       gh release edit $tagVersion --title "Beta" --notes "$releaseNotes"
-                      Write-Host "Successfully renamed release title to 'Beta'"
+                      Write-Host "Successfully updated release title to 'Beta' and added commit notes"
                   } else {
                       Write-Host "No release found with tag $tagVersion"
                   }
