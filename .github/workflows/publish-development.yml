@@ -1,0 +1,160 @@
+name: Publish Development (Manual)
+
+on:
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Semantic version number (e.g., 1.0.0) - beta suffix will be added automatically'
+                required: false
+                type: string
+
+jobs:
+    publish:
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            matrix:
+                os: [windows-latest, macos-latest, ubuntu-latest]
+
+        steps:
+            - name: Checkout git repo
+              uses: actions/checkout@v1
+
+            - name: Install Node and PNPM
+              uses: pnpm/action-setup@v4.1.0
+              with:
+                  version: 9
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Validate and set version with beta suffix
+              shell: pwsh
+              run: |
+                  $inputVersion = "${{ github.event.inputs.version }}"
+                  Write-Host "Input version: $inputVersion"
+
+                  if ($inputVersion -eq "" -or $inputVersion -eq "null") {
+                      # No input version provided, auto-increment patch version
+                      Write-Host "No version provided, auto-incrementing patch version..."
+
+                      # Get current version from package.json
+                      $currentVersion = (Get-Content package.json | ConvertFrom-Json).version
+                      Write-Host "Current version: $currentVersion"
+
+                      # Remove any existing suffix (like -beta) to get clean semantic version
+                      $cleanVersion = $currentVersion -replace '-.*$', ''
+
+                      # Extract major, minor, patch components
+                      $versionParts = $cleanVersion.Split('.')
+                      if ($versionParts.Length -ne 3) {
+                          Write-Error "Current version format is invalid: $cleanVersion"
+                          exit 1
+                      }
+
+                      $major = [int]$versionParts[0]
+                      $minor = [int]$versionParts[1]
+                      $patch = [int]$versionParts[2]
+
+                      # Increment patch version
+                      $newPatch = $patch + 1
+                      $inputVersion = "$major.$minor.$newPatch"
+                      Write-Host "Auto-generated version: $inputVersion"
+                  } else {
+                      # Validate semantic version format (major.minor.patch)
+                      $versionPattern = '^\d+\.\d+\.\d+$'
+                      if ($inputVersion -notmatch $versionPattern) {
+                          Write-Error "Invalid version format. Expected semantic version (e.g., 1.0.0), got: $inputVersion"
+                          exit 1
+                      }
+                  }
+
+                  # Add beta suffix
+                  $versionWithBeta = "$inputVersion-beta"
+                  Write-Host "Setting version to: $versionWithBeta"
+
+                  # Update package.json
+                  $packageJson = Get-Content package.json | ConvertFrom-Json
+                  $packageJson.version = $versionWithBeta
+                  $packageJson | ConvertTo-Json -Depth 10 | Set-Content package.json
+
+                  Write-Host "Updated package.json version to: $versionWithBeta"
+
+            - name: Delete existing release if it exists
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  # Get the version that was set in the previous step
+                  $versionWithBeta = (Get-Content package.json | ConvertFrom-Json).version
+                  Write-Host "Checking for existing release with tag: $versionWithBeta"
+
+                  # Check if release exists
+                  $releaseExists = gh release view $versionWithBeta 2>$null
+                  if ($LASTEXITCODE -eq 0) {
+                      Write-Host "Found existing release with tag $versionWithBeta, deleting it..."
+                      gh release delete $versionWithBeta --yes
+                      Write-Host "Successfully deleted existing release"
+                  } else {
+                      Write-Host "No existing release found with tag $versionWithBeta"
+                  }
+
+            - name: Build and Publish releases (Windows)
+              if: matrix.os == 'windows-latest'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  EP_PRE_RELEASE: true
+              uses: nick-invision/retry@v2.8.2
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run package:win
+                      pnpm run publish:win
+                  on_retry_command: pnpm cache delete
+
+            - name: Build and Publish releases (macOS)
+              if: matrix.os == 'macos-latest'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  EP_PRE_RELEASE: true
+              uses: nick-invision/retry@v2.8.2
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run package:mac
+                      pnpm run publish:mac
+                  on_retry_command: pnpm cache delete
+
+            - name: Build and Publish releases (Linux)
+              if: matrix.os == 'ubuntu-latest'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  EP_PRE_RELEASE: true
+              uses: nick-invision/retry@v2.8.2
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run package:linux
+                      pnpm run publish:linux
+                  on_retry_command: pnpm cache delete
+
+            - name: Build and Publish releases (Linux ARM64)
+              if: matrix.os == 'ubuntu-latest'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  EP_PRE_RELEASE: true
+              uses: nick-invision/retry@v2.8.2
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run package:linux-arm64
+                      pnpm run publish:linux-arm64
+                  on_retry_command: pnpm cache delete
