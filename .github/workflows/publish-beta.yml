@@ -9,13 +9,10 @@ on:
                 type: string
 
 jobs:
-    publish:
-        runs-on: ${{ matrix.os }}
-
-        strategy:
-            matrix:
-                os: [windows-latest, macos-latest, ubuntu-latest]
-
+    prepare:
+        runs-on: ubuntu-latest
+        outputs:
+            version: ${{ steps.version.outputs.version }}
         steps:
             - name: Checkout git repo
               uses: actions/checkout@v1
@@ -29,6 +26,7 @@ jobs:
               run: pnpm install
 
             - name: Validate and set version with beta suffix
+              id: version
               shell: pwsh
               run: |
                   $inputVersion = "${{ github.event.inputs.version }}"
@@ -80,11 +78,28 @@ jobs:
 
                   Write-Host "Updated package.json version to: $versionWithBeta"
 
+                  # Set output for other jobs
+                  echo "version=$versionWithBeta" >> $env:GITHUB_OUTPUT
+
             - name: Delete existing releases and tags
               shell: pwsh
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
+                  # Get the version that was set in the previous step
+                  $versionWithBeta = "${{ steps.version.outputs.version }}"
+                  Write-Host "Checking for existing releases with tag: $versionWithBeta"
+
+                  # Delete release by tag if it exists
+                  $releaseExists = gh release view $versionWithBeta 2>$null
+                  if ($LASTEXITCODE -eq 0) {
+                      Write-Host "Found existing release with tag $versionWithBeta, deleting it..."
+                      gh release delete $versionWithBeta --yes
+                      Write-Host "Successfully deleted existing release with tag $versionWithBeta"
+                  } else {
+                      Write-Host "No existing release found with tag $versionWithBeta"
+                  }
+
                   # Find and delete any releases with isPrerelease "true"
                   Write-Host "Deleting existing prereleases..."
                   Write-Host "Searching for releases with isPrerelease 'true'..."
@@ -101,6 +116,49 @@ jobs:
                   } else {
                       Write-Host "No releases found with isPrerelease 'true'"
                   }
+
+                  # Delete the tag if it exists (in case release was deleted but tag remained)
+                  $tagExists = gh api repos/:owner/:repo/git/refs/tags/$versionWithBeta 2>$null
+                  if ($LASTEXITCODE -eq 0) {
+                      Write-Host "Found existing tag $versionWithBeta, deleting it..."
+                      gh api -X DELETE repos/:owner/:repo/git/refs/tags/$versionWithBeta
+                      Write-Host "Successfully deleted tag $versionWithBeta"
+                  } else {
+                      Write-Host "No existing tag found: $versionWithBeta"
+                  }
+
+    publish:
+        needs: prepare
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            matrix:
+                os: [windows-latest, macos-latest, ubuntu-latest]
+
+        steps:
+            - name: Checkout git repo
+              uses: actions/checkout@v1
+
+            - name: Install Node and PNPM
+              uses: pnpm/action-setup@v4.1.0
+              with:
+                  version: 9
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Set version from prepare job
+              shell: pwsh
+              run: |
+                  $versionWithBeta = "${{ needs.prepare.outputs.version }}"
+                  Write-Host "Setting version from prepare job: $versionWithBeta"
+
+                  # Update package.json with the version from prepare job
+                  $packageJson = Get-Content package.json | ConvertFrom-Json
+                  $packageJson.version = $versionWithBeta
+                  $packageJson | ConvertTo-Json -Depth 10 | Set-Content package.json
+
+                  Write-Host "Updated package.json version to: $versionWithBeta"
 
             - name: Build and Publish releases (Windows)
               if: matrix.os == 'windows-latest'
@@ -162,26 +220,34 @@ jobs:
                       pnpm run publish:linux-arm64
                   on_retry_command: pnpm cache delete
 
+    rename-release:
+        needs: [prepare, publish]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout git repo
+              uses: actions/checkout@v1
+
             - name: Rename release title to Beta
               shell: pwsh
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  # Get the version that was set earlier
-                  $versionWithBeta = (Get-Content package.json | ConvertFrom-Json).version
-                  Write-Host "Renaming release title for tag: $versionWithBeta"
+                  # Get the version from the prepare job
+                  $versionWithBeta = "${{ needs.prepare.outputs.version }}"
+                  $tagVersion = "v" + $versionWithBeta
+                  Write-Host "Renaming release title for tag: $tagVersion"
 
                   # Check if release exists
-                  $releaseExists = gh release view $versionWithBeta 2>$null
+                  $releaseExists = gh release view $tagVersion 2>$null
                   if ($LASTEXITCODE -eq 0) {
-                      Write-Host "Found release with tag $versionWithBeta, renaming title to 'Beta'..."
+                      Write-Host "Found release with tag $tagVersion, renaming title to 'Beta'..."
 
                       # Get current release notes
-                      $releaseNotes = gh release view $versionWithBeta --json body --jq '.body'
+                      $releaseNotes = gh release view $tagVersion --json body --jq '.body'
 
                       # Update the release with new title
-                      gh release edit $versionWithBeta --title "Beta" --notes "$releaseNotes"
+                      gh release edit $tagVersion --title "Beta" --notes "$releaseNotes"
                       Write-Host "Successfully renamed release title to 'Beta'"
                   } else {
-                      Write-Host "No release found with tag $versionWithBeta"
+                      Write-Host "No release found with tag $tagVersion"
                   }
