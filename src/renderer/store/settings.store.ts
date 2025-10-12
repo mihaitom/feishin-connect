@@ -202,6 +202,7 @@ export interface SettingsSlice extends SettingsState {
         setTable: (type: TableType, data: DataTableProps) => void;
         setTranscodingConfig: (config: TranscodingConfig) => void;
         toggleContextMenuItem: (item: ContextMenuItemType) => void;
+        toggleMediaSession: () => void;
         toggleSidebarCollapseShare: () => void;
     };
 }
@@ -298,6 +299,7 @@ export interface SettingsState {
         audioDeviceId?: null | string;
         crossfadeDuration: number;
         crossfadeStyle: CrossfadeStyle;
+        mediaSession: boolean;
         mpvExtraParameters: string[];
         mpvProperties: MpvSettings;
         muted: boolean;
@@ -491,6 +493,7 @@ const initialState: SettingsState = {
         audioDeviceId: undefined,
         crossfadeDuration: 5,
         crossfadeStyle: CrossfadeStyle.EQUALPOWER,
+        mediaSession: false,
         mpvExtraParameters: [],
         mpvProperties: {
             audioExclusiveMode: 'no',
@@ -750,6 +753,11 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                         set((state) => {
                             state.general.disabledContextMenu[item] =
                                 !state.general.disabledContextMenu[item];
+                        });
+                    },
+                    toggleMediaSession: () => {
+                        set((state) => {
+                            state.playback.mediaSession = !state.playback.mediaSession;
                         });
                     },
                     toggleSidebarCollapseShare: () => {
