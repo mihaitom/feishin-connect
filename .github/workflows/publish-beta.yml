@@ -110,7 +110,7 @@ jobs:
                       Write-Host "Found $($betaReleases.Count) release(s) with isPrerelease 'true':"
                       foreach ($release in $betaReleases) {
                           Write-Host "  - Tag: $($release.tagName), Title: $($release.name)"
-                          gh release delete $release.tagName --yes
+                          gh release delete $release.tagName --yes --cleanup-tag
                           Write-Host "  Deleted release with tag: $($release.tagName)"
                       }
                   } else {
