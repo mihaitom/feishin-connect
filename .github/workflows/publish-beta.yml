@@ -1,4 +1,4 @@
-name: Publish Development (Manual)
+name: Publish Beta (Manual)
 
 on:
     workflow_dispatch:
@@ -80,23 +80,48 @@ jobs:
 
                   Write-Host "Updated package.json version to: $versionWithBeta"
 
-            - name: Delete existing release if it exists
+            - name: Delete existing releases and tags
               shell: pwsh
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   # Get the version that was set in the previous step
                   $versionWithBeta = (Get-Content package.json | ConvertFrom-Json).version
-                  Write-Host "Checking for existing release with tag: $versionWithBeta"
+                  Write-Host "Checking for existing releases with tag: $versionWithBeta"
 
-                  # Check if release exists
+                  # Delete release by tag if it exists
                   $releaseExists = gh release view $versionWithBeta 2>$null
                   if ($LASTEXITCODE -eq 0) {
                       Write-Host "Found existing release with tag $versionWithBeta, deleting it..."
                       gh release delete $versionWithBeta --yes
-                      Write-Host "Successfully deleted existing release"
+                      Write-Host "Successfully deleted existing release with tag $versionWithBeta"
                   } else {
                       Write-Host "No existing release found with tag $versionWithBeta"
+                  }
+
+                  # Find and delete any releases with title "Beta"
+                  Write-Host "Searching for releases with title 'Beta'..."
+                  $betaReleases = gh release list --limit 100 --json tagName,title | ConvertFrom-Json | Where-Object { $_.title -eq "Beta" }
+
+                  if ($betaReleases) {
+                      Write-Host "Found $($betaReleases.Count) release(s) with title 'Beta':"
+                      foreach ($release in $betaReleases) {
+                          Write-Host "  - Tag: $($release.tagName), Title: $($release.title)"
+                          gh release delete $release.tagName --yes
+                          Write-Host "  Deleted release with tag: $($release.tagName)"
+                      }
+                  } else {
+                      Write-Host "No releases found with title 'Beta'"
+                  }
+
+                  # Delete the tag if it exists (in case release was deleted but tag remained)
+                  $tagExists = gh api repos/:owner/:repo/git/refs/tags/$versionWithBeta 2>$null
+                  if ($LASTEXITCODE -eq 0) {
+                      Write-Host "Found existing tag $versionWithBeta, deleting it..."
+                      gh api -X DELETE repos/:owner/:repo/git/refs/tags/$versionWithBeta
+                      Write-Host "Successfully deleted tag $versionWithBeta"
+                  } else {
+                      Write-Host "No existing tag found: $versionWithBeta"
                   }
 
             - name: Build and Publish releases (Windows)
@@ -158,3 +183,27 @@ jobs:
                       pnpm run package:linux-arm64
                       pnpm run publish:linux-arm64
                   on_retry_command: pnpm cache delete
+
+            - name: Rename release title to Beta
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  # Get the version that was set earlier
+                  $versionWithBeta = (Get-Content package.json | ConvertFrom-Json).version
+                  Write-Host "Renaming release title for tag: $versionWithBeta"
+
+                  # Check if release exists
+                  $releaseExists = gh release view $versionWithBeta 2>$null
+                  if ($LASTEXITCODE -eq 0) {
+                      Write-Host "Found release with tag $versionWithBeta, renaming title to 'Beta'..."
+
+                      # Get current release notes
+                      $releaseNotes = gh release view $versionWithBeta --json body --jq '.body'
+
+                      # Update the release with new title
+                      gh release edit $versionWithBeta --title "Beta" --notes "$releaseNotes"
+                      Write-Host "Successfully renamed release title to 'Beta'"
+                  } else {
+                      Write-Host "No release found with tag $versionWithBeta"
+                  }
