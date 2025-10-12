@@ -323,3 +323,10 @@ jobs:
                   } else {
                       Write-Host "No release found with tag $tagVersion"
                   }
+            - name: Set release as prerelease
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  gh release edit $tagVersion --prerelease
+                  Write-Host "Successfully set release as prerelease"
