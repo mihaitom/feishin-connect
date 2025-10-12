@@ -1,3 +1,4 @@
+import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -6,6 +7,9 @@ import {
 } from '/@/renderer/features/settings/components/settings-section';
 import { usePlaybackSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import { Switch } from '/@/shared/components/switch/switch';
+
+const isWindows = window.api.utils.isWindows();
+const isDesktop = isElectron();
 
 export const MediaSessionSettings = () => {
     const { t } = useTranslation();
@@ -31,6 +35,7 @@ export const MediaSessionSettings = () => {
                 context: 'description',
                 postProcess: 'sentenceCase',
             }),
+            isHidden: isDesktop && !isWindows,
             note: t('common.restartRequired', { postProcess: 'sentenceCase' }),
             title: t('setting.mediaSession', { postProcess: 'sentenceCase' }),
         },
