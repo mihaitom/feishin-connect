@@ -57,6 +57,18 @@ If you're using a device running macOS 12 (Monterey) or higher, [check here](htt
 
 For media keys to work, you will be prompted to allow Feishin to be a Trusted Accessibility Client. After allowing, you will need to restart Feishin for the privacy settings to take effect.
 
+#### Linux Notes
+
+If you're using a Linux device, a `.desktop` file is recommended for easy launching of Feishin.
+
+Download the [latest release (AppImage)](https://github.com/jeffvli/feishin/releases) and [application icon](https://github.com/jeffvli/feishin/blob/development/resources/icon.png?raw=true) to your `~/applications/` folder. This folder may need to be created if it does not already exist.
+
+Rename the icon to `Feishin-linux-x86_64.png`.
+
+Save the [example desktop file](https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/feishin.desktop) as `~/.local/share/applications/feishin.desktop`.
+
+You will now see Feishin show up in your menu.
+
 ### Web and Docker
 
 Visit [https://feishin.vercel.app](https://feishin.vercel.app) to use the hosted web version of Feishin. The web client only supports the web player backend.
