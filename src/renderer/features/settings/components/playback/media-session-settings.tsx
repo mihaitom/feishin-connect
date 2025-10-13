@@ -8,7 +8,7 @@ import {
 import { usePlaybackSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import { Switch } from '/@/shared/components/switch/switch';
 
-const isWindows = window.api.utils.isWindows();
+const isWindows = isElectron() ? window.api.utils.isWindows() : null;
 const isDesktop = isElectron();
 
 export const MediaSessionSettings = () => {
