@@ -115,7 +115,16 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
         ],
     ]);
 
-    useMediaSession(playersRef);
+    useMediaSession({
+        handleNextTrack,
+        handlePause,
+        handlePlay,
+        handlePrevTrack,
+        handleSeekSlider,
+        handleSkipBackward,
+        handleSkipForward,
+        handleStop,
+    });
 
     return (
         <>
