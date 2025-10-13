@@ -10,6 +10,7 @@ import { Switch } from '/@/shared/components/switch/switch';
 
 const isWindows = isElectron() ? window.api.utils.isWindows() : null;
 const isDesktop = isElectron();
+const ipc = isElectron() ? window.api.ipc : null;
 
 export const MediaSessionSettings = () => {
     const { t } = useTranslation();
@@ -19,7 +20,7 @@ export const MediaSessionSettings = () => {
     function handleMediaSessionChange() {
         const current = mediaSession;
         toggleMediaSession();
-        window.api.ipc.send('settings-set', { property: 'mediaSession', value: !current });
+        ipc?.send('settings-set', { property: 'mediaSession', value: !current });
     }
 
     const mediaSessionOptions: SettingOption[] = [
