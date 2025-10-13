@@ -57,6 +57,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
         handlePlay,
         handlePlayPause,
         handlePrevTrack,
+        handleSeekSlider,
         handleSkipBackward,
         handleSkipForward,
         handleStop,
@@ -84,7 +85,16 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
         ],
     ]);
 
-    useMediaSession(playersRef);
+    useMediaSession({
+        handleNextTrack,
+        handlePause,
+        handlePlay,
+        handlePrevTrack,
+        handleSeekSlider,
+        handleSkipBackward,
+        handleSkipForward,
+        handleStop,
+    });
 
     return (
         <>
@@ -227,22 +237,24 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                     />
                 </div>
             </div>
-            <PlayerSeekSlider player1={player1} player2={player2} playersRef={playersRef} />
+            <PlayerSeekSlider
+                handleSeekSlider={handleSeekSlider}
+                player1={player1}
+                player2={player2}
+            />
         </>
     );
 };
 
 const PlayerSeekSlider = ({
+    handleSeekSlider,
     player1,
     player2,
-    playersRef,
 }: {
+    handleSeekSlider: (e: any | number) => void;
     player1: any;
     player2: any;
-    playersRef: any;
 }) => {
-    const { handleSeekSlider } = useCenterControls({ playersRef });
-
     const player = useCurrentPlayer();
     const playbackType = usePlaybackType();
     const setCurrentTime = useSetCurrentTime();
