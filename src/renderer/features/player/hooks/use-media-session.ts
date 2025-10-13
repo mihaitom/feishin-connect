@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 
+import { useCenterControls } from '/@/renderer/features/player/hooks/use-center-controls';
 import {
     useCurrentSong,
     useCurrentStatus,
@@ -8,30 +9,25 @@ import {
 } from '/@/renderer/store';
 import { PlayerStatus } from '/@/shared/types/types';
 
-export const useMediaSession = ({
-    handleNextTrack,
-    handlePause,
-    handlePlay,
-    handlePrevTrack,
-    handleSeekSlider,
-    handleSkipBackward,
-    handleSkipForward,
-    handleStop,
-}: {
-    handleNextTrack: () => void;
-    handlePause: () => void;
-    handlePlay: () => void;
-    handlePrevTrack: () => void;
-    handleSeekSlider: (e: any | number) => void;
-    handleSkipBackward: (seconds: number) => void;
-    handleSkipForward: (seconds: number) => void;
-    handleStop: () => void;
-}) => {
+export const useMediaSession = (playersRef: { player1: any; player2: any }) => {
     const { mediaSession: mediaSessionEnabled } = usePlaybackSettings();
     const playerStatus = useCurrentStatus();
     const currentSong = useCurrentSong();
     const mediaSession = navigator.mediaSession;
     const skip = useSettingsStore((state) => state.general.skipButtons);
+
+    const {
+        handleNextTrack,
+        handlePause,
+        handlePlay,
+        handlePrevTrack,
+        handleSeekSlider,
+        handleSkipBackward,
+        handleSkipForward,
+        handleStop,
+    } = useCenterControls({
+        playersRef,
+    });
 
     useEffect(() => {
         if (!mediaSessionEnabled || !mediaSession) {
