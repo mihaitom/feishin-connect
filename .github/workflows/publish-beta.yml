@@ -334,7 +334,7 @@ jobs:
                   $versionWithBeta = "${{ needs.prepare.outputs.version }}"
                   $tagVersion = "v" + $versionWithBeta
                   Write-Host "Setting release as prerelease for tag: $tagVersion"
-                  gh release edit $tagVersion --prerelease
+                  gh release edit $tagVersion --prerelease --draft=false
                   Write-Host "Successfully set release as prerelease"
 
     cleanup:
