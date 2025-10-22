@@ -250,7 +250,7 @@ async function createWindow(first = true): Promise<void> {
         await installExtensions().catch(console.log);
     }
 
-    const nativeFrame = store.get('window_window_bar_style') === 'linux';
+    const nativeFrame = store.get('window_window_bar_style', 'linux') === 'linux';
     store.set('window_has_frame', nativeFrame);
 
     const nativeFrameConfig: Record<string, BrowserWindowConstructorOptions> = {
