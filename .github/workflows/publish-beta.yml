@@ -13,6 +13,7 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
             version: ${{ steps.version.outputs.version }}
+            tagVersion: ${{ steps.version.outputs.tagVersion }}
         steps:
             - name: Checkout git repo
               uses: actions/checkout@v1
@@ -106,8 +107,9 @@ jobs:
 
                   Write-Host "Updated package.json version to: $versionWithBeta"
 
-                  # Set output for other jobs
+                  # Set outputs for other jobs
                   echo "version=$versionWithBeta" >> $env:GITHUB_OUTPUT
+                  echo "tagVersion=v$inputVersion" >> $env:GITHUB_OUTPUT
 
     publish:
         needs: prepare
@@ -206,9 +208,9 @@ jobs:
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  # Get the version from the prepare job
+                  # Get the version and tag from the prepare job
                   $versionWithBeta = "${{ needs.prepare.outputs.version }}"
-                  $tagVersion = "v" + $versionWithBeta
+                  $tagVersion = "${{ needs.prepare.outputs.tagVersion }}"
                   Write-Host "Editing release for tag: $tagVersion"
 
                   # Check if release exists
@@ -330,9 +332,9 @@ jobs:
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  # Get the version from the prepare job
+                  # Get the version and tag from the prepare job
                   $versionWithBeta = "${{ needs.prepare.outputs.version }}"
-                  $tagVersion = "v" + $versionWithBeta
+                  $tagVersion = "${{ needs.prepare.outputs.tagVersion }}"
                   Write-Host "Setting release as prerelease for tag: $tagVersion"
                   gh release edit $tagVersion --prerelease --draft=false
                   Write-Host "Successfully set release as prerelease"
@@ -344,17 +346,19 @@ jobs:
             - name: Checkout git repo
               uses: actions/checkout@v1
 
-            - name: Delete existing prereleases
+            - name: Delete existing prereleases with different tag versions
               shell: pwsh
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  # Get the current version that was just created
+                  # Get the current version and tag that was just created
                   $versionWithBeta = "${{ needs.prepare.outputs.version }}"
+                  $currentTagVersion = "${{ needs.prepare.outputs.tagVersion }}"
                   Write-Host "Current release version: $versionWithBeta"
+                  Write-Host "Current tag version: $currentTagVersion"
 
-                  # Find and delete any old prereleases (excluding the current one)
-                  Write-Host "Deleting old prereleases..."
+                  # Find and delete any old prereleases with different tag versions
+                  Write-Host "Deleting old prereleases with different tag versions..."
                   Write-Host "Searching for releases with isPrerelease 'true'..."
 
                   $betaReleases = gh release list --limit 100 --json tagName,isPrerelease,name | ConvertFrom-Json | Where-Object { $_.isPrerelease -eq $true }
@@ -363,8 +367,8 @@ jobs:
                       Write-Host "Found $($betaReleases.Count) release(s) with isPrerelease 'true':"
                       foreach ($release in $betaReleases) {
                           $tagName = $release.tagName
-                          # Skip the current release
-                          if ($tagName -ne "v$versionWithBeta") {
+                          # Skip the current release - only delete if tag version is different
+                          if ($tagName -ne $currentTagVersion) {
                               Write-Host "  - Tag: $tagName, Title: $($release.name)"
                               gh release delete $tagName --yes --cleanup-tag
                               Write-Host "  Deleted release with tag: $tagName"
