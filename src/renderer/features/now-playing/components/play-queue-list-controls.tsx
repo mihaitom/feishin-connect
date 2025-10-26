@@ -135,6 +135,8 @@ export const PlayQueueListControls = ({
         [handleSearch, tableRef],
     );
 
+    const hasSearch = !!searchTerm;
+
     return (
         <Group
             justify="space-between"
@@ -152,6 +154,7 @@ export const PlayQueueListControls = ({
                     variant="subtle"
                 />
                 <ActionIcon
+                    disabled={hasSearch}
                     icon="mediaPlayNext"
                     iconProps={{ size: 'lg' }}
                     onClick={handleMoveToNext}
@@ -159,6 +162,7 @@ export const PlayQueueListControls = ({
                     variant="subtle"
                 />
                 <ActionIcon
+                    disabled={hasSearch}
                     icon="arrowDownToLine"
                     iconProps={{ size: 'lg' }}
                     onClick={handleMoveToBottom}
@@ -166,6 +170,7 @@ export const PlayQueueListControls = ({
                     variant="subtle"
                 />
                 <ActionIcon
+                    disabled={hasSearch}
                     icon="arrowUpToLine"
                     iconProps={{ size: 'lg' }}
                     onClick={handleMoveToTop}
