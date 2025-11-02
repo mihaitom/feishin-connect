@@ -107,7 +107,12 @@ const ImageContainer = forwardRef(
 );
 
 function ImageLoader({ className }: ImageLoaderProps) {
-    return <Skeleton className={clsx(styles.skeleton, styles.loader, className)} />;
+    return (
+        <Skeleton
+            className={clsx(styles.skeleton, styles.loader, className)}
+            containerClassName={styles.skeletonContainer}
+        />
+    );
 }
 
 function ImageUnloader({ className }: ImageUnloaderProps) {
