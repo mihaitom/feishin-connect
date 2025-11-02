@@ -549,7 +549,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
 
         openModal({
             children: (
-                <ConfirmModal loading={removeFromPlaylistMutation.isLoading} onConfirm={confirm}>
+                <ConfirmModal loading={removeFromPlaylistMutation.isPending} onConfirm={confirm}>
                     {t('common.areYouSure', { postProcess: 'sentenceCase' })}
                 </ConfirmModal>
             ),

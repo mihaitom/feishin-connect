@@ -13,7 +13,7 @@ import {
     VirtualInfiniteGridRef,
 } from '/@/renderer/components/virtual-grid';
 import { useListContext } from '/@/renderer/context/list-context';
-import { usePlayQueueAdd } from '/@/renderer/features/player';
+import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-favorite';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
@@ -26,7 +26,6 @@ import {
     SongListSort,
 } from '/@/shared/types/domain-types';
 import { CardRow, ListDisplayType } from '/@/shared/types/types';
-
 interface SongListGridViewProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;
     itemCount?: number;
@@ -185,15 +184,17 @@ export const SongListGridView = ({ gridRef, itemCount }: SongListGridViewProps) 
 
             const queryKey = queryKeys.songs.list(server?.id || '', query, id);
 
-            const songs = await queryClient.fetchQuery(queryKey, async ({ signal }) =>
-                controller.getSongList({
-                    apiClientProps: {
-                        server,
-                        signal,
-                    },
-                    query,
-                }),
-            );
+            const songs = await queryClient.fetchQuery({
+                queryFn: async ({ signal }) =>
+                    controller.getSongList({
+                        apiClientProps: {
+                            server,
+                            signal,
+                        },
+                        query,
+                    }),
+                queryKey,
+            });
 
             return songs;
         },

@@ -1,4 +1,5 @@
 import { ColDef, RowDoubleClickedEvent } from '@ag-grid-community/core';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useParams } from 'react-router';
@@ -8,9 +9,8 @@ import styles from './album-artist-detail-content.module.css';
 
 import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel/grid-carousel';
 import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-table';
-import { useAlbumList } from '/@/renderer/features/albums/queries/album-list-query';
-import { useAlbumArtistDetail } from '/@/renderer/features/artists/queries/album-artist-detail-query';
-import { useTopSongsList } from '/@/renderer/features/artists/queries/top-songs-list-query';
+import { albumQueries } from '/@/renderer/features/albums/api/album-api';
+import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import {
     useHandleGeneralContextMenu,
     useHandleTableContextMenu,
@@ -75,10 +75,12 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
         return [enabled, order];
     }, [artistItems]);
 
-    const detailQuery = useAlbumArtistDetail({
-        query: { id: routeId },
-        serverId: server?.id,
-    });
+    const detailQuery = useQuery(
+        artistsQueries.albumArtistDetail({
+            query: { id: routeId },
+            serverId: server?.id,
+        }),
+    );
 
     const artistDiscographyLink = `${generatePath(
         AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_DISCOGRAPHY,
@@ -97,46 +99,52 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
         artistName: detailQuery?.data?.name || '',
     })}`;
 
-    const recentAlbumsQuery = useAlbumList({
-        options: {
-            enabled: enabledItem.recentAlbums,
-        },
-        query: {
-            artistIds: [routeId],
-            compilation: false,
-            limit: 15,
-            sortBy: AlbumListSort.RELEASE_DATE,
-            sortOrder: SortOrder.DESC,
-            startIndex: 0,
-        },
-        serverId: server?.id,
-    });
+    const recentAlbumsQuery = useQuery(
+        albumQueries.list({
+            options: {
+                enabled: enabledItem.recentAlbums,
+            },
+            query: {
+                artistIds: [routeId],
+                compilation: false,
+                limit: 15,
+                sortBy: AlbumListSort.RELEASE_DATE,
+                sortOrder: SortOrder.DESC,
+                startIndex: 0,
+            },
+            serverId: server?.id,
+        }),
+    );
 
-    const compilationAlbumsQuery = useAlbumList({
-        options: {
-            enabled: enabledItem.compilations && server?.type !== ServerType.SUBSONIC,
-        },
-        query: {
-            artistIds: [routeId],
-            compilation: true,
-            limit: 15,
-            sortBy: AlbumListSort.RELEASE_DATE,
-            sortOrder: SortOrder.DESC,
-            startIndex: 0,
-        },
-        serverId: server?.id,
-    });
+    const compilationAlbumsQuery = useQuery(
+        albumQueries.list({
+            options: {
+                enabled: enabledItem.compilations && server?.type !== ServerType.SUBSONIC,
+            },
+            query: {
+                artistIds: [routeId],
+                compilation: true,
+                limit: 15,
+                sortBy: AlbumListSort.RELEASE_DATE,
+                sortOrder: SortOrder.DESC,
+                startIndex: 0,
+            },
+            serverId: server?.id,
+        }),
+    );
 
-    const topSongsQuery = useTopSongsList({
-        options: {
-            enabled: !!detailQuery?.data?.name && enabledItem.topSongs,
-        },
-        query: {
-            artist: detailQuery?.data?.name || '',
-            artistId: routeId,
-        },
-        serverId: server?.id,
-    });
+    const topSongsQuery = useQuery(
+        artistsQueries.topSongs({
+            options: {
+                enabled: !!detailQuery?.data?.name && enabledItem.topSongs,
+            },
+            query: {
+                artist: detailQuery?.data?.name || '',
+                artistId: routeId,
+            },
+            serverId: server?.id,
+        }),
+    );
 
     const topSongsColumnDefs: ColDef[] = useMemo(
         () =>
@@ -364,7 +372,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
                                 fill: detailQuery?.data?.userFavorite ? 'primary' : undefined,
                             }}
                             loading={
-                                createFavoriteMutation.isLoading || deleteFavoriteMutation.isLoading
+                                createFavoriteMutation.isPending || deleteFavoriteMutation.isPending
                             }
                             onClick={handleFavorite}
                             size="lg"

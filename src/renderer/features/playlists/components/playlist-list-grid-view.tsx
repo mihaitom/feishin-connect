@@ -121,15 +121,17 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
 
             const queryKey = queryKeys.playlists.list(server?.id || '', query);
 
-            const playlists = await queryClient.fetchQuery(queryKey, async ({ signal }) =>
-                controller.getPlaylistList({
-                    apiClientProps: {
-                        server,
-                        signal,
-                    },
-                    query,
-                }),
-            );
+            const playlists = await queryClient.fetchQuery({
+                queryFn: async ({ signal }) =>
+                    controller.getPlaylistList({
+                        apiClientProps: {
+                            server,
+                            signal,
+                        },
+                        query,
+                    }),
+                queryKey,
+            });
 
             return playlists;
         },

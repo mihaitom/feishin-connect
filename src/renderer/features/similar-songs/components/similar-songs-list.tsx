@@ -1,5 +1,6 @@
 import { RowDoubleClickedEvent } from '@ag-grid-community/core';
 import { AgGridReact } from '@ag-grid-community/react';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -9,7 +10,7 @@ import { ErrorFallback } from '/@/renderer/features/action-required';
 import { useHandleTableContextMenu } from '/@/renderer/features/context-menu';
 import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
 import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-handle-playqueue-add';
-import { useSimilarSongs } from '/@/renderer/features/similar-songs/queries/similar-song-queries';
+import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { usePlayButtonBehavior, useTableSettings } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
@@ -26,14 +27,19 @@ export const SimilarSongsList = ({ count, fullScreen, song }: SimilarSongsListPr
     const handlePlayQueueAdd = useHandlePlayQueueAdd();
     const playButtonBehavior = usePlayButtonBehavior();
 
-    const songQuery = useSimilarSongs({
-        options: {
-            cacheTime: 1000 * 60 * 2,
-            staleTime: 1000 * 60 * 1,
-        },
-        query: { albumArtistIds: song.albumArtists.map((art) => art.id), count, songId: song.id },
-        serverId: song?.serverId,
-    });
+    const songQuery = useQuery(
+        songsQueries.similar({
+            options: {
+                gcTime: 1000 * 60 * 2,
+            },
+            query: {
+                albumArtistIds: song.albumArtists.map((art) => art.id),
+                count,
+                songId: song.id,
+            },
+            serverId: song?.serverId,
+        }),
+    );
 
     const columnDefs = useMemo(
         () => getColumnDefs(tableConfig.columns, false, 'generic'),

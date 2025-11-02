@@ -183,8 +183,8 @@ const DummyAlbumDetailRoute = () => {
                                     fill: detailQuery?.data?.userFavorite ? 'primary' : undefined,
                                 }}
                                 loading={
-                                    createFavoriteMutation.isLoading ||
-                                    deleteFavoriteMutation.isLoading
+                                    createFavoriteMutation.isPending ||
+                                    deleteFavoriteMutation.isPending
                                 }
                                 onClick={handleFavorite}
                                 variant="subtle"

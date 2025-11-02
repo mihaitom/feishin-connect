@@ -88,7 +88,7 @@ export const UpdatePlaylistForm = ({ body, onCancel, query, users }: UpdatePlayl
 
     const isPublicDisplayed = hasFeature(server, ServerFeature.PUBLIC_PLAYLIST);
     const isOwnerDisplayed = server?.type === ServerType.NAVIDROME && userList;
-    const isSubmitDisabled = !form.values.name || mutation.isLoading;
+    const isSubmitDisabled = !form.values.name || mutation.isPending;
 
     return (
         <form onSubmit={handleSubmit}>
@@ -143,7 +143,7 @@ export const UpdatePlaylistForm = ({ body, onCancel, query, users }: UpdatePlayl
                     <ModalButton onClick={onCancel}>{t('common.cancel')}</ModalButton>
                     <ModalButton
                         disabled={isSubmitDisabled}
-                        loading={mutation.isLoading}
+                        loading={mutation.isPending}
                         type="submit"
                         variant="filled"
                     >

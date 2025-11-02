@@ -70,7 +70,7 @@ export const SaveAsPlaylistForm = ({
     });
 
     const isPublicDisplayed = hasFeature(server, ServerFeature.PUBLIC_PLAYLIST);
-    const isSubmitDisabled = !form.values.name || mutation.isLoading;
+    const isSubmitDisabled = !form.values.name || mutation.isPending;
 
     return (
         <form onSubmit={handleSubmit}>
@@ -106,7 +106,7 @@ export const SaveAsPlaylistForm = ({
                     <ModalButton onClick={onCancel}>{t('common.cancel')}</ModalButton>
                     <ModalButton
                         disabled={isSubmitDisabled}
-                        loading={mutation.isLoading}
+                        loading={mutation.isPending}
                         type="submit"
                         variant="filled"
                     >

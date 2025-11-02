@@ -174,15 +174,17 @@ export const AlbumListGridView = ({ gridRef, itemCount }: any) => {
 
             const queryKey = queryKeys.albums.list(server?.id || '', query, id);
 
-            const albums = await queryClient.fetchQuery(queryKey, async ({ signal }) =>
-                controller.getAlbumList({
-                    apiClientProps: {
-                        server,
-                        signal,
-                    },
-                    query,
-                }),
-            );
+            const albums = await queryClient.fetchQuery({
+                queryFn: async ({ signal }) =>
+                    controller.getAlbumList({
+                        apiClientProps: {
+                            server,
+                            signal,
+                        },
+                        query,
+                    }),
+                queryKey,
+            });
 
             return albums;
         },

@@ -1,8 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
 import { forwardRef, Fragment, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
-import { useAlbumArtistDetail } from '/@/renderer/features/artists/queries/album-artist-detail-query';
+import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { LibraryHeader, useSetRating } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
@@ -30,10 +31,12 @@ export const AlbumArtistDetailHeader = forwardRef(
         const routeId = (artistId || albumArtistId) as string;
         const server = useCurrentServer();
         const { t } = useTranslation();
-        const detailQuery = useAlbumArtistDetail({
-            query: { id: routeId },
-            serverId: server?.id,
-        });
+        const detailQuery = useQuery(
+            artistsQueries.albumArtistDetail({
+                query: { id: routeId },
+                serverId: server?.id,
+            }),
+        );
 
         const albumCount = detailQuery?.data?.albumCount;
         const songCount = detailQuery?.data?.songCount;
@@ -101,7 +104,7 @@ export const AlbumArtistDetailHeader = forwardRef(
                                 <Rating
                                     onChange={handleUpdateRating}
                                     readOnly={
-                                        detailQuery?.isFetching || updateRatingMutation.isLoading
+                                        detailQuery?.isFetching || updateRatingMutation.isPending
                                     }
                                     value={detailQuery?.data?.userRating || 0}
                                 />

@@ -1,12 +1,13 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 
+import { useQuery } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { useParams } from 'react-router';
 
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
+import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumDetailContent } from '/@/renderer/features/albums/components/album-detail-content';
 import { AlbumDetailHeader } from '/@/renderer/features/albums/components/album-detail-header';
-import { useAlbumDetail } from '/@/renderer/features/albums/queries/album-detail-query';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { AnimatedPage, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useFastAverageColor } from '/@/renderer/hooks';
@@ -22,7 +23,9 @@ const AlbumDetailRoute = () => {
 
     const { albumId } = useParams() as { albumId: string };
     const server = useCurrentServer();
-    const detailQuery = useAlbumDetail({ query: { id: albumId }, serverId: server?.id });
+    const detailQuery = useQuery(
+        albumQueries.detail({ query: { id: albumId }, serverId: server?.id }),
+    );
     const { background: backgroundColor, colorId } = useFastAverageColor({
         id: albumId,
         src: detailQuery.data?.imageUrl,

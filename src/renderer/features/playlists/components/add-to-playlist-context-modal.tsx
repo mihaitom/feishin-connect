@@ -1,5 +1,6 @@
 import { useForm } from '@mantine/form';
 import { closeModal, ContextModalProps } from '@mantine/modals';
+import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,8 +9,8 @@ import styles from './add-to-playlist-context-modal.module.css';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { getGenreSongsById } from '/@/renderer/features/player';
+import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { useAddToPlaylist } from '/@/renderer/features/playlists/mutations/add-to-playlist-mutation';
-import { usePlaylistList } from '/@/renderer/features/playlists/queries/playlist-list-query';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentServer } from '/@/renderer/store';
 import { formatDurationString } from '/@/renderer/utils';
@@ -66,19 +67,21 @@ export const AddToPlaylistContextModal = ({
 
     const addToPlaylistMutation = useAddToPlaylist({});
 
-    const playlistList = usePlaylistList({
-        query: {
-            _custom: {
-                navidrome: {
-                    smart: false,
+    const playlistList = useQuery(
+        playlistsQueries.list({
+            query: {
+                _custom: {
+                    navidrome: {
+                        smart: false,
+                    },
                 },
+                sortBy: PlaylistListSort.NAME,
+                sortOrder: SortOrder.ASC,
+                startIndex: 0,
             },
-            sortBy: PlaylistListSort.NAME,
-            sortOrder: SortOrder.ASC,
-            startIndex: 0,
-        },
-        serverId: server?.id,
-    });
+            serverId: server?.id,
+        }),
+    );
 
     const [playlistSelect, playlistMap] = useMemo(() => {
         const existingPlaylists = new Array<Playlist & { label: string; value: string }>();
@@ -113,9 +116,15 @@ export const AddToPlaylistContextModal = ({
 
             const queryKey = queryKeys.songs.list(server?.id || '', query);
 
-            const songsRes = await queryClient.fetchQuery(queryKey, ({ signal }) => {
-                if (!server) throw new Error('No server');
-                return api.controller.getSongList({ apiClientProps: { server, signal }, query });
+            const songsRes = await queryClient.fetchQuery({
+                queryFn: ({ signal }) => {
+                    if (!server) throw new Error('No server');
+                    return api.controller.getSongList({
+                        apiClientProps: { server, signal },
+                        query,
+                    });
+                },
+                queryKey,
             });
 
             return songsRes;
@@ -134,9 +143,15 @@ export const AddToPlaylistContextModal = ({
 
             const queryKey = queryKeys.songs.list(server?.id || '', query);
 
-            const songsRes = await queryClient.fetchQuery(queryKey, ({ signal }) => {
-                if (!server) throw new Error('No server');
-                return api.controller.getSongList({ apiClientProps: { server, signal }, query });
+            const songsRes = await queryClient.fetchQuery({
+                queryFn: ({ signal }) => {
+                    if (!server) throw new Error('No server');
+                    return api.controller.getSongList({
+                        apiClientProps: { server, signal },
+                        query,
+                    });
+                },
+                queryKey,
             });
 
             return songsRes;
@@ -213,9 +228,8 @@ export const AddToPlaylistContextModal = ({
                 if (values.skipDuplicates) {
                     const queryKey = queryKeys.playlists.songList(server?.id || '', playlistId);
 
-                    const playlistSongsRes = await queryClient.fetchQuery(
-                        queryKey,
-                        ({ signal }) => {
+                    const playlistSongsRes = await queryClient.fetchQuery({
+                        queryFn: ({ signal }) => {
                             if (!server)
                                 throw new Error(
                                     t('error.serverNotSelectedError', {
@@ -232,7 +246,8 @@ export const AddToPlaylistContextModal = ({
                                 },
                             });
                         },
-                    );
+                        queryKey,
+                    });
 
                     const playlistSongIds = playlistSongsRes?.items?.map((song) => song.id);
 
@@ -508,7 +523,7 @@ export const AddToPlaylistContextModal = ({
                     />
                     <Group justify="flex-end">
                         <ModalButton
-                            disabled={isLoading || addToPlaylistMutation.isLoading}
+                            disabled={isLoading || addToPlaylistMutation.isPending}
                             onClick={() => closeModal(id)}
                             uppercase
                             variant="subtle"
@@ -518,7 +533,7 @@ export const AddToPlaylistContextModal = ({
                         <ModalButton
                             disabled={
                                 isLoading ||
-                                addToPlaylistMutation.isLoading ||
+                                addToPlaylistMutation.isPending ||
                                 (form.values.selectedPlaylistIds.length === 0 &&
                                     form.values.newPlaylists.length === 0)
                             }

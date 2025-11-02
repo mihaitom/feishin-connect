@@ -1,10 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { useParams } from 'react-router';
 
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
+import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistDetailContent } from '/@/renderer/features/artists/components/album-artist-detail-content';
 import { AlbumArtistDetailHeader } from '/@/renderer/features/artists/components/album-artist-detail-header';
-import { useAlbumArtistDetail } from '/@/renderer/features/artists/queries/album-artist-detail-query';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { AnimatedPage, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useFastAverageColor } from '/@/renderer/hooks';
@@ -27,10 +28,12 @@ const AlbumArtistDetailRoute = () => {
 
     const handlePlayQueueAdd = usePlayQueueAdd();
     const playButtonBehavior = usePlayButtonBehavior();
-    const detailQuery = useAlbumArtistDetail({
-        query: { id: routeId },
-        serverId: server?.id,
-    });
+    const detailQuery = useQuery(
+        artistsQueries.albumArtistDetail({
+            query: { id: routeId },
+            serverId: server?.id,
+        }),
+    );
 
     const { background: backgroundColor, colorId } = useFastAverageColor({
         id: artistId,

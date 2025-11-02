@@ -2,6 +2,7 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 
 import { RowDoubleClickedEvent, RowHeightParams, RowNode } from '@ag-grid-community/core';
 import { useSetState } from '@mantine/hooks';
+import { useQuery } from '@tanstack/react-query';
 import { MutableRefObject, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useParams } from 'react-router';
@@ -18,8 +19,7 @@ import {
 } from '/@/renderer/components/virtual-table';
 import { FullWidthDiscCell } from '/@/renderer/components/virtual-table/cells/full-width-disc-cell';
 import { useCurrentSongRowStyles } from '/@/renderer/components/virtual-table/hooks/use-current-song-row-styles';
-import { useAlbumDetail } from '/@/renderer/features/albums/queries/album-detail-query';
-import { useAlbumList } from '/@/renderer/features/albums/queries/album-list-query';
+import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import {
     useHandleGeneralContextMenu,
     useHandleTableContextMenu,
@@ -71,7 +71,14 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
     const { t } = useTranslation();
     const { albumId } = useParams() as { albumId: string };
     const server = useCurrentServer();
-    const detailQuery = useAlbumDetail({ query: { id: albumId }, serverId: server?.id });
+    const detailQuery = useQuery(
+        albumQueries.detail({ query: { id: albumId }, serverId: server.id }),
+    );
+
+    const { data: detail } = useQuery(
+        albumQueries.detail({ query: { id: albumId }, serverId: server.id }),
+    );
+
     const cq = useContainerQuery();
     const handlePlayQueueAdd = usePlayQueueAdd();
     const tableConfig = useTableSettings('albumDetail');
@@ -99,7 +106,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
     );
 
     const songsRowData = useMemo(() => {
-        if (!detailQuery.data?.songs) {
+        if (!detail?.songs) {
             return [];
         }
 
@@ -109,7 +116,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
         const rowData: (QueueSong | { id: string; name: string })[] = [];
         const discTranslated = t('common.disc', { postProcess: 'upperCase' });
 
-        for (const song of detailQuery.data.songs) {
+        for (const song of detail.songs) {
             if (song.discNumber !== discNumber || song.discSubtitle !== discSubtitle) {
                 discNumber = song.discNumber;
                 discSubtitle = song.discSubtitle;
@@ -128,7 +135,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
         }
 
         return rowData;
-    }, [detailQuery.data?.songs, t]);
+    }, [detail?.songs, t]);
 
     const [pagination, setPagination] = useSetState({
         artist: 0,
@@ -152,29 +159,46 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
         [pagination, setPagination],
     );
 
-    const artistQuery = useAlbumList({
-        options: {
-            cacheTime: 1000 * 60,
-            enabled: detailQuery?.data?.albumArtists[0]?.id !== undefined,
-            keepPreviousData: true,
-            staleTime: 1000 * 60,
-        },
-        query: {
-            _custom: {
-                jellyfin: {
-                    ExcludeItemIds: detailQuery?.data?.id,
+    const artistQuery = useQuery(
+        albumQueries.list({
+            query: {
+                _custom: {
+                    jellyfin: {
+                        ExcludeItemIds: detail?.id,
+                    },
                 },
+                artistIds: detail?.albumArtists.length ? [detail?.albumArtists[0].id] : undefined,
+                limit: 15,
+                sortBy: AlbumListSort.YEAR,
+                sortOrder: SortOrder.DESC,
+                startIndex: 0,
             },
-            artistIds: detailQuery?.data?.albumArtists.length
-                ? [detailQuery?.data?.albumArtists[0].id]
-                : undefined,
-            limit: 15,
-            sortBy: AlbumListSort.YEAR,
-            sortOrder: SortOrder.DESC,
-            startIndex: 0,
-        },
-        serverId: server?.id,
-    });
+            serverId: server.id,
+        }),
+    );
+
+    // const artistQuery = useAlbumList({
+    //     options: {
+    //         enabled: detail?.albumArtists[0]?.id !== undefined,
+    //         gcTime: 1000 * 60,
+    //         placeholderData: true,
+    //     },
+    //     query: {
+    //         _custom: {
+    //             jellyfin: {
+    //                 ExcludeItemIds: detailQuery?.data?.id,
+    //             },
+    //         },
+    //         artistIds: detailQuery?.data?.albumArtists.length
+    //             ? [detailQuery?.data?.albumArtists[0].id]
+    //             : undefined,
+    //         limit: 15,
+    //         sortBy: AlbumListSort.YEAR,
+    //         sortOrder: SortOrder.DESC,
+    //         startIndex: 0,
+    //     },
+    //     serverId: server?.id,
+    // });
 
     const relatedAlbumGenresRequest: AlbumListQuery = {
         genres: detailQuery.data?.genres.length ? [detailQuery.data.genres[0].id] : undefined,
@@ -184,20 +208,21 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
         startIndex: 0,
     };
 
-    const relatedAlbumGenresQuery = useAlbumList({
-        options: {
-            cacheTime: 1000 * 60,
-            enabled: !!detailQuery?.data?.genres?.[0],
-            queryKey: queryKeys.albums.related(
-                server?.id || '',
-                albumId,
-                relatedAlbumGenresRequest,
-            ),
-            staleTime: 1000 * 60,
-        },
-        query: relatedAlbumGenresRequest,
-        serverId: server?.id,
-    });
+    const relatedAlbumGenresQuery = useQuery(
+        albumQueries.list({
+            options: {
+                enabled: !!detailQuery?.data?.genres?.[0],
+                gcTime: 1000 * 60,
+                queryKey: queryKeys.albums.related(
+                    server?.id || '',
+                    albumId,
+                    relatedAlbumGenresRequest,
+                ),
+            },
+            query: relatedAlbumGenresRequest,
+            serverId: server?.id,
+        }),
+    );
 
     const carousels = [
         {
@@ -335,8 +360,8 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
                                             : undefined,
                                     }}
                                     loading={
-                                        createFavoriteMutation.isLoading ||
-                                        deleteFavoriteMutation.isLoading
+                                        createFavoriteMutation.isPending ||
+                                        deleteFavoriteMutation.isPending
                                     }
                                     onClick={handleFavorite}
                                     size="lg"

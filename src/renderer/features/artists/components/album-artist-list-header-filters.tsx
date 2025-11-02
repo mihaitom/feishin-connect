@@ -1,7 +1,7 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 
 import { IDatasource } from '@ag-grid-community/core';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import { MouseEvent, MutableRefObject, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,7 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { ALBUMARTIST_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
 import { useListContext } from '/@/renderer/context/list-context';
-import { OrderToggleButton, useMusicFolders } from '/@/renderer/features/shared';
+import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { FolderButton } from '/@/renderer/features/shared/components/folder-button';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { MoreButton } from '/@/renderer/features/shared/components/more-button';
@@ -146,7 +146,9 @@ export const AlbumArtistListHeaderFilters = ({
     const cq = useContainerQuery();
 
     const isGrid = display === ListDisplayType.CARD || display === ListDisplayType.GRID;
-    const musicFoldersQuery = useMusicFolders({ query: null, serverId: server?.id });
+    const musicFoldersQuery = useQuery(
+        sharedQueries.musicFolders({ query: null, serverId: server?.id }),
+    );
 
     const sortByLabel =
         (server?.type &&
@@ -176,9 +178,9 @@ export const AlbumArtistListHeaderFilters = ({
                 ...filters,
             });
 
-            const albums = await queryClient.fetchQuery(
-                queryKey,
-                async ({ signal }) =>
+            const albums = await queryClient.fetchQuery({
+                gcTime: 1000 * 60 * 1,
+                queryFn: async ({ signal }) =>
                     api.controller.getAlbumArtistList({
                         apiClientProps: {
                             server,
@@ -190,8 +192,8 @@ export const AlbumArtistListHeaderFilters = ({
                             ...filters,
                         },
                     }),
-                { cacheTime: 1000 * 60 * 1 },
-            );
+                queryKey,
+            });
 
             return albums;
         },
@@ -212,9 +214,9 @@ export const AlbumArtistListHeaderFilters = ({
                             ...filters,
                         });
 
-                        const albumArtistsRes = await queryClient.fetchQuery(
-                            queryKey,
-                            async ({ signal }) =>
+                        const albumArtistsRes = await queryClient.fetchQuery({
+                            gcTime: 1000 * 60 * 1,
+                            queryFn: async ({ signal }) =>
                                 api.controller.getAlbumArtistList({
                                     apiClientProps: {
                                         server,
@@ -226,8 +228,8 @@ export const AlbumArtistListHeaderFilters = ({
                                         ...filters,
                                     },
                                 }),
-                            { cacheTime: 1000 * 60 * 1 },
-                        );
+                            queryKey,
+                        });
 
                         params.successCallback(
                             albumArtistsRes?.items || [],
@@ -362,7 +364,7 @@ export const AlbumArtistListHeaderFilters = ({
     };
 
     const handleRefresh = useCallback(() => {
-        queryClient.invalidateQueries(queryKeys.albumArtists.list(server?.id || ''));
+        queryClient.invalidateQueries({ queryKey: queryKeys.albumArtists.list(server?.id || '') });
         handleFilterChange(filter);
     }, [filter, handleFilterChange, queryClient, server?.id]);
 

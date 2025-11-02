@@ -83,9 +83,9 @@ export const AlbumArtistListGridView = ({ gridRef, itemCount }: AlbumArtistListG
 
             const queryKey = queryKeys.albumArtists.list(server?.id || '', query);
 
-            const albumArtistsRes = await queryClient.fetchQuery(
-                queryKey,
-                async ({ signal }) =>
+            const albumArtistsRes = await queryClient.fetchQuery({
+                gcTime: 1000 * 60 * 1,
+                queryFn: async ({ signal }) =>
                     api.controller.getAlbumArtistList({
                         apiClientProps: {
                             server,
@@ -93,8 +93,8 @@ export const AlbumArtistListGridView = ({ gridRef, itemCount }: AlbumArtistListG
                         },
                         query,
                     }),
-                { cacheTime: 1000 * 60 * 1 },
-            );
+                queryKey,
+            });
 
             return albumArtistsRes;
         },

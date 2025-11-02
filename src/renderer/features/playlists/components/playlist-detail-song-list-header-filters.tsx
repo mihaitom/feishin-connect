@@ -1,7 +1,7 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 
 import { closeAllModals, openModal } from '@mantine/modals';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import { ChangeEvent, MouseEvent, MutableRefObject, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,9 +10,9 @@ import { useNavigate, useParams } from 'react-router';
 import i18n from '/@/i18n/i18n';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
+import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { openUpdatePlaylistModal } from '/@/renderer/features/playlists/components/update-playlist-form';
 import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
-import { usePlaylistDetail } from '/@/renderer/features/playlists/queries/playlist-detail-query';
 import { OrderToggleButton } from '/@/renderer/features/shared';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { MoreButton } from '/@/renderer/features/shared/components/more-button';
@@ -262,7 +262,9 @@ export const PlaylistDetailSongListHeaderFilters = ({
     const sortBy = page?.table.id[playlistId]?.filter?.sortBy || SongListSort.ID;
     const sortOrder = page?.table.id[playlistId]?.filter?.sortOrder || SortOrder.ASC;
 
-    const detailQuery = usePlaylistDetail({ query: { id: playlistId }, serverId: server?.id });
+    const detailQuery = useQuery(
+        playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
+    );
     const isSmartPlaylist = detailQuery.data?.rules;
 
     const cq = useContainerQuery();
@@ -291,7 +293,9 @@ export const PlaylistDetailSongListHeaderFilters = ({
     }, [tableRef, page.display, setPagination]);
 
     const handleRefresh = () => {
-        queryClient.invalidateQueries(queryKeys.playlists.songList(server?.id || '', playlistId));
+        queryClient.invalidateQueries({
+            queryKey: queryKeys.playlists.songList(server?.id || '', playlistId),
+        });
         handleFilterChange();
     };
 

@@ -1,20 +1,21 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 
 import { closeAllModals, openModal } from '@mantine/modals';
+import { useQuery } from '@tanstack/react-query';
+import Fuse from 'fuse.js';
 import { motion } from 'motion/react';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate, useParams } from 'react-router';
 
 import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-handle-playqueue-add';
+import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { PlaylistDetailSongListContent } from '/@/renderer/features/playlists/components/playlist-detail-song-list-content';
 import { PlaylistDetailSongListHeader } from '/@/renderer/features/playlists/components/playlist-detail-song-list-header';
 import { PlaylistQueryBuilder } from '/@/renderer/features/playlists/components/playlist-query-builder';
 import { SaveAsPlaylistForm } from '/@/renderer/features/playlists/components/save-as-playlist-form';
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
 import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
-import { usePlaylistDetail } from '/@/renderer/features/playlists/queries/playlist-detail-query';
-import { usePlaylistSongList } from '/@/renderer/features/playlists/queries/playlist-song-list-query';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, usePlaylistDetailStore } from '/@/renderer/store';
@@ -35,7 +36,9 @@ const PlaylistDetailSongListRoute = () => {
     const server = useCurrentServer();
     const handlePlayQueueAdd = useHandlePlayQueueAdd();
 
-    const detailQuery = usePlaylistDetail({ query: { id: playlistId }, serverId: server?.id });
+    const detailQuery = useQuery(
+        playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
+    );
     const createPlaylistMutation = useCreatePlaylist({});
     const deletePlaylistMutation = useDeletePlaylist({});
 
@@ -148,12 +151,14 @@ const PlaylistDetailSongListRoute = () => {
 
     const page = usePlaylistDetailStore();
 
-    const playlistSongs = usePlaylistSongList({
-        query: {
-            id: playlistId,
-        },
-        serverId: server?.id,
-    });
+    const playlistSongs = useQuery(
+        playlistsQueries.songList({
+            query: {
+                id: playlistId,
+            },
+            serverId: server?.id,
+        }),
+    );
 
     const filterSortedSongs = useMemo(() => {
         let items = playlistSongs.data?.items;

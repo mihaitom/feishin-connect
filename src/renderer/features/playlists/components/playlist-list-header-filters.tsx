@@ -170,15 +170,17 @@ export const PlaylistListHeaderFilters = ({
 
             const queryKey = queryKeys.playlists.list(server?.id || '', query);
 
-            const playlists = await queryClient.fetchQuery(queryKey, async ({ signal }) =>
-                api.controller.getPlaylistList({
-                    apiClientProps: {
-                        server,
-                        signal,
-                    },
-                    query,
-                }),
-            );
+            const playlists = await queryClient.fetchQuery({
+                queryFn: async ({ signal }) =>
+                    api.controller.getPlaylistList({
+                        apiClientProps: {
+                            server,
+                            signal,
+                        },
+                        query,
+                    }),
+                queryKey,
+            });
 
             return playlists;
         },
@@ -207,9 +209,8 @@ export const PlaylistListHeaderFilters = ({
                             ...pageFilters,
                         });
 
-                        const playlistsRes = await queryClient.fetchQuery(
-                            queryKey,
-                            async ({ signal }) =>
+                        const playlistsRes = await queryClient.fetchQuery({
+                            queryFn: async ({ signal }) =>
                                 api.controller.getPlaylistList({
                                     apiClientProps: {
                                         server,
@@ -221,7 +222,8 @@ export const PlaylistListHeaderFilters = ({
                                         ...pageFilters,
                                     },
                                 }),
-                        );
+                            queryKey,
+                        });
 
                         params.successCallback(
                             playlistsRes?.items || [],
@@ -338,7 +340,9 @@ export const PlaylistListHeaderFilters = ({
     };
 
     const handleRefresh = () => {
-        queryClient.invalidateQueries(queryKeys.playlists.list(server?.id || '', filter));
+        queryClient.invalidateQueries({
+            queryKey: queryKeys.playlists.list(server?.id || '', filter),
+        });
         handleFilterChange(filter);
     };
 

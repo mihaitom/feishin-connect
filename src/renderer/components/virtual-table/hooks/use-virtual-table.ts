@@ -163,20 +163,23 @@ export const useVirtualTable = <TFilter extends BaseQuery<any>>({
                         },
                     );
 
-                    const results = (await queryClient.fetchQuery(queryKey, async ({ signal }) => {
-                        const res = await queryFn!({
-                            apiClientProps: {
-                                server,
-                                signal,
-                            },
-                            query: {
-                                ...properties.filter,
-                                limit,
-                                startIndex,
-                            },
-                        });
+                    const results = (await queryClient.fetchQuery({
+                        queryFn: async ({ signal }) => {
+                            const res = await queryFn!({
+                                apiClientProps: {
+                                    server,
+                                    signal,
+                                },
+                                query: {
+                                    ...properties.filter,
+                                    limit,
+                                    startIndex,
+                                },
+                            });
 
-                        return res;
+                            return res;
+                        },
+                        queryKey,
                     })) as BasePaginatedResponse<any>;
 
                     if (isClientSideSort && results?.items) {

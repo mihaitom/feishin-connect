@@ -1,6 +1,7 @@
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 
 import { openModal } from '@mantine/modals';
+import { useQuery } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import { MouseEvent, MutableRefObject, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +11,8 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/virtual-table';
 import { useListContext } from '/@/renderer/context/list-context';
-import { OrderToggleButton, useMusicFolders } from '/@/renderer/features/shared';
+import { OrderToggleButton } from '/@/renderer/features/shared';
+import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { FilterButton } from '/@/renderer/features/shared/components/filter-button';
 import { FolderButton } from '/@/renderer/features/shared/components/folder-button';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
@@ -223,7 +225,9 @@ export const SongListHeaderFilters = ({
 
     const cq = useContainerQuery();
 
-    const musicFoldersQuery = useMusicFolders({ query: null, serverId: server?.id });
+    const musicFoldersQuery = useQuery(
+        sharedQueries.musicFolders({ query: null, serverId: server?.id }),
+    );
 
     const sortByLabel =
         (server?.type &&
@@ -407,7 +411,7 @@ export const SongListHeaderFilters = ({
     };
 
     const handleRefresh = () => {
-        queryClient.invalidateQueries(queryKeys.songs.list(server?.id || ''));
+        queryClient.invalidateQueries({ queryKey: queryKeys.songs.list(server?.id || '') });
         if (isGrid) {
             handleRefreshGrid(gridRef, filter);
         } else {
