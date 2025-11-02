@@ -36,7 +36,7 @@ import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-
 import { useAppFocus, useContainerQuery } from '/@/renderer/hooks';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer, useCurrentSong, useCurrentStatus } from '/@/renderer/store';
+import { useCurrentServer, usePlayerSong, usePlayerStatus } from '/@/renderer/store';
 import {
     PersistedTableColumn,
     useGeneralSettings,
@@ -85,9 +85,9 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
     const handlePlayQueueAdd = usePlayQueueAdd();
     const tableConfig = useTableSettings('albumDetail');
     const { setTable } = useSettingsStoreActions();
-    const status = useCurrentStatus();
+    const status = usePlayerStatus();
     const isFocused = useAppFocus();
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const { externalLinks, lastFM, musicBrainz } = useGeneralSettings();
     const genreRoute = useGenreRoute();
 

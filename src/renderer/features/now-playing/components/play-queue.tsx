@@ -24,13 +24,10 @@ import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { useAppFocus } from '/@/renderer/hooks';
 import {
     useAppStoreActions,
-    useCurrentSong,
-    useCurrentStatus,
-    useDefaultQueue,
-    usePlayerControls,
-    usePreviousSong,
-    useQueueControls,
-    useVolume,
+    usePlayerQueue,
+    usePlayerSong,
+    usePlayerStatus,
+    usePlayerVolume,
 } from '/@/renderer/store';
 import {
     PersistedTableColumn,
@@ -42,7 +39,7 @@ import {
 import { searchSongs } from '/@/renderer/utils/search-songs';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
 import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
-import { PlaybackType, TableType } from '/@/shared/types/types';
+import { PlayerType, TableType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 
@@ -54,18 +51,18 @@ type QueueProps = {
 export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<any>) => {
     const tableRef = useRef<AgGridReactType | null>(null);
     const mergedRef = useMergedRef(ref, tableRef);
-    const queue = useDefaultQueue();
-    const { reorderQueue, setCurrentTrack } = useQueueControls();
-    const currentSong = useCurrentSong();
-    const previousSong = usePreviousSong();
-    const status = useCurrentStatus();
+    const queue = usePlayerQueue();
+    // const { reorderQueue, setCurrentTrack } = useQueueControls();
+    const currentSong = usePlayerSong();
+    // const previousSong = usePreviousSong();
+    const status = usePlayerStatus();
     const { setSettings } = useSettingsStoreActions();
     const { setAppStore } = useAppStoreActions();
     const tableConfig = useTableSettings(type);
     const [gridApi, setGridApi] = useState<AgGridReactType | undefined>();
     const playbackType = usePlaybackType();
-    const { play } = usePlayerControls();
-    const volume = useVolume();
+    // const { play } = usePlayerControls();
+    const volume = usePlayerVolume();
     const isFocused = useAppFocus();
     const isFocusedRef = useRef<boolean>(isFocused);
 
@@ -94,26 +91,26 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
         [tableConfig.columns],
     );
 
-    const handleDoubleClick = (e: CellDoubleClickedEvent) => {
-        const playerData = setCurrentTrack(e.data.uniqueId);
-        updateSong(playerData.current.song);
+    // const handleDoubleClick = (e: CellDoubleClickedEvent) => {
+    //     const playerData = setCurrentTrack(e.data.uniqueId);
+    //     updateSong(playerData.current.song);
 
-        if (playbackType === PlaybackType.LOCAL) {
-            mpvPlayer!.volume(volume);
-            setQueue(playerData, false);
-        } else {
-            const player =
-                playerData.current.player === 1
-                    ? PlayersRef.current?.player1
-                    : PlayersRef.current?.player2;
-            const underlying = player?.getInternalPlayer();
-            if (underlying) {
-                underlying.currentTime = 0;
-            }
-        }
+    //     if (playbackType === PlaybackType.LOCAL) {
+    //         mpvPlayer!.volume(volume);
+    //         setQueue(playerData, false);
+    //     } else {
+    //         const player =
+    //             playerData.current.player === 1
+    //                 ? PlayersRef.current?.player1
+    //                 : PlayersRef.current?.player2;
+    //         const underlying = player?.getInternalPlayer();
+    //         if (underlying) {
+    //             underlying.currentTime = 0;
+    //         }
+    //     }
 
-        play();
-    };
+    //     play();
+    // };
 
     const handleDragStart = () => {
         if (type === 'sideDrawerQueue') {
@@ -128,11 +125,11 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
             .map((node) => node.data?.uniqueId)
             .filter((e) => e !== undefined);
 
-        const playerData = reorderQueue(selectedUniqueIds as string[], e.overNode?.data?.uniqueId);
+        // const playerData = reorderQueue(selectedUniqueIds as string[], e.overNode?.data?.uniqueId);
 
-        if (playbackType === PlaybackType.LOCAL) {
-            setQueueNext(playerData);
-        }
+        // if (playbackType === PlaybackType.LOCAL) {
+        //     setQueueNext(playerData);
+        // }
 
         if (type === 'sideDrawerQueue') {
             setAppStore({ isReorderingQueue: false });
@@ -204,6 +201,14 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
         };
     }, [currentSong?.uniqueId]);
 
+    const previousSongRef = useRef<QueueSong | undefined>(undefined);
+
+    useEffect(() => {
+        if (currentSong) {
+            previousSongRef.current = currentSong;
+        }
+    }, [currentSong]);
+
     // Redraw the current song row when the previous song changes
     useEffect(() => {
         if (tableRef?.current) {
@@ -215,8 +220,8 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
             const currentNode = currentSong?.uniqueId
                 ? api.getRowNode(currentSong.uniqueId)
                 : undefined;
-            const previousNode = previousSong?.uniqueId
-                ? api.getRowNode(previousSong?.uniqueId)
+            const previousNode = previousSongRef.current?.uniqueId
+                ? api.getRowNode(previousSongRef.current?.uniqueId)
                 : undefined;
 
             const rowNodes = [currentNode, previousNode].filter(
@@ -231,7 +236,7 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
                 }
             }
         }
-    }, [currentSong, previousSong, tableConfig.followCurrentSong, status]);
+    }, [currentSong, previousSongRef, tableConfig.followCurrentSong, status]);
 
     // As a separate rule, update the current row when focus changes. This is
     // to prevent queue scrolling when the application loses and then gains focus.
@@ -266,7 +271,7 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
                     columnDefs={columnDefs}
                     context={{
                         currentSong,
-                        handleDoubleClick,
+                        // handleDoubleClick,
                         isFocused,
                         isQueue: true,
                         itemType: LibraryItem.SONG,
@@ -276,7 +281,7 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
                     deselectOnClickOutside={type === 'fullScreen'}
                     getRowId={(data) => data.data.uniqueId}
                     onCellContextMenu={onCellContextMenu}
-                    onCellDoubleClicked={handleDoubleClick}
+                    // onCellDoubleClicked={handleDoubleClick}
                     onColumnMoved={handleColumnChange}
                     onColumnResized={debouncedColumnChange}
                     onDragStarted={handleDragStart}

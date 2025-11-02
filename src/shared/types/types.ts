@@ -101,20 +101,16 @@ export enum FontType {
 }
 
 export enum Play {
+    INDEX = 'index',
     LAST = 'last',
     NEXT = 'next',
     NOW = 'now',
     SHUFFLE = 'shuffle',
 }
 
-export enum PlaybackStyle {
-    CROSSFADE = 'crossfade',
-    GAPLESS = 'gapless',
-}
-
-export enum PlaybackType {
-    LOCAL = 'local',
-    WEB = 'web',
+export enum PlayerQueueType {
+    DEFAULT = 'default',
+    PRIORITY = 'priority',
 }
 
 export enum PlayerRepeat {
@@ -132,6 +128,16 @@ export enum PlayerShuffle {
 export enum PlayerStatus {
     PAUSED = 'paused',
     PLAYING = 'playing',
+}
+
+export enum PlayerStyle {
+    CROSSFADE = 'crossfade',
+    GAPLESS = 'gapless',
+}
+
+export enum PlayerType {
+    LOCAL = 'local',
+    WEB = 'web',
 }
 
 export enum TableColumn {

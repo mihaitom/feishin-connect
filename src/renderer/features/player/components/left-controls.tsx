@@ -12,7 +12,7 @@ import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu/h
 import { AppRoute } from '/@/renderer/router/routes';
 import {
     useAppStoreActions,
-    useCurrentSong,
+    usePlayerSong,
     useFullScreenPlayerStore,
     useHotkeySettings,
     useSetFullScreenPlayerStore,
@@ -34,7 +34,7 @@ export const LeftControls = () => {
     const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
     const { collapsed, image } = useSidebarStore();
     const hideImage = image && !collapsed;
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const title = currentSong?.name;
     const artists = currentSong?.artists;
     const { bindings } = useHotkeySettings();

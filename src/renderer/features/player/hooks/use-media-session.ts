@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
 import {
-    useCurrentSong,
-    useCurrentStatus,
+    usePlayerSong,
+    usePlayerStatus,
     usePlaybackSettings,
     useSettingsStore,
 } from '/@/renderer/store';
@@ -28,8 +28,8 @@ export const useMediaSession = ({
     handleStop: () => void;
 }) => {
     const { mediaSession: mediaSessionEnabled } = usePlaybackSettings();
-    const playerStatus = useCurrentStatus();
-    const currentSong = useCurrentSong();
+    const playerStatus = usePlayerStatus();
+    const currentSong = usePlayerSong();
     const mediaSession = navigator.mediaSession;
     const skip = useSettingsStore((state) => state.general.skipButtons);
 

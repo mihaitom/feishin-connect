@@ -20,7 +20,7 @@ import {
     UnsynchronizedLyricsProps,
 } from '/@/renderer/features/lyrics/unsynchronized-lyrics';
 import { queryClient } from '/@/renderer/lib/react-query';
-import { useCurrentSong, useLyricsSettings, usePlayerStore } from '/@/renderer/store';
+import { usePlayerSong, useLyricsSettings, usePlayerStore } from '/@/renderer/store';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -29,7 +29,7 @@ import { Text } from '/@/shared/components/text/text';
 import { FullLyricsMetadata, LyricSource, LyricsOverride } from '/@/shared/types/domain-types';
 
 export const Lyrics = () => {
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const {
         enableAutoTranslation,
         translationApiKey,

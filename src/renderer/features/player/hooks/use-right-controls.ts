@@ -1,13 +1,7 @@
 import isElectron from 'is-electron';
 import { useCallback, useEffect, WheelEvent } from 'react';
 
-import {
-    useMuted,
-    usePlayerControls,
-    useSetCurrentSpeed,
-    useSpeed,
-    useVolume,
-} from '/@/renderer/store';
+import { usePlayerMuted, usePlayerSpeed, usePlayerVolume } from '/@/renderer/store';
 import { useGeneralSettings } from '/@/renderer/store/settings.store';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
@@ -40,12 +34,12 @@ const calculateVolumeDown = (volume: number, volumeWheelStep: number) => {
 };
 
 export const useRightControls = () => {
-    const { setMuted, setVolume } = usePlayerControls();
-    const volume = useVolume();
-    const muted = useMuted();
+    // const { setMuted, setVolume } = usePlayerControls();
+    const volume = usePlayerVolume();
+    const muted = usePlayerMuted();
     const { volumeWheelStep } = useGeneralSettings();
-    const speed = useSpeed();
-    const setCurrentSpeed = useSetCurrentSpeed();
+    const speed = usePlayerSpeed();
+    // const setCurrentSpeed = useSetCurrentSpeed();
 
     // Ensure that the mpv player volume is set on startup
     useEffect(() => {
@@ -63,40 +57,37 @@ export const useRightControls = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleSpeed = useCallback(
-        (e: number) => {
-            setCurrentSpeed(e);
-            if (mpvPlayer) {
-                mpvPlayer?.setProperties({ speed: e });
-            }
-        },
-        [setCurrentSpeed],
-    );
+    const handleSpeed = useCallback((e: number) => {
+        // setCurrentSpeed(e);
+        if (mpvPlayer) {
+            mpvPlayer?.setProperties({ speed: e });
+        }
+    }, []);
 
     const handleVolumeSlider = (e: number) => {
         mpvPlayer?.volume(e);
         remote?.updateVolume(e);
-        setVolume(e);
+        // setVolume(e);
     };
 
     const handleVolumeSliderState = (e: number) => {
         remote?.updateVolume(e);
-        setVolume(e);
+        // setVolume(e);
     };
 
     const handleVolumeDown = useCallback(() => {
         const volumeToSet = calculateVolumeDown(volume, volumeWheelStep);
         mpvPlayer?.volume(volumeToSet);
         remote?.updateVolume(volumeToSet);
-        setVolume(volumeToSet);
-    }, [setVolume, volume, volumeWheelStep]);
+        // setVolume(volumeToSet);
+    }, [volume, volumeWheelStep]);
 
     const handleVolumeUp = useCallback(() => {
         const volumeToSet = calculateVolumeUp(volume, volumeWheelStep);
         mpvPlayer?.volume(volumeToSet);
         remote?.updateVolume(volumeToSet);
-        setVolume(volumeToSet);
-    }, [setVolume, volume, volumeWheelStep]);
+        // setVolume(volumeToSet);
+    }, [volume, volumeWheelStep]);
 
     const handleVolumeWheel = useCallback(
         (e: WheelEvent<HTMLButtonElement | HTMLDivElement>) => {
@@ -109,15 +100,15 @@ export const useRightControls = () => {
 
             mpvPlayer?.volume(volumeToSet);
             remote?.updateVolume(volumeToSet);
-            setVolume(volumeToSet);
+            // setVolume(volumeToSet);
         },
-        [setVolume, volume, volumeWheelStep],
+        [volume, volumeWheelStep],
     );
 
     const handleMute = useCallback(() => {
-        setMuted(!muted);
+        // setMuted(!muted);
         mpvPlayer?.mute(!muted);
-    }, [muted, setMuted]);
+    }, [muted]);
 
     useEffect(() => {
         if (isElectron()) {

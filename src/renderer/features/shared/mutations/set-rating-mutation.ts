@@ -5,7 +5,7 @@ import isElectron from 'is-electron';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { useSetAlbumListItemDataById, useSetQueueRating } from '/@/renderer/store';
+import { useSetAlbumListItemDataById } from '/@/renderer/store';
 import { useRatingEvent } from '/@/renderer/store/event.store';
 import {
     Album,
@@ -24,7 +24,7 @@ export const useSetRating = (args: MutationHookArgs) => {
     const { options } = args || {};
     const queryClient = useQueryClient();
     const setAlbumListData = useSetAlbumListItemDataById();
-    const setQueueRating = useSetQueueRating();
+    // const setQueueRating = useSetQueueRating();
     const setRatingEvent = useRatingEvent();
 
     return useMutation<
@@ -46,7 +46,7 @@ export const useSetRating = (args: MutationHookArgs) => {
                         setAlbumListData(item.id, { userRating: item.userRating });
                         break;
                     case LibraryItem.SONG:
-                        setQueueRating([item.id], item.userRating);
+                        // setQueueRating([item.id], item.userRating);
                         setRatingEvent([item.id], item.userRating);
                         break;
                 }
@@ -67,7 +67,7 @@ export const useSetRating = (args: MutationHookArgs) => {
             }
 
             if (songIds.length > 0) {
-                setQueueRating(songIds, variables.query.rating);
+                // setQueueRating(songIds, variables.query.rating);
                 setRatingEvent(songIds, variables.query.rating);
             }
 

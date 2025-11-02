@@ -7,15 +7,12 @@ import { useTranslation } from 'react-i18next';
 import { TableConfigDropdown } from '/@/renderer/components/virtual-table';
 import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { SearchInput } from '/@/renderer/features/shared/components/search-input';
-import { usePlayerControls, useQueueControls } from '/@/renderer/store';
-import { usePlayerStore, useSetCurrentTime } from '/@/renderer/store/player.store';
 import { usePlaybackType } from '/@/renderer/store/settings.store';
-import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
 import { Popover } from '/@/shared/components/popover/popover';
 import { Song } from '/@/shared/types/domain-types';
-import { PlaybackType, TableType } from '/@/shared/types/types';
+import { TableType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 
@@ -33,30 +30,30 @@ export const PlayQueueListControls = ({
     type,
 }: PlayQueueListOptionsProps) => {
     const { t } = useTranslation();
-    const {
-        clearQueue,
-        moveToBottomOfQueue,
-        moveToNextOfQueue,
-        moveToTopOfQueue,
-        removeFromQueue,
-        shuffleQueue,
-    } = useQueueControls();
+    // const {
+    //     clearQueue,
+    //     moveToBottomOfQueue,
+    //     moveToNextOfQueue,
+    //     moveToTopOfQueue,
+    //     removeFromQueue,
+    //     shuffleQueue,
+    // } = useQueueControls();
 
-    const { pause } = usePlayerControls();
+    // const { pause } = usePlayerControls();
 
     const playbackType = usePlaybackType();
-    const setCurrentTime = useSetCurrentTime();
+    // const setCurrentTime = useSetCurrentTime();
 
     const handleMoveToNext = () => {
         const selectedRows = tableRef?.current?.grid.api.getSelectedRows();
         const uniqueIds = selectedRows?.map((row) => row.uniqueId);
         if (!uniqueIds?.length) return;
 
-        const playerData = moveToNextOfQueue(uniqueIds);
+        // const playerData = moveToNextOfQueue(uniqueIds);
 
-        if (playbackType === PlaybackType.LOCAL) {
-            setQueueNext(playerData);
-        }
+        // if (playbackType === PlaybackType.LOCAL) {
+        //     setQueueNext(playerData);
+        // }
     };
 
     const handleMoveToBottom = () => {
@@ -64,11 +61,11 @@ export const PlayQueueListControls = ({
         const uniqueIds = selectedRows?.map((row) => row.uniqueId);
         if (!uniqueIds?.length) return;
 
-        const playerData = moveToBottomOfQueue(uniqueIds);
+        // const playerData = moveToBottomOfQueue(uniqueIds);
 
-        if (playbackType === PlaybackType.LOCAL) {
-            setQueueNext(playerData);
-        }
+        // if (playbackType === PlaybackType.LOCAL) {
+        //     setQueueNext(playerData);
+        // }
     };
 
     const handleMoveToTop = () => {
@@ -76,11 +73,11 @@ export const PlayQueueListControls = ({
         const uniqueIds = selectedRows?.map((row) => row.uniqueId);
         if (!uniqueIds?.length) return;
 
-        const playerData = moveToTopOfQueue(uniqueIds);
+        // const playerData = moveToTopOfQueue(uniqueIds);
 
-        if (playbackType === PlaybackType.LOCAL) {
-            setQueueNext(playerData);
-        }
+        // if (playbackType === PlaybackType.LOCAL) {
+        //     setQueueNext(playerData);
+        // }
     };
 
     const handleRemoveSelected = () => {
@@ -88,43 +85,42 @@ export const PlayQueueListControls = ({
         const uniqueIds = selectedRows?.map((row) => row.uniqueId);
         if (!uniqueIds?.length) return;
 
-        const currentSong = usePlayerStore.getState().current.song;
-        const playerData = removeFromQueue(uniqueIds);
-        const isCurrentSongRemoved = currentSong && uniqueIds.includes(currentSong.uniqueId);
+        // const currentSong = usePlayerStore.getState().current.song;
+        // const playerData = removeFromQueue(uniqueIds);
+        // const isCurrentSongRemoved = currentSong && uniqueIds.includes(currentSong.uniqueId);
 
-        if (playbackType === PlaybackType.LOCAL) {
-            if (isCurrentSongRemoved) {
-                setQueue(playerData);
-            } else {
-                setQueueNext(playerData);
-            }
-        }
+        // if (playbackType === PlaybackType.LOCAL) {
+        //     if (isCurrentSongRemoved) {
+        //         setQueue(playerData);
+        //     } else {
+        //         setQueueNext(playerData);
+        //     }
+        // }
 
-        if (isCurrentSongRemoved) {
-            updateSong(playerData.current.song);
-        }
+        // if (isCurrentSongRemoved) {
+        //     updateSong(playerData.current.song);
+        // }
     };
 
     const handleClearQueue = () => {
-        const playerData = clearQueue();
+        // const playerData = clearQueue();
 
-        if (playbackType === PlaybackType.LOCAL) {
-            setQueue(playerData);
-            mpvPlayer!.pause();
-        }
+        // if (playbackType === PlaybackType.LOCAL) {
+        //     setQueue(playerData);
+        //     mpvPlayer!.pause();
+        // }
 
         updateSong(undefined);
 
-        setCurrentTime(0);
-        pause();
+        // setCurrentTime(0);
+        // pause();
     };
 
     const handleShuffleQueue = () => {
-        const playerData = shuffleQueue();
-
-        if (playbackType === PlaybackType.LOCAL) {
-            setQueueNext(playerData);
-        }
+        // const playerData = shuffleQueue();
+        // if (playbackType === PlaybackType.LOCAL) {
+        //     setQueueNext(playerData);
+        // }
     };
 
     const handleSearchTerm = useCallback(

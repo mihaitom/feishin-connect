@@ -20,10 +20,15 @@ import {
     gaplessHandler,
 } from '/@/renderer/components/audio-player/utils/list-handlers';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
-import { TranscodingConfig, usePlaybackSettings, useSpeed } from '/@/renderer/store';
-import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
+import {
+    TranscodingConfig,
+    usePlaybackSettings,
+    usePlayerSpeed,
+    useSettingsStore,
+    useSettingsStoreActions,
+} from '/@/renderer/store';
 import { toast } from '/@/shared/components/toast/toast';
-import { PlaybackStyle, PlayerStatus } from '/@/shared/types/types';
+import { PlayerStatus, PlayerStyle } from '/@/shared/types/types';
 
 export type AudioPlayerProgress = {
     loaded: number;
@@ -38,7 +43,7 @@ interface AudioPlayerProps extends ReactPlayerProps {
     crossfadeStyle: CrossfadeStyle;
     currentPlayer: 1 | 2;
     muted: boolean;
-    playbackStyle: PlaybackStyle;
+    playbackStyle: PlayerStyle;
     player1?: Song;
     player2?: Song;
     status: PlayerStatus;
@@ -122,7 +127,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>((props, 
     const shouldUseWebAudio = useSettingsStore((state) => state.playback.webAudio);
     const preservesPitch = useSettingsStore((state) => state.playback.preservePitch);
     const { resetSampleRate } = useSettingsStoreActions();
-    const playbackSpeed = useSpeed();
+    const playbackSpeed = usePlayerSpeed();
     const { transcode } = usePlaybackSettings();
 
     const stream1 = useSongUrl(transcode, currentPlayer === 1, player1);
@@ -448,7 +453,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>((props, 
                 onEnded={stream1 ? handleOnEnded : undefined}
                 onError={handleOnError(player1Ref)}
                 onProgress={
-                    playbackStyle === PlaybackStyle.GAPLESS ? handleGapless1 : handleCrossfade1
+                    playbackStyle === PlayerStyle.GAPLESS ? handleGapless1 : handleCrossfade1
                 }
                 onReady={handlePlayer1Start}
                 playbackRate={playbackSpeed}
@@ -468,7 +473,7 @@ export const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>((props, 
                 onEnded={stream2 ? handleOnEnded : undefined}
                 onError={handleOnError(player2Ref)}
                 onProgress={
-                    playbackStyle === PlaybackStyle.GAPLESS ? handleGapless2 : handleCrossfade2
+                    playbackStyle === PlayerStyle.GAPLESS ? handleGapless2 : handleCrossfade2
                 }
                 onReady={handlePlayer2Start}
                 playbackRate={playbackSpeed}

@@ -6,14 +6,14 @@ import {
     SettingOption,
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
-import { useCurrentStatus, usePlayerStore } from '/@/renderer/store';
+import { usePlayerStatus, usePlayerStore } from '/@/renderer/store';
 import { usePlaybackSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import { setQueue } from '/@/renderer/utils/set-transcoded-queue-data';
 import { Select } from '/@/shared/components/select/select';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
 import { toast } from '/@/shared/components/toast/toast';
-import { CrossfadeStyle, PlaybackStyle, PlaybackType, PlayerStatus } from '/@/shared/types/types';
+import { CrossfadeStyle, PlayerStyle, PlayerType, PlayerStatus } from '/@/shared/types/types';
 
 const ipc = isElectron() ? window.api.ipc : null;
 
@@ -26,7 +26,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
     const { t } = useTranslation();
     const settings = usePlaybackSettings();
     const { setSettings } = useSettingsStoreActions();
-    const status = useCurrentStatus();
+    const status = usePlayerStatus();
 
     const [audioDevices, setAudioDevices] = useState<{ label: string; value: string }[]>([]);
 
@@ -43,7 +43,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                 );
         };
 
-        if (settings.type === PlaybackType.WEB) {
+        if (settings.type === PlayerType.WEB) {
             getAudioDevices();
         }
     }, [settings.type, t]);
@@ -56,16 +56,16 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                         {
                             disabled: !isElectron(),
                             label: 'MPV',
-                            value: PlaybackType.LOCAL,
+                            value: PlayerType.LOCAL,
                         },
-                        { label: 'Web', value: PlaybackType.WEB },
+                        { label: 'Web', value: PlayerType.WEB },
                     ]}
                     defaultValue={settings.type}
                     disabled={status === PlayerStatus.PLAYING}
                     onChange={(e) => {
-                        setSettings({ playback: { ...settings, type: e as PlaybackType } });
+                        setSettings({ playback: { ...settings, type: e as PlayerType } });
                         ipc?.send('settings-set', { property: 'playbackType', value: e });
-                        if (isElectron() && e === PlaybackType.LOCAL) {
+                        if (isElectron() && e === PlayerType.LOCAL) {
                             const queueData = usePlayerStore.getState().actions.getPlayerData();
                             setQueue(queueData);
                         }
@@ -89,7 +89,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                     clearable
                     data={audioDevices}
                     defaultValue={settings.audioDeviceId}
-                    disabled={settings.type !== PlaybackType.WEB}
+                    disabled={settings.type !== PlayerType.WEB}
                     onChange={(e) => setSettings({ playback: { ...settings, audioDeviceId: e } })}
                 />
             ),
@@ -97,7 +97,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                 context: 'description',
                 postProcess: 'sentenceCase',
             }),
-            isHidden: !isElectron() || settings.type !== PlaybackType.WEB,
+            isHidden: !isElectron() || settings.type !== PlayerType.WEB,
             title: t('setting.audioDevice', { postProcess: 'sentenceCase' }),
         },
         {
@@ -109,20 +109,20 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                                 context: 'optionNormal',
                                 postProcess: 'titleCase',
                             }),
-                            value: PlaybackStyle.GAPLESS,
+                            value: PlayerStyle.GAPLESS,
                         },
                         {
                             label: t('setting.playbackStyle', {
                                 context: 'optionCrossFade',
                                 postProcess: 'titleCase',
                             }),
-                            value: PlaybackStyle.CROSSFADE,
+                            value: PlayerStyle.CROSSFADE,
                         },
                     ]}
                     defaultValue={settings.style}
-                    disabled={settings.type !== PlaybackType.WEB || status === PlayerStatus.PLAYING}
+                    disabled={settings.type !== PlayerType.WEB || status === PlayerStatus.PLAYING}
                     onChange={(e) =>
-                        setSettings({ playback: { ...settings, style: e as PlaybackStyle } })
+                        setSettings({ playback: { ...settings, style: e as PlayerStyle } })
                     }
                 />
             ),
@@ -130,7 +130,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                 context: 'description',
                 postProcess: 'sentenceCase',
             }),
-            isHidden: settings.type !== PlaybackType.WEB,
+            isHidden: settings.type !== PlayerType.WEB,
             note: status === PlayerStatus.PLAYING ? 'Player must be paused' : undefined,
             title: t('setting.playbackStyle', {
                 context: 'description',
@@ -152,7 +152,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                 context: 'description',
                 postProcess: 'sentenceCase',
             }),
-            isHidden: settings.type !== PlaybackType.WEB,
+            isHidden: settings.type !== PlayerType.WEB,
             note: t('common.restartRequired', { postProcess: 'sentenceCase' }),
             title: t('setting.webAudio', {
                 postProcess: 'sentenceCase',
@@ -173,7 +173,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                 context: 'description',
                 postProcess: 'sentenceCase',
             }),
-            isHidden: settings.type !== PlaybackType.WEB,
+            isHidden: settings.type !== PlayerType.WEB,
             title: t('setting.preservePitch', {
                 postProcess: 'sentenceCase',
             }),
@@ -183,8 +183,8 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                 <Slider
                     defaultValue={settings.crossfadeDuration}
                     disabled={
-                        settings.type !== PlaybackType.WEB ||
-                        settings.style !== PlaybackStyle.CROSSFADE ||
+                        settings.type !== PlayerType.WEB ||
+                        settings.style !== PlayerStyle.CROSSFADE ||
                         status === PlayerStatus.PLAYING
                     }
                     max={15}
@@ -199,7 +199,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                 context: 'description',
                 postProcess: 'sentenceCase',
             }),
-            isHidden: settings.type !== PlaybackType.WEB,
+            isHidden: settings.type !== PlayerType.WEB,
             note: status === PlayerStatus.PLAYING ? 'Player must be paused' : undefined,
             title: t('setting.crossfadeDuration', {
                 postProcess: 'sentenceCase',
@@ -224,8 +224,8 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                     ]}
                     defaultValue={settings.crossfadeStyle}
                     disabled={
-                        settings.type !== PlaybackType.WEB ||
-                        settings.style !== PlaybackStyle.CROSSFADE ||
+                        settings.type !== PlayerType.WEB ||
+                        settings.style !== PlayerStyle.CROSSFADE ||
                         status === PlayerStatus.PLAYING
                     }
                     onChange={(e) => {
@@ -241,7 +241,7 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                 context: 'description',
                 postProcess: 'sentenceCase',
             }),
-            isHidden: settings.type !== PlaybackType.WEB,
+            isHidden: settings.type !== PlayerType.WEB,
             note: status === PlayerStatus.PLAYING ? 'Player must be paused' : undefined,
             title: t('setting.crossfadeStyle', { postProcess: 'sentenceCase' }),
         },

@@ -12,8 +12,8 @@ import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/conte
 import { useAppFocus } from '/@/renderer/hooks';
 import {
     useCurrentServer,
-    useCurrentSong,
-    useCurrentStatus,
+    usePlayerSong,
+    usePlayerStatus,
     usePlayButtonBehavior,
 } from '/@/renderer/store';
 import { LibraryItem, QueueSong, SongListQuery } from '/@/shared/types/domain-types';
@@ -27,8 +27,8 @@ export const SongListTableView = ({ itemCount, tableRef }: SongListTableViewProp
     const server = useCurrentServer();
     const { customFilters, handlePlay, id, pageKey } = useListContext();
     const isFocused = useAppFocus();
-    const currentSong = useCurrentSong();
-    const status = useCurrentStatus();
+    const currentSong = usePlayerSong();
+    const status = usePlayerStatus();
 
     const { rowClassRules } = useCurrentSongRowStyles({ tableRef });
 

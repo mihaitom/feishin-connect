@@ -29,8 +29,8 @@ import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-a
 import { useAppFocus } from '/@/renderer/hooks';
 import {
     useCurrentServer,
-    useCurrentSong,
-    useCurrentStatus,
+    usePlayerSong,
+    usePlayerStatus,
     usePlaylistDetailStore,
     usePlaylistDetailTablePagination,
     useSetPlaylistDetailTable,
@@ -58,9 +58,9 @@ interface PlaylistDetailContentProps {
 export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetailContentProps) => {
     const { playlistId } = useParams() as { playlistId: string };
     const queryClient = useQueryClient();
-    const status = useCurrentStatus();
+    const status = usePlayerStatus();
     const isFocused = useAppFocus();
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const server = useCurrentServer();
     const page = usePlaylistDetailStore();
     const filters: PlaylistSongListQueryClientSide = useMemo(() => {

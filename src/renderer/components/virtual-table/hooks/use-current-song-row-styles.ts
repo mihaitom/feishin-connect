@@ -4,7 +4,7 @@ import { RowClassRules, RowNode } from '@ag-grid-community/core';
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 
 import { useAppFocus } from '/@/renderer/hooks';
-import { useCurrentSong, usePlayerStore } from '/@/renderer/store';
+import { usePlayerSong, usePlayerStore } from '/@/renderer/store';
 import { Song } from '/@/shared/types/domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
@@ -13,7 +13,7 @@ interface UseCurrentSongRowStylesProps {
 }
 
 export const useCurrentSongRowStyles = ({ tableRef }: UseCurrentSongRowStylesProps) => {
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const isFocused = useAppFocus();
     const isFocusedRef = useRef<boolean>(isFocused);
 

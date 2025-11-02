@@ -21,8 +21,8 @@ import {
     FontType,
     Platform,
     Play,
-    PlaybackStyle,
-    PlaybackType,
+    PlayerStyle,
+    PlayerType,
     TableColumn,
     TableType,
 } from '/@/shared/types/types';
@@ -258,9 +258,9 @@ const PlaybackSettingsSchema = z.object({
     muted: z.boolean(),
     preservePitch: z.boolean(),
     scrobble: ScrobbleSettingsSchema,
-    style: z.nativeEnum(PlaybackStyle),
+    style: z.nativeEnum(PlayerStyle),
     transcode: TranscodingConfigSchema,
-    type: z.nativeEnum(PlaybackType),
+    type: z.nativeEnum(PlayerType),
     webAudio: z.boolean(),
 });
 
@@ -652,11 +652,11 @@ const initialState: SettingsState = {
             scrobbleAtDuration: 240,
             scrobbleAtPercentage: 75,
         },
-        style: PlaybackStyle.GAPLESS,
+        style: PlayerStyle.GAPLESS,
         transcode: {
             enabled: false,
         },
-        type: PlaybackType.WEB,
+        type: PlayerType.WEB,
         webAudio: true,
     },
     remote: {
@@ -843,7 +843,7 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                                 ...initialState,
                                 playback: {
                                     ...initialState.playback,
-                                    type: PlaybackType.WEB,
+                                    type: PlayerType.WEB,
                                 },
                             });
                         } else {
@@ -970,7 +970,7 @@ export const usePlaybackType = () =>
         const isFallback = usePlayerStore.getState().fallback;
 
         if (isFallback) {
-            return PlaybackType.WEB;
+            return PlayerType.WEB;
         }
 
         return state.playback.type;

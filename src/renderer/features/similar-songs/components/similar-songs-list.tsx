@@ -9,7 +9,6 @@ import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-tabl
 import { ErrorFallback } from '/@/renderer/features/action-required/components/error-fallback';
 import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
 import { useHandleTableContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
-import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-handle-playqueue-add';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { usePlayButtonBehavior, useTableSettings } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
@@ -24,8 +23,6 @@ export type SimilarSongsListProps = {
 export const SimilarSongsList = ({ count, fullScreen, song }: SimilarSongsListProps) => {
     const tableRef = useRef<AgGridReact<Song> | null>(null);
     const tableConfig = useTableSettings(fullScreen ? 'fullScreen' : 'songs');
-    const handlePlayQueueAdd = useHandlePlayQueueAdd();
-    const playButtonBehavior = usePlayButtonBehavior();
 
     const songQuery = useQuery(
         songsQueries.similar({
@@ -51,11 +48,11 @@ export const SimilarSongsList = ({ count, fullScreen, song }: SimilarSongsListPr
     const handleRowDoubleClick = (e: RowDoubleClickedEvent<Song>) => {
         if (!e.data || !songQuery.data) return;
 
-        handlePlayQueueAdd?.({
-            byData: songQuery.data,
-            initialSongId: e.data.id,
-            playType: playButtonBehavior,
-        });
+        // handlePlayQueueAdd?.({
+        //     byData: songQuery.data,
+        //     initialSongId: e.data.id,
+        //     playType: playButtonBehavior,
+        // });
     };
 
     return songQuery.isLoading ? (

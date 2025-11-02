@@ -7,7 +7,7 @@ import {
 } from '/@/renderer/features/settings/components/settings-section';
 import { useHotkeySettings, usePlaybackSettings, useSettingsStoreActions } from '/@/renderer/store';
 import { Switch } from '/@/shared/components/switch/switch';
-import { PlaybackType } from '/@/shared/types/types';
+import { PlayerType } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 const isWindows = isElectron() ? window.api.utils.isWindows() : false;
@@ -25,9 +25,7 @@ export const WindowHotkeySettings = () => {
                     defaultChecked={settings.globalMediaHotkeys}
                     disabled={
                         !isElectron() ||
-                        (enableWindowsMediaSession &&
-                            isWindows &&
-                            playbackType === PlaybackType.WEB)
+                        (enableWindowsMediaSession && isWindows && playbackType === PlayerType.WEB)
                     }
                     onChange={(e) => {
                         setSettings({

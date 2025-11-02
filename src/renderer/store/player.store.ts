@@ -10,40 +10,14 @@ import { useShallow } from 'zustand/react/shallow';
 import { createSelectors } from '/@/renderer/lib/zustand';
 import { shuffleInPlace } from '/@/renderer/utils/shuffle';
 import { QueueSong, Song } from '/@/shared/types/domain-types';
-
-export enum PlayerRepeat {
-    ALBUM = 'album',
-    ALL = 'all',
-    OFF = 'off',
-    ONE = 'one',
-}
-
-export enum PlayerShuffle {
-    OFF = 'off',
-    TRACK = 'track',
-}
-
-export enum PlayerStatus {
-    PAUSED = 'paused',
-    PLAYING = 'playing',
-}
-
-export enum PlayerTransition {
-    CROSSFADE = 'crossfade',
-    GAPLESS = 'gapless',
-}
-
-export enum PlayType {
-    INDEX = 'index',
-    LAST = 'last',
-    NEXT = 'next',
-    NOW = 'now',
-}
-
-export enum QueueType {
-    DEFAULT = 'default',
-    PRIORITY = 'priority',
-}
+import {
+    Play,
+    PlayerQueueType,
+    PlayerRepeat,
+    PlayerShuffle,
+    PlayerStatus,
+    PlayerStyle,
+} from '/@/shared/types/types';
 
 export interface PlayerData {
     currentTrack: QueueSong | undefined;
@@ -56,7 +30,7 @@ export interface PlayerData {
         shuffle: PlayerShuffle;
         speed: number;
         status: PlayerStatus;
-        transitionType: PlayerTransition;
+        transitionType: PlayerStyle;
         volume: number;
     };
     player1: QueueSong | undefined;
@@ -75,7 +49,7 @@ export interface QueueData {
 export type QueueGroupingProperty = keyof QueueSong;
 
 interface Actions {
-    addToQueueByType: (items: Song[], playType: PlayType) => void;
+    addToQueueByType: (items: Song[], playType: Play) => void;
     addToQueueByUniqueId: (items: Song[], uniqueId: string, edge: 'bottom' | 'top') => void;
     clearQueue: () => void;
     clearSelected: (items: QueueSong[]) => void;
@@ -103,11 +77,11 @@ interface Actions {
     moveSelectedToTop: (items: QueueSong[]) => void;
     setCrossfadeDuration: (duration: number) => void;
     setProgress: (timestamp: number) => void;
-    setQueueType: (queueType: QueueType) => void;
+    setQueueType: (queueType: PlayerQueueType) => void;
     setRepeat: (repeat: PlayerRepeat) => void;
     setShuffle: (shuffle: PlayerShuffle) => void;
     setSpeed: (speed: number) => void;
-    setTransitionType: (transitionType: PlayerTransition) => void;
+    setTransitionType: (transitionType: PlayerStyle) => void;
     setVolume: (volume: number) => void;
     shuffle: () => void;
     shuffleAll: () => void;
@@ -125,7 +99,7 @@ interface State {
         index: number;
         muted: boolean;
         playerNum: 1 | 2;
-        queueType: QueueType;
+        queueType: PlayerQueueType;
         repeat: PlayerRepeat;
         seekToTimestamp: string;
         shuffle: PlayerShuffle;
@@ -134,7 +108,7 @@ interface State {
         stepBackward: number;
         stepForward: number;
         timestamp: number;
-        transitionType: PlayerTransition;
+        transitionType: PlayerStyle;
         volume: number;
     };
     queue: QueueData;
@@ -150,9 +124,9 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     const queueType = getQueueType();
 
                     switch (queueType) {
-                        case QueueType.DEFAULT: {
+                        case PlayerQueueType.DEFAULT: {
                             switch (playType) {
-                                case PlayType.LAST: {
+                                case Play.LAST: {
                                     set((state) => {
                                         const currentIndex = state.player.index;
 
@@ -171,7 +145,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     });
                                     break;
                                 }
-                                case PlayType.NEXT: {
+                                case Play.NEXT: {
                                     set((state) => {
                                         const currentIndex = state.player.index;
 
@@ -194,7 +168,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     });
                                     break;
                                 }
-                                case PlayType.NOW: {
+                                case Play.NOW: {
                                     set((state) => {
                                         state.queue.default = [];
                                         state.player.index = 0;
@@ -214,9 +188,9 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             }
                             break;
                         }
-                        case QueueType.PRIORITY: {
+                        case PlayerQueueType.PRIORITY: {
                             switch (playType) {
-                                case PlayType.LAST: {
+                                case Play.LAST: {
                                     set((state) => {
                                         state.queue.priority = [
                                             ...state.queue.priority,
@@ -230,7 +204,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     });
                                     break;
                                 }
-                                case PlayType.NEXT: {
+                                case Play.NEXT: {
                                     set((state) => {
                                         const currentIndex = state.player.index;
                                         const isInPriority =
@@ -260,7 +234,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     });
                                     break;
                                 }
-                                case PlayType.NOW: {
+                                case Play.NOW: {
                                     set((state) => {
                                         state.queue.default = [];
                                         state.player.status = PlayerStatus.PLAYING;
@@ -337,7 +311,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     const queueType = getQueueType();
 
                     set((state) => {
-                        if (queueType === QueueType.DEFAULT) {
+                        if (queueType === PlayerQueueType.DEFAULT) {
                             const index = state.queue.default.findIndex(
                                 (item) => item.uniqueId === uniqueId,
                             );
@@ -445,7 +419,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     const queue = get().getQueueOrder();
                     const queueType = getQueueType();
 
-                    if (!groupBy || queueType === QueueType.PRIORITY) {
+                    if (!groupBy || queueType === PlayerQueueType.PRIORITY) {
                         return queue;
                     }
 
@@ -483,7 +457,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 getQueueOrder: () => {
                     const queueType = getQueueType();
 
-                    if (queueType === QueueType.PRIORITY) {
+                    if (queueType === PlayerQueueType.PRIORITY) {
                         const defaultQueue = get().queue.default;
                         const priorityQueue = get().queue.priority;
 
@@ -645,7 +619,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     set((state) => {
                         const uniqueIdMap = new Map(items.map((item) => [item.uniqueId, item]));
 
-                        if (queueType == QueueType.DEFAULT) {
+                        if (queueType == PlayerQueueType.DEFAULT) {
                             // Find the index of the drop target
                             const index = state.queue.default.findIndex(
                                 (item) => item.uniqueId === uniqueId,
@@ -738,7 +712,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     set((state) => {
                         const uniqueIds = items.map((item) => item.uniqueId);
 
-                        if (state.player.queueType === QueueType.PRIORITY) {
+                        if (state.player.queueType === PlayerQueueType.PRIORITY) {
                             const priorityFiltered = state.queue.priority.filter(
                                 (item) => !uniqueIds.includes(item.uniqueId),
                             );
@@ -779,7 +753,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                         const uniqueIds = items.map((item) => item.uniqueId);
 
-                        if (queueType === QueueType.DEFAULT) {
+                        if (queueType === PlayerQueueType.DEFAULT) {
                             const currentIndex = state.player.index;
                             const filtered = state.queue.default.filter(
                                 (item) => !uniqueIds.includes(item.uniqueId),
@@ -861,7 +835,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     set((state) => {
                         const uniqueIds = items.map((item) => item.uniqueId);
 
-                        if (state.player.queueType === QueueType.PRIORITY) {
+                        if (state.player.queueType === PlayerQueueType.PRIORITY) {
                             const priorityFiltered = state.queue.priority.filter(
                                 (item) => !uniqueIds.includes(item.uniqueId),
                             );
@@ -896,16 +870,16 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     index: -1,
                     muted: false,
                     playerNum: 1,
-                    queueType: QueueType.DEFAULT,
-                    repeat: PlayerRepeat.OFF,
+                    queueType: PlayerQueueType.DEFAULT,
+                    repeat: PlayerRepeat.NONE,
                     seekToTimestamp: uniqueSeekToTimestamp(0),
-                    shuffle: PlayerShuffle.OFF,
+                    shuffle: PlayerShuffle.NONE,
                     speed: 1,
                     status: PlayerStatus.PAUSED,
                     stepBackward: 10,
                     stepForward: 10,
                     timestamp: 0,
-                    transitionType: PlayerTransition.GAPLESS,
+                    transitionType: PlayerStyle.GAPLESS,
                     volume: 30,
                 },
                 queue: {
@@ -924,10 +898,10 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         state.player.timestamp = timestamp;
                     });
                 },
-                setQueueType: (queueType: QueueType) => {
+                setQueueType: (queueType: PlayerQueueType) => {
                     set((state) => {
                         // From default -> priority, move all items from default to priority
-                        if (queueType === QueueType.PRIORITY) {
+                        if (queueType === PlayerQueueType.PRIORITY) {
                             state.queue.priority = [
                                 ...state.queue.default,
                                 ...state.queue.priority,
@@ -960,7 +934,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         state.player.speed = normalizedSpeed;
                     });
                 },
-                setTransitionType: (transitionType: PlayerTransition) => {
+                setTransitionType: (transitionType: PlayerStyle) => {
                     set((state) => {
                         state.player.transitionType = transitionType;
                     });
@@ -1053,7 +1027,7 @@ export const usePlayerActions = () => {
     );
 };
 
-export type AddToQueueByPlayType = PlayType;
+export type AddToQueueByPlayType = Play;
 
 export type AddToQueueByUniqueId = {
     edge: 'bottom' | 'left' | 'right' | 'top' | null;
@@ -1254,16 +1228,6 @@ export const usePlayerProperties = () => {
     );
 };
 
-export const useCurrentTrack = () => {
-    return usePlayerStoreBase(
-        useShallow((state) => {
-            const queue = state.getQueue();
-            const index = state.player.index;
-            return { index, length: queue.items.length, track: queue.items[index] };
-        }),
-    );
-};
-
 export const usePlayerProgress = () => {
     return usePlayerStoreBase((state) => state.player.timestamp);
 };
@@ -1321,32 +1285,67 @@ export const updateQueueFavorites = (ids: string[], favorite: boolean) => {
     });
 };
 
-export function usePlayerMuted() {
+export const usePlayerMuted = () => {
     return usePlayerStoreBase((state) => state.player.muted);
-}
+};
 
-export function usePlayerQueueType() {
+export const usePlayerQueueType = () => {
     return usePlayerStoreBase((state) => state.player.queueType);
-}
+};
 
-export function usePlayerRepeat() {
+export const usePlayerRepeat = () => {
     return usePlayerStoreBase((state) => state.player.repeat);
-}
+};
 
-export function usePlayerShuffle() {
+export const usePlayerShuffle = () => {
     return usePlayerStoreBase((state) => state.player.shuffle);
-}
+};
 
-export function usePlayerStatus() {
+export const usePlayerStatus = () => {
     return usePlayerStoreBase((state) => state.player.status);
-}
+};
 
-export function usePlayerVolume() {
+export const usePlayerVolume = () => {
     return usePlayerStoreBase((state) => state.player.volume);
-}
+};
+
+export const usePlayerSpeed = () => {
+    return usePlayerStoreBase((state) => state.player.speed);
+};
+
+export const usePlayerTimestamp = () => {
+    return usePlayerStoreBase((state) => state.player.timestamp);
+};
+
+export const usePlayerSong = () => {
+    return usePlayerStoreBase((state) => {
+        const queue = state.getQueue();
+        const index = state.player.index;
+        return queue.items[index];
+    });
+};
+
+export const usePlayerNum = () => {
+    return usePlayerStoreBase((state) => state.player.playerNum);
+};
+
+export const usePlayerQueue = () => {
+    return usePlayerStoreBase((state) => {
+        const queueType = state.player.queueType;
+
+        switch (queueType) {
+            case PlayerQueueType.DEFAULT:
+                return state.queue.default;
+            case PlayerQueueType.PRIORITY:
+                return state.queue.priority;
+            default:
+                return state.queue.default;
+        }
+    });
+};
 
 function getQueueType() {
-    const queueType: QueueType = usePlayerStore.getState().player.queueType;
+    const queueType: PlayerQueueType = usePlayerStore.getState().player.queueType;
     return queueType;
 }
 

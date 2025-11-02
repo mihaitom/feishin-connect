@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { openLyricSearchModal } from '/@/renderer/features/lyrics/components/lyrics-search-form';
 import {
-    useCurrentSong,
+    usePlayerSong,
     useLyricsSettings,
     useSettingsStore,
     useSettingsStoreActions,
@@ -38,7 +38,7 @@ export const LyricsActions = ({
     setIndex,
 }: LyricsActionsProps) => {
     const { t } = useTranslation();
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const { setSettings } = useSettingsStoreActions();
     const { delayMs, sources } = useLyricsSettings();
 

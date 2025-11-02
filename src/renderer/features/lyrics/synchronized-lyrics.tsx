@@ -8,17 +8,16 @@ import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
 import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
 import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
 import {
-    useCurrentPlayer,
-    useCurrentStatus,
-    useCurrentTime,
     useLyricsSettings,
     usePlaybackType,
+    usePlayerActions,
     usePlayerData,
-    useSeeked,
-    useSetCurrentTime,
+    usePlayerNum,
+    usePlayerStatus,
+    usePlayerTimestamp,
 } from '/@/renderer/store';
 import { FullLyricsMetadata, SynchronizedLyricsArray } from '/@/shared/types/domain-types';
-import { PlaybackType, PlayerStatus } from '/@/shared/types/types';
+import { PlayerStatus, PlayerType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 const utils = isElectron() ? window.api.utils : null;
@@ -38,33 +37,33 @@ export const SynchronizedLyrics = ({
     translatedLyrics,
 }: SynchronizedLyricsProps) => {
     const playersRef = PlayersRef;
-    const status = useCurrentStatus();
+    const status = usePlayerStatus();
     const playbackType = usePlaybackType();
     const playerData = usePlayerData();
-    const now = useCurrentTime();
+    const now = usePlayerTimestamp();
     const settings = useLyricsSettings();
-    const currentPlayer = useCurrentPlayer();
+    const currentPlayer = usePlayerNum();
     const currentPlayerRef =
         currentPlayer === 1 ? playersRef.current?.player1 : playersRef.current?.player2;
-    const setCurrentTime = useSetCurrentTime();
+
     const { handleScrobbleFromSeek } = useScrobble();
 
     const handleSeek = useCallback(
         (time: number) => {
-            if (playbackType === PlaybackType.LOCAL && mpvPlayer) {
+            if (playbackType === PlayerType.LOCAL && mpvPlayer) {
                 mpvPlayer.seekTo(time);
-                setCurrentTime(time, true);
+                // setCurrentTime(time, true);
             } else {
-                setCurrentTime(time, true);
+                // setCurrentTime(time, true);
                 handleScrobbleFromSeek(time);
                 mpris?.updateSeek(time);
                 currentPlayerRef?.seekTo(time);
             }
         },
-        [currentPlayerRef, handleScrobbleFromSeek, playbackType, setCurrentTime],
+        [currentPlayerRef, handleScrobbleFromSeek, playbackType],
     );
 
-    const seeked = useSeeked();
+    // const seeked = useSeeked();
 
     // A reference to the timeout handler
     const lyricTimer = useRef<null | ReturnType<typeof setTimeout>>(null);
@@ -97,7 +96,7 @@ export const SynchronizedLyrics = ({
     };
 
     const getCurrentTime = useCallback(async () => {
-        if (isElectron() && playbackType !== PlaybackType.WEB) {
+        if (isElectron() && playbackType !== PlayerType.WEB) {
             if (mpvPlayer) {
                 return mpvPlayer.getCurrentTime();
             }
@@ -109,7 +108,7 @@ export const SynchronizedLyrics = ({
         }
 
         const player =
-            playerData.current.player === 1
+            playerData.player.playerNum === 1
                 ? playersRef.current.player1
                 : playersRef.current.player2;
         const underlying = player?.getInternalPlayer();
@@ -282,16 +281,16 @@ export const SynchronizedLyrics = ({
         // we may be playing the same track (repeat one). In this case, we also
         // need to restart playback
         const restarted = status === PlayerStatus.PLAYING && now === 0;
-        if (!seeked && !restarted) {
-            return;
-        }
+        // if (!seeked && !restarted) {
+        //     return;
+        // }
 
         if (lyricTimer.current) {
             clearTimeout(lyricTimer.current);
         }
 
         setCurrentLyric(now * 1000 - delayMsRef.current);
-    }, [now, seeked, setCurrentLyric, status]);
+    }, [now, setCurrentLyric, status]);
 
     useEffect(() => {
         // Guaranteed cleanup; stop the timer, and just in case also increment

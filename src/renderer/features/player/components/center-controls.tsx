@@ -1,4 +1,3 @@
-import { useHotkeys } from '@mantine/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import formatDuration from 'format-duration';
 import isElectron from 'is-electron';
@@ -10,27 +9,24 @@ import styles from './center-controls.module.css';
 import { PlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
 import { PlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 import { openShuffleAllModal } from '/@/renderer/features/player/components/shuffle-all-modal';
-import { useCenterControls } from '/@/renderer/features/player/hooks/use-center-controls';
-import { useMediaSession } from '/@/renderer/features/player/hooks/use-media-session';
 import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import {
     useAppStore,
     useAppStoreActions,
-    useCurrentPlayer,
-    useCurrentSong,
-    useCurrentStatus,
-    useCurrentTime,
     useHotkeySettings,
     usePlaybackType,
-    useRepeatStatus,
-    useSetCurrentTime,
+    usePlayerNum,
+    usePlayerRepeat,
+    usePlayerShuffle,
+    usePlayerSong,
+    usePlayerStatus,
+    usePlayerTimestamp,
     useSettingsStore,
-    useShuffleStatus,
 } from '/@/renderer/store';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Text } from '/@/shared/components/text/text';
 import { PlaybackSelectors } from '/@/shared/constants/playback-selectors';
-import { PlaybackType, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
+import { PlayerRepeat, PlayerShuffle, PlayerStatus, PlayerType } from '/@/shared/types/types';
 
 interface CenterControlsProps {
     playersRef: any;
@@ -40,38 +36,38 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [isSeeking, setIsSeeking] = useState(false);
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const skip = useSettingsStore((state) => state.general.skipButtons);
     const buttonSize = useSettingsStore((state) => state.general.buttonSize);
     const playbackType = usePlaybackType();
     const player1 = playersRef?.current?.player1;
     const player2 = playersRef?.current?.player2;
-    const status = useCurrentStatus();
-    const player = useCurrentPlayer();
-    const setCurrentTime = useSetCurrentTime();
-    const repeat = useRepeatStatus();
-    const shuffle = useShuffleStatus();
+    const status = usePlayerStatus();
+    const player = usePlayerNum();
+    // const setCurrentTime = useSetCurrentTime();
+    const repeat = usePlayerRepeat();
+    const shuffle = usePlayerShuffle();
     const { bindings } = useHotkeySettings();
     const { showTimeRemaining } = useAppStore();
     const { setShowTimeRemaining } = useAppStoreActions();
 
-    const {
-        handleNextTrack,
-        handlePause,
-        handlePlay,
-        handlePlayPause,
-        handlePrevTrack,
-        handleSeekSlider,
-        handleSkipBackward,
-        handleSkipForward,
-        handleStop,
-        handleToggleRepeat,
-        handleToggleShuffle,
-    } = useCenterControls({ playersRef });
+    // const {
+    //     handleNextTrack,
+    //     handlePause,
+    //     handlePlay,
+    //     handlePlayPause,
+    //     handlePrevTrack,
+    //     handleSeekSlider,
+    //     handleSkipBackward,
+    //     handleSkipForward,
+    //     handleStop,
+    //     handleToggleRepeat,
+    //     handleToggleShuffle,
+    // } = useCenterControls({ playersRef });
     const handlePlayQueueAdd = usePlayQueueAdd();
 
     const songDuration = currentSong?.duration ? currentSong.duration / 1000 : 0;
-    const currentTime = useCurrentTime();
+    const currentTime = usePlayerTimestamp();
     const currentPlayerRef = player === 1 ? player1 : player2;
     const formattedDuration = formatDuration(songDuration * 1000 || 0);
     const formattedTimeRemaining = formatDuration((currentTime - songDuration) * 1000 || 0);
@@ -81,50 +77,50 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
         let interval: ReturnType<typeof setInterval>;
 
         if (status === PlayerStatus.PLAYING && !isSeeking) {
-            if (!isElectron() || playbackType === PlaybackType.WEB) {
+            if (!isElectron() || playbackType === PlayerType.WEB) {
                 // Update twice a second for slightly better performance
                 interval = setInterval(() => {
                     if (currentPlayerRef) {
-                        setCurrentTime(currentPlayerRef.getCurrentTime());
+                        // setCurrentTime(currentPlayerRef.getCurrentTime());
                     }
                 }, 500);
             }
         }
 
         return () => clearInterval(interval);
-    }, [currentPlayerRef, isSeeking, setCurrentTime, playbackType, status]);
+    }, [currentPlayerRef, isSeeking, playbackType, status]);
 
     const [seekValue, setSeekValue] = useState(0);
 
-    useHotkeys([
-        [bindings.playPause.isGlobal ? '' : bindings.playPause.hotkey, handlePlayPause],
-        [bindings.play.isGlobal ? '' : bindings.play.hotkey, handlePlay],
-        [bindings.pause.isGlobal ? '' : bindings.pause.hotkey, handlePause],
-        [bindings.stop.isGlobal ? '' : bindings.stop.hotkey, handleStop],
-        [bindings.next.isGlobal ? '' : bindings.next.hotkey, handleNextTrack],
-        [bindings.previous.isGlobal ? '' : bindings.previous.hotkey, handlePrevTrack],
-        [bindings.toggleRepeat.isGlobal ? '' : bindings.toggleRepeat.hotkey, handleToggleRepeat],
-        [bindings.toggleShuffle.isGlobal ? '' : bindings.toggleShuffle.hotkey, handleToggleShuffle],
-        [
-            bindings.skipBackward.isGlobal ? '' : bindings.skipBackward.hotkey,
-            () => handleSkipBackward(skip?.skipBackwardSeconds || 5),
-        ],
-        [
-            bindings.skipForward.isGlobal ? '' : bindings.skipForward.hotkey,
-            () => handleSkipForward(skip?.skipForwardSeconds || 5),
-        ],
-    ]);
+    // useHotkeys([
+    //     [bindings.playPause.isGlobal ? '' : bindings.playPause.hotkey, handlePlayPause],
+    //     [bindings.play.isGlobal ? '' : bindings.play.hotkey, handlePlay],
+    //     [bindings.pause.isGlobal ? '' : bindings.pause.hotkey, handlePause],
+    //     [bindings.stop.isGlobal ? '' : bindings.stop.hotkey, handleStop],
+    //     [bindings.next.isGlobal ? '' : bindings.next.hotkey, handleNextTrack],
+    //     [bindings.previous.isGlobal ? '' : bindings.previous.hotkey, handlePrevTrack],
+    //     [bindings.toggleRepeat.isGlobal ? '' : bindings.toggleRepeat.hotkey, handleToggleRepeat],
+    //     [bindings.toggleShuffle.isGlobal ? '' : bindings.toggleShuffle.hotkey, handleToggleShuffle],
+    //     [
+    //         bindings.skipBackward.isGlobal ? '' : bindings.skipBackward.hotkey,
+    //         () => handleSkipBackward(skip?.skipBackwardSeconds || 5),
+    //     ],
+    //     [
+    //         bindings.skipForward.isGlobal ? '' : bindings.skipForward.hotkey,
+    //         () => handleSkipForward(skip?.skipForwardSeconds || 5),
+    //     ],
+    // ]);
 
-    useMediaSession({
-        handleNextTrack,
-        handlePause,
-        handlePlay,
-        handlePrevTrack,
-        handleSeekSlider,
-        handleSkipBackward,
-        handleSkipForward,
-        handleStop,
-    });
+    // useMediaSession({
+    //     handleNextTrack,
+    //     handlePause,
+    //     handlePlay,
+    //     handlePrevTrack,
+    //     handleSeekSlider,
+    //     handleSkipBackward,
+    //     handleSkipForward,
+    //     handleStop,
+    // });
 
     return (
         <>
@@ -132,7 +128,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                 <div className={styles.buttonsContainer}>
                     <PlayerButton
                         icon={<Icon fill="default" icon="mediaStop" size={buttonSize - 2} />}
-                        onClick={handleStop}
+                        // onClick={handleStop}
                         tooltip={{
                             label: t('player.stop', { postProcess: 'sentenceCase' }),
                             openDelay: 0,
@@ -148,7 +144,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                             />
                         }
                         isActive={shuffle !== PlayerShuffle.NONE}
-                        onClick={handleToggleShuffle}
+                        // onClick={handleToggleShuffle}
                         tooltip={{
                             label:
                                 shuffle === PlayerShuffle.NONE
@@ -163,7 +159,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                     />
                     <PlayerButton
                         icon={<Icon fill="default" icon="mediaPrevious" size={buttonSize} />}
-                        onClick={handlePrevTrack}
+                        // onClick={handlePrevTrack}
                         tooltip={{
                             label: t('player.previous', { postProcess: 'sentenceCase' }),
                             openDelay: 0,
@@ -175,7 +171,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                             icon={
                                 <Icon fill="default" icon="mediaStepBackward" size={buttonSize} />
                             }
-                            onClick={() => handleSkipBackward(skip?.skipBackwardSeconds)}
+                            // onClick={() => handleSkipBackward(skip?.skipBackwardSeconds)}
                             tooltip={{
                                 label: t('player.skip', {
                                     context: 'back',
@@ -190,12 +186,12 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                     <PlayButton
                         disabled={currentSong?.id === undefined}
                         isPaused={status === PlayerStatus.PAUSED}
-                        onClick={handlePlayPause}
+                        // onClick={handlePlayPause}
                     />
                     {skip?.enabled && (
                         <PlayerButton
                             icon={<Icon fill="default" icon="mediaStepForward" size={buttonSize} />}
-                            onClick={() => handleSkipForward(skip?.skipForwardSeconds)}
+                            // onClick={() => handleSkipForward(skip?.skipForwardSeconds)}
                             tooltip={{
                                 label: t('player.skip', {
                                     context: 'forward',
@@ -209,7 +205,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                     )}
                     <PlayerButton
                         icon={<Icon fill="default" icon="mediaNext" size={buttonSize} />}
-                        onClick={handleNextTrack}
+                        // onClick={handleNextTrack}
                         tooltip={{
                             label: t('player.next', { postProcess: 'sentenceCase' }),
                             openDelay: 0,
@@ -229,7 +225,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                             )
                         }
                         isActive={repeat !== PlayerRepeat.NONE}
-                        onClick={handleToggleRepeat}
+                        // onClick={handleToggleRepeat}
                         tooltip={{
                             label: `${
                                 repeat === PlayerRepeat.NONE
@@ -294,7 +290,7 @@ export const CenterControls = ({ playersRef }: CenterControlsProps) => {
                             // event fires before onChange. Add a small delay to force
                             // onChangeEnd to happen after onCHange
                             setTimeout(() => {
-                                handleSeekSlider(e);
+                                // handleSeekSlider(e);
                                 setIsSeeking(false);
                             }, 50);
                         }}

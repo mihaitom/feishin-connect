@@ -5,7 +5,7 @@ import isElectron from 'is-electron';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { useSetAlbumListItemDataById, useSetQueueFavorite } from '/@/renderer/store';
+import { useSetAlbumListItemDataById } from '/@/renderer/store';
 import { useFavoriteEvent } from '/@/renderer/store/event.store';
 import {
     AlbumArtistDetailResponse,
@@ -21,7 +21,7 @@ export const useDeleteFavorite = (args: MutationHookArgs) => {
     const { options } = args || {};
     const queryClient = useQueryClient();
     const setAlbumListData = useSetAlbumListItemDataById();
-    const setQueueFavorite = useSetQueueFavorite();
+    // const setQueueFavorite = useSetQueueFavorite();
     const setFavoriteEvent = useFavoriteEvent();
 
     return useMutation<FavoriteResponse, AxiosError, FavoriteArgs, null>({
@@ -44,7 +44,7 @@ export const useDeleteFavorite = (args: MutationHookArgs) => {
 
             if (variables.query.type === LibraryItem.SONG) {
                 remote?.updateFavorite(false, serverId, variables.query.id);
-                setQueueFavorite(variables.query.id, false);
+                // setQueueFavorite(variables.query.id, false);
                 setFavoriteEvent(variables.query.id, false);
             }
 

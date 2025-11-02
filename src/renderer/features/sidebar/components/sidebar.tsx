@@ -17,7 +17,7 @@ import {
 } from '/@/renderer/features/sidebar/components/sidebar-playlist-list';
 import {
     useAppStoreActions,
-    useCurrentSong,
+    usePlayerSong,
     useFullScreenPlayerStore,
     useSetFullScreenPlayerStore,
     useSidebarStore,
@@ -42,7 +42,7 @@ export const Sidebar = () => {
     const sidebar = useSidebarStore();
     const { setSideBar } = useAppStoreActions();
     const { sidebarPlaylistList } = useGeneralSettings();
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
 
     const translatedSidebarItemMap = useMemo(
         () => ({

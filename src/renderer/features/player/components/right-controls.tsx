@@ -11,17 +11,16 @@ import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-m
 import {
     useAppStoreActions,
     useCurrentServer,
-    useCurrentSong,
     useHotkeySettings,
-    useMuted,
     usePlaybackSettings,
     usePlaybackType,
-    usePreviousSong,
+    usePlayerMuted,
+    usePlayerSong,
+    usePlayerSpeed,
+    usePlayerVolume,
     useSettingsStore,
     useSettingsStoreActions,
     useSidebarStore,
-    useSpeed,
-    useVolume,
 } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
@@ -40,11 +39,11 @@ const remote = isElectron() ? window.api.remote : null;
 export const RightControls = () => {
     const { t } = useTranslation();
     const isMinWidth = useMediaQuery('(max-width: 480px)');
-    const volume = useVolume();
-    const muted = useMuted();
+    const volume = usePlayerVolume();
+    const muted = usePlayerMuted();
     const server = useCurrentServer();
-    const currentSong = useCurrentSong();
-    const previousSong = usePreviousSong();
+    const currentSong = usePlayerSong();
+    // const previousSong = usePreviousSong();
     const { setSideBar } = useAppStoreActions();
     const { rightExpanded: isQueueExpanded } = useSidebarStore();
     const { bindings } = useHotkeySettings();
@@ -60,7 +59,7 @@ export const RightControls = () => {
     const playbackSettings = usePlaybackSettings();
     const playbackType = usePlaybackType();
 
-    const speed = useSpeed();
+    const speed = usePlayerSpeed();
     const volumeWidth = useSettingsStore((state) => state.general.volumeWidth);
     const speedPreservePitch = useSettingsStore((state) => state.playback.preservePitch);
 
@@ -148,18 +147,18 @@ export const RightControls = () => {
             bindings.favoriteCurrentToggle.isGlobal ? '' : bindings.favoriteCurrentToggle.hotkey,
             () => handleToggleFavorite(currentSong),
         ],
-        [
-            bindings.favoritePreviousAdd.isGlobal ? '' : bindings.favoritePreviousAdd.hotkey,
-            () => handleAddToFavorites(previousSong),
-        ],
-        [
-            bindings.favoritePreviousRemove.isGlobal ? '' : bindings.favoritePreviousRemove.hotkey,
-            () => handleRemoveFromFavorites(previousSong),
-        ],
-        [
-            bindings.favoritePreviousToggle.isGlobal ? '' : bindings.favoritePreviousToggle.hotkey,
-            () => handleToggleFavorite(previousSong),
-        ],
+        // [
+        //     bindings.favoritePreviousAdd.isGlobal ? '' : bindings.favoritePreviousAdd.hotkey,
+        //     () => handleAddToFavorites(previousSong),
+        // ],
+        // [
+        //     bindings.favoritePreviousRemove.isGlobal ? '' : bindings.favoritePreviousRemove.hotkey,
+        //     () => handleRemoveFromFavorites(previousSong),
+        // ],
+        // [
+        //     bindings.favoritePreviousToggle.isGlobal ? '' : bindings.favoritePreviousToggle.hotkey,
+        //     () => handleToggleFavorite(previousSong),
+        // ],
         [bindings.rate0.isGlobal ? '' : bindings.rate0.hotkey, () => handleUpdateRating(0)],
         [bindings.rate1.isGlobal ? '' : bindings.rate1.hotkey, () => handleUpdateRating(1)],
         [bindings.rate2.isGlobal ? '' : bindings.rate2.hotkey, () => handleUpdateRating(2)],

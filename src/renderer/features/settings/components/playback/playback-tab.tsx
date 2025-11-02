@@ -8,7 +8,7 @@ import { ScrobbleSettings } from '/@/renderer/features/settings/components/playb
 import { TranscodeSettings } from '/@/renderer/features/settings/components/playback/transcode-settings';
 import { useSettingsStore } from '/@/renderer/store';
 import { Stack } from '/@/shared/components/stack/stack';
-import { PlaybackType } from '/@/shared/types/types';
+import { PlayerType } from '/@/shared/types/types';
 
 const MpvSettings = lazy(() =>
     import('/@/renderer/features/settings/components/playback/mpv-settings').then((module) => {
@@ -22,7 +22,7 @@ export const PlaybackTab = () => {
 
     const hasFancyAudio = useMemo(() => {
         return (
-            (isElectron() && audioType === PlaybackType.LOCAL) ||
+            (isElectron() && audioType === PlayerType.LOCAL) ||
             (useWebAudio && 'AudioContext' in window)
         );
     }, [audioType, useWebAudio]);

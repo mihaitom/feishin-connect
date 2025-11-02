@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { MouseEvent, useCallback } from 'react';
+import { MouseEvent } from 'react';
 
 import styles from './playerbar.module.css';
 
@@ -9,17 +9,17 @@ import { LeftControls } from '/@/renderer/features/player/components/left-contro
 import { RightControls } from '/@/renderer/features/player/components/right-controls';
 import { usePowerSaveBlocker } from '/@/renderer/features/player/hooks/use-power-save-blocker';
 import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
-import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import {
-    useCurrentPlayer,
-    useCurrentStatus,
     useFullScreenPlayerStore,
-    useMuted,
-    usePlayer1Data,
-    usePlayer2Data,
-    usePlayerControls,
+    usePlayerData,
+    // usePlayer1Data,
+    // usePlayer2Data,
+    // usePlayerControls,
+    usePlayerMuted,
+    usePlayerNum,
+    usePlayerStatus,
+    usePlayerVolume,
     useSetFullScreenPlayerStore,
-    useVolume,
 } from '/@/renderer/store';
 import {
     useGeneralSettings,
@@ -27,20 +27,20 @@ import {
     useSettingsStore,
 } from '/@/renderer/store/settings.store';
 import { PlaybackSelectors } from '/@/shared/constants/playback-selectors';
-import { PlaybackType } from '/@/shared/types/types';
+import { PlayerType } from '/@/shared/types/types';
 
 export const Playerbar = () => {
     const playersRef = PlayersRef;
     const settings = useSettingsStore((state) => state.playback);
     const { playerbarOpenDrawer } = useGeneralSettings();
     const playbackType = usePlaybackType();
-    const volume = useVolume();
-    const player1 = usePlayer1Data();
-    const player2 = usePlayer2Data();
-    const status = useCurrentStatus();
-    const player = useCurrentPlayer();
-    const muted = useMuted();
-    const { autoNext } = usePlayerControls();
+    const volume = usePlayerVolume();
+    // const player1 = usePlayer1Data();
+    // const player2 = usePlayer2Data();
+    const status = usePlayerStatus();
+    const player = usePlayerNum();
+    const muted = usePlayerMuted();
+    // const { autoNext } = usePlayerControls();
     const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
     const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
 
@@ -51,10 +51,12 @@ export const Playerbar = () => {
         setFullScreenPlayerStore({ expanded: !isFullScreenPlayerExpanded });
     };
 
-    const autoNextFn = useCallback(() => {
-        const playerData = autoNext();
-        updateSong(playerData.current.song);
-    }, [autoNext]);
+    const { player1, player2 } = usePlayerData();
+
+    // const autoNextFn = useCallback(() => {
+    //     const playerData = autoNext();
+    //     updateSong(playerData.current.song);
+    // }, [autoNext]);
 
     return (
         <div
@@ -72,9 +74,9 @@ export const Playerbar = () => {
                     <RightControls />
                 </div>
             </div>
-            {playbackType === PlaybackType.WEB && (
+            {playbackType === PlayerType.WEB && (
                 <AudioPlayer
-                    autoNext={autoNextFn}
+                    // autoNext={autoNextFn}
                     crossfadeDuration={settings.crossfadeDuration}
                     crossfadeStyle={settings.crossfadeStyle}
                     currentPlayer={player}

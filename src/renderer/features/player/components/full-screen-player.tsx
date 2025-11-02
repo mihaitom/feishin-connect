@@ -11,7 +11,7 @@ import { FullScreenPlayerImage } from '/@/renderer/features/player/components/fu
 import { FullScreenPlayerQueue } from '/@/renderer/features/player/components/full-screen-player-queue';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import {
-    useCurrentSong,
+    usePlayerSong,
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
     useLyricsSettings,
@@ -421,7 +421,7 @@ export const FullScreenPlayer = () => {
         isOpenedRef.current = true;
     }, [location, setStore]);
 
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const { background } = useFastAverageColor({
         algorithm: 'dominant',
         src: currentSong?.imageUrl,
