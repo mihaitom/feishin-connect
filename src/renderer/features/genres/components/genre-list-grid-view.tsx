@@ -62,12 +62,13 @@ export const GenreListGridView = ({ gridRef, itemCount }: any) => {
             ...filter,
         };
 
-        const queriesFromCache: [QueryKey, GenreListResponse][] = queryClient.getQueriesData({
-            exact: false,
-            fetchStatus: 'idle',
-            queryKey: queryKeys.genres.list(server?.id || '', query),
-            stale: false,
-        });
+        const queriesFromCache: [QueryKey, GenreListResponse | undefined][] =
+            queryClient.getQueriesData({
+                exact: false,
+                fetchStatus: 'idle',
+                queryKey: queryKeys.genres.list(server?.id || '', query),
+                stale: false,
+            });
 
         const itemData: Genre[] = [];
 

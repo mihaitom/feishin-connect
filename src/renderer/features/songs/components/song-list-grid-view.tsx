@@ -140,12 +140,13 @@ export const SongListGridView = ({ gridRef, itemCount }: SongListGridViewProps) 
 
         const queryKey = queryKeys.songs.list(server?.id || '', query, id);
 
-        const queriesFromCache: [QueryKey, SongListResponse][] = queryClient.getQueriesData({
-            exact: false,
-            fetchStatus: 'idle',
-            queryKey,
-            stale: false,
-        });
+        const queriesFromCache: [QueryKey, SongListResponse | undefined][] =
+            queryClient.getQueriesData({
+                exact: false,
+                fetchStatus: 'idle',
+                queryKey,
+                stale: false,
+            });
 
         const itemData: Song[] = [];
 

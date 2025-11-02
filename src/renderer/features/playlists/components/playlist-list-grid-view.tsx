@@ -78,12 +78,13 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
             ...filter,
         };
 
-        const queriesFromCache: [QueryKey, PlaylistListResponse][] = queryClient.getQueriesData({
-            exact: false,
-            fetchStatus: 'idle',
-            queryKey: queryKeys.playlists.list(server?.id || '', query),
-            stale: false,
-        });
+        const queriesFromCache: [QueryKey, PlaylistListResponse | undefined][] =
+            queryClient.getQueriesData({
+                exact: false,
+                fetchStatus: 'idle',
+                queryKey: queryKeys.playlists.list(server?.id || '', query),
+                stale: false,
+            });
 
         const itemData: Playlist[] = [];
 

@@ -252,7 +252,10 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     getAlbumArtistListCount: (args) =>
-        SubsonicController.getAlbumArtistList(args).then((res) => res!.totalRecordCount!),
+        SubsonicController.getAlbumArtistList({
+            ...args,
+            query: { ...args.query, startIndex: 0 },
+        }).then((res) => res!.totalRecordCount!),
     getAlbumDetail: async (args) => {
         const { apiClientProps, query } = args;
 
@@ -602,7 +605,10 @@ export const SubsonicController: ControllerEndpoint = {
         };
     },
     getArtistListCount: async (args) =>
-        SubsonicController.getArtistList(args).then((res) => res!.totalRecordCount!),
+        SubsonicController.getArtistList({
+            ...args,
+            query: { ...args.query, startIndex: 0 },
+        }).then((res) => res!.totalRecordCount!),
     getDownloadUrl: (args) => {
         const { apiClientProps, query } = args;
 

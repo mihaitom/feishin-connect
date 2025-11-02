@@ -129,12 +129,13 @@ export const AlbumListGridView = ({ gridRef, itemCount }: any) => {
 
         const queryKey = queryKeys.albums.list(server?.id || '', query, id);
 
-        const queriesFromCache: [QueryKey, AlbumListResponse][] = queryClient.getQueriesData({
-            exact: false,
-            fetchStatus: 'idle',
-            queryKey,
-            stale: false,
-        });
+        const queriesFromCache: [QueryKey, AlbumListResponse | undefined][] =
+            queryClient.getQueriesData({
+                exact: false,
+                fetchStatus: 'idle',
+                queryKey,
+                stale: false,
+            });
 
         const itemData: Album[] = [];
 

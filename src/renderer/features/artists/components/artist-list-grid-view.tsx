@@ -46,12 +46,13 @@ export const ArtistListGridView = ({ gridRef, itemCount }: ArtistListGridViewPro
             ...filter,
         };
 
-        const queriesFromCache: [QueryKey, ArtistListResponse][] = queryClient.getQueriesData({
-            exact: false,
-            fetchStatus: 'idle',
-            queryKey: queryKeys.artists.list(server?.id || '', query),
-            stale: false,
-        });
+        const queriesFromCache: [QueryKey, ArtistListResponse | undefined][] =
+            queryClient.getQueriesData({
+                exact: false,
+                fetchStatus: 'idle',
+                queryKey: queryKeys.artists.list(server?.id || '', query),
+                stale: false,
+            });
 
         const itemData: AlbumArtist[] = [];
 
