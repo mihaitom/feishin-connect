@@ -6,23 +6,16 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { PageHeader } from '/@/renderer/components/page-header/page-header';
-import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { PlaylistDetailSongListHeaderFilters } from '/@/renderer/features/playlists/components/playlist-detail-song-list-header-filters';
 import { FilterBar } from '/@/renderer/features/shared/components/filter-bar';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
-import { useCurrentServer, usePlaylistDetailStore } from '/@/renderer/store';
+import { useCurrentServer } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { formatDurationString } from '/@/renderer/utils';
 import { Badge } from '/@/shared/components/badge/badge';
 import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
-import {
-    LibraryItem,
-    PlaylistSongListQueryClientSide,
-    SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
 interface PlaylistDetailHeaderProps {
@@ -45,20 +38,6 @@ export const PlaylistDetailSongListHeader = ({
     const detailQuery = useQuery(
         playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
     );
-    const handlePlayQueueAdd = usePlayQueueAdd();
-    const page = usePlaylistDetailStore();
-    const filters: Partial<PlaylistSongListQueryClientSide> = {
-        sortBy: page?.table.id[playlistId]?.filter?.sortBy || SongListSort.ID,
-        sortOrder: page?.table.id[playlistId]?.filter?.sortOrder || SortOrder.ASC,
-    };
-
-    const handlePlay = async (playType: Play) => {
-        handlePlayQueueAdd?.({
-            byItemType: { id: [playlistId], type: LibraryItem.PLAYLIST },
-            playType,
-            query: filters,
-        });
-    };
 
     const playButtonBehavior = usePlayButtonBehavior();
 

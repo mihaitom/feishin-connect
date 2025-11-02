@@ -2,7 +2,6 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
-import Fuse from 'fuse.js';
 import { motion } from 'motion/react';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
