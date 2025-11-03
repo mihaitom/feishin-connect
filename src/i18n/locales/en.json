@@ -643,6 +643,7 @@
         "hotkey_zoomOut": "zoom out",
         "imageAspectRatio_description": "if enabled, cover art will be shown using their native aspect ratio. for art that is not 1:1, the remaining space will be empty",
         "imageAspectRatio": "use native cover art aspect ratio",
+        "language": "language",
         "language_description": "sets the language for the application ($t(common.restartRequired))",
         "lastfm_description": "show links to Last.fm on artist/album pages",
         "lastfm": "show last.fm links",
