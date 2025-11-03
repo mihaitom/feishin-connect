@@ -9,7 +9,6 @@ import { createWithEqualityFn } from 'zustand/traditional';
 import i18n from '/@/i18n/i18n';
 import { ContextMenuItemType } from '/@/renderer/features/context-menu/events';
 import { AppRoute } from '/@/renderer/router/routes';
-import { usePlayerStore } from '/@/renderer/store/player.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
 import { FontValueSchema } from '/@/renderer/types/fonts';
 import { randomString } from '/@/renderer/utils';
@@ -967,12 +966,6 @@ export const useGeneralSettings = () => useSettingsStore((state) => state.genera
 
 export const usePlaybackType = () =>
     useSettingsStore((state) => {
-        const isFallback = usePlayerStore.getState().fallback;
-
-        if (isFallback) {
-            return PlayerType.WEB;
-        }
-
         return state.playback.type;
     });
 

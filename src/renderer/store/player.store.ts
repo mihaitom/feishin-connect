@@ -8,6 +8,7 @@ import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 
 import { createSelectors } from '/@/renderer/lib/zustand';
+import { useSettingsStore } from '/@/renderer/store/settings.store';
 import { shuffleInPlace } from '/@/renderer/utils/shuffle';
 import { QueueSong, Song } from '/@/shared/types/domain-types';
 import {
@@ -67,8 +68,8 @@ interface Actions {
     mediaPlay: (id?: string) => void;
     mediaPrevious: () => void;
     mediaSeekToTimestamp: (timestamp: number) => void;
-    mediaStepBackward: () => void;
-    mediaStepForward: () => void;
+    mediaSkipBackward: () => void;
+    mediaSkipForward: () => void;
     mediaToggleMute: () => void;
     mediaTogglePlayPause: () => void;
     moveSelectedTo: (items: QueueSong[], uniqueId: string, edge: 'bottom' | 'top') => void;
@@ -105,8 +106,6 @@ interface State {
         shuffle: PlayerShuffle;
         speed: number;
         status: PlayerStatus;
-        stepBackward: number;
-        stepForward: number;
         timestamp: number;
         transitionType: PlayerStyle;
         volume: number;
@@ -570,22 +569,24 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         state.player.seekToTimestamp = uniqueSeekToTimestamp(timestamp);
                     });
                 },
-                mediaStepBackward: () => {
+                mediaSkipBackward: () => {
                     set((state) => {
-                        const newTimestamp = Math.max(
-                            0,
-                            state.player.timestamp - state.player.stepBackward,
-                        );
+                        const timeToSkip =
+                            useSettingsStore.getState().general.skipButtons.skipBackwardSeconds ||
+                            5;
+                        const newTimestamp = Math.max(0, state.player.timestamp - timeToSkip);
 
                         state.player.seekToTimestamp = uniqueSeekToTimestamp(newTimestamp);
                     });
                 },
-                mediaStepForward: () => {
+                mediaSkipForward: () => {
                     set((state) => {
                         const queue = state.getQueue();
                         const index = state.player.index;
                         const currentTrack = queue.items[index];
                         const duration = currentTrack?.duration;
+                        const timeToSkip =
+                            useSettingsStore.getState().general.skipButtons.skipForwardSeconds || 5;
 
                         if (!duration) {
                             return;
@@ -593,7 +594,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                         const newTimestamp = Math.min(
                             duration - 1,
-                            state.player.timestamp + state.player.stepForward,
+                            state.player.timestamp + timeToSkip,
                         );
 
                         state.player.seekToTimestamp = uniqueSeekToTimestamp(newTimestamp);
@@ -872,12 +873,12 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     playerNum: 1,
                     queueType: PlayerQueueType.DEFAULT,
                     repeat: PlayerRepeat.NONE,
+                    seekBackward: 10,
+                    seekForward: 10,
                     seekToTimestamp: uniqueSeekToTimestamp(0),
                     shuffle: PlayerShuffle.NONE,
                     speed: 1,
                     status: PlayerStatus.PAUSED,
-                    stepBackward: 10,
-                    stepForward: 10,
                     timestamp: 0,
                     transitionType: PlayerStyle.GAPLESS,
                     volume: 30,
@@ -1005,8 +1006,8 @@ export const usePlayerActions = () => {
             mediaPlay: state.mediaPlay,
             mediaPrevious: state.mediaPrevious,
             mediaSeekToTimestamp: state.mediaSeekToTimestamp,
-            mediaStepBackward: state.mediaStepBackward,
-            mediaStepForward: state.mediaStepForward,
+            mediaSkipBackward: state.mediaSkipBackward,
+            mediaSkipForward: state.mediaSkipForward,
             mediaToggleMute: state.mediaToggleMute,
             mediaTogglePlayPause: state.mediaTogglePlayPause,
             moveSelectedTo: state.moveSelectedTo,
