@@ -3,10 +3,10 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 import { RowClassRules, RowNode } from '@ag-grid-community/core';
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 
+import { usePlayerEvents } from '/@/renderer/features/player/audio-player/listener/use-player-events';
 import { useAppFocus } from '/@/renderer/hooks';
-import { usePlayerSong, usePlayerStore } from '/@/renderer/store';
+import { usePlayerSong } from '/@/renderer/store';
 import { Song } from '/@/shared/types/domain-types';
-import { PlayerStatus } from '/@/shared/types/types';
 
 interface UseCurrentSongRowStylesProps {
     tableRef: MutableRefObject<AgGridReactType | null>;
@@ -50,11 +50,12 @@ export const useCurrentSongRowStyles = ({ tableRef }: UseCurrentSongRowStylesPro
         };
     }, [currentSong?.albumId, currentSong?.id]);
 
-    useEffect(() => {
-        // Redraw song rows when current song changes
-        const unsubSongChange = usePlayerStore.subscribe(
-            (state) => state.current.song,
-            (song, previousSong) => {
+    usePlayerEvents(
+        {
+            onCurrentSongChange: (properties, prev) => {
+                const song = properties.song;
+                const previousSong = prev.song;
+
                 if (tableRef?.current) {
                     const { api, columnApi } = tableRef?.current || {};
                     if (api == null || columnApi == null) {
@@ -74,14 +75,8 @@ export const useCurrentSongRowStyles = ({ tableRef }: UseCurrentSongRowStylesPro
                     api.redrawRows({ rowNodes });
                 }
             },
-            { equalityFn: (a, b) => a?.id === b?.id },
-        );
-
-        // Redraw song rows when the status changes
-        const unsubStatusChange = usePlayerStore.subscribe(
-            (state) => [state.current.status, state.current.song],
-            (current: (PlayerStatus | Song | undefined)[]) => {
-                const song = current[1] as Song;
+            onPlayerStatus: (properties) => {
+                const song = properties.song;
 
                 if (tableRef?.current) {
                     const { api, columnApi } = tableRef?.current || {};
@@ -95,16 +90,9 @@ export const useCurrentSongRowStyles = ({ tableRef }: UseCurrentSongRowStylesPro
                     api.redrawRows({ rowNodes });
                 }
             },
-            {
-                equalityFn: (a, b) => (a[0] as PlayerStatus) === (b[0] as PlayerStatus),
-            },
-        );
-
-        return () => {
-            unsubSongChange();
-            unsubStatusChange();
-        };
-    }, [tableRef]);
+        },
+        [tableRef],
+    );
 
     return {
         rowClassRules,
