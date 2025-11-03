@@ -157,7 +157,10 @@
         "newVersion": "une nouvelle version vient d'être installée ({{version}})",
         "viewReleaseNotes": "voir la note de version",
         "sampleRate": "taux d'échantillonnage",
-        "bitDepth": "format d'échantillonnage"
+        "bitDepth": "format d'échantillonnage",
+        "explicitStatus": "status explicite",
+        "explicit": "explicite",
+        "clean": "propre"
     },
     "error": {
         "remotePortWarning": "redémarrer le serveur pour appliquer le nouveau port",
@@ -227,7 +230,8 @@
         "id": "id",
         "artist": "$t(entity.artist_one)",
         "isPublic": "est public",
-        "album": "$t(entity.album_one)"
+        "album": "$t(entity.album_one)",
+        "explicitStatus": "$t(common.explicitStatus)"
     },
     "page": {
         "sidebar": {
@@ -468,7 +472,7 @@
         "showSkipButton_description": "affiche ou cache les boutons suivants et précédents de la barre de lecture",
         "savePlayQueue": "sauvegarder la liste de lecture",
         "minimumScrobbleSeconds_description": "la durée minimale en secondes de la chanson qui doit être jouée avant qu'elle ne soit scrobblée",
-        "fontType_description": "police intégré vous permet de sélectionner une des polices fourni par feishin. Police système vous permet de sélectionner une des polices fourni par votre système d'éxploitation. personnalisé vous permet de fournir votre propre police",
+        "fontType_description": "La police intégrée vous permet de sélectionner une des polices fourni par feishin. La police système vous permet de sélectionner une des polices fourni par votre système d'exploitation. L'option personnalisée vous permet d'importer votre propre police",
         "playButtonBehavior": "comportement du bouton play",
         "playbackStyle_optionNormal": "normale",
         "floatingQueueArea": "afficher le zone de file d'attente flottante",
@@ -489,7 +493,7 @@
         "hotkey_toggleCurrentSongFavorite": "basculer favori de la $t(common.currentSong)",
         "remoteUsername": "nom d'utilisateur du serveur de contrôle à distance",
         "hotkey_browserBack": "retour arrière",
-        "showSkipButton": "affiche les boutons suivants et précédents",
+        "showSkipButton": "afficher les boutons suivants et précédents",
         "minimizeToTray": "réduire vers la barre des tâches",
         "gaplessAudio_optionWeak": "faible (recommandée)",
         "minimumScrobbleSeconds": "scrobble minimum (secondes)",
@@ -634,12 +638,24 @@
         "artistBackground_description": "ajoute une image d'arrière-plan pour les pages d'artiste contenant l'œuvre de l'artiste",
         "artistBackgroundBlur": "intensité du flou sur l'image d'arrière-plan d'artiste",
         "artistBackgroundBlur_description": "ajuste la quantité de flou appliquée à l'image d'arrière-plan de l'artiste",
-        "releaseChannel_optionLatest": "stable",
+        "releaseChannel_optionLatest": "dernière",
         "releaseChannel_optionBeta": "bêta",
         "releaseChannel": "canal de diffusion",
         "releaseChannel_description": "choisissez entre les versions stables ou les versions bêta pour les mises à jour automatiques",
         "mediaSession": "activer media session",
-        "mediaSession_description": "active l'intégration de la session Windows Media, affichant les commandes multimédias et les métadonnées dans la superposition du volume du système et l'écran de verrouillage (Windows uniquement)"
+        "mediaSession_description": "active l'intégration de la session Windows Media, affichant les commandes multimédias et les métadonnées dans la superposition du volume du système et l'écran de verrouillage (Windows uniquement)",
+        "enableAutoTranslation_description": "activer la traduction automatiquement lorsque les paroles sont chargées",
+        "enableAutoTranslation": "activer la traduction automatique",
+        "exportImportSettings_control_description": "Exporter et Importer les paramètres en JSON",
+        "exportImportSettings_control_exportText": "paramètres d'exportation",
+        "exportImportSettings_control_importText": "paramètres d'importation",
+        "exportImportSettings_control_title": "paramètres d'importation / exportation",
+        "exportImportSettings_destructiveWarning": "l'importation des paramètres est destructive, veuillez lire les informations ci-dessus avant de cliquer sur \"importer\" ci-dessous !",
+        "exportImportSettings_importBtn": "paramètres d'importation",
+        "exportImportSettings_importSuccess": "les paramètres ont été importés avec succès !",
+        "exportImportSettings_notValidJSON": "le fichier transmis n'est pas un JSON valide",
+        "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" est incorrecte - {{reason}}",
+        "exportImportSettings_importModalTitle": "paramètres d'importation feishin"
     },
     "form": {
         "deletePlaylist": {
@@ -839,5 +855,10 @@
             "size": "$t(common.size)",
             "codec": "$t(common.codec)"
         }
+    },
+    "dragDropZone": {
+        "error_oneFileOnly": "Veuillez ne sélectionner qu'un seul fichier",
+        "error_readingFile": "Un problème est survenu lors de la lecture du fichier : {{errorMessage}}",
+        "mainText": "Déposez un fichier ici"
     }
 }

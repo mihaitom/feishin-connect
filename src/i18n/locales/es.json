@@ -129,7 +129,7 @@
         "showSkipButton_description": "muestra o esconde los botones de saltar en la barra del reproductor",
         "savePlayQueue": "guardar cola de reproducción",
         "minimumScrobbleSeconds_description": "la duración mínima en segundos de la canción que debe ser reproducida antes de hacer scrobble",
-        "fontType_description": "Fuente incorporada selecciona una de las fuentes proporcionadas por Feishin. Fuente del sistema te permite seleccionar cualquier fuente proporcionada por tu sistema operativo. Personalizada te permite proporcionar tu propia fuente",
+        "fontType_description": "Fuente incorporada selecciona una de las fuentes proporcionadas por feishin. Fuente del sistema te permite seleccionar cualquier fuente proporcionada por tu sistema operativo. Personalizada te permite proporcionar tu propia fuente",
         "playButtonBehavior": "comportamiento del botón de reproducción",
         "sidebarPlaylistList_description": "muestra o esconde las listas de reproducción en la barra lateral",
         "sidePlayQueueStyle_description": "establece el estilo de la cola de reproducción lateral",
@@ -288,15 +288,18 @@
         "mediaSession": "Activar sesión de medios",
         "mediaSession_description": "Activa la integración de la sesión de medios de Windows, mostrando los controles de medios y los metadatos en la superposición del volumen del sistema y en la pantalla de bloqueo (solo en Windows)",
         "exportImportSettings_control_description": "Exporta e importa la configuración a través de JSON",
-        "exportImportSettings_control_exportText": "Exportar configuración",
-        "exportImportSettings_control_importText": "Importar configuración",
-        "exportImportSettings_control_title": "Importar / Exportar configuración",
-        "exportImportSettings_destructiveWarning": "Importar la configuración es perjudicial, ¡por favor revisa lo de arriba antes de hacer clic en \"Importar\" abajo!",
-        "exportImportSettings_importBtn": "Importar configuración",
-        "exportImportSettings_importModalTitle": "Importar configuración de Feishin",
-        "exportImportSettings_importSuccess": "¡La configuración ha sido importada con éxito!",
-        "exportImportSettings_notValidJSON": "El archivo suministrado no es un JSON válido",
-        "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" es incorrecto - {{reason}}"
+        "exportImportSettings_control_exportText": "exportar configuración",
+        "exportImportSettings_control_importText": "importar configuración",
+        "exportImportSettings_control_title": "importar / exportar configuración",
+        "exportImportSettings_destructiveWarning": "importar la configuración es perjudicial, ¡por favor revisa lo de arriba antes de hacer clic en \"importar\" abajo!",
+        "exportImportSettings_importBtn": "importar configuración",
+        "exportImportSettings_importModalTitle": "importar configuración de feishin",
+        "exportImportSettings_importSuccess": "¡la configuración ha sido importada con éxito!",
+        "exportImportSettings_notValidJSON": "el archivo suministrado no es un JSON válido",
+        "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" es incorrecto - {{reason}}",
+        "enableAutoTranslation_description": "Activa la traducción automáticamente cuando se cargan las letras",
+        "enableAutoTranslation": "Activar traducción automática",
+        "discordRichPresence": "Estado de actividad de {{discord}}"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
@@ -423,7 +426,9 @@
         "sampleRate": "Frecuencia de muestreo",
         "explicitStatus": "Estado explícito",
         "explicit": "Explícito",
-        "clean": "Limpio"
+        "clean": "Limpio",
+        "private": "Privado",
+        "public": "Público"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",
@@ -685,7 +690,9 @@
             "success": "añadido $t(entity.trackWithCount, {\"count\": {{message}} }) a $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
             "title": "añadir a $t(entity.playlist_one)",
             "input_skipDuplicates": "saltar duplicados",
-            "input_playlists": "$t(entity.playlist_other)"
+            "input_playlists": "$t(entity.playlist_other)",
+            "create": "Crear $t(entity.playlist_one) {{playlist}}",
+            "searchOrCreate": "Buscar $t(entity.playlist_other) o tipo para crear uno nuevo"
         },
         "updateServer": {
             "title": "actualizar servidor",

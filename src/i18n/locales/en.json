@@ -257,7 +257,7 @@
             "create": "create $t(entity.playlist_one) {{playlist}}",
             "input_playlists": "$t(entity.playlist_other)",
             "input_skipDuplicates": "skip duplicates",
-            "searchOrCreate": "Search $t(entity.playlist_other) or type to create a new one",
+            "searchOrCreate": "search $t(entity.playlist_other) or type to create a new one",
             "success": "added $t(entity.trackWithCount, {\"count\": {{message}} }) to $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
             "title": "add to $t(entity.playlist_one)"
         },
@@ -598,15 +598,15 @@
         "enableRemote": "enable remote control server",
         "exitToTray_description": "exit the application to the system tray",
         "exitToTray": "exit to tray",
-        "exportImportSettings_control_description": "Export and Import settings via JSON",
-        "exportImportSettings_control_exportText": "Export Settings",
-        "exportImportSettings_control_importText": "Import Settings",
-        "exportImportSettings_control_title": "Import / Export Settings",
-        "exportImportSettings_destructiveWarning": "Importing settings is destructive, please review the above before clicking \"Import\" below!",
-        "exportImportSettings_importBtn": "Import Settings",
-        "exportImportSettings_importModalTitle": "Import Feishin Settings",
-        "exportImportSettings_importSuccess": "Settings have been imported successfully!",
-        "exportImportSettings_notValidJSON": "The file passed is not valid JSON",
+        "exportImportSettings_control_description": "export and import settings via JSON",
+        "exportImportSettings_control_exportText": "export settings",
+        "exportImportSettings_control_importText": "import settings",
+        "exportImportSettings_control_title": "import / export settings",
+        "exportImportSettings_destructiveWarning": "importing settings is destructive, please review the above before clicking \"import\" below!",
+        "exportImportSettings_importBtn": "import settings",
+        "exportImportSettings_importModalTitle": "import feishin settings",
+        "exportImportSettings_importSuccess": "settings have been imported successfully!",
+        "exportImportSettings_notValidJSON": "the file passed is not valid JSON",
         "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" is incorrect - {{reason}}",
         "externalLinks_description": "enables showing external links (Last.fm, MusicBrainz) on artist/album pages",
         "externalLinks": "show external links",
@@ -616,7 +616,7 @@
         "followLyric": "follow current lyric",
         "font_description": "sets the font to use for the application",
         "font": "font",
-        "fontType_description": "built-in font selects one of the fonts provided by Feishin. system font allows you to select any font provided by your operating system. custom allows you to provide your own font",
+        "fontType_description": "built-in font selects one of the fonts provided by feishin. system font allows you to select any font provided by your operating system. custom allows you to provide your own font",
         "fontType_optionBuiltIn": "built-in font",
         "fontType_optionCustom": "custom font",
         "fontType_optionSystem": "system font",
@@ -871,7 +871,7 @@
     },
     "dragDropZone": {
         "error_oneFileOnly": "Please only select 1 file",
-        "error_readingFile": "There has been an issue reading the file: {{errorMessage}}",
-        "mainText": "Drop a file here"
+        "error_readingFile": "there has been an issue reading the file: {{errorMessage}}",
+        "mainText": "drop a file here"
     }
 }

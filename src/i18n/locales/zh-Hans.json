@@ -434,10 +434,12 @@
         "exportImportSettings_control_title": "导入/导出设置",
         "exportImportSettings_destructiveWarning": "导入设置会破坏现有设置，请在点击下方“导入”按钮前仔细阅读以上内容！",
         "exportImportSettings_importBtn": "导入设置",
-        "exportImportSettings_importModalTitle": "导入 Feishin 设置",
+        "exportImportSettings_importModalTitle": "导入 feishin 设置",
         "exportImportSettings_importSuccess": "设置已成功导入！",
         "exportImportSettings_notValidJSON": "传递的文件不是有效的 JSON 文件",
-        "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" 不正确 - {{reason}}"
+        "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" 不正确 - {{reason}}",
+        "enableAutoTranslation_description": "歌词加载时自动启用翻译",
+        "enableAutoTranslation": "启用自动翻译"
     },
     "error": {
         "remotePortWarning": "重启服务器使新端口生效",

@@ -134,7 +134,7 @@
         "savePlayQueue": "uložit frontu přehrávání",
         "minimumScrobbleSeconds_description": "minimální doba v sekundách, která musí být přehrána před scrobblováním skladby",
         "skipPlaylistPage_description": "při navigaci na playlist přejít na stránku seznamu skladeb v playlistu namísto výchozí stránky",
-        "fontType_description": "vestavěné písmo vybere jedno z písem poskytovaných programem Feishin. systémové písmo vám umožní vybrat si jakékoli písmo poskytované vaším operačním systémem. vlastní vám umožňuje použít vaše vlastní písmo",
+        "fontType_description": "vestavěné písmo vybere jedno z písem poskytovaných programem feishin. systémové písmo vám umožní vybrat si jakékoli písmo poskytované vaším operačním systémem. vlastní vám umožňuje použít vaše vlastní písmo",
         "playButtonBehavior": "chování tlačítka přehrávání",
         "volumeWheelStep": "krok kolečka hlasitosti",
         "sidebarPlaylistList_description": "zobrazit nebo skrýt seznam playlistů v postranním panelu",
@@ -287,15 +287,15 @@
         "releaseChannel_description": "vyberte si mezi stabilními vydáními nebo beta vydáními pro automatické aktualizace",
         "mediaSession": "povolit relaci médií",
         "mediaSession_description": "povolí integraci do služby Windows Media Session, což zobrazí ovládání a metadata médií v překrytí systémové hlasitosti a na zamykací obrazovce (pouze Windows)",
-        "exportImportSettings_control_description": "Exportovat a importovat nastavení pomocí souboru JSON",
-        "exportImportSettings_control_exportText": "Exportovat nastavení",
-        "exportImportSettings_control_importText": "Importovat nastavení",
-        "exportImportSettings_control_title": "Importovat / exportovat nastavení",
-        "exportImportSettings_destructiveWarning": "Importování nastavení je destruktivní, přečtěte si prosím informace výše, než kliknete na tlačítko „Importovat“!",
-        "exportImportSettings_importBtn": "Importovat nastavení",
-        "exportImportSettings_importModalTitle": "Importovat nastavení Feishin",
-        "exportImportSettings_importSuccess": "Nastavení byla úspěšně importována!",
-        "exportImportSettings_notValidJSON": "Poskytnutý soubor není platným souborem JSON",
+        "exportImportSettings_control_description": "exportovat a importovat nastavení pomocí souboru JSON",
+        "exportImportSettings_control_exportText": "exportovat nastavení",
+        "exportImportSettings_control_importText": "importovat nastavení",
+        "exportImportSettings_control_title": "importovat / exportovat nastavení",
+        "exportImportSettings_destructiveWarning": "importování nastavení je destruktivní, přečtěte si prosím informace výše, než kliknete na tlačítko „importovat“!",
+        "exportImportSettings_importBtn": "importovat nastavení",
+        "exportImportSettings_importModalTitle": "importovat nastavení feishin",
+        "exportImportSettings_importSuccess": "nastavení byla úspěšně importována!",
+        "exportImportSettings_notValidJSON": "poskytnutý soubor není platným souborem JSON",
         "exportImportSettings_offendingKeyError": "Řetězec „{{offendingKey}}“ je nesprávný – {{reason}}"
     },
     "action": {
@@ -852,8 +852,8 @@
         "song_other": "písní"
     },
     "dragDropZone": {
-        "error_oneFileOnly": "Vyberte prosím pouze 1 soubor",
-        "error_readingFile": "Během čtení souboru došlo k chybě: {{errorMessage}}",
-        "mainText": "Přesuňte soubor sem"
+        "error_oneFileOnly": "vyberte prosím pouze 1 soubor",
+        "error_readingFile": "během čtení souboru došlo k chybě: {{errorMessage}}",
+        "mainText": "přesuňte soubor sem"
     }
 }
