@@ -182,7 +182,9 @@ export type Album = {
     originalDate: null | string;
     participants: null | Record<string, RelatedArtist[]>;
     playCount: null | number;
+    recordLabels: string[];
     releaseDate: null | string;
+    releaseTypes: string[];
     releaseYear: null | number;
     serverId: string;
     serverType: ServerType;
@@ -194,6 +196,7 @@ export type Album = {
     updatedAt: string;
     userFavorite: boolean;
     userRating: null | number;
+    version: null | string;
 } & { songs?: Song[] };
 
 export type AlbumArtist = {

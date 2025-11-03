@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { forwardRef, Fragment, Ref, useCallback, useMemo } from 'react';
+import { forwardRef, Ref, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -13,8 +13,10 @@ import { useSongChange } from '/@/renderer/hooks/use-song-change';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
-import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
+import { formatDateAbsoluteUTC, formatDurationString, titleCase } from '/@/renderer/utils';
+import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
 import { Group } from '/@/shared/components/group/group';
+import { Pill } from '/@/shared/components/pill/pill';
 import { Rating } from '/@/shared/components/rating/rating';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
@@ -38,7 +40,9 @@ export const AlbumDetailHeader = forwardRef(
         const cq = useContainerQuery();
         const { t } = useTranslation();
 
-        const showRating = detailQuery?.data?.serverType === ServerType.NAVIDROME;
+        const showRating =
+            detailQuery?.data?.serverType === ServerType.NAVIDROME ||
+            detailQuery?.data?.serverType === ServerType.SUBSONIC;
 
         const originalDifferentFromRelease =
             detailQuery.data?.originalDate &&
@@ -78,7 +82,16 @@ export const AlbumDetailHeader = forwardRef(
             }
         }, detailQuery.data !== undefined);
 
-        const metadataItems = [
+        const releaseTypes = useMemo(
+            () =>
+                normalizeReleaseTypes(detailQuery.data?.releaseTypes ?? [], t).map((type) => ({
+                    id: type,
+                    value: titleCase(type),
+                })) || [],
+            [detailQuery.data?.releaseTypes, t],
+        );
+
+        const metadataItems = releaseTypes.concat([
             {
                 id: 'releaseDate',
                 value:
@@ -98,11 +111,17 @@ export const AlbumDetailHeader = forwardRef(
             },
             {
                 id: 'playCount',
-                value: t('entity.play', {
-                    count: detailQuery?.data?.playCount as number,
-                }),
+                value:
+                    typeof detailQuery?.data?.playCount === 'number' &&
+                    t('entity.play', {
+                        count: detailQuery?.data?.playCount,
+                    }),
             },
-        ];
+            {
+                id: 'version',
+                value: detailQuery.data?.version,
+            },
+        ]);
 
         if (originalDifferentFromRelease) {
             const formatted = `♫ ${formatDateAbsoluteUTC(detailQuery!.data!.originalDate)}`;
@@ -135,28 +154,22 @@ export const AlbumDetailHeader = forwardRef(
                     title={detailQuery?.data?.name || ''}
                     {...background}
                 >
-                    <Stack gap="sm">
-                        <Group gap="sm">
-                            {metadataItems.map((item, index) => (
-                                <Fragment key={`item-${item.id}-${index}`}>
-                                    {index > 0 && <Text isNoSelect>•</Text>}
-                                    <Text>{item.value}</Text>
-                                </Fragment>
-                            ))}
-                            {showRating && (
-                                <>
-                                    <Text isNoSelect>•</Text>
-                                    <Rating
-                                        onChange={handleUpdateRating}
-                                        readOnly={
-                                            detailQuery?.isFetching ||
-                                            updateRatingMutation.isPending
-                                        }
-                                        value={detailQuery?.data?.userRating || 0}
-                                    />
-                                </>
+                    <Stack gap="lg">
+                        <Pill.Group>
+                            {metadataItems.map(
+                                (item, index) =>
+                                    item.value && (
+                                        <Pill key={`item-${item.id}-${index}`}>{item.value}</Pill>
+                                    ),
                             )}
-                        </Group>
+                        </Pill.Group>
+                        {showRating && (
+                            <Rating
+                                onChange={handleUpdateRating}
+                                readOnly={detailQuery?.isFetching || updateRatingMutation.isPending}
+                                value={detailQuery?.data?.userRating || 0}
+                            />
+                        )}
                         <Group
                             gap="md"
                             mah="4rem"

@@ -97,6 +97,8 @@
         "quit": "quit",
         "random": "random",
         "rating": "rating",
+        "recordLabel": "record label",
+        "releaseType": "release type",
         "refresh": "refresh",
         "reload": "reload",
         "reset": "reset",
@@ -495,6 +497,29 @@
         "unfavorite": "unfavorite",
         "pause": "pause",
         "viewQueue": "view queue"
+    },
+    "releaseType": {
+        "primary": {
+            "album": "$t(entity.album_one)",
+            "broadcast": "broadcast",
+            "ep": "ep",
+            "other": "other",
+            "single": "single"
+        },
+        "secondary": {
+            "audiobook": "audiobook",
+            "audioDrama": "audio drama",
+            "compilation": "compilation",
+            "djMix": "dj mix",
+            "demo": "demo",
+            "fieldRecording": "field recording",
+            "interview": "interview",
+            "live": "live",
+            "mixtape": "mixtape",
+            "remix": "remix",
+            "soundtrack": "soundtrack",
+            "spokenWord": "spoken word"
+        }
     },
     "setting": {
         "accentColor_description": "sets the accent color for the application",
