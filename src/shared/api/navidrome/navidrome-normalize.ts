@@ -1,7 +1,6 @@
 import { nanoid } from 'nanoid';
 import z from 'zod';
 
-import { NDGenre } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
 import {
@@ -433,7 +432,7 @@ const normalizePlaylist = (
     };
 };
 
-const normalizeGenre = (item: NDGenre): Genre => {
+const normalizeGenre = (item: z.infer<typeof ndType._response.genre>): Genre => {
     return {
         albumCount: undefined,
         id: item.id,

@@ -1,7 +1,6 @@
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
-import { JFAlbum, JFGenre, JFMusicFolder, JFPlaylist } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import {
     Album,
@@ -59,7 +58,11 @@ const getAlbumArtistCoverArtUrl = (args: {
     );
 };
 
-const getAlbumCoverArtUrl = (args: { baseUrl: string; item: JFAlbum; size: number }) => {
+const getAlbumCoverArtUrl = (args: {
+    baseUrl: string;
+    item: z.infer<typeof jfType._response.album>;
+    size: number;
+}) => {
     const size = args.size ? args.size : 300;
 
     if (!args.item.ImageTags?.Primary && !args.item?.AlbumPrimaryImageTag) {
@@ -109,7 +112,11 @@ const getSongCoverArtUrl = (args: {
     return null;
 };
 
-const getPlaylistCoverArtUrl = (args: { baseUrl: string; item: JFPlaylist; size: number }) => {
+const getPlaylistCoverArtUrl = (args: {
+    baseUrl: string;
+    item: z.infer<typeof jfType._response.playlist>;
+    size: number;
+}) => {
     const size = args.size ? args.size : 300;
 
     if (!args.item.ImageTags?.Primary) {
@@ -448,7 +455,7 @@ const normalizePlaylist = (
     };
 };
 
-const normalizeMusicFolder = (item: JFMusicFolder): MusicFolder => {
+const normalizeMusicFolder = (item: z.infer<typeof jfType._response.musicFolder>): MusicFolder => {
     return {
         id: item.Id,
         name: item.Name,
@@ -495,7 +502,10 @@ const getGenreCoverArtUrl = (args: {
     );
 };
 
-const normalizeGenre = (item: JFGenre, server: null | ServerListItem): Genre => {
+const normalizeGenre = (
+    item: z.infer<typeof jfType._response.genre>,
+    server: null | ServerListItem,
+): Genre => {
     return {
         albumCount: undefined,
         id: item.Id,

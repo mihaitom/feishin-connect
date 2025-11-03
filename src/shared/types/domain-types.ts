@@ -12,19 +12,18 @@ import {
     JFPlaylistListSort,
     JFSongListSort,
     JFSortOrder,
-} from '/@/shared/api/jellyfin.types';
-import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
+    jfType,
+} from '/@/shared/api/jellyfin/jellyfin-types';
 import {
     NDAlbumArtistListSort,
     NDAlbumListSort,
     NDGenreListSort,
-    NDOrder,
     NDPlaylistListSort,
     NDSongListSort,
     NDSortOrder,
+    ndType,
     NDUserListSort,
-} from '/@/shared/api/navidrome.types';
-import { ndType } from '/@/shared/api/navidrome/navidrome-types';
+} from '/@/shared/api/navidrome/navidrome-types';
 import { ServerFeatures } from '/@/shared/types/features-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
@@ -288,7 +287,7 @@ export type GenreListResponse = BasePaginatedResponse<Genre[]>;
 
 export type GenresResponse = Genre[];
 
-export type ListSortOrder = JFSortOrder | NDOrder;
+export type ListSortOrder = 'asc' | 'desc';
 
 export type MusicFolder = {
     id: string;

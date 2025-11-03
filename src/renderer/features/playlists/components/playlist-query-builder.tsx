@@ -23,7 +23,7 @@ import {
     NDSongQueryNumberOperators,
     NDSongQueryPlaylistOperators,
     NDSongQueryStringOperators,
-} from '/@/shared/api/navidrome.types';
+} from '/@/shared/api/navidrome/navidrome-types';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';

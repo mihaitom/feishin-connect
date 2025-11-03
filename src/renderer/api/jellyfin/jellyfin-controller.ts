@@ -2,9 +2,8 @@ import chunk from 'lodash/chunk';
 import { z } from 'zod';
 
 import { jfApiClient } from '/@/renderer/api/jellyfin/jellyfin-api';
-import { JFSongListSort, JFSortOrder } from '/@/shared/api/jellyfin.types';
 import { jfNormalize } from '/@/shared/api/jellyfin/jellyfin-normalize';
-import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
+import { JFSongListSort, JFSortOrder, jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
 import {
     albumArtistListSortMap,

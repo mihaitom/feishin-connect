@@ -1,8 +1,8 @@
 import { ndApiClient } from '/@/renderer/api/navidrome/navidrome-api';
 import { ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
 import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
-import { NDSongListSort } from '/@/shared/api/navidrome.types';
 import { ndNormalize } from '/@/shared/api/navidrome/navidrome-normalize';
+import { NDSongListSort } from '/@/shared/api/navidrome/navidrome-types';
 import { ssNormalize } from '/@/shared/api/subsonic/subsonic-normalize';
 import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
 import {
