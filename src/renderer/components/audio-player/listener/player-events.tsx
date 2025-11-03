@@ -17,26 +17,32 @@ export interface PlayerEvents {
 }
 
 export interface PlayerEventsCallbacks {
-    onCurrentTrackChange?: (
-        track: { index: number; track: QueueSong | undefined },
-        prevTrack: { index: number; track: QueueSong | undefined },
+    onCurrentSongChange?: (
+        properties: { index: number; song: QueueSong | undefined },
+        prev: { index: number; song: QueueSong | undefined },
     ) => void;
-    onPlayerMute?: (muted: boolean, prevMuted: boolean) => void;
-    onPlayerProgress?: (timestamp: number, prevTimestamp: number) => void;
-    onPlayerQueueChange?: (queue: QueueData, prevQueue: QueueData) => void;
-    onPlayerSeek?: (seconds: number, prevSeconds: number) => void;
-    onPlayerSeekToTimestamp?: (timestamp: number, prevTimestamp: number) => void;
-    onPlayerSpeed?: (speed: number, prevSpeed: number) => void;
-    onPlayerStatus?: (status: PlayerStatus, prevStatus: PlayerStatus) => void;
-    onPlayerVolume?: (volume: number, prevVolume: number) => void;
+    onPlayerMute?: (properties: { muted: boolean }, prev: { muted: boolean }) => void;
+    onPlayerProgress?: (properties: { timestamp: number }, prev: { timestamp: number }) => void;
+    onPlayerQueueChange?: (queue: QueueData, prev: QueueData) => void;
+    onPlayerSeek?: (properties: { seconds: number }, prev: { seconds: number }) => void;
+    onPlayerSeekToTimestamp?: (
+        properties: { timestamp: number },
+        prev: { timestamp: number },
+    ) => void;
+    onPlayerSpeed?: (properties: { speed: number }, prev: { speed: number }) => void;
+    onPlayerStatus?: (
+        properties: { song: QueueSong | undefined; status: PlayerStatus },
+        prev: { song: QueueSong | undefined; status: PlayerStatus },
+    ) => void;
+    onPlayerVolume?: (properties: { volume: number }, prev: { volume: number }) => void;
 }
 
 export function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
     const unsubscribers: (() => void)[] = [];
 
     // Subscribe to current track changes
-    if (callbacks.onCurrentTrackChange) {
-        const unsubscribe = subscribeCurrentTrack(callbacks.onCurrentTrackChange);
+    if (callbacks.onCurrentSongChange) {
+        const unsubscribe = subscribeCurrentTrack(callbacks.onCurrentSongChange);
         unsubscribers.push(unsubscribe);
     }
 

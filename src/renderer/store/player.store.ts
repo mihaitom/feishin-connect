@@ -54,7 +54,7 @@ interface Actions {
     clearQueue: () => void;
     clearSelected: (items: QueueSong[]) => void;
     decreaseVolume: (value: number) => void;
-    getCurrentTrack: () => QueueSong | undefined;
+    getCurrentSong: () => QueueSong | undefined;
     getQueue: (groupBy?: QueueGroupingProperty) => GroupedQueue;
     getQueueOrder: () => {
         groups: { count: number; name: string }[];
@@ -411,7 +411,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         state.player.volume = Math.max(0, state.player.volume - value);
                     });
                 },
-                getCurrentTrack: () => {
+                getCurrentSong: () => {
                     const queue = get().getQueue();
                     return queue.items[get().player.index];
                 },
@@ -1127,52 +1127,64 @@ export const subscribePlayerQueue = (
 
 export const subscribeCurrentTrack = (
     onChange: (
-        track: { index: number; track: QueueSong | undefined },
-        prevTrack: { index: number; track: QueueSong | undefined },
+        properties: { index: number; song: QueueSong | undefined },
+        prev: { index: number; song: QueueSong | undefined },
     ) => void,
 ) => {
     return usePlayerStoreBase.subscribe(
         (state) => {
             const queue = state.getQueue();
             const index = state.player.index;
-            return { index, track: queue.items[index] };
+            return { index, song: queue.items[index] };
         },
-        (track, prevTrack) => {
-            onChange(track, prevTrack);
+        (song, prevSong) => {
+            onChange(song, prevSong);
         },
         {
             equalityFn: (a, b) => {
-                return a.track?.uniqueId === b.track?.uniqueId;
+                return a.song?.uniqueId === b.song?.uniqueId;
             },
         },
     );
 };
 
 export const subscribePlayerProgress = (
-    onChange: (timestamp: number, prevTimestamp: number) => void,
+    onChange: (properties: { timestamp: number }, prev: { timestamp: number }) => void,
 ) => {
     return usePlayerStoreBase.subscribe(
         (state) => state.player.timestamp,
         (timestamp, prevTimestamp) => {
-            onChange(timestamp, prevTimestamp);
+            onChange({ timestamp }, { timestamp: prevTimestamp });
         },
     );
 };
 
-export const subscribePlayerVolume = (onChange: (volume: number, prevVolume: number) => void) => {
+export const subscribePlayerVolume = (
+    onChange: (properties: { volume: number }, prev: { volume: number }) => void,
+) => {
     return usePlayerStoreBase.subscribe(
         (state) => state.player.volume,
         (volume, prevVolume) => {
-            onChange(volume, prevVolume);
+            onChange({ volume }, { volume: prevVolume });
         },
     );
 };
 
 export const subscribePlayerStatus = (
-    onChange: (status: PlayerStatus, prevStatus: PlayerStatus) => void,
+    onChange: (
+        properties: { song: QueueSong | undefined; status: PlayerStatus },
+        prev: { song: QueueSong | undefined; status: PlayerStatus },
+    ) => void,
 ) => {
     return usePlayerStoreBase.subscribe(
-        (state) => state.player.status,
+        (state) => {
+            const currentSong = state.getCurrentSong();
+
+            return {
+                song: currentSong,
+                status: state.player.status,
+            };
+        },
         (status, prevStatus) => {
             onChange(status, prevStatus);
         },
@@ -1180,33 +1192,37 @@ export const subscribePlayerStatus = (
 };
 
 export const subscribePlayerSeekToTimestamp = (
-    onChange: (timestamp: number, prevTimestamp: number) => void,
+    onChange: (properties: { timestamp: number }, prev: { timestamp: number }) => void,
 ) => {
     return usePlayerStoreBase.subscribe(
         (state) => state.player.seekToTimestamp,
         (timestamp, prevTimestamp) => {
             onChange(
-                parseUniqueSeekToTimestamp(timestamp),
-                parseUniqueSeekToTimestamp(prevTimestamp),
+                { timestamp: parseUniqueSeekToTimestamp(timestamp) },
+                { timestamp: parseUniqueSeekToTimestamp(prevTimestamp) },
             );
         },
     );
 };
 
-export const subscribePlayerMute = (onChange: (muted: boolean, prevMuted: boolean) => void) => {
+export const subscribePlayerMute = (
+    onChange: (properties: { muted: boolean }, prev: { muted: boolean }) => void,
+) => {
     return usePlayerStoreBase.subscribe(
         (state) => state.player.muted,
         (muted, prevMuted) => {
-            onChange(muted, prevMuted);
+            onChange({ muted }, { muted: prevMuted });
         },
     );
 };
 
-export const subscribePlayerSpeed = (onChange: (speed: number, prevSpeed: number) => void) => {
+export const subscribePlayerSpeed = (
+    onChange: (properties: { speed: number }, prev: { speed: number }) => void,
+) => {
     return usePlayerStoreBase.subscribe(
         (state) => state.player.speed,
         (speed, prevSpeed) => {
-            onChange(speed, prevSpeed);
+            onChange({ speed }, { speed: prevSpeed });
         },
     );
 };
