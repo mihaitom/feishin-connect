@@ -528,6 +528,7 @@
         "contextMenu": "context menu (right click) configuration",
         "crossfadeDuration_description": "sets the duration of the crossfade effect",
         "crossfadeDuration": "crossfade duration",
+        "crossfadeStyle": "crossfade style",
         "crossfadeStyle_description": "select the crossfade style to use for the audio player",
         "customCss_description": "custom css content. Note: content and remote urls are disallowed properties. A preview of your content is shown below. Additional fields you didn't set are present due to sanitization",
         "customCss": "custom css",
