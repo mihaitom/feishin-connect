@@ -38,7 +38,7 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
     const handlePlayQueueAdd = usePlayQueueAdd();
     const { display, filter, grid } = useListStoreByKey<PlaylistListQuery>({ key: pageKey });
     const { setGrid } = useListStoreActions();
-    const handleFavorite = useHandleFavorite({ gridRef, server });
+    const handleFavorite = useHandleFavorite({ gridRef });
 
     const cardRows = useMemo(() => {
         const rows: CardRow<Playlist>[] = [PLAYLIST_CARD_ROWS.nameFull];
@@ -126,7 +126,7 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
                 queryFn: async ({ signal }) =>
                     controller.getPlaylistList({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                             signal,
                         },
                         query,

@@ -62,11 +62,11 @@ export const RightControls = () => {
         if (!song?.id) return;
 
         addToFavoritesMutation.mutate({
+            apiClientProps: { serverId: song?.serverId || '' },
             query: {
                 id: [song.id],
                 type: LibraryItem.SONG,
             },
-            serverId: song?.serverId,
         });
     };
 
@@ -74,11 +74,11 @@ export const RightControls = () => {
         if (!currentSong) return;
 
         updateRatingMutation.mutate({
+            apiClientProps: { serverId: currentSong?.serverId || '' },
             query: {
                 item: [currentSong],
                 rating,
             },
-            serverId: currentSong?.serverId,
         });
     };
 
@@ -86,11 +86,11 @@ export const RightControls = () => {
         if (!song?.id) return;
 
         removeFromFavoritesMutation.mutate({
+            apiClientProps: { serverId: song?.serverId || '' },
             query: {
                 id: [song.id],
                 type: LibraryItem.SONG,
             },
-            serverId: song?.serverId,
         });
     };
 
@@ -163,16 +163,17 @@ export const RightControls = () => {
             remote.requestFavorite((_event, { favorite, id, serverId }) => {
                 const mutator = favorite ? addToFavoritesMutation : removeFromFavoritesMutation;
                 mutator.mutate({
+                    apiClientProps: { serverId },
                     query: {
                         id: [id],
                         type: LibraryItem.SONG,
                     },
-                    serverId,
                 });
             });
 
             remote.requestRating((_event, { id, rating, serverId }) => {
                 updateRatingMutation.mutate({
+                    apiClientProps: { serverId },
                     query: {
                         item: [
                             {
@@ -183,7 +184,6 @@ export const RightControls = () => {
                         ],
                         rating,
                     },
-                    serverId,
                 });
             });
 

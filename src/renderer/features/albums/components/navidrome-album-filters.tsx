@@ -12,7 +12,7 @@ import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import {
     AlbumListFilter,
-    getServerById,
+    useCurrentServer,
     useListStoreActions,
     useListStoreByKey,
 } from '/@/renderer/store';
@@ -53,7 +53,7 @@ export const NavidromeAlbumFilters = ({
     const { t } = useTranslation();
     const { filter } = useListStoreByKey<AlbumListQuery>({ key: pageKey });
     const { setFilter } = useListStoreActions();
-    const server = getServerById(serverId);
+    const server = useCurrentServer();
 
     const genreListQuery = useQuery(
         genresQueries.list({

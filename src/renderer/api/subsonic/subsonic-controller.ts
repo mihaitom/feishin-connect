@@ -16,8 +16,8 @@ import {
 } from '/@/shared/api/subsonic/subsonic-types';
 import {
     AlbumListSort,
-    ControllerEndpoint,
     GenreListSort,
+    InternalControllerEndpoint,
     LibraryItem,
     PlaylistListSort,
     Song,
@@ -51,7 +51,7 @@ const MAX_SUBSONIC_ITEMS = 500;
 // A trick to skip ahead 10x
 const SUBSONIC_FAST_BATCH_SIZE = MAX_SUBSONIC_ITEMS * 10;
 
-export const SubsonicController: ControllerEndpoint = {
+export const SubsonicController: InternalControllerEndpoint = {
     addToPlaylist: async ({ apiClientProps, body, query }) => {
         const res = await ssApiClient(apiClientProps).updatePlaylist({
             query: {

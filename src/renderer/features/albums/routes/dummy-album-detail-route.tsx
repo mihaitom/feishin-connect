@@ -42,9 +42,8 @@ const DummyAlbumDetailRoute = () => {
     const queryKey = queryKeys.songs.detail(server?.id || '', albumId);
     const detailQuery = useQuery({
         queryFn: ({ signal }) => {
-            if (!server) throw new Error('Server not found');
             return api.controller.getSongDetail({
-                apiClientProps: { server, signal },
+                apiClientProps: { serverId: server?.id || '', signal },
                 query: { id: albumId },
             });
         },
@@ -70,19 +69,19 @@ const DummyAlbumDetailRoute = () => {
         try {
             if (wasFavorite) {
                 await deleteFavoriteMutation.mutateAsync({
+                    apiClientProps: { serverId: detailQuery.data.serverId },
                     query: {
                         id: [detailQuery.data.id],
                         type: LibraryItem.SONG,
                     },
-                    serverId: detailQuery.data.serverId,
                 });
             } else {
                 await createFavoriteMutation.mutateAsync({
+                    apiClientProps: { serverId: detailQuery.data.serverId },
                     query: {
                         id: [detailQuery.data.id],
                         type: LibraryItem.SONG,
                     },
-                    serverId: detailQuery.data.serverId,
                 });
             }
 

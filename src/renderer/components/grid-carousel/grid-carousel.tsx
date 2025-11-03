@@ -142,19 +142,19 @@ export const SwiperGridCarousel = ({
             const { id, isFavorite, itemType, serverId } = options;
             if (isFavorite) {
                 deleteFavoriteMutation.mutate({
+                    apiClientProps: { serverId },
                     query: {
                         id,
                         type: itemType,
                     },
-                    serverId,
                 });
             } else {
                 createFavoriteMutation.mutate({
+                    apiClientProps: { serverId },
                     query: {
                         id,
                         type: itemType,
                     },
-                    serverId,
                 });
             }
         },

@@ -111,7 +111,7 @@ export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetai
                 try {
                     await api.controller.movePlaylistItem({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                         },
                         query: {
                             endingIndex: e.overIndex,

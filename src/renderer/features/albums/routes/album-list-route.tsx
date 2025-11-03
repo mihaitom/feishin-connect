@@ -107,7 +107,7 @@ const AlbumListRoute = () => {
             const albumListRes = await queryClient.fetchQuery({
                 queryFn: ({ signal }) => {
                     return api.controller.getAlbumList({
-                        apiClientProps: { server, signal },
+                        apiClientProps: { serverId: server?.id || '', signal },
                         query,
                     });
                 },

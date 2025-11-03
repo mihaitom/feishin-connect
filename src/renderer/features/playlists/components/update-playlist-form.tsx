@@ -65,9 +65,9 @@ export const UpdatePlaylistForm = ({ body, onCancel, query, users }: UpdatePlayl
     const handleSubmit = form.onSubmit((values) => {
         mutation.mutate(
             {
+                apiClientProps: { serverId: server?.id || '' },
                 body: values,
                 query,
-                serverId: server?.id,
             },
             {
                 onError: (err) => {
@@ -174,7 +174,10 @@ export const openUpdatePlaylistModal = async (args: {
             ? await queryClient
                   .fetchQuery({
                       queryFn: ({ signal }) =>
-                          api.controller.getUserList({ apiClientProps: { server, signal }, query }),
+                          api.controller.getUserList({
+                              apiClientProps: { serverId: server?.id || '', signal },
+                              query,
+                          }),
                       queryKey: queryKeys.users.list(server?.id || '', query),
                   })
                   .catch((error) => {

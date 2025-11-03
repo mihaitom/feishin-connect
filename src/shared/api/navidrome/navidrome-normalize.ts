@@ -126,7 +126,7 @@ const getArtists = (
 
 const normalizeSong = (
     item: z.infer<typeof ndType._response.playlistSong> | z.infer<typeof ndType._response.song>,
-    server: null | ServerListItem,
+    server?: null | ServerListItem,
     imageSize?: number,
 ): Song => {
     let id;
@@ -222,7 +222,7 @@ const normalizeAlbum = (
     item: z.infer<typeof ndType._response.album> & {
         songs?: z.infer<typeof ndType._response.songList>;
     },
-    server: null | ServerListItem,
+    server?: null | ServerListItem,
     imageSize?: number,
 ): Album => {
     const imageUrl = getCoverArtUrl({
@@ -293,7 +293,7 @@ const normalizeAlbumArtist = (
     item: z.infer<typeof ndType._response.albumArtist> & {
         similarArtists?: z.infer<typeof ssType._response.artistInfo>['artistInfo']['similarArtist'];
     },
-    server: null | ServerListItem,
+    server?: null | ServerListItem,
 ): AlbumArtist => {
     let imageUrl = getImageUrl({ url: item?.largeImageUrl || null });
 
@@ -358,7 +358,7 @@ const normalizeAlbumArtist = (
 
 const normalizePlaylist = (
     item: z.infer<typeof ndType._response.playlist>,
-    server: null | ServerListItem,
+    server?: null | ServerListItem,
     imageSize?: number,
 ): Playlist => {
     const imageUrl = getCoverArtUrl({

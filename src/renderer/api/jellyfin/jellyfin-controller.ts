@@ -9,8 +9,8 @@ import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
 import {
     albumArtistListSortMap,
     albumListSortMap,
-    ControllerEndpoint,
     genreListSortMap,
+    InternalControllerEndpoint,
     LibraryItem,
     Played,
     playlistListSortMap,
@@ -40,7 +40,7 @@ const VERSION_INFO: VersionInfo = [
     ['10.0.0', { [ServerFeature.TAGS]: [1] }],
 ];
 
-export const JellyfinController: ControllerEndpoint = {
+export const JellyfinController: InternalControllerEndpoint = {
     addToPlaylist: async (args) => {
         const { apiClientProps, body, query } = args;
 

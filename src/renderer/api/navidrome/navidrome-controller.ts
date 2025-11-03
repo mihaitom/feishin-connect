@@ -9,12 +9,12 @@ import {
     albumArtistListSortMap,
     albumListSortMap,
     AuthenticationResponse,
-    ControllerEndpoint,
     genreListSortMap,
+    InternalControllerEndpoint,
     playlistListSortMap,
     PlaylistSongListArgs,
     PlaylistSongListResponse,
-    ServerListItem,
+    ServerListItemWithCredential,
     Song,
     songListSortMap,
     sortOrderMap,
@@ -47,7 +47,11 @@ const NAVIDROME_ROLES: Array<string | { label: string; value: string }> = [
 
 const EXCLUDED_TAGS = new Set<string>(['disctotal', 'genre', 'tracktotal']);
 
-const excludeMissing = (server: null | ServerListItem) => {
+const excludeMissing = (server?: null | ServerListItemWithCredential) => {
+    if (!server) {
+        return undefined;
+    }
+
     if (hasFeature(server, ServerFeature.BFR)) {
         return { missing: false };
     }
@@ -55,10 +59,10 @@ const excludeMissing = (server: null | ServerListItem) => {
     return undefined;
 };
 
-const getArtistSongKey = (server: null | ServerListItem) =>
+const getArtistSongKey = (server: null | ServerListItemWithCredential) =>
     hasFeature(server, ServerFeature.TRACK_ALBUM_ARTIST_SEARCH) ? 'artists_id' : 'album_artist_id';
 
-export const NavidromeController: ControllerEndpoint = {
+export const NavidromeController: InternalControllerEndpoint = {
     addToPlaylist: async (args) => {
         const { apiClientProps, body, query } = args;
 
@@ -156,7 +160,7 @@ export const NavidromeController: ControllerEndpoint = {
             throw new Error('Failed to get album artist detail');
         }
 
-        if (!apiClientProps.server) {
+        if (!apiClientProps.serverId) {
             throw new Error('Server is required');
         }
 
@@ -431,7 +435,7 @@ export const NavidromeController: ControllerEndpoint = {
     getPlaylistSongList: async (args: PlaylistSongListArgs): Promise<PlaylistSongListResponse> => {
         const { apiClientProps, query } = args;
 
-        const res = await ndApiClient(apiClientProps).getPlaylistSongList({
+        const res = await ndApiClient(apiClientProps as any).getPlaylistSongList({
             params: {
                 id: query.id,
             },
@@ -481,7 +485,7 @@ export const NavidromeController: ControllerEndpoint = {
 
         return {
             features,
-            id: apiClientProps.server?.id,
+            id: apiClientProps.serverId,
             version: ping.body.serverVersion!,
         };
     },

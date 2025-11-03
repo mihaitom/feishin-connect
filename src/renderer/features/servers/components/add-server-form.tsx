@@ -21,7 +21,7 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { AuthenticationResponse, ServerListItem } from '/@/shared/types/domain-types';
+import { AuthenticationResponse, ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { DiscoveredServerItem, ServerType, toServerType } from '/@/shared/types/types';
 
 const autodiscover = isElectron() ? window.api.autodiscover : null;
@@ -152,7 +152,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                 });
             }
 
-            const serverItem: ServerListItem = {
+            const serverItem: ServerListItemWithCredential = {
                 credential: data.credential,
                 id: nanoid(),
                 name: values.name,

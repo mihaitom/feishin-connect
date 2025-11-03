@@ -87,11 +87,11 @@ export const lyricsQueries = {
                 // This should only be called for Jellyfin. Return null to ignore errors
                 if (server.type !== ServerType.JELLYFIN) return null;
                 return api.controller.getLyrics({
-                    apiClientProps: { server, signal },
+                    apiClientProps: { serverId: args.serverId, signal },
                     query: args.query,
                 });
             },
-            queryKey: queryKeys.songs.lyrics(args.serverId || '', args.query),
+            queryKey: queryKeys.songs.lyrics(args.serverId, args.query),
             ...args.options,
         });
     },
@@ -111,7 +111,7 @@ export const lyricsQueries = {
                 if (hasFeature(server, ServerFeature.LYRICS_MULTIPLE_STRUCTURED)) {
                     const subsonicLyrics = await api.controller
                         .getStructuredLyrics({
-                            apiClientProps: { server, signal },
+                            apiClientProps: { serverId: args.serverId, signal },
                             query: { songId: song.id },
                         })
                         .catch(console.error);
@@ -122,7 +122,7 @@ export const lyricsQueries = {
                 } else if (hasFeature(server, ServerFeature.LYRICS_SINGLE_STRUCTURED)) {
                     const jfLyrics = await api.controller
                         .getLyrics({
-                            apiClientProps: { server, signal },
+                            apiClientProps: { serverId: args.serverId, signal },
                             query: { songId: song.id },
                         })
                         .catch((err) => console.error(err));
@@ -175,7 +175,7 @@ export const lyricsQueries = {
 
                 return null;
             },
-            queryKey: queryKeys.songs.lyrics(args.serverId || '', args.query),
+            queryKey: queryKeys.songs.lyrics(args.serverId, args.query),
             staleTime: Infinity,
             ...args.options,
         });

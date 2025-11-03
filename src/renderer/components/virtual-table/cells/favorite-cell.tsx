@@ -15,11 +15,11 @@ export const FavoriteCell = ({ data, node, value }: ICellRendererParams) => {
         if (newFavoriteValue) {
             createMutation.mutate(
                 {
+                    apiClientProps: { serverId: data.serverId },
                     query: {
                         id: [data.id],
                         type: data.itemType,
                     },
-                    serverId: data.serverId,
                 },
                 {
                     onSuccess: () => {
@@ -30,11 +30,11 @@ export const FavoriteCell = ({ data, node, value }: ICellRendererParams) => {
         } else {
             deleteMutation.mutate(
                 {
+                    apiClientProps: { serverId: data.serverId },
                     query: {
                         id: [data.id],
                         type: data.itemType,
                     },
-                    serverId: data.serverId,
                 },
                 {
                     onSuccess: () => {

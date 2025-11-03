@@ -184,7 +184,7 @@ export const AlbumArtistListHeaderFilters = ({
                 queryFn: async ({ signal }) =>
                     api.controller.getAlbumArtistList({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                             signal,
                         },
                         query: {
@@ -220,7 +220,7 @@ export const AlbumArtistListHeaderFilters = ({
                             queryFn: async ({ signal }) =>
                                 api.controller.getAlbumArtistList({
                                     apiClientProps: {
-                                        server,
+                                        serverId: server?.id || '',
                                         signal,
                                     },
                                     query: {

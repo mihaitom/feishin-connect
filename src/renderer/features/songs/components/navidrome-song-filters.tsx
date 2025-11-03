@@ -10,8 +10,8 @@ import {
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import {
-    getServerById,
     SongListFilter,
+    useCurrentServer,
     useListFilterByKey,
     useListStoreActions,
 } from '/@/renderer/store';
@@ -42,7 +42,7 @@ export const NavidromeSongFilters = ({
     const { t } = useTranslation();
     const { setFilter } = useListStoreActions();
     const filter = useListFilterByKey<SongListQuery>({ key: pageKey });
-    const server = getServerById(serverId);
+    const server = useCurrentServer();
 
     const isGenrePage = customFilters?.genreIds !== undefined;
 

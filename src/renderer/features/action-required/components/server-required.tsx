@@ -18,7 +18,11 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { ServerListItem, ServerType } from '/@/shared/types/domain-types';
+import {
+    ServerListItem,
+    ServerListItemWithCredential,
+    ServerType,
+} from '/@/shared/types/domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 
@@ -69,7 +73,7 @@ function ServerSelector() {
     const currentServer = useCurrentServer();
     const { setCurrentServer } = useAuthStoreActions();
 
-    const handleSetCurrentServer = (server: ServerListItem) => {
+    const handleSetCurrentServer = (server: ServerListItemWithCredential) => {
         navigate(AppRoute.HOME);
         setCurrentServer(server);
     };

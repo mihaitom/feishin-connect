@@ -43,7 +43,7 @@ export const SongListGridView = ({ gridRef, itemCount }: SongListGridViewProps) 
     const scrollOffset = searchParams.get('scrollOffset');
     const initialScrollOffset = Number(id ? scrollOffset : grid?.scrollOffset) || 0;
 
-    const handleFavorite = useHandleFavorite({ gridRef, server });
+    const handleFavorite = useHandleFavorite({ gridRef });
 
     useEffect(() => {
         const unSub = useEventStore.subscribe((state) => {
@@ -189,7 +189,7 @@ export const SongListGridView = ({ gridRef, itemCount }: SongListGridViewProps) 
                 queryFn: async ({ signal }) =>
                     controller.getSongList({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                             signal,
                         },
                         query,

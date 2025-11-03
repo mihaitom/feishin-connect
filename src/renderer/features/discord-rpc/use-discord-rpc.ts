@@ -6,7 +6,6 @@ import { controller } from '/@/renderer/api/controller';
 import {
     DiscordDisplayType,
     DiscordLinkType,
-    getServerById,
     useAppStore,
     useDiscordSettings,
     useGeneralSettings,
@@ -123,11 +122,9 @@ export const useDiscordRpc = () => {
                     if (song.serverType === ServerType.JELLYFIN && song.imageUrl) {
                         activity.largeImageKey = song.imageUrl;
                     } else if (song.serverType === ServerType.NAVIDROME) {
-                        const server = getServerById(song.serverId);
-
                         try {
                             const info = await controller.getAlbumInfo({
-                                apiClientProps: { server },
+                                apiClientProps: { serverId: song.serverId },
                                 query: { id: song.albumId },
                             });
 

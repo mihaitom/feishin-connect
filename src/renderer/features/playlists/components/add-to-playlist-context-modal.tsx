@@ -120,7 +120,7 @@ export const AddToPlaylistContextModal = ({
                 queryFn: ({ signal }) => {
                     if (!server) throw new Error('No server');
                     return api.controller.getSongList({
-                        apiClientProps: { server, signal },
+                        apiClientProps: { serverId: server?.id || '', signal },
                         query,
                     });
                 },
@@ -147,7 +147,7 @@ export const AddToPlaylistContextModal = ({
                 queryFn: ({ signal }) => {
                     if (!server) throw new Error('No server');
                     return api.controller.getSongList({
-                        apiClientProps: { server, signal },
+                        apiClientProps: { serverId: server?.id || '', signal },
                         query,
                     });
                 },
@@ -203,7 +203,7 @@ export const AddToPlaylistContextModal = ({
                 for (const playlist of values.newPlaylists) {
                     try {
                         const response = await api.controller.createPlaylist({
-                            apiClientProps: { server },
+                            apiClientProps: { serverId: server?.id || '' },
                             body: {
                                 name: playlist,
                                 public: false,
@@ -238,7 +238,7 @@ export const AddToPlaylistContextModal = ({
                                 );
                             return api.controller.getPlaylistSongList({
                                 apiClientProps: {
-                                    server,
+                                    serverId: server?.id || '',
                                     signal,
                                 },
                                 query: {
@@ -266,9 +266,9 @@ export const AddToPlaylistContextModal = ({
                     }
                     addToPlaylistMutation.mutate(
                         {
+                            apiClientProps: { serverId: server.id },
                             body: { songId: values.skipDuplicates ? uniqueSongIds : allSongIds },
                             query: { id: playlistId },
-                            serverId: server?.id,
                         },
                         {
                             onError: (err) => {

@@ -1,3 +1,4 @@
+import { Omit } from 'lodash';
 import orderBy from 'lodash/orderBy';
 import reverse from 'lodash/reverse';
 import shuffle from 'lodash/shuffle';
@@ -84,11 +85,9 @@ export type QueueSong = Song & {
 };
 
 export type ServerListItem = {
-    credential: string;
     features?: ServerFeatures;
     id: string;
     name: string;
-    ndCredential?: string;
     preferInstantMix?: boolean;
     savePassword?: boolean;
     type: ServerType;
@@ -96,6 +95,11 @@ export type ServerListItem = {
     userId: null | string;
     username: string;
     version?: string;
+};
+
+export type ServerListItemWithCredential = ServerListItem & {
+    credential: string;
+    ndCredential?: string;
 };
 
 export type User = {
@@ -372,7 +376,8 @@ export type Song = {
 
 type BaseEndpointArgs = {
     apiClientProps: {
-        server: null | ServerListItem;
+        server?: null | ServerListItemWithCredential;
+        serverId: string;
         signal?: AbortSignal;
     };
 };
@@ -829,7 +834,6 @@ export enum PlaylistListSort {
 export type AddToPlaylistArgs = BaseEndpointArgs & {
     body: AddToPlaylistBody;
     query: AddToPlaylistQuery;
-    serverId?: string;
 };
 
 export type AddToPlaylistBody = {
@@ -843,7 +847,7 @@ export type AddToPlaylistQuery = {
 // Add to playlist
 export type AddToPlaylistResponse = null | undefined;
 
-export type CreatePlaylistArgs = BaseEndpointArgs & { body: CreatePlaylistBody; serverId?: string };
+export type CreatePlaylistArgs = BaseEndpointArgs & { body: CreatePlaylistBody };
 
 export type CreatePlaylistBody = {
     _custom?: {
@@ -864,7 +868,6 @@ export type CreatePlaylistResponse = undefined | { id: string };
 
 export type DeletePlaylistArgs = BaseEndpointArgs & {
     query: DeletePlaylistQuery;
-    serverId?: string;
 };
 
 export type DeletePlaylistQuery = { id: string };
@@ -872,7 +875,7 @@ export type DeletePlaylistQuery = { id: string };
 // Delete Playlist
 export type DeletePlaylistResponse = null | undefined;
 
-export type FavoriteArgs = BaseEndpointArgs & { query: FavoriteQuery; serverId?: string };
+export type FavoriteArgs = BaseEndpointArgs & { query: FavoriteQuery };
 
 export type FavoriteQuery = {
     id: string[];
@@ -909,7 +912,6 @@ export type RatingResponse = null | undefined;
 
 export type RemoveFromPlaylistArgs = BaseEndpointArgs & {
     query: RemoveFromPlaylistQuery;
-    serverId?: string;
 };
 
 export type RemoveFromPlaylistQuery = {
@@ -920,9 +922,9 @@ export type RemoveFromPlaylistQuery = {
 // Remove from playlist
 export type RemoveFromPlaylistResponse = null | undefined;
 
-export type SetRatingArgs = BaseEndpointArgs & { query: RatingQuery; serverId?: string };
+export type SetRatingArgs = BaseEndpointArgs & { query: RatingQuery };
 
-export type ShareItemArgs = BaseEndpointArgs & { body: ShareItemBody; serverId?: string };
+export type ShareItemArgs = BaseEndpointArgs & { body: ShareItemBody };
 
 export type ShareItemBody = {
     description: string;
@@ -938,7 +940,6 @@ export type ShareItemResponse = undefined | { id: string };
 export type UpdatePlaylistArgs = BaseEndpointArgs & {
     body: UpdatePlaylistBody;
     query: UpdatePlaylistQuery;
-    serverId?: string;
 };
 
 export type UpdatePlaylistBody = {
@@ -1135,7 +1136,6 @@ export type RandomSongListResponse = SongListResponse;
 
 export type ScrobbleArgs = BaseEndpointArgs & {
     query: ScrobbleQuery;
-    serverId?: string;
 };
 
 export type ScrobbleQuery = {
@@ -1279,6 +1279,85 @@ export type FontData = {
     style: string;
 };
 
+export type InternalControllerEndpoint = {
+    addToPlaylist: (
+        args: ReplaceApiClientProps<AddToPlaylistArgs>,
+    ) => Promise<AddToPlaylistResponse>;
+    authenticate: (
+        url: string,
+        body: { legacy?: boolean; password: string; username: string },
+    ) => Promise<AuthenticationResponse>;
+    createFavorite: (args: ReplaceApiClientProps<FavoriteArgs>) => Promise<FavoriteResponse>;
+    createPlaylist: (
+        args: ReplaceApiClientProps<CreatePlaylistArgs>,
+    ) => Promise<CreatePlaylistResponse>;
+    deleteFavorite: (args: ReplaceApiClientProps<FavoriteArgs>) => Promise<FavoriteResponse>;
+    deletePlaylist: (
+        args: ReplaceApiClientProps<DeletePlaylistArgs>,
+    ) => Promise<DeletePlaylistResponse>;
+    getAlbumArtistDetail: (
+        args: ReplaceApiClientProps<AlbumArtistDetailArgs>,
+    ) => Promise<AlbumArtistDetailResponse>;
+    getAlbumArtistList: (
+        args: ReplaceApiClientProps<AlbumArtistListArgs>,
+    ) => Promise<AlbumArtistListResponse>;
+    getAlbumArtistListCount: (
+        args: ReplaceApiClientProps<AlbumArtistListCountArgs>,
+    ) => Promise<number>;
+    getAlbumDetail: (args: ReplaceApiClientProps<AlbumDetailArgs>) => Promise<AlbumDetailResponse>;
+    getAlbumInfo?: (args: ReplaceApiClientProps<AlbumDetailArgs>) => Promise<AlbumInfo>;
+    getAlbumList: (args: ReplaceApiClientProps<AlbumListArgs>) => Promise<AlbumListResponse>;
+    getAlbumListCount: (args: ReplaceApiClientProps<AlbumListCountArgs>) => Promise<number>;
+    // getArtistInfo?: (args: any) => void;
+    getArtistList: (args: ReplaceApiClientProps<ArtistListArgs>) => Promise<ArtistListResponse>;
+    getArtistListCount: (args: ReplaceApiClientProps<ArtistListCountArgs>) => Promise<number>;
+    getDownloadUrl: (args: ReplaceApiClientProps<DownloadArgs>) => string;
+    getGenreList: (args: ReplaceApiClientProps<GenreListArgs>) => Promise<GenreListResponse>;
+    getLyrics?: (args: ReplaceApiClientProps<LyricsArgs>) => Promise<LyricsResponse>;
+    getMusicFolderList: (
+        args: ReplaceApiClientProps<MusicFolderListArgs>,
+    ) => Promise<MusicFolderListResponse>;
+    getPlaylistDetail: (
+        args: ReplaceApiClientProps<PlaylistDetailArgs>,
+    ) => Promise<PlaylistDetailResponse>;
+    getPlaylistList: (
+        args: ReplaceApiClientProps<PlaylistListArgs>,
+    ) => Promise<PlaylistListResponse>;
+    getPlaylistListCount: (args: ReplaceApiClientProps<PlaylistListCountArgs>) => Promise<number>;
+    getPlaylistSongList: (
+        args: ReplaceApiClientProps<PlaylistSongListArgs>,
+    ) => Promise<SongListResponse>;
+    getRandomSongList: (
+        args: ReplaceApiClientProps<RandomSongListArgs>,
+    ) => Promise<SongListResponse>;
+    getRoles: (
+        args: ReplaceApiClientProps<BaseEndpointArgs>,
+    ) => Promise<Array<string | { label: string; value: string }>>;
+    getServerInfo: (args: ReplaceApiClientProps<ServerInfoArgs>) => Promise<ServerInfo>;
+    getSimilarSongs: (args: ReplaceApiClientProps<SimilarSongsArgs>) => Promise<Song[]>;
+    getSongDetail: (args: ReplaceApiClientProps<SongDetailArgs>) => Promise<SongDetailResponse>;
+    getSongList: (args: ReplaceApiClientProps<SongListArgs>) => Promise<SongListResponse>;
+    getSongListCount: (args: ReplaceApiClientProps<SongListCountArgs>) => Promise<number>;
+    getStructuredLyrics?: (
+        args: ReplaceApiClientProps<StructuredLyricsArgs>,
+    ) => Promise<StructuredLyric[]>;
+    getTags?: (args: ReplaceApiClientProps<TagArgs>) => Promise<TagResponses>;
+    getTopSongs: (args: ReplaceApiClientProps<TopSongListArgs>) => Promise<TopSongListResponse>;
+    getTranscodingUrl: (args: ReplaceApiClientProps<TranscodingArgs>) => string;
+    getUserList?: (args: ReplaceApiClientProps<UserListArgs>) => Promise<UserListResponse>;
+    movePlaylistItem?: (args: ReplaceApiClientProps<MoveItemArgs>) => Promise<void>;
+    removeFromPlaylist: (
+        args: ReplaceApiClientProps<RemoveFromPlaylistArgs>,
+    ) => Promise<RemoveFromPlaylistResponse>;
+    scrobble: (args: ReplaceApiClientProps<ScrobbleArgs>) => Promise<ScrobbleResponse>;
+    search: (args: ReplaceApiClientProps<SearchArgs>) => Promise<SearchResponse>;
+    setRating?: (args: ReplaceApiClientProps<SetRatingArgs>) => Promise<RatingResponse>;
+    shareItem?: (args: ReplaceApiClientProps<ShareItemArgs>) => Promise<ShareItemResponse>;
+    updatePlaylist: (
+        args: ReplaceApiClientProps<UpdatePlaylistArgs>,
+    ) => Promise<UpdatePlaylistResponse>;
+};
+
 export type LyricGetQuery = {
     remoteSongId: string;
     remoteSource: LyricSource;
@@ -1304,6 +1383,8 @@ export type MoveItemQuery = {
     startingIndex: number;
     trackId: string;
 };
+
+export type ReplaceApiClientProps<T> = BaseEndpointArgsWithServer & Omit<T, 'apiClientProps'>;
 
 export type ServerInfo = {
     features: ServerFeatures;
@@ -1368,6 +1449,14 @@ export type TranscodingQuery = {
     base: string;
     bitrate?: number;
     format?: string;
+};
+
+type BaseEndpointArgsWithServer = {
+    apiClientProps: {
+        server: null | ServerListItemWithCredential;
+        serverId: string;
+        signal?: AbortSignal;
+    };
 };
 
 export const sortAlbumList = (albums: Album[], sortBy: AlbumListSort, sortOrder: SortOrder) => {

@@ -914,7 +914,6 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
             merge: mergeOverridingColumns,
             migrate(persistedState, version) {
                 const state = persistedState as SettingsSlice;
-                console.log('migrate: ', version);
 
                 if (version === 8) {
                     state.general.sidebarItems = state.general.sidebarItems.filter(

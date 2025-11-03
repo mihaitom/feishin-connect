@@ -86,7 +86,7 @@ export const useListFilterRefresh = ({
                         queryFn: async ({ signal }) => {
                             return queryFn({
                                 apiClientProps: {
-                                    server,
+                                    serverId: server?.id || '',
                                     signal,
                                 },
                                 query,

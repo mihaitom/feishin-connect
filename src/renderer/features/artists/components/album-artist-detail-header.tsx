@@ -71,11 +71,11 @@ export const AlbumArtistDetailHeader = forwardRef(
             if (!detailQuery?.data) return;
 
             updateRatingMutation.mutate({
+                apiClientProps: { serverId: detailQuery?.data.serverId },
                 query: {
                     item: [detailQuery.data],
                     rating,
                 },
-                serverId: detailQuery?.data.serverId,
             });
         };
 

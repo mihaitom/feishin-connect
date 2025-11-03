@@ -168,7 +168,7 @@ export const useVirtualTable = <TFilter extends BaseQuery<any>>({
                         queryFn: async ({ signal }) => {
                             const res = await queryFn!({
                                 apiClientProps: {
-                                    server,
+                                    serverId: server?.id || '',
                                     signal,
                                 },
                                 query: {

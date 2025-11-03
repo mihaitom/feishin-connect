@@ -33,7 +33,7 @@ export const getPlaylistSongsById = async (args: {
         queryFn: async ({ signal }) =>
             api.controller.getPlaylistSongList({
                 apiClientProps: {
-                    server,
+                    serverId: server?.id || '',
                     signal,
                 },
                 query: queryFilter,
@@ -77,7 +77,7 @@ export const getAlbumSongsById = async (args: {
         queryFn: async ({ signal }) =>
             api.controller.getSongList({
                 apiClientProps: {
-                    server,
+                    serverId: server?.id || '',
                     signal,
                 },
                 query: queryFilter,
@@ -119,7 +119,7 @@ export const getGenreSongsById = async (args: {
             queryFn: async ({ signal }) =>
                 api.controller.getSongList({
                     apiClientProps: {
-                        server,
+                        serverId: server?.id || '',
                         signal,
                     },
                     query: queryFilter,
@@ -161,7 +161,7 @@ export const getAlbumArtistSongsById = async (args: {
         queryFn: async ({ signal }) =>
             api.controller.getSongList({
                 apiClientProps: {
-                    server,
+                    serverId: server?.id || '',
                     signal,
                 },
                 query: queryFilter,
@@ -196,7 +196,7 @@ export const getArtistSongsById = async (args: {
         queryFn: async ({ signal }) =>
             api.controller.getSongList({
                 apiClientProps: {
-                    server,
+                    serverId: server?.id || '',
                     signal,
                 },
                 query: queryFilter,
@@ -229,7 +229,7 @@ export const getSongsByQuery = async (args: {
         queryFn: async ({ signal }) => {
             return api.controller.getSongList({
                 apiClientProps: {
-                    server,
+                    serverId: server?.id || '',
                     signal,
                 },
                 query: queryFilter,
@@ -258,7 +258,7 @@ export const getSongById = async (args: {
         queryFn: async ({ signal }) =>
             api.controller.getSongDetail({
                 apiClientProps: {
-                    server,
+                    serverId: server?.id || '',
                     signal,
                 },
                 query: queryFilter,

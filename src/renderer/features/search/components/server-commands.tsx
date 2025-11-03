@@ -7,7 +7,7 @@ import { Command, CommandPalettePages } from '/@/renderer/features/search/compon
 import { ServerList } from '/@/renderer/features/servers/components/server-list';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAuthStoreActions, useServerList } from '/@/renderer/store';
-import { ServerListItem } from '/@/shared/types/domain-types';
+import { ServerListItemWithCredential } from '/@/shared/types/domain-types';
 
 interface ServerCommandsProps {
     handleClose: () => void;
@@ -32,7 +32,7 @@ export const ServerCommands = ({ handleClose, setPages, setQuery }: ServerComman
     }, [handleClose, setPages, setQuery, t]);
 
     const handleSelectServer = useCallback(
-        (server: ServerListItem) => {
+        (server: ServerListItemWithCredential) => {
             navigate(AppRoute.HOME);
             setCurrentServer(server);
             handleClose();

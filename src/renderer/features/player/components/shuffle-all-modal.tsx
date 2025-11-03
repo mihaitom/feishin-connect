@@ -98,7 +98,7 @@ export const ShuffleAllModal = ({
             queryFn: ({ signal }) =>
                 api.controller.getRandomSongList({
                     apiClientProps: {
-                        server,
+                        serverId: server?.id || '',
                         signal,
                     },
                     query: {
@@ -257,7 +257,7 @@ export const openShuffleAllModal = async (
         queryFn: ({ signal }) =>
             api.controller.getGenreList({
                 apiClientProps: {
-                    server,
+                    serverId: server?.id || '',
                     signal,
                 },
                 query: {
@@ -275,7 +275,7 @@ export const openShuffleAllModal = async (
         queryFn: ({ signal }) =>
             api.controller.getMusicFolderList({
                 apiClientProps: {
-                    server,
+                    serverId: server?.id || '',
                     signal,
                 },
             }),

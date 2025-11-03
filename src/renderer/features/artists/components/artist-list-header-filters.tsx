@@ -191,7 +191,7 @@ export const ArtistListHeaderFilters = ({ gridRef, tableRef }: ArtistListHeaderF
                 queryFn: async ({ signal }) =>
                     api.controller.getArtistList({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                             signal,
                         },
                         query: {
@@ -227,7 +227,7 @@ export const ArtistListHeaderFilters = ({ gridRef, tableRef }: ArtistListHeaderF
                             queryFn: async ({ signal }) =>
                                 api.controller.getArtistList({
                                     apiClientProps: {
-                                        server,
+                                        serverId: server?.id || '',
                                         signal,
                                     },
                                     query: {

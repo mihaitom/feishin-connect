@@ -3,7 +3,6 @@ import { queryOptions } from '@tanstack/react-query';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
 import {
     PlaylistDetailQuery,
     PlaylistListQuery,
@@ -14,14 +13,12 @@ export const playlistsQueries = {
     detail: (args: QueryHookArgs<PlaylistDetailQuery>) => {
         return queryOptions({
             queryFn: ({ signal }) => {
-                const server = getServerById(args.serverId);
-                if (!server) throw new Error('Server not found');
                 return api.controller.getPlaylistDetail({
-                    apiClientProps: { server, signal },
+                    apiClientProps: { serverId: args.serverId, signal },
                     query: args.query,
                 });
             },
-            queryKey: queryKeys.playlists.detail(args.serverId || '', args.query.id, args.query),
+            queryKey: queryKeys.playlists.detail(args.serverId, args.query.id, args.query),
             ...args.options,
         });
     },
@@ -29,10 +26,8 @@ export const playlistsQueries = {
         return queryOptions({
             gcTime: 1000 * 60 * 60,
             queryFn: ({ signal }) => {
-                const server = getServerById(args.serverId);
-                if (!server) throw new Error('Server not found');
                 return api.controller.getPlaylistList({
-                    apiClientProps: { server, signal },
+                    apiClientProps: { serverId: args.serverId, signal },
                     query: args.query,
                 });
             },
@@ -43,10 +38,8 @@ export const playlistsQueries = {
     songList: (args: QueryHookArgs<PlaylistSongListQuery>) => {
         return queryOptions({
             queryFn: ({ signal }) => {
-                const server = getServerById(args.serverId);
-                if (!server) throw new Error('Server not found');
                 return api.controller.getPlaylistSongList({
-                    apiClientProps: { server, signal },
+                    apiClientProps: { serverId: args.serverId, signal },
                     query: args.query,
                 });
             },

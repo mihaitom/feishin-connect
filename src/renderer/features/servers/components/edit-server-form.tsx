@@ -18,7 +18,12 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { toast } from '/@/shared/components/toast/toast';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
-import { AuthenticationResponse, ServerListItem, ServerType } from '/@/shared/types/domain-types';
+import {
+    AuthenticationResponse,
+    ServerListItem,
+    ServerListItemWithCredential,
+    ServerType,
+} from '/@/shared/types/domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 
@@ -86,7 +91,7 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
                 });
             }
 
-            const serverItem: ServerListItem = {
+            const serverItem: ServerListItemWithCredential = {
                 credential: data.credential,
                 id: server.id,
                 name: values.name,

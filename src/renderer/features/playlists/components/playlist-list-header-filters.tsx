@@ -174,7 +174,7 @@ export const PlaylistListHeaderFilters = ({
                 queryFn: async ({ signal }) =>
                     api.controller.getPlaylistList({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                             signal,
                         },
                         query,
@@ -213,7 +213,7 @@ export const PlaylistListHeaderFilters = ({
                             queryFn: async ({ signal }) =>
                                 api.controller.getPlaylistList({
                                     apiClientProps: {
-                                        server,
+                                        serverId: server?.id || '',
                                         signal,
                                     },
                                     query: {

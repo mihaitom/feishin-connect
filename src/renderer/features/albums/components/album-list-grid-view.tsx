@@ -35,7 +35,7 @@ export const AlbumListGridView = ({ gridRef, itemCount }: any) => {
     const scrollOffset = searchParams.get('scrollOffset');
     const initialScrollOffset = Number(id ? scrollOffset : grid?.scrollOffset) || 0;
 
-    const handleFavorite = useHandleFavorite({ gridRef, server });
+    const handleFavorite = useHandleFavorite({ gridRef });
 
     const cardRows = useMemo(() => {
         const rows: CardRow<Album>[] = [ALBUM_CARD_ROWS.name];
@@ -177,7 +177,7 @@ export const AlbumListGridView = ({ gridRef, itemCount }: any) => {
                 queryFn: async ({ signal }) =>
                     controller.getAlbumList({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                             signal,
                         },
                         query,

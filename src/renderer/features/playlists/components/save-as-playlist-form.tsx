@@ -21,7 +21,7 @@ interface SaveAsPlaylistFormProps {
     body: Partial<CreatePlaylistBody>;
     onCancel: () => void;
     onSuccess: (data: CreatePlaylistResponse) => void;
-    serverId: string | undefined;
+    serverId?: string;
 }
 
 export const SaveAsPlaylistForm = ({
@@ -50,7 +50,7 @@ export const SaveAsPlaylistForm = ({
 
     const handleSubmit = form.onSubmit((values) => {
         mutation.mutate(
-            { body: values, serverId },
+            { apiClientProps: { serverId: serverId || '' }, body: values },
             {
                 onError: (err) => {
                     toast.error({

@@ -48,6 +48,7 @@ export const ShareItemContextModal = ({
     const handleSubmit = form.onSubmit(async (values) => {
         shareItemMutation.mutate(
             {
+                apiClientProps: { serverId: server?.id || '' },
                 body: {
                     description: values.description,
                     downloadable: values.allowDownloading,
@@ -55,7 +56,6 @@ export const ShareItemContextModal = ({
                     resourceIds: itemIds.join(),
                     resourceType,
                 },
-                serverId: server?.id,
             },
             {
                 onError: () => {

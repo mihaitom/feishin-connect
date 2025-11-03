@@ -10,11 +10,11 @@ export const RatingCell = ({ node, value }: ICellRendererParams) => {
     const handleUpdateRating = (rating: number) => {
         updateRatingMutation.mutate(
             {
+                apiClientProps: { serverId: value?.serverId || '' },
                 query: {
                     item: [value],
                     rating,
                 },
-                serverId: value?.serverId,
             },
             {
                 onSuccess: () => {

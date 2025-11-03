@@ -39,7 +39,7 @@ export const ArtistListGridView = ({ gridRef, itemCount }: ArtistListGridViewPro
     const { pageKey } = useListContext();
     const { display, filter, grid } = useListStoreByKey<ArtistListQuery>({ key: pageKey });
     const { setGrid } = useListStoreActions();
-    const handleFavorite = useHandleFavorite({ gridRef, server });
+    const handleFavorite = useHandleFavorite({ gridRef });
 
     const fetchInitialData = useCallback(() => {
         const query: Omit<ArtistListQuery, 'limit' | 'startIndex'> = {
@@ -90,7 +90,7 @@ export const ArtistListGridView = ({ gridRef, itemCount }: ArtistListGridViewPro
                 queryFn: async ({ signal }) =>
                     api.controller.getArtistList({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                             signal,
                         },
                         query,

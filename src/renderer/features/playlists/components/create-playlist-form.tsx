@@ -58,6 +58,7 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
 
         mutation.mutate(
             {
+                apiClientProps: { serverId: server.id },
                 body: {
                     ...values,
                     _custom: {
@@ -75,7 +76,6 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
                         },
                     },
                 },
-                serverId: server.id,
             },
             {
                 onError: (err) => {

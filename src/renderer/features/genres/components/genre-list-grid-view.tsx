@@ -109,7 +109,7 @@ export const GenreListGridView = ({ gridRef, itemCount }: any) => {
                 queryFn: async ({ signal }) => {
                     return api.controller.getGenreList({
                         apiClientProps: {
-                            server,
+                            serverId: server?.id || '',
                             signal,
                         },
                         query,
