@@ -6,7 +6,7 @@ import { OnProgressProps } from 'react-player/base';
 
 import { WebPlayerEngine, WebPlayerEngineHandle } from './engine/web-player-engine';
 
-import { usePlayerEvents } from '/@/renderer/components/audio-player/listener/use-player-events';
+import { usePlayerEvents } from '/@/renderer/features/player/audio-player/listener/use-player-events';
 import {
     usePlayerActions,
     usePlayerData,
@@ -19,7 +19,7 @@ import { PlayerStatus, PlayerStyle } from '/@/shared/types/types';
 const PLAY_PAUSE_FADE_DURATION = 300;
 const PLAY_PAUSE_FADE_INTERVAL = 10;
 
-export function AudiolingWebPlayer() {
+export function WebPlayer() {
     const playerRef = useRef<WebPlayerEngineHandle>(null);
     const { player, player1, player2 } = usePlayerData();
     const { mediaAutoNext, setProgress } = usePlayerActions();
@@ -178,21 +178,24 @@ export function AudiolingWebPlayer() {
 
     usePlayerEvents(
         {
-            onPlayerSeekToTimestamp: (timestamp) => {
+            onPlayerSeekToTimestamp: (properties) => {
+                const timestamp = properties.timestamp;
                 if (player.playerNum === 1) {
                     playerRef.current?.player1()?.ref?.seekTo(timestamp);
                 } else {
                     playerRef.current?.player2()?.ref?.seekTo(timestamp);
                 }
             },
-            onPlayerStatus: async (status) => {
+            onPlayerStatus: async (properties) => {
+                const status = properties.status;
                 if (status === PlayerStatus.PAUSED) {
                     fadeAndSetStatus(volume, 0, PLAY_PAUSE_FADE_DURATION, PlayerStatus.PAUSED);
                 } else if (status === PlayerStatus.PLAYING) {
                     fadeAndSetStatus(0, volume, PLAY_PAUSE_FADE_DURATION, PlayerStatus.PLAYING);
                 }
             },
-            onPlayerVolume: (volume) => {
+            onPlayerVolume: (properties) => {
+                const volume = properties.volume;
                 playerRef.current?.setVolume(volume);
             },
         },

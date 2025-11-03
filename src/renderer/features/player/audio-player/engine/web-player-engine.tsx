@@ -3,7 +3,7 @@ import type { RefObject } from 'react';
 import { useImperativeHandle, useRef, useState } from 'react';
 import ReactPlayer from 'react-player';
 
-import { AudioPlayer } from '/@/renderer/components/audio-player/types';
+import { AudioPlayer } from '/@/renderer/features/player/audio-player/types';
 import { PlayerStatus } from '/@/shared/types/types';
 
 export interface OnProgressProps {

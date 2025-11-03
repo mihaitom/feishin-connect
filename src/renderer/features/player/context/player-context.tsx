@@ -1,8 +1,7 @@
 import { createContext, useCallback, useMemo } from 'react';
-import { Song } from 'src/main/features/core/lyrics/netease';
 
 import { AddToQueueType } from '/@/renderer/store';
-import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
 
 interface PlayerContext {
     addToQueueByData: (data: Song[], type: AddToQueueType) => void;

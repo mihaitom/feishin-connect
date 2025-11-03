@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import {
     createPlayerEvents,
     PlayerEventsCallbacks,
-} from '/@/renderer/components/audio-player/listener/player-events';
+} from '/@/renderer/features/player/audio-player/listener/player-events';
 
 export function usePlayerEvents(callbacks: PlayerEventsCallbacks, deps: React.DependencyList) {
     useEffect(() => {
