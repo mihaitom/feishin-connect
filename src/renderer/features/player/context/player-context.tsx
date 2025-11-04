@@ -1,4 +1,4 @@
-import { createContext, useCallback, useMemo } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 
 import { AddToQueueType, usePlayerActions } from '/@/renderer/store';
 import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
@@ -75,6 +75,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         (id: string[], itemType: LibraryItem, type: AddToQueueType) => {},
         [],
     );
+
     const clearQueue = useCallback(() => {
         storeActions.clearQueue();
     }, [storeActions]);
@@ -246,4 +247,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     return <PlayerContext.Provider value={contextValue}>{children}</PlayerContext.Provider>;
+};
+
+export const usePlayer = () => {
+    return useContext(PlayerContext);
 };
