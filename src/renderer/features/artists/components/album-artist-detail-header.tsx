@@ -79,7 +79,7 @@ export const AlbumArtistDetailHeader = forwardRef(
             });
         };
 
-        const showRating = detailQuery?.data?.serverType === ServerType.NAVIDROME;
+        const showRating = detailQuery?.data?._serverType === ServerType.NAVIDROME;
 
         return (
             <LibraryHeader

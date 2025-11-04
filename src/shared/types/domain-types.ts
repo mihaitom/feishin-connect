@@ -80,7 +80,7 @@ export interface QueueData {
 }
 
 export type QueueSong = Song & {
-    uniqueId: string;
+    _uniqueId: string;
 };
 
 export type ServerListItem = {
@@ -161,6 +161,8 @@ export enum ImageType {
 }
 
 export type Album = {
+    _serverId: string;
+    _serverType: ServerType;
     albumArtist: string;
     albumArtists: RelatedArtist[];
     artists: RelatedArtist[];
@@ -185,13 +187,10 @@ export type Album = {
     releaseDate: null | string;
     releaseTypes: string[];
     releaseYear: null | number;
-    serverId: string;
-    serverType: ServerType;
     size: null | number;
     songCount: null | number;
     songs?: Song[];
     tags: null | Record<string, string[]>;
-    uniqueId: string;
     updatedAt: string;
     userFavorite: boolean;
     userRating: null | number;
@@ -199,6 +198,8 @@ export type Album = {
 } & { songs?: Song[] };
 
 export type AlbumArtist = {
+    _serverId: string;
+    _serverType: ServerType;
     albumCount: null | number;
     backgroundImageUrl: null | string;
     biography: null | string;
@@ -211,8 +212,6 @@ export type AlbumArtist = {
     mbz: null | string;
     name: string;
     playCount: null | number;
-    serverId: string;
-    serverType: ServerType;
     similarArtists: null | RelatedArtist[];
     songCount: null | number;
     userFavorite: boolean;
@@ -220,15 +219,14 @@ export type AlbumArtist = {
 };
 
 export type Artist = {
+    _serverId: string;
+    _serverType: ServerType;
     biography: null | string;
     createdAt: string;
     id: string;
     itemType: LibraryItem.ARTIST;
     name: string;
     remoteCreatedAt: null | string;
-    serverFolderId: string;
-    serverId: string;
-    serverType: ServerType;
     updatedAt: string;
 };
 
@@ -297,6 +295,8 @@ export type MusicFolder = {
 export type MusicFoldersResponse = MusicFolder[];
 
 export type Playlist = {
+    _serverId: string;
+    _serverType: ServerType;
     description: null | string;
     duration: null | number;
     genres: Genre[];
@@ -309,8 +309,6 @@ export type Playlist = {
     ownerId: null | string;
     public: boolean | null;
     rules?: null | Record<string, any>;
-    serverId: string;
-    serverType: ServerType;
     size: null | number;
     songCount: null | number;
     sync?: boolean | null;
@@ -328,6 +326,8 @@ export type RelatedArtist = {
 };
 
 export type Song = {
+    _serverId: string;
+    _serverType: ServerType;
     album: null | string;
     albumArtists: RelatedArtist[];
     albumId: string;
@@ -364,13 +364,10 @@ export type Song = {
     releaseDate: null | string;
     releaseYear: null | string;
     sampleRate: null | number;
-    serverId: string;
-    serverType: ServerType;
     size: number;
     streamUrl: string;
     tags: null | Record<string, string[]>;
     trackNumber: number;
-    uniqueId: string;
     updatedAt: string;
     userFavorite: boolean;
     userRating: null | number;

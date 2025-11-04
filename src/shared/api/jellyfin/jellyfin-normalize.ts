@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
@@ -228,6 +227,8 @@ const normalizeSong = (
     }
 
     return {
+        _serverId: server?.id || '',
+        _serverType: ServerType.JELLYFIN,
         album: item.Album,
         albumArtists: item.AlbumArtists?.map((entry) => ({
             id: entry.Id,
@@ -290,13 +291,10 @@ const normalizeSong = (
               : null,
         releaseYear: item.ProductionYear ? String(item.ProductionYear) : null,
         sampleRate,
-        serverId: server?.id || '',
-        serverType: ServerType.JELLYFIN,
         size,
         streamUrl,
         tags: getTags(item),
         trackNumber: item.IndexNumber,
-        uniqueId: nanoid(),
         updatedAt: item.DateCreated,
         userFavorite: (item.UserData && item.UserData.IsFavorite) || false,
         userRating: null,
@@ -309,6 +307,8 @@ const normalizeAlbum = (
     imageSize?: number,
 ): Album => {
     return {
+        _serverId: server?.id || '',
+        _serverType: ServerType.JELLYFIN,
         albumArtist: item.AlbumArtist,
         albumArtists:
             item.AlbumArtists.map((entry) => ({
@@ -351,13 +351,10 @@ const normalizeAlbum = (
         releaseDate: item.PremiereDate?.split('T')[0] || null,
         releaseTypes: [],
         releaseYear: item.ProductionYear || null,
-        serverId: server?.id || '',
-        serverType: ServerType.JELLYFIN,
         size: null,
         songCount: item?.ChildCount || null,
         songs: item.Songs?.map((song) => normalizeSong(song, server, '', imageSize)),
         tags: getTags(item),
-        uniqueId: nanoid(),
         updatedAt: item?.DateLastMediaAdded || item.DateCreated,
         userFavorite: item.UserData?.IsFavorite || false,
         userRating: null,
@@ -386,6 +383,8 @@ const normalizeAlbumArtist = (
         ) || [];
 
     return {
+        _serverId: server?.id || '',
+        _serverType: ServerType.JELLYFIN,
         albumCount: item.AlbumCount ?? null,
         backgroundImageUrl: null,
         biography: item.Overview || null,
@@ -407,8 +406,6 @@ const normalizeAlbumArtist = (
         mbz: item.ProviderIds?.MusicBrainzArtist || null,
         name: item.Name,
         playCount: item.UserData?.PlayCount || 0,
-        serverId: server?.id || '',
-        serverType: ServerType.JELLYFIN,
         similarArtists,
         songCount: item.SongCount ?? null,
         userFavorite: item.UserData?.IsFavorite || false,
@@ -430,6 +427,8 @@ const normalizePlaylist = (
     const imagePlaceholderUrl = null;
 
     return {
+        _serverId: server?.id || '',
+        _serverType: ServerType.JELLYFIN,
         description: item.Overview || null,
         duration: item.RunTimeTicks / 10000,
         genres: item.GenreItems?.map((entry) => ({
@@ -447,8 +446,6 @@ const normalizePlaylist = (
         ownerId: null,
         public: null,
         rules: null,
-        serverId: server?.id || '',
-        serverType: ServerType.JELLYFIN,
         size: null,
         songCount: item?.ChildCount || null,
         sync: null,

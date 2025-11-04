@@ -41,8 +41,8 @@ export const AlbumDetailHeader = forwardRef(
         const { t } = useTranslation();
 
         const showRating =
-            detailQuery?.data?.serverType === ServerType.NAVIDROME ||
-            detailQuery?.data?.serverType === ServerType.SUBSONIC;
+            detailQuery?.data?._serverType === ServerType.NAVIDROME ||
+            detailQuery?.data?._serverType === ServerType.SUBSONIC;
 
         const originalDifferentFromRelease =
             detailQuery.data?.originalDate &&
@@ -137,7 +137,7 @@ export const AlbumDetailHeader = forwardRef(
             if (!detailQuery?.data) return;
 
             updateRatingMutation.mutate({
-                apiClientProps: { serverId: detailQuery.data.serverId },
+                apiClientProps: { serverId: detailQuery.data._serverId },
                 query: {
                     item: [detailQuery.data],
                     rating,

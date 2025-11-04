@@ -137,7 +137,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                                 state.queue.shuffled[currentIndex],
                                                 ...shuffleInPlace([
                                                     ...state.queue.shuffled.slice(currentIndex + 1),
-                                                    ...newItems.map((item) => item.uniqueId),
+                                                    ...newItems.map((item) => item._uniqueId),
                                                 ]),
                                             ];
                                         }
@@ -160,7 +160,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                                 state.queue.shuffled[currentIndex],
                                                 ...shuffleInPlace([
                                                     ...state.queue.shuffled.slice(currentIndex + 1),
-                                                    ...newItems.map((item) => item.uniqueId),
+                                                    ...newItems.map((item) => item._uniqueId),
                                                 ]),
                                             ];
                                         }
@@ -177,7 +177,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                         if (state.player.shuffle === PlayerShuffle.TRACK) {
                                             state.queue.shuffled = shuffleInPlace(
-                                                newItems.map((item) => item.uniqueId),
+                                                newItems.map((item) => item._uniqueId),
                                             );
                                         }
                                     });
@@ -198,7 +198,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                         state.queue.shuffled = [
                                             ...state.queue.shuffled,
-                                            ...newItems.map((item) => item.uniqueId),
+                                            ...newItems.map((item) => item._uniqueId),
                                         ];
                                     });
                                     break;
@@ -227,7 +227,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                             state.queue.shuffled[currentIndex],
                                             ...shuffleInPlace([
                                                 ...state.queue.shuffled.slice(currentIndex + 1),
-                                                ...newItems.map((item) => item.uniqueId),
+                                                ...newItems.map((item) => item._uniqueId),
                                             ]),
                                         ];
                                     });
@@ -252,7 +252,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                             state.player.index = 0;
                                         } else if (currentTrack) {
                                             const priorityIndex = state.queue.priority.findIndex(
-                                                (item) => item.uniqueId === currentTrack.uniqueId,
+                                                (item) => item._uniqueId === currentTrack._uniqueId,
                                             );
 
                                             // If the current track is in the priority queue, add the first item after the current track
@@ -294,7 +294,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                         if (state.player.shuffle === PlayerShuffle.TRACK) {
                                             state.queue.shuffled = shuffleInPlace(
-                                                newItems.map((item) => item.uniqueId),
+                                                newItems.map((item) => item._uniqueId),
                                             );
                                         }
                                     });
@@ -312,7 +312,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     set((state) => {
                         if (queueType === PlayerQueueType.DEFAULT) {
                             const index = state.queue.default.findIndex(
-                                (item) => item.uniqueId === uniqueId,
+                                (item) => item._uniqueId === uniqueId,
                             );
 
                             const insertIndex = Math.max(0, edge === 'top' ? index : index + 1);
@@ -333,7 +333,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.default = newQueue;
                         } else {
                             const priorityIndex = state.queue.priority.findIndex(
-                                (item) => item.uniqueId === uniqueId,
+                                (item) => item._uniqueId === uniqueId,
                             );
 
                             if (priorityIndex !== -1) {
@@ -349,7 +349,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 ];
                             } else {
                                 const defaultIndex = state.queue.default.findIndex(
-                                    (item) => item.uniqueId === uniqueId,
+                                    (item) => item._uniqueId === uniqueId,
                                 );
 
                                 if (defaultIndex !== -1) {
@@ -374,7 +374,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     state.queue.shuffled[currentIndex],
                                     ...shuffleInPlace([
                                         ...state.queue.shuffled.slice(currentIndex + 1),
-                                        ...newItems.map((item) => item.uniqueId),
+                                        ...newItems.map((item) => item._uniqueId),
                                     ]),
                                 ];
                             }
@@ -390,14 +390,14 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 clearSelected: (items: QueueSong[]) => {
                     set((state) => {
-                        const uniqueIds = items.map((item) => item.uniqueId);
+                        const uniqueIds = items.map((item) => item._uniqueId);
 
                         state.queue.default = state.queue.default.filter(
-                            (item) => !uniqueIds.includes(item.uniqueId),
+                            (item) => !uniqueIds.includes(item._uniqueId),
                         );
 
                         state.queue.priority = state.queue.priority.filter(
-                            (item) => !uniqueIds.includes(item.uniqueId),
+                            (item) => !uniqueIds.includes(item._uniqueId),
                         );
 
                         const newQueue = [...state.queue.priority, ...state.queue.default];
@@ -546,7 +546,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         if (id) {
                             const queue = state.getQueue();
 
-                            const index = queue.items.findIndex((item) => item.uniqueId === id);
+                            const index = queue.items.findIndex((item) => item._uniqueId === id);
 
                             if (index !== -1) {
                                 state.player.index = index;
@@ -618,12 +618,12 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     const queueType = getQueueType();
 
                     set((state) => {
-                        const uniqueIdMap = new Map(items.map((item) => [item.uniqueId, item]));
+                        const uniqueIdMap = new Map(items.map((item) => [item._uniqueId, item]));
 
                         if (queueType == PlayerQueueType.DEFAULT) {
                             // Find the index of the drop target
                             const index = state.queue.default.findIndex(
-                                (item) => item.uniqueId === uniqueId,
+                                (item) => item._uniqueId === uniqueId,
                             );
 
                             // Get the new index based on the edge
@@ -631,11 +631,11 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                             const itemsBefore = state.queue.default
                                 .slice(0, insertIndex)
-                                .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                             const itemsAfter = state.queue.default
                                 .slice(insertIndex)
-                                .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                             const newQueue = [...itemsBefore, ...items, ...itemsAfter];
 
@@ -643,7 +643,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.default = newQueue;
                         } else {
                             const priorityIndex = state.queue.priority.findIndex(
-                                (item) => item.uniqueId === uniqueId,
+                                (item) => item._uniqueId === uniqueId,
                             );
 
                             // If the item is in the priority queue
@@ -655,16 +655,16 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                 const itemsBefore = state.queue.priority
                                     .slice(0, newIndex)
-                                    .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                    .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                                 const itemsAfter = state.queue.priority
                                     .slice(newIndex)
-                                    .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                    .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                                 const newPriorityQueue = [...itemsBefore, ...items, ...itemsAfter];
 
                                 const newDefaultQueue = state.queue.default.filter(
-                                    (item) => !uniqueIdMap.has(item.uniqueId),
+                                    (item) => !uniqueIdMap.has(item._uniqueId),
                                 );
 
                                 recalculatePlayerIndex(state, newPriorityQueue);
@@ -673,7 +673,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 state.queue.default = newDefaultQueue;
                             } else {
                                 const defaultIndex = state.queue.default.findIndex(
-                                    (item) => item.uniqueId === uniqueId,
+                                    (item) => item._uniqueId === uniqueId,
                                 );
 
                                 if (defaultIndex !== -1) {
@@ -684,11 +684,11 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                     const itemsBefore = state.queue.default
                                         .slice(0, newIndex)
-                                        .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                        .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                                     const itemsAfter = state.queue.default
                                         .slice(newIndex)
-                                        .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                        .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                                     const newDefaultQueue = [
                                         ...itemsBefore,
@@ -697,7 +697,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     ];
 
                                     const newPriorityQueue = state.queue.priority.filter(
-                                        (item) => !uniqueIdMap.has(item.uniqueId),
+                                        (item) => !uniqueIdMap.has(item._uniqueId),
                                     );
 
                                     recalculatePlayerIndex(state, newDefaultQueue);
@@ -711,17 +711,17 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 moveSelectedToBottom: (items: QueueSong[]) => {
                     set((state) => {
-                        const uniqueIds = items.map((item) => item.uniqueId);
+                        const uniqueIds = items.map((item) => item._uniqueId);
 
                         if (state.player.queueType === PlayerQueueType.PRIORITY) {
                             const priorityFiltered = state.queue.priority.filter(
-                                (item) => !uniqueIds.includes(item.uniqueId),
+                                (item) => !uniqueIds.includes(item._uniqueId),
                             );
 
                             const newPriorityQueue = [...priorityFiltered, ...items];
 
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item.uniqueId),
+                                (item) => !uniqueIds.includes(item._uniqueId),
                             );
 
                             const newDefaultQueue = [...filtered];
@@ -732,7 +732,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.priority = newPriorityQueue;
                         } else {
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item.uniqueId),
+                                (item) => !uniqueIds.includes(item._uniqueId),
                             );
 
                             const newQueue = [...filtered, ...items];
@@ -750,14 +750,14 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         const queue = state.getQueue();
                         const index = state.player.index;
                         const currentTrack = queue.items[index];
-                        const uniqueId = currentTrack?.uniqueId;
+                        const uniqueId = currentTrack?._uniqueId;
 
-                        const uniqueIds = items.map((item) => item.uniqueId);
+                        const uniqueIds = items.map((item) => item._uniqueId);
 
                         if (queueType === PlayerQueueType.DEFAULT) {
                             const currentIndex = state.player.index;
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item.uniqueId),
+                                (item) => !uniqueIds.includes(item._uniqueId),
                             );
 
                             const newQueue = [
@@ -770,10 +770,12 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.default = newQueue;
                         } else {
                             const priorityIndex = state.queue.priority.findIndex(
-                                (item) => item.uniqueId === uniqueId,
+                                (item) => item._uniqueId === uniqueId,
                             );
 
-                            const uniqueIdMap = new Map(items.map((item) => [item.uniqueId, item]));
+                            const uniqueIdMap = new Map(
+                                items.map((item) => [item._uniqueId, item]),
+                            );
 
                             // If the item is in the priority queue
                             if (priorityIndex !== -1) {
@@ -781,16 +783,16 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                 const itemsBefore = state.queue.priority
                                     .slice(0, newIndex)
-                                    .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                    .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                                 const itemsAfter = state.queue.priority
                                     .slice(newIndex)
-                                    .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                    .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                                 const newPriorityQueue = [...itemsBefore, ...items, ...itemsAfter];
 
                                 const newDefaultQueue = state.queue.default.filter(
-                                    (item) => !uniqueIdMap.has(item.uniqueId),
+                                    (item) => !uniqueIdMap.has(item._uniqueId),
                                 );
 
                                 recalculatePlayerIndex(state, newPriorityQueue);
@@ -799,7 +801,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 state.queue.default = newDefaultQueue;
                             } else {
                                 const defaultIndex = state.queue.default.findIndex(
-                                    (item) => item.uniqueId === uniqueId,
+                                    (item) => item._uniqueId === uniqueId,
                                 );
 
                                 if (defaultIndex !== -1) {
@@ -807,11 +809,11 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                     const itemsBefore = state.queue.default
                                         .slice(0, newIndex)
-                                        .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                        .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                                     const itemsAfter = state.queue.default
                                         .slice(newIndex)
-                                        .filter((item) => !uniqueIdMap.has(item.uniqueId));
+                                        .filter((item) => !uniqueIdMap.has(item._uniqueId));
 
                                     const newDefaultQueue = [
                                         ...itemsBefore,
@@ -820,7 +822,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     ];
 
                                     const newPriorityQueue = state.queue.priority.filter(
-                                        (item) => !uniqueIdMap.has(item.uniqueId),
+                                        (item) => !uniqueIdMap.has(item._uniqueId),
                                     );
 
                                     recalculatePlayerIndex(state, newDefaultQueue);
@@ -834,17 +836,17 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 moveSelectedToTop: (items: QueueSong[]) => {
                     set((state) => {
-                        const uniqueIds = items.map((item) => item.uniqueId);
+                        const uniqueIds = items.map((item) => item._uniqueId);
 
                         if (state.player.queueType === PlayerQueueType.PRIORITY) {
                             const priorityFiltered = state.queue.priority.filter(
-                                (item) => !uniqueIds.includes(item.uniqueId),
+                                (item) => !uniqueIds.includes(item._uniqueId),
                             );
 
                             const newPriorityQueue = [...items, ...priorityFiltered];
 
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item.uniqueId),
+                                (item) => !uniqueIds.includes(item._uniqueId),
                             );
 
                             const newDefaultQueue = [...filtered];
@@ -855,7 +857,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.priority = newPriorityQueue;
                         } else {
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item.uniqueId),
+                                (item) => !uniqueIds.includes(item._uniqueId),
                             );
 
                             const newQueue = [...items, ...filtered];
@@ -926,7 +928,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     set((state) => {
                         state.player.shuffle = shuffle;
                         const queue = state.queue.default;
-                        state.queue.shuffled = shuffleInPlace(queue.map((item) => item.uniqueId));
+                        state.queue.shuffled = shuffleInPlace(queue.map((item) => item._uniqueId));
                     });
                 },
                 setSpeed: (speed: number) => {
@@ -948,7 +950,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 shuffle: () => {
                     set((state) => {
                         const queue = state.queue.default;
-                        state.queue.shuffled = shuffleInPlace(queue.map((item) => item.uniqueId));
+                        state.queue.shuffled = shuffleInPlace(queue.map((item) => item._uniqueId));
                     });
                 },
                 shuffleAll: () => {
@@ -960,7 +962,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 shuffleSelected: (items: QueueSong[]) => {
                     set((state) => {
                         const indices = items.map((item) =>
-                            state.queue.default.findIndex((i) => i.uniqueId === item.uniqueId),
+                            state.queue.default.findIndex((i) => i._uniqueId === item._uniqueId),
                         );
 
                         const shuffledItems = shuffleInPlace(items);
@@ -1143,7 +1145,7 @@ export const subscribeCurrentTrack = (
         },
         {
             equalityFn: (a, b) => {
-                return a.song?.uniqueId === b.song?.uniqueId;
+                return a.song?._uniqueId === b.song?._uniqueId;
             },
         },
     );
@@ -1377,14 +1379,14 @@ function recalculatePlayerIndex(state: any, queue: QueueSong[]) {
         return;
     }
 
-    const index = queue.findIndex((item) => item.uniqueId === currentTrack.uniqueId);
+    const index = queue.findIndex((item) => item._uniqueId === currentTrack._uniqueId);
     state.player.index = Math.max(0, index);
 }
 
 function toQueueSong(item: Song): QueueSong {
     return {
         ...item,
-        uniqueId: nanoid(),
+        _uniqueId: nanoid(),
     };
 }
 

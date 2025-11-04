@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import z from 'zod';
 
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
@@ -152,6 +151,8 @@ const normalizeSong = (
         album: item.album,
         albumId: item.albumId,
         ...getArtists(item),
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         artistName: item.artist,
         bitDepth: item.bitDepth || null,
         bitRate: item.bitRate,
@@ -204,13 +205,10 @@ const normalizeSong = (
         ).toISOString(),
         releaseYear: String(item.year),
         sampleRate: item.sampleRate || null,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.NAVIDROME,
         size: item.size,
         streamUrl: `${server?.url}/rest/stream.view?id=${id}&v=1.13.0&c=Feishin&${server?.credential}`,
         tags: item.tags || null,
         trackNumber: item.trackNumber,
-        uniqueId: nanoid(),
         updatedAt: item.updatedAt,
         userFavorite: item.starred || false,
         userRating: item.rating || null,
@@ -280,6 +278,8 @@ const normalizeAlbum = (
     return {
         ...parseAlbumTags(item),
         ...getArtists(item),
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         albumArtist: item.albumArtist,
         backdropImageUrl: imageBackdropUrl,
         comment: item.comment || null,
@@ -301,9 +301,9 @@ const normalizeAlbum = (
         imagePlaceholderUrl,
         imageUrl,
         isCompilation: item.compilation,
+
         itemType: LibraryItem.ALBUM,
         lastPlayedAt: normalizePlayDate(item),
-
         mbzId: item.mbzAlbumId || null,
         name: item.name,
         originalDate: item.originalDate
@@ -317,12 +317,9 @@ const normalizeAlbum = (
             : new Date(Date.UTC(item.minYear, 0, 1))
         ).toISOString(),
         releaseYear: item.minYear,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.NAVIDROME,
         size: item.size,
         songCount: item.songCount,
         songs: item.songs ? item.songs.map((song) => normalizeSong(song, server)) : undefined,
-        uniqueId: nanoid(),
         updatedAt: item.updatedAt,
         userFavorite: item.starred,
         userRating: item.rating || null,
@@ -365,6 +362,8 @@ const normalizeAlbumArtist = (
     }
 
     return {
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         albumCount,
         backgroundImageUrl: null,
         biography: item.biography || null,
@@ -382,8 +381,6 @@ const normalizeAlbumArtist = (
         mbz: item.mbzArtistId || null,
         name: item.name,
         playCount: item.playCount || 0,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.NAVIDROME,
         similarArtists:
             item.similarArtists?.map((artist) => ({
                 id: artist.id,
@@ -412,6 +409,8 @@ const normalizePlaylist = (
     const imagePlaceholderUrl = null;
 
     return {
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         description: item.comment,
         duration: item.duration * 1000,
         genres: [],
@@ -424,8 +423,6 @@ const normalizePlaylist = (
         ownerId: item.ownerId,
         public: item.public,
         rules: item?.rules || null,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.NAVIDROME,
         size: item.size,
         songCount: item.songCount,
         sync: item.sync,

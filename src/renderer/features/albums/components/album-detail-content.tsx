@@ -290,7 +290,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
 
         if (detailQuery.data.userFavorite) {
             deleteFavoriteMutation.mutate({
-                apiClientProps: { serverId: detailQuery.data.serverId },
+                apiClientProps: { serverId: detailQuery.data._serverId },
                 query: {
                     id: [detailQuery.data.id],
                     type: LibraryItem.ALBUM,
@@ -298,7 +298,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
             });
         } else {
             createFavoriteMutation.mutate({
-                apiClientProps: { serverId: detailQuery.data.serverId },
+                apiClientProps: { serverId: detailQuery.data._serverId },
                 query: {
                     id: [detailQuery.data.id],
                     type: LibraryItem.ALBUM,

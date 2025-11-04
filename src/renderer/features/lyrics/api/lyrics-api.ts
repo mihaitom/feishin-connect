@@ -99,7 +99,7 @@ export const lyricsQueries = {
         return queryOptions({
             gcTime: Infinity,
             queryFn: async ({ signal }): Promise<FullLyricsMetadata | null | StructuredLyric[]> => {
-                const server = getServerById(song?.serverId);
+                const server = getServerById(song?._serverId);
                 if (!server) throw new Error('Server not found');
                 if (!song) return null;
 

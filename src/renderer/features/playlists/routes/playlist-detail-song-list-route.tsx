@@ -56,7 +56,7 @@ const PlaylistDetailSongListRoute = () => {
 
         createPlaylistMutation.mutate(
             {
-                apiClientProps: { serverId: detailQuery?.data?.serverId },
+                apiClientProps: { serverId: detailQuery?.data?._serverId },
                 body: {
                     _custom: {
                         navidrome: {
@@ -83,7 +83,7 @@ const PlaylistDetailSongListRoute = () => {
                         },
                     );
                     deletePlaylistMutation.mutate({
-                        apiClientProps: { serverId: detailQuery?.data?.serverId },
+                        apiClientProps: { serverId: detailQuery?.data?._serverId },
                         query: { id: playlistId },
                     });
                 },
@@ -124,7 +124,7 @@ const PlaylistDetailSongListRoute = () => {
                             }),
                         )
                     }
-                    serverId={detailQuery?.data?.serverId || ''}
+                    serverId={detailQuery?.data?._serverId || ''}
                 />
             ),
             title: t('common.saveAs', { postProcess: 'sentenceCase' }),

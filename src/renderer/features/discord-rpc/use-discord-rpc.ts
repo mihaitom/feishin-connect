@@ -41,7 +41,7 @@ export const useDiscordRpc = () => {
 
             // Handle change detection
             const song = current[0];
-            const trackChanged = lastUniqueId !== song.uniqueId;
+            const trackChanged = lastUniqueId !== song._uniqueId;
 
             /*
                 1. If the song has just started, update status
@@ -56,7 +56,7 @@ export const useDiscordRpc = () => {
                 current[2] !== previous[2]
             ) {
                 if (trackChanged) {
-                    setlastUniqueId(song.uniqueId);
+                    setlastUniqueId(song._uniqueId);
                 }
 
                 const start = Math.round(Date.now() - current[1] * 1000);
@@ -126,12 +126,12 @@ export const useDiscordRpc = () => {
                 }
 
                 if (discordSettings.showServerImage && song) {
-                    if (song.serverType === ServerType.JELLYFIN && song.imageUrl) {
+                    if (song._serverType === ServerType.JELLYFIN && song.imageUrl) {
                         activity.largeImageKey = song.imageUrl;
-                    } else if (song.serverType === ServerType.NAVIDROME) {
+                    } else if (song._serverType === ServerType.NAVIDROME) {
                         try {
                             const info = await controller.getAlbumInfo({
-                                apiClientProps: { serverId: song.serverId },
+                                apiClientProps: { serverId: song._serverId },
                                 query: { id: song.albumId },
                             });
 

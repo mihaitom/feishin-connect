@@ -45,7 +45,7 @@ export const Lyrics = () => {
         lyricsQueries.songLyrics(
             {
                 query: { songId: currentSong?.id || '' },
-                serverId: currentSong?.serverId || '',
+                serverId: currentSong?._serverId || '',
             },
             currentSong,
         ),
@@ -73,13 +73,13 @@ export const Lyrics = () => {
     const handleOnResetLyric = useCallback(() => {
         queryClient.invalidateQueries({
             exact: true,
-            queryKey: queryKeys.songs.lyrics(currentSong?.serverId, { songId: currentSong?.id }),
+            queryKey: queryKeys.songs.lyrics(currentSong?._serverId, { songId: currentSong?.id }),
         });
-    }, [currentSong?.id, currentSong?.serverId]);
+    }, [currentSong?.id, currentSong?._serverId]);
 
     const handleOnRemoveLyric = useCallback(() => {
         queryClient.setQueryData(
-            queryKeys.songs.lyrics(currentSong?.serverId, { songId: currentSong?.id }),
+            queryKeys.songs.lyrics(currentSong?._serverId, { songId: currentSong?.id }),
             (prev: FullLyricsMetadata | undefined) => {
                 if (!prev) {
                     return undefined;
@@ -91,7 +91,7 @@ export const Lyrics = () => {
                 };
             },
         );
-    }, [currentSong?.id, currentSong?.serverId]);
+    }, [currentSong?.id, currentSong?._serverId]);
 
     const fetchTranslation = useCallback(async () => {
         if (!lyrics) return;
@@ -126,7 +126,7 @@ export const Lyrics = () => {
                 remoteSource: override?.source as LyricSource | undefined,
                 song: currentSong,
             },
-            serverId: currentSong?.serverId || '',
+            serverId: currentSong?._serverId || '',
         }),
     );
 

@@ -71,7 +71,7 @@ export const RightControls = () => {
         if (!song?.id) return;
 
         addToFavoritesMutation.mutate({
-            apiClientProps: { serverId: song?.serverId || '' },
+            apiClientProps: { serverId: song?._serverId || '' },
             query: {
                 id: [song.id],
                 type: LibraryItem.SONG,
@@ -83,7 +83,7 @@ export const RightControls = () => {
         if (!currentSong) return;
 
         updateRatingMutation.mutate({
-            apiClientProps: { serverId: currentSong?.serverId || '' },
+            apiClientProps: { serverId: currentSong?._serverId || '' },
             query: {
                 item: [currentSong],
                 rating,
@@ -95,7 +95,7 @@ export const RightControls = () => {
         if (!song?.id) return;
 
         removeFromFavoritesMutation.mutate({
-            apiClientProps: { serverId: song?.serverId || '' },
+            apiClientProps: { serverId: song?._serverId || '' },
             query: {
                 id: [song.id],
                 type: LibraryItem.SONG,
@@ -188,7 +188,7 @@ export const RightControls = () => {
                             {
                                 id,
                                 itemType: LibraryItem.SONG,
-                                serverId,
+                                _serverId,
                             } as Song, // This is not a type-safe cast, but it works because those are all the prop
                         ],
                         rating,

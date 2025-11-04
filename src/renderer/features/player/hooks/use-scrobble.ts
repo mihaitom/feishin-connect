@@ -103,7 +103,7 @@ export const useScrobble = () => {
                     // Only trigger if the song changed, or the player changed. This should be the case
                     // anyways, but who knows
                     if (
-                        currentSong.uniqueId !== previous[0]?.uniqueId ||
+                        currentSong._uniqueId !== previous[0]?._uniqueId ||
                         current[2] !== previous[2]
                     ) {
                         const artists =
@@ -141,15 +141,15 @@ export const useScrobble = () => {
 
                 if (
                     (!isCurrentSongScrobbled && shouldSubmitScrobble) ||
-                    previousSong?.serverType === ServerType.JELLYFIN
+                    previousSong?._serverType === ServerType.JELLYFIN
                 ) {
                     const position =
-                        previousSong?.serverType === ServerType.JELLYFIN
+                        previousSong?._serverType === ServerType.JELLYFIN
                             ? previousSongTimeSec * 1e7
                             : undefined;
 
                     sendScrobble.mutate({
-                        apiClientProps: { serverId: previousSong?.serverId || '' },
+                        apiClientProps: { serverId: previousSong?._serverId || '' },
                         query: {
                             id: previousSong.id,
                             position,
@@ -173,7 +173,7 @@ export const useScrobble = () => {
                 // Send start scrobble when song changes and the new song is playing
                 if (currentStatus === PlayerStatus.PLAYING && currentSong?.id) {
                     sendScrobble.mutate({
-                        apiClientProps: { serverId: currentSong?.serverId || '' },
+                        apiClientProps: { serverId: currentSong?._serverId || '' },
                         query: {
                             event: 'start',
                             id: currentSong.id,
@@ -182,7 +182,7 @@ export const useScrobble = () => {
                         },
                     });
 
-                    if (currentSong?.serverType === ServerType.JELLYFIN) {
+                    if (currentSong?._serverType === ServerType.JELLYFIN) {
                         // It is possible that another function sets an interval.
                         // We only want one running, so clear the existing interval
                         if (progressIntervalId.current) {
@@ -379,7 +379,7 @@ export const useScrobble = () => {
                 //    multiple times in a row and playback goes normally (no next/previous)
                 equalityFn: (a, b) =>
                     // compute whether the song changed
-                    a[0]?.uniqueId === b[0]?.uniqueId &&
+                    a[0]?._uniqueId === b[0]?._uniqueId &&
                     // compute whether the same player: relevant for repeat one and repeat all (one track)
                     a[2] === b[2],
             },

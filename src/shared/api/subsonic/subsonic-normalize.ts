@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
@@ -9,10 +8,10 @@ import {
     Genre,
     LibraryItem,
     Playlist,
-    QueueSong,
     RelatedArtist,
     ServerListItemWithCredential,
     ServerType,
+    Song,
 } from '/@/shared/types/domain-types';
 
 const getCoverArtUrl = (args: {
@@ -119,7 +118,7 @@ const normalizeSong = (
     item: z.infer<typeof ssType._response.song>,
     server?: null | ServerListItemWithCredential,
     size?: number,
-): QueueSong => {
+): Song => {
     const imageUrl =
         getCoverArtUrl({
             baseUrl: server?.url,
@@ -131,6 +130,8 @@ const normalizeSong = (
     const streamUrl = `${server?.url}/rest/stream.view?id=${item.id}&v=1.13.0&c=Feishin&${server?.credential}`;
 
     return {
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.SUBSONIC,
         album: item.album || '',
         albumArtists: getArtistList(item.albumArtists, item.artistId, item.artist),
         albumId: item.albumId?.toString() || '',
@@ -183,13 +184,10 @@ const normalizeSong = (
         releaseDate: null,
         releaseYear: item.year ? String(item.year) : null,
         sampleRate: item.samplingRate || null,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.SUBSONIC,
         size: item.size,
         streamUrl,
         tags: null,
         trackNumber: item.track || 1,
-        uniqueId: nanoid(),
         updatedAt: '',
         userFavorite: item.starred || false,
         userRating: item.userRating || null,
@@ -212,6 +210,8 @@ const normalizeAlbumArtist = (
         }) || null;
 
     return {
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.SUBSONIC,
         albumCount: item.albumCount ? Number(item.albumCount) : 0,
         backgroundImageUrl: null,
         biography: null,
@@ -224,8 +224,6 @@ const normalizeAlbumArtist = (
         mbz: null,
         name: item.name,
         playCount: null,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.SUBSONIC,
         similarArtists: [],
         songCount: null,
         userFavorite: false,
@@ -247,6 +245,8 @@ const normalizeAlbum = (
         }) || null;
 
     return {
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.SUBSONIC,
         albumArtist: item.artist,
         albumArtists: getArtistList(item.artists, item.artistId, item.artist),
         artists: [],
@@ -276,8 +276,6 @@ const normalizeAlbum = (
         releaseDate: item.year ? new Date(Date.UTC(item.year, 0, 1)).toISOString() : null,
         releaseTypes: item.releaseTypes || [],
         releaseYear: item.year ? Number(item.year) : null,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.SUBSONIC,
         size: null,
         songCount: item.songCount,
         songs:
@@ -285,7 +283,6 @@ const normalizeAlbum = (
                 normalizeSong(song, server),
             ) || [],
         tags: null,
-        uniqueId: nanoid(),
         updatedAt: item.created,
         userFavorite: item.starred || false,
         userRating: item.userRating || null,
@@ -300,6 +297,8 @@ const normalizePlaylist = (
     server?: null | ServerListItemWithCredential,
 ): Playlist => {
     return {
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.SUBSONIC,
         description: item.comment || null,
         duration: item.duration * 1000,
         genres: [],
@@ -316,8 +315,6 @@ const normalizePlaylist = (
         owner: item.owner,
         ownerId: item.owner,
         public: item.public,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.SUBSONIC,
         size: null,
         songCount: item.songCount,
     };

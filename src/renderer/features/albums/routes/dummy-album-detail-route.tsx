@@ -69,7 +69,7 @@ const DummyAlbumDetailRoute = () => {
         try {
             if (wasFavorite) {
                 await deleteFavoriteMutation.mutateAsync({
-                    apiClientProps: { serverId: detailQuery.data.serverId },
+                    apiClientProps: { serverId: detailQuery.data._serverId },
                     query: {
                         id: [detailQuery.data.id],
                         type: LibraryItem.SONG,
@@ -77,7 +77,7 @@ const DummyAlbumDetailRoute = () => {
                 });
             } else {
                 await createFavoriteMutation.mutateAsync({
-                    apiClientProps: { serverId: detailQuery.data.serverId },
+                    apiClientProps: { serverId: detailQuery.data._serverId },
                     query: {
                         id: [detailQuery.data.id],
                         type: LibraryItem.SONG,

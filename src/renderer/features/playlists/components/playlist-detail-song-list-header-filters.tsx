@@ -377,7 +377,7 @@ export const PlaylistDetailSongListHeaderFilters = ({
         if (!detailQuery.data) return;
         deletePlaylistMutation?.mutate(
             {
-                apiClientProps: { serverId: detailQuery.data.serverId },
+                apiClientProps: { serverId: detailQuery.data._serverId },
                 query: { id: detailQuery.data.id },
             },
             {

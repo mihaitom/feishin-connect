@@ -74,7 +74,7 @@ export const useSetRating = (args: MutationHookArgs) => {
             if (remote) {
                 remote.updateRating(
                     variables.query.rating,
-                    variables.query.item[0].serverId,
+                    variables.query.item[0]._serverId,
                     songIds,
                 );
             }
@@ -88,9 +88,9 @@ export const useSetRating = (args: MutationHookArgs) => {
                 variables.query.item[0].itemType === LibraryItem.ALBUM;
 
             if (isAlbumDetailPage) {
-                const { id: albumId, serverId } = variables.query.item[0] as Album;
+                const { id: albumId, _serverId } = variables.query.item[0] as Album;
 
-                const queryKey = queryKeys.albums.detail(serverId || '', { id: albumId });
+                const queryKey = queryKeys.albums.detail(_serverId || '', { id: albumId });
                 const previous = queryClient.getQueryData<AlbumDetailResponse>(queryKey);
                 if (previous) {
                     queryClient.setQueryData<AlbumDetailResponse>(queryKey, {

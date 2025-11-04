@@ -122,7 +122,7 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
     const handleDragEnd = (e: RowDragEvent<QueueSong>) => {
         if (!e.nodes.length) return;
         const selectedUniqueIds = e.nodes
-            .map((node) => node.data?.uniqueId)
+            .map((node) => node.data?._uniqueId)
             .filter((e) => e !== undefined);
 
         // const playerData = reorderQueue(selectedUniqueIds as string[], e.overNode?.data?.uniqueId);
@@ -143,8 +143,8 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
     const handleGridReady = () => {
         const { api } = tableRef?.current || {};
 
-        if (currentSong?.uniqueId) {
-            const currentNode = api?.getRowNode(currentSong?.uniqueId);
+        if (currentSong?._uniqueId) {
+            const currentNode = api?.getRowNode(currentSong?._uniqueId);
 
             if (!currentNode) return;
             api?.ensureNodeVisible(currentNode, 'middle');
@@ -196,10 +196,10 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
     const rowClassRules = useMemo<RowClassRules | undefined>(() => {
         return {
             'current-song': (params) => {
-                return params.data.uniqueId === currentSong?.uniqueId;
+                return params.data.uniqueId === currentSong?._uniqueId;
             },
         };
-    }, [currentSong?.uniqueId]);
+    }, [currentSong?._uniqueId]);
 
     const previousSongRef = useRef<QueueSong | undefined>(undefined);
 
@@ -217,11 +217,11 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
                 return;
             }
 
-            const currentNode = currentSong?.uniqueId
-                ? api.getRowNode(currentSong.uniqueId)
+            const currentNode = currentSong?._uniqueId
+                ? api.getRowNode(currentSong._uniqueId)
                 : undefined;
-            const previousNode = previousSongRef.current?.uniqueId
-                ? api.getRowNode(previousSongRef.current?.uniqueId)
+            const previousNode = previousSongRef.current?._uniqueId
+                ? api.getRowNode(previousSongRef.current?._uniqueId)
                 : undefined;
 
             const rowNodes = [currentNode, previousNode].filter(
@@ -248,8 +248,8 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
                 return;
             }
 
-            const currentNode = currentSong?.uniqueId
-                ? api.getRowNode(currentSong.uniqueId)
+            const currentNode = currentSong?._uniqueId
+                ? api.getRowNode(currentSong._uniqueId)
                 : undefined;
 
             if (currentNode) {

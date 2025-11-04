@@ -12,7 +12,7 @@ const modifyUrl = (song: QueueSong): string => {
     if (transcode.enabled) {
         const streamUrl = api.controller.getTranscodingUrl({
             apiClientProps: {
-                serverId: song.serverId,
+                serverId: song._serverId,
             },
             query: {
                 base: song.streamUrl,

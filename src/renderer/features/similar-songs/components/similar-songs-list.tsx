@@ -34,7 +34,7 @@ export const SimilarSongsList = ({ count, fullScreen, song }: SimilarSongsListPr
                 count,
                 songId: song.id,
             },
-            serverId: song?.serverId,
+            serverId: song?._serverId,
         }),
     );
 
