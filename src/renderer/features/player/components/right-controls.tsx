@@ -164,9 +164,9 @@ export const RightControls = () => {
                 volumeToSet = calculateVolumeUp(volume, volumeWheelStep);
             }
 
-            remote?.updateVolume(volumeToSet);
+            setVolume(volumeToSet);
         },
-        [volume, volumeWheelStep],
+        [setVolume, volume, volumeWheelStep],
     );
 
     const handleToggleQueue = () => {
