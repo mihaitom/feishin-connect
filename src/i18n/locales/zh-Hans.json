@@ -118,7 +118,11 @@
         "sampleRate": "采样率",
         "explicitStatus": "显式状态",
         "clean": "清除",
-        "explicit": "显式"
+        "explicit": "显式",
+        "private": "私人",
+        "public": "公开",
+        "recordLabel": "唱片公司",
+        "releaseType": "发布类型"
     },
     "entity": {
         "albumArtist_other": "专辑艺术家",
@@ -693,7 +697,9 @@
             "success": "添加$t(entity.trackWithCount, {\"count\": {{message}} })到$t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
             "title": "添加到$t(entity.playlist_one)",
             "input_skipDuplicates": "跳过重复",
-            "input_playlists": "$t(entity.playlist_other)"
+            "input_playlists": "$t(entity.playlist_other)",
+            "create": "创建 $t(entity.playlist_one) {{playlist}}",
+            "searchOrCreate": "搜索 $t(entity.playlist_other) 或键入以创建一个新的"
         },
         "createPlaylist": {
             "title": "创建$t(entity.playlist_one)",
@@ -817,5 +823,11 @@
         "error_oneFileOnly": "请仅选择 1 个文件",
         "error_readingFile": "读取文件时出现问题：{{errorMessage}}",
         "mainText": "将文件拖放到这里"
+    },
+    "releaseType": {
+        "primary": {
+            "album": "$t(entity.album_one)",
+            "broadcast": "播送"
+        }
     }
 }

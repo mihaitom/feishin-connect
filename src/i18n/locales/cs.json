@@ -273,7 +273,7 @@
         "hotkey_navigateHome": "přejít domů",
         "preventSleepOnPlayback": "zabránit uspání při přehrávání",
         "preventSleepOnPlayback_description": "zabránit uspání displeje během přehrávání hudby",
-        "discordLinkType": "odkazy ve stavu na službě {{discord}}",
+        "discordLinkType": "odkazy ve stavu na {{discord}}u",
         "discordLinkType_description": "přidá externí odkazy na {{lastfm}} nebo {{musicbrainz}} do polí skladby a umělce ve stavu na službě {{discord}}. {{musicbrainz}} je nejpřesnější, ale vyžaduje značky a neposkytuje odkazy na umělce, zatímco {{lastfm}} by mělo vždy poskytnout odkaz. neprovádí žádné další síťové požadavky",
         "discordLinkType_none": "$t(common.none)",
         "discordLinkType_mbz_lastfm": "{{musicbrainz}} se zálohou na {{lastfm}}",
@@ -296,7 +296,12 @@
         "exportImportSettings_importModalTitle": "importovat nastavení feishin",
         "exportImportSettings_importSuccess": "nastavení byla úspěšně importována!",
         "exportImportSettings_notValidJSON": "poskytnutý soubor není platným souborem JSON",
-        "exportImportSettings_offendingKeyError": "Řetězec „{{offendingKey}}“ je nesprávný – {{reason}}"
+        "exportImportSettings_offendingKeyError": "Řetězec „{{offendingKey}}“ je nesprávný – {{reason}}",
+        "crossfadeStyle": "styl prolnutí",
+        "discordRichPresence": "stav na {{discord}}u",
+        "enableAutoTranslation_description": "povolit automatický překlad při načtení textů",
+        "enableAutoTranslation": "povolit automatický překlad",
+        "language": "jazyk"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist_one)",
@@ -423,7 +428,11 @@
         "sampleRate": "vzorkovací frekvence",
         "explicitStatus": "stav explicitivity",
         "explicit": "explicitní",
-        "clean": "čisté"
+        "clean": "čisté",
+        "private": "soukromý",
+        "public": "veřejný",
+        "recordLabel": "vydavatelství",
+        "releaseType": "typ vydání"
     },
     "table": {
         "config": {
@@ -762,7 +771,9 @@
             "success": "přidáno $t(entity.trackWithCount, {\"count\": {{message}} }) do $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
             "title": "přidat do $t(entity.playlist_one)",
             "input_skipDuplicates": "přeskočit duplicity",
-            "input_playlists": "$t(entity.playlist_other)"
+            "input_playlists": "$t(entity.playlist_other)",
+            "create": "vytvořit $t(entity.playlist_one) {{playlist}}",
+            "searchOrCreate": "vyhledejte $t(entity.playlist_other) nebo pište pro vytvoření nového"
         },
         "updateServer": {
             "title": "upravit server",
@@ -852,8 +863,31 @@
         "song_other": "písní"
     },
     "dragDropZone": {
-        "error_oneFileOnly": "vyberte prosím pouze 1 soubor",
+        "error_oneFileOnly": "Vyberte prosím pouze 1 soubor",
         "error_readingFile": "během čtení souboru došlo k chybě: {{errorMessage}}",
         "mainText": "přesuňte soubor sem"
+    },
+    "releaseType": {
+        "primary": {
+            "album": "$t(entity.album_one)",
+            "broadcast": "vysílání",
+            "ep": "ep",
+            "other": "jiné",
+            "single": "singl"
+        },
+        "secondary": {
+            "audiobook": "audiokniha",
+            "audioDrama": "rozhlasová hra",
+            "compilation": "kolekce",
+            "djMix": "dj mix",
+            "demo": "demo",
+            "fieldRecording": "field recording",
+            "interview": "rozhovor",
+            "live": "živě",
+            "mixtape": "mixtape",
+            "remix": "remix",
+            "soundtrack": "soundtrack",
+            "spokenWord": "mluvené slovo"
+        }
     }
 }

@@ -121,7 +121,10 @@
         "gap": "hutsunea",
         "explicitStatus": "egoera esplizitua",
         "explicit": "esplizitua",
-        "clean": "garbia"
+        "clean": "garbia",
+        "private": "pribatua",
+        "public": "publikoa",
+        "releaseType": "argitalpen mota"
     },
     "player": {
         "repeat": "errepikatu",
@@ -436,7 +439,7 @@
         "artistConfiguration": "albumaren artistaren konfigurazio orria",
         "artistConfiguration_description": "konfiguratu zein elementu erakusten diren eta zein ordenatan albumaren artistaren orrian",
         "audioExclusiveMode": "audio esklusiboko modua",
-        "releaseChannel_optionLatest": "egonkorra",
+        "releaseChannel_optionLatest": "azken bertsioa",
         "releaseChannel_optionBeta": "beta",
         "releaseChannel": "argitalpen kanala",
         "releaseChannel_description": "aukeratu argitalpen egonkorren edo beta artean eguneratze automatikoak lortzeko",
@@ -532,7 +535,10 @@
         "enableRemote": "gaitu urruneko kontrol zerbitzaria",
         "enableRemote_description": "urruneko kontrol zerbitzariari beste gailu batzuei aplikazioa kontrolatzeko aukera ematen dio",
         "doubleClickBehavior_description": "egia bada, bilaketa batean bat datozen pista guztiak ilaran jarriko dira. bestela, klikatutakoak bakarrik jarriko dira ilaran",
-        "imageAspectRatio_description": "gaituta badago, azaleko artea jatorrizko aspektu-erlazioa erabiliz erakutsiko da. 1:1 ez den arterako, gainerako espazioa hutsik egongo da"
+        "imageAspectRatio_description": "gaituta badago, azaleko artea jatorrizko aspektu-erlazioa erabiliz erakutsiko da. 1:1 ez den arterako, gainerako espazioa hutsik egongo da",
+        "crossfadeStyle": "crossfade estiloa",
+        "discordRichPresence": "{{discord}}-en jarduera-egoera",
+        "enableAutoTranslation": "gaitu itzulpen automatikoa"
     },
     "form": {
         "addServer": {
@@ -554,7 +560,9 @@
             "input_playlists": "$t(entity.playlist_other)",
             "success": "$t(entity.trackWithCount, {\"count\": {{message}} }) gehitu da $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })-ra",
             "input_skipDuplicates": "saltatu bikoiztuak",
-            "title": "gehitu $t(entity.playlist_one)-(a)ri"
+            "title": "gehitu $t(entity.playlist_one)-(a)ri",
+            "create": "sortu $t(entity.playlist_one) {{playlist}}",
+            "searchOrCreate": "bilatu $t(entity.playlist_other) edo idatzi berri bat sortzeko"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
@@ -756,6 +764,14 @@
         },
         "playlist": {
             "reorder": "berrantolaketa IDaren arabera ordenatzean bakarrik gaituta dago"
+        }
+    },
+    "releaseType": {
+        "primary": {
+            "album": "$t(entity.album_one)"
+        },
+        "secondary": {
+            "compilation": "konpilazioa"
         }
     }
 }

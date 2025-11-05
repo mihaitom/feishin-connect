@@ -299,7 +299,9 @@
         "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" es incorrecto - {{reason}}",
         "enableAutoTranslation_description": "Activa la traducción automáticamente cuando se cargan las letras",
         "enableAutoTranslation": "Activar traducción automática",
-        "discordRichPresence": "Estado de actividad de {{discord}}"
+        "discordRichPresence": "Estado de actividad de {{discord}}",
+        "crossfadeStyle": "Estilo del crossfade",
+        "language": "Idioma"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
@@ -428,7 +430,9 @@
         "explicit": "Explícito",
         "clean": "Limpio",
         "private": "Privado",
-        "public": "Público"
+        "public": "Público",
+        "recordLabel": "Sello discográfico",
+        "releaseType": "Tipo de lanzamiento"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",
@@ -862,5 +866,28 @@
         "error_oneFileOnly": "Por favor selecciona un solo archivo",
         "error_readingFile": "Ha habido un problema leyendo el archivo: {{errorMessage}}",
         "mainText": "Arrastra un archivo aquí"
+    },
+    "releaseType": {
+        "primary": {
+            "album": "$t(entity.album_one)",
+            "broadcast": "Emisión",
+            "ep": "EP",
+            "other": "Otro",
+            "single": "Sencillo"
+        },
+        "secondary": {
+            "audiobook": "Audiolibro",
+            "audioDrama": "Audio drama",
+            "compilation": "Compilación",
+            "djMix": "Mezcla del DJ",
+            "fieldRecording": "Grabación de campo",
+            "interview": "Entrevista",
+            "live": "En vivo",
+            "mixtape": "Recopilatorio",
+            "remix": "Remix",
+            "soundtrack": "Banda sonora",
+            "spokenWord": "Palabra hablada",
+            "demo": "Maqueta"
+        }
     }
 }

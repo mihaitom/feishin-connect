@@ -134,7 +134,7 @@
         "quit": "quitter",
         "expand": "étendre",
         "search": "recherche",
-        "saveAs": "enregistrer en tant que",
+        "saveAs": "enregistrer sous",
         "disc": "disque",
         "yes": "oui",
         "random": "aléatoire",
@@ -160,7 +160,11 @@
         "bitDepth": "format d'échantillonnage",
         "explicitStatus": "status explicite",
         "explicit": "explicite",
-        "clean": "propre"
+        "clean": "propre",
+        "private": "privé",
+        "public": "publique",
+        "recordLabel": "label de discographie",
+        "releaseType": "type de sortie"
     },
     "error": {
         "remotePortWarning": "redémarrer le serveur pour appliquer le nouveau port",
@@ -646,7 +650,7 @@
         "mediaSession_description": "active l'intégration de la session Windows Media, affichant les commandes multimédias et les métadonnées dans la superposition du volume du système et l'écran de verrouillage (Windows uniquement)",
         "enableAutoTranslation_description": "activer la traduction automatiquement lorsque les paroles sont chargées",
         "enableAutoTranslation": "activer la traduction automatique",
-        "exportImportSettings_control_description": "Exporter et Importer les paramètres en JSON",
+        "exportImportSettings_control_description": "exporter et importer les paramètres en JSON",
         "exportImportSettings_control_exportText": "paramètres d'exportation",
         "exportImportSettings_control_importText": "paramètres d'importation",
         "exportImportSettings_control_title": "paramètres d'importation / exportation",
@@ -655,7 +659,10 @@
         "exportImportSettings_importSuccess": "les paramètres ont été importés avec succès !",
         "exportImportSettings_notValidJSON": "le fichier transmis n'est pas un JSON valide",
         "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" est incorrecte - {{reason}}",
-        "exportImportSettings_importModalTitle": "paramètres d'importation feishin"
+        "exportImportSettings_importModalTitle": "paramètres d'importation feishin",
+        "crossfadeStyle": "style de fondu enchaîné",
+        "discordRichPresence": "{{discord}} Rich Presence",
+        "language": "langage"
     },
     "form": {
         "deletePlaylist": {
@@ -682,7 +689,9 @@
             "success": "$t(entity.trackWithCount, {\"count\" : {{message}} }) ajouté à $t(entity.playlistWithCount, {\"count\" : {{numOfPlaylists}} })",
             "title": "ajouter à $t(entity.playlist_one)",
             "input_skipDuplicates": "sauter les doublons",
-            "input_playlists": "$t(entity.playlist_other)"
+            "input_playlists": "$t(entity.playlist_other)",
+            "create": "créer $t(entity.playlist_one) {{playlist}}",
+            "searchOrCreate": "rechercher $t(entity.playlist_other) ou tapez pour en créer une nouvelle"
         },
         "createPlaylist": {
             "title": "créer une $t(entity.playlist_one)",
@@ -858,7 +867,30 @@
     },
     "dragDropZone": {
         "error_oneFileOnly": "Veuillez ne sélectionner qu'un seul fichier",
-        "error_readingFile": "Un problème est survenu lors de la lecture du fichier : {{errorMessage}}",
-        "mainText": "Déposez un fichier ici"
+        "error_readingFile": "un problème est survenu lors de la lecture du fichier : {{errorMessage}}",
+        "mainText": "déposez un fichier ici"
+    },
+    "releaseType": {
+        "primary": {
+            "album": "$t(entity.album_one)",
+            "broadcast": "diffuser",
+            "ep": "ep",
+            "other": "autre",
+            "single": "single"
+        },
+        "secondary": {
+            "audiobook": "livre audio",
+            "audioDrama": "dramatique radio",
+            "compilation": "compilation",
+            "djMix": "dj mix",
+            "demo": "démo",
+            "fieldRecording": "prise de son en extérieur",
+            "interview": "interview",
+            "live": "directe",
+            "mixtape": "mixtape",
+            "remix": "remix",
+            "soundtrack": "bande son",
+            "spokenWord": "spoken word"
+        }
     }
 }
