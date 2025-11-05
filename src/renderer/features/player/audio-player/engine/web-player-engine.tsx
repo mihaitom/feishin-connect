@@ -4,6 +4,7 @@ import { useImperativeHandle, useRef, useState } from 'react';
 import ReactPlayer from 'react-player';
 
 import { AudioPlayer } from '/@/renderer/features/player/audio-player/types';
+import { convertToLogVolume } from '/@/renderer/features/player/audio-player/utils/player-utils';
 import { PlayerStatus } from '/@/shared/types/types';
 
 export interface OnProgressProps {
@@ -120,52 +121,49 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
         },
     }));
 
+    const volume1 = convertToLogVolume(internalVolume1);
+    const volume2 = convertToLogVolume(internalVolume2);
+
     return (
-        <>
-            {Boolean(src1) && (
-                <ReactPlayer
-                    config={{
-                        file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
-                    }}
-                    controls={false}
-                    height={0}
-                    muted={isMuted}
-                    onEnded={src1 ? () => onEndedPlayer1() : undefined}
-                    onProgress={onProgressPlayer1}
-                    playbackRate={speed || 1}
-                    playing={playerNum === 1 && playerStatus === PlayerStatus.PLAYING}
-                    progressInterval={isTransitioning ? 10 : 250}
-                    ref={player1Ref}
-                    url={src1 || EMPTY_SOURCE}
-                    volume={convertToLogVolume(internalVolume1)}
-                    width={0}
-                />
-            )}
-            {Boolean(src2) && (
-                <ReactPlayer
-                    config={{
-                        file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
-                    }}
-                    controls={false}
-                    height={0}
-                    muted={isMuted}
-                    onEnded={src2 ? () => onEndedPlayer2() : undefined}
-                    onProgress={onProgressPlayer2}
-                    playbackRate={speed || 1}
-                    playing={playerNum === 2 && playerStatus === PlayerStatus.PLAYING}
-                    progressInterval={isTransitioning ? 10 : 250}
-                    ref={player2Ref}
-                    url={src2 || EMPTY_SOURCE}
-                    volume={convertToLogVolume(internalVolume2)}
-                    width={0}
-                />
-            )}
-        </>
+        <div id="web-player-engine" style={{ display: 'none' }}>
+            <ReactPlayer
+                config={{
+                    file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
+                }}
+                controls={false}
+                height={0}
+                id="web-player-1"
+                muted={isMuted}
+                onEnded={src1 ? () => onEndedPlayer1() : undefined}
+                onProgress={onProgressPlayer1}
+                playbackRate={speed || 1}
+                playing={playerNum === 1 && playerStatus === PlayerStatus.PLAYING}
+                progressInterval={isTransitioning ? 10 : 250}
+                ref={player1Ref}
+                url={src1 || EMPTY_SOURCE}
+                volume={volume1}
+                width={0}
+            />
+            <ReactPlayer
+                config={{
+                    file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
+                }}
+                controls={false}
+                height={0}
+                id="web-player-2"
+                muted={isMuted}
+                onEnded={src2 ? () => onEndedPlayer2() : undefined}
+                onProgress={onProgressPlayer2}
+                playbackRate={speed || 1}
+                playing={playerNum === 2 && playerStatus === PlayerStatus.PLAYING}
+                progressInterval={isTransitioning ? 10 : 250}
+                ref={player2Ref}
+                url={src2 || EMPTY_SOURCE}
+                volume={volume2}
+                width={0}
+            />
+        </div>
     );
 };
 
 WebPlayerEngine.displayName = 'WebPlayerEngine';
-
-function convertToLogVolume(linearVolume: number) {
-    return Math.pow(linearVolume, 2.0);
-}

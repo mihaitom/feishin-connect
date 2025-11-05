@@ -1,12 +1,28 @@
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
+import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
+import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { AddToQueueType, usePlayerActions } from '/@/renderer/store';
-import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
-import { Play } from '/@/shared/types/types';
+import {
+    LibraryItem,
+    PlaylistSongListResponse,
+    QueueSong,
+    Song,
+    SongListResponse,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { Play, PlayerRepeat, PlayerShuffle } from '/@/shared/types/types';
 
 interface PlayerContext {
     addToQueueByData: (data: Song[], type: AddToQueueType) => void;
-    addToQueueByFetch: (id: string[], itemType: LibraryItem, type: AddToQueueType) => void;
+    addToQueueByFetch: (
+        serverId: string,
+        id: string[],
+        itemType: LibraryItem,
+        type: AddToQueueType,
+    ) => void;
     clearQueue: () => void;
     clearSelected: (items: QueueSong[]) => void;
     decreaseVolume: (amount: number) => void;
@@ -18,16 +34,22 @@ interface PlayerContext {
     mediaSeekToTimestamp: (timestamp: number) => void;
     mediaSkipBackward: () => void;
     mediaSkipForward: () => void;
+    mediaStop: () => void;
     mediaToggleMute: () => void;
     mediaTogglePlayPause: () => void;
     moveSelectedTo: (items: QueueSong[], edge: 'bottom' | 'top', uniqueId: string) => void;
     moveSelectedToBottom: (items: QueueSong[]) => void;
     moveSelectedToNext: (items: QueueSong[]) => void;
     moveSelectedToTop: (items: QueueSong[]) => void;
+    setRepeat: (repeat: PlayerRepeat) => void;
+    setShuffle: (shuffle: PlayerShuffle) => void;
+    setSpeed: (speed: number) => void;
     setVolume: (volume: number) => void;
     shuffle: () => void;
     shuffleAll: () => void;
     shuffleSelected: (items: QueueSong[]) => void;
+    toggleRepeat: () => void;
+    toggleShuffle: () => void;
 }
 
 export const PlayerContext = createContext<PlayerContext>({
@@ -44,19 +66,26 @@ export const PlayerContext = createContext<PlayerContext>({
     mediaSeekToTimestamp: () => {},
     mediaSkipBackward: () => {},
     mediaSkipForward: () => {},
+    mediaStop: () => {},
     mediaToggleMute: () => {},
     mediaTogglePlayPause: () => {},
     moveSelectedTo: () => {},
     moveSelectedToBottom: () => {},
     moveSelectedToNext: () => {},
     moveSelectedToTop: () => {},
+    setRepeat: () => {},
+    setShuffle: () => {},
+    setSpeed: () => {},
     setVolume: () => {},
     shuffle: () => {},
     shuffleAll: () => {},
     shuffleSelected: () => {},
+    toggleRepeat: () => {},
+    toggleShuffle: () => {},
 });
 
 export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
+    const queryClient = useQueryClient();
     const storeActions = usePlayerActions();
 
     const addToQueueByData = useCallback(
@@ -72,8 +101,20 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const addToQueueByFetch = useCallback(
-        (id: string[], itemType: LibraryItem, type: AddToQueueType) => {},
-        [],
+        async (serverId: string, id: string[], itemType: LibraryItem, type: AddToQueueType) => {
+            const songs = await fetchSongsByItemType(queryClient, serverId, {
+                id,
+                itemType,
+            });
+
+            if (typeof type === 'object' && 'edge' in type && type.edge !== null) {
+                const edge = type.edge === 'top' ? 'top' : 'bottom';
+                storeActions.addToQueueByUniqueId(songs, type.uniqueId, edge);
+            } else {
+                storeActions.addToQueueByType(songs, type as Play);
+            }
+        },
+        [queryClient, storeActions],
     );
 
     const clearQueue = useCallback(() => {
@@ -120,6 +161,10 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         storeActions.mediaPrevious();
     }, [storeActions]);
 
+    const mediaStop = useCallback(() => {
+        storeActions.mediaStop();
+    }, [storeActions]);
+
     const mediaSeekToTimestamp = useCallback(
         (timestamp: number) => {
             storeActions.mediaSeekToTimestamp(timestamp);
@@ -134,6 +179,13 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     const mediaSkipForward = useCallback(() => {
         storeActions.mediaSkipForward();
     }, [storeActions]);
+
+    const setSpeed = useCallback(
+        (speed: number) => {
+            storeActions.setSpeed(speed);
+        },
+        [storeActions],
+    );
 
     const mediaToggleMute = useCallback(() => {
         storeActions.mediaToggleMute();
@@ -178,6 +230,20 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         [storeActions],
     );
 
+    const setRepeat = useCallback(
+        (repeat: PlayerRepeat) => {
+            storeActions.setRepeat(repeat);
+        },
+        [storeActions],
+    );
+
+    const setShuffle = useCallback(
+        (shuffle: PlayerShuffle) => {
+            storeActions.setShuffle(shuffle);
+        },
+        [storeActions],
+    );
+
     const shuffle = useCallback(() => {
         storeActions.shuffle();
     }, [storeActions]);
@@ -192,6 +258,14 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         },
         [storeActions],
     );
+
+    const toggleRepeat = useCallback(() => {
+        storeActions.toggleRepeat();
+    }, [storeActions]);
+
+    const toggleShuffle = useCallback(() => {
+        storeActions.toggleShuffle();
+    }, [storeActions]);
 
     const contextValue: PlayerContext = useMemo(
         () => ({
@@ -208,16 +282,22 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             mediaSeekToTimestamp,
             mediaSkipBackward,
             mediaSkipForward,
+            mediaStop,
             mediaToggleMute,
             mediaTogglePlayPause,
             moveSelectedTo,
             moveSelectedToBottom,
             moveSelectedToNext,
             moveSelectedToTop,
+            setRepeat,
+            setShuffle,
+            setSpeed,
             setVolume,
             shuffle,
             shuffleAll,
             shuffleSelected,
+            toggleRepeat,
+            toggleShuffle,
         }),
         [
             addToQueueByData,
@@ -225,6 +305,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             clearQueue,
             clearSelected,
             decreaseVolume,
+            setSpeed,
             increaseVolume,
             mediaNext,
             mediaPause,
@@ -233,22 +314,154 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             mediaSeekToTimestamp,
             mediaSkipBackward,
             mediaSkipForward,
+            mediaStop,
             mediaToggleMute,
             mediaTogglePlayPause,
             moveSelectedTo,
             moveSelectedToBottom,
             moveSelectedToNext,
             moveSelectedToTop,
+            setRepeat,
+            setShuffle,
             setVolume,
             shuffle,
             shuffleAll,
             shuffleSelected,
+            toggleRepeat,
+            toggleShuffle,
         ],
     );
 
     return <PlayerContext.Provider value={contextValue}>{children}</PlayerContext.Provider>;
 };
 
-export const usePlayer = () => {
+export const usePlayerContext = () => {
     return useContext(PlayerContext);
 };
+
+/**
+ * Fetches the songs from the server
+ * @param queryClient - The query client to use to fetch the data
+ * @param serverId - The library id to use to fetch the data
+ * @param type - The type of the item to add to the queue
+ * @param args - The arguments to use to fetch the data
+ * @returns The songs to add to the queue
+ */
+export async function fetchSongsByItemType(
+    queryClient: QueryClient,
+    serverId: string,
+    args: {
+        id: string[];
+        itemType: LibraryItem;
+        params?: Record<string, any>;
+    },
+) {
+    const songs: Song[] = [];
+
+    switch (args.itemType) {
+        case LibraryItem.ALBUM: {
+            const promises: Promise<SongListResponse>[] = [];
+
+            for (const id of args.id) {
+                promises.push(
+                    queryClient.fetchQuery(
+                        songsQueries.list({
+                            query: {
+                                albumIds: [id],
+                                sortBy: SongListSort.ID,
+                                sortOrder: SortOrder.ASC,
+                                startIndex: 0,
+                                ...args.params,
+                            },
+                            serverId: serverId,
+                        }),
+                    ),
+                );
+            }
+
+            const results = await Promise.all(promises);
+            songs.push(...results.flatMap((r) => r.items));
+
+            break;
+        }
+
+        case LibraryItem.ALBUM_ARTIST:
+        case LibraryItem.ARTIST: {
+            const promises: Promise<SongListResponse>[] = [];
+
+            for (const id of args.id) {
+                promises.push(
+                    queryClient.fetchQuery(
+                        songsQueries.list({
+                            query: {
+                                albumArtistIds: [id],
+                                limit: -1,
+                                sortBy: SongListSort.ID,
+                                sortOrder: SortOrder.ASC,
+                                startIndex: 0,
+                                ...args.params,
+                            },
+                            serverId: serverId,
+                        }),
+                    ),
+                );
+            }
+
+            const results = await Promise.all(promises);
+            songs.push(...results.flatMap((r) => r.items));
+
+            break;
+        }
+
+        case LibraryItem.GENRE: {
+            const promises: Promise<SongListResponse>[] = [];
+
+            for (const id of args.id) {
+                promises.push(
+                    queryClient.fetchQuery(
+                        songsQueries.list({
+                            query: {
+                                genreIds: [id],
+                                limit: -1,
+                                sortBy: SongListSort.ID,
+                                sortOrder: SortOrder.ASC,
+                                startIndex: 0,
+                                ...args.params,
+                            },
+                            serverId: serverId,
+                        }),
+                    ),
+                );
+            }
+
+            const results = await Promise.all(promises);
+            songs.push(...results.flatMap((r) => r.items));
+            break;
+        }
+
+        case LibraryItem.PLAYLIST: {
+            const promises: Promise<PlaylistSongListResponse>[] = [];
+
+            for (const id of args.id) {
+                promises.push(
+                    queryClient.fetchQuery(
+                        playlistsQueries.songList({
+                            query: {
+                                id: id,
+                                ...args.params,
+                            },
+                            serverId: serverId,
+                        }),
+                    ),
+                );
+            }
+
+            const results = await Promise.all(promises);
+
+            songs.push(...results.flatMap((r) => r.items));
+            break;
+        }
+    }
+
+    return songs;
+}

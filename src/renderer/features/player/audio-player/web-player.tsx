@@ -21,13 +21,13 @@ const PLAY_PAUSE_FADE_INTERVAL = 10;
 
 export function WebPlayer() {
     const playerRef = useRef<WebPlayerEngineHandle>(null);
-    const { player, player1, player2 } = usePlayerData();
+    const { num, player1, player2, status } = usePlayerData();
     const { mediaAutoNext, setProgress } = usePlayerActions();
     const { crossfadeDuration, speed, transitionType } = usePlayerProperties();
     const isMuted = usePlayerMuted();
     const volume = usePlayerVolume();
 
-    const [localPlayerStatus, setLocalPlayerStatus] = useState<PlayerStatus>(player.status);
+    const [localPlayerStatus, setLocalPlayerStatus] = useState<PlayerStatus>(status);
     const [isTransitioning, setIsTransitioning] = useState<boolean | string>(false);
 
     const fadeAndSetStatus = useCallback(
@@ -68,7 +68,7 @@ export function WebPlayer() {
 
     const onProgressPlayer1 = useCallback(
         (e: OnProgressProps) => {
-            if (transitionType === 'crossfade' && player.playerNum === 1) {
+            if (transitionType === 'crossfade' && num === 1) {
                 setProgress(Number(e.playedSeconds.toFixed(0)));
             } else if (transitionType === 'gapless') {
                 setProgress(Number(e.playedSeconds.toFixed(0)));
@@ -83,7 +83,7 @@ export function WebPlayer() {
                     crossfadeHandler({
                         crossfadeDuration: crossfadeDuration,
                         currentPlayer: playerRef.current.player1(),
-                        currentPlayerNum: player.playerNum,
+                        currentPlayerNum: num,
                         currentTime: e.playedSeconds,
                         duration: getDuration(playerRef.current.player1().ref),
                         isTransitioning,
@@ -105,12 +105,12 @@ export function WebPlayer() {
                     break;
             }
         },
-        [crossfadeDuration, isTransitioning, player.playerNum, setProgress, transitionType, volume],
+        [crossfadeDuration, isTransitioning, num, setProgress, transitionType, volume],
     );
 
     const onProgressPlayer2 = useCallback(
         (e: OnProgressProps) => {
-            if (transitionType === PlayerStyle.CROSSFADE && player.playerNum === 2) {
+            if (transitionType === PlayerStyle.CROSSFADE && num === 2) {
                 setProgress(Number(e.playedSeconds.toFixed(0)));
             } else if (transitionType === PlayerStyle.GAPLESS) {
                 setProgress(Number(e.playedSeconds.toFixed(0)));
@@ -125,7 +125,7 @@ export function WebPlayer() {
                     crossfadeHandler({
                         crossfadeDuration: crossfadeDuration,
                         currentPlayer: playerRef.current.player2(),
-                        currentPlayerNum: player.playerNum,
+                        currentPlayerNum: num,
                         currentTime: e.playedSeconds,
                         duration: getDuration(playerRef.current.player2().ref),
                         isTransitioning,
@@ -147,7 +147,7 @@ export function WebPlayer() {
                     break;
             }
         },
-        [crossfadeDuration, isTransitioning, player.playerNum, setProgress, transitionType, volume],
+        [crossfadeDuration, isTransitioning, num, setProgress, transitionType, volume],
     );
 
     const handleOnEndedPlayer1 = useCallback(() => {
@@ -180,7 +180,7 @@ export function WebPlayer() {
         {
             onPlayerSeekToTimestamp: (properties) => {
                 const timestamp = properties.timestamp;
-                if (player.playerNum === 1) {
+                if (num === 1) {
                     playerRef.current?.player1()?.ref?.seekTo(timestamp);
                 } else {
                     playerRef.current?.player2()?.ref?.seekTo(timestamp);
@@ -199,7 +199,7 @@ export function WebPlayer() {
                 playerRef.current?.setVolume(volume);
             },
         },
-        [volume, player.playerNum, isTransitioning],
+        [volume, num, isTransitioning],
     );
 
     return (
@@ -210,7 +210,7 @@ export function WebPlayer() {
             onEndedPlayer2={handleOnEndedPlayer2}
             onProgressPlayer1={onProgressPlayer1}
             onProgressPlayer2={onProgressPlayer2}
-            playerNum={player.playerNum}
+            playerNum={num}
             playerRef={playerRef}
             playerStatus={localPlayerStatus}
             speed={speed}

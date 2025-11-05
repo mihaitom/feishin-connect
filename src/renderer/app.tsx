@@ -16,6 +16,7 @@ import 'overlayscrollbars/overlayscrollbars.css';
 
 import i18n from '/@/i18n/i18n';
 import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
+import { PlayerProvider } from '/@/renderer/features/player/context/player-context';
 import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
 import { getMpvProperties } from '/@/renderer/features/settings/components/playback/mpv-settings';
 import { useServerVersion } from '/@/renderer/hooks/use-server-version';
@@ -31,8 +32,8 @@ import {
 import { useAppTheme } from '/@/renderer/themes/use-app-theme';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
 import { toast } from '/@/shared/components/toast/toast';
-import { PlayerType, WebAudio } from '/@/shared/types/types';
 import '/styles/overlayscrollbars.css';
+import { PlayerType, WebAudio } from '/@/shared/types/types';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, InfiniteRowModelModule]);
 
@@ -193,7 +194,9 @@ export const App = () => {
                 zIndex={50000}
             />
             <WebAudioContext.Provider value={webAudioProvider}>
-                <AppRouter />
+                <PlayerProvider>
+                    <AppRouter />
+                </PlayerProvider>
             </WebAudioContext.Provider>
             <IsUpdatedDialog />
         </MantineProvider>

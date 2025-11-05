@@ -1,21 +1,22 @@
 import { useHotkeys, useMediaQuery } from '@mantine/hooks';
 import isElectron from 'is-electron';
-import { useEffect } from 'react';
+import { useCallback, useEffect, WheelEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { PlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
-import { useRightControls } from '/@/renderer/features/player/hooks/use-right-controls';
+import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
+import { usePlayerContext } from '/@/renderer/features/player/context/player-context';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import {
     useAppStoreActions,
     useCurrentServer,
+    useGeneralSettings,
     useHotkeySettings,
     usePlaybackSettings,
     usePlaybackType,
+    usePlayerData,
     usePlayerMuted,
-    usePlayerSong,
     usePlayerSpeed,
     usePlayerVolume,
     useSettingsStore,
@@ -31,10 +32,34 @@ import { Rating } from '/@/shared/components/rating/rating';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
 import { LibraryItem, QueueSong, ServerType, Song } from '/@/shared/types/domain-types';
-import { PlaybackType } from '/@/shared/types/types';
+import { PlayerType } from '/@/shared/types/types';
 
 const ipc = isElectron() ? window.api.ipc : null;
 const remote = isElectron() ? window.api.remote : null;
+
+const calculateVolumeUp = (volume: number, volumeWheelStep: number) => {
+    let volumeToSet;
+    const newVolumeGreaterThanHundred = volume + volumeWheelStep > 100;
+    if (newVolumeGreaterThanHundred) {
+        volumeToSet = 100;
+    } else {
+        volumeToSet = volume + volumeWheelStep;
+    }
+
+    return volumeToSet;
+};
+
+const calculateVolumeDown = (volume: number, volumeWheelStep: number) => {
+    let volumeToSet;
+    const newVolumeLessThanZero = volume - volumeWheelStep < 0;
+    if (newVolumeLessThanZero) {
+        volumeToSet = 0;
+    } else {
+        volumeToSet = volume - volumeWheelStep;
+    }
+
+    return volumeToSet;
+};
 
 export const RightControls = () => {
     const { t } = useTranslation();
@@ -42,27 +67,18 @@ export const RightControls = () => {
     const volume = usePlayerVolume();
     const muted = usePlayerMuted();
     const server = useCurrentServer();
-    const currentSong = usePlayerSong();
-    // const previousSong = usePreviousSong();
+    const { currentSong, previousSong } = usePlayerData();
     const { setSideBar } = useAppStoreActions();
     const { rightExpanded: isQueueExpanded } = useSidebarStore();
     const { bindings } = useHotkeySettings();
-    const {
-        handleMute,
-        handleSpeed,
-        handleVolumeDown,
-        handleVolumeSlider,
-        handleVolumeUp,
-        handleVolumeWheel,
-    } = useRightControls();
     const { setSettings } = useSettingsStoreActions();
     const playbackSettings = usePlaybackSettings();
     const playbackType = usePlaybackType();
-
+    const { volumeWheelStep } = useGeneralSettings();
     const speed = usePlayerSpeed();
     const volumeWidth = useSettingsStore((state) => state.general.volumeWidth);
     const speedPreservePitch = useSettingsStore((state) => state.playback.preservePitch);
-
+    const { mediaToggleMute, setSpeed, setVolume } = usePlayerContext();
     const updateRatingMutation = useSetRating({});
     const addToFavoritesMutation = useCreateFavorite({});
     const removeFromFavoritesMutation = useDeleteFavorite({});
@@ -113,6 +129,46 @@ export const RightControls = () => {
         }
     };
 
+    const handleVolumeDown = useCallback(() => {
+        setVolume(volume - 1);
+    }, [setVolume, volume]);
+
+    const handleVolumeUp = useCallback(() => {
+        setVolume(volume + 1);
+    }, [setVolume, volume]);
+
+    const handleMute = useCallback(() => {
+        mediaToggleMute();
+    }, [mediaToggleMute]);
+
+    const handleSpeed = useCallback(
+        (e: number) => {
+            setSpeed(e);
+        },
+        [setSpeed],
+    );
+
+    const handleVolumeSlider = useCallback(
+        (e: number) => {
+            setVolume(e);
+        },
+        [setVolume],
+    );
+
+    const handleVolumeWheel = useCallback(
+        (e: WheelEvent<HTMLButtonElement | HTMLDivElement>) => {
+            let volumeToSet;
+            if (e.deltaY > 0 || e.deltaX > 0) {
+                volumeToSet = calculateVolumeDown(volume, volumeWheelStep);
+            } else {
+                volumeToSet = calculateVolumeUp(volume, volumeWheelStep);
+            }
+
+            remote?.updateVolume(volumeToSet);
+        },
+        [volume, volumeWheelStep],
+    );
+
     const handleToggleQueue = () => {
         setSideBar({ rightExpanded: !isQueueExpanded });
     };
@@ -147,18 +203,18 @@ export const RightControls = () => {
             bindings.favoriteCurrentToggle.isGlobal ? '' : bindings.favoriteCurrentToggle.hotkey,
             () => handleToggleFavorite(currentSong),
         ],
-        // [
-        //     bindings.favoritePreviousAdd.isGlobal ? '' : bindings.favoritePreviousAdd.hotkey,
-        //     () => handleAddToFavorites(previousSong),
-        // ],
-        // [
-        //     bindings.favoritePreviousRemove.isGlobal ? '' : bindings.favoritePreviousRemove.hotkey,
-        //     () => handleRemoveFromFavorites(previousSong),
-        // ],
-        // [
-        //     bindings.favoritePreviousToggle.isGlobal ? '' : bindings.favoritePreviousToggle.hotkey,
-        //     () => handleToggleFavorite(previousSong),
-        // ],
+        [
+            bindings.favoritePreviousAdd.isGlobal ? '' : bindings.favoritePreviousAdd.hotkey,
+            () => handleAddToFavorites(previousSong),
+        ],
+        [
+            bindings.favoritePreviousRemove.isGlobal ? '' : bindings.favoritePreviousRemove.hotkey,
+            () => handleRemoveFromFavorites(previousSong),
+        ],
+        [
+            bindings.favoritePreviousToggle.isGlobal ? '' : bindings.favoritePreviousToggle.hotkey,
+            () => handleToggleFavorite(previousSong),
+        ],
         [bindings.rate0.isGlobal ? '' : bindings.rate0.hotkey, () => handleUpdateRating(0)],
         [bindings.rate1.isGlobal ? '' : bindings.rate1.hotkey, () => handleUpdateRating(1)],
         [bindings.rate2.isGlobal ? '' : bindings.rate2.hotkey, () => handleUpdateRating(2)],
@@ -186,9 +242,9 @@ export const RightControls = () => {
                     query: {
                         item: [
                             {
+                                _serverId: currentSong?._serverId || '',
                                 id,
                                 itemType: LibraryItem.SONG,
-                                _serverId,
                             } as Song, // This is not a type-safe cast, but it works because those are all the prop
                         ],
                         rating,
@@ -203,7 +259,12 @@ export const RightControls = () => {
         }
 
         return () => {};
-    }, [addToFavoritesMutation, removeFromFavoritesMutation, updateRatingMutation]);
+    }, [
+        addToFavoritesMutation,
+        currentSong?._serverId,
+        removeFromFavoritesMutation,
+        updateRatingMutation,
+    ]);
 
     return (
         <Flex align="flex-end" direction="column" h="100%" px="1rem" py="0.5rem">
@@ -236,7 +297,7 @@ export const RightControls = () => {
                         />
                     </DropdownMenu.Target>
                     <DropdownMenu.Dropdown>
-                        {playbackType === PlaybackType.WEB && (
+                        {playbackType === PlayerType.WEB && (
                             <Option>
                                 <Option.Label>
                                     {t('setting.preservePitch', {
@@ -338,7 +399,7 @@ export const RightControls = () => {
                     variant="subtle"
                 />
                 {!isMinWidth ? (
-                    <PlayerbarSlider
+                    <CustomPlayerbarSlider
                         max={100}
                         min={0}
                         onChange={handleVolumeSlider}

@@ -30,10 +30,7 @@ export interface PlayerEventsCallbacks {
         prev: { timestamp: number },
     ) => void;
     onPlayerSpeed?: (properties: { speed: number }, prev: { speed: number }) => void;
-    onPlayerStatus?: (
-        properties: { song: QueueSong | undefined; status: PlayerStatus },
-        prev: { song: QueueSong | undefined; status: PlayerStatus },
-    ) => void;
+    onPlayerStatus?: (properties: { status: PlayerStatus }, prev: { status: PlayerStatus }) => void;
     onPlayerVolume?: (properties: { volume: number }, prev: { volume: number }) => void;
 }
 

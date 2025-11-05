@@ -1,5 +1,3 @@
-import type { QueryClient } from '@tanstack/react-query';
-
 import merge from 'lodash/merge';
 import { nanoid } from 'nanoid';
 import { create } from 'zustand';
@@ -21,30 +19,31 @@ import {
 } from '/@/shared/types/types';
 
 export interface PlayerData {
-    currentTrack: QueueSong | undefined;
-    nextTrack: QueueSong | undefined;
-    player: {
-        index: number;
-        muted: boolean;
-        playerNum: 1 | 2;
-        repeat: PlayerRepeat;
-        shuffle: PlayerShuffle;
-        speed: number;
-        status: PlayerStatus;
-        transitionType: PlayerStyle;
-        volume: number;
-    };
+    currentSong: QueueSong | undefined;
+    index: number;
+    muted: boolean;
+    nextSong: QueueSong | undefined;
+    num: 1 | 2;
     player1: QueueSong | undefined;
     player2: QueueSong | undefined;
+    previousSong: QueueSong | undefined;
     queue: QueueData;
+    queueLength: number;
+    repeat: PlayerRepeat;
+    shuffle: PlayerShuffle;
+    speed: number;
+    status: PlayerStatus;
+    transitionType: PlayerStyle;
+    volume: number;
 }
 
 export interface PlayerState extends Actions, State {}
 
 export interface QueueData {
-    default: QueueSong[];
-    priority: QueueSong[];
+    default: string[];
+    priority: string[];
     shuffled: string[];
+    songs: QueueSong[];
 }
 
 export type QueueGroupingProperty = keyof QueueSong;
@@ -70,6 +69,7 @@ interface Actions {
     mediaSeekToTimestamp: (timestamp: number) => void;
     mediaSkipBackward: () => void;
     mediaSkipForward: () => void;
+    mediaStop: () => void;
     mediaToggleMute: () => void;
     mediaTogglePlayPause: () => void;
     moveSelectedTo: (items: QueueSong[], uniqueId: string, edge: 'bottom' | 'top') => void;
@@ -87,6 +87,8 @@ interface Actions {
     shuffle: () => void;
     shuffleAll: () => void;
     shuffleSelected: (items: QueueSong[]) => void;
+    toggleRepeat: () => void;
+    toggleShuffle: () => void;
 }
 
 interface GroupedQueue {
@@ -119,6 +121,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
             immer((set, get) => ({
                 addToQueueByType: (items, playType) => {
                     const newItems = items.map(toQueueSong);
+                    const newUniqueIds = newItems.map((item) => item._uniqueId);
 
                     const queueType = getQueueType();
 
@@ -128,8 +131,21 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 case Play.LAST: {
                                     set((state) => {
                                         const currentIndex = state.player.index;
+                                        const existingIds = new Set(
+                                            state.queue.songs.map((s) => s._uniqueId),
+                                        );
 
-                                        state.queue.default = [...state.queue.default, ...newItems];
+                                        // Add new songs to songs array (avoiding duplicates)
+                                        newItems.forEach((item) => {
+                                            if (!existingIds.has(item._uniqueId)) {
+                                                state.queue.songs.push(item);
+                                            }
+                                        });
+
+                                        state.queue.default = [
+                                            ...state.queue.default,
+                                            ...newUniqueIds,
+                                        ];
 
                                         if (state.player.shuffle === PlayerShuffle.TRACK) {
                                             state.queue.shuffled = [
@@ -137,7 +153,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                                 state.queue.shuffled[currentIndex],
                                                 ...shuffleInPlace([
                                                     ...state.queue.shuffled.slice(currentIndex + 1),
-                                                    ...newItems.map((item) => item._uniqueId),
+                                                    ...newUniqueIds,
                                                 ]),
                                             ];
                                         }
@@ -147,10 +163,20 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 case Play.NEXT: {
                                     set((state) => {
                                         const currentIndex = state.player.index;
+                                        const existingIds = new Set(
+                                            state.queue.songs.map((s) => s._uniqueId),
+                                        );
+
+                                        // Add new songs to songs array (avoiding duplicates)
+                                        newItems.forEach((item) => {
+                                            if (!existingIds.has(item._uniqueId)) {
+                                                state.queue.songs.push(item);
+                                            }
+                                        });
 
                                         state.queue.default = [
                                             ...state.queue.default.slice(0, currentIndex + 1),
-                                            ...newItems,
+                                            ...newUniqueIds,
                                             ...state.queue.default.slice(currentIndex + 1),
                                         ];
 
@@ -160,7 +186,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                                 state.queue.shuffled[currentIndex],
                                                 ...shuffleInPlace([
                                                     ...state.queue.shuffled.slice(currentIndex + 1),
-                                                    ...newItems.map((item) => item._uniqueId),
+                                                    ...newUniqueIds,
                                                 ]),
                                             ];
                                         }
@@ -169,16 +195,25 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 }
                                 case Play.NOW: {
                                     set((state) => {
+                                        const existingIds = new Set(
+                                            state.queue.songs.map((s) => s._uniqueId),
+                                        );
+
+                                        // Add new songs to songs array (avoiding duplicates)
+                                        newItems.forEach((item) => {
+                                            if (!existingIds.has(item._uniqueId)) {
+                                                state.queue.songs.push(item);
+                                            }
+                                        });
+
                                         state.queue.default = [];
                                         state.player.index = 0;
                                         state.player.status = PlayerStatus.PLAYING;
                                         state.player.playerNum = 1;
-                                        state.queue.default = newItems;
+                                        state.queue.default = newUniqueIds;
 
                                         if (state.player.shuffle === PlayerShuffle.TRACK) {
-                                            state.queue.shuffled = shuffleInPlace(
-                                                newItems.map((item) => item._uniqueId),
-                                            );
+                                            state.queue.shuffled = shuffleInPlace(newUniqueIds);
                                         }
                                     });
 
@@ -191,14 +226,25 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             switch (playType) {
                                 case Play.LAST: {
                                     set((state) => {
+                                        const existingIds = new Set(
+                                            state.queue.songs.map((s) => s._uniqueId),
+                                        );
+
+                                        // Add new songs to songs array (avoiding duplicates)
+                                        newItems.forEach((item) => {
+                                            if (!existingIds.has(item._uniqueId)) {
+                                                state.queue.songs.push(item);
+                                            }
+                                        });
+
                                         state.queue.priority = [
                                             ...state.queue.priority,
-                                            ...newItems,
+                                            ...newUniqueIds,
                                         ];
 
                                         state.queue.shuffled = [
                                             ...state.queue.shuffled,
-                                            ...newItems.map((item) => item._uniqueId),
+                                            ...newUniqueIds,
                                         ];
                                     });
                                     break;
@@ -208,17 +254,27 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         const currentIndex = state.player.index;
                                         const isInPriority =
                                             currentIndex < state.queue.priority.length;
+                                        const existingIds = new Set(
+                                            state.queue.songs.map((s) => s._uniqueId),
+                                        );
+
+                                        // Add new songs to songs array (avoiding duplicates)
+                                        newItems.forEach((item) => {
+                                            if (!existingIds.has(item._uniqueId)) {
+                                                state.queue.songs.push(item);
+                                            }
+                                        });
 
                                         if (isInPriority) {
                                             state.queue.priority = [
                                                 ...state.queue.priority.slice(0, currentIndex + 1),
-                                                ...newItems,
+                                                ...newUniqueIds,
                                                 ...state.queue.priority.slice(currentIndex + 1),
                                             ];
                                         } else {
                                             state.queue.priority = [
                                                 ...state.queue.priority,
-                                                ...newItems,
+                                                ...newUniqueIds,
                                             ];
                                         }
 
@@ -227,7 +283,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                             state.queue.shuffled[currentIndex],
                                             ...shuffleInPlace([
                                                 ...state.queue.shuffled.slice(currentIndex + 1),
-                                                ...newItems.map((item) => item._uniqueId),
+                                                ...newUniqueIds,
                                             ]),
                                         ];
                                     });
@@ -235,6 +291,17 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 }
                                 case Play.NOW: {
                                     set((state) => {
+                                        const existingIds = new Set(
+                                            state.queue.songs.map((s) => s._uniqueId),
+                                        );
+
+                                        // Add new songs to songs array (avoiding duplicates)
+                                        newItems.forEach((item) => {
+                                            if (!existingIds.has(item._uniqueId)) {
+                                                state.queue.songs.push(item);
+                                            }
+                                        });
+
                                         state.queue.default = [];
                                         state.player.status = PlayerStatus.PLAYING;
                                         state.player.playerNum = 1;
@@ -247,12 +314,12 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         const currentTrack = queue.items[currentIndex];
 
                                         if (queue.items.length === 0) {
-                                            state.queue.priority = [...newItems.slice(0, 1)];
-                                            state.queue.default = [...newItems.slice(1)];
+                                            state.queue.priority = [newUniqueIds[0]];
+                                            state.queue.default = newUniqueIds.slice(1);
                                             state.player.index = 0;
                                         } else if (currentTrack) {
                                             const priorityIndex = state.queue.priority.findIndex(
-                                                (item) => item._uniqueId === currentTrack._uniqueId,
+                                                (id) => id === currentTrack._uniqueId,
                                             );
 
                                             // If the current track is in the priority queue, add the first item after the current track
@@ -262,7 +329,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                                         0,
                                                         priorityIndex + 1,
                                                     ),
-                                                    ...newItems.slice(0, 1),
+                                                    newUniqueIds[0],
                                                     ...state.queue.priority.slice(
                                                         priorityIndex + 1,
                                                     ),
@@ -272,19 +339,19 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                                 state.queue.default = [
                                                     ...state.queue.default,
-                                                    ...newItems.slice(1),
+                                                    ...newUniqueIds.slice(1),
                                                 ];
                                             } else {
                                                 // If the current track is not in the priority queue, add it to the end of the priority queue
                                                 state.queue.priority = [
                                                     ...state.queue.priority.slice(0, currentIndex),
-                                                    ...newItems.slice(0, 1),
+                                                    newUniqueIds[0],
                                                     ...state.queue.priority.slice(currentIndex),
                                                 ];
 
                                                 state.queue.default = [
                                                     ...state.queue.default,
-                                                    ...newItems.slice(1),
+                                                    ...newUniqueIds.slice(1),
                                                 ];
 
                                                 state.player.index =
@@ -293,9 +360,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         }
 
                                         if (state.player.shuffle === PlayerShuffle.TRACK) {
-                                            state.queue.shuffled = shuffleInPlace(
-                                                newItems.map((item) => item._uniqueId),
-                                            );
+                                            state.queue.shuffled = shuffleInPlace(newUniqueIds);
                                         }
                                     });
                                     break;
@@ -307,24 +372,32 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 addToQueueByUniqueId: (items, uniqueId, edge) => {
                     const newItems = items.map(toQueueSong);
+                    const newUniqueIds = newItems.map((item) => item._uniqueId);
                     const queueType = getQueueType();
 
                     set((state) => {
+                        const existingIds = new Set(state.queue.songs.map((s) => s._uniqueId));
+
+                        // Add new songs to songs array (avoiding duplicates)
+                        newItems.forEach((item) => {
+                            if (!existingIds.has(item._uniqueId)) {
+                                state.queue.songs.push(item);
+                            }
+                        });
+
                         if (queueType === PlayerQueueType.DEFAULT) {
-                            const index = state.queue.default.findIndex(
-                                (item) => item._uniqueId === uniqueId,
-                            );
+                            const index = state.queue.default.findIndex((id) => id === uniqueId);
 
                             const insertIndex = Math.max(0, edge === 'top' ? index : index + 1);
 
                             // Recalculate the player index if we're inserting items above the current index
                             if (insertIndex <= state.player.index) {
-                                state.player.index = state.player.index + newItems.length;
+                                state.player.index = state.player.index + newUniqueIds.length;
                             }
 
                             const newQueue = [
                                 ...state.queue.default.slice(0, insertIndex),
-                                ...newItems,
+                                ...newUniqueIds,
                                 ...state.queue.default.slice(insertIndex),
                             ];
 
@@ -333,7 +406,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.default = newQueue;
                         } else {
                             const priorityIndex = state.queue.priority.findIndex(
-                                (item) => item._uniqueId === uniqueId,
+                                (id) => id === uniqueId,
                             );
 
                             if (priorityIndex !== -1) {
@@ -344,12 +417,12 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                 state.queue.priority = [
                                     ...state.queue.priority.slice(0, insertIndex),
-                                    ...newItems,
+                                    ...newUniqueIds,
                                     ...state.queue.priority.slice(insertIndex),
                                 ];
                             } else {
                                 const defaultIndex = state.queue.default.findIndex(
-                                    (item) => item._uniqueId === uniqueId,
+                                    (id) => id === uniqueId,
                                 );
 
                                 if (defaultIndex !== -1) {
@@ -360,7 +433,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
 
                                     state.queue.default = [
                                         ...state.queue.default.slice(0, insertIndex),
-                                        ...newItems,
+                                        ...newUniqueIds,
                                         ...state.queue.default.slice(insertIndex),
                                     ];
                                 }
@@ -374,7 +447,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     state.queue.shuffled[currentIndex],
                                     ...shuffleInPlace([
                                         ...state.queue.shuffled.slice(currentIndex + 1),
-                                        ...newItems.map((item) => item._uniqueId),
+                                        ...newUniqueIds,
                                     ]),
                                 ];
                             }
@@ -386,6 +459,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         state.player.index = -1;
                         state.queue.default = [];
                         state.queue.priority = [];
+                        state.queue.songs = [];
                     });
                 },
                 clearSelected: (items: QueueSong[]) => {
@@ -393,11 +467,20 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         const uniqueIds = items.map((item) => item._uniqueId);
 
                         state.queue.default = state.queue.default.filter(
-                            (item) => !uniqueIds.includes(item._uniqueId),
+                            (id) => !uniqueIds.includes(id),
                         );
 
                         state.queue.priority = state.queue.priority.filter(
-                            (item) => !uniqueIds.includes(item._uniqueId),
+                            (id) => !uniqueIds.includes(id),
+                        );
+
+                        // Remove songs from songs array if they're not in default or priority
+                        const remainingIds = new Set([
+                            ...state.queue.default,
+                            ...state.queue.priority,
+                        ]);
+                        state.queue.songs = state.queue.songs.filter((song) =>
+                            remainingIds.has(song._uniqueId),
                         );
 
                         const newQueue = [...state.queue.priority, ...state.queue.default];
@@ -455,10 +538,21 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 getQueueOrder: () => {
                     const queueType = getQueueType();
+                    const state = get();
+                    const songsMap = new Map(
+                        state.queue.songs.map((song) => [song._uniqueId, song]),
+                    );
 
                     if (queueType === PlayerQueueType.PRIORITY) {
-                        const defaultQueue = get().queue.default;
-                        const priorityQueue = get().queue.priority;
+                        const defaultIds = state.queue.default;
+                        const priorityIds = state.queue.priority;
+
+                        const defaultQueue = defaultIds
+                            .map((id) => songsMap.get(id))
+                            .filter((song): song is QueueSong => song !== undefined);
+                        const priorityQueue = priorityIds
+                            .map((id) => songsMap.get(id))
+                            .filter((song): song is QueueSong => song !== undefined);
 
                         return {
                             groups: [
@@ -469,7 +563,10 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         };
                     }
 
-                    const defaultQueue = get().queue.default;
+                    const defaultIds = state.queue.default;
+                    const defaultQueue = defaultIds
+                        .map((id) => songsMap.get(id))
+                        .filter((song): song is QueueSong => song !== undefined);
 
                     return {
                         groups: [{ count: defaultQueue.length, name: 'All' }],
@@ -507,24 +604,24 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     });
 
                     return {
-                        currentTrack: queue.items[newIndex],
-                        nextTrack: queue.items[newIndex + 1],
-                        player: {
-                            index: newIndex,
-                            muted: player.muted,
-                            playerNum: newPlayerNum,
-                            repeat: player.repeat,
-                            shuffle: player.shuffle,
-                            speed: player.speed,
-                            status: newStatus,
-                            transitionType: player.transitionType,
-                            volume: player.volume,
-                        },
+                        currentSong: queue.items[newIndex],
+                        index: newIndex,
+                        muted: player.muted,
+                        nextSong: queue.items[newIndex + 1],
+                        num: newPlayerNum,
                         player1:
                             newPlayerNum === 1 ? queue.items[newIndex] : queue.items[newIndex + 1],
                         player2:
                             newPlayerNum === 2 ? queue.items[newIndex] : queue.items[newIndex + 1],
+                        previousSong: queue.items[newIndex - 1],
                         queue: get().queue,
+                        queueLength: queue.items.length,
+                        repeat: player.repeat,
+                        shuffle: player.shuffle,
+                        speed: player.speed,
+                        status: newStatus,
+                        transitionType: player.transitionType,
+                        volume: player.volume,
                     };
                 },
                 mediaNext: () => {
@@ -600,6 +697,16 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         state.player.seekToTimestamp = uniqueSeekToTimestamp(newTimestamp);
                     });
                 },
+                mediaStop: () => {
+                    set((state) => {
+                        state.player.status = PlayerStatus.PAUSED;
+                        state.player.timestamp = 0;
+                        state.player.index = -1;
+                        state.queue.default = [];
+                        state.queue.priority = [];
+                        state.queue.songs = [];
+                    });
+                },
                 mediaToggleMute: () => {
                     set((state) => {
                         state.player.muted = !state.player.muted;
@@ -608,42 +715,48 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 mediaTogglePlayPause: () => {
                     set((state) => {
                         if (state.player.status === PlayerStatus.PLAYING) {
-                            state.mediaPause();
+                            state.player.status = PlayerStatus.PAUSED;
                         } else {
-                            state.mediaPlay();
+                            state.player.status = PlayerStatus.PLAYING;
                         }
                     });
                 },
                 moveSelectedTo: (items: QueueSong[], uniqueId: string, edge: 'bottom' | 'top') => {
                     const queueType = getQueueType();
+                    const itemUniqueIds = items.map((item) => item._uniqueId);
 
                     set((state) => {
-                        const uniqueIdMap = new Map(items.map((item) => [item._uniqueId, item]));
+                        const existingIds = new Set(state.queue.songs.map((s) => s._uniqueId));
+
+                        // Add new songs to songs array (avoiding duplicates)
+                        items.forEach((item) => {
+                            if (!existingIds.has(item._uniqueId)) {
+                                state.queue.songs.push(item);
+                            }
+                        });
 
                         if (queueType == PlayerQueueType.DEFAULT) {
                             // Find the index of the drop target
-                            const index = state.queue.default.findIndex(
-                                (item) => item._uniqueId === uniqueId,
-                            );
+                            const index = state.queue.default.findIndex((id) => id === uniqueId);
 
                             // Get the new index based on the edge
                             const insertIndex = Math.max(0, edge === 'top' ? index : index + 1);
 
-                            const itemsBefore = state.queue.default
+                            const idsBefore = state.queue.default
                                 .slice(0, insertIndex)
-                                .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                .filter((id) => !itemUniqueIds.includes(id));
 
-                            const itemsAfter = state.queue.default
+                            const idsAfter = state.queue.default
                                 .slice(insertIndex)
-                                .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                .filter((id) => !itemUniqueIds.includes(id));
 
-                            const newQueue = [...itemsBefore, ...items, ...itemsAfter];
+                            const newQueue = [...idsBefore, ...itemUniqueIds, ...idsAfter];
 
                             recalculatePlayerIndex(state, newQueue);
                             state.queue.default = newQueue;
                         } else {
                             const priorityIndex = state.queue.priority.findIndex(
-                                (item) => item._uniqueId === uniqueId,
+                                (id) => id === uniqueId,
                             );
 
                             // If the item is in the priority queue
@@ -653,18 +766,22 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                     edge === 'top' ? priorityIndex : priorityIndex + 1,
                                 );
 
-                                const itemsBefore = state.queue.priority
+                                const idsBefore = state.queue.priority
                                     .slice(0, newIndex)
-                                    .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                    .filter((id) => !itemUniqueIds.includes(id));
 
-                                const itemsAfter = state.queue.priority
+                                const idsAfter = state.queue.priority
                                     .slice(newIndex)
-                                    .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                    .filter((id) => !itemUniqueIds.includes(id));
 
-                                const newPriorityQueue = [...itemsBefore, ...items, ...itemsAfter];
+                                const newPriorityQueue = [
+                                    ...idsBefore,
+                                    ...itemUniqueIds,
+                                    ...idsAfter,
+                                ];
 
                                 const newDefaultQueue = state.queue.default.filter(
-                                    (item) => !uniqueIdMap.has(item._uniqueId),
+                                    (id) => !itemUniqueIds.includes(id),
                                 );
 
                                 recalculatePlayerIndex(state, newPriorityQueue);
@@ -673,7 +790,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 state.queue.default = newDefaultQueue;
                             } else {
                                 const defaultIndex = state.queue.default.findIndex(
-                                    (item) => item._uniqueId === uniqueId,
+                                    (id) => id === uniqueId,
                                 );
 
                                 if (defaultIndex !== -1) {
@@ -682,22 +799,22 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         edge === 'top' ? defaultIndex : defaultIndex + 1,
                                     );
 
-                                    const itemsBefore = state.queue.default
+                                    const idsBefore = state.queue.default
                                         .slice(0, newIndex)
-                                        .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                        .filter((id) => !itemUniqueIds.includes(id));
 
-                                    const itemsAfter = state.queue.default
+                                    const idsAfter = state.queue.default
                                         .slice(newIndex)
-                                        .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                        .filter((id) => !itemUniqueIds.includes(id));
 
                                     const newDefaultQueue = [
-                                        ...itemsBefore,
-                                        ...items,
-                                        ...itemsAfter,
+                                        ...idsBefore,
+                                        ...itemUniqueIds,
+                                        ...idsAfter,
                                     ];
 
                                     const newPriorityQueue = state.queue.priority.filter(
-                                        (item) => !uniqueIdMap.has(item._uniqueId),
+                                        (id) => !itemUniqueIds.includes(id),
                                     );
 
                                     recalculatePlayerIndex(state, newDefaultQueue);
@@ -712,16 +829,24 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 moveSelectedToBottom: (items: QueueSong[]) => {
                     set((state) => {
                         const uniqueIds = items.map((item) => item._uniqueId);
+                        const existingIds = new Set(state.queue.songs.map((s) => s._uniqueId));
+
+                        // Add new songs to songs array (avoiding duplicates)
+                        items.forEach((item) => {
+                            if (!existingIds.has(item._uniqueId)) {
+                                state.queue.songs.push(item);
+                            }
+                        });
 
                         if (state.player.queueType === PlayerQueueType.PRIORITY) {
                             const priorityFiltered = state.queue.priority.filter(
-                                (item) => !uniqueIds.includes(item._uniqueId),
+                                (id) => !uniqueIds.includes(id),
                             );
 
-                            const newPriorityQueue = [...priorityFiltered, ...items];
+                            const newPriorityQueue = [...priorityFiltered, ...uniqueIds];
 
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item._uniqueId),
+                                (id) => !uniqueIds.includes(id),
                             );
 
                             const newDefaultQueue = [...filtered];
@@ -732,10 +857,10 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.priority = newPriorityQueue;
                         } else {
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item._uniqueId),
+                                (id) => !uniqueIds.includes(id),
                             );
 
-                            const newQueue = [...filtered, ...items];
+                            const newQueue = [...filtered, ...uniqueIds];
 
                             recalculatePlayerIndex(state, newQueue);
 
@@ -753,16 +878,24 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         const uniqueId = currentTrack?._uniqueId;
 
                         const uniqueIds = items.map((item) => item._uniqueId);
+                        const existingIds = new Set(state.queue.songs.map((s) => s._uniqueId));
+
+                        // Add new songs to songs array (avoiding duplicates)
+                        items.forEach((item) => {
+                            if (!existingIds.has(item._uniqueId)) {
+                                state.queue.songs.push(item);
+                            }
+                        });
 
                         if (queueType === PlayerQueueType.DEFAULT) {
                             const currentIndex = state.player.index;
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item._uniqueId),
+                                (id) => !uniqueIds.includes(id),
                             );
 
                             const newQueue = [
                                 ...filtered.slice(0, currentIndex + 1),
-                                ...items,
+                                ...uniqueIds,
                                 ...filtered.slice(currentIndex + 1),
                             ];
 
@@ -770,29 +903,25 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.default = newQueue;
                         } else {
                             const priorityIndex = state.queue.priority.findIndex(
-                                (item) => item._uniqueId === uniqueId,
-                            );
-
-                            const uniqueIdMap = new Map(
-                                items.map((item) => [item._uniqueId, item]),
+                                (id) => id === uniqueId,
                             );
 
                             // If the item is in the priority queue
                             if (priorityIndex !== -1) {
                                 const newIndex = Math.max(0, priorityIndex + 1);
 
-                                const itemsBefore = state.queue.priority
+                                const idsBefore = state.queue.priority
                                     .slice(0, newIndex)
-                                    .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                    .filter((id) => !uniqueIds.includes(id));
 
-                                const itemsAfter = state.queue.priority
+                                const idsAfter = state.queue.priority
                                     .slice(newIndex)
-                                    .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                    .filter((id) => !uniqueIds.includes(id));
 
-                                const newPriorityQueue = [...itemsBefore, ...items, ...itemsAfter];
+                                const newPriorityQueue = [...idsBefore, ...uniqueIds, ...idsAfter];
 
                                 const newDefaultQueue = state.queue.default.filter(
-                                    (item) => !uniqueIdMap.has(item._uniqueId),
+                                    (id) => !uniqueIds.includes(id),
                                 );
 
                                 recalculatePlayerIndex(state, newPriorityQueue);
@@ -801,28 +930,28 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 state.queue.default = newDefaultQueue;
                             } else {
                                 const defaultIndex = state.queue.default.findIndex(
-                                    (item) => item._uniqueId === uniqueId,
+                                    (id) => id === uniqueId,
                                 );
 
                                 if (defaultIndex !== -1) {
                                     const newIndex = Math.max(0, defaultIndex + 1);
 
-                                    const itemsBefore = state.queue.default
+                                    const idsBefore = state.queue.default
                                         .slice(0, newIndex)
-                                        .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                        .filter((id) => !uniqueIds.includes(id));
 
-                                    const itemsAfter = state.queue.default
+                                    const idsAfter = state.queue.default
                                         .slice(newIndex)
-                                        .filter((item) => !uniqueIdMap.has(item._uniqueId));
+                                        .filter((id) => !uniqueIds.includes(id));
 
                                     const newDefaultQueue = [
-                                        ...itemsBefore,
-                                        ...items,
-                                        ...itemsAfter,
+                                        ...idsBefore,
+                                        ...uniqueIds,
+                                        ...idsAfter,
                                     ];
 
                                     const newPriorityQueue = state.queue.priority.filter(
-                                        (item) => !uniqueIdMap.has(item._uniqueId),
+                                        (id) => !uniqueIds.includes(id),
                                     );
 
                                     recalculatePlayerIndex(state, newDefaultQueue);
@@ -837,16 +966,24 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 moveSelectedToTop: (items: QueueSong[]) => {
                     set((state) => {
                         const uniqueIds = items.map((item) => item._uniqueId);
+                        const existingIds = new Set(state.queue.songs.map((s) => s._uniqueId));
+
+                        // Add new songs to songs array (avoiding duplicates)
+                        items.forEach((item) => {
+                            if (!existingIds.has(item._uniqueId)) {
+                                state.queue.songs.push(item);
+                            }
+                        });
 
                         if (state.player.queueType === PlayerQueueType.PRIORITY) {
                             const priorityFiltered = state.queue.priority.filter(
-                                (item) => !uniqueIds.includes(item._uniqueId),
+                                (id) => !uniqueIds.includes(id),
                             );
 
-                            const newPriorityQueue = [...items, ...priorityFiltered];
+                            const newPriorityQueue = [...uniqueIds, ...priorityFiltered];
 
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item._uniqueId),
+                                (id) => !uniqueIds.includes(id),
                             );
 
                             const newDefaultQueue = [...filtered];
@@ -857,10 +994,10 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             state.queue.priority = newPriorityQueue;
                         } else {
                             const filtered = state.queue.default.filter(
-                                (item) => !uniqueIds.includes(item._uniqueId),
+                                (id) => !uniqueIds.includes(id),
                             );
 
-                            const newQueue = [...items, ...filtered];
+                            const newQueue = [...uniqueIds, ...filtered];
 
                             recalculatePlayerIndex(state, newQueue);
 
@@ -889,6 +1026,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     default: [],
                     priority: [],
                     shuffled: [],
+                    songs: [],
                 },
                 setCrossfadeDuration: (duration: number) => {
                     set((state) => {
@@ -928,7 +1066,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     set((state) => {
                         state.player.shuffle = shuffle;
                         const queue = state.queue.default;
-                        state.queue.shuffled = shuffleInPlace(queue.map((item) => item._uniqueId));
+                        state.queue.shuffled = shuffleInPlace([...queue]);
                     });
                 },
                 setSpeed: (speed: number) => {
@@ -950,26 +1088,48 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 shuffle: () => {
                     set((state) => {
                         const queue = state.queue.default;
-                        state.queue.shuffled = shuffleInPlace(queue.map((item) => item._uniqueId));
+                        state.queue.shuffled = shuffleInPlace([...queue]);
                     });
                 },
                 shuffleAll: () => {
                     set((state) => {
                         const queue = state.queue.default;
-                        state.queue.default = shuffleInPlace(queue);
+                        state.queue.default = shuffleInPlace([...queue]);
                     });
                 },
                 shuffleSelected: (items: QueueSong[]) => {
                     set((state) => {
-                        const indices = items.map((item) =>
-                            state.queue.default.findIndex((i) => i._uniqueId === item._uniqueId),
+                        const itemUniqueIds = items.map((item) => item._uniqueId);
+                        const indices = itemUniqueIds.map((id) =>
+                            state.queue.default.findIndex((i) => i === id),
                         );
 
-                        const shuffledItems = shuffleInPlace(items);
+                        const shuffledIds = shuffleInPlace([...itemUniqueIds]);
 
                         indices.forEach((i, index) => {
-                            state.queue.default[i] = shuffledItems[index];
+                            if (i !== -1) {
+                                state.queue.default[i] = shuffledIds[index];
+                            }
                         });
+                    });
+                },
+                toggleRepeat: () => {
+                    set((state) => {
+                        if (state.player.repeat === PlayerRepeat.NONE) {
+                            state.player.repeat = PlayerRepeat.ONE;
+                        } else if (state.player.repeat === PlayerRepeat.ONE) {
+                            state.player.repeat = PlayerRepeat.ALL;
+                        } else {
+                            state.player.repeat = PlayerRepeat.NONE;
+                        }
+                    });
+                },
+                toggleShuffle: () => {
+                    set((state) => {
+                        state.player.shuffle =
+                            state.player.shuffle === PlayerShuffle.NONE
+                                ? PlayerShuffle.TRACK
+                                : PlayerShuffle.NONE;
                     });
                 },
             })),
@@ -1010,6 +1170,7 @@ export const usePlayerActions = () => {
             mediaSeekToTimestamp: state.mediaSeekToTimestamp,
             mediaSkipBackward: state.mediaSkipBackward,
             mediaSkipForward: state.mediaSkipForward,
+            mediaStop: state.mediaStop,
             mediaToggleMute: state.mediaToggleMute,
             mediaTogglePlayPause: state.mediaTogglePlayPause,
             moveSelectedTo: state.moveSelectedTo,
@@ -1026,6 +1187,8 @@ export const usePlayerActions = () => {
             shuffle: state.shuffle,
             shuffleAll: state.shuffleAll,
             shuffleSelected: state.shuffleSelected,
+            toggleRepeat: state.toggleRepeat,
+            toggleShuffle: state.toggleShuffle,
         })),
     );
 };
@@ -1048,73 +1211,6 @@ export async function addToQueueByData(type: AddToQueueType, data: Song[]) {
         const normalizedEdge = type.edge === 'top' ? 'top' : 'bottom';
         usePlayerStoreBase.getState().addToQueueByUniqueId(items, type.uniqueId, normalizedEdge);
     }
-}
-
-export async function addToQueueByFetch(
-    queryClient: QueryClient,
-    libraryId: string,
-    type: AddToQueueType,
-    args: {
-        id: string[];
-        itemType: LibraryItemType;
-        params?: GetApiLibraryIdAlbumsIdTracksParams;
-    },
-) {
-    // const items: TrackItem[] = [];
-    // if (args.itemType === LibraryItemType.ALBUM) {
-    //     for (const id of args.id) {
-    //         const result = await fetchTracksByAlbumId(queryClient, libraryId, id, {
-    //             limit: '-1',
-    //             offset: '0',
-    //             sortBy: TrackListSortOptions.ID,
-    //             sortOrder: ListSortOrder.ASC,
-    //             ...args.params,
-    //         });
-    //         items.push(...result.data);
-    //     }
-    // } else if (args.itemType === LibraryItemType.PLAYLIST) {
-    //     for (const id of args.id) {
-    //         const result = await fetchTracksByPlaylistId(queryClient, libraryId, id, {
-    //             limit: '-1',
-    //             offset: '0',
-    //             sortBy: TrackListSortOptions.ID,
-    //             sortOrder: ListSortOrder.ASC,
-    //             ...args.params,
-    //         });
-    //         items.push(...result.data);
-    //     }
-    // } else if (args.itemType === LibraryItemType.GENRE) {
-    //     for (const id of args.id) {
-    //         const result = await fetchTracksByGenreId(queryClient, libraryId, id, {
-    //             limit: '-1',
-    //             offset: '0',
-    //             sortBy: TrackListSortOptions.ID,
-    //             sortOrder: ListSortOrder.ASC,
-    //             ...args.params,
-    //         });
-    //         items.push(...result.data);
-    //     }
-    // } else if (
-    //     args.itemType === LibraryItemType.ALBUM_ARTIST ||
-    //     args.itemType === LibraryItemType.ARTIST
-    // ) {
-    //     for (const id of args.id) {
-    //         const result = await fetchTracksByAlbumArtistId(queryClient, libraryId, id, {
-    //             limit: '-1',
-    //             offset: '0',
-    //             sortBy: TrackListSortOptions.ID,
-    //             sortOrder: ListSortOrder.ASC,
-    //             ...args.params,
-    //         });
-    //         items.push(...result.data);
-    //     }
-    // }
-    // if (typeof type === 'string') {
-    //     usePlayerStoreBase.getState().addToQueueByType(items, type);
-    // } else {
-    //     const normalizedEdge = type.edge === 'top' ? 'top' : 'bottom';
-    //     usePlayerStoreBase.getState().addToQueueByUniqueId(items, type.uniqueId, normalizedEdge);
-    // }
 }
 
 export const subscribePlayerQueue = (
@@ -1174,22 +1270,12 @@ export const subscribePlayerVolume = (
 };
 
 export const subscribePlayerStatus = (
-    onChange: (
-        properties: { song: QueueSong | undefined; status: PlayerStatus },
-        prev: { song: QueueSong | undefined; status: PlayerStatus },
-    ) => void,
+    onChange: (properties: { status: PlayerStatus }, prev: { status: PlayerStatus }) => void,
 ) => {
     return usePlayerStoreBase.subscribe(
-        (state) => {
-            const currentSong = state.getCurrentSong();
-
-            return {
-                song: currentSong,
-                status: state.player.status,
-            };
-        },
+        (state) => state.player.status,
         (status, prevStatus) => {
-            onChange(status, prevStatus);
+            onChange({ status }, { status: prevStatus });
         },
     );
 };
@@ -1265,42 +1351,41 @@ export const usePlayerData = (): PlayerData => {
         useShallow((state) => {
             const queue = state.getQueue();
             const index = state.player.index;
-            const currentTrack = queue.items[index];
-            const nextTrack = queue.items[index + 1];
+            const currentSong = queue.items[index];
+            const nextSong = queue.items[index + 1];
+            const previousSong = queue.items[index - 1];
 
             return {
-                currentTrack,
-                nextTrack,
-                player: state.player,
-                player1: state.player.playerNum === 1 ? currentTrack : nextTrack,
-                player2: state.player.playerNum === 2 ? currentTrack : nextTrack,
+                currentSong,
+                index,
+                muted: state.player.muted,
+                nextSong,
+                num: state.player.playerNum,
+                player1: state.player.playerNum === 1 ? currentSong : nextSong,
+                player2: state.player.playerNum === 2 ? currentSong : nextSong,
+                previousSong,
                 queue: state.queue,
+                queueLength: state.queue.default.length + state.queue.priority.length,
+                repeat: state.player.repeat,
+                shuffle: state.player.shuffle,
+                speed: state.player.speed,
+                status: state.player.status,
+                transitionType: state.player.transitionType,
+                volume: state.player.volume,
             };
         }),
     );
 };
 
 export const updateQueueFavorites = (ids: string[], favorite: boolean) => {
-    const queue = usePlayerStore.getState().queue;
-
-    const defaultQueue = queue.default.map((item) => {
-        if (ids.includes(item.id)) {
-            return { ...item, userFavorite: favorite };
-        }
-
-        return item;
-    });
-
-    const priorityQueue = queue.priority.map((item) => {
-        if (ids.includes(item.id)) {
-            return { ...item, userFavorite: favorite };
-        }
-
-        return item;
-    });
-
-    usePlayerStoreBase.setState({
-        queue: { default: defaultQueue, priority: priorityQueue, shuffled: queue.shuffled },
+    usePlayerStoreBase.setState((state) => {
+        // Update songs in the songs array
+        state.queue.songs.forEach((song) => {
+            if (ids.includes(song.id)) {
+                song.userFavorite = favorite;
+            }
+        });
+        // default and priority are just uniqueId arrays, so they don't need updating
     });
 };
 
@@ -1372,14 +1457,14 @@ function parseUniqueSeekToTimestamp(timestamp: string) {
     return Number(timestamp.split('-')[0]);
 }
 
-function recalculatePlayerIndex(state: any, queue: QueueSong[]) {
-    const currentTrack = state.getCurrentTrack() as QueueSong | undefined;
+function recalculatePlayerIndex(state: any, queue: string[]) {
+    const currentTrack = state.getCurrentSong() as QueueSong | undefined;
 
     if (!currentTrack) {
         return;
     }
 
-    const index = queue.findIndex((item) => item._uniqueId === currentTrack._uniqueId);
+    const index = queue.findIndex((id) => id === currentTrack._uniqueId);
     state.player.index = Math.max(0, index);
 }
 
