@@ -10,7 +10,7 @@ import { CommandPalette } from '/@/renderer/features/search/components/command-p
 import { MainContent } from '/@/renderer/layouts/default-layout/main-content';
 import { PlayerBar } from '/@/renderer/layouts/default-layout/player-bar';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useAppStore, useCommandPalette } from '/@/renderer/store';
+import { useCommandPalette } from '/@/renderer/store';
 import {
     useGeneralSettings,
     useHotkeySettings,
@@ -48,8 +48,6 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
     const settings = useGeneralSettings();
     const { setSettings } = useSettingsStoreActions();
 
-    const { privateMode } = useAppStore();
-
     const updateZoom = (increase: number) => {
         const newVal = settings.zoomFactor + increase;
         if (newVal > 300 || newVal < 50 || !isElectron()) return;
@@ -76,19 +74,6 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
         ...(isElectron() ? zoomHotkeys : []),
     ]);
 
-    // const title = useMemo(() => {
-    //     const statusString = playerStatus === PlayerStatus.PAUSED ? '(Paused) ' : '';
-    //     const queueString = length ? `(${index + 1} / ${length}) ` : '';
-    //     const privateModeString = privateMode ? '(Private mode)' : '';
-    //     const title = `${
-    //         length
-    //             ? `${statusString}${queueString}${currentSong?.name}${currentSong?.artistName ? ` — ${currentSong?.artistName} — Feishin` : ''}`
-    //             : 'Feishin'
-    //     }${privateMode ? ` ${privateModeString}` : ''}`;
-    //     document.title = title;
-    //     return title;
-    // }, [currentSong?.artistName, currentSong?.name, index, length, playerStatus, privateMode]);
-
     return (
         <>
             <div
@@ -98,7 +83,7 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
                 })}
                 id="default-layout"
             >
-                {windowBarStyle !== Platform.WEB && <WindowBar title="" />}
+                <WindowBar />
                 <MainContent shell={shell} />
                 <PlayerBar />
             </div>
