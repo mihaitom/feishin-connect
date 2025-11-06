@@ -41,8 +41,8 @@ interface Actions {
     mediaPlay: (id?: string) => void;
     mediaPrevious: () => void;
     mediaSeekToTimestamp: (timestamp: number) => void;
-    mediaSkipBackward: () => void;
-    mediaSkipForward: () => void;
+    mediaSkipBackward: (offset?: number) => void;
+    mediaSkipForward: (offset?: number) => void;
     mediaStop: () => void;
     mediaToggleMute: () => void;
     mediaTogglePlayPause: () => void;
@@ -603,24 +603,25 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         state.player.seekToTimestamp = uniqueSeekToTimestamp(timestamp);
                     });
                 },
-                mediaSkipBackward: () => {
+                mediaSkipBackward: (offset?: number) => {
                     set((state) => {
-                        const timeToSkip =
-                            useSettingsStore.getState().general.skipButtons.skipBackwardSeconds ||
-                            5;
+                        const offsetFromSettings =
+                            useSettingsStore.getState().general.skipButtons.skipBackwardSeconds;
+                        const timeToSkip = offset ?? offsetFromSettings ?? 5;
                         const newTimestamp = Math.max(0, state.player.timestamp - timeToSkip);
 
                         state.player.seekToTimestamp = uniqueSeekToTimestamp(newTimestamp);
                     });
                 },
-                mediaSkipForward: () => {
+                mediaSkipForward: (offset?: number) => {
                     set((state) => {
                         const queue = state.getQueue();
                         const index = state.player.index;
                         const currentTrack = queue.items[index];
                         const duration = currentTrack?.duration;
-                        const timeToSkip =
-                            useSettingsStore.getState().general.skipButtons.skipForwardSeconds || 5;
+                        const offsetFromSettings =
+                            useSettingsStore.getState().general.skipButtons.skipForwardSeconds;
+                        const timeToSkip = offset ?? offsetFromSettings ?? 5;
 
                         if (!duration) {
                             return;
