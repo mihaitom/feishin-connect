@@ -1,6 +1,5 @@
 import isElectron from 'is-electron';
 import { useEffect } from 'react';
-import { ipc } from 'src/preload/ipc';
 
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
@@ -11,6 +10,7 @@ import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { PlayerShuffle } from '/@/shared/types/types';
 
 const remote = isElectron() ? window.api.remote : null;
+const ipc = isElectron() ? window.api.ipc : null;
 
 export const useRemote = () => {
     const { mediaSkipForward, setTimestamp, setVolume } = usePlayerActions();
