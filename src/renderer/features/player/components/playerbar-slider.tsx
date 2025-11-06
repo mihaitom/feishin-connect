@@ -6,6 +6,7 @@ import styles from './playerbar-slider.module.css';
 import { MpvPlayer } from '/@/renderer/features/player/audio-player/mpv-player';
 import { WebPlayer } from '/@/renderer/features/player/audio-player/web-player';
 import { usePlayerContext } from '/@/renderer/features/player/context/player-context';
+import { useRemote } from '/@/renderer/features/remote/hooks/use-remote';
 import {
     useAppStore,
     useAppStoreActions,
@@ -48,6 +49,8 @@ export const PlayerbarSlider = ({ ...props }: SliderProps) => {
             }
         };
     }, []);
+
+    useRemote();
 
     return (
         <>
