@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import styles from './playerbar-slider.module.css';
 
+import { MpvPlayer } from '/@/renderer/features/player/audio-player/mpv-player';
 import { WebPlayer } from '/@/renderer/features/player/audio-player/web-player';
 import { usePlayerContext } from '/@/renderer/features/player/context/player-context';
 import {
@@ -113,6 +114,7 @@ export const PlayerbarSlider = ({ ...props }: SliderProps) => {
                 </div>
             </div>
             {playbackType === PlayerType.WEB && <WebPlayer />}
+            {playbackType === PlayerType.LOCAL && <MpvPlayer />}
         </>
     );
 };

@@ -9,16 +9,16 @@ import {
     PLAYLIST_CONTEXT_MENU_ITEMS,
 } from '/@/renderer/features/context-menu/context-menu-items';
 import { useHandleGridContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
+import { usePlayerContext } from '/@/renderer/features/player/context/player-context';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { Icon } from '/@/shared/components/icon/icon';
 import { LibraryItem } from '/@/shared/types/domain-types';
-import { Play, PlayQueueAddOptions } from '/@/shared/types/types';
+import { Play } from '/@/shared/types/types';
 
 export const GridCardControls = ({
     handleFavorite,
-    handlePlayQueueAdd,
     isHovered,
     itemData,
     itemType,
@@ -30,7 +30,6 @@ export const GridCardControls = ({
         itemType: LibraryItem;
         serverId: string;
     }) => void;
-    handlePlayQueueAdd?: (options: PlayQueueAddOptions) => void;
     isHovered?: boolean;
     itemData: any;
     itemType: LibraryItem;
@@ -39,17 +38,18 @@ export const GridCardControls = ({
     const [isFavorite, setIsFavorite] = useState(itemData?.userFavorite);
     const playButtonBehavior = usePlayButtonBehavior();
 
+    const player = usePlayerContext();
+
     const handlePlay = async (e: MouseEvent<HTMLButtonElement>, playType?: Play) => {
         e.preventDefault();
         e.stopPropagation();
 
-        handlePlayQueueAdd?.({
-            byItemType: {
-                id: [itemData.id],
-                type: itemType,
-            },
-            playType: playType || playButtonBehavior,
-        });
+        player.addToQueueByFetch(
+            itemData._serverId,
+            [itemData.id],
+            itemType,
+            playType || playButtonBehavior,
+        );
     };
 
     const handleFavorites = async (e: MouseEvent<HTMLButtonElement>, serverId: string) => {

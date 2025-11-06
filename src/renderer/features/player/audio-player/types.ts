@@ -6,3 +6,8 @@ export interface AudioPlayer {
     seekTo(seekTo: number): void;
     setVolume(volume: number): void;
 }
+
+export interface PlayerOnProgressProps {
+    played: number;
+    playedSeconds: number;
+}

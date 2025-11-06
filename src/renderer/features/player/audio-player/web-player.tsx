@@ -2,11 +2,14 @@ import type { Dispatch } from 'react';
 import type ReactPlayer from 'react-player';
 
 import { useCallback, useRef, useState } from 'react';
-import { OnProgressProps } from 'react-player/base';
 
-import { WebPlayerEngine, WebPlayerEngineHandle } from './engine/web-player-engine';
-
-import { usePlayerEvents } from '/@/renderer/features/player/audio-player/listener/use-player-events';
+import {
+    WebPlayerEngine,
+    WebPlayerEngineHandle,
+} from '/@/renderer/features/player/audio-player/engine/web-player-engine';
+import { useMainPlayerListener } from '/@/renderer/features/player/audio-player/hooks/use-main-player-listener';
+import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
+import { PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
 import {
     usePlayerActions,
     usePlayerData,
@@ -22,7 +25,7 @@ const PLAY_PAUSE_FADE_INTERVAL = 10;
 export function WebPlayer() {
     const playerRef = useRef<WebPlayerEngineHandle>(null);
     const { num, player1, player2, status } = usePlayerData();
-    const { mediaAutoNext, setProgress } = usePlayerActions();
+    const { mediaAutoNext, setTimestamp } = usePlayerActions();
     const { crossfadeDuration, speed, transitionType } = usePlayerProperties();
     const isMuted = usePlayerMuted();
     const volume = usePlayerVolume();
@@ -67,11 +70,11 @@ export function WebPlayer() {
     );
 
     const onProgressPlayer1 = useCallback(
-        (e: OnProgressProps) => {
+        (e: PlayerOnProgressProps) => {
             if (transitionType === 'crossfade' && num === 1) {
-                setProgress(Number(e.playedSeconds.toFixed(0)));
+                setTimestamp(Number(e.playedSeconds.toFixed(0)));
             } else if (transitionType === 'gapless') {
-                setProgress(Number(e.playedSeconds.toFixed(0)));
+                setTimestamp(Number(e.playedSeconds.toFixed(0)));
             }
 
             if (!playerRef.current?.player1()) {
@@ -105,15 +108,15 @@ export function WebPlayer() {
                     break;
             }
         },
-        [crossfadeDuration, isTransitioning, num, setProgress, transitionType, volume],
+        [crossfadeDuration, isTransitioning, num, setTimestamp, transitionType, volume],
     );
 
     const onProgressPlayer2 = useCallback(
-        (e: OnProgressProps) => {
+        (e: PlayerOnProgressProps) => {
             if (transitionType === PlayerStyle.CROSSFADE && num === 2) {
-                setProgress(Number(e.playedSeconds.toFixed(0)));
+                setTimestamp(Number(e.playedSeconds.toFixed(0)));
             } else if (transitionType === PlayerStyle.GAPLESS) {
-                setProgress(Number(e.playedSeconds.toFixed(0)));
+                setTimestamp(Number(e.playedSeconds.toFixed(0)));
             }
 
             if (!playerRef.current?.player2()) {
@@ -147,7 +150,7 @@ export function WebPlayer() {
                     break;
             }
         },
-        [crossfadeDuration, isTransitioning, num, setProgress, transitionType, volume],
+        [crossfadeDuration, isTransitioning, num, setTimestamp, transitionType, volume],
     );
 
     const handleOnEndedPlayer1 = useCallback(() => {
@@ -201,6 +204,8 @@ export function WebPlayer() {
         },
         [volume, num, isTransitioning],
     );
+
+    useMainPlayerListener();
 
     return (
         <WebPlayerEngine

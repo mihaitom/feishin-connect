@@ -1,15 +1,9 @@
-import type {
-    CellDoubleClickedEvent,
-    RowClassRules,
-    RowDragEvent,
-    RowNode,
-} from '@ag-grid-community/core';
+import type { RowClassRules, RowDragEvent, RowNode } from '@ag-grid-community/core';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 import type { Ref } from 'react';
 
-import { useMergedRef } from '@mantine/hooks';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
-import isElectron from 'is-electron';
+import { useMergedRef } from '@mantine/hooks';
 import debounce from 'lodash/debounce';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -19,29 +13,22 @@ import { getColumnDefs, VirtualTable } from '/@/renderer/components/virtual-tabl
 import { ErrorFallback } from '/@/renderer/features/action-required/components/error-fallback';
 import { QUEUE_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
 import { useHandleTableContextMenu } from '/@/renderer/features/context-menu/hooks/use-handle-context-menu';
-import { PlayersRef } from '/@/renderer/features/player/ref/players-ref';
-import { updateSong } from '/@/renderer/features/player/update-remote-song';
 import { useAppFocus } from '/@/renderer/hooks';
 import {
     useAppStoreActions,
     usePlayerQueue,
     usePlayerSong,
     usePlayerStatus,
-    usePlayerVolume,
 } from '/@/renderer/store';
 import {
     PersistedTableColumn,
-    usePlaybackType,
     useSettingsStore,
     useSettingsStoreActions,
     useTableSettings,
 } from '/@/renderer/store/settings.store';
 import { searchSongs } from '/@/renderer/utils/search-songs';
-import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
 import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
-import { PlayerType, TableType } from '/@/shared/types/types';
-
-const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
+import { TableType } from '/@/shared/types/types';
 
 type QueueProps = {
     searchTerm?: string;
@@ -52,17 +39,12 @@ export const PlayQueue = forwardRef(({ searchTerm, type }: QueueProps, ref: Ref<
     const tableRef = useRef<AgGridReactType | null>(null);
     const mergedRef = useMergedRef(ref, tableRef);
     const queue = usePlayerQueue();
-    // const { reorderQueue, setCurrentTrack } = useQueueControls();
     const currentSong = usePlayerSong();
-    // const previousSong = usePreviousSong();
     const status = usePlayerStatus();
     const { setSettings } = useSettingsStoreActions();
     const { setAppStore } = useAppStoreActions();
     const tableConfig = useTableSettings(type);
     const [gridApi, setGridApi] = useState<AgGridReactType | undefined>();
-    const playbackType = usePlaybackType();
-    // const { play } = usePlayerControls();
-    const volume = usePlayerVolume();
     const isFocused = useAppFocus();
     const isFocusedRef = useRef<boolean>(isFocused);
 

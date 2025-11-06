@@ -3,16 +3,9 @@ import type { RefObject } from 'react';
 import { useImperativeHandle, useRef, useState } from 'react';
 import ReactPlayer from 'react-player';
 
-import { AudioPlayer } from '/@/renderer/features/player/audio-player/types';
+import { AudioPlayer, PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
 import { convertToLogVolume } from '/@/renderer/features/player/audio-player/utils/player-utils';
 import { PlayerStatus } from '/@/shared/types/types';
-
-export interface OnProgressProps {
-    loaded: number;
-    loadedSeconds: number;
-    played: number;
-    playedSeconds: number;
-}
 
 export interface WebPlayerEngineHandle extends AudioPlayer {
     player1(): {
@@ -30,8 +23,8 @@ interface WebPlayerEngineProps {
     isTransitioning: boolean;
     onEndedPlayer1: () => void;
     onEndedPlayer2: () => void;
-    onProgressPlayer1: (e: OnProgressProps) => void;
-    onProgressPlayer2: (e: OnProgressProps) => void;
+    onProgressPlayer1: (e: PlayerOnProgressProps) => void;
+    onProgressPlayer2: (e: PlayerOnProgressProps) => void;
     playerNum: number;
     playerRef: RefObject<WebPlayerEngineHandle>;
     playerStatus: PlayerStatus;

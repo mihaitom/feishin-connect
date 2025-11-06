@@ -59,7 +59,6 @@ export const PosterCard = ({
                     <Image className={styles.image} src={data?.imageUrl} />
                     <GridCardControls
                         handleFavorite={controls.handleFavorite}
-                        handlePlayQueueAdd={controls.handlePlayQueueAdd}
                         isHovered={isHovered}
                         itemData={data}
                         itemType={controls.itemType}

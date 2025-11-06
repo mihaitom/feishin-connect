@@ -6,14 +6,13 @@ import {
     SettingOption,
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
-import { usePlayerStatus, usePlayerStore } from '/@/renderer/store';
+import { usePlayerStatus } from '/@/renderer/store';
 import { usePlaybackSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
-import { setQueue } from '/@/renderer/utils/set-transcoded-queue-data';
 import { Select } from '/@/shared/components/select/select';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
 import { toast } from '/@/shared/components/toast/toast';
-import { CrossfadeStyle, PlayerStyle, PlayerType, PlayerStatus } from '/@/shared/types/types';
+import { CrossfadeStyle, PlayerStatus, PlayerStyle, PlayerType } from '/@/shared/types/types';
 
 const ipc = isElectron() ? window.api.ipc : null;
 
@@ -65,10 +64,6 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                     onChange={(e) => {
                         setSettings({ playback: { ...settings, type: e as PlayerType } });
                         ipc?.send('settings-set', { property: 'playbackType', value: e });
-                        if (isElectron() && e === PlayerType.LOCAL) {
-                            const queueData = usePlayerStore.getState().actions.getPlayerData();
-                            setQueue(queueData);
-                        }
                     }}
                 />
             ),

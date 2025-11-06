@@ -3,7 +3,7 @@ import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/li
 import { RowClassRules, RowNode } from '@ag-grid-community/core';
 import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 
-import { usePlayerEvents } from '/@/renderer/features/player/audio-player/listener/use-player-events';
+import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { useAppFocus } from '/@/renderer/hooks';
 import { usePlayerSong } from '/@/renderer/store';
 import { Song } from '/@/shared/types/domain-types';
@@ -75,8 +75,8 @@ export const useCurrentSongRowStyles = ({ tableRef }: UseCurrentSongRowStylesPro
                     api.redrawRows({ rowNodes });
                 }
             },
-            onPlayerStatus: (properties) => {
-                const song = properties.song;
+            onPlayerStatus: () => {
+                const song = currentSong;
 
                 if (tableRef?.current) {
                     const { api, columnApi } = tableRef?.current || {};

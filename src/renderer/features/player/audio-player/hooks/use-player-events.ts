@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
+
 import {
-    QueueData,
     subscribeCurrentTrack,
     subscribePlayerMute,
     subscribePlayerProgress,
@@ -9,14 +10,14 @@ import {
     subscribePlayerStatus,
     subscribePlayerVolume,
 } from '/@/renderer/store';
-import { QueueSong } from '/@/shared/types/domain-types';
+import { QueueData, QueueSong } from '/@/shared/types/domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
-export interface PlayerEvents {
+interface PlayerEvents {
     cleanup: () => void;
 }
 
-export interface PlayerEventsCallbacks {
+interface PlayerEventsCallbacks {
     onCurrentSongChange?: (
         properties: { index: number; song: QueueSong | undefined },
         prev: { index: number; song: QueueSong | undefined },
@@ -34,7 +35,18 @@ export interface PlayerEventsCallbacks {
     onPlayerVolume?: (properties: { volume: number }, prev: { volume: number }) => void;
 }
 
-export function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
+export function usePlayerEvents(callbacks: PlayerEventsCallbacks, deps: React.DependencyList) {
+    useEffect(() => {
+        const engine = createPlayerEvents(callbacks);
+
+        return () => {
+            engine.cleanup();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [...deps]);
+}
+
+function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
     const unsubscribers: (() => void)[] = [];
 
     // Subscribe to current track changes

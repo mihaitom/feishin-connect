@@ -4,7 +4,7 @@
 // import { useTranslation } from 'react-i18next';
 
 // import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
-// import { updateSong } from '/@/renderer/features/player/update-remote-song';
+// import { updateSong } from '/@/renderer/features/plaayer/update-remote-song';
 // import {
 //     usePlayerNum,
 //     usePlayerStatus,
