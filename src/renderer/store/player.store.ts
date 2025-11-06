@@ -1245,6 +1245,28 @@ export const subscribePlayerSpeed = (
     );
 };
 
+export const subscribePlayerRepeat = (
+    onChange: (properties: { repeat: PlayerRepeat }, prev: { repeat: PlayerRepeat }) => void,
+) => {
+    return usePlayerStoreBase.subscribe(
+        (state) => state.player.repeat,
+        (repeat, prevRepeat) => {
+            onChange({ repeat }, { repeat: prevRepeat });
+        },
+    );
+};
+
+export const subscribePlayerShuffle = (
+    onChange: (properties: { shuffle: PlayerShuffle }, prev: { shuffle: PlayerShuffle }) => void,
+) => {
+    return usePlayerStoreBase.subscribe(
+        (state) => state.player.shuffle,
+        (shuffle, prevShuffle) => {
+            onChange({ shuffle }, { shuffle: prevShuffle });
+        },
+    );
+};
+
 export const usePlayerProperties = () => {
     return usePlayerStoreBase(
         useShallow((state) => ({

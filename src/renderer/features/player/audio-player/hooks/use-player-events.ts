@@ -5,13 +5,15 @@ import {
     subscribePlayerMute,
     subscribePlayerProgress,
     subscribePlayerQueue,
+    subscribePlayerRepeat,
     subscribePlayerSeekToTimestamp,
+    subscribePlayerShuffle,
     subscribePlayerSpeed,
     subscribePlayerStatus,
     subscribePlayerVolume,
 } from '/@/renderer/store';
 import { QueueData, QueueSong } from '/@/shared/types/domain-types';
-import { PlayerStatus } from '/@/shared/types/types';
+import { PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
 interface PlayerEvents {
     cleanup: () => void;
@@ -25,10 +27,15 @@ interface PlayerEventsCallbacks {
     onPlayerMute?: (properties: { muted: boolean }, prev: { muted: boolean }) => void;
     onPlayerProgress?: (properties: { timestamp: number }, prev: { timestamp: number }) => void;
     onPlayerQueueChange?: (queue: QueueData, prev: QueueData) => void;
+    onPlayerRepeat?: (properties: { repeat: PlayerRepeat }, prev: { repeat: PlayerRepeat }) => void;
     onPlayerSeek?: (properties: { seconds: number }, prev: { seconds: number }) => void;
     onPlayerSeekToTimestamp?: (
         properties: { timestamp: number },
         prev: { timestamp: number },
+    ) => void;
+    onPlayerShuffle?: (
+        properties: { shuffle: PlayerShuffle },
+        prev: { shuffle: PlayerShuffle },
     ) => void;
     onPlayerSpeed?: (properties: { speed: number }, prev: { speed: number }) => void;
     onPlayerStatus?: (properties: { status: PlayerStatus }, prev: { status: PlayerStatus }) => void;
@@ -94,6 +101,18 @@ function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
     // Subscribe to speed changes
     if (callbacks.onPlayerSpeed) {
         const unsubscribe = subscribePlayerSpeed(callbacks.onPlayerSpeed);
+        unsubscribers.push(unsubscribe);
+    }
+
+    // Subscribe to repeat changes
+    if (callbacks.onPlayerRepeat) {
+        const unsubscribe = subscribePlayerRepeat(callbacks.onPlayerRepeat);
+        unsubscribers.push(unsubscribe);
+    }
+
+    // Subscribe to shuffle changes
+    if (callbacks.onPlayerShuffle) {
+        const unsubscribe = subscribePlayerShuffle(callbacks.onPlayerShuffle);
         unsubscribers.push(unsubscribe);
     }
 
