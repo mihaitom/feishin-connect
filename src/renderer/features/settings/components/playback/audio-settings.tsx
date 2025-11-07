@@ -6,7 +6,7 @@ import {
     SettingOption,
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
-import { usePlayerStatus } from '/@/renderer/store';
+import { usePlayerActions, usePlayerProperties, usePlayerStatus } from '/@/renderer/store';
 import { usePlaybackSettings, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import { Select } from '/@/shared/components/select/select';
 import { Slider } from '/@/shared/components/slider/slider';
@@ -26,6 +26,9 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
     const settings = usePlaybackSettings();
     const { setSettings } = useSettingsStoreActions();
     const status = usePlayerStatus();
+
+    const { crossfadeDuration, transitionType } = usePlayerProperties();
+    const { setCrossfadeDuration, setTransitionType } = usePlayerActions();
 
     const [audioDevices, setAudioDevices] = useState<{ label: string; value: string }[]>([]);
 
@@ -114,11 +117,9 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
                             value: PlayerStyle.CROSSFADE,
                         },
                     ]}
-                    defaultValue={settings.style}
+                    defaultValue={transitionType}
                     disabled={settings.type !== PlayerType.WEB || status === PlayerStatus.PLAYING}
-                    onChange={(e) =>
-                        setSettings({ playback: { ...settings, style: e as PlayerStyle } })
-                    }
+                    onChange={(e) => setTransitionType(e as PlayerStyle)}
                 />
             ),
             description: t('setting.playbackStyle', {
@@ -176,17 +177,15 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
         {
             control: (
                 <Slider
-                    defaultValue={settings.crossfadeDuration}
+                    defaultValue={crossfadeDuration}
                     disabled={
                         settings.type !== PlayerType.WEB ||
                         settings.style !== PlayerStyle.CROSSFADE ||
                         status === PlayerStatus.PLAYING
                     }
                     max={15}
-                    min={0}
-                    onChangeEnd={(e) =>
-                        setSettings({ playback: { ...settings, crossfadeDuration: e } })
-                    }
+                    min={3}
+                    onChangeEnd={(e) => setCrossfadeDuration(e)}
                     w={100}
                 />
             ),
