@@ -26,12 +26,10 @@ import {
     useCssSettings,
     useHotkeySettings,
     usePlaybackSettings,
-    useRemoteSettings,
     useSettingsStore,
 } from '/@/renderer/store';
 import { useAppTheme } from '/@/renderer/themes/use-app-theme';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
-import { toast } from '/@/shared/components/toast/toast';
 import '/styles/overlayscrollbars.css';
 import { PlayerType, WebAudio } from '/@/shared/types/types';
 
@@ -39,7 +37,6 @@ ModuleRegistry.registerModules([ClientSideRowModelModule, InfiniteRowModelModule
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 const ipc = isElectron() ? window.api.ipc : null;
-const remote = isElectron() ? window.api.remote : null;
 const utils = isElectron() ? window.api.utils : null;
 
 export const App = () => {
@@ -49,9 +46,6 @@ export const App = () => {
     const { content, enabled } = useCssSettings();
     const { type: playbackType } = usePlaybackSettings();
     const { bindings } = useHotkeySettings();
-    // const handlePlayQueueAdd = useHandlePlayQueueAdd();
-    // const { clearQueue, restoreQueue } = useQueueControls();
-    const remoteSettings = useRemoteSettings();
     const cssRef = useRef<HTMLStyleElement | null>(null);
     useDiscordRpc();
     useServerVersion();
@@ -77,10 +71,6 @@ export const App = () => {
 
         return () => {};
     }, [content, enabled]);
-
-    // const providerValue = useMemo(() => {
-    //     return { handlePlayQueueAdd };
-    // }, [handlePlayQueueAdd]);
 
     const webAudioProvider = useMemo(() => {
         return { setWebAudio, webAudio };
@@ -128,52 +118,6 @@ export const App = () => {
             ipc?.send('set-global-shortcuts', bindings);
         }
     }, [bindings]);
-
-    // useEffect(() => {
-    //     if (utils) {
-    //         utils.onSaveQueue(() => {
-    //             const { current, queue } = usePlayerStore.getState();
-    //             const stateToSave: Partial<Pick<PlayerState, 'current' | 'queue'>> = {
-    //                 current: {
-    //                     ...current,
-    //                     status: PlayerStatus.PAUSED,
-    //                 },
-    //                 queue,
-    //             };
-    //             utils.saveQueue(stateToSave);
-    //         });
-
-    //         utils.onRestoreQueue((_event: any, data) => {
-    //             const playerData = restoreQueue(data);
-    //             if (playbackType === PlaybackType.LOCAL) {
-    //                 setQueue(playerData, true);
-    //             }
-    //             updateSong(playerData.current.song);
-    //         });
-    //     }
-
-    //     return () => {
-    //         ipc?.removeAllListeners('renderer-restore-queue');
-    //         ipc?.removeAllListeners('renderer-save-queue');
-    //     };
-    // }, [playbackType, restoreQueue]);
-
-    useEffect(() => {
-        if (remote) {
-            remote
-                ?.updateSetting(
-                    remoteSettings.enabled,
-                    remoteSettings.port,
-                    remoteSettings.username,
-                    remoteSettings.password,
-                )
-                .catch((error) => {
-                    toast.warn({ message: error, title: 'Failed to enable remote' });
-                });
-        }
-        // We only want to fire this once
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     useEffect(() => {
         if (language) {

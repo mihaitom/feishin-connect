@@ -5,7 +5,8 @@ import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
-import { usePlayerActions } from '/@/renderer/store';
+import { usePlayerActions, useRemoteSettings } from '/@/renderer/store';
+import { toast } from '/@/shared/components/toast/toast';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { PlayerShuffle } from '/@/shared/types/types';
 
@@ -15,9 +16,30 @@ const ipc = isElectron() ? window.api.ipc : null;
 export const useRemote = () => {
     const { mediaSkipForward, setTimestamp, setVolume } = usePlayerActions();
 
+    const remoteSettings = useRemoteSettings();
     const updateRatingMutation = useSetRating({});
     const addToFavoritesMutation = useCreateFavorite({});
     const removeFromFavoritesMutation = useDeleteFavorite({});
+
+    // Initialize the remote
+    useEffect(() => {
+        if (!remote) {
+            return;
+        }
+
+        remote
+            ?.updateSetting(
+                remoteSettings.enabled,
+                remoteSettings.port,
+                remoteSettings.username,
+                remoteSettings.password,
+            )
+            .catch((error) => {
+                toast.warn({ message: error, title: 'Failed to enable remote' });
+            });
+        // We only want to fire this once
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (!remote) {
