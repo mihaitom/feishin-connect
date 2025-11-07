@@ -18,33 +18,24 @@ import i18n from '/@/i18n/i18n';
 import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
 import { PlayerProvider } from '/@/renderer/features/player/context/player-context';
 import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
-import { getMpvProperties } from '/@/renderer/features/settings/components/playback/mpv-settings';
 import { useServerVersion } from '/@/renderer/hooks/use-server-version';
 import { IsUpdatedDialog } from '/@/renderer/is-updated-dialog';
 import { AppRouter } from '/@/renderer/router/app-router';
-import {
-    useCssSettings,
-    useHotkeySettings,
-    usePlaybackSettings,
-    useSettingsStore,
-} from '/@/renderer/store';
+import { useCssSettings, useHotkeySettings, useSettingsStore } from '/@/renderer/store';
 import { useAppTheme } from '/@/renderer/themes/use-app-theme';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
 import '/styles/overlayscrollbars.css';
-import { PlayerType, WebAudio } from '/@/shared/types/types';
+import { WebAudio } from '/@/shared/types/types';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, InfiniteRowModelModule]);
 
-const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 const ipc = isElectron() ? window.api.ipc : null;
-const utils = isElectron() ? window.api.utils : null;
 
 export const App = () => {
     const { mode, theme } = useAppTheme();
     const language = useSettingsStore((store) => store.general.language);
 
     const { content, enabled } = useCssSettings();
-    const { type: playbackType } = usePlaybackSettings();
     const { bindings } = useHotkeySettings();
     const cssRef = useRef<HTMLStyleElement | null>(null);
     useDiscordRpc();
@@ -75,43 +66,6 @@ export const App = () => {
     const webAudioProvider = useMemo(() => {
         return { setWebAudio, webAudio };
     }, [webAudio]);
-
-    // Start the mpv instance on startup
-    useEffect(() => {
-        const initializeMpv = async () => {
-            if (playbackType === PlayerType.LOCAL) {
-                const isRunning: boolean | undefined = await mpvPlayer?.isRunning();
-
-                mpvPlayer?.stop();
-
-                if (!isRunning) {
-                    const extraParameters = useSettingsStore.getState().playback.mpvExtraParameters;
-                    const properties: Record<string, any> = {
-                        // speed: usePlayerStore.getState().speed,
-                        ...getMpvProperties(useSettingsStore.getState().playback.mpvProperties),
-                    };
-
-                    await mpvPlayer?.initialize({
-                        extraParameters,
-                        properties,
-                    });
-
-                    mpvPlayer?.volume(properties.volume);
-                }
-            }
-
-            utils?.restoreQueue();
-        };
-
-        if (isElectron()) {
-            initializeMpv();
-        }
-
-        return () => {
-            mpvPlayer?.stop();
-            mpvPlayer?.cleanup();
-        };
-    }, [playbackType]);
 
     useEffect(() => {
         if (isElectron()) {

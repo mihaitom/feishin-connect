@@ -4,6 +4,8 @@ import isElectron from 'is-electron';
 import { useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { AudioPlayer, PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
+import { getMpvProperties } from '/@/renderer/features/settings/components/playback/mpv-settings';
+import { useSettingsStore } from '/@/renderer/store';
 import { PlayerStatus } from '/@/shared/types/types';
 
 export interface MpvPlayerEngineHandle extends AudioPlayer {}
@@ -24,6 +26,7 @@ interface MpvPlayerEngineProps {
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 const mpvPlayerListener = isElectron() ? window.api.mpvPlayerListener : null;
 const ipc = isElectron() ? window.api.ipc : null;
+const utils = isElectron() ? window.api.utils : null;
 
 const PROGRESS_UPDATE_INTERVAL = 250;
 const TRANSITION_PROGRESS_INTERVAL = 10;
@@ -47,6 +50,41 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const [previousCurrentSrc, setPreviousCurrentSrc] = useState<string | undefined>(currentSrc);
 
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
+    const mpvProperties = useSettingsStore((store) => store.playback.mpvProperties);
+
+    // Start the mpv instance on startup
+    useEffect(() => {
+        const initializeMpv = async () => {
+            const isRunning: boolean | undefined = await mpvPlayer?.isRunning();
+
+            mpvPlayer?.stop();
+
+            if (!isRunning) {
+                const properties: Record<string, any> = {
+                    // speed: usePlayerStore.getState().speed,
+                    ...getMpvProperties(mpvProperties),
+                };
+
+                await mpvPlayer?.initialize({
+                    extraParameters: mpvExtraParameters,
+                    properties,
+                });
+
+                mpvPlayer?.volume(properties.volume);
+            }
+
+            utils?.restoreQueue();
+        };
+
+        initializeMpv();
+
+        return () => {
+            mpvPlayer?.stop();
+            mpvPlayer?.cleanup();
+        };
+    }, [mpvExtraParameters, mpvProperties]);
 
     // Update volume
     useEffect(() => {
