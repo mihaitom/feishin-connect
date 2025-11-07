@@ -12,9 +12,9 @@ import { useHandleGeneralContextMenu } from '/@/renderer/features/context-menu/h
 import { AppRoute } from '/@/renderer/router/routes';
 import {
     useAppStoreActions,
-    usePlayerSong,
     useFullScreenPlayerStore,
     useHotkeySettings,
+    usePlayerSong,
     useSetFullScreenPlayerStore,
     useSidebarStore,
 } from '/@/renderer/store';
