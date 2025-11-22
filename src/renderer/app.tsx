@@ -20,6 +20,8 @@ import { useAppTheme } from '/@/renderer/themes/use-app-theme';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
 import { WebAudio } from '/@/shared/types/types';
 import '/@/shared/styles/global.css';
+import { PlayerProvider } from '/@/renderer/features/player/context/player-context';
+import { AudioPlayers } from '/@/renderer/features/player/components/audio-players';
 
 const ipc = isElectron() ? window.api.ipc : null;
 
@@ -84,7 +86,10 @@ export const App = () => {
                 zIndex={50000}
             />
             <WebAudioContext.Provider value={webAudioProvider}>
-                <AppRouter />
+                <PlayerProvider>
+                    <AudioPlayers />
+                    <AppRouter />
+                </PlayerProvider>
             </WebAudioContext.Provider>
             <IsUpdatedDialog />
         </MantineProvider>
