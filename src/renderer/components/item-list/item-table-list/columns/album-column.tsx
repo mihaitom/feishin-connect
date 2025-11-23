@@ -31,20 +31,24 @@ const AlbumColumn = (props: ItemTableListInnerColumn) => {
         if (albumId && albumPath) {
             return (
                 <TableColumnContainer {...props}>
-                    <Text
+                    <div
                         className={clsx(styles.albumContainer, {
                             [styles.compact]: props.size === 'compact',
                             [styles.large]: props.size === 'large',
                         })}
-                        component={Link}
-                        isLink
-                        isMuted
-                        isNoSelect
-                        state={{ item: song }}
-                        to={albumPath}
                     >
-                        {row}
-                    </Text>
+                        <Text
+                            className={styles.albumLink}
+                            component={Link}
+                            isLink
+                            isMuted
+                            isNoSelect
+                            state={{ item: song }}
+                            to={albumPath}
+                        >
+                            {row}
+                        </Text>
+                    </div>
                 </TableColumnContainer>
             );
         }

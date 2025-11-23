@@ -7,6 +7,12 @@
     user-select: none;
 }
 
+.album-link {
+    display: inline;
+    width: max-content;
+    max-width: 100%;
+}
+
 .album-container.compact {
     -webkit-line-clamp: 1;
 }
