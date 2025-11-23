@@ -3,6 +3,7 @@ import { HashRouter, Route, Routes } from 'react-router';
 
 import { RouterErrorBoundary } from '/@/renderer/components/error-boundary/router-error-boundary';
 import { AddToPlaylistContextModal } from '/@/renderer/features/playlists/components/add-to-playlist-context-modal';
+import { SettingsModal } from '/@/renderer/features/settings/components/settings-modal';
 import { ShareItemContextModal } from '/@/renderer/features/sharing/components/share-item-context-modal';
 import { ResponsiveLayout } from '/@/renderer/layouts/responsive-layout';
 import { AppOutlet } from '/@/renderer/router/app-outlet';
@@ -62,8 +63,6 @@ const DummyAlbumDetailRoute = lazy(
 
 const GenreListRoute = lazy(() => import('/@/renderer/features/genres/routes/genre-list-route'));
 
-const SettingsRoute = lazy(() => import('/@/renderer/features/settings/routes/settings-route'));
-
 const SearchRoute = lazy(() => import('/@/renderer/features/search/routes/search-route'));
 
 const RouteErrorBoundary = lazy(
@@ -78,6 +77,7 @@ export const AppRouter = () => {
                     modals={{
                         addToPlaylist: AddToPlaylistContextModal,
                         base: BaseContextModal,
+                        settings: SettingsModal,
                         shareItem: ShareItemContextModal,
                     }}
                 >
@@ -99,11 +99,6 @@ export const AppRouter = () => {
                                         element={<SearchRoute />}
                                         errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.SEARCH}
-                                    />
-                                    <Route
-                                        element={<SettingsRoute />}
-                                        errorElement={<RouteErrorBoundary />}
-                                        path={AppRoute.SETTINGS}
                                     />
                                     <Route
                                         element={<NowPlayingRoute />}

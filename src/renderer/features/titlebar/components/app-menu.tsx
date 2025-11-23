@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router';
 
 import packageJson from '../../../../../package.json';
 
-import { AppRoute } from '/@/renderer/router/routes';
+import { openSettingsModal } from '/@/renderer/features/settings/utils/open-settings-modal';
 import { useAppStore, useAppStoreActions, useSidebarStore } from '/@/renderer/store';
 import { DropdownMenu, MenuItemProps } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -181,11 +181,10 @@ export const AppMenu = () => {
             type: 'divider',
         },
         {
-            component: Link,
             icon: 'settings',
             id: 'settings',
             label: t('page.appMenu.settings', { postProcess: 'sentenceCase' }),
-            to: AppRoute.SETTINGS,
+            onClick: openSettingsModal,
             type: 'item',
         },
         {
