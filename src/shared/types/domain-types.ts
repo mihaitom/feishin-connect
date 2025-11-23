@@ -265,11 +265,11 @@ export type Genre = {
     _itemType: LibraryItem.GENRE;
     _serverId: string;
     _serverType: ServerType;
-    albumCount?: number;
+    albumCount: null | number;
     id: string;
     imageUrl: null | string;
     name: string;
-    songCount?: number;
+    songCount: null | number;
 };
 
 export type GenreListArgs = BaseEndpointArgs & { query: GenreListQuery };

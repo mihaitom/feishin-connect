@@ -101,9 +101,11 @@ const getGenres = (
               _itemType: LibraryItem.GENRE,
               _serverId: server?.id || 'unknown',
               _serverType: ServerType.SUBSONIC,
+              albumCount: null,
               id: genre.name,
               imageUrl: null,
               name: genre.name,
+              songCount: null,
           }))
         : item.genre
           ? [
@@ -111,9 +113,11 @@ const getGenres = (
                     _itemType: LibraryItem.GENRE,
                     _serverId: server?.id || 'unknown',
                     _serverType: ServerType.SUBSONIC,
+                    albumCount: null,
                     id: item.genre,
                     imageUrl: null,
                     name: item.genre,
+                    songCount: null,
                 },
             ]
           : [];
