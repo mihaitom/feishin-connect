@@ -110,7 +110,9 @@ export enum FontType {
 export enum Play {
     INDEX = 'index',
     LAST = 'last',
+    LAST_SHUFFLE = 'lastShuffle',
     NEXT = 'next',
+    NEXT_SHUFFLE = 'nextShuffle',
     NOW = 'now',
     SHUFFLE = 'shuffle',
 }

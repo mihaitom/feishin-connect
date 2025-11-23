@@ -47,6 +47,14 @@ export const PlayAction = ({ ids, itemType, songs }: PlayActionProps) => {
         handlePlay(Play.SHUFFLE);
     }, [handlePlay]);
 
+    const handlePlayNextShuffled = useCallback(() => {
+        handlePlay(Play.NEXT_SHUFFLE);
+    }, [handlePlay]);
+
+    const handlePlayLastShuffled = useCallback(() => {
+        handlePlay(Play.LAST_SHUFFLE);
+    }, [handlePlay]);
+
     const playButtonBehavior = usePlayButtonBehavior();
 
     const defaultPlayAction = useCallback(() => {
@@ -76,8 +84,15 @@ export const PlayAction = ({ ids, itemType, songs }: PlayActionProps) => {
                 <ContextMenu.Item leftIcon="mediaPlayLast" onSelect={handlePlayLast}>
                     {t('player.addLast', { postProcess: 'sentenceCase' })}
                 </ContextMenu.Item>
+                <ContextMenu.Divider />
                 <ContextMenu.Item leftIcon="mediaShuffle" onSelect={handlePlayShuffled}>
                     {t('player.shuffle', { postProcess: 'sentenceCase' })}
+                </ContextMenu.Item>
+                <ContextMenu.Item leftIcon="mediaPlayNext" onSelect={handlePlayNextShuffled}>
+                    {t('player.addNextShuffled', { postProcess: 'sentenceCase' })}
+                </ContextMenu.Item>
+                <ContextMenu.Item leftIcon="mediaPlayLast" onSelect={handlePlayLastShuffled}>
+                    {t('player.addLastShuffled', { postProcess: 'sentenceCase' })}
                 </ContextMenu.Item>
             </ContextMenu.SubmenuContent>
         </ContextMenu.Submenu>
