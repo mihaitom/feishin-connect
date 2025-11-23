@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './server-selector.module.css';
@@ -7,7 +8,7 @@ import JellyfinLogo from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeLogo from '/@/renderer/features/servers/assets/navidrome.png';
 import OpenSubsonicLogo from '/@/renderer/features/servers/assets/opensubsonic.png';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
-import { AppMenu } from '/@/renderer/features/titlebar/components/app-menu';
+import { ServerSelectorItems } from '/@/renderer/features/sidebar/components/server-selector-items';
 import { useCurrentServer } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
 import { Box } from '/@/shared/components/box/box';
@@ -32,6 +33,9 @@ export const ServerSelector = ({ showImage = false }: ServerSelectorProps) => {
             ? sharedQueries.musicFolders({ query: null, serverId: currentServer.id })
             : { enabled: false, queryKey: ['disabled'] },
     );
+
+    const targetRef = useRef<HTMLDivElement | null>(null);
+    const widthOfTarget = targetRef.current?.getBoundingClientRect().width;
 
     if (!currentServer) {
         return null;
@@ -66,7 +70,7 @@ export const ServerSelector = ({ showImage = false }: ServerSelectorProps) => {
               : OpenSubsonicLogo;
 
     return (
-        <DropdownMenu position="right">
+        <DropdownMenu offset={0} position="top">
             <DropdownMenu.Target>
                 <div className={styles.popoverTarget}>
                     <Box
@@ -74,7 +78,7 @@ export const ServerSelector = ({ showImage = false }: ServerSelectorProps) => {
                             showImage ? styles.buttonContainerNoBottomPadding : ''
                         }`}
                     >
-                        <Group className={styles.buttonGroup} gap="sm">
+                        <Group className={styles.buttonGroup} gap="sm" ref={targetRef}>
                             <img className={styles.logo} src={logo} />
                             <Stack className={styles.buttonStack} gap={2}>
                                 <Text fw={600} size="sm" truncate>
@@ -89,8 +93,8 @@ export const ServerSelector = ({ showImage = false }: ServerSelectorProps) => {
                     </Box>
                 </div>
             </DropdownMenu.Target>
-            <DropdownMenu.Dropdown>
-                <AppMenu />
+            <DropdownMenu.Dropdown style={{ width: `${widthOfTarget}px` }}>
+                <ServerSelectorItems />
             </DropdownMenu.Dropdown>
         </DropdownMenu>
     );

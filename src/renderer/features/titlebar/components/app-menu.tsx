@@ -5,7 +5,6 @@ import { Link, useNavigate } from 'react-router';
 
 import packageJson from '../../../../../package.json';
 
-import { ServerSelectorItems } from '/@/renderer/features/sidebar/components/server-selector-items';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAppStore, useAppStoreActions, useSidebarStore } from '/@/renderer/store';
 import { DropdownMenu, MenuItemProps } from '/@/shared/components/dropdown-menu/dropdown-menu';
@@ -191,15 +190,6 @@ export const AppMenu = () => {
         },
         {
             id: 'divider-3',
-            type: 'divider',
-        },
-        {
-            component: <ServerSelectorItems />,
-            id: 'server-selector',
-            type: 'custom',
-        },
-        {
-            id: 'divider-4',
             type: 'divider',
         },
         {

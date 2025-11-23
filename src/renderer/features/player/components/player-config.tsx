@@ -312,7 +312,7 @@ export const PlayerConfig = () => {
     ]);
 
     return (
-        <Popover position="top-end" width={500} withArrow>
+        <Popover position="top" width={500}>
             <Popover.Target>
                 <ActionIcon
                     icon="mediaSettings"
