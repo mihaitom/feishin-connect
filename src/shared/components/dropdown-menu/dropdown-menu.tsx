@@ -24,6 +24,26 @@ type MenuDropdownProps = MantineMenuDropdownProps;
 type MenuLabelProps = MantineMenuLabelProps;
 type MenuProps = MantineMenuProps;
 
+const getTransition = (position?: string) => {
+    if (position?.includes('top')) {
+        return 'fade-up';
+    }
+
+    if (position?.includes('bottom')) {
+        return 'fade-down';
+    }
+
+    if (position?.includes('left')) {
+        return 'fade-left';
+    }
+
+    if (position?.includes('right')) {
+        return 'fade-right';
+    }
+
+    return 'fade';
+};
+
 export const DropdownMenu = ({ children, ...props }: MenuProps) => {
     return (
         <MantineMenu
@@ -31,8 +51,9 @@ export const DropdownMenu = ({ children, ...props }: MenuProps) => {
                 dropdown: styles['menu-dropdown'],
                 itemSection: styles['menu-item-section'],
             }}
+            offset={10}
             transitionProps={{
-                transition: 'fade',
+                transition: getTransition(props.position),
             }}
             withinPortal
             {...props}
