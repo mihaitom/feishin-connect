@@ -6,6 +6,7 @@ import { FeatureCarousel } from '/@/renderer/components/feature-carousel/feature
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumInfiniteCarousel } from '/@/renderer/features/albums/components/album-infinite-carousel';
+import { FeaturedGenres } from '/@/renderer/features/home/components/featured-genres';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
@@ -125,6 +126,7 @@ const HomeRoute = () => {
                         px="2rem"
                     >
                         {homeFeature && <FeatureCarousel data={featureItemsWithImage} />}
+                        <FeaturedGenres />
                         {sortedCarousel.map((carousel) => {
                             if (carousel.itemType === LibraryItem.ALBUM) {
                                 return (
