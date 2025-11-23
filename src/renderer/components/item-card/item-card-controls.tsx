@@ -13,6 +13,7 @@ import { useIsMutatingRating } from '/@/renderer/features/shared/mutations/set-r
 import { animationVariants } from '/@/shared/components/animations/animation-variants';
 import { AppIcon, Icon, IconProps } from '/@/shared/components/icon/icon';
 import { Rating } from '/@/shared/components/rating/rating';
+import { useLongPress } from '/@/shared/hooks/use-long-press';
 import {
     Album,
     AlbumArtist,
@@ -179,8 +180,6 @@ export const ItemCardControls = ({
     itemType,
     type = 'default',
 }: ItemCardControlsProps) => {
-    const isPlayerFetching = useIsPlayerFetching();
-
     const playNowHandler = useMemo(
         () => createPlayHandler(controls, item, internalState, itemType, Play.NOW),
         [controls, item, internalState, itemType],
@@ -193,6 +192,21 @@ export const ItemCardControls = ({
 
     const playLastHandler = useMemo(
         () => createPlayHandler(controls, item, internalState, itemType, Play.LAST),
+        [controls, item, internalState, itemType],
+    );
+
+    const playShuffleHandler = useMemo(
+        () => createPlayHandler(controls, item, internalState, itemType, Play.SHUFFLE),
+        [controls, item, internalState, itemType],
+    );
+
+    const playNextShuffleHandler = useMemo(
+        () => createPlayHandler(controls, item, internalState, itemType, Play.NEXT_SHUFFLE),
+        [controls, item, internalState, itemType],
+    );
+
+    const playLastShuffleHandler = useMemo(
+        () => createPlayHandler(controls, item, internalState, itemType, Play.LAST_SHUFFLE),
         [controls, item, internalState, itemType],
     );
 
@@ -222,16 +236,18 @@ export const ItemCardControls = ({
         <motion.div className={clsx(styles.container)} {...containerProps[type]}>
             {controls?.onPlay && (
                 <>
-                    <PlayButton disabled={isPlayerFetching} onClick={playNowHandler} />
+                    <PlayButton onClick={playNowHandler} onLongPress={playShuffleHandler} />
                     <SecondaryPlayButton
                         className={styles.left}
                         icon="mediaPlayNext"
                         onClick={playNextHandler}
+                        onLongPress={playNextShuffleHandler}
                     />
                     <SecondaryPlayButton
                         className={styles.right}
                         icon="mediaPlayLast"
                         onClick={playLastHandler}
+                        onLongPress={playLastShuffleHandler}
                     />
                 </>
             )}
@@ -326,26 +342,40 @@ const RatingButton = memo(
 
 const PlayButton = memo(
     ({
-        disabled,
         loading,
         onClick,
+        onLongPress,
     }: {
-        disabled?: boolean;
         loading?: boolean;
-        onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+        onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+        onLongPress?: (e: React.MouseEvent<HTMLButtonElement>) => void;
     }) => {
-        const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
-            e.preventDefault();
-            if (disabled || loading) {
-                return;
-            }
-            onClick?.(e);
-        };
+        const isPlayerFetching = useIsPlayerFetching();
+
+        const disabled = isPlayerFetching || loading;
+
+        const longPressHandlers = useLongPress<HTMLButtonElement>({
+            onClick: (e) => {
+                if (disabled || loading) {
+                    return;
+                }
+                e.stopPropagation();
+                e.preventDefault();
+                onClick?.(e as React.MouseEvent<HTMLButtonElement>);
+            },
+            onLongPress: (e) => {
+                if (disabled || loading) {
+                    return;
+                }
+                e.stopPropagation();
+                e.preventDefault();
+                onLongPress?.(e as React.MouseEvent<HTMLButtonElement>);
+            },
+        });
 
         const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
-            e.preventDefault();
+            longPressHandlers.onMouseDown?.(e);
         };
 
         return (
@@ -354,8 +384,12 @@ const PlayButton = memo(
                     [styles.disabled]: disabled,
                 })}
                 disabled={disabled}
-                onClick={handleClick}
                 onMouseDown={handleMouseDown}
+                onMouseLeave={longPressHandlers.onMouseLeave}
+                onMouseUp={longPressHandlers.onMouseUp}
+                onTouchCancel={longPressHandlers.onTouchCancel}
+                onTouchEnd={longPressHandlers.onTouchEnd}
+                onTouchStart={longPressHandlers.onTouchStart}
             >
                 <Icon icon="mediaPlay" size="lg" />
             </button>
@@ -368,27 +402,47 @@ const SecondaryPlayButton = memo(
         className,
         icon,
         onClick,
+        onLongPress,
     }: {
         className?: string;
         icon: keyof typeof AppIcon;
-        onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+        onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+        onLongPress?: (e: React.MouseEvent<HTMLButtonElement>) => void;
     }) => {
-        const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
-            e.preventDefault();
-            onClick?.(e);
-        };
+        const isPlayerFetching = useIsPlayerFetching();
+
+        const disabled = isPlayerFetching;
+
+        const longPressHandlers = useLongPress<HTMLButtonElement>({
+            onClick: (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onClick?.(e as React.MouseEvent<HTMLButtonElement>);
+            },
+            onLongPress: (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onLongPress?.(e as React.MouseEvent<HTMLButtonElement>);
+            },
+        });
 
         const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
-            e.preventDefault();
+            longPressHandlers.onMouseDown?.(e);
         };
 
         return (
             <button
-                className={clsx(styles.playButton, styles.secondary, className)}
-                onClick={handleClick}
+                className={clsx(styles.playButton, styles.secondary, className, {
+                    [styles.disabled]: disabled,
+                })}
+                disabled={disabled}
                 onMouseDown={handleMouseDown}
+                onMouseLeave={longPressHandlers.onMouseLeave}
+                onMouseUp={longPressHandlers.onMouseUp}
+                onTouchCancel={longPressHandlers.onTouchCancel}
+                onTouchEnd={longPressHandlers.onTouchEnd}
+                onTouchStart={longPressHandlers.onTouchStart}
             >
                 <Icon icon={icon} size="lg" />
             </button>
