@@ -45,9 +45,12 @@ const pageVariants: Variants = {
 export function GridCarousel(props: GridCarouselProps) {
     const { cards, hasNextPage, loadNextPage, onNextPage, onPrevPage, rowCount = 1, title } = props;
     const { ref, ...cq } = useContainerQuery({
-        lg: 900,
+        '2xl': 1024,
+        '3xl': 1280,
+        lg: 768,
         md: 600,
         sm: 360,
+        xl: 900,
     });
 
     const [currentPage, setCurrentPage] = useState({
@@ -72,12 +75,12 @@ export function GridCarousel(props: GridCarouselProps) {
     }, [currentPage, onNextPage]);
 
     const cardsToShow = getCardsToShow({
+        isLargerThan2xl: cq.is2xl,
+        isLargerThan3xl: cq.is3xl,
         isLargerThanLg: cq.isLg,
         isLargerThanMd: cq.isMd,
         isLargerThanSm: cq.isSm,
         isLargerThanXl: cq.isXl,
-        isLargerThanXxl: cq.is2xl,
-        isLargerThanXxxl: cq.is3xl,
     });
 
     const visibleCards = useMemo(() => {
@@ -190,31 +193,31 @@ export function GridCarousel(props: GridCarouselProps) {
 }
 
 function getCardsToShow(breakpoints: {
+    isLargerThan2xl: boolean;
+    isLargerThan3xl: boolean;
     isLargerThanLg: boolean;
     isLargerThanMd: boolean;
     isLargerThanSm: boolean;
     isLargerThanXl: boolean;
-    isLargerThanXxl: boolean;
-    isLargerThanXxxl: boolean;
 }) {
-    if (breakpoints.isLargerThanXxxl) {
-        return 14;
-    }
-
-    if (breakpoints.isLargerThanXxl) {
-        return 10;
-    }
-
-    if (breakpoints.isLargerThanXl) {
+    if (breakpoints.isLargerThan3xl) {
         return 8;
     }
 
-    if (breakpoints.isLargerThanLg) {
+    if (breakpoints.isLargerThan2xl) {
         return 6;
     }
 
-    if (breakpoints.isLargerThanMd) {
+    if (breakpoints.isLargerThanXl) {
+        return 5;
+    }
+
+    if (breakpoints.isLargerThanLg) {
         return 4;
+    }
+
+    if (breakpoints.isLargerThanMd) {
+        return 3;
     }
 
     if (breakpoints.isLargerThanSm) {
