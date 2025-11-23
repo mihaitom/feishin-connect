@@ -55,7 +55,7 @@ export const ItemCard = ({
     data,
     enableDrag,
     enableExpansion,
-    enableNavigation,
+    enableNavigation = true,
     internalState,
     isRound,
     itemType,
