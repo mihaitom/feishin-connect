@@ -206,7 +206,7 @@ export const LibraryHeaderMenu = ({
                         disabled={isMutatingCreateFavorite || isMutatingDeleteFavorite}
                         icon="favorite"
                         iconProps={{
-                            fill: favorite ? 'favorite' : undefined,
+                            fill: favorite ? 'primary' : undefined,
                         }}
                         onClick={onFavorite}
                         size="lg"
