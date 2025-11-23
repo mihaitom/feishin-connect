@@ -74,8 +74,6 @@ export const useScrobble = () => {
         (properties: { timestamp: number }, prev: { timestamp: number }) => {
             if (!isScrobbleEnabled || isPrivateModeEnabled) return;
 
-            console.log('handleScrobbleFromProgress', properties, prev);
-
             const currentSong = usePlayerStore.getState().getCurrentSong();
             const currentStatus = usePlayerStore.getState().player.status;
 
