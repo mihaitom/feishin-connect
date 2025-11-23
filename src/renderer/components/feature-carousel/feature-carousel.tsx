@@ -1,7 +1,7 @@
 import type { MouseEvent } from 'react';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './feature-carousel.module.css';
@@ -19,23 +19,50 @@ import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
 import { Album, LibraryItem } from '/@/shared/types/domain-types';
 
-const fadeVariants = {
-    center: {
+const containerVariants = {
+    animate: (custom: { isNext: boolean }) => ({
+        transition: {
+            delayChildren: 0.1,
+            staggerChildren: 0.3,
+            staggerDirection: custom.isNext ? 1 : -1,
+        },
+    }),
+    exit: (custom: { isNext: boolean }) => ({
+        transition: {
+            staggerChildren: 0.3,
+            staggerDirection: custom.isNext ? 1 : -1,
+        },
+    }),
+    initial: (custom: { isNext: boolean }) => ({
+        transition: {
+            staggerChildren: 0.3,
+            staggerDirection: custom.isNext ? -1 : 1,
+        },
+    }),
+};
+
+const itemVariants = {
+    animate: {
         opacity: 1,
+        scale: 1,
         transition: {
             duration: 0.4,
-            ease: 'easeInOut' as const,
+            ease: 'easeOut' as const,
         },
-    },
-    enter: {
-        opacity: 0,
+        y: 0,
     },
     exit: {
         opacity: 0,
+        scale: 0.8,
         transition: {
-            duration: 0.4,
-            ease: 'easeInOut' as const,
+            duration: 0.3,
+            ease: 'easeIn' as const,
         },
+        y: -20,
+    },
+    initial: {
+        opacity: 0,
+        y: 20,
     },
 };
 
@@ -90,16 +117,11 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
                         </TextTitle>
                     </div>
 
-                    <div
-                        className={styles.imageSection}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        }}
-                    >
+                    <div className={styles.imageSection}>
                         <ItemCard
                             controls={controls}
                             data={album}
+                            enableNavigation={false}
                             itemType={LibraryItem.ALBUM}
                             rows={[]}
                             type="poster"
@@ -144,6 +166,7 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
 
 export const FeatureCarousel = ({ data }: FeatureCarouselProps) => {
     const [startIndex, setStartIndex] = useState(0);
+    const directionRef = useRef<{ isNext: boolean }>({ isNext: true });
     const {
         is2xl,
         is3xl,
@@ -180,6 +203,7 @@ export const FeatureCarousel = ({ data }: FeatureCarouselProps) => {
         e?.preventDefault();
         e?.stopPropagation();
         if (!data) return;
+        directionRef.current = { isNext: true };
         setStartIndex((prev) => (prev + itemsPerRow) % data.length);
     };
 
@@ -187,6 +211,7 @@ export const FeatureCarousel = ({ data }: FeatureCarouselProps) => {
         e?.preventDefault();
         e?.stopPropagation();
         if (!data) return;
+        directionRef.current = { isNext: false };
         setStartIndex((prev) => (prev - itemsPerRow + data.length) % data.length);
     };
 
@@ -198,16 +223,22 @@ export const FeatureCarousel = ({ data }: FeatureCarouselProps) => {
         <div className={styles.carouselContainer} ref={containerRef}>
             <AnimatePresence initial={false} mode="popLayout">
                 <motion.div
-                    animate="center"
+                    animate="animate"
                     className={styles.carousel}
+                    custom={directionRef.current}
                     exit="exit"
-                    initial="enter"
+                    initial="initial"
                     key={`carousel-${startIndex}`}
                     style={{ '--items-per-row': itemsPerRow } as React.CSSProperties}
-                    variants={fadeVariants}
+                    variants={containerVariants}
                 >
-                    {visibleItems.map((album) => (
-                        <CarouselItem album={album} key={`item-${album.id}-${startIndex}`} />
+                    {visibleItems.map((album, index) => (
+                        <motion.div
+                            key={`item-${album.id}-${startIndex}-${index}`}
+                            variants={itemVariants}
+                        >
+                            <CarouselItem album={album} />
+                        </motion.div>
                     ))}
                 </motion.div>
             </AnimatePresence>
