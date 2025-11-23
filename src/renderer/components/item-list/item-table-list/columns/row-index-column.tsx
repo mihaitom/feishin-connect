@@ -20,7 +20,9 @@ export const RowIndexColumn = (props: ItemTableListInnerColumn) => {
     const { itemType } = props;
 
     switch (itemType) {
+        case LibraryItem.PLAYLIST_SONG:
         case LibraryItem.QUEUE_SONG:
+        case LibraryItem.SONG:
             return <QueueSongRowIndexColumn {...props} />;
         default:
             return <DefaultRowIndexColumn {...props} />;
@@ -54,14 +56,18 @@ const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
                     className={clsx(styles.expand, 'hover-only')}
                     icon="arrowDownS"
                     iconProps={{ color: 'muted', size: 'md' }}
-                    onClick={(e) =>
+                    onClick={(e) => {
+                        const item = data[rowIndex] as ItemListItem;
+                        const rowId = internalState.extractRowId(item);
+                        const index = rowId ? internalState.findItemIndex(rowId) : -1;
                         controls.onExpand?.({
                             event: e,
+                            index,
                             internalState,
-                            item: data[rowIndex] as ItemListItem,
+                            item,
                             itemType,
-                        })
-                    }
+                        });
+                    }}
                     size="xs"
                     variant="subtle"
                 />
@@ -78,7 +84,7 @@ const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
 const QueueSongRowIndexColumn = (props: ItemTableListInnerColumn) => {
     const status = usePlayerStatus();
     const song = props.data[props.rowIndex] as QueueSong;
-    const isActive = props.activeRowId === song?._uniqueId;
+    const isActive = props.activeRowId === song?.id || props.activeRowId === song?._uniqueId;
 
     let adjustedRowIndex =
         props.adjustedRowIndexMap?.get(props.rowIndex) ??

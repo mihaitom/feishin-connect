@@ -12,10 +12,14 @@ export const ActionsColumn = (props: ItemTableListInnerColumn) => {
         event.stopPropagation();
         event.preventDefault();
         if (row !== undefined) {
+            const item = row as ItemListItem;
+            const rowId = props.internalState.extractRowId(item);
+            const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
             props.controls.onMore?.({
                 event,
+                index,
                 internalState: props.internalState,
-                item: row as ItemListItem,
+                item,
                 itemType: props.itemType,
             });
         }

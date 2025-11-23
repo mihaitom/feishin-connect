@@ -255,6 +255,7 @@ export interface ItemGridListProps {
     onRangeChanged?: (range: { startIndex: number; stopIndex: number }) => void;
     onScroll?: (offset: number, direction: 'down' | 'up') => void;
     onScrollEnd?: (offset: number, direction: 'down' | 'up') => void;
+    overrideControls?: Partial<ItemControls>;
     ref?: Ref<ItemListHandle>;
     rows?: ItemCardProps['rows'];
 }
@@ -272,6 +273,7 @@ export const ItemGridList = ({
     onRangeChanged,
     onScroll,
     onScrollEnd,
+    overrideControls,
     ref,
     rows,
 }: ItemGridListProps) => {
@@ -366,7 +368,7 @@ export const ItemGridList = ({
         throttledSetTableMeta(containerWidth, data.length, setTableMeta);
     }, [containerWidth, data.length, throttledSetTableMeta]);
 
-    const controls = useDefaultItemListControls();
+    const controls = useDefaultItemListControls({ overrides: overrideControls });
 
     const scrollToIndex = useCallback(
         (

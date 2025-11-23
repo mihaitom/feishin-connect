@@ -54,6 +54,7 @@ export interface PlayerContext {
     mediaNext: () => void;
     mediaPause: () => void;
     mediaPlay: (id?: string) => void;
+    mediaPlayByIndex: (index: number) => void;
     mediaPrevious: () => void;
     mediaSeekToTimestamp: (timestamp: number) => void;
     mediaSkipBackward: () => void;
@@ -94,6 +95,7 @@ export const PlayerContext = createContext<PlayerContext>({
     mediaNext: () => {},
     mediaPause: () => {},
     mediaPlay: () => {},
+    mediaPlayByIndex: () => {},
     mediaPrevious: () => {},
     mediaSeekToTimestamp: () => {},
     mediaSkipBackward: () => {},
@@ -488,6 +490,13 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         [storeActions],
     );
 
+    const mediaPlayByIndex = useCallback(
+        (index: number) => {
+            storeActions.mediaPlayByIndex(index);
+        },
+        [storeActions],
+    );
+
     const mediaPrevious = useCallback(() => {
         storeActions.mediaPrevious();
     }, [storeActions]);
@@ -642,6 +651,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             mediaNext,
             mediaPause,
             mediaPlay,
+            mediaPlayByIndex,
             mediaPrevious,
             mediaSeekToTimestamp,
             mediaSkipBackward,
@@ -677,6 +687,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             mediaNext,
             mediaPause,
             mediaPlay,
+            mediaPlayByIndex,
             mediaPrevious,
             mediaSeekToTimestamp,
             mediaSkipBackward,

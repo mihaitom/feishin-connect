@@ -24,11 +24,15 @@ export const FavoriteColumn = (props: ItemTableListInnerColumn) => {
                     onClick={(event) => {
                         event.stopPropagation();
                         event.preventDefault();
+                        const item = props.data[props.rowIndex] as ItemListItem;
+                        const rowId = props.internalState.extractRowId(item);
+                        const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                         props.controls.onFavorite?.({
                             event,
                             favorite: !row,
+                            index,
                             internalState: props.internalState,
-                            item: props.data[props.rowIndex] as ItemListItem,
+                            item,
                             itemType: props.itemType,
                         });
                     }}

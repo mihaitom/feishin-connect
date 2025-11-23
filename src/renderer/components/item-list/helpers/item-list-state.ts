@@ -438,7 +438,9 @@ export const useItemListState = (
     );
 
     const getData = useCallback(() => {
-        return getDataFn ? getDataFn() : [];
+        const data = getDataFn ? getDataFn() : [];
+        // Filter out null/undefined values (e.g., group header rows)
+        return data.filter((d) => d != null);
     }, [getDataFn]);
 
     const findItemIndex = useCallback(

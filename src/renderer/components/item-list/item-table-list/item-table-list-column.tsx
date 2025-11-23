@@ -547,8 +547,11 @@ export const TableColumnTextContainer = (
     const handleClick = useDoubleClick({
         onDoubleClick: (event: React.MouseEvent<HTMLDivElement>) => {
             if (isDataRow && item) {
+                const rowId = props.internalState.extractRowId(item);
+                const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                 props.controls.onDoubleClick?.({
                     event,
+                    index,
                     internalState: props.internalState,
                     item: item as ItemListItem,
                     itemType: props.itemType,
@@ -567,8 +570,11 @@ export const TableColumnTextContainer = (
             }
 
             if (isDataRow && item && props.enableSelection) {
+                const rowId = props.internalState.extractRowId(item);
+                const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                 props.controls.onClick?.({
                     event,
+                    index,
                     internalState: props.internalState,
                     item: item as ItemListItem,
                     itemType: props.itemType,
@@ -580,8 +586,11 @@ export const TableColumnTextContainer = (
     const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
         if (isDataRow && item) {
             event.preventDefault();
+            const rowId = props.internalState.extractRowId(item);
+            const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
             props.controls.onMore?.({
                 event,
+                index,
                 internalState: props.internalState,
                 item: item as ItemListItem,
                 itemType: props.itemType,
@@ -750,8 +759,11 @@ export const TableColumnContainer = (
     const handleClick = useDoubleClick({
         onDoubleClick: (event: React.MouseEvent<HTMLDivElement>) => {
             if (isDataRow && item) {
+                const rowId = props.internalState.extractRowId(item);
+                const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                 props.controls.onDoubleClick?.({
                     event,
+                    index,
                     internalState: props.internalState,
                     item: item as ItemListItem,
                     itemType: props.itemType,
@@ -770,8 +782,11 @@ export const TableColumnContainer = (
             }
 
             if (isDataRow && item && props.enableSelection) {
+                const rowId = props.internalState.extractRowId(item);
+                const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                 props.controls.onClick?.({
                     event,
+                    index,
                     internalState: props.internalState,
                     item: item as ItemListItem,
                     itemType: props.itemType,
@@ -783,8 +798,11 @@ export const TableColumnContainer = (
     const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
         if (isDataRow && item) {
             event.preventDefault();
+            const rowId = props.internalState.extractRowId(item);
+            const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
             props.controls.onMore?.({
                 event,
+                index,
                 internalState: props.internalState,
                 item: item as ItemListItem,
                 itemType: props.itemType,

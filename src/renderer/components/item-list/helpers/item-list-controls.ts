@@ -16,6 +16,7 @@ interface UseDefaultItemListControlsArgs {
         edge: 'bottom' | 'left' | 'right' | 'top' | null,
     ) => void;
     onColumnResized?: (columnId: TableColumn, width: number) => void;
+    overrides?: Partial<ItemControls>;
 }
 
 const itemTypeMapping = {
@@ -32,7 +33,7 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
     const player = usePlayer();
     const navigate = useNavigate();
 
-    const { onColumnReordered, onColumnResized } = args || {};
+    const { onColumnReordered, onColumnResized, overrides } = args || {};
 
     const controls: ItemControls = useMemo(() => {
         return {
@@ -326,8 +327,10 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
 
                 player.setRating(item._serverId, [item.id], apiItemType, newRating);
             },
+
+            ...overrides,
         };
-    }, [onColumnReordered, onColumnResized, navigate, player]);
+    }, [onColumnReordered, onColumnResized, overrides, navigate, player]);
 
     return controls;
 };

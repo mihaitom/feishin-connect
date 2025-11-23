@@ -10,14 +10,16 @@ import { useItemListColumnResize } from '/@/renderer/components/item-list/helper
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
+import { ItemControls } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumInfiniteCarousel } from '/@/renderer/features/albums/components/album-infinite-carousel';
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer } from '/@/renderer/store';
+import { useCurrentServer, usePlayerSong } from '/@/renderer/store';
 import { useGeneralSettings, useSettingsStore } from '/@/renderer/store/settings.store';
 import {
     formatDateAbsoluteUTC,
@@ -46,7 +48,7 @@ import {
     Song,
     SortOrder,
 } from '/@/shared/types/domain-types';
-import { ItemListKey, ListDisplayType } from '/@/shared/types/types';
+import { ItemListKey, ListDisplayType, Play } from '/@/shared/types/types';
 
 interface AlbumMetadataTagsProps {
     album: Album | undefined;
@@ -423,6 +425,8 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
     const [searchTerm, setSearchTerm] = useState('');
     const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.ALBUM_DETAIL]?.table);
 
+    const currentSong = usePlayerSong();
+
     const columns = useMemo(() => {
         return tableConfig?.columns || [];
     }, [tableConfig?.columns]);
@@ -560,9 +564,30 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
         }));
     }, [discGroups, t, searchTerm]);
 
+    const player = usePlayer();
+
+    const overrideControls: Partial<ItemControls> = useMemo(() => {
+        return {
+            onDoubleClick: ({ index, internalState, item }) => {
+                if (!item) {
+                    return;
+                }
+
+                const items = internalState?.getData() as Song[];
+
+                if (index !== undefined) {
+                    player.addToQueueByData(items, Play.NOW);
+                    player.mediaPlayByIndex(index);
+                }
+            },
+        };
+    }, [player]);
+
     if (!tableConfig || columns.length === 0) {
         return null;
     }
+
+    const currentSongId = currentSong?.id;
 
     return (
         <Stack gap="md">
@@ -604,6 +629,7 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
                 />
             </Group>
             <ItemTableList
+                activeRowId={currentSongId}
                 autoFitColumns={tableConfig.autoFitColumns}
                 CellComponent={ItemTableListColumn}
                 columns={columns}
@@ -622,6 +648,7 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
                 itemType={LibraryItem.SONG}
                 onColumnReordered={handleColumnReordered}
                 onColumnResized={handleColumnResized}
+                overrideControls={overrideControls}
                 size={tableConfig.size}
             />
         </Stack>

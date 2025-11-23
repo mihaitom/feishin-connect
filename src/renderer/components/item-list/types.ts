@@ -11,13 +11,14 @@ import { Play, TableColumn } from '/@/shared/types/types';
 
 export interface DefaultItemControlProps {
     event: null | React.MouseEvent<unknown>;
+    index?: number;
     internalState?: ItemListStateActions;
     item: ItemListItem | undefined;
     itemType: LibraryItem;
 }
 
 export interface ItemControls {
-    onClick?: ({ internalState, item, itemType }: DefaultItemControlProps) => void;
+    onClick?: ({ index, internalState, item, itemType }: DefaultItemControlProps) => void;
     onColumnReordered?: ({
         columnIdFrom,
         columnIdTo,
@@ -25,24 +26,27 @@ export interface ItemControls {
     }: {
         columnIdFrom: TableColumn;
         columnIdTo: TableColumn;
-        edge: 'top' | 'bottom' | 'left' | 'right' | null;
+        edge: 'bottom' | 'left' | 'right' | 'top' | null;
     }) => void;
     onColumnResized?: ({ columnId, width }: { columnId: TableColumn; width: number }) => void;
-    onDoubleClick?: ({ internalState, item, itemType }: DefaultItemControlProps) => void;
-    onExpand?: ({ internalState, item, itemType }: DefaultItemControlProps) => void;
+    onDoubleClick?: ({ index, internalState, item, itemType }: DefaultItemControlProps) => void;
+    onExpand?: ({ index, internalState, item, itemType }: DefaultItemControlProps) => void;
     onFavorite?: ({
+        index,
         internalState,
         item,
         itemType,
     }: DefaultItemControlProps & { favorite: boolean }) => void;
-    onMore?: ({ internalState, item, itemType }: DefaultItemControlProps) => void;
+    onMore?: ({ index, internalState, item, itemType }: DefaultItemControlProps) => void;
     onPlay?: ({
+        index,
         internalState,
         item,
         itemType,
         playType,
     }: DefaultItemControlProps & { playType: Play }) => void;
     onRating?: ({
+        index,
         internalState,
         item,
         itemType,
@@ -66,7 +70,7 @@ export interface ItemListHandle {
     internalState: ItemListStateActions;
     scrollToIndex: (
         index: number,
-        options?: { align?: 'top' | 'bottom' | 'center'; behavior?: 'auto' | 'smooth' },
+        options?: { align?: 'bottom' | 'center' | 'top'; behavior?: 'auto' | 'smooth' },
     ) => void;
     scrollToOffset: (offset: number, options?: { behavior?: 'auto' | 'smooth' }) => void;
 }

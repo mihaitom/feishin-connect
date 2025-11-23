@@ -45,6 +45,7 @@ interface Actions {
     mediaNext: () => void;
     mediaPause: () => void;
     mediaPlay: (id?: string) => void;
+    mediaPlayByIndex: (index: number) => void;
     mediaPrevious: () => void;
     mediaSeekToTimestamp: (timestamp: number) => void;
     mediaSkipBackward: (offset?: number) => void;
@@ -682,6 +683,21 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         state.player.status = PlayerStatus.PLAYING;
                     });
                 },
+                mediaPlayByIndex: (index: number) => {
+                    set((state) => {
+                        const queue = state.getQueue();
+
+                        if (index === -1 || index >= queue.items.length) {
+                            state.player.status = PlayerStatus.PAUSED;
+                            return;
+                        }
+
+                        state.player.index = index;
+                        setTimestampStore(0);
+
+                        state.player.status = PlayerStatus.PLAYING;
+                    });
+                },
                 mediaPrevious: () => {
                     const currentIndex = get().player.index;
 
@@ -1266,6 +1282,7 @@ export const usePlayerActions = () => {
             mediaNext: state.mediaNext,
             mediaPause: state.mediaPause,
             mediaPlay: state.mediaPlay,
+            mediaPlayByIndex: state.mediaPlayByIndex,
             mediaPrevious: state.mediaPrevious,
             mediaSeekToTimestamp: state.mediaSeekToTimestamp,
             mediaSkipBackward: state.mediaSkipBackward,

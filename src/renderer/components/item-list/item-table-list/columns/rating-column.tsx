@@ -16,10 +16,14 @@ export const RatingColumn = (props: ItemTableListInnerColumn) => {
                 <Rating
                     className={row ? undefined : 'hover-only-flex'}
                     onChange={(rating) => {
+                        const item = props.data[props.rowIndex] as ItemListItem;
+                        const rowId = props.internalState.extractRowId(item);
+                        const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                         props.controls.onRating?.({
                             event: null,
+                            index,
                             internalState: props.internalState,
-                            item: props.data[props.rowIndex] as ItemListItem,
+                            item,
                             itemType: props.itemType,
                             rating,
                         });

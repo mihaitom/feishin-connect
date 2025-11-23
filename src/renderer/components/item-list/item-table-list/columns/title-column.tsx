@@ -17,7 +17,9 @@ export const TitleColumn = (props: ItemTableListInnerColumn) => {
     const { itemType } = props;
 
     switch (itemType) {
+        case LibraryItem.PLAYLIST_SONG:
         case LibraryItem.QUEUE_SONG:
+        case LibraryItem.SONG:
             return <QueueSongTitleColumn {...props} />;
         default:
             return <DefaultTitleColumn {...props} />;
@@ -72,7 +74,7 @@ function QueueSongTitleColumn(props: ItemTableListInnerColumn) {
     ];
 
     const song = props.data[props.rowIndex] as QueueSong;
-    const isActive = props.activeRowId === song?._uniqueId;
+    const isActive = props.activeRowId === song?.id || props.activeRowId === song?._uniqueId;
 
     if (typeof row === 'string') {
         const path = getTitlePath(props.itemType, (props.data[props.rowIndex] as any).id as string);

@@ -697,6 +697,7 @@ interface ItemTableListProps {
     onColumnResized?: (columnId: TableColumn, width: number) => void;
     onRangeChanged?: (range: { startIndex: number; stopIndex: number }) => void;
     onScrollEnd?: (offset: number, internalState: ItemListStateActions) => void;
+    overrideControls?: Partial<ItemControls>;
     ref?: Ref<ItemListHandle>;
     rowHeight?: ((index: number, cellProps: TableItemProps) => number) | number;
     size?: 'compact' | 'default' | 'large';
@@ -729,6 +730,7 @@ export const ItemTableList = ({
     onColumnResized,
     onRangeChanged,
     onScrollEnd,
+    overrideControls,
     ref,
     rowHeight,
     size = 'default',
@@ -1759,6 +1761,7 @@ export const ItemTableList = ({
     const controls = useDefaultItemListControls({
         onColumnReordered,
         onColumnResized,
+        overrides: overrideControls,
     });
 
     // Create itemProps for sticky header
