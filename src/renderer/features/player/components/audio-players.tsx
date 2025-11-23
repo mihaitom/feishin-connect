@@ -4,6 +4,7 @@ import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { UserFavoriteEventPayload, UserRatingEventPayload } from '/@/renderer/events/events';
 import { MpvPlayer } from '/@/renderer/features/player/audio-player/mpv-player';
 import { WebPlayer } from '/@/renderer/features/player/audio-player/web-player';
+import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
 import {
     updateQueueFavorites,
     updateQueueRatings,
@@ -16,6 +17,8 @@ import { PlayerType } from '/@/shared/types/types';
 export const AudioPlayers = () => {
     const playbackType = usePlaybackType();
     const serverId = useCurrentServerId();
+
+    useScrobble();
 
     // Listen to favorite and rating events to update queue songs
     useEffect(() => {

@@ -41,6 +41,8 @@ interface Actions {
         items: QueueSong[];
     };
     increaseVolume: (value: number) => void;
+    isFirstTrackInQueue: () => boolean;
+    isLastTrackInQueue: () => boolean;
     mediaAutoNext: () => PlayerData;
     mediaNext: () => void;
     mediaPause: () => void;
@@ -605,6 +607,17 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     set((state) => {
                         state.player.volume = Math.min(100, state.player.volume + value);
                     });
+                },
+                isFirstTrackInQueue: () => {
+                    const state = get();
+                    const currentIndex = state.player.index;
+                    return currentIndex === 0;
+                },
+                isLastTrackInQueue: () => {
+                    const state = get();
+                    const queue = state.getQueueOrder();
+                    const currentIndex = state.player.index;
+                    return currentIndex === queue.items.length - 1;
                 },
                 mediaAutoNext: () => {
                     const currentIndex = get().player.index;
@@ -1278,6 +1291,8 @@ export const usePlayerActions = () => {
             decreaseVolume: state.decreaseVolume,
             getQueue: state.getQueue,
             increaseVolume: state.increaseVolume,
+            isFirstTrackInQueue: state.isFirstTrackInQueue,
+            isLastTrackInQueue: state.isLastTrackInQueue,
             mediaAutoNext: state.mediaAutoNext,
             mediaNext: state.mediaNext,
             mediaPause: state.mediaPause,

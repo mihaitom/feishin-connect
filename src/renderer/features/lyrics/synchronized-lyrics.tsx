@@ -6,7 +6,6 @@ import styles from './synchronized-lyrics.module.css';
 
 import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
-import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
 import { useLyricsSettings, usePlaybackType, usePlayerActions } from '/@/renderer/store';
 import { FullLyricsMetadata, SynchronizedLyricsArray } from '/@/shared/types/domain-types';
 import { PlayerStatus, PlayerType } from '/@/shared/types/types';
@@ -31,7 +30,6 @@ export const SynchronizedLyrics = ({
     const playbackType = usePlaybackType();
     const settings = useLyricsSettings();
     const { mediaSeekToTimestamp } = usePlayerActions();
-    const { handleScrobbleFromSeek } = useScrobble();
 
     // State for player status and timestamp from events
     const [status, setStatus] = useState<PlayerStatus>(PlayerStatus.PAUSED);
@@ -42,12 +40,11 @@ export const SynchronizedLyrics = ({
             if (playbackType === PlayerType.LOCAL && mpvPlayer) {
                 mpvPlayer.seekTo(time);
             } else {
-                handleScrobbleFromSeek(time);
                 mpris?.updateSeek(time);
                 mediaSeekToTimestamp(time);
             }
         },
-        [handleScrobbleFromSeek, mediaSeekToTimestamp, playbackType],
+        [mediaSeekToTimestamp, playbackType],
     );
 
     // const seeked = useSeeked();
