@@ -74,7 +74,9 @@ function QueueSongTitleColumn(props: ItemTableListInnerColumn) {
     ];
 
     const song = props.data[props.rowIndex] as QueueSong;
-    const isActive = props.activeRowId === song?.id || props.activeRowId === song?._uniqueId;
+    const isActive =
+        !!props.activeRowId &&
+        (props.activeRowId === song?.id || props.activeRowId === song?._uniqueId);
 
     if (typeof row === 'string') {
         const path = getTitlePath(props.itemType, (props.data[props.rowIndex] as any).id as string);

@@ -84,7 +84,9 @@ const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
 const QueueSongRowIndexColumn = (props: ItemTableListInnerColumn) => {
     const status = usePlayerStatus();
     const song = props.data[props.rowIndex] as QueueSong;
-    const isActive = props.activeRowId === song?.id || props.activeRowId === song?._uniqueId;
+    const isActive =
+        !!props.activeRowId &&
+        (props.activeRowId === song?.id || props.activeRowId === song?._uniqueId);
 
     let adjustedRowIndex =
         props.adjustedRowIndexMap?.get(props.rowIndex) ??

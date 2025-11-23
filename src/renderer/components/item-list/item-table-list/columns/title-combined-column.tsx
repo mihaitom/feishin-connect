@@ -88,7 +88,9 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
     const row: object | undefined = (props.data as (any | undefined)[])[props.rowIndex];
 
     const song = props.data[props.rowIndex] as QueueSong;
-    const isActive = props.activeRowId === song?.id || props.activeRowId === song?._uniqueId;
+    const isActive =
+        !!props.activeRowId &&
+        (props.activeRowId === song?.id || props.activeRowId === song?._uniqueId);
 
     const artists = useMemo(() => {
         if (row && 'artists' in row && Array.isArray(row.artists)) {
