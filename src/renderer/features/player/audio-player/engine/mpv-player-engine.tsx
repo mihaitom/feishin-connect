@@ -51,12 +51,15 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const isInitializedRef = useRef<boolean>(false);
     const hasPopulatedQueueRef = useRef<boolean>(false);
+    const isMountedRef = useRef<boolean>(true);
 
     const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
     const mpvProperties = useSettingsStore((store) => store.playback.mpvProperties);
 
     // Start the mpv instance on startup
     useEffect(() => {
+        isMountedRef.current = true;
+
         const initializeMpv = async () => {
             const isRunning: boolean | undefined = await mpvPlayer?.isRunning();
 
@@ -83,6 +86,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         initializeMpv();
 
         return () => {
+            isMountedRef.current = false;
             mpvPlayer?.stop();
             mpvPlayer?.cleanup();
             isInitializedRef.current = false;
@@ -184,13 +188,13 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         }
 
         const updateProgress = async () => {
-            if (!mpvPlayer) {
+            if (!mpvPlayer || !isMountedRef.current) {
                 return;
             }
 
             try {
                 const time = await mpvPlayer.getCurrentTime();
-                if (time !== undefined) {
+                if (time !== undefined && isMountedRef.current) {
                     onProgress({
                         played: time / (duration || time + 10),
                         playedSeconds: time,
@@ -210,8 +214,10 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         }
 
         return () => {
+            isMountedRef.current = false;
             if (progressIntervalRef.current) {
                 clearInterval(progressIntervalRef.current);
+                progressIntervalRef.current = null;
             }
         };
     }, [currentSrc, isTransitioning, duration, onProgress]);

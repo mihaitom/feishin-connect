@@ -57,10 +57,6 @@ export const useMainPlayerListener = () => {
             mediaPrevious();
         });
 
-        mpvPlayerListener.rendererPlayPause(() => {
-            mediaTogglePlayPause();
-        });
-
         mpvPlayerListener.rendererPlay(() => {
             mediaPlay();
         });
@@ -113,7 +109,6 @@ export const useMainPlayerListener = () => {
             ipc?.removeAllListeners('renderer-player-play-pause');
             ipc?.removeAllListeners('renderer-player-next');
             ipc?.removeAllListeners('renderer-player-previous');
-            ipc?.removeAllListeners('renderer-player-play-pause');
             ipc?.removeAllListeners('renderer-player-play');
             ipc?.removeAllListeners('renderer-player-pause');
             ipc?.removeAllListeners('renderer-player-stop');
