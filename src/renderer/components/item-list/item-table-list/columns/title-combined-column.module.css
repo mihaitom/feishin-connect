@@ -9,8 +9,12 @@
 .text-container {
     display: grid;
     grid-template-rows: 1fr 1fr;
-    gap: 2px;
+    gap: var(--theme-spacing-xs);
     min-width: 0;
+}
+
+.text-container.compact {
+    gap: 0;
 }
 
 .title {
@@ -23,7 +27,7 @@
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.875rem;
+    font-size: var(--theme-font-size-xs) !important;
     color: var(--theme-colors-foreground-muted);
     white-space: nowrap;
     user-select: none;

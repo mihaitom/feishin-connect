@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { CSSProperties, useMemo } from 'react';
 import { generatePath, Link } from 'react-router';
 
@@ -46,13 +47,13 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
 
         return (
             <TableColumnContainer
-                className={styles['title-combined']}
+                className={styles.titleCombined}
                 containerStyle={{ '--row-height': `${rowHeight}px` } as CSSProperties}
                 {...props}
             >
                 <Image containerClassName={styles.image} src={row.imageUrl as string} />
-                <div className={styles['text-container']}>
-                    <Text className={styles.title} isNoSelect {...titleLinkProps}>
+                <div className={styles.textContainer}>
+                    <Text className={styles.title} isNoSelect size="md" {...titleLinkProps}>
                         {row.name as string}
                     </Text>
                     <div className={styles.artists}>
@@ -63,6 +64,7 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
                                     isLink
                                     isMuted
                                     isNoSelect
+                                    size="sm"
                                     state={{ item: artist }}
                                     to={artist.path}
                                 >
@@ -122,15 +124,20 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
 
         return (
             <TableColumnContainer
-                className={styles['title-combined']}
+                className={styles.titleCombined}
                 containerStyle={{ '--row-height': `${rowHeight}px` } as CSSProperties}
                 {...props}
             >
                 <Image containerClassName={styles.image} src={row.imageUrl as string} />
-                <div className={styles['text-container']}>
+                <div
+                    className={clsx(styles.textContainer, {
+                        [styles.compact]: props.size === 'compact',
+                    })}
+                >
                     <Text
                         className={styles.title}
                         isNoSelect
+                        size="md"
                         {...titleLinkProps}
                         style={textStyles}
                     >
@@ -144,6 +151,7 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
                                     isLink
                                     isMuted
                                     isNoSelect
+                                    size="sm"
                                     state={{ item: artist }}
                                     to={artist.path}
                                 >
