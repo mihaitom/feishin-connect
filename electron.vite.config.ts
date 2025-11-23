@@ -48,6 +48,7 @@ const config: UserConfig = {
         build: {
             cssMinify: 'esbuild',
             minify: 'esbuild',
+            sourcemap: true,
         },
         css: {
             modules: {
