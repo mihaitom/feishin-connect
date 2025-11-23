@@ -338,6 +338,7 @@ export const AlbumDetailContent = () => {
                     ? [detailQuery?.data?.albumArtists[0].id]
                     : undefined,
             },
+            rowCount: 1,
             sortBy: AlbumListSort.YEAR,
             sortOrder: SortOrder.DESC,
             title: t('page.albumDetail.moreFromArtist', { postProcess: 'sentenceCase' }),
@@ -351,6 +352,7 @@ export const AlbumDetailContent = () => {
                     ? [detailQuery?.data?.genres[0].id]
                     : undefined,
             },
+            rowCount: 2,
             sortBy: AlbumListSort.RANDOM,
             sortOrder: SortOrder.ASC,
             title: `${t('page.albumDetail.moreFromGeneric', {
@@ -402,7 +404,7 @@ export const AlbumDetailContent = () => {
                                         excludeIds={carousel.excludeIds}
                                         key={`carousel-${carousel.uniqueId}`}
                                         query={carousel.query}
-                                        rowCount={1}
+                                        rowCount={carousel.rowCount}
                                         sortBy={carousel.sortBy}
                                         sortOrder={carousel.sortOrder}
                                         title={carousel.title}

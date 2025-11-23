@@ -123,7 +123,7 @@ function useAlbumArtistListInfinite(
                 },
             });
         },
-        queryKey: queryKeys.albumArtists.list(serverId, {
+        queryKey: queryKeys.albumArtists.infiniteList(serverId, {
             sortBy,
             sortOrder,
             ...additionalQuery,

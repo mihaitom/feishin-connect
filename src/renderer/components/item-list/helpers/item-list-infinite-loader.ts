@@ -116,7 +116,7 @@ export const useItemListInfiniteLoader = ({
                         query: queryParams,
                     });
 
-                    return result.items;
+                    return result;
                 },
                 queryKey: queryKeys[getQueryKeyName(itemType)].list(serverId, queryParams),
                 staleTime: 1000 * 15,
@@ -130,7 +130,7 @@ export const useItemListInfiniteLoader = ({
                 (oldData: { data: unknown[]; pagesLoaded: Record<string, boolean> }) => {
                     const newData = [
                         ...oldData.data.slice(0, startIndex),
-                        ...result,
+                        ...result.items,
                         ...oldData.data.slice(endIndex),
                     ];
                     const newPagesLoaded = {

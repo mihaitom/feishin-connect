@@ -71,6 +71,18 @@ export const queryKeys: Record<
 
             return [serverId, 'albumArtists', 'detail'] as const;
         },
+        infiniteList: (serverId: string, query?: AlbumArtistListQuery) => {
+            const { filter, pagination } = splitPaginatedQuery(query);
+            if (query && pagination) {
+                return [serverId, 'albumArtists', 'infiniteList', filter, pagination] as const;
+            }
+
+            if (query) {
+                return [serverId, 'albumArtists', 'infiniteList', filter] as const;
+            }
+
+            return [serverId, 'albumArtists', 'infiniteList'] as const;
+        },
         list: (serverId: string, query?: AlbumArtistListQuery) => {
             const { filter, pagination } = splitPaginatedQuery(query);
             if (query && pagination) {
@@ -118,6 +130,27 @@ export const queryKeys: Record<
 
             return [serverId, 'albums', 'detail'] as const;
         },
+        infiniteList: (serverId: string, query?: AlbumListQuery, artistId?: string) => {
+            const { filter, pagination } = splitPaginatedQuery(query);
+
+            if (query && pagination && artistId) {
+                return [serverId, 'albums', 'infiniteList', artistId, filter, pagination] as const;
+            }
+
+            if (query && pagination) {
+                return [serverId, 'albums', 'infiniteList', filter, pagination] as const;
+            }
+
+            if (query && artistId) {
+                return [serverId, 'albums', 'infiniteList', artistId, filter] as const;
+            }
+
+            if (query) {
+                return [serverId, 'albums', 'infiniteList', filter] as const;
+            }
+
+            return [serverId, 'albums', 'infiniteList'] as const;
+        },
         list: (serverId: string, query?: AlbumListQuery, artistId?: string) => {
             const { filter, pagination } = splitPaginatedQuery(query);
 
@@ -164,6 +197,18 @@ export const queryKeys: Record<
             }
 
             return [serverId, 'artists', 'count'] as const;
+        },
+        infiniteList: (serverId: string, query?: ArtistListQuery) => {
+            const { filter, pagination } = splitPaginatedQuery(query);
+            if (query && pagination) {
+                return [serverId, 'artists', 'infiniteList', filter, pagination] as const;
+            }
+
+            if (query) {
+                return [serverId, 'artists', 'infiniteList', filter] as const;
+            }
+
+            return [serverId, 'artists', 'infiniteList'] as const;
         },
         list: (serverId: string, query?: ArtistListQuery) => {
             const { filter, pagination } = splitPaginatedQuery(query);

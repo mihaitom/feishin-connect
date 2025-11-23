@@ -766,7 +766,7 @@ export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
 }
 
 // Artist List
-export type ArtistListResponse = BasePaginatedResponse<AlbumArtist[]>;
+export type ArtistListResponse = BasePaginatedResponse<Artist[]>;
 
 type ArtistListSortMap = {
     jellyfin: Record<ArtistListSort, JFArtistListSort | undefined>;

@@ -121,7 +121,7 @@ function useAlbumListInfinite(
                 },
             });
         },
-        queryKey: queryKeys.albums.list(serverId, {
+        queryKey: queryKeys.albums.infiniteList(serverId, {
             sortBy,
             sortOrder,
             ...additionalQuery,

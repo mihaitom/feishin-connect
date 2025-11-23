@@ -1,33 +1,47 @@
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import isElectron from 'is-electron';
+import { useTranslation } from 'react-i18next';
 
 import { api } from '/@/renderer/api';
-import { queryKeys } from '/@/renderer/api/query-keys';
 import { eventEmitter } from '/@/renderer/events/event-emitter';
+import {
+    applyFavoriteOptimisticUpdates,
+    PreviousQueryData,
+    restoreFavoriteQueryData,
+} from '/@/renderer/features/shared/mutations/favorite-optimistic-updates';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { useFavoriteEvent } from '/@/renderer/store/event.store';
+import { toast } from '/@/shared/components/toast/toast';
 import { FavoriteArgs, FavoriteResponse, LibraryItem } from '/@/shared/types/domain-types';
 
 const remote = isElectron() ? window.api.remote : null;
 
-const createFavoriteQueryKey = ['set-favorite', true];
+const createFavoriteMutationKey = ['set-favorite', true];
 
 export const useCreateFavorite = (args: MutationHookArgs) => {
     const { options } = args || {};
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
 
-    const setFavoriteEvent = useFavoriteEvent();
-
-    return useMutation<FavoriteResponse, AxiosError, FavoriteArgs, null>({
+    return useMutation<FavoriteResponse, AxiosError, FavoriteArgs, PreviousQueryData[]>({
         mutationFn: (args) => {
             return api.controller.createFavorite({
                 ...args,
                 apiClientProps: { serverId: args.apiClientProps.serverId },
             });
         },
-        mutationKey: createFavoriteQueryKey,
-        onError: (_error, variables) => {
+        mutationKey: createFavoriteMutationKey,
+        onError: (_error, variables, context) => {
+            if (context) {
+                restoreFavoriteQueryData(queryClient, context);
+            }
+
+            toast.show({
+                message: _error.message,
+                title: t('error.genericError', { postProcess: 'sentenceCase' }) as string,
+                type: 'error',
+            });
+
             eventEmitter.emit('USER_FAVORITE', {
                 favorite: false,
                 id: variables.query.id,
@@ -43,69 +57,11 @@ export const useCreateFavorite = (args: MutationHookArgs) => {
                 serverId: variables.apiClientProps.serverId,
             });
 
-            return null;
+            return applyFavoriteOptimisticUpdates(queryClient, variables, true);
         },
         onSuccess: (_data, variables) => {
             if (variables.query.type === LibraryItem.SONG) {
                 remote?.updateFavorite(true, variables.apiClientProps.serverId, variables.query.id);
-                setFavoriteEvent(variables.query.id, true);
-            }
-
-            switch (variables.query.type) {
-                case LibraryItem.ALBUM: {
-                    const queryKey = queryKeys.albums.detail(variables.apiClientProps.serverId);
-                    queryClient.invalidateQueries({
-                        exact: false,
-                        queryKey,
-                    });
-
-                    break;
-                }
-                case LibraryItem.ALBUM_ARTIST: {
-                    const queryKey = queryKeys.albumArtists.detail(
-                        variables.apiClientProps.serverId,
-                    );
-
-                    queryClient.invalidateQueries({
-                        exact: false,
-                        queryKey,
-                    });
-
-                    break;
-                }
-                case LibraryItem.ARTIST: {
-                    const queryKey = queryKeys.artists.detail(variables.apiClientProps.serverId);
-
-                    queryClient.invalidateQueries({
-                        exact: false,
-                        queryKey,
-                    });
-
-                    break;
-                }
-                case LibraryItem.PLAYLIST_SONG:
-                case LibraryItem.QUEUE_SONG:
-                case LibraryItem.SONG: {
-                    const songDetailQueryKey = queryKeys.songs.detail(
-                        variables.apiClientProps.serverId,
-                    );
-
-                    queryClient.invalidateQueries({
-                        exact: false,
-                        queryKey: songDetailQueryKey,
-                    });
-
-                    const albumDetailQueryKey = queryKeys.albums.detail(
-                        variables.apiClientProps.serverId,
-                    );
-
-                    queryClient.invalidateQueries({
-                        exact: false,
-                        queryKey: albumDetailQueryKey,
-                    });
-
-                    break;
-                }
             }
         },
         ...options,
@@ -113,6 +69,6 @@ export const useCreateFavorite = (args: MutationHookArgs) => {
 };
 
 export const useIsMutatingCreateFavorite = () => {
-    const mutatingCount = useIsMutating({ mutationKey: createFavoriteQueryKey });
+    const mutatingCount = useIsMutating({ mutationKey: createFavoriteMutationKey });
     return mutatingCount > 0;
 };

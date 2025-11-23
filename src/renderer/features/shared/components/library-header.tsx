@@ -185,6 +185,7 @@ export const LibraryHeaderMenu = ({
     const isMutatingRating = useIsMutatingRating();
     const isMutatingCreateFavorite = useIsMutatingCreateFavorite();
     const isMutatingDeleteFavorite = useIsMutatingDeleteFavorite();
+    const isMutatingFavorite = isMutatingCreateFavorite || isMutatingDeleteFavorite;
 
     return (
         <div className={styles.libraryHeaderMenu}>
@@ -203,7 +204,7 @@ export const LibraryHeaderMenu = ({
                 )}
                 {onFavorite && (
                     <ActionIcon
-                        disabled={isMutatingCreateFavorite || isMutatingDeleteFavorite}
+                        disabled={isMutatingFavorite}
                         icon="favorite"
                         iconProps={{
                             fill: favorite ? 'primary' : undefined,

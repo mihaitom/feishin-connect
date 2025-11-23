@@ -1,9 +1,10 @@
 import type { MantineColorsTuple, MantineThemeOverride } from '@mantine/core';
 
 import { generateColors } from '@mantine/colors-generator';
-import { createTheme, rem } from '@mantine/core';
+import { createTheme, Loader, rem } from '@mantine/core';
 import merge from 'lodash/merge';
 
+import { Spinner } from '/@/shared/components/spinner/spinner';
 import { AppThemeConfiguration } from '/@/shared/themes/app-theme-types';
 
 // const lightColors: MantineColorsTuple = [
@@ -42,6 +43,14 @@ const mantineTheme: MantineThemeOverride = createTheme({
         sm: '48em',
         xl: '88em',
         xs: '36em',
+    },
+    components: {
+        Loader: Loader.extend({
+            defaultProps: {
+                loaders: { ...Loader.defaultLoaders, spinner: Spinner as any },
+                type: 'spinner',
+            },
+        }),
     },
     cursorType: 'pointer',
     defaultRadius: 'sm',

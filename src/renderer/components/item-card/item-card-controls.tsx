@@ -7,6 +7,9 @@ import styles from './item-card-controls.module.css';
 import { ItemListStateActions } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { ItemControls } from '/@/renderer/components/item-list/types';
 import { useIsPlayerFetching } from '/@/renderer/features/player/context/player-context';
+import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
+import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
+import { useIsMutatingRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import { animationVariants } from '/@/shared/components/animations/animation-variants';
 import { AppIcon, Icon, IconProps } from '/@/shared/components/icon/icon';
 import { Rating } from '/@/shared/components/rating/rating';
@@ -127,16 +130,6 @@ const createRatingChangeHandler =
         });
     };
 
-const ratingClickHandler = (e: MouseEvent<HTMLElement>) => {
-    e.stopPropagation();
-    e.preventDefault();
-};
-
-const ratingMouseDownHandler = (e: React.MouseEvent<HTMLElement>) => {
-    e.stopPropagation();
-    e.preventDefault();
-};
-
 const moreDoubleClickHandler = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
@@ -225,14 +218,6 @@ export const ItemCardControls = ({
 
     const isFavorite = (item as { userFavorite?: boolean })?.userFavorite ?? false;
 
-    const favoriteIconProps = useMemo<Partial<IconProps>>(
-        () => ({
-            color: isFavorite ? ('primary' as const) : ('default' as const),
-            fill: isFavorite ? ('primary' as const) : undefined,
-        }),
-        [isFavorite],
-    );
-
     return (
         <motion.div className={clsx(styles.container)} {...containerProps[type]}>
             {controls?.onPlay && (
@@ -251,20 +236,12 @@ export const ItemCardControls = ({
                 </>
             )}
             {controls?.onFavorite && (
-                <SecondaryButton
-                    className={styles.favorite}
-                    icon="favorite"
-                    iconProps={favoriteIconProps}
-                    onClick={favoriteHandler}
-                />
+                <FavoriteButton isFavorite={isFavorite} onClick={favoriteHandler} />
             )}
             {controls?.onRating && (
-                <Rating
-                    className={styles.rating}
+                <RatingButton
                     onChange={ratingChangeHandler}
-                    onClick={ratingClickHandler}
-                    onMouseDown={ratingMouseDownHandler}
-                    size="xs"
+                    rating={(item as { userRating: number }).userRating}
                 />
             )}
             {controls?.onMore && (
@@ -285,6 +262,67 @@ export const ItemCardControls = ({
         </motion.div>
     );
 };
+
+const FavoriteButton = memo(
+    ({
+        isFavorite,
+        onClick,
+    }: {
+        isFavorite: boolean;
+        onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+    }) => {
+        const isMutatingCreate = useIsMutatingCreateFavorite();
+        const isMutatingDelete = useIsMutatingDeleteFavorite();
+        const isMutating = isMutatingCreate || isMutatingDelete;
+
+        const favoriteIconProps = useMemo<Partial<IconProps>>(
+            () => ({
+                color: isFavorite ? ('primary' as const) : ('default' as const),
+                fill: isFavorite ? ('primary' as const) : undefined,
+            }),
+            [isFavorite],
+        );
+
+        return (
+            <SecondaryButton
+                className={styles.favorite}
+                disabled={isMutating}
+                icon="favorite"
+                iconProps={favoriteIconProps}
+                onClick={onClick}
+            />
+        );
+    },
+    (prev, next) => prev.isFavorite === next.isFavorite,
+);
+
+const RatingButton = memo(
+    ({ onChange, rating }: { onChange: (rating: number) => void; rating: number }) => {
+        const ratingClickHandler = (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
+        const ratingMouseDownHandler = (e: React.MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
+        const isMutatingRating = useIsMutatingRating();
+        return (
+            <Rating
+                className={styles.rating}
+                onChange={onChange}
+                onClick={ratingClickHandler}
+                onMouseDown={ratingMouseDownHandler}
+                readOnly={isMutatingRating}
+                size="sm"
+                value={rating}
+            />
+        );
+    },
+    (prev, next) => prev.rating === next.rating,
+);
 
 const PlayButton = memo(
     ({
@@ -360,6 +398,7 @@ const SecondaryPlayButton = memo(
 
 interface SecondaryButtonProps {
     className?: string;
+    disabled?: boolean;
     icon: keyof typeof AppIcon;
     onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
 }
@@ -367,6 +406,7 @@ interface SecondaryButtonProps {
 const SecondaryButton = memo(
     ({
         className,
+        disabled,
         icon,
         iconProps,
         onClick,
@@ -395,6 +435,7 @@ const SecondaryButton = memo(
         return (
             <button
                 className={clsx(styles.secondaryButton, className)}
+                disabled={disabled}
                 onClick={handleClick}
                 onDoubleClick={handleDoubleClick}
                 onMouseDown={handleMouseDown}

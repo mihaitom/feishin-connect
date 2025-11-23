@@ -3,12 +3,15 @@ import {
     TableColumnContainer,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemListItem } from '/@/renderer/components/item-list/types';
+import { useIsMutatingRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import { Rating } from '/@/shared/components/rating/rating';
 
 export const RatingColumn = (props: ItemTableListInnerColumn) => {
     const row: null | number | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
         props.columns[props.columnIndex].id
     ];
+
+    const isMutatingRating = useIsMutatingRating();
 
     if (typeof row === 'number' || row === null) {
         return (
@@ -28,6 +31,7 @@ export const RatingColumn = (props: ItemTableListInnerColumn) => {
                             rating,
                         });
                     }}
+                    readOnly={isMutatingRating}
                     size="xs"
                     value={row || 0}
                 />

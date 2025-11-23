@@ -3,6 +3,8 @@ import {
     TableColumnContainer,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemListItem } from '/@/renderer/components/item-list/types';
+import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
+import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 
 export const FavoriteColumn = (props: ItemTableListInnerColumn) => {
@@ -10,11 +12,16 @@ export const FavoriteColumn = (props: ItemTableListInnerColumn) => {
         props.columns[props.columnIndex].id
     ];
 
+    const isMutatingCreateFavorite = useIsMutatingCreateFavorite();
+    const isMutatingDeleteFavorite = useIsMutatingDeleteFavorite();
+    const isMutatingFavorite = isMutatingCreateFavorite || isMutatingDeleteFavorite;
+
     if (typeof row === 'boolean') {
         return (
             <TableColumnContainer {...props}>
                 <ActionIcon
                     className={row ? undefined : 'hover-only'}
+                    disabled={isMutatingFavorite}
                     icon="favorite"
                     iconProps={{
                         color: row ? 'primary' : 'muted',
