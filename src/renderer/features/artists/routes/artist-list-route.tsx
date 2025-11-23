@@ -5,6 +5,7 @@ import { ArtistListContent } from '/@/renderer/features/artists/components/artis
 import { ArtistListHeader } from '/@/renderer/features/artists/components/artist-list-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { ItemListKey } from '/@/shared/types/types';
 
 const ArtistListRoute = () => {
@@ -33,4 +34,12 @@ const ArtistListRoute = () => {
     );
 };
 
-export default ArtistListRoute;
+const ArtistListRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <ArtistListRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default ArtistListRouteWithBoundary;

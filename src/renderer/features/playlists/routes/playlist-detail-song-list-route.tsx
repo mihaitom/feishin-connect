@@ -14,6 +14,7 @@ import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/crea
 import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, usePlaylistDetailStore } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
@@ -233,4 +234,12 @@ const PlaylistDetailSongListRoute = () => {
     );
 };
 
-export default PlaylistDetailSongListRoute;
+const PlaylistDetailSongListRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <PlaylistDetailSongListRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default PlaylistDetailSongListRouteWithBoundary;

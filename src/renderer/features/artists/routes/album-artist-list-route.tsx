@@ -5,6 +5,7 @@ import { AlbumArtistListContent } from '/@/renderer/features/artists/components/
 import { AlbumArtistListHeader } from '/@/renderer/features/artists/components/album-artist-list-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { ItemListKey } from '/@/shared/types/types';
 
 const AlbumArtistListRoute = () => {
@@ -33,4 +34,12 @@ const AlbumArtistListRoute = () => {
     );
 };
 
-export default AlbumArtistListRoute;
+const AlbumArtistListRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <AlbumArtistListRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default AlbumArtistListRouteWithBoundary;

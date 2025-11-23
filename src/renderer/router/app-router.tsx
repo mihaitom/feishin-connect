@@ -1,9 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { HashRouter, Route, Routes } from 'react-router';
 
-import { RouterErrorBoundary } from '/@/renderer/components/error-boundary/router-error-boundary';
 import { AddToPlaylistContextModal } from '/@/renderer/features/playlists/components/add-to-playlist-context-modal';
 import { SettingsModal } from '/@/renderer/features/settings/components/settings-modal';
+import { RouterErrorBoundary } from '/@/renderer/features/shared/components/router-error-boundary';
 import { ShareItemContextModal } from '/@/renderer/features/sharing/components/share-item-context-modal';
 import { ResponsiveLayout } from '/@/renderer/layouts/responsive-layout';
 import { AppOutlet } from '/@/renderer/router/app-outlet';
@@ -65,52 +65,31 @@ const GenreListRoute = lazy(() => import('/@/renderer/features/genres/routes/gen
 
 const SearchRoute = lazy(() => import('/@/renderer/features/search/routes/search-route'));
 
-const RouteErrorBoundary = lazy(
-    () => import('/@/renderer/features/action-required/components/route-error-boundary'),
-);
-
 export const AppRouter = () => {
     const router = (
         <HashRouter>
-            <RouterErrorBoundary>
-                <ModalsProvider
-                    modals={{
-                        addToPlaylist: AddToPlaylistContextModal,
-                        base: BaseContextModal,
-                        settings: SettingsModal,
-                        shareItem: ShareItemContextModal,
-                    }}
-                >
+            <ModalsProvider
+                modals={{
+                    addToPlaylist: AddToPlaylistContextModal,
+                    base: BaseContextModal,
+                    settings: SettingsModal,
+                    shareItem: ShareItemContextModal,
+                }}
+            >
+                <RouterErrorBoundary>
                     <Routes>
                         <Route element={<TitlebarOutlet />}>
-                            <Route element={<AppOutlet />} errorElement={<RouteErrorBoundary />}>
+                            <Route element={<AppOutlet />}>
                                 <Route element={<ResponsiveLayout />}>
-                                    <Route
-                                        element={<HomeRoute />}
-                                        errorElement={<RouteErrorBoundary />}
-                                        index
-                                    />
-                                    <Route
-                                        element={<HomeRoute />}
-                                        errorElement={<RouteErrorBoundary />}
-                                        path={AppRoute.HOME}
-                                    />
-                                    <Route
-                                        element={<SearchRoute />}
-                                        errorElement={<RouteErrorBoundary />}
-                                        path={AppRoute.SEARCH}
-                                    />
+                                    <Route element={<HomeRoute />} index />
+                                    <Route element={<HomeRoute />} path={AppRoute.HOME} />
+                                    <Route element={<SearchRoute />} path={AppRoute.SEARCH} />
                                     <Route
                                         element={<NowPlayingRoute />}
-                                        errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.NOW_PLAYING}
                                     />
                                     <Route path={AppRoute.LIBRARY_GENRES}>
-                                        <Route
-                                            element={<GenreListRoute />}
-                                            errorElement={<RouteErrorBoundary />}
-                                            index
-                                        />
+                                        <Route element={<GenreListRoute />} index />
                                         <Route
                                             element={<AlbumListRoute />}
                                             path={AppRoute.LIBRARY_GENRES_ALBUMS}
@@ -122,17 +101,14 @@ export const AppRouter = () => {
                                     </Route>
                                     <Route
                                         element={<AlbumListRoute />}
-                                        errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.LIBRARY_ALBUMS}
                                     />
                                     <Route
                                         element={<AlbumDetailRoute />}
-                                        errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.LIBRARY_ALBUMS_DETAIL}
                                     />
                                     <Route
                                         element={<ArtistListRoute />}
-                                        errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.LIBRARY_ARTISTS}
                                     />
                                     <Route path={AppRoute.LIBRARY_ARTISTS_DETAIL}>
@@ -152,28 +128,21 @@ export const AppRouter = () => {
                                     </Route>
                                     <Route
                                         element={<DummyAlbumDetailRoute />}
-                                        errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.FAKE_LIBRARY_ALBUM_DETAILS}
                                     />
                                     <Route
                                         element={<SongListRoute />}
-                                        errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.LIBRARY_SONGS}
                                     />
                                     <Route
                                         element={<PlaylistListRoute />}
-                                        errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.PLAYLISTS}
                                     />
                                     <Route
                                         element={<PlaylistDetailSongListRoute />}
-                                        errorElement={<RouteErrorBoundary />}
                                         path={AppRoute.PLAYLISTS_DETAIL_SONGS}
                                     />
-                                    <Route
-                                        errorElement={<RouteErrorBoundary />}
-                                        path={AppRoute.LIBRARY_ALBUM_ARTISTS}
-                                    >
+                                    <Route path={AppRoute.LIBRARY_ALBUM_ARTISTS}>
                                         <Route element={<AlbumArtistListRoute />} index />
                                         <Route path={AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL}>
                                             <Route element={<AlbumArtistDetailRoute />} index />
@@ -209,8 +178,8 @@ export const AppRouter = () => {
                             </Route>
                         </Route>
                     </Routes>
-                </ModalsProvider>
-            </RouterErrorBoundary>
+                </RouterErrorBoundary>
+            </ModalsProvider>
         </HashRouter>
     );
 

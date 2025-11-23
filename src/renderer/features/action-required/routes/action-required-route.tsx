@@ -9,6 +9,7 @@ import { ServerCredentialRequired } from '/@/renderer/features/action-required/c
 import { ServerRequired } from '/@/renderer/features/action-required/components/server-required';
 import { ServerList } from '/@/renderer/features/servers/components/server-list';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServerWithCredential } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
@@ -84,4 +85,12 @@ const ActionRequiredRoute = () => {
     );
 };
 
-export default ActionRequiredRoute;
+const ActionRequiredRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <ActionRequiredRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default ActionRequiredRouteWithBoundary;

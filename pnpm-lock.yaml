@@ -46,7 +46,7 @@ importers:
         version: 8.3.8(@mantine/core@8.3.8(@mantine/hooks@8.3.8(react@19.1.0))(@types/react@19.2.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@mantine/hooks@8.3.8(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@offlegacy/nuqs-hash-router':
         specifier: ^0.1.1
-        version: 0.1.1(nuqs@2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(react@19.1.0)
+        version: 0.1.1(nuqs@2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-context-menu':
         specifier: ^2.2.16
         version: 2.2.16(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -151,7 +151,7 @@ importers:
         version: https://codeload.github.com/jeffvli/Node-MPV/tar.gz/32b4d64395289ad710c41d481d2707a7acfc228f
       nuqs:
         specifier: ^2.7.1
-        version: 2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+        version: 2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       overlayscrollbars:
         specifier: ^2.11.1
         version: 2.11.3
@@ -189,8 +189,8 @@ importers:
         specifier: ^2.11.0
         version: 2.16.0(react@19.1.0)
       react-router:
-        specifier: ^7.9.4
-        version: 7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: ^7.9.6
+        version: 7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-virtualized-auto-sizer:
         specifier: ^1.0.26
         version: 1.0.26(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -4610,6 +4610,16 @@ packages:
       react-dom:
         optional: true
 
+  react-router@7.9.6:
+    resolution: {integrity: sha512-Y1tUp8clYRXpfPITyuifmSoE2vncSME18uVLgaqyxh9H35JWpIfzHo+9y3Fzh5odk/jxPW29IgLgzcdwxGqyNA==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+
   react-style-singleton@2.2.3:
     resolution: {integrity: sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==}
     engines: {node: '>=10'}
@@ -7101,9 +7111,9 @@ snapshots:
       mkdirp: 1.0.4
       rimraf: 3.0.2
 
-  '@offlegacy/nuqs-hash-router@0.1.1(nuqs@2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(react@19.1.0)':
+  '@offlegacy/nuqs-hash-router@0.1.1(nuqs@2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(react@19.1.0)':
     dependencies:
-      nuqs: 2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+      nuqs: 2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       react: 19.1.0
 
   '@pkgjs/parseargs@0.11.0':
@@ -10148,12 +10158,12 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuqs@2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
+  nuqs@2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
     dependencies:
       '@standard-schema/spec': 1.0.0
       react: 19.1.0
     optionalDependencies:
-      react-router: 7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react-router: 7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-router-dom: 7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   object-assign@4.1.1: {}
@@ -10565,6 +10575,15 @@ snapshots:
     optional: true
 
   react-router@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      cookie: 1.0.2
+      react: 19.1.0
+      set-cookie-parser: 2.7.1
+    optionalDependencies:
+      react-dom: 19.1.0(react@19.1.0)
+    optional: true
+
+  react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       cookie: 1.0.2
       react: 19.1.0

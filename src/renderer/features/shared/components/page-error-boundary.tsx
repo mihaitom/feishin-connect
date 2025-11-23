@@ -5,17 +5,19 @@ import { ServerSelector } from '/@/renderer/features/sidebar/components/server-s
 import { Box } from '/@/shared/components/box/box';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
+import { Code } from '/@/shared/components/code/code';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
+import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
 
-interface RouterErrorFallbackProps {
+interface PageErrorFallbackProps {
     error: Error;
     resetErrorBoundary: () => void;
 }
 
-const RouterErrorFallback = ({ error, resetErrorBoundary }: RouterErrorFallbackProps) => {
+const PageErrorFallback = ({ error, resetErrorBoundary }: PageErrorFallbackProps) => {
     const { t } = useTranslation();
 
     const handleRefresh = () => {
@@ -23,13 +25,7 @@ const RouterErrorFallback = ({ error, resetErrorBoundary }: RouterErrorFallbackP
     };
 
     return (
-        <Box
-            style={{
-                backgroundColor: 'var(--theme-colors-background)',
-                height: '100vh',
-                width: '100vw',
-            }}
-        >
+        <Box h="100%" pos="relative" w="100%">
             <Box
                 style={{
                     padding: 'var(--theme-spacing-md)',
@@ -41,32 +37,30 @@ const RouterErrorFallback = ({ error, resetErrorBoundary }: RouterErrorFallbackP
             >
                 <ServerSelector />
             </Box>
-            <Center style={{ height: '100vh' }}>
-                <Stack style={{ maxWidth: '50%' }}>
+            <Center h="100%" p="md" w="100%">
+                <Stack maw="800px">
                     <Group gap="xs">
                         <Icon fill="error" icon="error" size="lg" />
-                        <Text size="lg">
+                        <TextTitle fw={700} order={3}>
                             {t('error.genericError', { postProcess: 'sentenceCase' })}
-                        </Text>
+                        </TextTitle>
                     </Group>
-                    <Text size="sm" style={{ wordBreak: 'break-word' }}>
+                    <Text style={{ wordBreak: 'break-word' }}>
                         {error?.message || t('error.genericError', { postProcess: 'sentenceCase' })}
                     </Text>
                     {process.env.NODE_ENV === 'development' && error?.stack && (
-                        <Text
-                            size="xs"
+                        <Code
+                            p="md"
                             style={{
-                                backgroundColor: 'var(--theme-colors-error)',
-                                color: 'var(--theme-colors-errorText)',
+                                backgroundColor: 'var(--theme-colors-surface)',
                                 fontFamily: 'monospace',
                                 maxHeight: '300px',
                                 overflow: 'auto',
-                                padding: '10px',
                                 wordBreak: 'break-word',
                             }}
                         >
                             {error.stack}
-                        </Text>
+                        </Code>
                     )}
                     <Group grow>
                         <Button onClick={resetErrorBoundary} size="md" variant="default">
@@ -82,17 +76,17 @@ const RouterErrorFallback = ({ error, resetErrorBoundary }: RouterErrorFallbackP
     );
 };
 
-interface RouterErrorBoundaryProps {
+interface PageErrorBoundaryProps {
     children: React.ReactNode;
 }
 
-export const RouterErrorBoundary = ({ children }: RouterErrorBoundaryProps) => {
+export const PageErrorBoundary = ({ children }: PageErrorBoundaryProps) => {
     return (
         <ErrorBoundary
-            FallbackComponent={RouterErrorFallback}
+            FallbackComponent={PageErrorFallback}
             onError={(error, errorInfo) => {
                 if (process.env.NODE_ENV === 'development') {
-                    console.error('Root error boundary caught an error:', error, errorInfo);
+                    console.error('Page error boundary caught an error:', error, errorInfo);
                 }
             }}
             onReset={() => {}}

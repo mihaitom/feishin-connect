@@ -5,6 +5,7 @@ import { SearchContent } from '/@/renderer/features/search/components/search-con
 import { SearchHeader } from '/@/renderer/features/search/components/search-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 
 const SearchRoute = () => {
     const { state: locationState } = useLocation();
@@ -22,4 +23,12 @@ const SearchRoute = () => {
     );
 };
 
-export default SearchRoute;
+const SearchRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <SearchRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default SearchRouteWithBoundary;

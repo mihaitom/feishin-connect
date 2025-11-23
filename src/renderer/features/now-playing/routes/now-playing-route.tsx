@@ -6,6 +6,7 @@ import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queu
 import { PlayQueueListControls } from '/@/renderer/features/now-playing/components/play-queue-list-controls';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { ItemListKey } from '/@/shared/types/types';
 
 const NowPlayingRoute = () => {
@@ -28,4 +29,12 @@ const NowPlayingRoute = () => {
     );
 };
 
-export default NowPlayingRoute;
+const NowPlayingRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <NowPlayingRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default NowPlayingRouteWithBoundary;

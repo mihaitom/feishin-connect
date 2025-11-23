@@ -6,12 +6,13 @@ import { ListContext } from '/@/renderer/context/list-context';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { SongListContent } from '/@/renderer/features/songs/components/song-list-content';
 import { SongListHeader } from '/@/renderer/features/songs/components/song-list-header';
 import { useCurrentServer } from '/@/renderer/store';
 import { GenreListSort, SortOrder } from '/@/shared/types/domain-types';
 
-const TrackListRoute = () => {
+const SongListRoute = () => {
     const server = useCurrentServer();
     const [searchParams] = useSearchParams();
     const { albumArtistId, genreId } = useParams();
@@ -83,4 +84,12 @@ const TrackListRoute = () => {
     );
 };
 
-export default TrackListRoute;
+const SongListRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <SongListRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default SongListRouteWithBoundary;

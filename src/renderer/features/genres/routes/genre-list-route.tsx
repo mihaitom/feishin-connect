@@ -5,6 +5,7 @@ import { GenreListContent } from '/@/renderer/features/genres/components/genre-l
 import { GenreListHeader } from '/@/renderer/features/genres/components/genre-list-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { ItemListKey } from '/@/shared/types/types';
 
 const GenreListRoute = () => {
@@ -33,4 +34,12 @@ const GenreListRoute = () => {
     );
 };
 
-export default GenreListRoute;
+const GenreListRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <GenreListRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default GenreListRouteWithBoundary;

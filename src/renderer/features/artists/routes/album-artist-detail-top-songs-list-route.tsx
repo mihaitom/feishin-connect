@@ -8,6 +8,7 @@ import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistDetailTopSongsListHeader } from '/@/renderer/features/artists/components/album-artist-detail-top-songs-list-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { useCurrentServer } from '/@/renderer/store/auth.store';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
@@ -64,4 +65,12 @@ const AlbumArtistDetailTopSongsListRoute = () => {
     );
 };
 
-export default AlbumArtistDetailTopSongsListRoute;
+const AlbumArtistDetailTopSongsListRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <AlbumArtistDetailTopSongsListRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default AlbumArtistDetailTopSongsListRouteWithBoundary;

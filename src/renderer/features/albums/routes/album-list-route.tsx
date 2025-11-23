@@ -6,6 +6,7 @@ import { AlbumListContent } from '/@/renderer/features/albums/components/album-l
 import { AlbumListHeader } from '/@/renderer/features/albums/components/album-list-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 
 const AlbumListRoute = () => {
     const { albumArtistId, genreId } = useParams();
@@ -34,4 +35,12 @@ const AlbumListRoute = () => {
     );
 };
 
-export default AlbumListRoute;
+const AlbumListRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <AlbumListRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default AlbumListRouteWithBoundary;

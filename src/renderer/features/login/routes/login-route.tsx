@@ -11,6 +11,7 @@ import JellyfinIcon from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeIcon from '/@/renderer/features/servers/assets/navidrome.png';
 import SubsonicIcon from '/@/renderer/features/servers/assets/opensubsonic.png';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAuthStoreActions, useCurrentServer } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
@@ -200,4 +201,12 @@ const LoginRoute = () => {
     );
 };
 
-export default LoginRoute;
+const LoginRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <LoginRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default LoginRouteWithBoundary;

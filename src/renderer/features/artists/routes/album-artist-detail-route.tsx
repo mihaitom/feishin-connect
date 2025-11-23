@@ -13,6 +13,7 @@ import {
 } from '/@/renderer/features/shared/components/library-background-overlay';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import { useCurrentServer, useGeneralSettings } from '/@/renderer/store';
 import { LibraryItem } from '/@/shared/types/domain-types';
@@ -89,4 +90,12 @@ const AlbumArtistDetailRoute = () => {
     );
 };
 
-export default AlbumArtistDetailRoute;
+const AlbumArtistDetailRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <AlbumArtistDetailRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default AlbumArtistDetailRouteWithBoundary;

@@ -10,6 +10,7 @@ import { FeaturedGenres } from '/@/renderer/features/home/components/featured-ge
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import {
     HomeItem,
     useCurrentServer,
@@ -154,12 +155,14 @@ const HomeRoute = () => {
     );
 };
 
-const SuspensedHomeRoute = () => {
+const HomeRouteWithBoundary = () => {
     return (
-        <Suspense fallback={<Spinner container />}>
-            <HomeRoute />
-        </Suspense>
+        <PageErrorBoundary>
+            <Suspense fallback={<Spinner container />}>
+                <HomeRoute />
+            </Suspense>
+        </PageErrorBoundary>
     );
 };
 
-export default SuspensedHomeRoute;
+export default HomeRouteWithBoundary;

@@ -120,7 +120,7 @@
         "react-image": "^4.1.0",
         "react-loading-skeleton": "^3.5.0",
         "react-player": "^2.11.0",
-        "react-router": "^7.9.4",
+        "react-router": "^7.9.6",
         "react-virtualized-auto-sizer": "^1.0.26",
         "react-window": "1.8.11",
         "react-window-v2": "npm:react-window@^2.2.3",
