@@ -132,21 +132,14 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
                     <div className={styles.metadataSection}>
                         <Stack gap="sm">
                             {album.albumArtists.slice(0, 1).map((artist) => (
-                                <Link
-                                    className={styles.artistLink}
+                                <Text
+                                    className={styles.artist}
+                                    fw={600}
                                     key={`artist-${artist.id}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                    }}
-                                    state={{ item: artist }}
-                                    to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
-                                        albumArtistId: artist.id,
-                                    })}
+                                    size="md"
                                 >
-                                    <Text className={styles.artist} fw={600} size="md">
-                                        {artist.name}
-                                    </Text>
-                                </Link>
+                                    {artist.name}
+                                </Text>
                             ))}
                             <Group gap="sm" justify="center" wrap="wrap">
                                 {album.genres?.slice(0, 2).map((genre) => (
