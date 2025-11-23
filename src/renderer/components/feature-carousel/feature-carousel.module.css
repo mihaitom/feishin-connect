@@ -14,7 +14,7 @@
     gap: var(--theme-spacing-md);
     width: 100%;
     min-height: 400px;
-    padding: var(--theme-spacing-xl);
+    padding: 0 var(--theme-spacing-xl);
     overflow: hidden;
 }
 
