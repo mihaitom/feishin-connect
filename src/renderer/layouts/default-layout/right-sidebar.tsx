@@ -11,24 +11,6 @@ import { AppRoute } from '/@/renderer/router/routes';
 import { useGeneralSettings, useSidebarStore, useWindowSettings } from '/@/renderer/store';
 import { Platform } from '/@/shared/types/types';
 
-const queueSidebarVariants: Variants = {
-    closed: (rightWidth) => ({
-        transition: { duration: 0.5 },
-        width: rightWidth,
-        x: 1000,
-        zIndex: 120,
-    }),
-    open: (rightWidth) => ({
-        transition: {
-            duration: 0.5,
-            ease: 'anticipate',
-        },
-        width: rightWidth,
-        x: 0,
-        zIndex: 120,
-    }),
-};
-
 const queueDrawerVariants: Variants = {
     closed: (windowBarStyle) => ({
         height:
@@ -78,25 +60,20 @@ export const RightSidebar = forwardRef(
         ref: Ref<HTMLDivElement>,
     ) => {
         const { windowBarStyle } = useWindowSettings();
-        const { rightExpanded, rightWidth } = useSidebarStore();
+        const { rightExpanded } = useSidebarStore();
         const { sideQueueType } = useGeneralSettings();
         const location = useLocation();
         const showSideQueue = rightExpanded && location.pathname !== AppRoute.NOW_PLAYING;
 
         return (
-            <AnimatePresence initial={false} key="queue-sidebar" mode="sync" presenceAffectsLayout>
+            <>
                 {showSideQueue && (
                     <>
                         {sideQueueType === 'sideQueue' ? (
-                            <motion.aside
-                                animate="open"
+                            <aside
                                 className={styles.rightSidebarContainer}
-                                custom={rightWidth}
-                                exit="closed"
                                 id="sidebar-queue"
-                                initial="closed"
                                 key="queue-sidebar"
-                                variants={queueSidebarVariants}
                             >
                                 <ResizeHandle
                                     isResizing={isResizingRight}
@@ -108,24 +85,26 @@ export const RightSidebar = forwardRef(
                                     ref={ref}
                                 />
                                 <SidebarPlayQueue />
-                            </motion.aside>
+                            </aside>
                         ) : (
-                            <motion.div
-                                animate="open"
-                                className={styles.queueDrawer}
-                                custom={windowBarStyle}
-                                exit="closed"
-                                id="drawer-queue"
-                                initial="closed"
-                                key="queue-drawer"
-                                variants={queueDrawerVariants}
-                            >
-                                <DrawerPlayQueue />
-                            </motion.div>
+                            <AnimatePresence initial={false} key="queue-drawer" mode="sync">
+                                <motion.div
+                                    animate="open"
+                                    className={styles.queueDrawer}
+                                    custom={windowBarStyle}
+                                    exit="closed"
+                                    id="drawer-queue"
+                                    initial="closed"
+                                    key="queue-drawer"
+                                    variants={queueDrawerVariants}
+                                >
+                                    <DrawerPlayQueue />
+                                </motion.div>
+                            </AnimatePresence>
                         )}
                     </>
                 )}
-            </AnimatePresence>
+            </>
         );
     },
 );
