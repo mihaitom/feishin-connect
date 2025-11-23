@@ -2,3 +2,7 @@
     width: initial;
     aspect-ratio: 1 / 1;
 }
+
+.compact-image-container {
+    width: 100%;
+}

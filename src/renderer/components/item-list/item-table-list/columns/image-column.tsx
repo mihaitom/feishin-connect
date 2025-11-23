@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+
 import styles from './image-column.module.css';
 
 import {
@@ -15,7 +17,12 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
     if (typeof row === 'string') {
         return (
             <TableColumnContainer {...props}>
-                <Image src={row} />
+                <Image
+                    containerClassName={clsx({
+                        [styles.compactImageContainer]: props.size === 'compact',
+                    })}
+                    src={row}
+                />
             </TableColumnContainer>
         );
     }
