@@ -31,12 +31,26 @@
     text-align: center;
 }
 
-.container.left {
+.container.center > * {
+    align-self: center;
+}
+
+.container.start {
+    align-items: flex-start;
     text-align: left;
 }
 
+.container.start > * {
+    align-self: flex-start;
+}
+
 .container.right {
+    align-items: flex-end;
     text-align: right;
+}
+
+.container.right > * {
+    align-self: flex-end;
 }
 
 .content {
