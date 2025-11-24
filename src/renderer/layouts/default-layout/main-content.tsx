@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { motion } from 'motion/react';
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 
 import styles from './main-content.module.css';
@@ -14,19 +14,13 @@ import { useGeneralSettings } from '/@/renderer/store/settings.store';
 import { constrainRightSidebarWidth, constrainSidebarWidth } from '/@/renderer/utils';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 
-const SideDrawerQueue = lazy(() =>
-    import('/@/renderer/layouts/default-layout/side-drawer-queue').then((module) => ({
-        default: module.SideDrawerQueue,
-    })),
-);
-
 const MINIMUM_SIDEBAR_WIDTH = 260;
 
 export const MainContent = ({ shell }: { shell?: boolean }) => {
     const location = useLocation();
     const { collapsed, leftWidth, rightExpanded, rightWidth } = useSidebarStore();
     const { setSideBar } = useAppStoreActions();
-    const { showQueueDrawerButton, sideQueueType } = useGeneralSettings();
+    const { sideQueueType } = useGeneralSettings();
     const [isResizing, setIsResizing] = useState(false);
     const [isResizingRight, setIsResizingRight] = useState(false);
 
@@ -144,9 +138,6 @@ export const MainContent = ({ shell }: { shell?: boolean }) => {
         >
             {!shell && (
                 <>
-                    <Suspense fallback={<></>}>
-                        {showQueueDrawerButton && <SideDrawerQueue />}
-                    </Suspense>
                     <FullScreenOverlay />
                     <LeftSidebar isResizing={isResizing} startResizing={startResizing} />
                     <RightSidebar
