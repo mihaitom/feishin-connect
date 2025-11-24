@@ -85,14 +85,14 @@ export const useItemListPaginatedLoader = ({
 
     const { data, refetch: queryRefetch } = useQuery({
         gcTime: 1000 * 15,
-        placeholderData: getInitialData(itemsPerPage),
+        placeholderData: { items: getInitialData(itemsPerPage) },
         queryFn: async ({ signal }) => {
             const result = await listQueryFn({
                 apiClientProps: { serverId, signal },
                 query: queryParams,
             });
 
-            return result.items;
+            return result;
         },
         queryKey: queryKeys[getQueryKeyName(itemType)].list(serverId, queryParams),
         staleTime: 1000 * 15,
@@ -106,25 +106,28 @@ export const useItemListPaginatedLoader = ({
         (indexes: number[], value: object) => {
             return queryClient.setQueryData(
                 queryKeys[getQueryKeyName(itemType)].list(serverId, queryParams),
-                (prev: undefined | unknown[]) => {
+                (prev: undefined | { items: unknown[] }) => {
                     if (!prev) {
                         return prev;
                     }
 
-                    return prev.map((item: any, index) => {
-                        if (!item) {
-                            return item;
-                        }
+                    return {
+                        ...prev,
+                        items: prev.items.map((item: any, index) => {
+                            if (!item) {
+                                return item;
+                            }
 
-                        if (!indexes.includes(index)) {
-                            return item;
-                        }
+                            if (!indexes.includes(index)) {
+                                return item;
+                            }
 
-                        return {
-                            ...item,
-                            ...value,
-                        };
-                    });
+                            return {
+                                ...item,
+                                ...value,
+                            };
+                        }),
+                    };
                 },
             );
         },
@@ -141,7 +144,7 @@ export const useItemListPaginatedLoader = ({
         };
 
         const handleFavorite = (payload: UserFavoriteEventPayload) => {
-            if (!data) {
+            if (!data || !data.items) {
                 return;
             }
 
@@ -149,7 +152,7 @@ export const useItemListPaginatedLoader = ({
                 return;
             }
 
-            const idToIndexMap = data
+            const idToIndexMap = data.items
                 .filter(Boolean)
                 .reduce((acc: Record<string, number>, item: any, index: number) => {
                     acc[item.id] = index;
@@ -168,7 +171,7 @@ export const useItemListPaginatedLoader = ({
         };
 
         const handleRating = (payload: UserRatingEventPayload) => {
-            if (!data) {
+            if (!data || !data.items) {
                 return;
             }
 
@@ -176,7 +179,7 @@ export const useItemListPaginatedLoader = ({
                 return;
             }
 
-            const idToIndexMap = data.reduce(
+            const idToIndexMap = data.items.reduce(
                 (acc: Record<string, number>, item: any, index: number) => {
                     acc[item.id] = index;
                     return acc;
@@ -206,7 +209,7 @@ export const useItemListPaginatedLoader = ({
         };
     }, [data, eventKey, itemType, serverId, refresh, updateItems]);
 
-    return { data, pageCount, totalItemCount };
+    return { data: data?.items || [], pageCount, totalItemCount };
 };
 
 const getFetchRange = (pageIndex: number, itemsPerPage: number) => {
