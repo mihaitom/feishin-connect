@@ -47,12 +47,15 @@ export const applyRatingOptimisticUpdates = (
                 detailQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumDetailResponse) => {
-                            if (prev && itemIdSet.has(prev.id)) {
-                                return { ...prev, userRating: rating };
-                            }
-                            return prev;
-                        });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: AlbumDetailResponse | undefined) => {
+                                if (prev && itemIdSet.has(prev.id)) {
+                                    return { ...prev, userRating: rating };
+                                }
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -131,12 +134,15 @@ export const applyRatingOptimisticUpdates = (
                 detailQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumArtistDetailResponse) => {
-                            if (prev && itemIdSet.has(prev.id)) {
-                                return { ...prev, userRating: rating };
-                            }
-                            return prev;
-                        });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: AlbumArtistDetailResponse | undefined) => {
+                                if (prev && itemIdSet.has(prev.id)) {
+                                    return { ...prev, userRating: rating };
+                                }
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -203,27 +209,6 @@ export const applyRatingOptimisticUpdates = (
             break;
         }
         case LibraryItem.ARTIST: {
-            const detailQueryKey = queryKeys.artists.detail(variables.apiClientProps.serverId);
-
-            const detailQueries = queryClient.getQueriesData({
-                exact: false,
-                queryKey: detailQueryKey,
-            });
-
-            if (detailQueries.length) {
-                detailQueries.forEach(([queryKey, data]) => {
-                    if (data) {
-                        previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumArtistDetailResponse) => {
-                            if (prev && itemIdSet.has(prev.id)) {
-                                return { ...prev, userRating: rating };
-                            }
-                            return prev;
-                        });
-                    }
-                });
-            }
-
             const listQueryKey = queryKeys.artists.list(variables.apiClientProps.serverId);
 
             const listQueries = queryClient.getQueriesData({
@@ -299,19 +284,22 @@ export const applyRatingOptimisticUpdates = (
                 albumDetailQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumDetailResponse) => {
-                            if (prev) {
-                                return {
-                                    ...prev,
-                                    songs: prev.songs?.map((song: Song) => {
-                                        return itemIdSet.has(song.id)
-                                            ? { ...song, userRating: rating }
-                                            : song;
-                                    }),
-                                };
-                            }
-                            return prev;
-                        });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: AlbumDetailResponse | undefined) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        songs: prev.songs?.map((song: Song) => {
+                                            return itemIdSet.has(song.id)
+                                                ? { ...song, userRating: rating }
+                                                : song;
+                                        }),
+                                    };
+                                }
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -327,12 +315,15 @@ export const applyRatingOptimisticUpdates = (
                 detailQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: SongDetailResponse) => {
-                            if (prev && itemIdSet.has(prev.id)) {
-                                return { ...prev, userRating: rating };
-                            }
-                            return prev;
-                        });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: SongDetailResponse | undefined) => {
+                                if (prev && itemIdSet.has(prev.id)) {
+                                    return { ...prev, userRating: rating };
+                                }
+                                return prev;
+                            },
+                        );
                     }
                 });
             }

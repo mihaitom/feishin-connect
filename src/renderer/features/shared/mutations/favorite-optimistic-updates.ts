@@ -50,16 +50,19 @@ export const applyFavoriteOptimisticUpdates = (
                 detailQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumDetailResponse) => {
-                            if (prev && itemIdSet.has(prev.id)) {
-                                return {
-                                    ...prev,
-                                    userFavorite: isFavorite,
-                                };
-                            }
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: AlbumDetailResponse | undefined) => {
+                                if (prev && itemIdSet.has(prev.id)) {
+                                    return {
+                                        ...prev,
+                                        userFavorite: isFavorite,
+                                    };
+                                }
 
-                            return prev;
-                        });
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -75,20 +78,23 @@ export const applyFavoriteOptimisticUpdates = (
                 listQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumListResponse) => {
-                            if (prev) {
-                                return {
-                                    ...prev,
-                                    items: prev.items.map((item: Album) => {
-                                        return itemIdSet.has(item.id)
-                                            ? { ...item, userFavorite: isFavorite }
-                                            : item;
-                                    }),
-                                };
-                            }
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: AlbumListResponse | undefined) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        items: prev.items.map((item: Album) => {
+                                            return itemIdSet.has(item.id)
+                                                ? { ...item, userFavorite: isFavorite }
+                                                : item;
+                                        }),
+                                    };
+                                }
 
-                            return prev;
-                        });
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -108,20 +114,33 @@ export const applyFavoriteOptimisticUpdates = (
                         previousQueries.push({ data, queryKey });
                         queryClient.setQueryData(
                             queryKey,
-                            (prev: { pageParams: string[]; pages: AlbumListResponse[] }) => {
+                            (
+                                prev:
+                                    | undefined
+                                    | { pageParams: string[]; pages: AlbumListResponse[] },
+                            ) => {
                                 if (prev) {
                                     return {
                                         ...prev,
-                                        pages: prev.pages.map((page: AlbumListResponse) => {
-                                            return {
-                                                ...page,
-                                                items: page.items.map((item: Album) => {
-                                                    return itemIdSet.has(item.id)
-                                                        ? { ...item, userFavorite: isFavorite }
-                                                        : item;
-                                                }),
-                                            };
-                                        }),
+                                        pages: prev.pages.map(
+                                            (page: AlbumListResponse | undefined) => {
+                                                if (page) {
+                                                    return {
+                                                        ...page,
+                                                        items: page.items.map((item: Album) => {
+                                                            return itemIdSet.has(item.id)
+                                                                ? {
+                                                                      ...item,
+                                                                      userFavorite: isFavorite,
+                                                                  }
+                                                                : item;
+                                                        }),
+                                                    };
+                                                }
+
+                                                return page;
+                                            },
+                                        ),
                                     };
                                 }
 
@@ -146,16 +165,19 @@ export const applyFavoriteOptimisticUpdates = (
                 detailQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumArtistDetailResponse) => {
-                            if (prev && itemIdSet.has(prev.id)) {
-                                return {
-                                    ...prev,
-                                    userFavorite: isFavorite,
-                                };
-                            }
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: AlbumArtistDetailResponse | undefined) => {
+                                if (prev && itemIdSet.has(prev.id)) {
+                                    return {
+                                        ...prev,
+                                        userFavorite: isFavorite,
+                                    };
+                                }
 
-                            return prev;
-                        });
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -170,20 +192,27 @@ export const applyFavoriteOptimisticUpdates = (
                 listQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumArtistListResponse) => {
-                            if (prev) {
-                                return {
-                                    ...prev,
-                                    items: prev.items.map((item: AlbumArtist) => {
-                                        return itemIdSet.has(item.id)
-                                            ? { ...item, userFavorite: isFavorite }
-                                            : item;
-                                    }),
-                                };
-                            }
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: AlbumArtistListResponse | undefined) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        items: prev.items.map((item: AlbumArtist | undefined) => {
+                                            if (item) {
+                                                return itemIdSet.has(item.id)
+                                                    ? { ...item, userFavorite: isFavorite }
+                                                    : item;
+                                            }
 
-                            return prev;
-                        });
+                                            return item;
+                                        }),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -203,23 +232,39 @@ export const applyFavoriteOptimisticUpdates = (
                         previousQueries.push({ data, queryKey });
                         queryClient.setQueryData(
                             queryKey,
-                            (prev: { pageParams: string[]; pages: AlbumArtistListResponse[] }) => {
-                                return {
-                                    ...prev,
-                                    pages: prev.pages.map((page: AlbumArtistListResponse) => {
-                                        return {
-                                            ...page,
-                                            items: page.items.map((item: AlbumArtist) => {
-                                                return itemIdSet.has(item.id)
-                                                    ? {
-                                                          ...item,
-                                                          userFavorite: isFavorite,
-                                                      }
-                                                    : item;
-                                            }),
-                                        };
-                                    }),
-                                };
+                            (
+                                prev:
+                                    | undefined
+                                    | { pageParams: string[]; pages: AlbumArtistListResponse[] },
+                            ) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        pages: prev.pages.map(
+                                            (page: AlbumArtistListResponse | undefined) => {
+                                                if (page) {
+                                                    return {
+                                                        ...page,
+                                                        items: page.items.map(
+                                                            (item: AlbumArtist) => {
+                                                                return itemIdSet.has(item.id)
+                                                                    ? {
+                                                                          ...item,
+                                                                          userFavorite: isFavorite,
+                                                                      }
+                                                                    : item;
+                                                            },
+                                                        ),
+                                                    };
+                                                }
+
+                                                return page;
+                                            },
+                                        ),
+                                    };
+                                }
+
+                                return prev;
                             },
                         );
                     }
@@ -229,31 +274,6 @@ export const applyFavoriteOptimisticUpdates = (
             break;
         }
         case LibraryItem.ARTIST: {
-            const detailQueryKey = queryKeys.artists.detail(variables.apiClientProps.serverId);
-
-            const detailQueries = queryClient.getQueriesData({
-                exact: false,
-                queryKey: detailQueryKey,
-            });
-
-            if (detailQueries.length) {
-                detailQueries.forEach(([queryKey, data]) => {
-                    if (data) {
-                        previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumArtistDetailResponse) => {
-                            if (prev && itemIdSet.has(prev.id)) {
-                                return {
-                                    ...prev,
-                                    userFavorite: isFavorite,
-                                };
-                            }
-
-                            return prev;
-                        });
-                    }
-                });
-            }
-
             const listQueryKey = queryKeys.artists.list(variables.apiClientProps.serverId);
 
             const listQueries = queryClient.getQueriesData({
@@ -265,16 +285,23 @@ export const applyFavoriteOptimisticUpdates = (
                 listQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: ArtistListResponse) => {
-                            return {
-                                ...prev,
-                                items: prev.items.map((item: Artist) => {
-                                    return itemIdSet.has(item.id)
-                                        ? { ...item, userFavorite: isFavorite }
-                                        : item;
-                                }),
-                            };
-                        });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: ArtistListResponse | undefined) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        items: prev.items.map((item: Artist) => {
+                                            return itemIdSet.has(item.id)
+                                                ? { ...item, userFavorite: isFavorite }
+                                                : item;
+                                        }),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -294,20 +321,28 @@ export const applyFavoriteOptimisticUpdates = (
                         previousQueries.push({ data, queryKey });
                         queryClient.setQueryData(
                             queryKey,
-                            (prev: { pageParams: string[]; pages: ArtistListResponse[] }) => {
-                                return {
-                                    ...prev,
-                                    pages: prev.pages.map((page: ArtistListResponse) => {
-                                        return {
-                                            ...page,
-                                            items: page.items.map((item: Artist) => {
-                                                return itemIdSet.has(item.id)
-                                                    ? { ...item, userFavorite: isFavorite }
-                                                    : item;
-                                            }),
-                                        };
-                                    }),
-                                };
+                            (
+                                prev:
+                                    | undefined
+                                    | { pageParams: string[]; pages: ArtistListResponse[] },
+                            ) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        pages: prev.pages.map((page: ArtistListResponse) => {
+                                            return {
+                                                ...page,
+                                                items: page.items.map((item: Artist) => {
+                                                    return itemIdSet.has(item.id)
+                                                        ? { ...item, userFavorite: isFavorite }
+                                                        : item;
+                                                }),
+                                            };
+                                        }),
+                                    };
+                                }
+
+                                return prev;
                             },
                         );
                     }
@@ -330,20 +365,23 @@ export const applyFavoriteOptimisticUpdates = (
                 albumDetailQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: AlbumDetailResponse) => {
-                            if (prev) {
-                                return {
-                                    ...prev,
-                                    songs: prev.songs?.map((song: Song) => {
-                                        return itemIdSet.has(song.id)
-                                            ? { ...song, userFavorite: isFavorite }
-                                            : song;
-                                    }),
-                                };
-                            }
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: AlbumDetailResponse | undefined) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        songs: prev.songs?.map((song: Song) => {
+                                            return itemIdSet.has(song.id)
+                                                ? { ...song, userFavorite: isFavorite }
+                                                : song;
+                                        }),
+                                    };
+                                }
 
-                            return prev;
-                        });
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
@@ -359,16 +397,19 @@ export const applyFavoriteOptimisticUpdates = (
                 detailQueries.forEach(([queryKey, data]) => {
                     if (data) {
                         previousQueries.push({ data, queryKey });
-                        queryClient.setQueryData(queryKey, (prev: SongDetailResponse) => {
-                            if (prev && itemIdSet.has(prev.id)) {
-                                return {
-                                    ...prev,
-                                    userFavorite: isFavorite,
-                                };
-                            }
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: SongDetailResponse | undefined) => {
+                                if (prev && itemIdSet.has(prev.id)) {
+                                    return {
+                                        ...prev,
+                                        userFavorite: isFavorite,
+                                    };
+                                }
 
-                            return prev;
-                        });
+                                return prev;
+                            },
+                        );
                     }
                 });
             }
