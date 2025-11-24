@@ -378,12 +378,18 @@ const PlayButton = memo(
             longPressHandlers.onMouseDown?.(e);
         };
 
+        const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
         return (
             <button
                 className={clsx(styles.playButton, styles.primary, {
                     [styles.disabled]: disabled,
                 })}
                 disabled={disabled}
+                onClick={handleClick}
                 onMouseDown={handleMouseDown}
                 onMouseLeave={longPressHandlers.onMouseLeave}
                 onMouseUp={longPressHandlers.onMouseUp}
@@ -431,12 +437,18 @@ const SecondaryPlayButton = memo(
             longPressHandlers.onMouseDown?.(e);
         };
 
+        const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
         return (
             <button
                 className={clsx(styles.playButton, styles.secondary, className, {
                     [styles.disabled]: disabled,
                 })}
                 disabled={disabled}
+                onClick={handleClick}
                 onMouseDown={handleMouseDown}
                 onMouseLeave={longPressHandlers.onMouseLeave}
                 onMouseUp={longPressHandlers.onMouseUp}
