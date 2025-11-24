@@ -238,5 +238,10 @@ export const LyricSettings = () => {
         },
     ];
 
-    return <SettingsSection divider={false} options={lyricOptions} />;
+    return (
+        <SettingsSection
+            options={lyricOptions}
+            title={t('page.setting.lyrics', { postProcess: 'sentenceCase' })}
+        />
+    );
 };

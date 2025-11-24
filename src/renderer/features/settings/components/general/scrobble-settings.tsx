@@ -144,5 +144,10 @@ export const ScrobbleSettings = () => {
         },
     ];
 
-    return <SettingsSection options={scrobbleOptions} />;
+    return (
+        <SettingsSection
+            options={scrobbleOptions}
+            title={t('page.setting.scrobble', { postProcess: 'sentenceCase' })}
+        />
+    );
 };

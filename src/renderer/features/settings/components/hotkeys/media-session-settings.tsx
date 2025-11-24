@@ -44,5 +44,5 @@ export const MediaSessionSettings = () => {
         },
     ];
 
-    return <SettingsSection divider options={mediaSessionOptions} />;
+    return <SettingsSection options={mediaSessionOptions} />;
 };

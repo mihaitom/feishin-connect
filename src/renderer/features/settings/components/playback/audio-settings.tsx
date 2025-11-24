@@ -20,7 +20,7 @@ const getAudioDevice = async () => {
     return (devices || []).filter((dev: MediaDeviceInfo) => dev.kind === 'audiooutput');
 };
 
-export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => {
+export const AudioSettings = () => {
     const { t } = useTranslation();
     const settings = usePlaybackSettings();
     const { setSettings } = useSettingsStoreActions();
@@ -137,5 +137,10 @@ export const AudioSettings = ({ hasFancyAudio }: { hasFancyAudio: boolean }) => 
         },
     ];
 
-    return <SettingsSection divider={!hasFancyAudio} options={audioOptions} />;
+    return (
+        <SettingsSection
+            options={audioOptions}
+            title={t('page.setting.audio', { postProcess: 'sentenceCase' })}
+        />
+    );
 };

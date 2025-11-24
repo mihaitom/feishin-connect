@@ -268,5 +268,10 @@ export const DiscordSettings = () => {
         },
     ];
 
-    return <SettingsSection options={discordOptions} />;
+    return (
+        <SettingsSection
+            options={discordOptions}
+            title={t('page.setting.discord', { postProcess: 'sentenceCase' })}
+        />
+    );
 };

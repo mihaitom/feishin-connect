@@ -155,5 +155,10 @@ export const RemoteSettings = () => {
         },
     ];
 
-    return <SettingsSection options={controlOptions} />;
+    return (
+        <SettingsSection
+            options={controlOptions}
+            title={t('page.setting.remote', { postProcess: 'sentenceCase' })}
+        />
+    );
 };

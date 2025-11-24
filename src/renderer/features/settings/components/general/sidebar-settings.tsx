@@ -1,6 +1,7 @@
 import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SidebarReorder } from '/@/renderer/features/settings/components/general/sidebar-reorder';
 import {
     SettingOption,
     SettingsSection,
@@ -60,5 +61,11 @@ export const SidebarSettings = () => {
         },
     ];
 
-    return <SettingsSection options={options} />;
+    return (
+        <SettingsSection
+            extra={<SidebarReorder />}
+            options={options}
+            title={t('page.setting.sidebar', { postProcess: 'sentenceCase' })}
+        />
+    );
 };
