@@ -467,7 +467,7 @@
             "controls": "controls",
             "sidebar": "sidebar",
             "remote": "remote",
-            "exportImport": "export/import",
+            "exportImport": "import/export",
             "scrobble": "scrobble",
             "audio": "audio",
             "lyrics": "lyrics",
