@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
@@ -43,7 +43,7 @@ export const SongListContent = () => {
     );
 };
 
-export type OverrideSongListQuery = Omit<SongListQuery, 'limit' | 'startIndex'>;
+export type OverrideSongListQuery = Omit<Partial<SongListQuery>, 'limit' | 'startIndex'>;
 
 export const SongListView = ({
     display,
@@ -57,6 +57,18 @@ export const SongListView = ({
 
     const { query } = useSongListFilters();
 
+    const mergedQuery = useMemo(() => {
+        if (!overrideQuery) {
+            return query;
+        }
+
+        return {
+            ...overrideQuery,
+            sortBy: overrideQuery.sortBy || query.sortBy,
+            sortOrder: overrideQuery.sortOrder || query.sortOrder,
+        };
+    }, [query, overrideQuery]);
+
     switch (display) {
         case ListDisplayType.GRID: {
             switch (pagination) {
@@ -66,7 +78,7 @@ export const SongListView = ({
                             gap={grid.itemGap}
                             itemsPerPage={itemsPerPage}
                             itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                         />
                     );
@@ -76,7 +88,7 @@ export const SongListView = ({
                             gap={grid.itemGap}
                             itemsPerPage={itemsPerPage}
                             itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                         />
                     );
@@ -96,7 +108,7 @@ export const SongListView = ({
                             enableRowHoverHighlight={table.enableRowHoverHighlight}
                             enableVerticalBorders={table.enableVerticalBorders}
                             itemsPerPage={itemsPerPage}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
                         />
@@ -111,7 +123,7 @@ export const SongListView = ({
                             enableRowHoverHighlight={table.enableRowHoverHighlight}
                             enableVerticalBorders={table.enableVerticalBorders}
                             itemsPerPage={itemsPerPage}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
                         />

@@ -51,7 +51,6 @@ export const JellyfinAlbumFilters = ({
     const genreListQuery = useQuery(
         genresQueries.list({
             query: {
-                musicFolderId: query.musicFolderId,
                 sortBy: GenreListSort.NAME,
                 sortOrder: SortOrder.ASC,
                 startIndex: 0,
@@ -75,7 +74,6 @@ export const JellyfinAlbumFilters = ({
                 staleTime: 1000 * 60 * 1,
             },
             query: {
-                folder: query.musicFolderId,
                 type: LibraryItem.ALBUM,
             },
             serverId,
@@ -150,7 +148,7 @@ export const JellyfinAlbumFilters = ({
             label: artist.name,
             value: artist.id,
         }));
-    }, [albumArtistListQuery?.data?.items]);
+    }, [albumArtistListQuery.data?.items]);
 
     const handleAlbumArtistFilter = (e: null | string[]) => {
         setAlbumArtist(e ?? null);

@@ -9,7 +9,7 @@ import {
 } from '/@/renderer/components/select-with-invalid-data';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
-import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
+import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { useCurrentServer } from '/@/renderer/store';
 import { NDSongQueryFields } from '/@/shared/api/navidrome/navidrome-types';
@@ -22,12 +22,7 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
-import {
-    AlbumArtistListSort,
-    GenreListSort,
-    LibraryItem,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { AlbumArtistListSort, LibraryItem, SortOrder } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
 interface NavidromeAlbumFiltersProps {
@@ -52,20 +47,7 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
         setRecentlyPlayed,
     } = useAlbumListFilters();
 
-    const genreListQuery = useQuery(
-        genresQueries.list({
-            options: {
-                gcTime: 1000 * 60 * 2,
-                staleTime: 1000 * 60 * 1,
-            },
-            query: {
-                sortBy: GenreListSort.NAME,
-                sortOrder: SortOrder.ASC,
-                startIndex: 0,
-            },
-            serverId,
-        }),
-    );
+    const genreListQuery = useGenreList();
 
     const genreList = useMemo(() => {
         if (!genreListQuery?.data) return [];
@@ -152,7 +134,7 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
             label: artist.name,
             value: artist.id,
         }));
-    }, [albumArtistListQuery?.data?.items]);
+    }, [albumArtistListQuery.data?.items]);
 
     const handleTagFilter = debounce((tag: string, e: null | string) => {
         setCustom((prev) => ({

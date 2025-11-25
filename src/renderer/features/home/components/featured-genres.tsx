@@ -99,7 +99,7 @@ export const FeaturedGenres = () => {
 
         return visibleGenres.map((genre: Genre) => {
             const { color, isLight } = stringToColor(genre.name);
-            const path = generatePath(AppRoute.LIBRARY_GENRES_ALBUMS, { genreId: genre.id });
+            const path = generatePath(AppRoute.LIBRARY_GENRES_DETAIL, { genreId: genre.id });
 
             return {
                 ...genre,

@@ -7,7 +7,7 @@ import {
     MultiSelectWithInvalidData,
     SelectWithInvalidData,
 } from '/@/renderer/components/select-with-invalid-data';
-import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
+import { genresQueries, useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import {
     SongListFilter,
@@ -46,16 +46,7 @@ export const NavidromeSongFilters = ({
 
     const isGenrePage = customFilters?.genreIds !== undefined;
 
-    const genreListQuery = useQuery(
-        genresQueries.list({
-            query: {
-                sortBy: GenreListSort.NAME,
-                sortOrder: SortOrder.ASC,
-                startIndex: 0,
-            },
-            serverId,
-        }),
-    );
+    const genreListQuery = useGenreList();
 
     const tagsQuery = useQuery(
         sharedQueries.tags({

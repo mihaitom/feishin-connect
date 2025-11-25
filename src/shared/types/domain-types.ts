@@ -431,7 +431,7 @@ export interface AlbumListQuery extends AlbumListNavidromeQuery, BaseQuery<Album
     artistIds?: string[];
     compilation?: boolean;
     favorite?: boolean;
-    genres?: string[];
+    genreIds?: string[];
     limit?: number;
     maxYear?: number;
     minYear?: number;
@@ -765,7 +765,7 @@ export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
 }
 
 // Artist List
-export type ArtistListResponse = BasePaginatedResponse<Artist[]>;
+export type ArtistListResponse = BasePaginatedResponse<AlbumArtist[]>;
 
 type ArtistListSortMap = {
     jellyfin: Record<ArtistListSort, JFArtistListSort | undefined>;

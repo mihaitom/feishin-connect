@@ -9,10 +9,14 @@ export const useSearchTermFilter = (defaultValue?: string) => {
         defaultValue ? parseAsString.withDefault(defaultValue) : parseAsString,
     );
 
-    const debouncedSetSearchTerm = useDebouncedCallback(setSearchTerm, 300);
+    const handleSetSearchTerm = (value: null | string) => {
+        setSearchTerm(value === '' ? null : value);
+    };
+
+    const debouncedSetSearchTerm = useDebouncedCallback(handleSetSearchTerm, 300);
 
     return {
-        [FILTER_KEYS.SHARED.SEARCH_TERM]: searchTerm ?? undefined,
+        [FILTER_KEYS.SHARED.SEARCH_TERM]: searchTerm || undefined,
         setSearchTerm: debouncedSetSearchTerm,
     };
 };

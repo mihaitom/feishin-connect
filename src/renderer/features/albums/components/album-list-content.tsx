@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
@@ -46,7 +46,7 @@ export const AlbumListContent = () => {
     );
 };
 
-export type OverrideAlbumListQuery = Omit<AlbumListQuery, 'limit' | 'startIndex'>;
+export type OverrideAlbumListQuery = Omit<Partial<AlbumListQuery>, 'limit' | 'startIndex'>;
 
 export const AlbumListView = ({
     display,
@@ -60,6 +60,18 @@ export const AlbumListView = ({
 
     const { query } = useAlbumListFilters();
 
+    const mergedQuery = useMemo(() => {
+        if (!overrideQuery) {
+            return query;
+        }
+
+        return {
+            ...overrideQuery,
+            sortBy: overrideQuery.sortBy || query.sortBy,
+            sortOrder: overrideQuery.sortOrder || query.sortOrder,
+        };
+    }, [query, overrideQuery]);
+
     switch (display) {
         case ListDisplayType.GRID: {
             switch (pagination) {
@@ -69,7 +81,7 @@ export const AlbumListView = ({
                             gap={grid.itemGap}
                             itemsPerPage={itemsPerPage}
                             itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                         />
                     );
@@ -80,7 +92,7 @@ export const AlbumListView = ({
                             gap={grid.itemGap}
                             itemsPerPage={itemsPerPage}
                             itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                         />
                     );
@@ -101,7 +113,7 @@ export const AlbumListView = ({
                             enableRowHoverHighlight={table.enableRowHoverHighlight}
                             enableVerticalBorders={table.enableVerticalBorders}
                             itemsPerPage={itemsPerPage}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
                         />
@@ -117,7 +129,7 @@ export const AlbumListView = ({
                             enableRowHoverHighlight={table.enableRowHoverHighlight}
                             enableVerticalBorders={table.enableVerticalBorders}
                             itemsPerPage={itemsPerPage}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
                         />

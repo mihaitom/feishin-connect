@@ -284,8 +284,8 @@ export const NavidromeController: InternalControllerEndpoint = {
         const { apiClientProps, query } = args;
 
         const genres = hasFeature(apiClientProps.server, ServerFeature.BFR)
-            ? query.genres
-            : query.genres?.[0];
+            ? query.genreIds
+            : query.genreIds?.[0];
 
         const res = await ndApiClient(apiClientProps).getAlbumList({
             query: {

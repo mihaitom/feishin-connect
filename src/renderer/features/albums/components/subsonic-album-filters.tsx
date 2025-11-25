@@ -105,7 +105,7 @@ export const SubsonicAlbumFilters = ({
     const handleGenresFilter = debounce((e: null | string) => {
         setGenreId(e ?? null);
         const updatedFilters: Partial<AlbumListFilter> = {
-            genres: e ? [e] : undefined,
+            genreIds: e ? [e] : undefined,
         };
         onFilterChange(updatedFilters as AlbumListFilter);
     }, 250);

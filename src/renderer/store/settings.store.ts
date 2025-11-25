@@ -1321,3 +1321,5 @@ export const useListSettings = (type: ItemListKey) =>
 export const usePrimaryColor = () => useSettingsStore((store) => store.general.accent);
 
 export const usePlayerbarSlider = () => useSettingsStore((store) => store.general.playerbarSlider);
+
+export const useGenreTarget = () => useSettingsStore((store) => store.general.genreTarget);

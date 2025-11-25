@@ -22,7 +22,7 @@ const GenreColumn = (props: ItemTableListInnerColumn) => {
     const genres = useMemo(() => {
         if (!row) return [];
         return row.map((genre) => {
-            const path = generatePath(AppRoute.LIBRARY_GENRES_ALBUMS, {
+            const path = generatePath(AppRoute.LIBRARY_GENRES_DETAIL, {
                 genreId: genre.id,
             });
             return { ...genre, path };

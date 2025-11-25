@@ -63,6 +63,10 @@ const DummyAlbumDetailRoute = lazy(
 
 const GenreListRoute = lazy(() => import('/@/renderer/features/genres/routes/genre-list-route'));
 
+const GenreDetailRoute = lazy(
+    () => import('/@/renderer/features/genres/routes/genre-detail-route'),
+);
+
 const SearchRoute = lazy(() => import('/@/renderer/features/search/routes/search-route'));
 
 export const AppRouter = () => {
@@ -91,12 +95,8 @@ export const AppRouter = () => {
                                     <Route path={AppRoute.LIBRARY_GENRES}>
                                         <Route element={<GenreListRoute />} index />
                                         <Route
-                                            element={<AlbumListRoute />}
-                                            path={AppRoute.LIBRARY_GENRES_ALBUMS}
-                                        />
-                                        <Route
-                                            element={<SongListRoute />}
-                                            path={AppRoute.LIBRARY_GENRES_SONGS}
+                                            element={<GenreDetailRoute />}
+                                            path={AppRoute.LIBRARY_GENRES_DETAIL}
                                         />
                                     </Route>
                                     <Route

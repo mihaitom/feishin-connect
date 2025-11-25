@@ -5,6 +5,9 @@ export const ListSearchInput = () => {
     const { searchTerm, setSearchTerm } = useSearchTermFilter();
 
     return (
-        <SearchInput defaultValue={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        <SearchInput
+            defaultValue={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value || null)}
+        />
     );
 };

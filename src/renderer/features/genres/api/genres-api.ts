@@ -1,9 +1,15 @@
-import { queryOptions } from '@tanstack/react-query';
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { GenreListQuery, ListCountQuery } from '/@/shared/types/domain-types';
+import { useCurrentServerId } from '/@/renderer/store';
+import {
+    GenreListQuery,
+    GenreListSort,
+    ListCountQuery,
+    SortOrder,
+} from '/@/shared/types/domain-types';
 
 export const genresQueries = {
     list: (args: QueryHookArgs<GenreListQuery>) => {
@@ -36,4 +42,22 @@ export const genresQueries = {
             ...args.options,
         });
     },
+};
+
+export const useGenreList = () => {
+    const serverId = useCurrentServerId();
+
+    return useSuspenseQuery({
+        ...genresQueries.list({
+            query: {
+                limit: -1,
+                sortBy: GenreListSort.NAME,
+                sortOrder: SortOrder.ASC,
+                startIndex: 0,
+            },
+            serverId,
+        }),
+        gcTime: Infinity,
+        staleTime: Infinity,
+    });
 };

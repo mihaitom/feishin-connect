@@ -208,7 +208,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 Fields: 'Genres, DateCreated, ExternalUrls, Overview',
                 ImageTypeLimit: 1,
                 Limit: query.limit,
-                ParentId: query.musicFolderId,
+                ParentId: getMusicFolderId(query.musicFolderId),
                 Recursive: true,
                 SearchTerm: query.searchTerm,
                 SortBy: albumArtistListSortMap.jellyfin[query.sortBy] || 'SortName,Name',
@@ -316,11 +316,11 @@ export const JellyfinController: InternalControllerEndpoint = {
             query: {
                 ...artistQuery,
                 Fields: 'People, Tags',
-                GenreIds: query.genres ? query.genres.join(',') : undefined,
+                GenreIds: query.genreIds ? query.genreIds.join(',') : undefined,
                 IncludeItemTypes: 'MusicAlbum',
                 IsFavorite: query.favorite,
                 Limit: query.limit,
-                ParentId: query.musicFolderId,
+                ParentId: getMusicFolderId(query.musicFolderId),
                 Recursive: true,
                 SearchTerm: query.searchTerm,
                 SortBy: albumListSortMap.jellyfin[query.sortBy] || 'SortName',
@@ -354,7 +354,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 Fields: 'Genres, DateCreated, ExternalUrls, Overview',
                 ImageTypeLimit: 1,
                 Limit: query.limit,
-                ParentId: query.musicFolderId,
+                ParentId: getMusicFolderId(query.musicFolderId),
                 Recursive: true,
                 SearchTerm: query.searchTerm,
                 SortBy: albumArtistListSortMap.jellyfin[query.sortBy] || 'SortName,Name',
@@ -398,7 +398,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 EnableTotalRecordCount: true,
                 Fields: 'ItemCounts',
                 Limit: query.limit,
-                ParentId: query?.musicFolderId,
+                ParentId: getMusicFolderId(query.musicFolderId),
                 Recursive: true,
                 SearchTerm: query?.searchTerm,
                 SortBy: genreListSortMap.jellyfin[query.sortBy] || 'SortName',
@@ -588,7 +588,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                           ? true
                           : undefined,
                 Limit: query.limit,
-                ParentId: query.musicFolderId,
+                ParentId: getMusicFolderId(query.musicFolderId),
                 Recursive: true,
                 SortBy: JFSongListSort.RANDOM,
                 SortOrder: JFSortOrder.ASC,
@@ -742,7 +742,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                         IncludeItemTypes: 'Audio',
                         IsFavorite: query.favorite,
                         Limit: query.limit,
-                        ParentId: query.musicFolderId,
+                        ParentId: getMusicFolderId(query.musicFolderId),
                         Recursive: true,
                         SearchTerm: query.searchTerm,
                         SortBy: songListSortMap.jellyfin[query.sortBy] || 'Album,SortName',
@@ -777,7 +777,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                     IncludeItemTypes: 'Audio',
                     IsFavorite: query.favorite,
                     Limit: query.limit,
-                    ParentId: query.musicFolderId,
+                    ParentId: getMusicFolderId(query.musicFolderId),
                     Recursive: true,
                     SearchTerm: query.searchTerm,
                     SortBy: songListSortMap.jellyfin[query.sortBy] || 'Album,SortName',
@@ -1160,3 +1160,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 //         totalRecordCount: res.body.TotalRecordCount,
 //     };
 // };
+
+function getMusicFolderId(musicFolderId?: string | string[]) {
+    return Array.isArray(musicFolderId) ? musicFolderId[0] : musicFolderId;
+}

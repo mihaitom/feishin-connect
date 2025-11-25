@@ -26,7 +26,7 @@ const GenreBadgeColumn = (props: ItemTableListInnerColumn) => {
         if (!row) return [];
         return row.map((genre) => {
             const { color, isLight } = stringToColor(genre.name);
-            const path = generatePath(AppRoute.LIBRARY_GENRES_ALBUMS, { genreId: genre.id });
+            const path = generatePath(AppRoute.LIBRARY_GENRES_DETAIL, { genreId: genre.id });
             return { ...genre, color, isLight, path };
         });
     }, [row]);

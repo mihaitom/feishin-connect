@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
-import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
+import { genresQueries, useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { SongListFilter, useCurrentServer } from '/@/renderer/store';
@@ -29,20 +29,10 @@ export const JellyfinSongFilters = ({ customFilters }: JellyfinSongFiltersProps)
 
     // Despite the fact that getTags returns genres, it only returns genre names.
     // We prefer using IDs, hence the double query
-    const genreListQuery = useQuery(
-        genresQueries.list({
-            query: {
-                musicFolderId: query.musicFolderId,
-                sortBy: GenreListSort.NAME,
-                sortOrder: SortOrder.ASC,
-                startIndex: 0,
-            },
-            serverId: server.id,
-        }),
-    );
+    const genreListQuery = useGenreList();
 
     const genreList = useMemo(() => {
-        if (!genreListQuery?.data) return [];
+        if (!genreListQuery.data) return [];
         return genreListQuery.data.items.map((genre) => ({
             label: genre.name,
             value: genre.id,
@@ -52,7 +42,6 @@ export const JellyfinSongFilters = ({ customFilters }: JellyfinSongFiltersProps)
     const tagsQuery = useQuery(
         sharedQueries.tags({
             query: {
-                folder: query.musicFolderId,
                 type: LibraryItem.SONG,
             },
             serverId: server.id,
