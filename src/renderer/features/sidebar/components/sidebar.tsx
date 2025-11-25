@@ -2,7 +2,6 @@ import clsx from 'clsx';
 import { AnimatePresence, motion } from 'motion/react';
 import { CSSProperties, MouseEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router';
 
 import styles from './sidebar.module.css';
 
@@ -39,7 +38,6 @@ import { Platform } from '/@/shared/types/types';
 
 export const Sidebar = () => {
     const { t } = useTranslation();
-    const location = useLocation();
     const sidebar = useSidebarStore();
     const { setSideBar } = useAppStoreActions();
     const { sidebarPlaylistList } = useGeneralSettings();
@@ -60,6 +58,7 @@ export const Sidebar = () => {
         }),
         [t],
     );
+
     const upsizedImageUrl = currentSong?.imageUrl
         ?.replace(/size=\d+/, 'size=450')
         .replace(/width=\d+/, 'width=450')

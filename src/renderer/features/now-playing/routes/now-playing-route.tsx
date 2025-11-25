@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ItemListHandle } from '/@/renderer/components/item-list/types';
 import { NowPlayingHeader } from '/@/renderer/features/now-playing/components/now-playing-header';
@@ -7,11 +7,23 @@ import { PlayQueueListControls } from '/@/renderer/features/now-playing/componen
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
+import { useAppStoreActions } from '/@/renderer/store';
 import { ItemListKey } from '/@/shared/types/types';
 
 const NowPlayingRoute = () => {
     const queueRef = useRef<ItemListHandle | null>(null);
     const [search, setSearch] = useState<string | undefined>(undefined);
+    const { setSideBar } = useAppStoreActions();
+
+    useEffect(() => {
+        // On page enter, set rightExpanded to false
+        setSideBar({ rightExpanded: false });
+
+        return () => {
+            // On page exit, set rightExpanded to true
+            setSideBar({ rightExpanded: true });
+        };
+    }, [setSideBar]);
 
     return (
         <AnimatedPage>

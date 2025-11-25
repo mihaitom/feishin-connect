@@ -1,14 +1,13 @@
 import clsx from 'clsx';
 import { motion } from 'motion/react';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { Outlet, useLocation } from 'react-router';
+import { Outlet } from 'react-router';
 
 import styles from './main-content.module.css';
 
 import { FullScreenOverlay } from '/@/renderer/layouts/default-layout/full-screen-overlay';
 import { LeftSidebar } from '/@/renderer/layouts/default-layout/left-sidebar';
 import { RightSidebar } from '/@/renderer/layouts/default-layout/right-sidebar';
-import { AppRoute } from '/@/renderer/router/routes';
 import { useAppStoreActions, useSidebarStore } from '/@/renderer/store';
 import { useGeneralSettings } from '/@/renderer/store/settings.store';
 import { constrainRightSidebarWidth, constrainSidebarWidth } from '/@/renderer/utils';
@@ -17,14 +16,12 @@ import { Spinner } from '/@/shared/components/spinner/spinner';
 const MINIMUM_SIDEBAR_WIDTH = 260;
 
 export const MainContent = ({ shell }: { shell?: boolean }) => {
-    const location = useLocation();
     const { collapsed, leftWidth, rightExpanded, rightWidth } = useSidebarStore();
     const { setSideBar } = useAppStoreActions();
     const { sideQueueType } = useGeneralSettings();
     const [isResizing, setIsResizing] = useState(false);
     const [isResizingRight, setIsResizingRight] = useState(false);
 
-    const showSideQueue = rightExpanded && location.pathname !== AppRoute.NOW_PLAYING;
     const rightSidebarRef = useRef<HTMLDivElement | null>(null);
     const mainContentRef = useRef<HTMLDivElement | null>(null);
     const initialRightWidthRef = useRef<string>(rightWidth);
@@ -128,7 +125,7 @@ export const MainContent = ({ shell }: { shell?: boolean }) => {
     return (
         <motion.div
             className={clsx(styles.mainContentContainer, {
-                [styles.rightExpanded]: showSideQueue && sideQueueType === 'sideQueue',
+                [styles.rightExpanded]: rightExpanded && sideQueueType === 'sideQueue',
                 [styles.shell]: shell,
                 [styles.sidebarCollapsed]: collapsed,
                 [styles.sidebarExpanded]: !collapsed,

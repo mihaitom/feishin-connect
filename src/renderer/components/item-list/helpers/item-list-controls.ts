@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { getTitlePath } from '/@/renderer/components/item-list/helpers/get-title-path';
@@ -32,6 +32,11 @@ const itemTypeMapping = {
 export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs) => {
     const player = usePlayer();
     const navigate = useNavigate();
+    const navigateRef = useRef(navigate);
+
+    useEffect(() => {
+        navigateRef.current = navigate;
+    }, [navigate]);
 
     const { onColumnReordered, onColumnResized, overrides } = args || {};
 
@@ -202,7 +207,7 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                 ) {
                     const path = getTitlePath(itemType, item.id);
                     if (path) {
-                        navigate(path, { state: { item } });
+                        navigateRef.current(path, { state: { item } });
                         return;
                     }
                 }
@@ -330,7 +335,7 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
 
             ...overrides,
         };
-    }, [onColumnReordered, onColumnResized, overrides, navigate, player]);
+    }, [onColumnReordered, onColumnResized, overrides, player]);
 
     return controls;
 };

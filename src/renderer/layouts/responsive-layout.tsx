@@ -1,12 +1,24 @@
+import isElectron from 'is-electron';
+import { useNavigate } from 'react-router';
+
+import { CommandPalette } from '/@/renderer/features/search/components/command-palette';
 import { useIsMobile } from '/@/renderer/hooks/use-is-mobile';
 import { DefaultLayout } from '/@/renderer/layouts/default-layout';
 import { MobileLayout } from '/@/renderer/layouts/mobile-layout/mobile-layout';
+import { AppRoute } from '/@/renderer/router/routes';
+import {
+    useCommandPalette,
+    useGeneralSettings,
+    useHotkeySettings,
+    useSettingsStoreActions,
+} from '/@/renderer/store';
+import { HotkeyItem, useHotkeys } from '/@/shared/hooks/use-hotkeys';
 
 interface ResponsiveLayoutProps {
     shell?: boolean;
 }
 
-export const ResponsiveLayout = ({ shell }: ResponsiveLayoutProps) => {
+const ResponsiveLayoutBase = ({ shell }: ResponsiveLayoutProps) => {
     const isMobile = useIsMobile();
 
     if (isMobile) {
@@ -14,4 +26,50 @@ export const ResponsiveLayout = ({ shell }: ResponsiveLayoutProps) => {
     }
 
     return <DefaultLayout shell={shell} />;
+};
+
+export const ResponsiveLayout = ({ shell }: ResponsiveLayoutProps) => {
+    return (
+        <>
+            <ResponsiveLayoutBase shell={shell} />
+            <LayoutHotkeys />
+        </>
+    );
+};
+
+const LayoutHotkeys = () => {
+    const navigate = useNavigate();
+    const localSettings = isElectron() ? window.api.localSettings : null;
+    const settings = useGeneralSettings();
+    const { setSettings } = useSettingsStoreActions();
+    const { bindings } = useHotkeySettings();
+    const { opened, ...handlers } = useCommandPalette();
+
+    const updateZoom = (increase: number) => {
+        const newVal = settings.zoomFactor + increase;
+        if (newVal > 300 || newVal < 50 || !isElectron()) return;
+        setSettings({
+            general: {
+                ...settings,
+                zoomFactor: newVal,
+            },
+        });
+        localSettings?.setZoomFactor(settings.zoomFactor);
+    };
+    localSettings?.setZoomFactor(settings.zoomFactor);
+
+    const zoomHotkeys: HotkeyItem[] = [
+        [bindings.zoomIn.hotkey, () => updateZoom(5)],
+        [bindings.zoomOut.hotkey, () => updateZoom(-5)],
+    ];
+
+    useHotkeys([
+        [bindings.globalSearch.hotkey, () => handlers.open()],
+        [bindings.browserBack.hotkey, () => navigate(-1)],
+        [bindings.browserForward.hotkey, () => navigate(1)],
+        [bindings.navigateHome.hotkey, () => navigate(AppRoute.HOME)],
+        ...(isElectron() ? zoomHotkeys : []),
+    ]);
+
+    return <CommandPalette modalProps={{ handlers, opened }} />;
 };

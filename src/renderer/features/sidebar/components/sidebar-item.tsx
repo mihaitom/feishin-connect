@@ -19,10 +19,10 @@ export const SidebarItem = ({ children, className, to, ...props }: SidebarItemPr
         <Button
             className={clsx(
                 {
+                    [styles.active]: isActive,
                     [styles.disabled]: props.disabled,
                     [styles.link]: true,
                     [styles.root]: true,
-                    [styles.active]: isActive,
                 },
                 className,
             )}

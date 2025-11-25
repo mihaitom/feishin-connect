@@ -14,7 +14,6 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 
 export const ActionBar = () => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { open } = useCommandPalette();
 
     return (
@@ -50,15 +49,25 @@ export const ActionBar = () => {
                                 <AppMenu />
                             </DropdownMenu.Dropdown>
                         </DropdownMenu>
-                        <Button onClick={() => navigate(-1)} p="0.5rem">
-                            <Icon icon="arrowLeftS" size="lg" />
-                        </Button>
-                        <Button onClick={() => navigate(1)} p="0.5rem">
-                            <Icon icon="arrowRightS" size="lg" />
-                        </Button>
+                        <NavigateButtons />
                     </Group>
                 </Grid.Col>
             </Grid>
         </div>
+    );
+};
+
+const NavigateButtons = () => {
+    const navigate = useNavigate();
+
+    return (
+        <>
+            <Button onClick={() => navigate(-1)} p="0.5rem">
+                <Icon icon="arrowLeftS" size="lg" />
+            </Button>
+            <Button onClick={() => navigate(1)} p="0.5rem">
+                <Icon icon="arrowRightS" size="lg" />
+            </Button>
+        </>
     );
 };

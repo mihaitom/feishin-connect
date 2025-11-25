@@ -1,24 +1,13 @@
 import clsx from 'clsx';
 import isElectron from 'is-electron';
 import { lazy } from 'react';
-import { useNavigate } from 'react-router';
 
 import styles from './default-layout.module.css';
 
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
-import { CommandPalette } from '/@/renderer/features/search/components/command-palette';
 import { MainContent } from '/@/renderer/layouts/default-layout/main-content';
 import { PlayerBar } from '/@/renderer/layouts/default-layout/player-bar';
-import { AppRoute } from '/@/renderer/router/routes';
-import { useCommandPalette } from '/@/renderer/store';
-import {
-    useGeneralSettings,
-    useHotkeySettings,
-    useSettingsStore,
-    useSettingsStoreActions,
-    useWindowSettings,
-} from '/@/renderer/store/settings.store';
-import { HotkeyItem, useHotkeys } from '/@/shared/hooks/use-hotkeys';
+import { useSettingsStore, useWindowSettings } from '/@/renderer/store/settings.store';
 import { Platform, PlayerType } from '/@/shared/types/types';
 
 if (!isElectron()) {
@@ -42,38 +31,6 @@ interface DefaultLayoutProps {
 
 export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
     const { windowBarStyle } = useWindowSettings();
-    const { opened, ...handlers } = useCommandPalette();
-    const { bindings } = useHotkeySettings();
-    const navigate = useNavigate();
-    const localSettings = isElectron() ? window.api.localSettings : null;
-    const settings = useGeneralSettings();
-    const { setSettings } = useSettingsStoreActions();
-
-    const updateZoom = (increase: number) => {
-        const newVal = settings.zoomFactor + increase;
-        if (newVal > 300 || newVal < 50 || !isElectron()) return;
-        setSettings({
-            general: {
-                ...settings,
-                zoomFactor: newVal,
-            },
-        });
-        localSettings?.setZoomFactor(settings.zoomFactor);
-    };
-    localSettings?.setZoomFactor(settings.zoomFactor);
-
-    const zoomHotkeys: HotkeyItem[] = [
-        [bindings.zoomIn.hotkey, () => updateZoom(5)],
-        [bindings.zoomOut.hotkey, () => updateZoom(-5)],
-    ];
-
-    useHotkeys([
-        [bindings.globalSearch.hotkey, () => handlers.open()],
-        [bindings.browserBack.hotkey, () => navigate(-1)],
-        [bindings.browserForward.hotkey, () => navigate(1)],
-        [bindings.navigateHome.hotkey, () => navigate(AppRoute.HOME)],
-        ...(isElectron() ? zoomHotkeys : []),
-    ]);
 
     return (
         <>
@@ -88,7 +45,6 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
                 <MainContent shell={shell} />
                 <PlayerBar />
             </div>
-            <CommandPalette modalProps={{ handlers, opened }} />
             <ContextMenuController.Root />
         </>
     );
