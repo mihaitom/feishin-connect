@@ -3,7 +3,6 @@ import { Fragment } from 'react/jsx-runtime';
 import { ApplicationSettings } from '/@/renderer/features/settings/components/general/application-settings';
 import { ControlSettings } from '/@/renderer/features/settings/components/general/control-settings';
 import { LyricSettings } from '/@/renderer/features/settings/components/general/lyric-settings';
-import { RemoteSettings } from '/@/renderer/features/settings/components/general/remote-settings';
 import { ScrobbleSettings } from '/@/renderer/features/settings/components/general/scrobble-settings';
 import { SidebarSettings } from '/@/renderer/features/settings/components/general/sidebar-settings';
 import { ThemeSettings } from '/@/renderer/features/settings/components/general/theme-settings';
@@ -15,7 +14,6 @@ const sections = [
     { component: ThemeSettings, key: 'theme' },
     { component: ControlSettings, key: 'control' },
     { component: SidebarSettings, key: 'sidebar' },
-    { component: RemoteSettings, key: 'remote' },
     { component: ScrobbleSettings, key: 'scrobble' },
     { component: LyricSettings, key: 'lyrics' },
 ];
