@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useLocation, useParams } from 'react-router';
+import { useParams } from 'react-router';
 
 import { ListContext } from '/@/renderer/context/list-context';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
@@ -29,9 +29,6 @@ const GenreDetailRoute = () => {
     const name = useMemo(() => {
         return genres?.items.find((g) => g.id === genreId)?.name || '—';
     }, [genreId, genres]);
-
-    const location = useLocation();
-    console.log('location', location.pathname);
 
     return (
         <AnimatedPage>

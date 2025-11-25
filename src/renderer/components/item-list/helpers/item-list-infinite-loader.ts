@@ -5,7 +5,7 @@ import {
     UseSuspenseQueryOptions,
 } from '@tanstack/react-query';
 import throttle from 'lodash/throttle';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { useListContext } from '/@/renderer/context/list-context';
@@ -61,6 +61,8 @@ export const useItemListInfiniteLoader = ({
     serverId,
 }: UseItemListInfiniteLoaderProps) => {
     const queryClient = useQueryClient();
+    const lastFetchedPageRef = useRef<number>(-1);
+    const currentVisibleRangeRef = useRef<null | { startIndex: number; stopIndex: number }>(null);
 
     const { data: totalItemCount } = useSuspenseQuery<number, any, number, any>(listCountQuery);
 
@@ -88,6 +90,8 @@ export const useItemListInfiniteLoader = ({
                 pagesLoaded: {},
             };
         });
+        lastFetchedPageRef.current = -1;
+        currentVisibleRangeRef.current = null;
     }, [query, queryClient, dataQueryKey]);
 
     const { data } = useQuery<{ data: unknown[]; pagesLoaded: Record<string, boolean> }>({
@@ -144,12 +148,18 @@ export const useItemListInfiniteLoader = ({
                     };
                 },
             );
+
+            // Track the last fetched page
+            lastFetchedPageRef.current = Math.max(lastFetchedPageRef.current, pageNumber);
         },
         [itemsPerPage, query, queryClient, serverId, dataQueryKey, listQueryFn, itemType],
     );
 
     const onRangeChangedBase = useCallback(
         async (range: { startIndex: number; stopIndex: number }) => {
+            // Track the current visible range
+            currentVisibleRangeRef.current = range;
+
             const pageNumber = Math.floor(range.startIndex / itemsPerPage);
 
             const currentData = queryClient.getQueryData<{
@@ -204,18 +214,54 @@ export const useItemListInfiniteLoader = ({
 
     const refresh = useCallback(
         async (force?: boolean) => {
+            // Invalidate all queries to ensure fresh data
             await queryClient.invalidateQueries();
 
-            if (force) {
-                await queryClient.setQueryData(dataQueryKey, getInitialData(totalItemCount));
+            // Reset the infinite list data
+            const currentData = queryClient.getQueryData<{
+                data: unknown[];
+                pagesLoaded: Record<string, boolean>;
+            }>(dataQueryKey);
+
+            if (force || currentData) {
+                // Reset data to initial state and clear all loaded pages
+                await queryClient.setQueryData(dataQueryKey, (oldData: any) => {
+                    if (!oldData) return getInitialData(totalItemCount);
+                    return {
+                        ...oldData,
+                        data: Array.from({ length: totalItemCount }, () => undefined),
+                        pagesLoaded: {},
+                    };
+                });
+                lastFetchedPageRef.current = -1;
             }
 
-            // await onRangeChanged({
-            //     endIndex: currentPageRef.current * itemsPerPage,
-            //     startIndex: currentPageRef.current * itemsPerPage,
-            // });
+            // Add a delay to make the refresh visually clear
+            await new Promise((resolve) => setTimeout(resolve, 150));
+
+            // Determine which page to refetch based on current visible range
+            let pageToFetch = 0;
+            if (currentVisibleRangeRef.current) {
+                // Calculate the page from the current visible range
+                pageToFetch = Math.floor(currentVisibleRangeRef.current.startIndex / itemsPerPage);
+            } else if (lastFetchedPageRef.current >= 0) {
+                // Fallback to last fetched page if no visible range is tracked
+                pageToFetch = lastFetchedPageRef.current;
+            }
+
+            // Refetch the current page
+            await fetchPage(pageToFetch);
+
+            // Trigger range changed to ensure adjacent pages are prefetched if needed
+            const startIndex = pageToFetch * itemsPerPage;
+            const stopIndex = Math.min((pageToFetch + 1) * itemsPerPage, totalItemCount);
+
+            await onRangeChangedBase({
+                startIndex,
+                stopIndex,
+            });
         },
-        [queryClient, totalItemCount, dataQueryKey],
+        [queryClient, itemsPerPage, onRangeChangedBase, dataQueryKey, totalItemCount, fetchPage],
     );
 
     const updateItems = useCallback(

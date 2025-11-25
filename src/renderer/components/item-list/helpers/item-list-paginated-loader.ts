@@ -98,9 +98,22 @@ export const useItemListPaginatedLoader = ({
         staleTime: 1000 * 15,
     });
 
-    const refresh = useCallback(() => {
-        return queryRefetch();
-    }, [queryRefetch]);
+    const refresh = useCallback(
+        async (force?: boolean) => {
+            const queryKey = queryKeys[getQueryKeyName(itemType)].list(serverId, queryParams);
+
+            await queryClient.invalidateQueries();
+
+            if (force) {
+                queryClient.setQueryData(queryKey, {
+                    items: getInitialData(itemsPerPage),
+                });
+            }
+
+            return queryRefetch();
+        },
+        [queryClient, queryRefetch, queryParams, serverId, itemType, itemsPerPage],
+    );
 
     const updateItems = useCallback(
         (indexes: number[], value: object) => {
@@ -140,7 +153,7 @@ export const useItemListPaginatedLoader = ({
                 return;
             }
 
-            return refresh();
+            return refresh(true);
         };
 
         const handleFavorite = (payload: UserFavoriteEventPayload) => {

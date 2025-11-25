@@ -54,6 +54,7 @@ export const ArtistListPaginatedTable = forwardRef<any, ArtistListPaginatedTable
 
         const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
             currentPage,
+            eventKey: ItemListKey.ARTIST,
             itemsPerPage,
             itemType: LibraryItem.ARTIST,
             listCountQuery,

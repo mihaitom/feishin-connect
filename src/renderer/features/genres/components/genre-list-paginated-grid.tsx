@@ -46,6 +46,7 @@ export const GenreListPaginatedGrid = forwardRef<any, GenreListPaginatedGridProp
 
         const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
             currentPage,
+            eventKey: ItemListKey.GENRE,
             itemsPerPage,
             itemType: LibraryItem.GENRE,
             listCountQuery,

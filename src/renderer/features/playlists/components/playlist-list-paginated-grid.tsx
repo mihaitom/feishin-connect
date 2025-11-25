@@ -46,6 +46,7 @@ export const PlaylistListPaginatedGrid = forwardRef<any, PlaylistListPaginatedGr
 
         const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
             currentPage,
+            eventKey: ItemListKey.PLAYLIST,
             itemsPerPage,
             itemType: LibraryItem.PLAYLIST,
             listCountQuery,

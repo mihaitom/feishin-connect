@@ -39,6 +39,7 @@ export const SongListPaginatedGrid = forwardRef<any, SongListPaginatedGridProps>
 
         const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
             currentPage,
+            eventKey: ItemListKey.SONG,
             itemsPerPage,
             itemType: LibraryItem.SONG,
             listCountQuery,
