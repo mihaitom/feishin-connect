@@ -47,6 +47,7 @@ import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface VirtualizedGridListProps {
+    _tableMetaVersion: number; // Used to trigger rerenders via React.memo comparison
     controls: ItemControls;
     data: unknown[];
     enableDrag?: boolean;
@@ -63,11 +64,11 @@ interface VirtualizedGridListProps {
     outerRef: RefObject<any>;
     ref: RefObject<FixedSizeList<GridItemProps> | null>;
     rows?: ItemCardProps['rows'];
-    tableMeta: null | {
+    tableMetaRef: RefObject<null | {
         columnCount: number;
         itemHeight: number;
         rowCount: number;
-    };
+    }>;
     width: number;
 }
 
@@ -89,9 +90,11 @@ const VirtualizedGridList = React.memo(
         outerRef,
         ref,
         rows,
-        tableMeta,
+        tableMetaRef,
         width,
     }: VirtualizedGridListProps) => {
+        const tableMeta = tableMetaRef.current;
+
         const itemData: GridItemProps = useMemo(() => {
             return {
                 columns: tableMeta?.columnCount || 0,
@@ -129,12 +132,13 @@ const VirtualizedGridList = React.memo(
 
         const handleOnItemsRendered = useCallback(
             (items: ListOnItemsRenderedProps) => {
+                const columnCount = tableMetaRef.current?.columnCount || 0;
                 onRangeChanged?.({
-                    startIndex: items.visibleStartIndex * (tableMeta?.columnCount || 0),
-                    stopIndex: items.visibleStopIndex * (tableMeta?.columnCount || 0),
+                    startIndex: items.visibleStartIndex * columnCount,
+                    stopIndex: items.visibleStopIndex * columnCount,
                 });
             },
-            [onRangeChanged, tableMeta?.columnCount],
+            [onRangeChanged, tableMetaRef],
         );
 
         if (!tableMeta) {
@@ -148,17 +152,19 @@ const VirtualizedGridList = React.memo(
                 return initialTop.to;
             }
 
-            const rowIndex = Math.floor(initialTop.to / (tableMeta?.columnCount || 1));
-            return rowIndex * (tableMeta?.itemHeight || 0);
+            const columnCount = tableMeta?.columnCount || 1;
+            const itemHeight = tableMeta?.itemHeight || 0;
+            const rowIndex = Math.floor(initialTop.to / columnCount);
+            return rowIndex * itemHeight;
         };
 
         return (
             <FixedSizeList
                 height={height}
                 initialScrollOffset={calculateInitialScrollOffset()}
-                itemCount={itemData.tableMeta?.rowCount || 0}
+                itemCount={tableMeta.rowCount || 0}
                 itemData={itemData}
-                itemSize={itemData.tableMeta?.itemHeight || 0}
+                itemSize={tableMeta.itemHeight || 0}
                 onItemsRendered={handleOnItemsRendered}
                 onScroll={handleOnScroll}
                 outerRef={outerRef}
@@ -316,17 +322,20 @@ export const ItemGridList = ({
 
     const hasExpanded = internalState.hasExpanded();
 
-    const [tableMeta, setTableMeta] = useState<null | {
+    const tableMetaRef = useRef<null | {
         columnCount: number;
         itemHeight: number;
         rowCount: number;
     }>(null);
 
+    const [tableMetaVersion, setTableMetaVersion] = useState(0);
+    const isOverlayScrollbarsInitialized = useRef(false);
+
     useEffect(() => {
         const { current: root } = rootRef;
         const { current: outer } = outerRef;
 
-        if (!tableMeta || !root || !outer) {
+        if (!tableMetaRef.current || !root || !outer || isOverlayScrollbarsInitialized.current) {
             return;
         }
 
@@ -337,6 +346,10 @@ export const ItemGridList = ({
             target: root,
         });
 
+        isOverlayScrollbarsInitialized.current = true;
+    }, [initialize, tableMetaVersion]);
+
+    useEffect(() => {
         return () => {
             try {
                 const instance = osInstance();
@@ -358,15 +371,34 @@ export const ItemGridList = ({
                 // Ignore error
             }
         };
-    }, [initialize, osInstance, tableMeta]);
+    }, [osInstance]);
 
     const throttledSetTableMeta = useMemo(() => {
         return createThrottledSetTableMeta(itemsPerRow, rows?.length);
     }, [itemsPerRow, rows?.length]);
 
     useLayoutEffect(() => {
-        throttledSetTableMeta(containerWidth, data.length, setTableMeta);
-    }, [containerWidth, data.length, throttledSetTableMeta]);
+        const { current: container } = containerRef;
+        if (!container) return;
+
+        throttledSetTableMeta(containerWidth, data.length, (meta) => {
+            if (!meta) return;
+
+            const current = tableMetaRef.current;
+            if (
+                !current ||
+                current.columnCount !== meta.columnCount ||
+                current.itemHeight !== meta.itemHeight ||
+                current.rowCount !== meta.rowCount
+            ) {
+                tableMetaRef.current = meta;
+                container.style.setProperty('--grid-column-count', String(meta.columnCount));
+                container.style.setProperty('--grid-item-height', `${meta.itemHeight}px`);
+                container.style.setProperty('--grid-row-count', String(meta.rowCount));
+                setTableMetaVersion((v) => v + 1);
+            }
+        });
+    }, [containerWidth, data.length, throttledSetTableMeta, containerRef]);
 
     const controls = useDefaultItemListControls({ overrides: overrideControls });
 
@@ -375,8 +407,8 @@ export const ItemGridList = ({
             index: number,
             options?: { align?: 'bottom' | 'center' | 'top'; behavior?: 'auto' | 'smooth' },
         ) => {
-            if (!listRef.current || !tableMeta) return;
-            const row = Math.floor(index / tableMeta.columnCount);
+            if (!listRef.current || !tableMetaRef.current) return;
+            const row = Math.floor(index / tableMetaRef.current.columnCount);
 
             // Map alignment options to react-window's alignment
             let alignment: 'auto' | 'center' | 'end' | 'smart' | 'start' = 'smart';
@@ -390,7 +422,7 @@ export const ItemGridList = ({
 
             listRef.current.scrollToItem(row, alignment);
         },
-        [tableMeta],
+        [],
     );
 
     const scrollToOffset = useCallback((offset: number) => {
@@ -401,7 +433,7 @@ export const ItemGridList = ({
     // Handle keyboard navigation
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLDivElement>) => {
-            if (!enableSelection || !tableMeta) return;
+            if (!enableSelection || !tableMetaRef.current) return;
             if (
                 e.key !== 'ArrowDown' &&
                 e.key !== 'ArrowUp' &&
@@ -428,9 +460,12 @@ export const ItemGridList = ({
 
             // Calculate grid position
             const currentRow =
-                currentIndex !== -1 ? Math.floor(currentIndex / tableMeta.columnCount) : 0;
-            const currentCol = currentIndex !== -1 ? currentIndex % tableMeta.columnCount : 0;
-            const totalRows = Math.ceil(data.length / tableMeta.columnCount);
+                currentIndex !== -1
+                    ? Math.floor(currentIndex / tableMetaRef.current.columnCount)
+                    : 0;
+            const currentCol =
+                currentIndex !== -1 ? currentIndex % tableMetaRef.current.columnCount : 0;
+            const totalRows = Math.ceil(data.length / tableMetaRef.current.columnCount);
 
             let newIndex = 0;
             if (currentIndex !== -1) {
@@ -439,9 +474,9 @@ export const ItemGridList = ({
                         // Move down one row
                         const nextRow = currentRow + 1;
                         if (nextRow < totalRows) {
-                            const nextRowStart = nextRow * tableMeta.columnCount;
+                            const nextRowStart = nextRow * tableMetaRef.current.columnCount;
                             const nextRowEnd = Math.min(
-                                nextRowStart + tableMeta.columnCount - 1,
+                                nextRowStart + tableMetaRef.current.columnCount - 1,
                                 data.length - 1,
                             );
                             // Keep same column position, or use last item in row if column doesn't exist
@@ -458,8 +493,8 @@ export const ItemGridList = ({
                         } else if (currentRow > 0) {
                             // Wrap to end of previous row
                             newIndex = Math.max(
-                                (currentRow - 1) * tableMeta.columnCount +
-                                    tableMeta.columnCount -
+                                (currentRow - 1) * tableMetaRef.current.columnCount +
+                                    tableMetaRef.current.columnCount -
                                     1,
                                 0,
                             );
@@ -472,14 +507,14 @@ export const ItemGridList = ({
                     case 'ArrowRight': {
                         // Move right, wrap to next row if at end of row
                         if (
-                            currentCol < tableMeta.columnCount - 1 &&
+                            currentCol < tableMetaRef.current.columnCount - 1 &&
                             currentIndex < data.length - 1
                         ) {
                             newIndex = currentIndex + 1;
                         } else if (currentRow < totalRows - 1) {
                             // Wrap to start of next row
                             newIndex = Math.min(
-                                (currentRow + 1) * tableMeta.columnCount,
+                                (currentRow + 1) * tableMetaRef.current.columnCount,
                                 data.length - 1,
                             );
                         } else {
@@ -491,9 +526,9 @@ export const ItemGridList = ({
                         // Move up one row
                         const prevRow = currentRow - 1;
                         if (prevRow >= 0) {
-                            const prevRowStart = prevRow * tableMeta.columnCount;
+                            const prevRowStart = prevRow * tableMetaRef.current.columnCount;
                             const prevRowEnd = Math.min(
-                                prevRowStart + tableMeta.columnCount - 1,
+                                prevRowStart + tableMetaRef.current.columnCount - 1,
                                 data.length - 1,
                             );
                             // Keep same column position, or use last item in row if column doesn't exist
@@ -599,7 +634,7 @@ export const ItemGridList = ({
 
             scrollToIndex(newIndex);
         },
-        [data, enableSelection, internalState, tableMeta, scrollToIndex],
+        [data, enableSelection, internalState, scrollToIndex],
     );
 
     const imperativeHandle: ItemListHandle = useMemo(() => {
@@ -634,6 +669,7 @@ export const ItemGridList = ({
             <AutoSizer>
                 {({ height, width }) => (
                     <VirtualizedGridList
+                        _tableMetaVersion={tableMetaVersion}
                         controls={controls}
                         data={data}
                         enableDrag={enableDrag}
@@ -650,7 +686,7 @@ export const ItemGridList = ({
                         outerRef={outerRef}
                         ref={listRef}
                         rows={rows}
-                        tableMeta={tableMeta}
+                        tableMetaRef={tableMetaRef}
                         width={width}
                     />
                 )}
