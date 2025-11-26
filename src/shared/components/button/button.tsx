@@ -6,7 +6,6 @@ import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './button.module.css';
 
-import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Tooltip, TooltipProps } from '/@/shared/components/tooltip/tooltip';
 import { useTimeout } from '/@/shared/hooks/use-timeout';
 import { createPolymorphicComponent } from '/@/shared/utils/create-polymorphic-component';
@@ -48,6 +47,7 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     <MantineButton
                         autoContrast
                         classNames={{
+                            inner: styles.inner,
                             label: clsx(styles.label, {
                                 [styles.uppercase]: uppercase,
                             }),
@@ -56,6 +56,7 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
                             section: styles.section,
                             ...classNames,
                         }}
+                        loading={loading}
                         ref={ref}
                         size={size}
                         style={style}
@@ -63,11 +64,6 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
                         {...props}
                     >
                         {children}
-                        {loading && (
-                            <div className={styles.spinner}>
-                                <Spinner />
-                            </div>
-                        )}
                     </MantineButton>
                 </Tooltip>
             );
@@ -76,6 +72,7 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
         return (
             <MantineButton
                 classNames={{
+                    inner: styles.inner,
                     label: clsx(styles.label, {
                         [styles.uppercase]: uppercase,
                     }),
@@ -84,6 +81,7 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     section: styles.section,
                     ...classNames,
                 }}
+                loading={loading}
                 ref={ref}
                 size={size}
                 style={style}
@@ -91,11 +89,6 @@ export const _Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 {...props}
             >
                 {children}
-                {loading && (
-                    <div className={styles.spinner}>
-                        <Spinner />
-                    </div>
-                )}
             </MantineButton>
         );
     },
