@@ -144,9 +144,15 @@ export const MainContent = ({ shell }: { shell?: boolean }) => {
                     />
                 </>
             )}
-            <Suspense fallback={<Spinner container />}>
-                <Outlet />
-            </Suspense>
+            <MainContentBody />
         </motion.div>
     );
 };
+
+function MainContentBody() {
+    return (
+        <Suspense fallback={<Spinner container />}>
+            <Outlet />
+        </Suspense>
+    );
+}
