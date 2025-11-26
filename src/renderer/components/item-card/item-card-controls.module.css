@@ -45,6 +45,22 @@
     margin-bottom: var(--theme-spacing-lg);
 }
 
+.play-button {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(var(--play-button-scale, 1));
+
+    &:hover {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    &:active {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+}
+
 .primary {
     left: 50%;
     width: 25%;

@@ -9,6 +9,7 @@ import { ActionIcon, ActionIconProps } from '/@/shared/components/action-icon/ac
 import { Button, ButtonProps } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { AppIcon, Icon } from '/@/shared/components/icon/icon';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 
 export interface DefaultPlayButtonProps extends ActionIconProps {
     size?: number | string;
@@ -76,14 +77,24 @@ export const WideShuffleButton = ({ ...props }: TextPlayButtonProps) => {
 
 interface PlayButtonProps {
     classNames?: string;
+    fill?: boolean;
     icon?: keyof typeof AppIcon;
+    isSecondary?: boolean;
     loading?: boolean;
     onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
     onLongPress?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export const PlayButton = memo(
-    ({ classNames, icon = 'mediaPlay', loading, onClick, onLongPress }: PlayButtonProps) => {
+    ({
+        classNames,
+        fill,
+        icon = 'mediaPlay',
+        isSecondary,
+        loading,
+        onClick,
+        onLongPress,
+    }: PlayButtonProps) => {
         const clickHandlers = usePlayButtonClick({
             loading,
             onClick,
@@ -92,11 +103,14 @@ export const PlayButton = memo(
 
         return (
             <button
-                className={clsx(styles.playButton, classNames)}
+                className={clsx(styles.playButton, classNames, {
+                    [styles.fill]: fill,
+                    [styles.secondary]: isSecondary,
+                })}
                 {...clickHandlers.handlers}
                 {...clickHandlers.props}
             >
-                <Icon icon={icon} size="lg" />
+                {loading ? <Spinner color="black" /> : <Icon icon={icon} size="lg" />}
             </button>
         );
     },

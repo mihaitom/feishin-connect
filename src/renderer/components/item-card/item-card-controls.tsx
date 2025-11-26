@@ -236,18 +236,18 @@ export const ItemCardControls = ({
             {controls?.onPlay && (
                 <>
                     <PlayButton
-                        classNames={clsx(styles.primary)}
+                        classNames={clsx(styles.playButton, styles.primary)}
                         onClick={playNowHandler}
                         onLongPress={playShuffleHandler}
                     />
                     <PlayButton
-                        classNames={clsx(styles.secondary, styles.left)}
+                        classNames={clsx(styles.playButton, styles.secondary, styles.left)}
                         icon="mediaPlayNext"
                         onClick={playNextHandler}
                         onLongPress={playNextShuffleHandler}
                     />
                     <PlayButton
-                        classNames={clsx(styles.secondary, styles.right)}
+                        classNames={clsx(styles.playButton, styles.secondary, styles.right)}
                         icon="mediaPlayLast"
                         onClick={playLastHandler}
                         onLongPress={playLastShuffleHandler}
