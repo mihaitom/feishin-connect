@@ -7,7 +7,7 @@ import { generatePath, Link } from 'react-router';
 import styles from './mobile-playerbar.module.css';
 
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
-import { PlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
+import { MainPlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
@@ -35,7 +35,7 @@ export const MobilePlayerbar = () => {
     const { setStore } = useFullScreenPlayerStoreActions();
     const currentSong = usePlayerSong();
     const status = usePlayerStatus();
-    const { mediaTogglePlayPause, mediaNext, mediaPrevious } = usePlayer();
+    const { mediaNext, mediaPrevious, mediaTogglePlayPause } = usePlayer();
     const title = currentSong?.name;
     const artists = currentSong?.artists;
     const isSongDefined = Boolean(currentSong?.id);
@@ -203,7 +203,7 @@ export const MobilePlayerbar = () => {
                     }}
                     variant="tertiary"
                 />
-                <PlayButton
+                <MainPlayButton
                     disabled={currentSong?.id === undefined}
                     isPaused={status === PlayerStatus.PAUSED}
                     onClick={(e) => {

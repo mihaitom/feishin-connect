@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import styles from './mobile-fullscreen-player.module.css';
 
-import { PlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
+import { MainPlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { usePlayerStatus } from '/@/renderer/store';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -50,7 +50,7 @@ export const MobileFullscreenPlayerControls = memo(
                     }}
                     variant="tertiary"
                 />
-                <PlayButton
+                <MainPlayButton
                     disabled={currentSongId === undefined}
                     isPaused={status === PlayerStatus.PAUSED}
                     onClick={mediaTogglePlayPause}

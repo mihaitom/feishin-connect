@@ -4,7 +4,7 @@ import { SettingsContent } from '/@/renderer/features/settings/components/settin
 import { SettingsHeader } from '/@/renderer/features/settings/components/settings-header';
 import { SettingSearchContext } from '/@/renderer/features/settings/context/search-context';
 
-export const SettingsModal = () => {
+export const SettingsContextModal = () => {
     const [search, setSearch] = useState('');
 
     return (

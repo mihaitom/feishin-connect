@@ -1,9 +1,8 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import styles from './center-controls.module.css';
 
-import { PlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
+import { MainPlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
 import { PlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 import { openShuffleAllModal } from '/@/renderer/features/player/components/shuffle-all-modal';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
@@ -135,7 +134,7 @@ const CenterPlayButton = () => {
     const { mediaTogglePlayPause } = usePlayer();
 
     return (
-        <PlayButton
+        <MainPlayButton
             disabled={currentSong?.id === undefined}
             isPaused={status === PlayerStatus.PAUSED}
             onClick={mediaTogglePlayPause}
@@ -229,19 +228,14 @@ const RepeatButton = () => {
 
 const ShuffleAllButton = () => {
     const { t } = useTranslation();
-    const queryClient = useQueryClient();
     const buttonSize = useSettingsStore((state) => state.general.buttonSize);
 
     return (
         <PlayerButton
             icon={<Icon fill="default" icon="mediaRandom" size={buttonSize} />}
-            onClick={() =>
-                openShuffleAllModal({
-                    queryClient,
-                })
-            }
+            onClick={() => openShuffleAllModal()}
             tooltip={{
-                label: t('player.playRandom', { postProcess: 'sentenceCase' }),
+                label: t('form.shuffleAll.title', { postProcess: 'sentenceCase' }),
                 openDelay: 0,
             }}
             variant="tertiary"

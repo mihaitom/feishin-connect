@@ -311,6 +311,17 @@
             "expireInvalid": "expiration must be in the future",
             "createFailed": "failed to create share (is sharing enabled?)"
         },
+        "shuffleAll": {
+            "title": "play random",
+            "input_genre": "$t(entity.genre_one)",
+            "input_limit": "how many songs?",
+            "input_minYear": "from year",
+            "input_maxYear": "to year",
+            "input_played": "play filter",
+            "input_played_optionAll": "all tracks",
+            "input_played_optionUnplayed": "only unplayed tracks",
+            "input_played_optionPlayed": "only played tracks"
+        },
         "updateServer": {
             "success": "server updated successfully",
             "title": "update server"

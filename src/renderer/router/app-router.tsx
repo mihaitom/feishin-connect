@@ -1,8 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { HashRouter, Route, Routes } from 'react-router';
 
+import { ShuffleAllContextModal } from '/@/renderer/features/player/components/shuffle-all-modal';
 import { AddToPlaylistContextModal } from '/@/renderer/features/playlists/components/add-to-playlist-context-modal';
-import { SettingsModal } from '/@/renderer/features/settings/components/settings-modal';
+import { SettingsContextModal } from '/@/renderer/features/settings/components/settings-modal';
 import { RouterErrorBoundary } from '/@/renderer/features/shared/components/router-error-boundary';
 import { ShareItemContextModal } from '/@/renderer/features/sharing/components/share-item-context-modal';
 import { ResponsiveLayout } from '/@/renderer/layouts/responsive-layout';
@@ -76,8 +77,9 @@ export const AppRouter = () => {
                 modals={{
                     addToPlaylist: AddToPlaylistContextModal,
                     base: BaseContextModal,
-                    settings: SettingsModal,
+                    settings: SettingsContextModal,
                     shareItem: ShareItemContextModal,
+                    shuffleAll: ShuffleAllContextModal,
                 }}
             >
                 <RouterErrorBoundary>
