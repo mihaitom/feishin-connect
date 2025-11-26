@@ -98,6 +98,61 @@ interface State {
     queue: QueueData;
 }
 
+// Calculates the next song based on repeat mode and current position
+export function calculateNextSong(
+    currentIndex: number,
+    queueItems: QueueSong[],
+    repeat: PlayerRepeat,
+): QueueSong | undefined {
+    if (queueItems.length === 0) {
+        return undefined;
+    }
+
+    if (repeat === PlayerRepeat.ONE) {
+        // When repeating one, next song is the same as current
+        return queueItems[currentIndex];
+    } else if (repeat === PlayerRepeat.ALL) {
+        // When repeating all, next song wraps to first if at the end
+        const isLastTrack = currentIndex === queueItems.length - 1;
+        if (isLastTrack) {
+            return queueItems[0];
+        } else {
+            return queueItems[currentIndex + 1];
+        }
+    } else {
+        // When repeat is none, next song is undefined if at the end
+        return queueItems[currentIndex + 1];
+    }
+}
+
+// Calculates the next index based on repeat mode and current position
+function calculateNextIndex(
+    currentIndex: number,
+    queueLength: number,
+    repeat: PlayerRepeat,
+): { nextIndex: number; shouldPause: boolean } {
+    const isLastTrack = currentIndex === queueLength - 1;
+
+    if (repeat === PlayerRepeat.ONE) {
+        // Repeat one: stay on the same track
+        return { nextIndex: currentIndex, shouldPause: false };
+    } else if (repeat === PlayerRepeat.ALL) {
+        // Repeat all: loop to first track if at the end
+        if (isLastTrack) {
+            return { nextIndex: 0, shouldPause: false };
+        } else {
+            return { nextIndex: currentIndex + 1, shouldPause: false };
+        }
+    } else {
+        // Repeat none: move to next track, or pause if at the end
+        if (isLastTrack) {
+            return { nextIndex: 0, shouldPause: true };
+        } else {
+            return { nextIndex: currentIndex + 1, shouldPause: false };
+        }
+    }
+}
+
 const initialState: State = {
     player: {
         crossfadeDuration: 5,
@@ -743,35 +798,31 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     const queue = get().getQueueOrder();
 
                     const newPlayerNum = player.playerNum === 1 ? 2 : 1;
-                    let newIndex = Math.min(queue.items.length - 1, currentIndex + 1);
-                    let newStatus = PlayerStatus.PLAYING;
-
-                    if (repeat === PlayerRepeat.ONE) {
-                        newIndex = currentIndex;
-                    }
-
-                    if (newIndex === queue.items.length - 1) {
-                        newStatus = PlayerStatus.PAUSED;
-                    }
+                    const { nextIndex, shouldPause } = calculateNextIndex(
+                        currentIndex,
+                        queue.items.length,
+                        repeat,
+                    );
+                    const newStatus = shouldPause ? PlayerStatus.PAUSED : PlayerStatus.PLAYING;
 
                     set((state) => {
-                        state.player.index = newIndex;
+                        state.player.index = nextIndex;
                         state.player.playerNum = newPlayerNum;
                         setTimestampStore(0);
                         state.player.status = newStatus;
                     });
 
+                    const nextSong = calculateNextSong(nextIndex, queue.items, repeat);
+
                     return {
-                        currentSong: queue.items[newIndex],
-                        index: newIndex,
+                        currentSong: queue.items[nextIndex],
+                        index: nextIndex,
                         muted: player.muted,
-                        nextSong: queue.items[newIndex + 1],
+                        nextSong,
                         num: newPlayerNum,
-                        player1:
-                            newPlayerNum === 1 ? queue.items[newIndex] : queue.items[newIndex + 1],
-                        player2:
-                            newPlayerNum === 2 ? queue.items[newIndex] : queue.items[newIndex + 1],
-                        previousSong: queue.items[newIndex - 1],
+                        player1: newPlayerNum === 1 ? queue.items[nextIndex] : nextSong,
+                        player2: newPlayerNum === 2 ? queue.items[nextIndex] : nextSong,
+                        previousSong: queue.items[nextIndex - 1],
                         queue: get().queue,
                         queueLength: queue.items.length,
                         repeat: player.repeat,
@@ -784,10 +835,25 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 mediaNext: () => {
                     const currentIndex = get().player.index;
+                    const player = get().player;
                     const queue = get().getQueueOrder();
+                    const isLastTrack = currentIndex === queue.items.length - 1;
+
+                    let nextIndex: number;
+
+                    if (player.repeat === PlayerRepeat.ALL && isLastTrack) {
+                        // Repeat all: wrap to first track when on last track
+                        nextIndex = 0;
+                    } else if (player.repeat === PlayerRepeat.NONE && isLastTrack) {
+                        // Repeat none: stay on last track if already there
+                        nextIndex = currentIndex;
+                    } else {
+                        // Otherwise, advance to next track (including repeat ONE for manual navigation)
+                        nextIndex = Math.min(queue.items.length - 1, currentIndex + 1);
+                    }
 
                     set((state) => {
-                        state.player.index = Math.min(queue.items.length - 1, currentIndex + 1);
+                        state.player.index = nextIndex;
                         state.player.playerNum = 1;
                         setTimestampStore(0);
                     });
@@ -830,10 +896,35 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 mediaPrevious: () => {
                     const currentIndex = get().player.index;
+                    const player = get().player;
+                    const queue = get().getQueueOrder();
+                    const currentTimestamp = useTimestampStoreBase.getState().timestamp;
+                    const isFirstTrack = currentIndex === 0;
+
+                    // If timestamp is greater than 10 seconds, restart current song
+                    if (currentTimestamp > 10) {
+                        set((state) => {
+                            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
+                        });
+                        return;
+                    }
+
+                    let previousIndex: number;
+
+                    if (player.repeat === PlayerRepeat.ALL && isFirstTrack) {
+                        // Repeat all: wrap to last track when on first track
+                        previousIndex = queue.items.length - 1;
+                    } else if (player.repeat === PlayerRepeat.NONE && isFirstTrack) {
+                        // Repeat none: stay on first track if already there
+                        previousIndex = currentIndex;
+                    } else {
+                        // Otherwise, go to previous track
+                        previousIndex = Math.max(0, currentIndex - 1);
+                    }
 
                     set((state) => {
-                        // Only decrement if we're not at the start
-                        state.player.index = Math.max(0, currentIndex - 1);
+                        state.player.index = previousIndex;
+                        state.player.playerNum = 1;
                         setTimestampStore(0);
                     });
                 },
@@ -1615,8 +1706,10 @@ export const usePlayerData = (): PlayerData => {
             const queue = state.getQueue();
             const index = state.player.index;
             const currentSong = queue.items[index];
-            const nextSong = queue.items[index + 1];
             const previousSong = queue.items[index - 1];
+            const repeat = state.player.repeat;
+
+            const nextSong = calculateNextSong(index, queue.items, repeat);
 
             return {
                 currentSong,

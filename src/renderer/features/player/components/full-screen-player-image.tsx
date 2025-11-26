@@ -8,7 +8,12 @@ import styles from './full-screen-player-image.module.css';
 
 import { useFastAverageColor } from '/@/renderer/hooks';
 import { AppRoute } from '/@/renderer/router/routes';
-import { subscribeCurrentTrack, usePlayerData, usePlayerStoreBase } from '/@/renderer/store';
+import {
+    calculateNextSong,
+    subscribeCurrentTrack,
+    usePlayerData,
+    usePlayerStoreBase,
+} from '/@/renderer/store';
 import { useSettingsStore } from '/@/renderer/store/settings.store';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Center } from '/@/shared/components/center/center';
@@ -109,7 +114,7 @@ export const FullScreenPlayerImage = () => {
             const playerData = state.getQueue();
             const currentIndex = state.player.index;
             const current = playerData.items[currentIndex];
-            const next = playerData.items[currentIndex + 1];
+            const next = calculateNextSong(currentIndex, playerData.items, state.player.repeat);
 
             setMainImageDimensions({
                 idealSize:
@@ -147,7 +152,7 @@ export const FullScreenPlayerImage = () => {
             const state = usePlayerStoreBase.getState();
             const queue = state.getQueue();
             const currentSong = queue.items[index];
-            const nextSong = queue.items[index + 1];
+            const nextSong = calculateNextSong(index, queue.items, state.player.repeat);
 
             const currentImageUrl = scaleImageUrl(
                 mainImageDimensions.idealSize,
