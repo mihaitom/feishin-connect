@@ -112,14 +112,15 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
     ),
 );
 
-export const useCurrentServerId = () =>
+export const useCurrentServerId = (): string =>
     useAuthStore((state) => {
         const currentServer = state.currentServer;
+
         if (!currentServer) {
-            return null;
+            return '';
         }
 
-        return currentServer.id || '';
+        return currentServer.id;
     }, shallow);
 
 export const useCurrentServer = () =>
