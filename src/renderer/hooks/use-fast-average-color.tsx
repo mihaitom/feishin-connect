@@ -14,14 +14,24 @@ export const getFastAverageColor = async (args: {
     algorithm?: 'dominant' | 'simple' | 'sqrt';
     src: string;
 }) => {
-    const fac = new FastAverageColor();
-    const background = await fac.getColorAsync(args.src, {
-        algorithm: args.algorithm || 'dominant',
-        ignoredColor: ignoredColors,
-        mode: 'speed',
+    return new Promise<string>((resolve, reject) => {
+        setTimeout(() => {
+            const fac = new FastAverageColor();
+            fac.getColorAsync(args.src, {
+                algorithm: args.algorithm || 'dominant',
+                ignoredColor: ignoredColors,
+                mode: 'speed',
+            })
+                .then((background) => {
+                    resolve(background.rgb);
+                    fac.destroy();
+                })
+                .catch((error) => {
+                    fac.destroy();
+                    reject(error);
+                });
+        });
     });
-
-    return background.rgb;
 };
 
 export const useFastAverageColor = (args: {
@@ -48,38 +58,52 @@ export const useFastAverageColor = (args: {
 
     useEffect(() => {
         let isMounted = true;
-        const fac = new FastAverageColor();
+        let fac: FastAverageColor | null = null;
 
         if (src && srcLoaded) {
             setIsLoading(true);
-            fac.getColorAsync(src, {
-                algorithm: algorithm || 'dominant',
-                ignoredColor: ignoredColors,
-                mode: 'speed',
-            })
-                .then((color) => {
-                    if (isMounted) {
-                        idRef.current = id;
-                        setBackground({
-                            background: color.rgb,
-                            isDark: color.isDark,
-                            isLight: color.isLight,
-                        });
-                        setIsLoading(false);
-                    }
+
+            setTimeout(() => {
+                if (!isMounted) return;
+
+                fac = new FastAverageColor();
+                fac.getColorAsync(src, {
+                    algorithm: algorithm || 'dominant',
+                    ignoredColor: ignoredColors,
+                    mode: 'speed',
                 })
-                .catch((e) => {
-                    if (isMounted) {
-                        console.error('Error fetching average color', e);
-                        idRef.current = id;
-                        setBackground({
-                            background: 'rgba(0, 0, 0, 0)',
-                            isDark: true,
-                            isLight: false,
-                        });
-                        setIsLoading(false);
-                    }
-                });
+                    .then((color) => {
+                        if (isMounted) {
+                            idRef.current = id;
+                            setBackground({
+                                background: color.rgb,
+                                isDark: color.isDark,
+                                isLight: color.isLight,
+                            });
+                            setIsLoading(false);
+                        }
+                        if (fac) {
+                            fac.destroy();
+                            fac = null;
+                        }
+                    })
+                    .catch((e) => {
+                        if (isMounted) {
+                            console.error('Error fetching average color', e);
+                            idRef.current = id;
+                            setBackground({
+                                background: 'rgba(0, 0, 0, 0)',
+                                isDark: true,
+                                isLight: false,
+                            });
+                            setIsLoading(false);
+                        }
+                        if (fac) {
+                            fac.destroy();
+                            fac = null;
+                        }
+                    });
+            });
         } else if (srcLoaded) {
             if (isMounted) {
                 idRef.current = id;
@@ -93,7 +117,10 @@ export const useFastAverageColor = (args: {
 
         return () => {
             isMounted = false;
-            fac.destroy();
+            if (fac) {
+                fac.destroy();
+                fac = null;
+            }
         };
     }, [algorithm, srcLoaded, src, id]);
 
