@@ -125,6 +125,34 @@ export function calculateNextSong(
     }
 }
 
+// Helper function to add new indexes to shuffled array after current position
+function addIndexesToShuffled(
+    shuffled: number[],
+    currentShuffledIndex: number,
+    newIndexes: number[],
+): number[] {
+    // Keep everything before and including current position
+    const beforeCurrent = shuffled.slice(0, currentShuffledIndex + 1);
+    // Shuffle everything after current position plus new indexes
+    const afterCurrent = shuffled.slice(currentShuffledIndex + 1);
+    const toShuffle = [...afterCurrent, ...newIndexes];
+    return [...beforeCurrent, ...shuffleInPlace(toShuffle)];
+}
+
+// Helper function to adjust shuffled indexes when items are inserted
+function adjustShuffledIndexesForInsertion(
+    shuffled: number[],
+    insertPosition: number,
+    insertCount: number,
+): number[] {
+    return shuffled.map((idx) => {
+        if (idx >= insertPosition) {
+            return idx + insertCount;
+        }
+        return idx;
+    });
+}
+
 // Calculates the next index based on repeat mode and current position
 function calculateNextIndex(
     currentIndex: number,
@@ -150,6 +178,57 @@ function calculateNextIndex(
         } else {
             return { nextIndex: currentIndex + 1, shouldPause: false };
         }
+    }
+}
+
+// Helper function to find shuffled position for a given queue index
+function findShuffledPositionForQueueIndex(
+    queueIndex: number,
+    shuffled: number[],
+): number | undefined {
+    const shuffledPosition = shuffled.findIndex((idx) => idx === queueIndex);
+    return shuffledPosition !== -1 ? shuffledPosition : undefined;
+}
+
+// Helper function to generate shuffled indexes for a queue of given length
+function generateShuffledIndexes(length: number): number[] {
+    const indexes = Array.from({ length }, (_, i) => i);
+    return shuffleInPlace(indexes);
+}
+
+// Helper function to get combined queue length
+function getCombinedQueueLength(priority: string[], defaultQueue: string[]): number {
+    return priority.length + defaultQueue.length;
+}
+
+// Helper function to check if shuffle is enabled and not in priority mode
+function isShuffleEnabled(state: {
+    player: { queueType: PlayerQueueType; shuffle: PlayerShuffle };
+    queue: { shuffled: number[] };
+}): boolean {
+    return (
+        state.player.shuffle === PlayerShuffle.TRACK &&
+        state.queue.shuffled.length > 0 &&
+        state.player.queueType !== PlayerQueueType.PRIORITY
+    );
+}
+
+// Helper function to map shuffled position to actual queue position
+function mapShuffledToQueueIndex(shuffledIndex: number, shuffled: number[]): number {
+    if (shuffledIndex >= 0 && shuffledIndex < shuffled.length) {
+        return shuffled[shuffledIndex];
+    }
+    return shuffledIndex;
+}
+
+// Helper function to regenerate shuffled indexes if shuffle is enabled
+function regenerateShuffledIndexesIfNeeded(state: {
+    player: { queueType: PlayerQueueType; shuffle: PlayerShuffle };
+    queue: { default: string[]; priority: string[]; shuffled: number[] };
+}): void {
+    if (isShuffleEnabled(state)) {
+        const combinedLength = getCombinedQueueLength(state.queue.priority, state.queue.default);
+        state.queue.shuffled = generateShuffledIndexes(combinedLength);
     }
 }
 
@@ -192,24 +271,29 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             switch (playType) {
                                 case Play.LAST: {
                                     set((state) => {
-                                        const currentIndex = state.player.index;
                                         newItems.forEach((item) => {
                                             state.queue.songs[item._uniqueId] = item;
                                         });
 
+                                        const oldQueueLength = state.queue.default.length;
                                         state.queue.default = [
                                             ...state.queue.default,
                                             ...newUniqueIds,
                                         ];
 
-                                        if (state.player.shuffle === PlayerShuffle.TRACK) {
+                                        if (isShuffleEnabled(state)) {
+                                            // New items will be at indexes starting from oldQueueLength
+                                            const newIndexes = Array.from(
+                                                { length: newUniqueIds.length },
+                                                (_, i) => oldQueueLength + i,
+                                            );
+                                            // Shuffle the new indexes and add to the end of shuffled array
+                                            const shuffledNewIndexes = shuffleInPlace([
+                                                ...newIndexes,
+                                            ]);
                                             state.queue.shuffled = [
-                                                ...state.queue.shuffled.slice(0, currentIndex),
-                                                state.queue.shuffled[currentIndex],
-                                                ...shuffleInPlace([
-                                                    ...state.queue.shuffled.slice(currentIndex + 1),
-                                                    ...newUniqueIds,
-                                                ]),
+                                                ...state.queue.shuffled,
+                                                ...shuffledNewIndexes,
                                             ];
                                         }
                                     });
@@ -217,7 +301,6 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 }
                                 case Play.LAST_SHUFFLE: {
                                     set((state) => {
-                                        const currentIndex = state.player.index;
                                         newItems.forEach((item) => {
                                             state.queue.songs[item._uniqueId] = item;
                                         });
@@ -225,19 +308,28 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         // Shuffle the new items before appending
                                         const shuffledIds = shuffleInPlace([...newUniqueIds]);
 
+                                        const oldQueueLength = state.queue.default.length;
                                         state.queue.default = [
                                             ...state.queue.default,
                                             ...shuffledIds,
                                         ];
 
-                                        if (state.player.shuffle === PlayerShuffle.TRACK) {
+                                        if (
+                                            state.player.shuffle === PlayerShuffle.TRACK &&
+                                            state.player.queueType !== PlayerQueueType.PRIORITY
+                                        ) {
+                                            // New items will be at indexes starting from oldQueueLength
+                                            const newIndexes = Array.from(
+                                                { length: shuffledIds.length },
+                                                (_, i) => oldQueueLength + i,
+                                            );
+                                            // Shuffle the new indexes and add to the end of shuffled array
+                                            const shuffledNewIndexes = shuffleInPlace([
+                                                ...newIndexes,
+                                            ]);
                                             state.queue.shuffled = [
-                                                ...state.queue.shuffled.slice(0, currentIndex),
-                                                state.queue.shuffled[currentIndex],
-                                                ...shuffleInPlace([
-                                                    ...state.queue.shuffled.slice(currentIndex + 1),
-                                                    ...shuffledIds,
-                                                ]),
+                                                ...state.queue.shuffled,
+                                                ...shuffledNewIndexes,
                                             ];
                                         }
                                     });
@@ -245,25 +337,48 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 }
                                 case Play.NEXT: {
                                     set((state) => {
-                                        const currentIndex = state.player.index;
+                                        const currentShuffledIndex = state.player.index;
                                         newItems.forEach((item) => {
                                             state.queue.songs[item._uniqueId] = item;
                                         });
 
+                                        const insertPosition =
+                                            state.player.shuffle === PlayerShuffle.TRACK
+                                                ? state.queue.shuffled[currentShuffledIndex] + 1
+                                                : currentShuffledIndex + 1;
+
                                         state.queue.default = [
-                                            ...state.queue.default.slice(0, currentIndex + 1),
+                                            ...state.queue.default.slice(0, insertPosition),
                                             ...newUniqueIds,
-                                            ...state.queue.default.slice(currentIndex + 1),
+                                            ...state.queue.default.slice(insertPosition),
                                         ];
 
-                                        if (state.player.shuffle === PlayerShuffle.TRACK) {
+                                        if (isShuffleEnabled(state)) {
+                                            // Adjust existing indexes that are >= insertPosition
+                                            const adjustedShuffled =
+                                                adjustShuffledIndexesForInsertion(
+                                                    state.queue.shuffled,
+                                                    insertPosition,
+                                                    newUniqueIds.length,
+                                                );
+
+                                            // New items will be at indexes starting from insertPosition
+                                            const newIndexes = Array.from(
+                                                { length: newUniqueIds.length },
+                                                (_, i) => insertPosition + i,
+                                            );
+
+                                            // Shuffle the new indexes and add directly after current shuffled index
+                                            const shuffledNewIndexes = shuffleInPlace([
+                                                ...newIndexes,
+                                            ]);
                                             state.queue.shuffled = [
-                                                ...state.queue.shuffled.slice(0, currentIndex),
-                                                state.queue.shuffled[currentIndex],
-                                                ...shuffleInPlace([
-                                                    ...state.queue.shuffled.slice(currentIndex + 1),
-                                                    ...newUniqueIds,
-                                                ]),
+                                                ...adjustedShuffled.slice(
+                                                    0,
+                                                    currentShuffledIndex + 1,
+                                                ),
+                                                ...shuffledNewIndexes,
+                                                ...adjustedShuffled.slice(currentShuffledIndex + 1),
                                             ];
                                         }
                                     });
@@ -271,7 +386,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                 }
                                 case Play.NEXT_SHUFFLE: {
                                     set((state) => {
-                                        const currentIndex = state.player.index;
+                                        const currentShuffledIndex = state.player.index;
                                         newItems.forEach((item) => {
                                             state.queue.songs[item._uniqueId] = item;
                                         });
@@ -279,20 +394,42 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         // Shuffle the new items before inserting
                                         const shuffledIds = shuffleInPlace([...newUniqueIds]);
 
+                                        const insertPosition = isShuffleEnabled(state)
+                                            ? state.queue.shuffled[currentShuffledIndex] + 1
+                                            : currentShuffledIndex + 1;
+
                                         state.queue.default = [
-                                            ...state.queue.default.slice(0, currentIndex + 1),
+                                            ...state.queue.default.slice(0, insertPosition),
                                             ...shuffledIds,
-                                            ...state.queue.default.slice(currentIndex + 1),
+                                            ...state.queue.default.slice(insertPosition),
                                         ];
 
-                                        if (state.player.shuffle === PlayerShuffle.TRACK) {
+                                        if (isShuffleEnabled(state)) {
+                                            // Adjust existing indexes that are >= insertPosition
+                                            const adjustedShuffled =
+                                                adjustShuffledIndexesForInsertion(
+                                                    state.queue.shuffled,
+                                                    insertPosition,
+                                                    shuffledIds.length,
+                                                );
+
+                                            // New items will be at indexes starting from insertPosition
+                                            const newIndexes = Array.from(
+                                                { length: shuffledIds.length },
+                                                (_, i) => insertPosition + i,
+                                            );
+
+                                            // Shuffle the new indexes and add directly after current shuffled index
+                                            const shuffledNewIndexes = shuffleInPlace([
+                                                ...newIndexes,
+                                            ]);
                                             state.queue.shuffled = [
-                                                ...state.queue.shuffled.slice(0, currentIndex),
-                                                state.queue.shuffled[currentIndex],
-                                                ...shuffleInPlace([
-                                                    ...state.queue.shuffled.slice(currentIndex + 1),
-                                                    ...shuffledIds,
-                                                ]),
+                                                ...adjustedShuffled.slice(
+                                                    0,
+                                                    currentShuffledIndex + 1,
+                                                ),
+                                                ...shuffledNewIndexes,
+                                                ...adjustedShuffled.slice(currentShuffledIndex + 1),
                                             ];
                                         }
                                     });
@@ -311,8 +448,13 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         setTimestampStore(0);
                                         state.queue.default = newUniqueIds;
 
-                                        if (state.player.shuffle === PlayerShuffle.TRACK) {
-                                            state.queue.shuffled = shuffleInPlace(newUniqueIds);
+                                        if (
+                                            state.player.shuffle === PlayerShuffle.TRACK &&
+                                            state.player.queueType !== PlayerQueueType.PRIORITY
+                                        ) {
+                                            state.queue.shuffled = generateShuffledIndexes(
+                                                newUniqueIds.length,
+                                            );
                                         }
                                     });
 
@@ -334,8 +476,12 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         setTimestampStore(0);
                                         state.queue.default = shuffledIds;
 
-                                        // Always maintain shuffled array when using Play.SHUFFLE
-                                        state.queue.shuffled = shuffleInPlace([...shuffledIds]);
+                                        // Always maintain shuffled array when using Play.SHUFFLE (only if not in priority mode)
+                                        if (state.player.queueType !== PlayerQueueType.PRIORITY) {
+                                            state.queue.shuffled = generateShuffledIndexes(
+                                                shuffledIds.length,
+                                            );
+                                        }
                                     });
 
                                     break;
@@ -352,15 +498,29 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                             state.queue.songs[item._uniqueId] = item;
                                         });
 
+                                        const oldCombinedLength =
+                                            state.queue.priority.length +
+                                            state.queue.default.length;
                                         state.queue.priority = [
                                             ...state.queue.priority,
                                             ...newUniqueIds,
                                         ];
 
-                                        state.queue.shuffled = [
-                                            ...state.queue.shuffled,
-                                            ...newUniqueIds,
-                                        ];
+                                        if (state.player.shuffle === PlayerShuffle.TRACK) {
+                                            // New items will be at indexes starting from oldCombinedLength
+                                            const newIndexes = Array.from(
+                                                { length: newUniqueIds.length },
+                                                (_, i) => oldCombinedLength + i,
+                                            );
+                                            // Shuffle the new indexes and add to the end of shuffled array
+                                            const shuffledNewIndexes = shuffleInPlace([
+                                                ...newIndexes,
+                                            ]);
+                                            state.queue.shuffled = [
+                                                ...state.queue.shuffled,
+                                                ...shuffledNewIndexes,
+                                            ];
+                                        }
                                     });
                                     break;
                                 }
@@ -379,53 +539,53 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                             ...shuffledIds,
                                         ];
 
-                                        state.queue.shuffled = [
-                                            ...state.queue.shuffled,
-                                            ...shuffledIds,
-                                        ];
+                                        // Shuffle is disabled in priority mode - no shuffled indexes needed
                                     });
                                     break;
                                 }
                                 case Play.NEXT: {
                                     set((state) => {
-                                        const currentIndex = state.player.index;
-                                        const isInPriority =
-                                            currentIndex < state.queue.priority.length;
+                                        const currentShuffledIndex = state.player.index;
 
                                         // Add new songs to songs object
                                         newItems.forEach((item) => {
                                             state.queue.songs[item._uniqueId] = item;
                                         });
 
+                                        const insertPosition =
+                                            state.player.shuffle === PlayerShuffle.TRACK
+                                                ? state.queue.shuffled[currentShuffledIndex] + 1
+                                                : currentShuffledIndex + 1;
+
+                                        const isInPriority =
+                                            insertPosition < state.queue.priority.length;
+
                                         if (isInPriority) {
                                             state.queue.priority = [
-                                                ...state.queue.priority.slice(0, currentIndex + 1),
+                                                ...state.queue.priority.slice(0, insertPosition),
                                                 ...newUniqueIds,
-                                                ...state.queue.priority.slice(currentIndex + 1),
+                                                ...state.queue.priority.slice(insertPosition),
                                             ];
                                         } else {
-                                            state.queue.priority = [
-                                                ...state.queue.priority,
+                                            const defaultInsertPosition =
+                                                insertPosition - state.queue.priority.length;
+                                            state.queue.default = [
+                                                ...state.queue.default.slice(
+                                                    0,
+                                                    defaultInsertPosition,
+                                                ),
                                                 ...newUniqueIds,
+                                                ...state.queue.default.slice(defaultInsertPosition),
                                             ];
                                         }
 
-                                        state.queue.shuffled = [
-                                            ...state.queue.shuffled.slice(0, currentIndex),
-                                            state.queue.shuffled[currentIndex],
-                                            ...shuffleInPlace([
-                                                ...state.queue.shuffled.slice(currentIndex + 1),
-                                                ...newUniqueIds,
-                                            ]),
-                                        ];
+                                        // Shuffle is disabled in priority mode - no shuffled indexes needed
                                     });
                                     break;
                                 }
                                 case Play.NEXT_SHUFFLE: {
                                     set((state) => {
-                                        const currentIndex = state.player.index;
-                                        const isInPriority =
-                                            currentIndex < state.queue.priority.length;
+                                        const currentShuffledIndex = state.player.index;
 
                                         // Add new songs to songs object
                                         newItems.forEach((item) => {
@@ -435,27 +595,61 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         // Shuffle the new items before inserting
                                         const shuffledIds = shuffleInPlace([...newUniqueIds]);
 
+                                        // Calculate insert position in combined queue (priority mode uses direct indexing)
+                                        const insertPosition = currentShuffledIndex + 1;
+
+                                        const isInPriority =
+                                            insertPosition < state.queue.priority.length;
+
                                         if (isInPriority) {
                                             state.queue.priority = [
-                                                ...state.queue.priority.slice(0, currentIndex + 1),
+                                                ...state.queue.priority.slice(0, insertPosition),
                                                 ...shuffledIds,
-                                                ...state.queue.priority.slice(currentIndex + 1),
+                                                ...state.queue.priority.slice(insertPosition),
                                             ];
                                         } else {
-                                            state.queue.priority = [
-                                                ...state.queue.priority,
+                                            const defaultInsertPosition =
+                                                insertPosition - state.queue.priority.length;
+                                            state.queue.default = [
+                                                ...state.queue.default.slice(
+                                                    0,
+                                                    defaultInsertPosition,
+                                                ),
                                                 ...shuffledIds,
+                                                ...state.queue.default.slice(defaultInsertPosition),
                                             ];
                                         }
 
-                                        state.queue.shuffled = [
-                                            ...state.queue.shuffled.slice(0, currentIndex),
-                                            state.queue.shuffled[currentIndex],
-                                            ...shuffleInPlace([
-                                                ...state.queue.shuffled.slice(currentIndex + 1),
-                                                ...shuffledIds,
-                                            ]),
-                                        ];
+                                        if (state.player.shuffle === PlayerShuffle.TRACK) {
+                                            // Adjust existing indexes that are >= insertPosition
+                                            const adjustedShuffled = state.queue.shuffled.map(
+                                                (idx) => {
+                                                    if (idx >= insertPosition) {
+                                                        return idx + shuffledIds.length;
+                                                    }
+                                                    return idx;
+                                                },
+                                            );
+
+                                            // New items will be at indexes starting from insertPosition
+                                            const newIndexes = Array.from(
+                                                { length: shuffledIds.length },
+                                                (_, i) => insertPosition + i,
+                                            );
+
+                                            // Shuffle the new indexes and add directly after current shuffled index
+                                            const shuffledNewIndexes = shuffleInPlace([
+                                                ...newIndexes,
+                                            ]);
+                                            state.queue.shuffled = [
+                                                ...adjustedShuffled.slice(
+                                                    0,
+                                                    currentShuffledIndex + 1,
+                                                ),
+                                                ...shuffledNewIndexes,
+                                                ...adjustedShuffled.slice(currentShuffledIndex + 1),
+                                            ];
+                                        }
                                     });
                                     break;
                                 }
@@ -525,7 +719,11 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         }
 
                                         if (state.player.shuffle === PlayerShuffle.TRACK) {
-                                            state.queue.shuffled = shuffleInPlace(newUniqueIds);
+                                            const combinedLength =
+                                                state.queue.priority.length +
+                                                state.queue.default.length;
+                                            state.queue.shuffled =
+                                                generateShuffledIndexes(combinedLength);
                                         }
                                     });
                                     break;
@@ -552,7 +750,9 @@ export const usePlayerStoreBase = create<PlayerState>()(
                                         state.queue.default = shuffledIds.slice(1);
 
                                         // Always maintain shuffled array when using Play.SHUFFLE
-                                        state.queue.shuffled = shuffleInPlace([...shuffledIds]);
+                                        state.queue.shuffled = generateShuffledIndexes(
+                                            shuffledIds.length,
+                                        );
                                     });
                                     break;
                                 }
@@ -637,16 +837,54 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             );
 
                             if (state.player.shuffle === PlayerShuffle.TRACK) {
-                                const currentIndex = state.player.index;
-
-                                state.queue.shuffled = [
-                                    ...state.queue.shuffled.slice(0, currentIndex),
-                                    state.queue.shuffled[currentIndex],
-                                    ...shuffleInPlace([
-                                        ...state.queue.shuffled.slice(currentIndex + 1),
-                                        ...newUniqueIds,
-                                    ]),
+                                const currentShuffledIndex = state.player.index;
+                                const combinedQueue = [
+                                    ...state.queue.priority,
+                                    ...state.queue.default,
                                 ];
+
+                                // Find insert position in combined queue
+                                let insertPosition: number;
+                                if (priorityIndex !== -1) {
+                                    insertPosition = Math.max(
+                                        0,
+                                        edge === 'top' ? priorityIndex : priorityIndex + 1,
+                                    );
+                                } else {
+                                    const defaultIndex = state.queue.default.findIndex(
+                                        (id) => id === uniqueId,
+                                    );
+                                    if (defaultIndex !== -1) {
+                                        insertPosition =
+                                            state.queue.priority.length +
+                                            Math.max(
+                                                0,
+                                                edge === 'top' ? defaultIndex : defaultIndex + 1,
+                                            );
+                                    } else {
+                                        insertPosition = combinedQueue.length;
+                                    }
+                                }
+
+                                // Adjust existing indexes that are >= insertPosition
+                                const adjustedShuffled = state.queue.shuffled.map((idx) => {
+                                    if (idx >= insertPosition) {
+                                        return idx + newUniqueIds.length;
+                                    }
+                                    return idx;
+                                });
+
+                                // New items will be at indexes starting from insertPosition
+                                const newIndexes = Array.from(
+                                    { length: newUniqueIds.length },
+                                    (_, i) => insertPosition + i,
+                                );
+
+                                state.queue.shuffled = addIndexesToShuffled(
+                                    adjustedShuffled,
+                                    currentShuffledIndex,
+                                    newIndexes,
+                                );
                             }
                         }
                     });
@@ -664,6 +902,16 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     set((state) => {
                         const uniqueIds = new Set(items.map((item) => item._uniqueId));
 
+                        // Build a map of uniqueId to index in combined queue before removal
+                        const combinedQueue = [...state.queue.priority, ...state.queue.default];
+                        const indexesToRemove = new Set<number>();
+
+                        combinedQueue.forEach((id, index) => {
+                            if (uniqueIds.has(id)) {
+                                indexesToRemove.add(index);
+                            }
+                        });
+
                         state.queue.default = state.queue.default.filter(
                             (id) => !uniqueIds.has(id),
                         );
@@ -672,9 +920,24 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             (id) => !uniqueIds.has(id),
                         );
 
-                        state.queue.shuffled = state.queue.shuffled.filter(
-                            (id) => !uniqueIds.has(id),
-                        );
+                        if (isShuffleEnabled(state)) {
+                            // Remove indexes from shuffled array and adjust remaining indexes
+                            const newShuffled = state.queue.shuffled
+                                .filter((idx) => !indexesToRemove.has(idx))
+                                .map((idx) => {
+                                    // Count how many removed indexes are before this index
+                                    let adjustment = 0;
+                                    for (const removedIdx of indexesToRemove) {
+                                        if (removedIdx < idx) {
+                                            adjustment++;
+                                        }
+                                    }
+                                    return idx - adjustment;
+                                });
+                            state.queue.shuffled = newShuffled;
+                        } else {
+                            state.queue.shuffled = [];
+                        }
 
                         cleanupOrphanedSongs(state);
 
@@ -689,8 +952,16 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     });
                 },
                 getCurrentSong: () => {
-                    const queue = get().getQueue();
-                    return queue.items[get().player.index];
+                    const state = get();
+                    const queue = state.getQueue();
+                    let index = state.player.index;
+
+                    // If shuffle is enabled and not in priority mode, map shuffled position to actual queue position
+                    if (isShuffleEnabled(state)) {
+                        index = mapShuffledToQueueIndex(index, state.queue.shuffled);
+                    }
+
+                    return queue.items[index];
                 },
                 getQueue: (groupBy?: QueueGroupingProperty) => {
                     const queue = get().getQueueOrder();
@@ -753,12 +1024,15 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             if (song) defaultQueue.push(song);
                         }
 
+                        const combinedQueue = [...priorityQueue, ...defaultQueue];
+
+                        // Always return original order (shuffle only affects playback, not display)
                         return {
                             groups: [
                                 { count: priorityQueue.length, name: 'Priority' },
                                 { count: defaultQueue.length, name: 'Default' },
                             ],
-                            items: [...priorityQueue, ...defaultQueue],
+                            items: combinedQueue,
                         };
                     }
 
@@ -770,6 +1044,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         if (song) defaultQueue.push(song);
                     }
 
+                    // Always return original order (shuffle only affects playback, not display)
                     return {
                         groups: [{ count: defaultQueue.length, name: 'All' }],
                         items: defaultQueue,
@@ -834,9 +1109,10 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     };
                 },
                 mediaNext: () => {
-                    const currentIndex = get().player.index;
-                    const player = get().player;
-                    const queue = get().getQueueOrder();
+                    const state = get();
+                    const currentIndex = state.player.index;
+                    const player = state.player;
+                    const queue = state.getQueueOrder();
                     const isLastTrack = currentIndex === queue.items.length - 1;
 
                     let nextIndex: number;
@@ -849,6 +1125,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         nextIndex = currentIndex;
                     } else {
                         // Otherwise, advance to next track (including repeat ONE for manual navigation)
+                        // When shuffle is enabled, currentIndex is already the position in the shuffled array
                         nextIndex = Math.min(queue.items.length - 1, currentIndex + 1);
                     }
 
@@ -868,10 +1145,28 @@ export const usePlayerStoreBase = create<PlayerState>()(
                         if (id) {
                             const queue = state.getQueue();
 
-                            const index = queue.items.findIndex((item) => item._uniqueId === id);
+                            // Find the song in the original queue
+                            const queueIndex = queue.items.findIndex(
+                                (item) => item._uniqueId === id,
+                            );
 
-                            if (index !== -1) {
-                                state.player.index = index;
+                            if (queueIndex !== -1) {
+                                if (
+                                    state.player.shuffle === PlayerShuffle.TRACK &&
+                                    state.queue.shuffled.length > 0
+                                ) {
+                                    // Find the shuffled position for this queue index
+                                    const shuffledPosition = state.queue.shuffled.findIndex(
+                                        (idx) => idx === queueIndex,
+                                    );
+                                    if (shuffledPosition !== -1) {
+                                        state.player.index = shuffledPosition;
+                                    } else {
+                                        state.player.index = queueIndex;
+                                    }
+                                } else {
+                                    state.player.index = queueIndex;
+                                }
                                 setTimestampStore(0);
                             }
                         }
@@ -888,7 +1183,18 @@ export const usePlayerStoreBase = create<PlayerState>()(
                             return;
                         }
 
-                        state.player.index = index;
+                        // index is the position in the original queue
+                        if (isShuffleEnabled(state)) {
+                            // Find the shuffled position for this queue index
+                            const shuffledPosition = findShuffledPositionForQueueIndex(
+                                index,
+                                state.queue.shuffled,
+                            );
+                            state.player.index =
+                                shuffledPosition !== undefined ? shuffledPosition : index;
+                        } else {
+                            state.player.index = index;
+                        }
                         setTimestampStore(0);
 
                         state.player.status = PlayerStatus.PLAYING;
@@ -1320,9 +1626,52 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 setShuffle: (shuffle: PlayerShuffle) => {
                     set((state) => {
+                        const wasShuffled = state.player.shuffle === PlayerShuffle.TRACK;
+                        const willBeShuffled = shuffle === PlayerShuffle.TRACK;
+                        const currentIndex = state.player.index;
+                        const isPriorityMode = state.player.queueType === PlayerQueueType.PRIORITY;
+
                         state.player.shuffle = shuffle;
-                        const queue = state.queue.default;
-                        state.queue.shuffled = shuffleInPlace([...queue]);
+
+                        // Shuffle is disabled in priority mode
+                        if (isPriorityMode) {
+                            state.queue.shuffled = [];
+                            cleanupOrphanedSongs(state);
+                            return;
+                        }
+
+                        if (willBeShuffled) {
+                            const combinedLength = getCombinedQueueLength(
+                                state.queue.priority,
+                                state.queue.default,
+                            );
+                            state.queue.shuffled = generateShuffledIndexes(combinedLength);
+
+                            // Convert current index to shuffled position if there's a current song
+                            if (currentIndex >= 0 && currentIndex < combinedLength) {
+                                // Find the shuffled position that corresponds to the current queue position
+                                const shuffledPosition = findShuffledPositionForQueueIndex(
+                                    currentIndex,
+                                    state.queue.shuffled,
+                                );
+                                if (shuffledPosition !== undefined) {
+                                    state.player.index = shuffledPosition;
+                                }
+                            }
+                        } else {
+                            // When disabling shuffle, convert shuffled position back to queue position
+                            if (
+                                wasShuffled &&
+                                currentIndex >= 0 &&
+                                currentIndex < state.queue.shuffled.length
+                            ) {
+                                const queuePosition = state.queue.shuffled[currentIndex];
+                                if (queuePosition !== undefined) {
+                                    state.player.index = queuePosition;
+                                }
+                            }
+                            state.queue.shuffled = [];
+                        }
                         cleanupOrphanedSongs(state);
                     });
                 },
@@ -1344,48 +1693,83 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 shuffle: () => {
                     set((state) => {
-                        const queue = state.queue.default;
-                        state.queue.shuffled = shuffleInPlace([...queue]);
+                        if (state.player.shuffle === PlayerShuffle.TRACK) {
+                            const combinedLength =
+                                state.queue.priority.length + state.queue.default.length;
+                            state.queue.shuffled = generateShuffledIndexes(combinedLength);
+                        }
                     });
                 },
                 shuffleAll: () => {
                     set((state) => {
-                        const queue = state.queue.default;
+                        const queue = state.getQueue();
                         const currentIndex = state.player.index;
+                        const currentSong = queue.items[currentIndex];
 
                         // If there's a current song playing, keep it in place
-                        if (currentIndex >= 0 && currentIndex < queue.length) {
-                            const currentSong = queue[currentIndex];
-                            const beforeCurrent = queue.slice(0, currentIndex);
-                            const afterCurrent = queue.slice(currentIndex + 1);
+                        if (currentSong && currentIndex >= 0 && currentIndex < queue.items.length) {
+                            const currentUniqueId = currentSong._uniqueId;
+                            const currentQueueIndex = state.queue.default.findIndex(
+                                (id) => id === currentUniqueId,
+                            );
 
-                            const shuffledBefore = shuffleInPlace([...beforeCurrent]);
-                            const shuffledAfter = shuffleInPlace([...afterCurrent]);
+                            if (currentQueueIndex !== -1) {
+                                const beforeItems = state.queue.default.slice(0, currentQueueIndex);
+                                const afterItems = state.queue.default.slice(currentQueueIndex + 1);
 
-                            state.queue.default = [
-                                ...shuffledBefore,
-                                currentSong,
-                                ...shuffledAfter,
-                            ];
+                                const shuffledBefore = shuffleInPlace([...beforeItems]);
+                                const shuffledAfter = shuffleInPlace([...afterItems]);
+
+                                state.queue.default = [
+                                    ...shuffledBefore,
+                                    currentUniqueId,
+                                    ...shuffledAfter,
+                                ];
+                            } else {
+                                // Current song not in default queue, just shuffle everything
+                                state.queue.default = shuffleInPlace([...state.queue.default]);
+                            }
                         } else {
-                            state.queue.default = shuffleInPlace([...queue]);
+                            // No current song, shuffle everything
+                            state.queue.default = shuffleInPlace([...state.queue.default]);
                         }
+
+                        // Regenerate shuffled indexes if shuffle is enabled
+                        regenerateShuffledIndexesIfNeeded(state);
                     });
                 },
                 shuffleSelected: (items: QueueSong[]) => {
                     set((state) => {
                         const itemUniqueIds = items.map((item) => item._uniqueId);
-                        const indices = itemUniqueIds.map((id) =>
-                            state.queue.default.findIndex((i) => i === id),
+
+                        // Find positions of selected items in the default queue
+                        const selectedPositions = itemUniqueIds
+                            .map((id) => state.queue.default.findIndex((i) => i === id))
+                            .filter((idx) => idx !== -1)
+                            .sort((a, b) => a - b); // Sort to maintain order
+
+                        if (selectedPositions.length === 0) {
+                            return;
+                        }
+
+                        // Get the selected items in their current order
+                        const selectedItems = selectedPositions.map(
+                            (pos) => state.queue.default[pos],
                         );
 
-                        const shuffledIds = shuffleInPlace([...itemUniqueIds]);
+                        // Shuffle the selected items
+                        const shuffledItems = shuffleInPlace([...selectedItems]);
 
-                        indices.forEach((i, index) => {
-                            if (i !== -1) {
-                                state.queue.default[i] = shuffledIds[index];
-                            }
+                        // Rebuild the default queue with shuffled selected items
+                        const newDefaultQueue = [...state.queue.default];
+                        selectedPositions.forEach((pos, i) => {
+                            newDefaultQueue[pos] = shuffledItems[i];
                         });
+
+                        state.queue.default = newDefaultQueue;
+
+                        // Regenerate shuffled indexes if shuffle is enabled
+                        regenerateShuffledIndexesIfNeeded(state);
                     });
                 },
                 toggleRepeat: () => {
@@ -1401,10 +1785,57 @@ export const usePlayerStoreBase = create<PlayerState>()(
                 },
                 toggleShuffle: () => {
                     set((state) => {
+                        const wasShuffled = state.player.shuffle === PlayerShuffle.TRACK;
+                        const willBeShuffled = state.player.shuffle !== PlayerShuffle.TRACK;
+                        const currentIndex = state.player.index;
+
                         state.player.shuffle =
                             state.player.shuffle === PlayerShuffle.NONE
                                 ? PlayerShuffle.TRACK
                                 : PlayerShuffle.NONE;
+
+                        if (willBeShuffled) {
+                            // Enabling shuffle: create shuffled indexes with current track as first
+                            const combinedLength =
+                                state.queue.priority.length + state.queue.default.length;
+
+                            if (
+                                combinedLength > 0 &&
+                                currentIndex >= 0 &&
+                                currentIndex < combinedLength
+                            ) {
+                                // Get the current queue position (actual index in combined queue)
+                                const currentQueuePosition = currentIndex;
+
+                                // Create shuffled indexes with current track first
+                                const remainingIndexes = Array.from(
+                                    { length: combinedLength },
+                                    (_, i) => i,
+                                ).filter((idx) => idx !== currentQueuePosition);
+                                const shuffledRemaining = shuffleInPlace([...remainingIndexes]);
+
+                                state.queue.shuffled = [currentQueuePosition, ...shuffledRemaining];
+
+                                // Set player index to 0 since current track is now first in shuffled array
+                                state.player.index = 0;
+                            } else {
+                                // No current track, just generate shuffled indexes normally
+                                state.queue.shuffled = generateShuffledIndexes(combinedLength);
+                            }
+                        } else {
+                            // Disabling shuffle: clear shuffled indexes and convert index back
+                            if (
+                                wasShuffled &&
+                                currentIndex >= 0 &&
+                                currentIndex < state.queue.shuffled.length
+                            ) {
+                                const queuePosition = state.queue.shuffled[currentIndex];
+                                if (queuePosition !== undefined) {
+                                    state.player.index = queuePosition;
+                                }
+                            }
+                            state.queue.shuffled = [];
+                        }
                     });
                 },
             })),
@@ -1461,7 +1892,7 @@ export const usePlayerStoreBase = create<PlayerState>()(
                     const allQueueIds = new Set([
                         ...(filteredState.queue.default || []),
                         ...(filteredState.queue.priority || []),
-                        ...(filteredState.queue.shuffled || []),
+                        // shuffled now contains indexes, not uniqueIds, so we don't include it here
                     ]);
 
                     const songs = filteredState.queue.songs || {};
@@ -1694,7 +2125,15 @@ export const usePlayerProperties = () => {
 export const usePlayerDuration = () => {
     return usePlayerStoreBase((state) => {
         const queue = state.getQueue();
-        const index = state.player.index;
+        let index = state.player.index;
+
+        // If shuffle is enabled, map shuffled position to actual queue position
+        if (state.player.shuffle === PlayerShuffle.TRACK && state.queue.shuffled.length > 0) {
+            if (index >= 0 && index < state.queue.shuffled.length) {
+                index = state.queue.shuffled[index];
+            }
+        }
+
         const currentTrack = queue.items[index];
         return currentTrack?.duration;
     });
@@ -1705,15 +2144,37 @@ export const usePlayerData = (): PlayerData => {
         useShallow((state) => {
             const queue = state.getQueue();
             const index = state.player.index;
-            const currentSong = queue.items[index];
-            const previousSong = queue.items[index - 1];
+
+            // If shuffle is enabled and not in priority mode, map shuffled position to actual queue position for display
+            let queueIndex = index;
+            if (isShuffleEnabled(state)) {
+                queueIndex = mapShuffledToQueueIndex(index, state.queue.shuffled);
+            }
+
+            const currentSong = queue.items[queueIndex];
+            const previousSong = queueIndex > 0 ? queue.items[queueIndex - 1] : undefined;
             const repeat = state.player.repeat;
 
-            const nextSong = calculateNextSong(index, queue.items, repeat);
+            // For nextSong calculation, we need to consider the shuffled order (only if not in priority mode)
+            let nextSong: QueueSong | undefined;
+            if (isShuffleEnabled(state)) {
+                // Calculate next in shuffled order
+                const nextShuffledIndex = index + 1;
+                if (nextShuffledIndex < state.queue.shuffled.length) {
+                    const nextQueueIndex = state.queue.shuffled[nextShuffledIndex];
+                    nextSong = queue.items[nextQueueIndex];
+                } else if (repeat === PlayerRepeat.ALL) {
+                    // Wrap to first in shuffled order
+                    const firstQueueIndex = state.queue.shuffled[0];
+                    nextSong = queue.items[firstQueueIndex];
+                }
+            } else {
+                nextSong = calculateNextSong(queueIndex, queue.items, repeat);
+            }
 
             return {
                 currentSong,
-                index,
+                index: queueIndex, // Return the actual queue position for display
                 muted: state.player.muted,
                 nextSong,
                 num: state.player.playerNum,
@@ -1784,7 +2245,15 @@ export const usePlayerSpeed = () => {
 export const usePlayerSong = () => {
     return usePlayerStoreBase((state) => {
         const queue = state.getQueue();
-        const index = state.player.index;
+        let index = state.player.index;
+
+        // If shuffle is enabled, map shuffled position to actual queue position
+        if (state.player.shuffle === PlayerShuffle.TRACK && state.queue.shuffled.length > 0) {
+            if (index >= 0 && index < state.queue.shuffled.length) {
+                index = state.queue.shuffled[index];
+            }
+        }
+
         return queue.items[index];
     });
 };
@@ -1836,7 +2305,7 @@ function cleanupOrphanedSongs(state: any): boolean {
     const allQueueIds = new Set([
         ...state.queue.default,
         ...state.queue.priority,
-        ...state.queue.shuffled,
+        // shuffled now contains indexes, not uniqueIds, so we don't include it here
     ]);
 
     const songs = state.queue.songs;
