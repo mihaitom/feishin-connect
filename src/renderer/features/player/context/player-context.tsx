@@ -13,6 +13,8 @@ import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-
 import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { AddToQueueType, usePlayerActions } from '/@/renderer/store';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
+import { logMsg } from '/@/renderer/utils/logger-message';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
 import { ConfirmModal } from '/@/shared/components/modal/modal';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -205,8 +207,19 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         (data: Song[], type: AddToQueueType) => {
             if (typeof type === 'object' && 'edge' in type && type.edge !== null) {
                 const edge = type.edge === 'top' ? 'top' : 'bottom';
+
+                logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByData, {
+                    category: LogCategory.PLAYER,
+                    meta: { data: data.length, edge, type, uniqueId: type.uniqueId },
+                });
+
                 storeActions.addToQueueByUniqueId(data, type.uniqueId, edge);
             } else {
+                logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByType, {
+                    category: LogCategory.PLAYER,
+                    meta: { data: data.length, type },
+                });
+
                 storeActions.addToQueueByType(data, type as Play);
             }
         },
@@ -253,6 +266,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             };
 
             try {
+                logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByFetch, {
+                    category: LogCategory.PLAYER,
+                    meta: { ids: id, itemType, serverId, type },
+                });
+
                 const songs = await queryClient.fetchQuery({
                     gcTime: 0,
                     queryFn: () => {
@@ -303,6 +321,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         async (serverId: string, query: any, itemType: LibraryItem, type: AddToQueueType) => {
             let toastId: null | string = null;
             let fetchId: null | string = null;
+
+            logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByListQuery, {
+                category: LogCategory.PLAYER,
+                meta: { itemType, query, serverId, type },
+            });
 
             try {
                 // Get total count first
@@ -372,6 +395,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                                 postProcess: 'sentenceCase',
                             }),
                             onClose: () => {
+                                logFn.debug(logMsg[LogCategory.PLAYER].cancelledFetch, {
+                                    category: LogCategory.PLAYER,
+                                    meta: { itemType, serverId },
+                                });
+
                                 queryClient.cancelQueries({
                                     exact: false,
                                     queryKey: getRootQueryKey(itemType, serverId),
@@ -451,11 +479,20 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const clearQueue = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].clearQueue, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.clearQueue();
     }, [storeActions]);
 
     const clearSelected = useCallback(
         (items: QueueSong[]) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].clearSelected, {
+                category: LogCategory.PLAYER,
+                meta: { items },
+            });
+
             storeActions.clearSelected(items);
         },
         [storeActions],
@@ -463,6 +500,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const decreaseVolume = useCallback(
         (amount: number) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].decreaseVolume, {
+                category: LogCategory.PLAYER,
+                meta: { amount },
+            });
+
             storeActions.decreaseVolume(amount);
         },
         [storeActions],
@@ -470,21 +512,39 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const increaseVolume = useCallback(
         (amount: number) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].increaseVolume, {
+                category: LogCategory.PLAYER,
+                meta: { amount },
+            });
+
             storeActions.increaseVolume(amount);
         },
         [storeActions],
     );
 
     const mediaNext = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].mediaNext, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.mediaNext();
     }, [storeActions]);
 
     const mediaPause = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].mediaPause, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.mediaPause();
     }, [storeActions]);
 
     const mediaPlay = useCallback(
         (id?: string) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].mediaPlay, {
+                category: LogCategory.PLAYER,
+                meta: { id },
+            });
+
             storeActions.mediaPlay(id);
         },
         [storeActions],
@@ -492,51 +552,95 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const mediaPlayByIndex = useCallback(
         (index: number) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].mediaPlayByIndex, {
+                category: LogCategory.PLAYER,
+                meta: { index },
+            });
+
             storeActions.mediaPlayByIndex(index);
         },
         [storeActions],
     );
 
     const mediaPrevious = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].mediaPrevious, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.mediaPrevious();
     }, [storeActions]);
 
     const mediaStop = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].mediaStop, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.mediaStop();
     }, [storeActions]);
 
     const mediaSeekToTimestamp = useCallback(
         (timestamp: number) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].mediaSeekToTimestamp, {
+                category: LogCategory.PLAYER,
+                meta: { timestamp },
+            });
+
             storeActions.mediaSeekToTimestamp(timestamp);
         },
         [storeActions],
     );
 
     const mediaSkipBackward = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].mediaSkipBackward, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.mediaSkipBackward();
     }, [storeActions]);
 
     const mediaSkipForward = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].mediaSkipForward, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.mediaSkipForward();
     }, [storeActions]);
 
     const setSpeed = useCallback(
         (speed: number) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].setSpeed, {
+                category: LogCategory.PLAYER,
+                meta: { speed },
+            });
+
             storeActions.setSpeed(speed);
         },
         [storeActions],
     );
 
     const mediaToggleMute = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].mediaToggleMute, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.mediaToggleMute();
     }, [storeActions]);
 
     const mediaTogglePlayPause = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].mediaTogglePlayPause, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.mediaTogglePlayPause();
     }, [storeActions]);
 
     const moveSelectedTo = useCallback(
         (items: QueueSong[], edge: 'bottom' | 'top', uniqueId: string) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].moveSelectedTo, {
+                category: LogCategory.PLAYER,
+                meta: { edge, items, uniqueId },
+            });
+
             storeActions.moveSelectedTo(items, uniqueId, edge);
         },
         [storeActions],
@@ -544,6 +648,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const moveSelectedToBottom = useCallback(
         (items: QueueSong[]) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].moveSelectedToBottom, {
+                category: LogCategory.PLAYER,
+                meta: { items },
+            });
+
             storeActions.moveSelectedToBottom(items);
         },
         [storeActions],
@@ -551,6 +660,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const moveSelectedToNext = useCallback(
         (items: QueueSong[]) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].moveSelectedToNext, {
+                category: LogCategory.PLAYER,
+                meta: { items },
+            });
+
             storeActions.moveSelectedToNext(items);
         },
         [storeActions],
@@ -558,6 +672,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const moveSelectedToTop = useCallback(
         (items: QueueSong[]) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].moveSelectedToTop, {
+                category: LogCategory.PLAYER,
+                meta: { items },
+            });
+
             storeActions.moveSelectedToTop(items);
         },
         [storeActions],
@@ -565,6 +684,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setVolume = useCallback(
         (volume: number) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].setVolume, {
+                category: LogCategory.PLAYER,
+                meta: { volume },
+            });
+
             storeActions.setVolume(volume);
         },
         [storeActions],
@@ -572,6 +696,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setRepeat = useCallback(
         (repeat: PlayerRepeat) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].setRepeat, {
+                category: LogCategory.PLAYER,
+                meta: { repeat },
+            });
+
             storeActions.setRepeat(repeat);
         },
         [storeActions],
@@ -579,31 +708,57 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setShuffle = useCallback(
         (shuffle: PlayerShuffle) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].setShuffle, {
+                category: LogCategory.PLAYER,
+                meta: { shuffle },
+            });
+
             storeActions.setShuffle(shuffle);
         },
         [storeActions],
     );
 
     const shuffle = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].shuffle, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.shuffle();
     }, [storeActions]);
 
     const shuffleAll = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].shuffleAll, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.shuffleAll();
     }, [storeActions]);
 
     const shuffleSelected = useCallback(
         (items: QueueSong[]) => {
+            logFn.debug(logMsg[LogCategory.PLAYER].shuffleSelected, {
+                category: LogCategory.PLAYER,
+                meta: { items },
+            });
+
             storeActions.shuffleSelected(items);
         },
         [storeActions],
     );
 
     const toggleRepeat = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].toggleRepeat, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.toggleRepeat();
     }, [storeActions]);
 
     const toggleShuffle = useCallback(() => {
+        logFn.debug(logMsg[LogCategory.PLAYER].toggleShuffle, {
+            category: LogCategory.PLAYER,
+        });
+
         storeActions.toggleShuffle();
     }, [storeActions]);
 
