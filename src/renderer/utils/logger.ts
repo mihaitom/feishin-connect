@@ -33,9 +33,9 @@ const DEFAULT_LOG_LEVEL = process.env.NODE_ENV === 'production' ? 'info' : 'debu
 const NO_OP: LogFn = (_message?: string, ..._optionalParams: any[]) => {};
 
 const colors = {
-    debug: '\x1B[38;2;54;96;146m', // #366092
-    error: '\x1B[38;2;240;0;0m', // #f00000
-    info: '\x1B[38;2;0;125;60m', // #007d3c
+    debug: '\x1B[38;2;100;149;237m', // #6495ED
+    error: '\x1B[38;2;255;100;100m', // #ff6464
+    info: '\x1B[38;2;76;175;80m', // #4caf50
     warn: '\x1B[38;2;225;125;50m', // #e17d32
 };
 
