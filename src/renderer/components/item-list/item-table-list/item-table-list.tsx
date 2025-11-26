@@ -29,6 +29,7 @@ import {
     ItemListStateActions,
     ItemListStateItemWithRequiredProperties,
     useItemListState,
+    useItemListStateSubscription,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { parseTableColumns } from '/@/renderer/components/item-list/helpers/parse-table-columns';
 import { useStickyTableGroupRows } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-table-group-rows';
@@ -1583,8 +1584,6 @@ const BaseItemTableList = ({
 
     const internalState = useItemListState(getDataFn, extractRowId);
 
-    const hasExpanded = internalState.hasExpanded();
-
     // Helper function to get ItemListStateItemWithRequiredProperties (rowId is separate, not part of item)
     const getStateItem = useCallback(
         (item: any): ItemListStateItemWithRequiredProperties | null => {
@@ -2169,17 +2168,33 @@ const BaseItemTableList = ({
                 totalColumnCount={totalColumnCount}
                 totalRowCount={totalRowCount}
             />
-            <AnimatePresence initial={false}>
-                {hasExpanded && (
-                    <ExpandedListContainer>
-                        <ExpandedListItem internalState={internalState} itemType={itemType} />
-                    </ExpandedListContainer>
-                )}
-            </AnimatePresence>
+            <ExpandedContainer internalState={internalState} itemType={itemType} />
         </motion.div>
     );
 };
 
 export const ItemTableList = memo(BaseItemTableList);
+
+const ExpandedContainer = ({
+    internalState,
+    itemType,
+}: {
+    internalState: ItemListStateActions;
+    itemType: LibraryItem;
+}) => {
+    const hasExpanded = useItemListStateSubscription(internalState, (state) =>
+        state ? state.expanded.size > 0 : false,
+    );
+
+    return (
+        <AnimatePresence initial={false}>
+            {hasExpanded && (
+                <ExpandedListContainer>
+                    <ExpandedListItem internalState={internalState} itemType={itemType} />
+                </ExpandedListContainer>
+            )}
+        </AnimatePresence>
+    );
+};
 
 ItemTableList.displayName = 'ItemTableList';

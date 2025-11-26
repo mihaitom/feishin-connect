@@ -39,6 +39,7 @@ import {
     ItemListStateActions,
     ItemListStateItemWithRequiredProperties,
     useItemListState,
+    useItemListStateSubscription,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { ItemControls, ItemListHandle } from '/@/renderer/components/item-list/types';
 import { animationProps } from '/@/shared/components/animations/animation-props';
@@ -319,8 +320,6 @@ const BaseItemGridList = ({
             },
         },
     });
-
-    const hasExpanded = internalState.hasExpanded();
 
     const tableMetaRef = useRef<null | {
         columnCount: number;
@@ -691,13 +690,7 @@ const BaseItemGridList = ({
                     />
                 )}
             </AutoSizer>
-            <AnimatePresence>
-                {hasExpanded && (
-                    <ExpandedListContainer>
-                        <ExpandedListItem internalState={internalState} itemType={itemType} />
-                    </ExpandedListContainer>
-                )}
-            </AnimatePresence>
+            <ExpandedContainer internalState={internalState} itemType={itemType} />
         </motion.div>
     );
 };
@@ -754,3 +747,25 @@ const ListComponent = memo((props: ListChildComponentProps<GridItemProps>) => {
 export const ItemGridList = memo(BaseItemGridList);
 
 ItemGridList.displayName = 'ItemGridList';
+
+const ExpandedContainer = ({
+    internalState,
+    itemType,
+}: {
+    internalState: ItemListStateActions;
+    itemType: LibraryItem;
+}) => {
+    const hasExpanded = useItemListStateSubscription(internalState, (state) =>
+        state ? state.expanded.size > 0 : false,
+    );
+
+    return (
+        <AnimatePresence initial={false}>
+            {hasExpanded && (
+                <ExpandedListContainer>
+                    <ExpandedListItem internalState={internalState} itemType={itemType} />
+                </ExpandedListContainer>
+            )}
+        </AnimatePresence>
+    );
+};

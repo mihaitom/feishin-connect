@@ -5,6 +5,7 @@ import styles from './expanded-list-item.module.css';
 import {
     ItemListStateActions,
     ItemListStateItem,
+    useItemListStateSubscription,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { ExpandedAlbumListItem } from '/@/renderer/features/albums/components/expanded-album-list-item';
 import { Spinner } from '/@/shared/components/spinner/spinner';
@@ -16,7 +17,9 @@ interface ExpandedListItemProps {
 }
 
 export const ExpandedListItem = ({ internalState, itemType }: ExpandedListItemProps) => {
-    const expandedItems = internalState.getExpanded();
+    const expandedItems = useItemListStateSubscription(internalState, () =>
+        internalState ? internalState.getExpandedItemsCached() : [],
+    );
     const currentItem = expandedItems[0];
 
     if (!currentItem) {

@@ -9,7 +9,11 @@ import styles from './item-card.module.css';
 import { ItemCardControls } from '/@/renderer/components/item-card/item-card-controls';
 import { getDraggedItems } from '/@/renderer/components/item-list/helpers/get-dragged-items';
 import { getTitlePath } from '/@/renderer/components/item-list/helpers/get-title-path';
-import { ItemListStateActions } from '/@/renderer/components/item-list/helpers/item-list-state';
+import {
+    ItemListStateActions,
+    useItemDraggingState,
+    useItemSelectionState,
+} from '/@/renderer/components/item-list/helpers/item-list-state';
 import { ItemControls } from '/@/renderer/components/item-list/types';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -141,10 +145,11 @@ const CompactItemCard = ({
     withControls,
 }: ItemCardDerivativeProps) => {
     const [showControls, setShowControls] = useState(false);
-    const isSelected =
+    const itemRowId =
         data && internalState && typeof data === 'object' && 'id' in data
-            ? internalState.isSelected(internalState.extractRowId(data) || '')
-            : false;
+            ? internalState.extractRowId(data)
+            : undefined;
+    const isSelected = useItemSelectionState(internalState, itemRowId || undefined);
 
     const handleClick = useDoubleClick({
         onDoubleClick: (e: React.MouseEvent<HTMLDivElement>) => {
@@ -345,10 +350,11 @@ const DefaultItemCard = ({
     withControls,
 }: ItemCardDerivativeProps) => {
     const [showControls, setShowControls] = useState(false);
-    const isSelected =
+    const itemRowId =
         data && internalState && typeof data === 'object' && 'id' in data
-            ? internalState.isSelected(internalState.extractRowId(data) || '')
-            : false;
+            ? internalState.extractRowId(data)
+            : undefined;
+    const isSelected = useItemSelectionState(internalState, itemRowId || undefined);
 
     const handleClick = useDoubleClick({
         onDoubleClick: (e: React.MouseEvent<HTMLDivElement>) => {
@@ -549,10 +555,11 @@ const PosterItemCard = ({
     withControls,
 }: ItemCardDerivativeProps) => {
     const [showControls, setShowControls] = useState(false);
-    const isSelected =
+    const itemRowId =
         data && internalState && typeof data === 'object' && 'id' in data
-            ? internalState.isSelected(internalState.extractRowId(data) || '')
-            : false;
+            ? internalState.extractRowId(data)
+            : undefined;
+    const isSelected = useItemSelectionState(internalState, itemRowId || undefined);
 
     const { isDragging: isDraggingLocal, ref } = useDragDrop<HTMLDivElement>({
         drag: {
@@ -597,7 +604,9 @@ const PosterItemCard = ({
         isEnabled: !!enableDrag && !!data,
     });
 
-    const isDragging = data && internalState ? internalState.isDragging(data.id) : isDraggingLocal;
+    const itemId = data && internalState ? data.id : undefined;
+    const isDraggingState = useItemDraggingState(internalState, itemId);
+    const isDragging = isDraggingState || isDraggingLocal;
 
     const handleClick = useDoubleClick({
         onDoubleClick: (e: React.MouseEvent<HTMLDivElement>) => {

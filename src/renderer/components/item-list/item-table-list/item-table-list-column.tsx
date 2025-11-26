@@ -17,6 +17,10 @@ import styles from './item-table-list-column.module.css';
 
 import i18n from '/@/i18n/i18n';
 import { getDraggedItems } from '/@/renderer/components/item-list/helpers/get-dragged-items';
+import {
+    useItemDraggingState,
+    useItemSelectionState,
+} from '/@/renderer/components/item-list/helpers/item-list-state';
 import { ActionsColumn } from '/@/renderer/components/item-list/item-table-list/columns/actions-column';
 import { AlbumArtistsColumn } from '/@/renderer/components/item-list/item-table-list/columns/album-artists-column';
 import { AlbumColumn } from '/@/renderer/components/item-list/item-table-list/columns/album-column';
@@ -294,10 +298,16 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
         isEnabled: shouldEnableDrag,
     });
 
-    const isDragging =
+    const itemRowId =
         item && typeof item === 'object' && 'id' in item && props.internalState
-            ? props.internalState.isDragging((item as any).id)
-            : isDraggingLocal;
+            ? props.internalState.extractRowId(item)
+            : undefined;
+    const isDraggingState = useItemDraggingState(
+        props.internalState,
+        itemRowId ||
+            (item && typeof item === 'object' && 'id' in item ? (item as any).id : undefined),
+    );
+    const isDragging = props.internalState ? isDraggingState : isDraggingLocal;
 
     const controls = props.controls;
 
@@ -452,10 +462,11 @@ export const TableColumnTextContainer = (
     const isDataRow = props.enableHeader ? props.rowIndex > 0 : true;
     const dataIndex = props.enableHeader ? props.rowIndex - 1 : props.rowIndex;
     const item = isDataRow ? props.data[props.rowIndex] : null;
-    const isSelected =
+    const itemRowId =
         item && typeof item === 'object' && 'id' in item
-            ? props.internalState.isSelected(props.internalState.extractRowId(item) || '')
-            : false;
+            ? props.internalState.extractRowId(item)
+            : undefined;
+    const isSelected = useItemSelectionState(props.internalState, itemRowId || undefined);
 
     const isDragging = props.isDragging ?? false;
     const mergedRef = useMergedRef(containerRef, props.dragRef ?? null);
@@ -664,10 +675,11 @@ export const TableColumnContainer = (
     const isDataRow = props.enableHeader ? props.rowIndex > 0 : true;
     const dataIndex = props.enableHeader ? props.rowIndex - 1 : props.rowIndex;
     const item = isDataRow ? props.data[props.rowIndex] : null;
-    const isSelected =
+    const itemRowId =
         item && typeof item === 'object' && 'id' in item
-            ? props.internalState.isSelected(props.internalState.extractRowId(item) || '')
-            : false;
+            ? props.internalState.extractRowId(item)
+            : undefined;
+    const isSelected = useItemSelectionState(props.internalState, itemRowId || undefined);
 
     const isDragging = props.isDragging ?? false;
     const mergedRef = useMergedRef(containerRef, props.dragRef ?? null);

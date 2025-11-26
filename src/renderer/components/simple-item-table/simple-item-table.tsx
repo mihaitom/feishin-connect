@@ -1,11 +1,15 @@
 import clsx from 'clsx';
-import { useId, useMemo } from 'react';
+import { memo, useId, useMemo } from 'react';
 
 import styles from './simple-item-table.module.css';
 
 import { createExtractRowId } from '/@/renderer/components/item-list/helpers/extract-row-id';
 import { useDefaultItemListControls } from '/@/renderer/components/item-list/helpers/item-list-controls';
-import { useItemListState } from '/@/renderer/components/item-list/helpers/item-list-state';
+import {
+    ItemListStateActions,
+    useItemListState,
+    useItemSelectionState,
+} from '/@/renderer/components/item-list/helpers/item-list-state';
 import { parseTableColumns } from '/@/renderer/components/item-list/helpers/parse-table-columns';
 import { TableItemProps } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
@@ -176,68 +180,115 @@ export const SimpleItemTable = ({
                     </Table.Thead>
                 )}
                 <Table.Tbody>
-                    {data.map((item, rowIndex) => {
-                        const adjustedRowIndex = enableHeader ? rowIndex + 1 : rowIndex;
-                        const isSelected =
-                            item && typeof item === 'object' && 'id' in item
-                                ? internalState.isSelected(internalState.extractRowId(item) || '')
-                                : false;
-
-                        const isLastRow = rowIndex === data.length - 1;
-
-                        return (
-                            <Table.Tr
-                                className={clsx({
-                                    [styles.alternateRowEven]:
-                                        enableAlternateRowColors && rowIndex % 2 === 0,
-                                    [styles.alternateRowOdd]:
-                                        enableAlternateRowColors && rowIndex % 2 === 1,
-                                    [styles.rowHover]: enableRowHoverHighlight,
-                                    [styles.rowSelected]: isSelected,
-                                    [styles.withHorizontalBorder]:
-                                        enableHorizontalBorders && enableHeader && !isLastRow,
-                                })}
-                                data-row-index={`${tableId}-${adjustedRowIndex}`}
-                                key={internalState.extractRowId(item) || rowIndex}
-                            >
-                                {parsedColumns.map((column, columnIndex) => {
-                                    const isLastColumn = columnIndex === parsedColumns.length - 1;
-
-                                    return (
-                                        <Table.Td
-                                            className={clsx({
-                                                [styles.withVerticalBorder]:
-                                                    enableVerticalBorders && !isLastColumn,
-                                            })}
-                                            key={column.id}
-                                            style={{
-                                                textAlign:
-                                                    column.align === 'start'
-                                                        ? 'left'
-                                                        : column.align === 'end'
-                                                          ? 'right'
-                                                          : 'center',
-                                                width: column.width,
-                                            }}
-                                        >
-                                            <ItemTableListColumn
-                                                {...tableItemProps}
-                                                ariaAttributes={{
-                                                    'aria-colindex': columnIndex + 1,
-                                                    role: 'gridcell',
-                                                }}
-                                                columnIndex={columnIndex}
-                                                rowIndex={adjustedRowIndex}
-                                                style={{ width: column.width }}
-                                            />
-                                        </Table.Td>
-                                    );
-                                })}
-                            </Table.Tr>
-                        );
-                    })}
+                    {data.map((item, rowIndex) => (
+                        <SimpleItemTableRow
+                            adjustedRowIndex={enableHeader ? rowIndex + 1 : rowIndex}
+                            enableAlternateRowColors={enableAlternateRowColors}
+                            enableHeader={enableHeader}
+                            enableHorizontalBorders={enableHorizontalBorders}
+                            enableRowHoverHighlight={enableRowHoverHighlight}
+                            enableVerticalBorders={enableVerticalBorders}
+                            internalState={internalState}
+                            isLastRow={rowIndex === data.length - 1}
+                            item={item}
+                            key={internalState.extractRowId(item) || rowIndex}
+                            parsedColumns={parsedColumns}
+                            rowIndex={rowIndex}
+                            tableId={tableId}
+                            tableItemProps={tableItemProps}
+                        />
+                    ))}
                 </Table.Tbody>
             </Table>
         </div>
     );
 };
+
+interface SimpleItemTableRowProps {
+    adjustedRowIndex: number;
+    enableAlternateRowColors: boolean;
+    enableHeader: boolean;
+    enableHorizontalBorders: boolean;
+    enableRowHoverHighlight: boolean;
+    enableVerticalBorders: boolean;
+    internalState: ItemListStateActions;
+    isLastRow: boolean;
+    item: unknown;
+    parsedColumns: ReturnType<typeof parseTableColumns>;
+    rowIndex: number;
+    tableId: string;
+    tableItemProps: TableItemProps;
+}
+
+const SimpleItemTableRow = memo(
+    ({
+        adjustedRowIndex,
+        enableAlternateRowColors,
+        enableHeader,
+        enableHorizontalBorders,
+        enableRowHoverHighlight,
+        enableVerticalBorders,
+        internalState,
+        isLastRow,
+        item,
+        parsedColumns,
+        rowIndex,
+        tableId,
+        tableItemProps,
+    }: SimpleItemTableRowProps) => {
+        const itemRowId =
+            item && typeof item === 'object' && 'id' in item
+                ? internalState.extractRowId(item)
+                : undefined;
+        const isSelected = useItemSelectionState(internalState, itemRowId || undefined);
+
+        return (
+            <Table.Tr
+                className={clsx({
+                    [styles.alternateRowEven]: enableAlternateRowColors && rowIndex % 2 === 0,
+                    [styles.alternateRowOdd]: enableAlternateRowColors && rowIndex % 2 === 1,
+                    [styles.rowHover]: enableRowHoverHighlight,
+                    [styles.rowSelected]: isSelected,
+                    [styles.withHorizontalBorder]:
+                        enableHorizontalBorders && enableHeader && !isLastRow,
+                })}
+                data-row-index={`${tableId}-${adjustedRowIndex}`}
+            >
+                {parsedColumns.map((column, columnIndex) => {
+                    const isLastColumn = columnIndex === parsedColumns.length - 1;
+
+                    return (
+                        <Table.Td
+                            className={clsx({
+                                [styles.withVerticalBorder]: enableVerticalBorders && !isLastColumn,
+                            })}
+                            key={column.id}
+                            style={{
+                                textAlign:
+                                    column.align === 'start'
+                                        ? 'left'
+                                        : column.align === 'end'
+                                          ? 'right'
+                                          : 'center',
+                                width: column.width,
+                            }}
+                        >
+                            <ItemTableListColumn
+                                {...tableItemProps}
+                                ariaAttributes={{
+                                    'aria-colindex': columnIndex + 1,
+                                    role: 'gridcell',
+                                }}
+                                columnIndex={columnIndex}
+                                rowIndex={adjustedRowIndex}
+                                style={{ width: column.width }}
+                            />
+                        </Table.Td>
+                    );
+                })}
+            </Table.Tr>
+        );
+    },
+);
+
+SimpleItemTableRow.displayName = 'SimpleItemTableRow';

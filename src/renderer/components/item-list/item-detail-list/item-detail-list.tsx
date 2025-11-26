@@ -18,7 +18,10 @@ import styles from './item-detail-list.module.css';
 
 import { ItemDetail } from '/@/renderer/components/item-detail/item-detail';
 import { ExpandedListItem } from '/@/renderer/components/item-list/expanded-list-item';
-import { useItemListState } from '/@/renderer/components/item-list/helpers/item-list-state';
+import {
+    useItemListState,
+    useItemListStateSubscription,
+} from '/@/renderer/components/item-list/helpers/item-list-state';
 import { useElementSize } from '/@/shared/hooks/use-element-size';
 import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
 import { LibraryItem } from '/@/shared/types/domain-types';
@@ -118,15 +121,17 @@ export const ItemDetailList = ({
         }
     }, [itemDetailRef, initialize]);
 
-    const hasExpanded = internalState.hasExpanded();
+    const hasExpanded = useItemListStateSubscription(internalState, (state) =>
+        state ? state.expanded.size > 0 : false,
+    );
 
     const handleExpand = useCallback(
         (_e: MouseEvent<HTMLDivElement>, item: unknown, itemType: LibraryItem) => {
             if (item && typeof item === 'object' && 'id' in item && 'serverId' in item) {
                 internalState.toggleExpanded({
+                    _itemType: itemType,
                     _serverId: item.serverId as string,
                     id: item.id as string,
-                    itemType: itemType,
                 });
             }
         },
