@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styles from './library-header-bar.module.css';
 
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { PlayButton } from '/@/renderer/features/shared/components/play-button';
+import { DefaultPlayButton } from '/@/renderer/features/shared/components/play-button';
 import { PlayButtonGroup } from '/@/renderer/features/shared/components/play-button-group';
 import { useCurrentServerId } from '/@/renderer/store';
 import { Badge, BadgeProps } from '/@/shared/components/badge/badge';
@@ -75,7 +75,7 @@ const HeaderPlayButton = ({
 
     return (
         <div className={styles.playButtonContainer}>
-            <PlayButton
+            <DefaultPlayButton
                 className={className}
                 onClick={openPlayTypeModal}
                 variant={variant}

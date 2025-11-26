@@ -12,7 +12,7 @@ import { AnimatedPage } from '/@/renderer/features/shared/components/animated-pa
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { LibraryHeader } from '/@/renderer/features/shared/components/library-header';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
-import { PlayButton } from '/@/renderer/features/shared/components/play-button';
+import { DefaultPlayButton } from '/@/renderer/features/shared/components/play-button';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { useContainerQuery, useFastAverageColor } from '/@/renderer/hooks';
@@ -165,7 +165,7 @@ const DummyAlbumDetailRoute = () => {
                     <section>
                         <Group gap="sm" justify="space-between">
                             <Group>
-                                <PlayButton onClick={() => handlePlay()} />
+                                <DefaultPlayButton onClick={() => handlePlay()} />
                                 <ActionIcon
                                     icon="favorite"
                                     iconProps={{

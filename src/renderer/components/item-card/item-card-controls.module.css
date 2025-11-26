@@ -45,44 +45,7 @@
     margin-bottom: var(--theme-spacing-lg);
 }
 
-.play-button {
-    all: unset;
-    position: absolute;
-    top: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #fff;
-    border: none;
-    border-radius: 100%;
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(1);
-    transition: opacity 0.1s ease-in-out;
-    transition: transform 0.1s ease-in-out;
-
-    &:hover {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
-    }
-
-    &:active {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-
-    svg {
-        stroke: rgb(0 0 0);
-    }
-}
-
-.play-button.disabled,
-.play-button.loading {
-    cursor: not-allowed;
-    opacity: 0.5;
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.play-button.primary {
+.primary {
     left: 50%;
     width: 25%;
     height: 25%;
@@ -92,36 +55,16 @@
     }
 }
 
-.play-button.secondary {
+.secondary {
     width: 15%;
     height: 15%;
 }
 
-.play-button.left {
+.left {
     left: 25%;
 }
 
-.play-button.right {
-    left: 75%;
-}
-
-.play-button.left-top {
-    top: 40%;
-    left: 25%;
-}
-
-.play-button.left-bottom {
-    top: 60%;
-    left: 25%;
-}
-
-.play-button.right-bottom {
-    top: 60%;
-    left: 75%;
-}
-
-.play-button.right-top {
-    top: 40%;
+.right {
     left: 75%;
 }
 
@@ -130,7 +73,7 @@
     position: absolute;
     padding: var(--theme-spacing-md);
     border-radius: var(--theme-radius-md);
-    opacity: 0.8;
+    opacity: 1;
     transition: opacity 0.2s ease-in-out;
     transition: scale 0.2s linear;
 

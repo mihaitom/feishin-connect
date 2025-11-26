@@ -3,7 +3,9 @@ import { useCallback, useRef } from 'react';
 interface UseLongPressOptions<T extends HTMLElement = HTMLElement> {
     delay?: number;
     onClick?: (event: React.MouseEvent<T> | React.TouchEvent<T>) => void;
+    onFinish?: (event: null | React.MouseEvent<T> | React.TouchEvent<T>) => void;
     onLongPress?: (event: React.MouseEvent<T> | React.TouchEvent<T>) => void;
+    onStart?: (event: React.MouseEvent<T> | React.TouchEvent<T>) => void;
 }
 
 interface UseLongPressReturn {
@@ -18,7 +20,9 @@ interface UseLongPressReturn {
 export const useLongPress = <T extends HTMLElement = HTMLElement>({
     delay = 500,
     onClick,
+    onFinish,
     onLongPress,
+    onStart,
 }: UseLongPressOptions<T>): UseLongPressReturn => {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const targetRef = useRef<EventTarget | null>(null);
@@ -31,6 +35,8 @@ export const useLongPress = <T extends HTMLElement = HTMLElement>({
             targetRef.current = event.target;
             eventRef.current = event;
 
+            onStart?.(event);
+
             timeoutRef.current = setTimeout(() => {
                 longPressTriggeredRef.current = true;
                 if (eventRef.current) {
@@ -38,7 +44,7 @@ export const useLongPress = <T extends HTMLElement = HTMLElement>({
                 }
             }, delay);
         },
-        [onLongPress, delay],
+        [onLongPress, onStart, delay],
     );
 
     const clear = useCallback(() => {
@@ -57,19 +63,23 @@ export const useLongPress = <T extends HTMLElement = HTMLElement>({
     );
 
     const handleMouseUp = useCallback(() => {
+        const event = eventRef.current;
         clear();
-        if (!longPressTriggeredRef.current && onClick && eventRef.current) {
-            onClick(eventRef.current);
+        if (!longPressTriggeredRef.current && onClick && event) {
+            onClick(event);
         }
+        onFinish?.(event || null);
         longPressTriggeredRef.current = false;
         eventRef.current = null;
-    }, [clear, onClick]);
+    }, [clear, onClick, onFinish]);
 
     const handleMouseLeave = useCallback(() => {
+        const event = eventRef.current;
         clear();
+        onFinish?.(event || null);
         longPressTriggeredRef.current = false;
         eventRef.current = null;
-    }, [clear]);
+    }, [clear, onFinish]);
 
     const handleTouchStart = useCallback(
         (event: React.TouchEvent) => {
@@ -79,19 +89,23 @@ export const useLongPress = <T extends HTMLElement = HTMLElement>({
     );
 
     const handleTouchEnd = useCallback(() => {
+        const event = eventRef.current;
         clear();
-        if (!longPressTriggeredRef.current && onClick && eventRef.current) {
-            onClick(eventRef.current);
+        if (!longPressTriggeredRef.current && onClick && event) {
+            onClick(event);
         }
+        onFinish?.(event || null);
         longPressTriggeredRef.current = false;
         eventRef.current = null;
-    }, [clear, onClick]);
+    }, [clear, onClick, onFinish]);
 
     const handleTouchCancel = useCallback(() => {
+        const event = eventRef.current;
         clear();
+        onFinish?.(event || null);
         longPressTriggeredRef.current = false;
         eventRef.current = null;
-    }, [clear]);
+    }, [clear, onFinish]);
 
     return {
         onMouseDown: handleMouseDown,

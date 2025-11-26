@@ -1,21 +1,27 @@
 import clsx from 'clsx';
 import { t } from 'i18next';
+import { memo } from 'react';
 
 import styles from './play-button.module.css';
 
+import { usePlayButtonClick } from '/@/renderer/features/shared/hooks/use-play-button-click';
 import { ActionIcon, ActionIconProps } from '/@/shared/components/action-icon/action-icon';
 import { Button, ButtonProps } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
-import { Icon } from '/@/shared/components/icon/icon';
+import { AppIcon, Icon } from '/@/shared/components/icon/icon';
 
-export interface PlayButtonProps extends ActionIconProps {
+export interface DefaultPlayButtonProps extends ActionIconProps {
     size?: number | string;
 }
 
-export const PlayButton = ({ className, variant = 'filled', ...props }: PlayButtonProps) => {
+export const DefaultPlayButton = ({
+    className,
+    variant = 'filled',
+    ...props
+}: DefaultPlayButtonProps) => {
     return (
         <ActionIcon
-            className={clsx(styles.button, className, {
+            className={clsx(styles.textButton, className, {
                 [styles.unthemed]: variant !== 'filled',
             })}
             icon="mediaPlay"
@@ -28,21 +34,21 @@ export const PlayButton = ({ className, variant = 'filled', ...props }: PlayButt
     );
 };
 
-interface WidePlayButtonProps extends ButtonProps {}
+interface TextPlayButtonProps extends ButtonProps {}
 
-export const WidePlayButton = ({
+export const PlayTextButton = ({
     className,
     variant = 'default',
     ...props
-}: WidePlayButtonProps) => {
+}: TextPlayButtonProps) => {
     return (
         <Button
-            className={clsx(styles.wideButton, className, {
+            className={clsx(styles.wideTextButton, className, {
                 [styles.unthemed]: variant !== 'filled',
             })}
             classNames={{
-                label: styles.wideButtonLabel,
-                root: styles.wideButton,
+                label: styles.wideTextButtonLabel,
+                root: styles.wideTextButton,
             }}
             variant="subtle"
             {...props}
@@ -57,13 +63,43 @@ export const WidePlayButton = ({
     );
 };
 
-export const WideShuffleButton = ({ ...props }: WidePlayButtonProps) => {
+export const WideShuffleButton = ({ ...props }: TextPlayButtonProps) => {
     return (
-        <WidePlayButton {...props}>
+        <PlayTextButton {...props}>
             <Group gap="sm" wrap="nowrap">
                 <Icon fill="default" icon="mediaShuffle" size="lg" />
                 {t('action.shuffle', { postProcess: 'sentenceCase' })}
             </Group>
-        </WidePlayButton>
+        </PlayTextButton>
     );
 };
+
+interface PlayButtonProps {
+    classNames?: string;
+    icon?: keyof typeof AppIcon;
+    loading?: boolean;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    onLongPress?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+export const PlayButton = memo(
+    ({ classNames, icon = 'mediaPlay', loading, onClick, onLongPress }: PlayButtonProps) => {
+        const clickHandlers = usePlayButtonClick({
+            loading,
+            onClick,
+            onLongPress,
+        });
+
+        return (
+            <button
+                className={clsx(styles.playButton, classNames)}
+                {...clickHandlers.handlers}
+                {...clickHandlers.props}
+            >
+                <Icon icon={icon} size="lg" />
+            </button>
+        );
+    },
+);
+
+PlayButton.displayName = 'PlayButton';

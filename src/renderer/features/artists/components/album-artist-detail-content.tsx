@@ -10,7 +10,7 @@ import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistGridCarousel } from '/@/renderer/features/artists/components/album-artist-grid-carousel';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { PlayButton } from '/@/renderer/features/shared/components/play-button';
+import { DefaultPlayButton } from '/@/renderer/features/shared/components/play-button';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -227,7 +227,7 @@ export const AlbumArtistDetailContent = () => {
         <div className={styles.contentContainer} ref={ref}>
             <div className={styles.detailContainer}>
                 <Group gap="md">
-                    <PlayButton
+                    <DefaultPlayButton
                         disabled={albumCount === 0}
                         onClick={() => handlePlay(playButtonBehavior)}
                     />

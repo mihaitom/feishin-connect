@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 import styles from './library-header.module.css';
 
 import {
-    WidePlayButton,
+    PlayTextButton,
     WideShuffleButton,
 } from '/@/renderer/features/shared/components/play-button';
 import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
@@ -190,7 +190,7 @@ export const LibraryHeaderMenu = ({
     return (
         <div className={styles.libraryHeaderMenu}>
             <Group wrap="nowrap">
-                {onPlay && <WidePlayButton onClick={onPlay} />}
+                {onPlay && <PlayTextButton onClick={onPlay} />}
                 {onShuffle && <WideShuffleButton onClick={onShuffle} />}
             </Group>
             <Group gap="sm" wrap="nowrap">
