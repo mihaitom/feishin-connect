@@ -43,6 +43,7 @@ export const useFastAverageColor = (args: {
 }) => {
     const { algorithm, default: defaultColor, id, src, srcLoaded } = args;
     const idRef = useRef<string | undefined>(id);
+    const processingSrcRef = useRef<null | string | undefined>(null);
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -59,12 +60,23 @@ export const useFastAverageColor = (args: {
     useEffect(() => {
         let isMounted = true;
         let fac: FastAverageColor | null = null;
+        let timeoutId: NodeJS.Timeout | null = null;
+
+        // Reset loading state when src changes or srcLoaded becomes false
+        if (!src || !srcLoaded) {
+            setIsLoading(false);
+            processingSrcRef.current = null;
+        }
 
         if (src && srcLoaded) {
+            processingSrcRef.current = src;
             setIsLoading(true);
 
-            setTimeout(() => {
-                if (!isMounted) return;
+            timeoutId = setTimeout(() => {
+                // Check if src has changed since we started processing
+                if (!isMounted || processingSrcRef.current !== src) {
+                    return;
+                }
 
                 fac = new FastAverageColor();
                 fac.getColorAsync(src, {
@@ -73,7 +85,8 @@ export const useFastAverageColor = (args: {
                     mode: 'speed',
                 })
                     .then((color) => {
-                        if (isMounted) {
+                        // Only update if this is still the current src being processed
+                        if (isMounted && processingSrcRef.current === src) {
                             idRef.current = id;
                             setBackground({
                                 background: color.rgb,
@@ -81,6 +94,7 @@ export const useFastAverageColor = (args: {
                                 isLight: color.isLight,
                             });
                             setIsLoading(false);
+                            processingSrcRef.current = null;
                         }
                         if (fac) {
                             fac.destroy();
@@ -88,7 +102,8 @@ export const useFastAverageColor = (args: {
                         }
                     })
                     .catch((e) => {
-                        if (isMounted) {
+                        // Only update if this is still the current src being processed
+                        if (isMounted && processingSrcRef.current === src) {
                             console.error('Error fetching average color', e);
                             idRef.current = id;
                             setBackground({
@@ -97,6 +112,7 @@ export const useFastAverageColor = (args: {
                                 isLight: false,
                             });
                             setIsLoading(false);
+                            processingSrcRef.current = null;
                         }
                         if (fac) {
                             fac.destroy();
@@ -112,11 +128,18 @@ export const useFastAverageColor = (args: {
                     isDark: true,
                     isLight: false,
                 });
+                setIsLoading(false);
+                processingSrcRef.current = null;
             }
         }
 
         return () => {
             isMounted = false;
+            processingSrcRef.current = null;
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
             if (fac) {
                 fac.destroy();
                 fac = null;

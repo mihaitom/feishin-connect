@@ -2,13 +2,14 @@ import clsx from 'clsx';
 import { motion } from 'motion/react';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router';
+import { shallow } from 'zustand/shallow';
 
 import styles from './main-content.module.css';
 
 import { FullScreenOverlay } from '/@/renderer/layouts/default-layout/full-screen-overlay';
 import { LeftSidebar } from '/@/renderer/layouts/default-layout/left-sidebar';
 import { RightSidebar } from '/@/renderer/layouts/default-layout/right-sidebar';
-import { useAppStoreActions, useSidebarStore } from '/@/renderer/store';
+import { useAppStore, useAppStoreActions } from '/@/renderer/store';
 import { useGeneralSettings } from '/@/renderer/store/settings.store';
 import { constrainRightSidebarWidth, constrainSidebarWidth } from '/@/renderer/utils';
 import { Spinner } from '/@/shared/components/spinner/spinner';
@@ -16,7 +17,15 @@ import { Spinner } from '/@/shared/components/spinner/spinner';
 const MINIMUM_SIDEBAR_WIDTH = 260;
 
 export const MainContent = ({ shell }: { shell?: boolean }) => {
-    const { collapsed, leftWidth, rightExpanded, rightWidth } = useSidebarStore();
+    const { collapsed, leftWidth, rightExpanded, rightWidth } = useAppStore(
+        (state) => ({
+            collapsed: state.sidebar.collapsed,
+            leftWidth: state.sidebar.leftWidth,
+            rightExpanded: state.sidebar.rightExpanded,
+            rightWidth: state.sidebar.rightWidth,
+        }),
+        shallow,
+    );
     const { setSideBar } = useAppStoreActions();
     const { sideQueueType } = useGeneralSettings();
     const [isResizing, setIsResizing] = useState(false);

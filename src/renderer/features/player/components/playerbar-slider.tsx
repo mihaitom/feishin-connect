@@ -27,7 +27,7 @@ export const PlayerbarSlider = () => {
     const formattedTimeRemaining = formatDuration((currentTime - songDuration) * 1000 || 0);
     const formattedTime = formatDuration(currentTime * 1000 || 0);
 
-    const { showTimeRemaining } = useAppStore();
+    const showTimeRemaining = useAppStore((state) => state.showTimeRemaining);
     const { setShowTimeRemaining } = useAppStoreActions();
 
     useRemote();

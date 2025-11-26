@@ -18,167 +18,233 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
 export const CenterControls = () => {
-    const { t } = useTranslation();
-    const queryClient = useQueryClient();
-    const currentSong = usePlayerSong();
     const skip = useSettingsStore((state) => state.general.skipButtons);
-    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
-    const status = usePlayerStatus();
-    const repeat = usePlayerRepeat();
-    const shuffle = usePlayerShuffle();
-
-    const {
-        mediaNext,
-        mediaPrevious,
-        mediaSkipBackward,
-        mediaSkipForward,
-        mediaStop,
-        mediaTogglePlayPause,
-        toggleRepeat,
-        toggleShuffle,
-    } = usePlayer();
 
     return (
         <>
             <div className={styles.controlsContainer}>
                 <div className={styles.buttonsContainer}>
-                    <PlayerButton
-                        icon={<Icon fill="default" icon="mediaStop" size={buttonSize - 2} />}
-                        onClick={mediaStop}
-                        tooltip={{
-                            label: t('player.stop', { postProcess: 'sentenceCase' }),
-                            openDelay: 0,
-                        }}
-                        variant="tertiary"
-                    />
-                    <PlayerButton
-                        icon={
-                            <Icon
-                                fill={shuffle === PlayerShuffle.NONE ? 'default' : 'primary'}
-                                icon="mediaShuffle"
-                                size={buttonSize}
-                            />
-                        }
-                        isActive={shuffle !== PlayerShuffle.NONE}
-                        onClick={toggleShuffle}
-                        tooltip={{
-                            label:
-                                shuffle === PlayerShuffle.NONE
-                                    ? t('player.shuffle', {
-                                          context: 'off',
-                                          postProcess: 'sentenceCase',
-                                      })
-                                    : t('player.shuffle', { postProcess: 'sentenceCase' }),
-                            openDelay: 0,
-                        }}
-                        variant="tertiary"
-                    />
-                    <PlayerButton
-                        icon={<Icon fill="default" icon="mediaPrevious" size={buttonSize} />}
-                        onClick={mediaPrevious}
-                        tooltip={{
-                            label: t('player.previous', { postProcess: 'sentenceCase' }),
-                            openDelay: 0,
-                        }}
-                        variant="secondary"
-                    />
-                    {skip?.enabled && (
-                        <PlayerButton
-                            icon={
-                                <Icon fill="default" icon="mediaStepBackward" size={buttonSize} />
-                            }
-                            onClick={mediaSkipBackward}
-                            tooltip={{
-                                label: t('player.skip', {
-                                    context: 'back',
-                                    postProcess: 'sentenceCase',
-                                }),
-
-                                openDelay: 0,
-                            }}
-                            variant="secondary"
-                        />
-                    )}
-                    <PlayButton
-                        disabled={currentSong?.id === undefined}
-                        isPaused={status === PlayerStatus.PAUSED}
-                        onClick={mediaTogglePlayPause}
-                    />
-                    {skip?.enabled && (
-                        <PlayerButton
-                            icon={<Icon fill="default" icon="mediaStepForward" size={buttonSize} />}
-                            onClick={mediaSkipForward}
-                            tooltip={{
-                                label: t('player.skip', {
-                                    context: 'forward',
-                                    postProcess: 'sentenceCase',
-                                }),
-
-                                openDelay: 0,
-                            }}
-                            variant="secondary"
-                        />
-                    )}
-                    <PlayerButton
-                        icon={<Icon fill="default" icon="mediaNext" size={buttonSize} />}
-                        onClick={mediaNext}
-                        tooltip={{
-                            label: t('player.next', { postProcess: 'sentenceCase' }),
-                            openDelay: 0,
-                        }}
-                        variant="secondary"
-                    />
-                    <PlayerButton
-                        icon={
-                            repeat === PlayerRepeat.ONE ? (
-                                <Icon fill="primary" icon="mediaRepeatOne" size={buttonSize} />
-                            ) : (
-                                <Icon
-                                    fill={repeat === PlayerRepeat.NONE ? 'default' : 'primary'}
-                                    icon="mediaRepeat"
-                                    size={buttonSize}
-                                />
-                            )
-                        }
-                        isActive={repeat !== PlayerRepeat.NONE}
-                        onClick={toggleRepeat}
-                        tooltip={{
-                            label: `${
-                                repeat === PlayerRepeat.NONE
-                                    ? t('player.repeat', {
-                                          context: 'off',
-                                          postProcess: 'sentenceCase',
-                                      })
-                                    : repeat === PlayerRepeat.ALL
-                                      ? t('player.repeat', {
-                                            context: 'all',
-                                            postProcess: 'sentenceCase',
-                                        })
-                                      : t('player.repeat', {
-                                            context: 'one',
-                                            postProcess: 'sentenceCase',
-                                        })
-                            }`,
-                            openDelay: 0,
-                        }}
-                        variant="tertiary"
-                    />
-                    <PlayerButton
-                        icon={<Icon fill="default" icon="mediaRandom" size={buttonSize} />}
-                        onClick={() =>
-                            openShuffleAllModal({
-                                queryClient,
-                            })
-                        }
-                        tooltip={{
-                            label: t('player.playRandom', { postProcess: 'sentenceCase' }),
-                            openDelay: 0,
-                        }}
-                        variant="tertiary"
-                    />
+                    <StopButton />
+                    <ShuffleButton />
+                    <PreviousButton />
+                    {skip?.enabled && <SkipBackwardButton />}
+                    <CenterPlayButton />
+                    {skip?.enabled && <SkipForwardButton />}
+                    <NextButton />
+                    <RepeatButton />
+                    <ShuffleAllButton />
                 </div>
             </div>
             <PlayerbarSlider />
         </>
+    );
+};
+
+const StopButton = () => {
+    const { t } = useTranslation();
+    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
+    const { mediaStop } = usePlayer();
+
+    return (
+        <PlayerButton
+            icon={<Icon fill="default" icon="mediaStop" size={buttonSize - 2} />}
+            onClick={mediaStop}
+            tooltip={{
+                label: t('player.stop', { postProcess: 'sentenceCase' }),
+                openDelay: 0,
+            }}
+            variant="tertiary"
+        />
+    );
+};
+
+const ShuffleButton = () => {
+    const { t } = useTranslation();
+    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
+    const shuffle = usePlayerShuffle();
+    const { toggleShuffle } = usePlayer();
+
+    return (
+        <PlayerButton
+            icon={
+                <Icon
+                    fill={shuffle === PlayerShuffle.NONE ? 'default' : 'primary'}
+                    icon="mediaShuffle"
+                    size={buttonSize}
+                />
+            }
+            isActive={shuffle !== PlayerShuffle.NONE}
+            onClick={toggleShuffle}
+            tooltip={{
+                label:
+                    shuffle === PlayerShuffle.NONE
+                        ? t('player.shuffle', {
+                              context: 'off',
+                              postProcess: 'sentenceCase',
+                          })
+                        : t('player.shuffle', { postProcess: 'sentenceCase' }),
+                openDelay: 0,
+            }}
+            variant="tertiary"
+        />
+    );
+};
+
+const PreviousButton = () => {
+    const { t } = useTranslation();
+    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
+    const { mediaPrevious } = usePlayer();
+
+    return (
+        <PlayerButton
+            icon={<Icon fill="default" icon="mediaPrevious" size={buttonSize} />}
+            onClick={mediaPrevious}
+            tooltip={{
+                label: t('player.previous', { postProcess: 'sentenceCase' }),
+                openDelay: 0,
+            }}
+            variant="secondary"
+        />
+    );
+};
+
+const SkipBackwardButton = () => {
+    const { t } = useTranslation();
+    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
+    const { mediaSkipBackward } = usePlayer();
+
+    return (
+        <PlayerButton
+            icon={<Icon fill="default" icon="mediaStepBackward" size={buttonSize} />}
+            onClick={mediaSkipBackward}
+            tooltip={{
+                label: t('player.skip', {
+                    context: 'back',
+                    postProcess: 'sentenceCase',
+                }),
+                openDelay: 0,
+            }}
+            variant="secondary"
+        />
+    );
+};
+
+const CenterPlayButton = () => {
+    const currentSong = usePlayerSong();
+    const status = usePlayerStatus();
+    const { mediaTogglePlayPause } = usePlayer();
+
+    return (
+        <PlayButton
+            disabled={currentSong?.id === undefined}
+            isPaused={status === PlayerStatus.PAUSED}
+            onClick={mediaTogglePlayPause}
+        />
+    );
+};
+
+const SkipForwardButton = () => {
+    const { t } = useTranslation();
+    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
+    const { mediaSkipForward } = usePlayer();
+
+    return (
+        <PlayerButton
+            icon={<Icon fill="default" icon="mediaStepForward" size={buttonSize} />}
+            onClick={mediaSkipForward}
+            tooltip={{
+                label: t('player.skip', {
+                    context: 'forward',
+                    postProcess: 'sentenceCase',
+                }),
+                openDelay: 0,
+            }}
+            variant="secondary"
+        />
+    );
+};
+
+const NextButton = () => {
+    const { t } = useTranslation();
+    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
+    const { mediaNext } = usePlayer();
+
+    return (
+        <PlayerButton
+            icon={<Icon fill="default" icon="mediaNext" size={buttonSize} />}
+            onClick={mediaNext}
+            tooltip={{
+                label: t('player.next', { postProcess: 'sentenceCase' }),
+                openDelay: 0,
+            }}
+            variant="secondary"
+        />
+    );
+};
+
+const RepeatButton = () => {
+    const { t } = useTranslation();
+    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
+    const repeat = usePlayerRepeat();
+    const { toggleRepeat } = usePlayer();
+
+    return (
+        <PlayerButton
+            icon={
+                repeat === PlayerRepeat.ONE ? (
+                    <Icon fill="primary" icon="mediaRepeatOne" size={buttonSize} />
+                ) : (
+                    <Icon
+                        fill={repeat === PlayerRepeat.NONE ? 'default' : 'primary'}
+                        icon="mediaRepeat"
+                        size={buttonSize}
+                    />
+                )
+            }
+            isActive={repeat !== PlayerRepeat.NONE}
+            onClick={toggleRepeat}
+            tooltip={{
+                label: `${
+                    repeat === PlayerRepeat.NONE
+                        ? t('player.repeat', {
+                              context: 'off',
+                              postProcess: 'sentenceCase',
+                          })
+                        : repeat === PlayerRepeat.ALL
+                          ? t('player.repeat', {
+                                context: 'all',
+                                postProcess: 'sentenceCase',
+                            })
+                          : t('player.repeat', {
+                                context: 'one',
+                                postProcess: 'sentenceCase',
+                            })
+                }`,
+                openDelay: 0,
+            }}
+            variant="tertiary"
+        />
+    );
+};
+
+const ShuffleAllButton = () => {
+    const { t } = useTranslation();
+    const queryClient = useQueryClient();
+    const buttonSize = useSettingsStore((state) => state.general.buttonSize);
+
+    return (
+        <PlayerButton
+            icon={<Icon fill="default" icon="mediaRandom" size={buttonSize} />}
+            onClick={() =>
+                openShuffleAllModal({
+                    queryClient,
+                })
+            }
+            tooltip={{
+                label: t('player.playRandom', { postProcess: 'sentenceCase' }),
+                openDelay: 0,
+            }}
+            variant="tertiary"
+        />
     );
 };

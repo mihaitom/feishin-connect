@@ -15,11 +15,11 @@ import {
     SidebarSharedPlaylistList,
 } from '/@/renderer/features/sidebar/components/sidebar-playlist-list';
 import {
+    useAppStore,
     useAppStoreActions,
     useFullScreenPlayerStore,
     usePlayerSong,
     useSetFullScreenPlayerStore,
-    useSidebarStore,
 } from '/@/renderer/store';
 import {
     SidebarItemType,
@@ -38,10 +38,8 @@ import { Platform } from '/@/shared/types/types';
 
 export const Sidebar = () => {
     const { t } = useTranslation();
-    const sidebar = useSidebarStore();
-    const { setSideBar } = useAppStoreActions();
+
     const { sidebarPlaylistList } = useGeneralSettings();
-    const currentSong = usePlayerSong();
 
     const translatedSidebarItemMap = useMemo(
         () => ({
@@ -58,36 +56,6 @@ export const Sidebar = () => {
         }),
         [t],
     );
-
-    const upsizedImageUrl = currentSong?.imageUrl
-        ?.replace(/size=\d+/, 'size=450')
-        .replace(/width=\d+/, 'width=450')
-        .replace(/height=\d+/, 'height=450');
-
-    const showImage = sidebar.image;
-    const isSongDefined = Boolean(currentSong?.id);
-
-    const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
-    const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
-    const expandFullScreenPlayer = () => {
-        setFullScreenPlayerStore({ expanded: !isFullScreenPlayerExpanded });
-    };
-
-    const handleToggleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!currentSong) {
-            return;
-        }
-
-        if (isSongDefined && !isFullScreenPlayerExpanded) {
-            ContextMenuController.call({
-                cmd: { items: [currentSong!], type: LibraryItem.SONG },
-                event: e,
-            });
-        }
-    };
 
     const { sidebarItems } = useGeneralSettings();
     const { windowBarStyle } = useWindowSettings();
@@ -164,69 +132,110 @@ export const Sidebar = () => {
                 </Accordion>
             </ScrollArea>
             <motion.div className={styles.serverSelectorWrapper} layout>
-                <ServerSelector showImage={showImage} />
+                <ServerSelector />
             </motion.div>
-            <AnimatePresence initial={false} mode="popLayout">
-                {showImage && (
-                    <motion.div
-                        animate={{ opacity: 1, y: 0 }}
-                        className={styles.imageContainer}
-                        exit={{ opacity: 0, y: 200 }}
-                        initial={{ opacity: 0, y: 200 }}
-                        key="sidebar-image"
-                        onClick={expandFullScreenPlayer}
-                        onContextMenu={handleToggleContextMenu}
-                        role="button"
-                        style={
-                            {
-                                '--sidebar-image-height': sidebar.leftWidth,
-                            } as CSSProperties
-                        }
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    >
-                        <Tooltip
-                            label={t('player.toggleFullscreenPlayer', {
-                                postProcess: 'sentenceCase',
-                            })}
-                            openDelay={500}
-                        >
-                            {upsizedImageUrl ? (
-                                <img
-                                    className={styles.sidebarImage}
-                                    loading="eager"
-                                    src={upsizedImageUrl}
-                                />
-                            ) : (
-                                <ImageUnloader />
-                            )}
-                        </Tooltip>
-                        <ActionIcon
-                            icon="arrowDownS"
-                            iconProps={{
-                                size: 'lg',
-                            }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setSideBar({ image: false });
-                            }}
-                            opacity={0.8}
-                            radius="md"
-                            style={{
-                                cursor: 'default',
-                                position: 'absolute',
-                                right: '1rem',
-                                top: '1rem',
-                            }}
-                            tooltip={{
-                                label: t('common.collapse', {
-                                    postProcess: 'titleCase',
-                                }),
-                                openDelay: 500,
-                            }}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <SidebarImage />
         </div>
+    );
+};
+
+const SidebarImage = () => {
+    const { t } = useTranslation();
+    const showImage = useAppStore((state) => state.sidebar.image);
+    const leftWidth = useAppStore((state) => state.sidebar.leftWidth);
+    const { setSideBar } = useAppStoreActions();
+    const currentSong = usePlayerSong();
+
+    const upsizedImageUrl = currentSong?.imageUrl
+        ?.replace(/size=\d+/, 'size=450')
+        .replace(/width=\d+/, 'width=450')
+        .replace(/height=\d+/, 'height=450');
+
+    const isSongDefined = Boolean(currentSong?.id);
+
+    const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
+    const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
+    const expandFullScreenPlayer = () => {
+        setFullScreenPlayerStore({ expanded: !isFullScreenPlayerExpanded });
+    };
+
+    const handleToggleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!currentSong) {
+            return;
+        }
+
+        if (isSongDefined && !isFullScreenPlayerExpanded) {
+            ContextMenuController.call({
+                cmd: { items: [currentSong!], type: LibraryItem.SONG },
+                event: e,
+            });
+        }
+    };
+
+    return (
+        <AnimatePresence initial={false} mode="popLayout">
+            {showImage && (
+                <motion.div
+                    animate={{ opacity: 1, y: 0 }}
+                    className={styles.imageContainer}
+                    exit={{ opacity: 0, y: 200 }}
+                    initial={{ opacity: 0, y: 200 }}
+                    key="sidebar-image"
+                    onClick={expandFullScreenPlayer}
+                    onContextMenu={handleToggleContextMenu}
+                    role="button"
+                    style={
+                        {
+                            '--sidebar-image-height': leftWidth,
+                        } as CSSProperties
+                    }
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                >
+                    <Tooltip
+                        label={t('player.toggleFullscreenPlayer', {
+                            postProcess: 'sentenceCase',
+                        })}
+                        openDelay={500}
+                    >
+                        {upsizedImageUrl ? (
+                            <img
+                                className={styles.sidebarImage}
+                                loading="eager"
+                                src={upsizedImageUrl}
+                            />
+                        ) : (
+                            <ImageUnloader />
+                        )}
+                    </Tooltip>
+                    <ActionIcon
+                        icon="arrowDownS"
+                        iconProps={{
+                            size: 'lg',
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setSideBar({ image: false });
+                        }}
+                        opacity={0.8}
+                        radius="md"
+                        style={{
+                            cursor: 'default',
+                            position: 'absolute',
+                            right: '1rem',
+                            top: '1rem',
+                        }}
+                        tooltip={{
+                            label: t('common.collapse', {
+                                postProcess: 'titleCase',
+                            }),
+                            openDelay: 500,
+                        }}
+                    />
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };

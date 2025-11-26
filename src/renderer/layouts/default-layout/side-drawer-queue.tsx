@@ -6,7 +6,7 @@ import styles from './side-drawer-queue.module.css';
 
 import { DrawerPlayQueue } from '/@/renderer/features/now-playing/components/drawer-play-queue';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useAppStore, useSidebarStore } from '/@/renderer/store';
+import { useAppStore } from '/@/renderer/store';
 import { Icon } from '/@/shared/components/icon/icon';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { useTimeout } from '/@/shared/hooks/use-timeout';
@@ -66,7 +66,7 @@ const queueDrawerButtonVariants: Variants = {
 export const SideDrawerQueue = () => {
     const location = useLocation();
     const [drawer, drawerHandler] = useDisclosure(false);
-    const { rightExpanded } = useSidebarStore();
+    const rightExpanded = useAppStore((state) => state.sidebar.rightExpanded);
 
     const drawerTimeout = useTimeout(() => drawerHandler.open(), 500);
 

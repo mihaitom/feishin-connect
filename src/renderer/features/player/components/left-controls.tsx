@@ -3,18 +3,19 @@ import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
 import React, { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
+import { shallow } from 'zustand/shallow';
 
 import styles from './left-controls.module.css';
 
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
+    useAppStore,
     useAppStoreActions,
     useFullScreenPlayerStore,
     useHotkeySettings,
     usePlayerSong,
     useSetFullScreenPlayerStore,
-    useSidebarStore,
 } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
@@ -31,7 +32,15 @@ export const LeftControls = () => {
     const { setSideBar } = useAppStoreActions();
     const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
     const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
-    const { collapsed, image } = useSidebarStore();
+
+    const { collapsed, image } = useAppStore(
+        (state) => ({
+            collapsed: state.sidebar.collapsed,
+            image: state.sidebar.image,
+        }),
+        shallow,
+    );
+
     const hideImage = image && !collapsed;
     const currentSong = usePlayerSong();
     const title = currentSong?.name;

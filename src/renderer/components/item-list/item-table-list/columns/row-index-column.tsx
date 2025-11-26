@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { memo } from 'react';
 
 import styles from './row-index-column.module.css';
 
@@ -88,6 +89,8 @@ const QueueSongRowIndexColumn = (props: ItemTableListInnerColumn) => {
         !!props.activeRowId &&
         (props.activeRowId === song?.id || props.activeRowId === song?._uniqueId);
 
+    const isActiveAndPlaying = isActive && status === PlayerStatus.PLAYING;
+
     let adjustedRowIndex =
         props.adjustedRowIndexMap?.get(props.rowIndex) ??
         (props.enableHeader ? props.rowIndex : props.rowIndex + 1);
@@ -97,20 +100,39 @@ const QueueSongRowIndexColumn = (props: ItemTableListInnerColumn) => {
     }
 
     return (
-        <TableColumnTextContainer {...props}>
-            {isActive ? (
-                status === PlayerStatus.PLAYING ? (
-                    <Flex>
-                        <Icon fill="primary" icon="mediaPlay" />
-                    </Flex>
-                ) : (
-                    <Flex>
-                        <Icon fill="primary" icon="mediaPause" />
-                    </Flex>
-                )
-            ) : (
-                adjustedRowIndex
-            )}
-        </TableColumnTextContainer>
+        <InnerQueueSongRowIndexColumn
+            {...props}
+            adjustedRowIndex={adjustedRowIndex}
+            isActive={isActive}
+            isPlaying={isActiveAndPlaying}
+        />
     );
 };
+
+const InnerQueueSongRowIndexColumn = memo(
+    (
+        props: ItemTableListInnerColumn & {
+            adjustedRowIndex: number;
+            isActive: boolean;
+            isPlaying: boolean;
+        },
+    ) => {
+        return (
+            <TableColumnTextContainer {...props}>
+                {props.isActive ? (
+                    props.isPlaying ? (
+                        <Flex>
+                            <Icon fill="primary" icon="mediaPlay" />
+                        </Flex>
+                    ) : (
+                        <Flex>
+                            <Icon fill="primary" icon="mediaPause" />
+                        </Flex>
+                    )
+                ) : (
+                    props.adjustedRowIndex
+                )}
+            </TableColumnTextContainer>
+        );
+    },
+);

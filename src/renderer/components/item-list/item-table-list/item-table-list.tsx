@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useOverlayScrollbars } from 'overlayscrollbars-react';
 import React, {
     type JSXElementConstructor,
+    memo,
     ReactElement,
     Ref,
     useCallback,
@@ -704,7 +705,7 @@ interface ItemTableListProps {
     startRowIndex?: number;
 }
 
-export const ItemTableList = ({
+const BaseItemTableList = ({
     activeRowId,
     autoFitColumns = false,
     CellComponent,
@@ -2178,3 +2179,7 @@ export const ItemTableList = ({
         </motion.div>
     );
 };
+
+export const ItemTableList = memo(BaseItemTableList);
+
+ItemTableList.displayName = 'ItemTableList';

@@ -4,7 +4,7 @@ import styles from './right-sidebar.module.css';
 
 import { SidebarPlayQueue } from '/@/renderer/features/now-playing/components/sidebar-play-queue';
 import { ResizeHandle } from '/@/renderer/features/shared/components/resize-handle';
-import { useGeneralSettings, useSidebarStore } from '/@/renderer/store';
+import { useAppStore, useGeneralSettings } from '/@/renderer/store';
 
 // const queueDrawerVariants: Variants = {
 //     closed: (windowBarStyle) => ({
@@ -54,7 +54,7 @@ export const RightSidebar = forwardRef(
         { isResizing: isResizingRight, startResizing }: RightSidebarProps,
         ref: Ref<HTMLDivElement>,
     ) => {
-        const { rightExpanded } = useSidebarStore();
+        const rightExpanded = useAppStore((state) => state.sidebar.rightExpanded);
         const { sideQueueType } = useGeneralSettings();
 
         return (

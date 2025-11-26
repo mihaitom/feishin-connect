@@ -10,7 +10,6 @@ import {
     AlbumArtistListResponse,
     AlbumDetailResponse,
     AlbumListResponse,
-    Artist,
     ArtistListResponse,
     LibraryItem,
     SetRatingArgs,
@@ -120,6 +119,54 @@ export const applyRatingOptimisticUpdates = (
                 });
             }
 
+            // Update infinite loader custom query keys
+            const infiniteLoaderQueryKey = [
+                variables.apiClientProps.serverId,
+                'item-list-infinite-loader',
+                LibraryItem.ALBUM,
+            ];
+
+            const infiniteLoaderQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: infiniteLoaderQueryKey,
+            });
+
+            if (infiniteLoaderQueries.length) {
+                infiniteLoaderQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (
+                                prev:
+                                    | undefined
+                                    | {
+                                          data: unknown[];
+                                          pagesLoaded: Record<string, boolean>;
+                                      },
+                            ) => {
+                                if (prev && prev.data) {
+                                    return {
+                                        ...prev,
+                                        data: prev.data.map((item: any) => {
+                                            if (!item || !item.id) {
+                                                return item;
+                                            }
+
+                                            return itemIdSet.has(item.id)
+                                                ? { ...item, userRating: rating }
+                                                : item;
+                                        }),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
+                    }
+                });
+            }
+
             break;
         }
         case LibraryItem.ALBUM_ARTIST: {
@@ -206,6 +253,54 @@ export const applyRatingOptimisticUpdates = (
                 });
             }
 
+            // Update infinite loader custom query keys
+            const infiniteLoaderQueryKey = [
+                variables.apiClientProps.serverId,
+                'item-list-infinite-loader',
+                LibraryItem.ALBUM_ARTIST,
+            ];
+
+            const infiniteLoaderQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: infiniteLoaderQueryKey,
+            });
+
+            if (infiniteLoaderQueries.length) {
+                infiniteLoaderQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (
+                                prev:
+                                    | undefined
+                                    | {
+                                          data: unknown[];
+                                          pagesLoaded: Record<string, boolean>;
+                                      },
+                            ) => {
+                                if (prev && prev.data) {
+                                    return {
+                                        ...prev,
+                                        data: prev.data.map((item: any) => {
+                                            if (!item || !item.id) {
+                                                return item;
+                                            }
+
+                                            return itemIdSet.has(item.id)
+                                                ? { ...item, userRating: rating }
+                                                : item;
+                                        }),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
+                    }
+                });
+            }
+
             break;
         }
         case LibraryItem.ARTIST: {
@@ -223,7 +318,7 @@ export const applyRatingOptimisticUpdates = (
                         queryClient.setQueryData(queryKey, (prev: ArtistListResponse) => {
                             return {
                                 ...prev,
-                                items: prev.items.map((item: Artist) => {
+                                items: prev.items.map((item: AlbumArtist) => {
                                     return itemIdSet.has(item.id)
                                         ? { ...item, userRating: rating }
                                         : item;
@@ -254,7 +349,7 @@ export const applyRatingOptimisticUpdates = (
                                     pages: prev.pages.map((page: ArtistListResponse) => {
                                         return {
                                             ...page,
-                                            items: page.items.map((item: Artist) => {
+                                            items: page.items.map((item: AlbumArtist) => {
                                                 return itemIdSet.has(item.id)
                                                     ? { ...item, userRating: rating }
                                                     : item;
@@ -262,6 +357,54 @@ export const applyRatingOptimisticUpdates = (
                                         };
                                     }),
                                 };
+                            },
+                        );
+                    }
+                });
+            }
+
+            // Update infinite loader custom query keys
+            const infiniteLoaderQueryKey = [
+                variables.apiClientProps.serverId,
+                'item-list-infinite-loader',
+                LibraryItem.ARTIST,
+            ];
+
+            const infiniteLoaderQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: infiniteLoaderQueryKey,
+            });
+
+            if (infiniteLoaderQueries.length) {
+                infiniteLoaderQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (
+                                prev:
+                                    | undefined
+                                    | {
+                                          data: unknown[];
+                                          pagesLoaded: Record<string, boolean>;
+                                      },
+                            ) => {
+                                if (prev && prev.data) {
+                                    return {
+                                        ...prev,
+                                        data: prev.data.map((item: any) => {
+                                            if (!item || !item.id) {
+                                                return item;
+                                            }
+
+                                            return itemIdSet.has(item.id)
+                                                ? { ...item, userRating: rating }
+                                                : item;
+                                        }),
+                                    };
+                                }
+
+                                return prev;
                             },
                         );
                     }

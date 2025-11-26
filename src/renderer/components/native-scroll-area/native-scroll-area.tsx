@@ -1,5 +1,5 @@
 import { useOverlayScrollbars } from 'overlayscrollbars-react';
-import { CSSProperties, forwardRef, ReactNode, Ref, useEffect, useRef } from 'react';
+import { CSSProperties, forwardRef, memo, ReactNode, Ref, useEffect, useRef } from 'react';
 
 import styles from './native-scroll-area.module.css';
 
@@ -18,7 +18,7 @@ interface NativeScrollAreaProps {
     style?: CSSProperties;
 }
 
-export const NativeScrollArea = forwardRef(
+const BaseNativeScrollArea = forwardRef(
     (
         { children, noHeader, pageHeaderProps, scrollHideDelay, ...props }: NativeScrollAreaProps,
         ref: Ref<HTMLDivElement>,
@@ -98,3 +98,7 @@ export const NativeScrollArea = forwardRef(
         );
     },
 );
+
+export const NativeScrollArea = memo(BaseNativeScrollArea);
+
+NativeScrollArea.displayName = 'NativeScrollArea';

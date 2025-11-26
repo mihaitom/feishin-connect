@@ -9,7 +9,7 @@ import NavidromeLogo from '/@/renderer/features/servers/assets/navidrome.png';
 import OpenSubsonicLogo from '/@/renderer/features/servers/assets/opensubsonic.png';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { ServerSelectorItems } from '/@/renderer/features/sidebar/components/server-selector-items';
-import { useCurrentServer } from '/@/renderer/store';
+import { useAppStore, useCurrentServer } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
 import { Box } from '/@/shared/components/box/box';
 import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
@@ -20,13 +20,10 @@ import { Text } from '/@/shared/components/text/text';
 import { ServerType } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
-interface ServerSelectorProps {
-    showImage?: boolean;
-}
-
-export const ServerSelector = ({ showImage = false }: ServerSelectorProps) => {
+export const ServerSelector = () => {
     const { t } = useTranslation();
     const currentServer = useCurrentServer();
+    const showImage = useAppStore((state) => state.sidebar.image);
 
     const { data: musicFolders } = useQuery(
         currentServer

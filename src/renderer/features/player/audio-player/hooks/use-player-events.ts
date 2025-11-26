@@ -140,6 +140,12 @@ function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
     return {
         cleanup: () => {
             unsubscribers.forEach((unsubscribe) => unsubscribe());
+            if (callbacks.onUserRating) {
+                eventEmitter.off('USER_RATING', callbacks.onUserRating);
+            }
+            if (callbacks.onUserFavorite) {
+                eventEmitter.off('USER_FAVORITE', callbacks.onUserFavorite);
+            }
         },
     };
 }

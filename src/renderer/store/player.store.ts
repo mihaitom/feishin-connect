@@ -1,9 +1,9 @@
 import merge from 'lodash/merge';
 import { nanoid } from 'nanoid';
-import { create } from 'zustand';
 import { createJSONStorage, persist, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
+import { createWithEqualityFn } from 'zustand/traditional';
 
 import { createSelectors } from '/@/renderer/lib/zustand';
 import { useSettingsStore } from '/@/renderer/store/settings.store';
@@ -256,7 +256,7 @@ const initialState: State = {
     },
 };
 
-export const usePlayerStoreBase = create<PlayerState>()(
+export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
     persist(
         subscribeWithSelector(
             immer((set, get) => ({
@@ -2243,19 +2243,18 @@ export const usePlayerSpeed = () => {
 };
 
 export const usePlayerSong = () => {
-    return usePlayerStoreBase((state) => {
-        const queue = state.getQueue();
-        let index = state.player.index;
-
-        // If shuffle is enabled, map shuffled position to actual queue position
-        if (state.player.shuffle === PlayerShuffle.TRACK && state.queue.shuffled.length > 0) {
-            if (index >= 0 && index < state.queue.shuffled.length) {
-                index = state.queue.shuffled[index];
-            }
-        }
-
-        return queue.items[index];
-    });
+    return usePlayerStoreBase(
+        (state) => {
+            return state.getCurrentSong();
+        },
+        (prev, next) => {
+            return (
+                prev?._uniqueId === next?._uniqueId &&
+                prev?.userFavorite === next?.userFavorite &&
+                prev?.userRating === next?.userRating
+            );
+        },
+    );
 };
 
 export const usePlayerNum = () => {

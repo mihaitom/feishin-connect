@@ -266,7 +266,7 @@ export interface ItemGridListProps {
     rows?: ItemCardProps['rows'];
 }
 
-export const ItemGridList = ({
+const BaseItemGridList = ({
     data,
     enableDrag = true,
     enableExpansion = false,
@@ -750,3 +750,7 @@ const ListComponent = memo((props: ListChildComponentProps<GridItemProps>) => {
         </div>
     );
 });
+
+export const ItemGridList = memo(BaseItemGridList);
+
+ItemGridList.displayName = 'ItemGridList';

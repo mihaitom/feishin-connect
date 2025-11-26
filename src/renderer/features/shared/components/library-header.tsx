@@ -100,6 +100,7 @@ export const LibraryHeader = forwardRef(
                         <Image
                             alt="cover"
                             className={styles.image}
+                            containerClassName={styles.image}
                             loading="eager"
                             onError={onImageError}
                             src={imageUrl || ''}

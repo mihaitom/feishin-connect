@@ -10,6 +10,7 @@ import {
     useDiscordSettings,
     useGeneralSettings,
     usePlayerStore,
+    useTimestampStoreBase,
 } from '/@/renderer/store';
 import { sentenceCase } from '/@/renderer/utils';
 import { QueueSong, ServerType } from '/@/shared/types/domain-types';
@@ -26,7 +27,7 @@ const truncate = (field: string) =>
 export const useDiscordRpc = () => {
     const discordSettings = useDiscordSettings();
     const generalSettings = useGeneralSettings();
-    const { privateMode } = useAppStore();
+    const privateMode = useAppStore((state) => state.privateMode);
     const [lastUniqueId, setlastUniqueId] = useState('');
 
     const setActivity = useCallback(
@@ -201,14 +202,13 @@ export const useDiscordRpc = () => {
         if (!discordSettings.enabled || privateMode) {
             return;
         }
-        const unsubSongChange = usePlayerStore.subscribe(
-            (state): ActivityState => [
-                state.current.song,
-                state.current.time,
-                state.current.status,
-            ],
-            setActivity,
-        );
+        const unsubSongChange = usePlayerStore.subscribe((state): ActivityState => {
+            const currentSong = state.getCurrentSong();
+            const currentTime = useTimestampStoreBase.getState().timestamp;
+            const status = state.player.status;
+
+            return [currentSong, currentTime, status];
+        }, setActivity);
         return () => {
             unsubSongChange();
         };

@@ -42,7 +42,7 @@ const pageVariants: Variants = {
     initial: (custom: { isNext: boolean }) => ({ opacity: 0, x: custom.isNext ? 100 : -100 }),
 };
 
-export function GridCarousel(props: GridCarouselProps) {
+function BaseGridCarousel(props: GridCarouselProps) {
     const { cards, hasNextPage, loadNextPage, onNextPage, onPrevPage, rowCount = 1, title } = props;
     const { ref, ...cq } = useContainerQuery({
         '2xl': 1024,
@@ -191,6 +191,10 @@ export function GridCarousel(props: GridCarouselProps) {
         </div>
     );
 }
+
+export const GridCarousel = memo(BaseGridCarousel);
+
+GridCarousel.displayName = 'GridCarousel';
 
 function getCardsToShow(breakpoints: {
     isLargerThan2xl: boolean;

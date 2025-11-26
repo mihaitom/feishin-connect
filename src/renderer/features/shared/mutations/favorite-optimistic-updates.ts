@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { infiniteLoaderDataQueryKey } from '/@/renderer/components/item-list/helpers/item-list-infinite-loader';
 import {
     Album,
     AlbumArtist,
@@ -8,7 +9,6 @@ import {
     AlbumArtistListResponse,
     AlbumDetailResponse,
     AlbumListResponse,
-    Artist,
     ArtistListResponse,
     FavoriteArgs,
     LibraryItem,
@@ -151,6 +151,52 @@ export const applyFavoriteOptimisticUpdates = (
                 });
             }
 
+            const infiniteLoaderQueryKey = infiniteLoaderDataQueryKey(
+                variables.apiClientProps.serverId,
+                LibraryItem.ALBUM,
+            );
+
+            const infiniteLoaderQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: infiniteLoaderQueryKey,
+            });
+
+            if (infiniteLoaderQueries.length) {
+                infiniteLoaderQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (
+                                prev:
+                                    | undefined
+                                    | {
+                                          data: unknown[];
+                                          pagesLoaded: Record<string, boolean>;
+                                      },
+                            ) => {
+                                if (prev && prev.data) {
+                                    return {
+                                        ...prev,
+                                        data: prev.data.map((item: any) => {
+                                            if (!item || !item.id) {
+                                                return item;
+                                            }
+
+                                            return itemIdSet.has(item.id)
+                                                ? { ...item, userFavorite: isFavorite }
+                                                : item;
+                                        }),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
+                    }
+                });
+            }
+
             break;
         }
         case LibraryItem.ALBUM_ARTIST: {
@@ -271,6 +317,52 @@ export const applyFavoriteOptimisticUpdates = (
                 });
             }
 
+            const infiniteLoaderQueryKey = infiniteLoaderDataQueryKey(
+                variables.apiClientProps.serverId,
+                LibraryItem.ALBUM_ARTIST,
+            );
+
+            const infiniteLoaderQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: infiniteLoaderQueryKey,
+            });
+
+            if (infiniteLoaderQueries.length) {
+                infiniteLoaderQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (
+                                prev:
+                                    | undefined
+                                    | {
+                                          data: unknown[];
+                                          pagesLoaded: Record<string, boolean>;
+                                      },
+                            ) => {
+                                if (prev && prev.data) {
+                                    return {
+                                        ...prev,
+                                        data: prev.data.map((item: any) => {
+                                            if (!item || !item.id) {
+                                                return item;
+                                            }
+
+                                            return itemIdSet.has(item.id)
+                                                ? { ...item, userFavorite: isFavorite }
+                                                : item;
+                                        }),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
+                    }
+                });
+            }
+
             break;
         }
         case LibraryItem.ARTIST: {
@@ -291,7 +383,7 @@ export const applyFavoriteOptimisticUpdates = (
                                 if (prev) {
                                     return {
                                         ...prev,
-                                        items: prev.items.map((item: Artist) => {
+                                        items: prev.items.map((item: AlbumArtist) => {
                                             return itemIdSet.has(item.id)
                                                 ? { ...item, userFavorite: isFavorite }
                                                 : item;
@@ -332,12 +424,58 @@ export const applyFavoriteOptimisticUpdates = (
                                         pages: prev.pages.map((page: ArtistListResponse) => {
                                             return {
                                                 ...page,
-                                                items: page.items.map((item: Artist) => {
+                                                items: page.items.map((item: AlbumArtist) => {
                                                     return itemIdSet.has(item.id)
                                                         ? { ...item, userFavorite: isFavorite }
                                                         : item;
                                                 }),
                                             };
+                                        }),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
+                    }
+                });
+            }
+
+            const infiniteLoaderQueryKey = infiniteLoaderDataQueryKey(
+                variables.apiClientProps.serverId,
+                LibraryItem.ARTIST,
+            );
+
+            const infiniteLoaderQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: infiniteLoaderQueryKey,
+            });
+
+            if (infiniteLoaderQueries.length) {
+                infiniteLoaderQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (
+                                prev:
+                                    | undefined
+                                    | {
+                                          data: unknown[];
+                                          pagesLoaded: Record<string, boolean>;
+                                      },
+                            ) => {
+                                if (prev && prev.data) {
+                                    return {
+                                        ...prev,
+                                        data: prev.data.map((item: any) => {
+                                            if (!item || !item.id) {
+                                                return item;
+                                            }
+
+                                            return itemIdSet.has(item.id)
+                                                ? { ...item, userFavorite: isFavorite }
+                                                : item;
                                         }),
                                     };
                                 }

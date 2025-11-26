@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { useInView } from 'motion/react';
 import { AnimatePresence, motion, Variants } from 'motion/react';
-import { CSSProperties, ReactNode, RefObject, useEffect, useRef } from 'react';
+import { CSSProperties, memo, ReactNode, RefObject, useEffect, useRef } from 'react';
 
 import styles from './page-header.module.css';
 
@@ -35,7 +35,7 @@ const variants: Variants = {
     initial: { opacity: 0 },
 };
 
-export const PageHeader = ({
+const BasePageHeader = ({
     animated,
     backgroundColor,
     children,
@@ -144,3 +144,7 @@ export const PageHeader = ({
         </>
     );
 };
+
+export const PageHeader = memo(BasePageHeader);
+
+PageHeader.displayName = 'PageHeader';

@@ -50,9 +50,21 @@ function getInitialData(itemCount: number) {
     };
 }
 
+export const infiniteLoaderDataQueryKey = (
+    serverId: string,
+    itemType: LibraryItem,
+    query?: Record<string, any>,
+) => {
+    if (query) {
+        return [serverId, 'item-list-infinite-loader', itemType, query];
+    }
+
+    return [serverId, 'item-list-infinite-loader', itemType];
+};
+
 export const useItemListInfiniteLoader = ({
     eventKey,
-    fetchThreshold = 0.2,
+    fetchThreshold = 0.5,
     itemsPerPage = 100,
     itemType,
     listCountQuery,

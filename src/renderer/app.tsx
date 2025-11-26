@@ -10,7 +10,6 @@ import isElectron from 'is-electron';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import i18n from '/@/i18n/i18n';
-import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
 import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
 import { useServerVersion } from '/@/renderer/hooks/use-server-version';
 import { IsUpdatedDialog } from '/@/renderer/is-updated-dialog';
@@ -32,7 +31,6 @@ export const App = () => {
     const { content, enabled } = useCssSettings();
     const { bindings } = useHotkeySettings();
     const cssRef = useRef<HTMLStyleElement | null>(null);
-    useDiscordRpc();
     useServerVersion();
 
     const [webAudio, setWebAudio] = useState<WebAudio>();

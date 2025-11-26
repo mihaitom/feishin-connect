@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router';
 import packageJson from '../../../../../package.json';
 
 import { openSettingsModal } from '/@/renderer/features/settings/utils/open-settings-modal';
-import { useAppStore, useAppStoreActions, useSidebarStore } from '/@/renderer/store';
+import { useAppStore, useAppStoreActions } from '/@/renderer/store';
 import { DropdownMenu, MenuItemProps } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Icon } from '/@/shared/components/icon/icon';
 import { toast } from '/@/shared/components/toast/toast';
@@ -67,8 +67,8 @@ interface RegularMenuItem extends BaseMenuItem {
 export const AppMenu = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { collapsed } = useSidebarStore();
-    const { privateMode } = useAppStore();
+    const collapsed = useAppStore((state) => state.sidebar.collapsed);
+    const privateMode = useAppStore((state) => state.privateMode);
     const { setPrivateMode, setSideBar } = useAppStoreActions();
 
     const handleBrowserDevTools = () => {

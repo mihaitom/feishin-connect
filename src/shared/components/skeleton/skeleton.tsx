@@ -1,6 +1,5 @@
-import type { CSSProperties } from 'react';
-
 import clsx from 'clsx';
+import { type CSSProperties, memo } from 'react';
 import RSkeleton from 'react-loading-skeleton';
 
 import styles from './skeleton.module.css';
@@ -22,7 +21,7 @@ interface SkeletonProps {
     width?: number | string;
 }
 
-export function Skeleton({
+export function BaseSkeleton({
     baseColor,
     borderRadius,
     className,
@@ -54,3 +53,7 @@ export function Skeleton({
         />
     );
 }
+
+export const Skeleton = memo(BaseSkeleton);
+
+Skeleton.displayName = 'Skeleton';

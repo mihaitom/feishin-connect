@@ -60,7 +60,7 @@ const checkScrobbleConditions = (args: {
 export const useScrobble = () => {
     const scrobbleSettings = usePlaybackSettings().scrobble;
     const isScrobbleEnabled = scrobbleSettings?.enabled;
-    const isPrivateModeEnabled = useAppStore().privateMode;
+    const isPrivateModeEnabled = useAppStore((state) => state.privateMode);
     const sendScrobble = useSendScrobble();
 
     const [isCurrentSongScrobbled, setIsCurrentSongScrobbled] = useState(false);

@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import isElectron from 'is-electron';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RiCheckboxBlankLine, RiCloseLine, RiSubtractLine } from 'react-icons/ri';
 
 import appIcon from '../../../assets/icons/32x32.png';
@@ -124,7 +124,7 @@ const MacOsControls = ({ controls, title }: WindowBarControlsProps) => {
 export const WindowBar = () => {
     const { windowBarStyle } = useWindowSettings();
     const playerStatus = usePlayerStatus();
-    const { privateMode } = useAppStore();
+    const privateMode = useAppStore((state) => state.privateMode);
     const handleMinimize = () => minimize();
 
     const { currentSong, index, queueLength } = usePlayerData();
@@ -150,9 +150,12 @@ export const WindowBar = () => {
                 ? `${statusString}${queueString}${currentSong?.name}${currentSong?.artistName ? ` — ${currentSong?.artistName} — Feishin` : ''}`
                 : 'Feishin'
         }${privateMode ? ` ${privateModeString}` : ''}`;
-        document.title = title;
         return title;
     }, [currentSong?.artistName, currentSong?.name, index, playerStatus, privateMode, queueLength]);
+
+    useEffect(() => {
+        document.title = title;
+    }, [title]);
 
     if (windowBarStyle === Platform.WEB) {
         return null;

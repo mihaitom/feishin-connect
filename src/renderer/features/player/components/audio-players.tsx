@@ -2,8 +2,10 @@ import { useEffect } from 'react';
 
 import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { UserFavoriteEventPayload, UserRatingEventPayload } from '/@/renderer/events/events';
+import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
 import { MpvPlayer } from '/@/renderer/features/player/audio-player/mpv-player';
 import { WebPlayer } from '/@/renderer/features/player/audio-player/web-player';
+import { usePowerSaveBlocker } from '/@/renderer/features/player/hooks/use-power-save-blocker';
 import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
 import {
     updateQueueFavorites,
@@ -19,6 +21,8 @@ export const AudioPlayers = () => {
     const serverId = useCurrentServerId();
 
     useScrobble();
+    usePowerSaveBlocker();
+    useDiscordRpc();
 
     // Listen to favorite and rating events to update queue songs
     useEffect(() => {
