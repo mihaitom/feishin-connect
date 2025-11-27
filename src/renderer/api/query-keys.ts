@@ -301,7 +301,10 @@ export const queryKeys: Record<
         },
         root: (serverId: string) => [serverId, 'playlists'] as const,
         songList: (serverId: string, id?: string) => {
-            if (id) return [serverId, 'playlists', id, 'songList'] as const;
+            if (id) {
+                return [serverId, 'playlists', 'songList', id] as const;
+            }
+
             return [serverId, 'playlists', 'songList'] as const;
         },
     },

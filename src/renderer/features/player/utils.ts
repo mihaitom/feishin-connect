@@ -2,6 +2,7 @@ import { QueryClient } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { sortSongList } from '/@/shared/api/utils';
 import {
     PlaylistSongListQuery,
     PlaylistSongListQueryClientSide,
@@ -11,7 +12,6 @@ import {
     SongListResponse,
     SongListSort,
     SortOrder,
-    sortSongList,
 } from '/@/shared/types/domain-types';
 
 export const getPlaylistSongsById = async (args: {

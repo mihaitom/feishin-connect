@@ -1,12 +1,14 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'motion/react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate, useParams } from 'react-router';
 
 import { ItemListHandle } from '/@/renderer/components/item-list/types';
+import { ListContext } from '/@/renderer/context/list-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
+import { PlaylistDetailSongListContent } from '/@/renderer/features/playlists/components/playlist-detail-song-list-content';
 import { PlaylistDetailSongListHeader } from '/@/renderer/features/playlists/components/playlist-detail-song-list-header';
 import { PlaylistQueryBuilder } from '/@/renderer/features/playlists/components/playlist-query-builder';
 import { SaveAsPlaylistForm } from '/@/renderer/features/playlists/components/save-as-playlist-form';
@@ -16,14 +18,14 @@ import { AnimatedPage } from '/@/renderer/features/shared/components/animated-pa
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer, usePlaylistDetailStore } from '/@/renderer/store';
+import { useCurrentServer } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Box } from '/@/shared/components/box/box';
 import { Group } from '/@/shared/components/group/group';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { ServerType, SongListSort, SortOrder, sortSongList } from '/@/shared/types/domain-types';
-import { Play } from '/@/shared/types/types';
+import { ServerType, SongListSort } from '/@/shared/types/domain-types';
+import { ItemListKey, Play } from '/@/shared/types/types';
 
 const PlaylistDetailSongListRoute = () => {
     const { t } = useTranslation();
@@ -145,8 +147,6 @@ const PlaylistDetailSongListRoute = () => {
         setIsQueryBuilderExpanded(true);
     };
 
-    const page = usePlaylistDetailStore();
-
     const playlistSongs = useQuery(
         playlistsQueries.songList({
             query: {
@@ -156,80 +156,83 @@ const PlaylistDetailSongListRoute = () => {
         }),
     );
 
-    const filterSortedSongs = useMemo(() => {
-        const items = playlistSongs.data?.items;
+    const [itemCount, setItemCount] = useState<number | undefined>(undefined);
 
-        if (items) {
-            const searchTerm = page?.table.id[playlistId]?.filter?.searchTerm;
-
-            if (searchTerm) {
-                // items = searchSongs(items, searchTerm);
-            }
-
-            const sortBy = page?.table.id[playlistId]?.filter?.sortBy || SongListSort.ID;
-            const sortOrder = page?.table.id[playlistId]?.filter?.sortOrder || SortOrder.ASC;
-            return sortSongList(items, sortBy, sortOrder);
-        } else {
-            return [];
-        }
-    }, [playlistSongs.data?.items, page?.table.id, playlistId]);
-
-    const itemCount =
-        typeof playlistSongs.data?.totalRecordCount === 'number'
-            ? filterSortedSongs.length
-            : undefined;
-
-    const handlePlay = (play: Play) => {
+    const handlePlay = (_play: Play) => {
         // handlePlayQueueAdd?.({
         //     byData: filterSortedSongs,
         //     playType: play,
         // });
     };
 
+    const providerValue = useMemo(() => {
+        return {
+            customFilters: undefined,
+            id: playlistId,
+            itemCount,
+            pageKey: ItemListKey.PLAYLIST_SONG,
+            setItemCount,
+        };
+    }, [playlistId, itemCount]);
+
+    // Update item count when playlist songs are loaded
+    useEffect(() => {
+        if (
+            playlistSongs.data?.totalRecordCount !== undefined &&
+            playlistSongs.data.totalRecordCount !== null
+        ) {
+            setItemCount(playlistSongs.data.totalRecordCount);
+        }
+    }, [playlistSongs.data?.totalRecordCount]);
+
     return (
         <AnimatedPage key={`playlist-detail-songList-${playlistId}`}>
-            <LibraryContainer>
-                <PlaylistDetailSongListHeader
-                    handlePlay={handlePlay}
-                    handleToggleShowQueryBuilder={handleToggleShowQueryBuilder}
-                    itemCount={itemCount}
-                    tableRef={tableRef}
-                />
+            <ListContext.Provider value={providerValue}>
+                <LibraryContainer>
+                    <PlaylistDetailSongListHeader
+                        handlePlay={handlePlay}
+                        handleToggleShowQueryBuilder={handleToggleShowQueryBuilder}
+                        itemCount={itemCount}
+                        tableRef={tableRef}
+                    />
 
-                {(isSmartPlaylist || showQueryBuilder) && (
-                    <motion.div>
-                        <Box h="100%" mah="35vh" p="md" w="100%">
-                            <Group pb="md">
-                                <ActionIcon
-                                    icon={isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'}
-                                    iconProps={{
-                                        size: 'md',
-                                    }}
-                                    onClick={handleToggleExpand}
-                                    size="xs"
-                                />
-                                <Text>
-                                    {t('form.queryEditor.title', { postProcess: 'titleCase' })}
-                                </Text>
-                            </Group>
-                            {isQueryBuilderExpanded && (
-                                <PlaylistQueryBuilder
-                                    isSaving={createPlaylistMutation?.isPending}
-                                    key={JSON.stringify(detailQuery?.data?.rules)}
-                                    limit={detailQuery?.data?.rules?.limit}
-                                    onSave={handleSave}
-                                    onSaveAs={handleSaveAs}
-                                    playlistId={playlistId}
-                                    query={detailQuery?.data?.rules}
-                                    sortBy={detailQuery?.data?.rules?.sort || SongListSort.ALBUM}
-                                    sortOrder={detailQuery?.data?.rules?.order || 'asc'}
-                                />
-                            )}
-                        </Box>
-                    </motion.div>
-                )}
-                {/* <PlaylistDetailSongListContent songs={filterSortedSongs} tableRef={tableRef} /> */}
-            </LibraryContainer>
+                    {(isSmartPlaylist || showQueryBuilder) && (
+                        <motion.div>
+                            <Box h="100%" mah="35vh" p="md" w="100%">
+                                <Group pb="md">
+                                    <ActionIcon
+                                        icon={isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'}
+                                        iconProps={{
+                                            size: 'md',
+                                        }}
+                                        onClick={handleToggleExpand}
+                                        size="xs"
+                                    />
+                                    <Text>
+                                        {t('form.queryEditor.title', { postProcess: 'titleCase' })}
+                                    </Text>
+                                </Group>
+                                {isQueryBuilderExpanded && (
+                                    <PlaylistQueryBuilder
+                                        isSaving={createPlaylistMutation?.isPending}
+                                        key={JSON.stringify(detailQuery?.data?.rules)}
+                                        limit={detailQuery?.data?.rules?.limit}
+                                        onSave={handleSave}
+                                        onSaveAs={handleSaveAs}
+                                        playlistId={playlistId}
+                                        query={detailQuery?.data?.rules}
+                                        sortBy={
+                                            detailQuery?.data?.rules?.sort || SongListSort.ALBUM
+                                        }
+                                        sortOrder={detailQuery?.data?.rules?.order || 'asc'}
+                                    />
+                                )}
+                            </Box>
+                        </motion.div>
+                    )}
+                    <PlaylistDetailSongListContent />
+                </LibraryContainer>
+            </ListContext.Provider>
         </AnimatedPage>
     );
 };

@@ -192,13 +192,6 @@ export const createFuseForLibraryItem = <T extends FuseSearchableItem>(
                     },
                     name: 'albumArtists',
                 },
-                {
-                    getFn: (item) => {
-                        const s = item as QueueSong | Song;
-                        return s.genres?.map((genre) => genre.name).join(' ') || '';
-                    },
-                    name: 'genres',
-                },
             );
             break;
         }

@@ -21,6 +21,7 @@ export const DragTargetMap = {
     [LibraryItem.ARTIST]: DragTarget.ARTIST,
     [LibraryItem.GENRE]: DragTarget.GENRE,
     [LibraryItem.PLAYLIST]: DragTarget.PLAYLIST,
+    [LibraryItem.PLAYLIST_SONG]: DragTarget.SONG,
     [LibraryItem.QUEUE_SONG]: DragTarget.QUEUE_SONG,
     [LibraryItem.SONG]: DragTarget.SONG,
 };

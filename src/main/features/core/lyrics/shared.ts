@@ -1,4 +1,4 @@
-import Fuse from 'fuse.js';
+import Fuse, { IFuseOptions } from 'fuse.js';
 
 import {
     InternetProviderLyricSearchResponse,
@@ -11,7 +11,7 @@ export const orderSearchResults = (args: {
 }) => {
     const { params, results } = args;
 
-    const options: Fuse.IFuseOptions<InternetProviderLyricSearchResponse> = {
+    const options: IFuseOptions<InternetProviderLyricSearchResponse> = {
         fieldNormWeight: 1,
         includeScore: true,
         keys: [

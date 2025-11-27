@@ -64,6 +64,89 @@ export const ListSortByDropdown = ({
     );
 };
 
+const CLIENT_SIDE_SONG_FILTERS = [
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.id', { postProcess: 'titleCase' }),
+        value: SongListSort.ID,
+    },
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.album', { postProcess: 'titleCase' }),
+        value: SongListSort.ALBUM,
+    },
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.albumArtist', { postProcess: 'titleCase' }),
+        value: SongListSort.ALBUM_ARTIST,
+    },
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.artist', { postProcess: 'titleCase' }),
+        value: SongListSort.ARTIST,
+    },
+    {
+        defaultOrder: SortOrder.DESC,
+        name: i18n.t('filter.bpm', { postProcess: 'titleCase' }),
+        value: SongListSort.BPM,
+    },
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('common.channel', { count: 2, postProcess: 'titleCase' }),
+        value: SongListSort.CHANNELS,
+    },
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.comment', { postProcess: 'titleCase' }),
+        value: SongListSort.COMMENT,
+    },
+    {
+        defaultOrder: SortOrder.DESC,
+        name: i18n.t('filter.duration', { postProcess: 'titleCase' }),
+        value: SongListSort.DURATION,
+    },
+    {
+        defaultOrder: SortOrder.DESC,
+        name: i18n.t('filter.isFavorited', { postProcess: 'titleCase' }),
+        value: SongListSort.FAVORITED,
+    },
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.genre', { postProcess: 'titleCase' }),
+        value: SongListSort.GENRE,
+    },
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.name', { postProcess: 'titleCase' }),
+        value: SongListSort.NAME,
+    },
+    {
+        defaultOrder: SortOrder.DESC,
+        name: i18n.t('filter.playCount', { postProcess: 'titleCase' }),
+        value: SongListSort.PLAY_COUNT,
+    },
+    {
+        defaultOrder: SortOrder.DESC,
+        name: i18n.t('filter.rating', { postProcess: 'titleCase' }),
+        value: SongListSort.RATING,
+    },
+    {
+        defaultOrder: SortOrder.DESC,
+        name: i18n.t('filter.recentlyAdded', { postProcess: 'titleCase' }),
+        value: SongListSort.RECENTLY_ADDED,
+    },
+    {
+        defaultOrder: SortOrder.DESC,
+        name: i18n.t('filter.recentlyPlayed', { postProcess: 'titleCase' }),
+        value: SongListSort.RECENTLY_PLAYED,
+    },
+    {
+        defaultOrder: SortOrder.DESC,
+        name: i18n.t('filter.releaseYear', { postProcess: 'titleCase' }),
+        value: SongListSort.YEAR,
+    },
+];
+
 const ALBUM_LIST_FILTERS: Partial<
     Record<ServerType, Array<{ defaultOrder: SortOrder; name: string; value: string }>>
 > = {
@@ -361,6 +444,14 @@ const SONG_LIST_FILTERS: Partial<
     ],
 };
 
+const PLAYLIST_SONG_LIST_FILTERS: Partial<
+    Record<ServerType, Array<{ defaultOrder: SortOrder; name: string; value: string }>>
+> = {
+    [ServerType.JELLYFIN]: CLIENT_SIDE_SONG_FILTERS,
+    [ServerType.NAVIDROME]: CLIENT_SIDE_SONG_FILTERS,
+    [ServerType.SUBSONIC]: CLIENT_SIDE_SONG_FILTERS,
+};
+
 const ALBUM_ARTIST_LIST_FILTERS: Partial<
     Record<ServerType, Array<{ defaultOrder: SortOrder; name: string; value: string }>>
 > = {
@@ -626,5 +717,6 @@ const FILTERS: Partial<Record<LibraryItem, any>> = {
     [LibraryItem.ARTIST]: ARTIST_LIST_FILTERS,
     [LibraryItem.GENRE]: GENRE_LIST_FILTERS,
     [LibraryItem.PLAYLIST]: PLAYLIST_LIST_FILTERS,
+    [LibraryItem.PLAYLIST_SONG]: PLAYLIST_SONG_LIST_FILTERS,
     [LibraryItem.SONG]: SONG_LIST_FILTERS,
 };

@@ -12,6 +12,7 @@ import {
     ArtistListResponse,
     FavoriteArgs,
     LibraryItem,
+    PlaylistSongListResponse,
     Song,
     SongDetailResponse,
 } from '/@/shared/types/domain-types';
@@ -551,13 +552,47 @@ export const applyFavoriteOptimisticUpdates = (
                     }
                 });
             }
+
+            const playlistSongListQueryKey = queryKeys.playlists.songList(
+                variables.apiClientProps.serverId,
+            );
+
+            const playlistSongListQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: playlistSongListQueryKey,
+            });
+
+            if (playlistSongListQueries.length) {
+                playlistSongListQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: PlaylistSongListResponse | undefined) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        items: prev.items.map((item: Song) =>
+                                            itemIdSet.has(item.id)
+                                                ? { ...item, userFavorite: isFavorite }
+                                                : item,
+                                        ),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
+                    }
+                });
+            }
+
             break;
         }
     }
 
     return previousQueries;
 };
-
 export const restoreFavoriteQueryData = (
     queryClient: QueryClient,
     previousQueries: PreviousQueryData[],

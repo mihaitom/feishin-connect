@@ -14,6 +14,7 @@ import {
     ssType,
     SubsonicExtensions,
 } from '/@/shared/api/subsonic/subsonic-types';
+import { sortAlbumArtistList, sortAlbumList, sortSongList } from '/@/shared/api/utils';
 import {
     AlbumListSort,
     GenreListSort,
@@ -21,10 +22,7 @@ import {
     LibraryItem,
     PlaylistListSort,
     Song,
-    sortAlbumArtistList,
-    sortAlbumList,
     SortOrder,
-    sortSongList,
 } from '/@/shared/types/domain-types';
 import { ServerFeatures } from '/@/shared/types/features-types';
 

@@ -1,7 +1,7 @@
 import { parseAsString, useQueryState } from 'nuqs';
 
-import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
 import { useListFilterPersistence } from '/@/renderer/features/shared/hooks/use-list-filter-persistence';
+import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
 import { useCurrentServer } from '/@/renderer/store';
 import { SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
