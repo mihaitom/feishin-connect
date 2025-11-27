@@ -52,6 +52,8 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const isInitializedRef = useRef<boolean>(false);
     const hasPopulatedQueueRef = useRef<boolean>(false);
     const isMountedRef = useRef<boolean>(true);
+    const currentSrcRef = useRef<string | undefined>(currentSrc);
+    const nextSrcRef = useRef<string | undefined>(nextSrc);
 
     const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
     const mpvProperties = useSettingsStore((store) => store.playback.mpvProperties);
@@ -62,8 +64,6 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
         const initializeMpv = async () => {
             const isRunning: boolean | undefined = await mpvPlayer?.isRunning();
-
-            mpvPlayer?.stop();
 
             if (!isRunning) {
                 const properties: Record<string, any> = {
@@ -81,29 +81,30 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             } else {
                 isInitializedRef.current = true;
             }
+
+            // After initialization, populate the queue if currentSrc is available
+            const latestCurrentSrc = currentSrcRef.current;
+            const latestNextSrc = nextSrcRef.current;
+            if (latestCurrentSrc && !hasPopulatedQueueRef.current && mpvPlayer) {
+                mpvPlayer.setQueue(latestCurrentSrc, latestNextSrc, true);
+                hasPopulatedQueueRef.current = true;
+                setPreviousCurrentSrc(latestCurrentSrc);
+            }
         };
 
         initializeMpv();
 
         return () => {
             isMountedRef.current = false;
-            mpvPlayer?.stop();
-            mpvPlayer?.cleanup();
+            mpvPlayer?.quit();
             isInitializedRef.current = false;
             hasPopulatedQueueRef.current = false;
         };
     }, [mpvExtraParameters, mpvProperties]);
 
-    // Populate mpv queue after initialization
     useEffect(() => {
-        if (!mpvPlayer || !isInitializedRef.current || hasPopulatedQueueRef.current) {
-            return;
-        }
-
-        if (currentSrc) {
-            mpvPlayer.setQueue(currentSrc, nextSrc, true);
-            hasPopulatedQueueRef.current = true;
-        }
+        currentSrcRef.current = currentSrc;
+        nextSrcRef.current = nextSrc;
     }, [currentSrc, nextSrc]);
 
     // Update volume
