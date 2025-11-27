@@ -69,10 +69,18 @@ export const PlayerbarWaveform = () => {
         waveColor,
     });
 
-    // Reset loading state when stream URL changes
+    // Reset loading state when stream URL changes and ensure media is muted
     useEffect(() => {
         setIsLoading(true);
-    }, [streamUrl]);
+        if (wavesurfer) {
+            wavesurfer.setVolume(0);
+            const mediaElement = wavesurfer.getMediaElement();
+            if (mediaElement) {
+                mediaElement.muted = true;
+                mediaElement.volume = 0;
+            }
+        }
+    }, [streamUrl, wavesurfer]);
 
     // Handle waveform ready state
     useEffect(() => {
@@ -80,6 +88,11 @@ export const PlayerbarWaveform = () => {
 
         const handleReady = () => {
             setIsLoading(false);
+            const mediaElement = wavesurfer.getMediaElement();
+            if (mediaElement) {
+                mediaElement.muted = true;
+                mediaElement.volume = 0;
+            }
         };
 
         wavesurfer.on('ready', handleReady);
@@ -87,6 +100,11 @@ export const PlayerbarWaveform = () => {
         // Check if already loaded
         if (wavesurfer.getDuration() > 0) {
             setIsLoading(false);
+            const mediaElement = wavesurfer.getMediaElement();
+            if (mediaElement) {
+                mediaElement.muted = true;
+                mediaElement.volume = 0;
+            }
         }
 
         return () => {
@@ -98,8 +116,21 @@ export const PlayerbarWaveform = () => {
         if (!wavesurfer) return;
 
         // Ensure waveform never plays - it's just for visualization
+        wavesurfer.setVolume(0);
+
+        const muteMediaElement = () => {
+            const mediaElement = wavesurfer.getMediaElement();
+            if (mediaElement) {
+                mediaElement.muted = true;
+                mediaElement.volume = 0;
+            }
+        };
+
+        muteMediaElement();
+
         const preventPlay = () => {
             wavesurfer.pause();
+            muteMediaElement(); // Ensure it stays muted
         };
 
         wavesurfer.on('play', preventPlay);
