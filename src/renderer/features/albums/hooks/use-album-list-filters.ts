@@ -11,13 +11,13 @@ import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-searc
 import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
 import { useSortOrderFilter } from '/@/renderer/features/shared/hooks/use-sort-order-filter';
 import { customFiltersSchema, FILTER_KEYS } from '/@/renderer/features/shared/utils';
-import { AlbumListSort } from '/@/shared/types/domain-types';
+import { AlbumListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 export const useAlbumListFilters = () => {
-    const { sortBy } = useSortByFilter<AlbumListSort>(null, ItemListKey.ALBUM);
+    const { sortBy } = useSortByFilter<AlbumListSort>(AlbumListSort.NAME, ItemListKey.ALBUM);
 
-    const { sortOrder } = useSortOrderFilter(null, ItemListKey.ALBUM);
+    const { sortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.ALBUM);
 
     const { searchTerm, setSearchTerm } = useSearchTermFilter('');
 

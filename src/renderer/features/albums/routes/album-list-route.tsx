@@ -7,21 +7,43 @@ import { AlbumListHeader } from '/@/renderer/features/albums/components/album-li
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
+import { AlbumListQuery } from '/@/shared/types/domain-types';
+import { ItemListKey } from '/@/shared/types/types';
+
+const getPageKey = (options: { albumArtistId?: string; genreId?: string }) => {
+    if (options.albumArtistId) {
+        return ItemListKey.ALBUM_ARTIST_ALBUM;
+    }
+
+    if (options.genreId) {
+        return ItemListKey.GENRE_ALBUM;
+    }
+
+    return ItemListKey.ALBUM;
+};
 
 const AlbumListRoute = () => {
     const { albumArtistId, genreId } = useParams();
-    const pageKey = albumArtistId ? `albumArtistAlbum` : 'album';
+    const pageKey = getPageKey({ albumArtistId, genreId });
 
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
 
+    const customFilters: Partial<AlbumListQuery> = useMemo(() => {
+        return {
+            artistIds: albumArtistId ? [albumArtistId] : undefined,
+            genreIds: genreId ? [genreId] : undefined,
+        };
+    }, [albumArtistId, genreId]);
+
     const providerValue = useMemo(() => {
         return {
+            customFilters,
             id: albumArtistId ?? genreId,
             itemCount,
             pageKey,
             setItemCount,
         };
-    }, [albumArtistId, genreId, itemCount, pageKey, setItemCount]);
+    }, [albumArtistId, customFilters, genreId, itemCount, pageKey]);
 
     return (
         <AnimatedPage>

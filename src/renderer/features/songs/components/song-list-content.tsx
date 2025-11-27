@@ -1,5 +1,6 @@
 import { lazy, Suspense, useMemo } from 'react';
 
+import { useListContext } from '/@/renderer/context/list-context';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
@@ -30,12 +31,15 @@ const SongListPaginatedTable = lazy(() =>
 export const SongListContent = () => {
     const { display, grid, itemsPerPage, pagination, table } = useListSettings(ItemListKey.SONG);
 
+    const { customFilters } = useListContext();
+
     return (
         <Suspense fallback={<Spinner container />}>
             <SongListView
                 display={display}
                 grid={grid}
                 itemsPerPage={itemsPerPage}
+                overrideQuery={customFilters}
                 pagination={pagination}
                 table={table}
             />
