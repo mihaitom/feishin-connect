@@ -77,6 +77,7 @@ export interface ItemListStateActions {
     clearDragging: () => void;
     clearExpanded: () => void;
     clearSelected: () => void;
+    deselectAll: () => void;
     extractRowId: (item: unknown) => string | undefined;
     findItemIndex: (rowId: string) => number;
     getData: () => unknown[];
@@ -91,9 +92,12 @@ export interface ItemListStateActions {
     hasDragging: () => boolean;
     hasExpanded: () => boolean;
     hasSelected: () => boolean;
+    isAllSelected: () => boolean;
     isDragging: (rowId: string) => boolean;
     isExpanded: (rowId: string) => boolean;
     isSelected: (rowId: string) => boolean;
+    isSomeSelected: () => boolean;
+    selectAll: () => void;
     setDragging: (items: ItemListStateItemWithRequiredProperties[]) => void;
     setExpanded: (items: ItemListStateItemWithRequiredProperties[]) => void;
     setSelected: (items: ItemListStateItemWithRequiredProperties[]) => void;
@@ -587,6 +591,29 @@ export const useItemListState = (
         [getDataFn, extractRowId],
     );
 
+    const selectAll = useCallback(() => {
+        const data = getDataFn ? getDataFn() : [];
+        const items = data
+            .filter((d) => d && typeof d === 'object')
+            .map((d) => d as ItemListStateItemWithRequiredProperties);
+        store.dispatch({ extractRowId: extractRowIdFn, payload: items, type: 'SET_SELECTED' });
+    }, [extractRowIdFn, getDataFn, store]);
+
+    const deselectAll = useCallback(() => {
+        store.dispatch({ type: 'CLEAR_SELECTED' });
+    }, [store]);
+
+    const isAllSelected = useCallback(() => {
+        const state = getCurrentState();
+        const data = getDataFn ? getDataFn() : [];
+        return state.selected.size === data.filter((d) => d && typeof d === 'object').length;
+    }, [getCurrentState, getDataFn]);
+
+    const isSomeSelected = useCallback(() => {
+        const state = getCurrentState();
+        return state.selected.size > 0;
+    }, [getCurrentState]);
+
     // Expose the store so components can subscribe if needed
     // Store it in the actions object for access
     const actions = useMemo(() => {
@@ -597,6 +624,7 @@ export const useItemListState = (
             clearDragging,
             clearExpanded,
             clearSelected,
+            deselectAll,
             extractRowId: extractRowIdFn,
             findItemIndex,
             getData,
@@ -611,9 +639,12 @@ export const useItemListState = (
             hasDragging,
             hasExpanded,
             hasSelected,
+            isAllSelected,
             isDragging,
             isExpanded,
             isSelected,
+            isSomeSelected,
+            selectAll,
             setDragging,
             setExpanded,
             setSelected,
@@ -625,10 +656,15 @@ export const useItemListState = (
         };
         return actionsObj;
     }, [
+        getCurrentState,
+        store,
         clearAll,
         clearDragging,
         clearExpanded,
         clearSelected,
+        isAllSelected,
+        isSomeSelected,
+        deselectAll,
         extractRowIdFn,
         findItemIndex,
         getData,
@@ -646,13 +682,12 @@ export const useItemListState = (
         isDragging,
         isExpanded,
         isSelected,
+        selectAll,
         setDragging,
         setExpanded,
         setSelected,
         toggleExpanded,
         toggleSelected,
-        store,
-        getCurrentState,
     ]);
 
     return actions;

@@ -41,6 +41,8 @@ import {
 } from '/@/renderer/components/item-list/types';
 import { PlayerContext, usePlayer } from '/@/renderer/features/player/context/player-context';
 import { animationProps } from '/@/shared/components/animations/animation-props';
+import { useFocusWithin } from '/@/shared/hooks/use-focus-within';
+import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
 import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { TableColumn } from '/@/shared/types/types';
@@ -847,7 +849,9 @@ const BaseItemTableList = ({
     const [showRightShadow, setShowRightShadow] = useState(false);
     const [showTopShadow, setShowTopShadow] = useState(false);
     const handleRef = useRef<ItemListHandle | null>(null);
-    const containerFocusRef = useRef<HTMLDivElement | null>(null);
+    const { focused, ref: focusRef } = useFocusWithin();
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const mergedContainerRef = useMergedRef(containerRef, focusRef);
 
     const stickyHeaderRef = useRef<HTMLDivElement | null>(null);
     const stickyGroupRowRef = useRef<HTMLDivElement | null>(null);
@@ -856,7 +860,7 @@ const BaseItemTableList = ({
     const stickyHeaderRightRef = useRef<HTMLDivElement | null>(null);
 
     const { shouldShowStickyHeader, stickyTop } = useStickyTableHeader({
-        containerRef: containerFocusRef,
+        containerRef: containerRef,
         enabled: enableHeader && enableStickyHeader,
         headerRef: pinnedRowRef,
         mainGridRef: rowRef,
@@ -867,12 +871,12 @@ const BaseItemTableList = ({
 
     // Update position and width of sticky header (scroll sync is handled in the hook)
     useEffect(() => {
-        if (!shouldShowStickyHeader || !stickyHeaderRef.current || !containerFocusRef.current) {
+        if (!shouldShowStickyHeader || !stickyHeaderRef.current || !containerRef.current) {
             return;
         }
 
         const stickyHeader = stickyHeaderRef.current;
-        const container = containerFocusRef.current;
+        const container = containerRef.current;
 
         const updatePosition = () => {
             const containerRect = container.getBoundingClientRect();
@@ -914,7 +918,7 @@ const BaseItemTableList = ({
 
     // Track total container width for autoSizeColumns
     useEffect(() => {
-        const el = containerFocusRef.current;
+        const el = containerRef.current;
         if (!el || !autoFitColumns) return;
 
         const updateWidth = () => {
@@ -1495,7 +1499,7 @@ const BaseItemTableList = ({
         stickyGroupIndex,
         stickyTop: stickyGroupTop,
     } = useStickyTableGroupRows({
-        containerRef: containerFocusRef,
+        containerRef: containerRef,
         enabled: enableStickyGroupRows && !!groups && groups.length > 0,
         getRowHeight: getRowHeightWrapper,
         groups,
@@ -1510,16 +1514,12 @@ const BaseItemTableList = ({
 
     // Update position and width of sticky group row
     useEffect(() => {
-        if (
-            !shouldRenderStickyGroupRow ||
-            !stickyGroupRowRef.current ||
-            !containerFocusRef.current
-        ) {
+        if (!shouldRenderStickyGroupRow || !stickyGroupRowRef.current || !containerRef.current) {
             return;
         }
 
         const stickyGroupRow = stickyGroupRowRef.current;
-        const container = containerFocusRef.current;
+        const container = containerRef.current;
 
         const updatePosition = () => {
             const containerRect = container.getBoundingClientRect();
@@ -2109,6 +2109,21 @@ const BaseItemTableList = ({
         stickyGroupTop,
     ]);
 
+    useHotkeys([
+        [
+            'mod+a',
+            () => {
+                if (focused) {
+                    if (internalState.isAllSelected()) {
+                        internalState.deselectAll();
+                    } else {
+                        internalState.selectAll();
+                    }
+                }
+            },
+        ],
+    ]);
+
     return (
         <motion.div
             className={styles.itemTableListContainer}
@@ -2120,7 +2135,7 @@ const BaseItemTableList = ({
                     element.focus({ preventScroll: true });
                 }
             }}
-            ref={containerFocusRef}
+            ref={mergedContainerRef}
             tabIndex={0}
             {...animationProps.fadeIn}
             transition={{ duration: 1, ease: 'anticipate' }}
