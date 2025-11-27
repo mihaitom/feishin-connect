@@ -26,6 +26,8 @@ import { Flex } from '/@/shared/components/flex/flex';
 import { LoadingOverlay } from '/@/shared/components/loading-overlay/loading-overlay';
 import { Text } from '/@/shared/components/text/text';
 import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
+import { useFocusWithin } from '/@/shared/hooks/use-focus-within';
+import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
 import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
 import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
 import { DragTarget } from '/@/shared/types/drag-and-drop';
@@ -140,8 +142,29 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
     const currentSong = usePlayerSong();
     const currentSongUniqueId = currentSong?._uniqueId;
 
+    const { focused, ref: containerFocusRef } = useFocusWithin();
+    const player = usePlayer();
+
+    useHotkeys([
+        [
+            'delete',
+            () => {
+                if (focused) {
+                    const selectedItems =
+                        tableRef.current?.internalState.getSelected() as QueueSong[];
+
+                    if (!selectedItems || selectedItems.length === 0) {
+                        return;
+                    }
+
+                    player.clearSelected(selectedItems);
+                }
+            },
+        ],
+    ]);
+
     return (
-        <div className={styles.container} key={containerKey}>
+        <div className={styles.container} key={containerKey} ref={containerFocusRef}>
             <LoadingOverlay pos="absolute" visible={isFetching} />
             <ItemTableList
                 activeRowId={currentSongUniqueId}

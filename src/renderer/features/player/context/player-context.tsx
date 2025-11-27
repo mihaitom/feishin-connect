@@ -498,7 +498,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         (items: QueueSong[]) => {
             logFn.debug(logMsg[LogCategory.PLAYER].clearSelected, {
                 category: LogCategory.PLAYER,
-                meta: { items },
+                meta: { items: items.length },
             });
 
             storeActions.clearSelected(items);
