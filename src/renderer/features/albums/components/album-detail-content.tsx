@@ -17,7 +17,6 @@ import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { useContainerQuery } from '/@/renderer/hooks';
-import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, usePlayerSong } from '/@/renderer/store';
 import { useGeneralSettings, useSettingsStore } from '/@/renderer/store/settings.store';
@@ -179,7 +178,6 @@ interface AlbumMetadataGenresProps {
 
 const AlbumMetadataGenres = ({ genres }: AlbumMetadataGenresProps) => {
     const { t } = useTranslation();
-    const genreRoute = useGenreRoute();
 
     if (!genres || genres.length === 0) return null;
 
@@ -195,7 +193,7 @@ const AlbumMetadataGenres = ({ genres }: AlbumMetadataGenresProps) => {
                     <PillLink
                         key={`genre-${genre.id}`}
                         size="md"
-                        to={generatePath(genreRoute, {
+                        to={generatePath(AppRoute.LIBRARY_GENRES_DETAIL, {
                             genreId: genre.id,
                         })}
                     >
