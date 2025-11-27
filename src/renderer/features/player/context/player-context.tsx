@@ -413,7 +413,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 };
 
                 // Paginate through all items to collect IDs
-                const allIds: string[] = [];
+                const allResults: Song[] | string[] = [];
                 const pageSize = 500; // Fetch in chunks
                 let startIndex = 0;
 
@@ -434,8 +434,12 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                     })) as { items: any[] };
 
                     if (pageResult?.items) {
-                        const pageIds = pageResult.items.map((item: any) => item.id);
-                        allIds.push(...pageIds);
+                        if (itemType === LibraryItem.SONG) {
+                            allResults.push(...pageResult.items);
+                        } else {
+                            const pageIds = pageResult.items.map((item: any) => item.id);
+                            allResults.push(...pageIds);
+                        }
                     }
 
                     // If we got fewer items than requested, we've reached the end
@@ -450,12 +454,16 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                     clearTimeout(timeoutIds.current[fetchId] as ReturnType<typeof setTimeout>);
                     delete timeoutIds.current[fetchId];
                 }
+
                 if (toastId) {
                     toast.hide(toastId);
                 }
 
-                // Now call addToQueueByFetch with all collected IDs (skip confirmation since we already confirmed)
-                await addToQueueByFetch(serverId, allIds, itemType, type, true);
+                if (itemType === LibraryItem.SONG) {
+                    addToQueueByData(allResults as Song[], type);
+                } else {
+                    await addToQueueByFetch(serverId, allResults as string[], itemType, type, true);
+                }
             } catch (err: any) {
                 if (instanceOfCancellationError(err)) {
                     return;
@@ -475,7 +483,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 });
             }
         },
-        [confirmLargeFetch, queueFetchConfirmThreshold, queryClient, addToQueueByFetch, t],
+        [queryClient, confirmLargeFetch, t, addToQueueByData, addToQueueByFetch],
     );
 
     const clearQueue = useCallback(() => {
