@@ -32,6 +32,7 @@ export const logMsg = {
         moveSelectedToBottom: 'Moved selected to bottom',
         moveSelectedToNext: 'Moved selected to next',
         moveSelectedToTop: 'Moved selected to top',
+        playbackError: 'An error occurred during playback',
         setFavorite: 'Set favorite',
         setRating: 'Set rating',
         setRepeat: 'Set repeat',

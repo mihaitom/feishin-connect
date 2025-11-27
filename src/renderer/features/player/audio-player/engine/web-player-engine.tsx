@@ -5,6 +5,8 @@ import ReactPlayer from 'react-player';
 
 import { AudioPlayer, PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
 import { convertToLogVolume } from '/@/renderer/features/player/audio-player/utils/player-utils';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
+import { logMsg } from '/@/renderer/utils/logger-message';
 import { PlayerStatus } from '/@/shared/types/types';
 
 export interface WebPlayerEngineHandle extends AudioPlayer {
@@ -117,48 +119,72 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
     const volume1 = convertToLogVolume(internalVolume1);
     const volume2 = convertToLogVolume(internalVolume2);
 
+    const handleOnError = (playerRef: React.RefObject<null | ReactPlayer>, onEnded: () => void) => {
+        return ({ target }: ErrorEvent) => {
+            const { current: player } = playerRef;
+
+            if (!player || !(target instanceof Audio)) {
+                return;
+            }
+
+            const { error } = target;
+
+            logFn.error(logMsg[LogCategory.PLAYER].playbackError, {
+                category: LogCategory.PLAYER,
+                meta: { error },
+            });
+
+            if (
+                error?.code !== MediaError.MEDIA_ERR_DECODE &&
+                error?.code !== MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
+            ) {
+                return;
+            }
+
+            onEnded();
+        };
+    };
+
     return (
         <div id="web-player-engine" style={{ display: 'none' }}>
-            {Boolean(src1) && (
-                <ReactPlayer
-                    config={{
-                        file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
-                    }}
-                    controls={false}
-                    height={0}
-                    id="web-player-1"
-                    muted={isMuted}
-                    onEnded={src1 ? () => onEndedPlayer1() : undefined}
-                    onProgress={onProgressPlayer1}
-                    playbackRate={speed || 1}
-                    playing={playerNum === 1 && playerStatus === PlayerStatus.PLAYING}
-                    progressInterval={isTransitioning ? 10 : 250}
-                    ref={player1Ref}
-                    url={src1 || EMPTY_SOURCE}
-                    volume={volume1}
-                    width={0}
-                />
-            )}
-            {Boolean(src2) && (
-                <ReactPlayer
-                    config={{
-                        file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
-                    }}
-                    controls={false}
-                    height={0}
-                    id="web-player-2"
-                    muted={isMuted}
-                    onEnded={src2 ? () => onEndedPlayer2() : undefined}
-                    onProgress={onProgressPlayer2}
-                    playbackRate={speed || 1}
-                    playing={playerNum === 2 && playerStatus === PlayerStatus.PLAYING}
-                    progressInterval={isTransitioning ? 10 : 250}
-                    ref={player2Ref}
-                    url={src2 || EMPTY_SOURCE}
-                    volume={volume2}
-                    width={0}
-                />
-            )}
+            <ReactPlayer
+                config={{
+                    file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
+                }}
+                controls={false}
+                height={0}
+                id="web-player-1"
+                muted={isMuted}
+                onEnded={src1 ? () => onEndedPlayer1() : undefined}
+                onError={handleOnError(player1Ref, () => onEndedPlayer1())}
+                onProgress={onProgressPlayer1}
+                playbackRate={speed || 1}
+                playing={playerNum === 1 && playerStatus === PlayerStatus.PLAYING}
+                progressInterval={isTransitioning ? 10 : 250}
+                ref={player1Ref}
+                url={src1 || EMPTY_SOURCE}
+                volume={volume1}
+                width={0}
+            />
+            <ReactPlayer
+                config={{
+                    file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
+                }}
+                controls={false}
+                height={0}
+                id="web-player-2"
+                muted={isMuted}
+                onEnded={src2 ? () => onEndedPlayer2() : undefined}
+                onError={handleOnError(player2Ref, () => onEndedPlayer2())}
+                onProgress={onProgressPlayer2}
+                playbackRate={speed || 1}
+                playing={playerNum === 2 && playerStatus === PlayerStatus.PLAYING}
+                progressInterval={isTransitioning ? 10 : 250}
+                ref={player2Ref}
+                url={src2 || EMPTY_SOURCE}
+                volume={volume2}
+                width={0}
+            />
         </div>
     );
 };
