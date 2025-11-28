@@ -14,8 +14,11 @@ import {
     dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { disableNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/disable-native-drag-preview';
+import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import { useEffect, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 
+import { DragPreview } from '/@/shared/components/drag-preview/drag-preview';
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { dndUtils, DragData, DragOperation, DragTarget } from '/@/shared/types/drag-and-drop';
 
@@ -85,14 +88,22 @@ export const useDragDrop = <TElement extends HTMLElement>({
                             return drag.onGenerateDragPreview(data);
                         }
 
+                        const dragData = dndUtils.generateDragData({
+                            id: drag.getId(),
+                            item: drag.getItem(),
+                            itemType: drag.itemType,
+                            operation: drag.operation,
+                            type: drag.target,
+                        }) as DragData;
+
                         disableNativeDragPreview({ nativeSetDragImage: data.nativeSetDragImage });
-                        // setCustomNativeDragPreview({
-                        //     nativeSetDragImage: data.nativeSetDragImage,
-                        //     // render: ({ container }) => {
-                        //     //     const root = createRoot(container);
-                        //     //     root.render(<DragPreview itemCount={1} />);
-                        //     // },
-                        // });
+                        setCustomNativeDragPreview({
+                            nativeSetDragImage: data.nativeSetDragImage,
+                            render: ({ container }) => {
+                                const root = createRoot(container);
+                                root.render(<DragPreview data={dragData} />);
+                            },
+                        });
                     },
                 }),
             );
