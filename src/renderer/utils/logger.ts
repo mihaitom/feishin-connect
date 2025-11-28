@@ -5,6 +5,7 @@ export enum LogCategory {
     API = 'api',
     OTHER = 'other',
     PLAYER = 'player',
+    SCROBBLE = 'scrobble',
     SYSTEM = 'system',
 }
 

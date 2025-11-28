@@ -45,5 +45,12 @@ export const logMsg = {
         toggleRepeat: 'Toggle repeat',
         toggleShuffle: 'Toggle shuffle',
     },
+    [LogCategory.SCROBBLE]: {
+        scrobbledPause: 'Scrobbled a pause event',
+        scrobbledStart: 'Scrobbled a start event',
+        scrobbledSubmission: 'Scrobbled a submission event',
+        scrobbledTimeupdate: 'Scrobbled a timeupdate event',
+        scrobbledUnpause: 'Scrobbled an unpause event',
+    },
     [LogCategory.SYSTEM]: {},
 };
