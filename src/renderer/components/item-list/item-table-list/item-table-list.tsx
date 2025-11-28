@@ -1108,7 +1108,38 @@ const BaseItemTableList = ({
         ],
     );
 
+    // Main grid overlayscrollbars - only handle X-axis if right-pinned columns exist
     const [initialize, osInstance] = useOverlayScrollbars({
+        defer: false,
+        events: {
+            initialized(osInstance) {
+                const { viewport } = osInstance.elements();
+                viewport.style.overflowX = `var(--os-viewport-overflow-x)`;
+
+                if (pinnedRightColumnCount > 0) {
+                    viewport.style.overflowY = 'auto';
+                } else {
+                    viewport.style.overflowY = `var(--os-viewport-overflow-y)`;
+                }
+            },
+        },
+        options: {
+            overflow: {
+                x: 'scroll',
+                y: pinnedRightColumnCount > 0 ? 'hidden' : 'scroll',
+            },
+            paddingAbsolute: true,
+            scrollbars: {
+                autoHide: 'leave',
+                autoHideDelay: 500,
+                pointers: ['mouse', 'pen', 'touch'],
+                theme: 'feishin-os-scrollbar',
+            },
+        },
+    });
+
+    // Right pinned columns overlayscrollbars - enable Y-axis scroll when right-pinned columns exist
+    const [initializeRightPinned, osInstanceRightPinned] = useOverlayScrollbars({
         defer: false,
         events: {
             initialized(osInstance) {
@@ -1118,7 +1149,7 @@ const BaseItemTableList = ({
             },
         },
         options: {
-            overflow: { x: 'scroll', y: 'scroll' },
+            overflow: { x: 'hidden', y: 'scroll' },
             paddingAbsolute: true,
             scrollbars: {
                 autoHide: 'leave',
@@ -1174,7 +1205,56 @@ const BaseItemTableList = ({
                 // Ignore error
             }
         };
-    }, [enableDrag, initialize, osInstance]);
+    }, [enableDrag, initialize, osInstance, pinnedRightColumnCount]);
+
+    // Initialize overlayscrollbars for right pinned columns
+    useEffect(() => {
+        if (pinnedRightColumnCount === 0) {
+            return;
+        }
+
+        const { current: root } = pinnedRightColumnRef;
+
+        if (!root || !root.firstElementChild) {
+            return;
+        }
+
+        const viewport = root.firstElementChild as HTMLElement;
+
+        initializeRightPinned({
+            elements: { viewport },
+            target: root,
+        });
+
+        if (enableDrag) {
+            autoScrollForElements({
+                canScroll: () => true,
+                element: viewport,
+                getAllowedAxis: () => 'vertical',
+                getConfiguration: () => ({ maxScrollSpeed: 'fast' }),
+            });
+        }
+
+        return () => {
+            try {
+                const instance = osInstanceRightPinned();
+                const { current: root } = pinnedRightColumnRef;
+
+                if (instance && root) {
+                    const viewport = root.firstElementChild as HTMLElement;
+
+                    const rootInDocument = document.contains(root);
+                    const viewportInDocument = viewport && document.contains(viewport);
+
+                    if (rootInDocument && viewportInDocument) {
+                        instance.destroy();
+                    }
+                }
+            } catch {
+                // Ignore error
+            }
+        };
+    }, [enableDrag, initializeRightPinned, osInstanceRightPinned, pinnedRightColumnCount]);
 
     useEffect(() => {
         const header = pinnedRowRef.current?.childNodes[0] as HTMLDivElement;
@@ -1236,14 +1316,19 @@ const BaseItemTableList = ({
                 // Set a timeout to remove the element from scrolling set
                 const timeout = setTimeout(() => {
                     scrollingElements.delete(element);
-                    scrollTimeouts.delete(element);
 
-                    if (element === row && onScrollEndRef.current) {
+                    // Use right pinned column scroll position if right-pinned columns exist
+                    const hasRightPinnedColumns = pinnedRightColumnCount > 0;
+                    const scrollElement = hasRightPinnedColumns && pinnedRight ? pinnedRight : row;
+
+                    if (scrollElement && onScrollEndRef.current) {
                         onScrollEndRef.current(
-                            row.scrollTop,
+                            scrollElement.scrollTop,
                             handleRef.current ?? (undefined as any),
                         );
                     }
+
+                    scrollTimeouts.delete(element);
                 }, 150);
 
                 scrollTimeouts.set(element, timeout);
@@ -1276,6 +1361,8 @@ const BaseItemTableList = ({
                     row: false,
                 };
 
+                const hasRightPinnedColumns = pinnedRightColumnCount > 0;
+
                 // Sync horizontal scroll between header and main content (only if header exists)
                 if (header && e.currentTarget === header && !isScrolling.row) {
                     isScrolling.row = true;
@@ -1300,36 +1387,57 @@ const BaseItemTableList = ({
                             left: scrollLeft,
                         });
                     }
-                    if (pinnedLeft) {
-                        isScrolling.pinnedLeft = true;
-                        pinnedLeft.scrollTo({
-                            behavior: 'instant',
-                            top: scrollTop,
-                        });
-                    }
-                    if (pinnedRight) {
+                    // When right-pinned columns exist, sync Y-scroll to right pinned column instead of from main grid
+                    if (hasRightPinnedColumns && pinnedRight) {
                         isScrolling.pinnedRight = true;
                         pinnedRight.scrollTo({
                             behavior: 'instant',
                             top: scrollTop,
                         });
+                        isScrolling.pinnedRight = false;
+                    } else {
+                        // When no right-pinned columns, sync Y-scroll normally
+                        if (pinnedLeft) {
+                            isScrolling.pinnedLeft = true;
+                            pinnedLeft.scrollTo({
+                                behavior: 'instant',
+                                top: scrollTop,
+                            });
+                        }
+                        if (pinnedRight) {
+                            isScrolling.pinnedRight = true;
+                            pinnedRight.scrollTo({
+                                behavior: 'instant',
+                                top: scrollTop,
+                            });
+                        }
                     }
                     isScrolling.header = false;
                     isScrolling.pinnedLeft = false;
-                    isScrolling.pinnedRight = false;
                 }
 
                 // Sync vertical scroll between left pinned column and main content (only if pinnedLeft exists)
                 if (pinnedLeft && e.currentTarget === pinnedLeft && !isScrolling.row) {
-                    isScrolling.row = true;
-                    row.scrollTo({
-                        behavior: 'instant',
-                        top: scrollTop,
-                    });
-                    isScrolling.row = false;
+                    // When right-pinned columns exist, sync Y-scroll to right pinned column instead of main grid
+                    if (hasRightPinnedColumns && pinnedRight) {
+                        isScrolling.pinnedRight = true;
+                        pinnedRight.scrollTo({
+                            behavior: 'instant',
+                            top: scrollTop,
+                        });
+                        isScrolling.pinnedRight = false;
+                    } else {
+                        isScrolling.row = true;
+                        row.scrollTo({
+                            behavior: 'instant',
+                            top: scrollTop,
+                        });
+                        isScrolling.row = false;
+                    }
                 }
 
-                // Sync vertical scroll between right pinned column and main content (only if pinnedRight exists)
+                // Sync vertical scroll from right pinned column to main content and left pinned column
+                // When right-pinned columns exist, this is the source of truth for Y-scroll
                 if (pinnedRight && e.currentTarget === pinnedRight && !isScrolling.row) {
                     isScrolling.row = true;
                     row.scrollTo({
@@ -1337,6 +1445,14 @@ const BaseItemTableList = ({
                         top: scrollTop,
                     });
                     isScrolling.row = false;
+                    if (pinnedLeft) {
+                        isScrolling.pinnedLeft = true;
+                        pinnedLeft.scrollTo({
+                            behavior: 'instant',
+                            top: scrollTop,
+                        });
+                        isScrolling.pinnedLeft = false;
+                    }
                 }
             };
 
@@ -1437,6 +1553,7 @@ const BaseItemTableList = ({
     // Handle top shadow visibility based on vertical scroll
     useEffect(() => {
         const row = rowRef.current?.childNodes[0] as HTMLDivElement;
+        const pinnedRight = pinnedRightColumnRef.current?.childNodes[0] as HTMLDivElement;
 
         if (!row || !enableHeader) {
             const timeout = setTimeout(() => {
@@ -1446,19 +1563,22 @@ const BaseItemTableList = ({
             return () => clearTimeout(timeout);
         }
 
+        // When right-pinned columns exist, use right pinned column's scroll position
+        const scrollElement = pinnedRightColumnCount > 0 && pinnedRight ? pinnedRight : row;
+
         const checkScrollPosition = () => {
-            const currentScrollTop = row.scrollTop;
+            const currentScrollTop = scrollElement.scrollTop;
             setShowTopShadow(currentScrollTop > 0);
         };
 
         checkScrollPosition();
 
-        row.addEventListener('scroll', checkScrollPosition);
+        scrollElement.addEventListener('scroll', checkScrollPosition);
 
         return () => {
-            row.removeEventListener('scroll', checkScrollPosition);
+            scrollElement.removeEventListener('scroll', checkScrollPosition);
         };
-    }, [enableHeader]);
+    }, [enableHeader, pinnedRightColumnCount]);
 
     const getRowHeight = useCallback(
         (index: number, cellProps: TableItemProps) => {
