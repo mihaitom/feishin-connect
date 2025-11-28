@@ -87,7 +87,7 @@ const HeaderPlayButton = ({
 
 const Title = ({ children }: TitleProps) => {
     return (
-        <TextTitle fw={700} order={2} overflow="hidden">
+        <TextTitle fw={700} order={1} overflow="hidden">
             {children}
         </TextTitle>
     );
