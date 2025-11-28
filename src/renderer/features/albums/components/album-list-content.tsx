@@ -70,6 +70,7 @@ export const AlbumListView = ({
         }
 
         return {
+            ...query,
             ...overrideQuery,
             sortBy: overrideQuery.sortBy || query.sortBy,
             sortOrder: overrideQuery.sortOrder || query.sortOrder,

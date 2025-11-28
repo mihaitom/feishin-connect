@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 
 import { usePlaylistListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-list-filters';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
@@ -68,6 +68,19 @@ export const PlaylistListView = ({
 
     const { query } = usePlaylistListFilters();
 
+    const mergedQuery = useMemo(() => {
+        if (!overrideQuery) {
+            return query;
+        }
+
+        return {
+            ...query,
+            ...overrideQuery,
+            sortBy: overrideQuery.sortBy || query.sortBy,
+            sortOrder: overrideQuery.sortOrder || query.sortOrder,
+        };
+    }, [query, overrideQuery]);
+
     switch (display) {
         case ListDisplayType.GRID: {
             switch (pagination) {
@@ -77,7 +90,7 @@ export const PlaylistListView = ({
                             gap={grid.itemGap}
                             itemsPerPage={itemsPerPage}
                             itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                         />
                     );
@@ -88,7 +101,7 @@ export const PlaylistListView = ({
                             gap={grid.itemGap}
                             itemsPerPage={itemsPerPage}
                             itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                         />
                     );
@@ -109,7 +122,7 @@ export const PlaylistListView = ({
                             enableRowHoverHighlight={table.enableRowHoverHighlight}
                             enableVerticalBorders={table.enableVerticalBorders}
                             itemsPerPage={itemsPerPage}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
                         />
@@ -125,7 +138,7 @@ export const PlaylistListView = ({
                             enableRowHoverHighlight={table.enableRowHoverHighlight}
                             enableVerticalBorders={table.enableVerticalBorders}
                             itemsPerPage={itemsPerPage}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
                         />

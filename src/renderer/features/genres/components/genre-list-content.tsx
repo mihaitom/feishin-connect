@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 
 import { useGenreListFilters } from '/@/renderer/features/genres/hooks/use-genre-list-filters';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
@@ -58,6 +58,19 @@ export const GenreListView = ({
 
     const { query } = useGenreListFilters();
 
+    const mergedQuery = useMemo(() => {
+        if (!overrideQuery) {
+            return query;
+        }
+
+        return {
+            ...query,
+            ...overrideQuery,
+            sortBy: overrideQuery.sortBy || query.sortBy,
+            sortOrder: overrideQuery.sortOrder || query.sortOrder,
+        };
+    }, [query, overrideQuery]);
+
     switch (display) {
         case ListDisplayType.GRID: {
             switch (pagination) {
@@ -67,7 +80,7 @@ export const GenreListView = ({
                             gap={grid.itemGap}
                             itemsPerPage={itemsPerPage}
                             itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                         />
                     );
@@ -78,7 +91,7 @@ export const GenreListView = ({
                             gap={grid.itemGap}
                             itemsPerPage={itemsPerPage}
                             itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                         />
                     );
@@ -99,7 +112,7 @@ export const GenreListView = ({
                             enableRowHoverHighlight={table.enableRowHoverHighlight}
                             enableVerticalBorders={table.enableVerticalBorders}
                             itemsPerPage={itemsPerPage}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
                         />
@@ -115,7 +128,7 @@ export const GenreListView = ({
                             enableRowHoverHighlight={table.enableRowHoverHighlight}
                             enableVerticalBorders={table.enableVerticalBorders}
                             itemsPerPage={itemsPerPage}
-                            query={overrideQuery ?? query}
+                            query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
                         />

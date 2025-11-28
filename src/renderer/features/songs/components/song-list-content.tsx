@@ -67,6 +67,7 @@ export const SongListView = ({
         }
 
         return {
+            ...query,
             ...overrideQuery,
             sortBy: overrideQuery.sortBy || query.sortBy,
             sortOrder: overrideQuery.sortOrder || query.sortOrder,
