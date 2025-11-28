@@ -12,6 +12,7 @@ import {
     ItemListStateActions,
     ItemListStateItem,
     useItemListState,
+    useItemSelectionState,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { ItemListItem } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
@@ -29,6 +30,7 @@ import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { DragOperation, DragTarget, DragTargetMap } from '/@/shared/types/drag-and-drop';
 
 interface AlbumTracksTableProps {
+    internalState?: ItemListStateActions;
     isDark?: boolean;
     serverId: string;
     songs?: Array<{
@@ -54,7 +56,7 @@ interface TrackRowProps {
 
 const TrackRow = ({ controls, internalState, serverId, song }: TrackRowProps) => {
     const rowId = internalState.extractRowId(song);
-    const isSelected = rowId ? internalState.isSelected(rowId) : false;
+    const isSelected = useItemSelectionState(internalState, rowId);
 
     const songWithMetadata = {
         ...song,
@@ -132,7 +134,12 @@ const TrackRow = ({ controls, internalState, serverId, song }: TrackRowProps) =>
     );
 };
 
-const AlbumTracksTable = ({ isDark, serverId, songs }: AlbumTracksTableProps) => {
+const AlbumTracksTable = ({
+    internalState: parentInternalState,
+    isDark,
+    serverId,
+    songs,
+}: AlbumTracksTableProps) => {
     const getDataFn = useCallback(() => songs || [], [songs]);
 
     const extractRowId = useCallback((item: unknown) => {
@@ -142,7 +149,9 @@ const AlbumTracksTable = ({ isDark, serverId, songs }: AlbumTracksTableProps) =>
         return undefined;
     }, []);
 
-    const internalState = useItemListState(getDataFn, extractRowId);
+    // Use parent internalState if available, otherwise create a local one
+    const localInternalState = useItemListState(getDataFn, extractRowId);
+    const internalState = parentInternalState || localInternalState;
 
     const controls = useDefaultItemListControls();
 
@@ -253,6 +262,7 @@ export const ExpandedAlbumListItem = ({ internalState, item }: ExpandedAlbumList
                             </Group>
                         </div>
                         <AlbumTracksTable
+                            internalState={internalState}
                             isDark={color.isDark}
                             serverId={item._serverId}
                             songs={data?.songs}
