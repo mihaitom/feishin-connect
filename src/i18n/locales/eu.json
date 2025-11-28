@@ -538,7 +538,12 @@
         "imageAspectRatio_description": "gaituta badago, azaleko artea jatorrizko aspektu-erlazioa erabiliz erakutsiko da. 1:1 ez den arterako, gainerako espazioa hutsik egongo da",
         "crossfadeStyle": "crossfade estiloa",
         "discordRichPresence": "{{discord}}-en jarduera-egoera",
-        "enableAutoTranslation": "gaitu itzulpen automatikoa"
+        "enableAutoTranslation": "gaitu itzulpen automatikoa",
+        "exportImportSettings_control_exportText": "esportatu ezarpenak",
+        "exportImportSettings_control_importText": "inportatu ezarpenak",
+        "exportImportSettings_control_title": "inportatu / esportatu ezarpenak",
+        "exportImportSettings_importBtn": "inportatu ezarpenak",
+        "exportImportSettings_importModalTitle": "inportatu feishin ezarpenak"
     },
     "form": {
         "addServer": {
@@ -768,10 +773,14 @@
     },
     "releaseType": {
         "primary": {
-            "album": "$t(entity.album_one)"
+            "album": "$t(entity.album_one)",
+            "other": "bestelakoa"
         },
         "secondary": {
-            "compilation": "konpilazioa"
+            "compilation": "konpilazioa",
+            "audiobook": "audioliburua",
+            "interview": "elkarrizketa",
+            "remix": "nahasketa"
         }
     }
 }

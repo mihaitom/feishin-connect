@@ -440,8 +440,8 @@
             "removeFromQueue": "$t(action.removeFromQueue)",
             "showDetails": "получить информацию",
             "shareItem": "поделиться",
-            "goToAlbum": "Перейти $t(entity.album_one)",
-            "goToAlbumArtist": "Перейти $t(entity.albumArtist_one)"
+            "goToAlbum": "Перейти к $t(entity.album_one)",
+            "goToAlbumArtist": "Перейти к $t(entity.albumArtist_one)"
         },
         "home": {
             "mostPlayed": "слушают чаще всего",
@@ -782,6 +782,22 @@
         "lyricOffset": "синхронизация текста треков (мс)",
         "audioExclusiveMode": "эксклюзивный режим аудио",
         "audioExclusiveMode_description": "включить режим эксклюзивного вывода. В этом режиме система обычно блокируется, и только mpv сможет выводить звук",
-        "artistBackground": "Фоновое изображение исполнителя"
+        "artistBackground": "Фоновое изображение исполнителя",
+        "artistBackground_description": "Добавляет фоновое изображение для страниц исполнителя, содержащих обложку исполнителя",
+        "artistBackgroundBlur": "процент размытия обложки исполнителя",
+        "artistBackgroundBlur_description": "регулирует процент размытия к заднему фону исполнителя"
+    },
+    "releaseType": {
+        "secondary": {
+            "demo": "демо",
+            "audiobook": "аудиокнига",
+            "compilation": "подборка",
+            "interview": "интервью",
+            "remix": "ремикс",
+            "live": "прямой эфир"
+        },
+        "primary": {
+            "other": "другие"
+        }
     }
 }

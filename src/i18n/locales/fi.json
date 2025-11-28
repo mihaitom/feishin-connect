@@ -94,7 +94,14 @@
         "newVersion": "uusi versio on asennettu ({{version}})",
         "viewReleaseNotes": "katsele julkaisutietoja",
         "bitDepth": "bittisyvyys",
-        "sampleRate": "näytteenottotaajuus"
+        "sampleRate": "näytteenottotaajuus",
+        "private": "yksityinen",
+        "public": "julkinen",
+        "explicitStatus": "eksplisiittinen tila",
+        "recordLabel": "levy-yhtiö",
+        "releaseType": "julkaisun tyyppi",
+        "explicit": "eksplisiittinen",
+        "clean": "puhdas"
     },
     "entity": {
         "album_one": "albumi",
@@ -225,7 +232,8 @@
         "note": "muistiinpano",
         "owner": "$t(common.owner)",
         "path": "polku",
-        "songCount": "kappalemäärä"
+        "songCount": "kappalemäärä",
+        "explicitStatus": "$t(common.explicitStatus)"
     },
     "form": {
         "addServer": {
@@ -239,7 +247,9 @@
             "error_savePassword": "salasanaa tallentaessa tapahtui virhe",
             "input_password": "salasana",
             "input_username": "käyttäjänimi",
-            "success": "palvelin lisätty onnistuneesti"
+            "success": "palvelin lisätty onnistuneesti",
+            "input_preferInstantMix": "suosi pika-miksausta",
+            "input_preferInstantMixDescription": "käytä vain pika-miksausta saadaksesi samankaltaisia kappaleita. käytännöllinen jos sinulla on lisäosia, jotka muuttavat tätä käytöstä"
         },
         "createPlaylist": {
             "input_public": "julkinen",
@@ -253,7 +263,9 @@
             "input_skipDuplicates": "ohita kaksoiskappaleet",
             "success": "$t(entity.trackWithCount, {\"count\": {{message}} }) lisätty $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
             "title": "lisää soittolistalle $t(entity.playlist_one)",
-            "input_playlists": "$t(entity.playlist_other)"
+            "input_playlists": "$t(entity.playlist_other)",
+            "create": "luo $t(entity.playlist_one) {{playlist}}",
+            "searchOrCreate": "hae $t(entity.playlist_other) tai tyyppiä luodaksesi uuden"
         },
         "updateServer": {
             "success": "palvelin on päivitetty onnistuneesti",
@@ -286,6 +298,11 @@
             "input_optionMatchAny": "sovita joku",
             "input_optionMatchAll": "sovita kaikki",
             "title": "kyselyeditori"
+        },
+        "privateMode": {
+            "enabled": "yksityinen tila käytössä, toistotila on nyt piilotettu ulkoisilta integraatioilta",
+            "disabled": "yksityinen tila poissa käytössä, toistotila on nyt näkyvillä ulkoisille integraatioille",
+            "title": "yksityinen tila"
         }
     },
     "setting": {
@@ -521,7 +538,17 @@
         "discordPausedStatus": "näytä rich presence tauotettuna",
         "discordPausedStatus_description": "ollessak käytössä, status näyttää milloin soitin on tautotettuna",
         "preservePitch": "säilytä sävelkorkeus",
-        "preservePitch_description": "säilytä sävelkorkeus toistonopeutta muokatessa"
+        "preservePitch_description": "säilytä sävelkorkeus toistonopeutta muokatessa",
+        "artistBackground": "artistin taustakuva",
+        "artistBackground_description": "lisää taustakuvan artistin sivuille, jotak sisältävät artistin kuvia",
+        "artistBackgroundBlur": "artistin taustakuvan kuvan sumennuksen koko",
+        "artistBackgroundBlur_description": "säätää artistin taustakuvaan käytettävän sumennuksen määrää",
+        "crossfadeStyle": "ristihäivytyksen tyylli",
+        "releaseChannel_optionBeta": "beeta",
+        "releaseChannel_optionLatest": "viimeisin",
+        "releaseChannel": "julkaisulinja",
+        "releaseChannel_description": "valitse vakaiden ja beetaversioiden välillä automaattisille päivityksille",
+        "discordDisplayType_artistname": "artistin nimi / artistien nimet"
     },
     "page": {
         "itemDetail": {
@@ -552,7 +579,9 @@
             "goForward": "mene eteenpäin",
             "manageServers": "hallitse palvelimia",
             "collapseSidebar": "kutista sivupalkki",
-            "version": "versio {{version}}"
+            "version": "versio {{version}}",
+            "privateModeOff": "käännä yksityinen tila pois käytöstä",
+            "privateModeOn": "käännä yksityinen tila käyttöön"
         },
         "contextMenu": {
             "playSimilarSongs": "$t(player.playSimilarSongs)",
@@ -576,7 +605,9 @@
             "addFavorite": "$t(action.addToFavorites)",
             "addLast": "$t(player.addLast)",
             "moveToNext": "$t(action.moveToNext)",
-            "removeFromQueue": "$t(action.removeFromQueue)"
+            "removeFromQueue": "$t(action.removeFromQueue)",
+            "goToAlbum": "mene $t(entity.album_one)",
+            "goToAlbumArtist": "mene $t(entity.albumArtist_one)"
         },
         "sidebar": {
             "albumArtists": "$t(entity.albumArtist_other)",
@@ -641,7 +672,8 @@
             "recentlyPlayed": "hiljattain soitetut",
             "title": "$t(common.home)",
             "mostPlayed": "eniten soitetut",
-            "newlyAdded": "hiljattain lisätyt julkaisut"
+            "newlyAdded": "hiljattain lisätyt julkaisut",
+            "recentlyReleased": "hiljattain julkaistu"
         },
         "albumArtistDetail": {
             "about": "{{artist}}{sta/stä",
@@ -782,6 +814,29 @@
             "playCount": "toistoja",
             "rating": "arvostelu",
             "releaseDate": "julkaisupäivämäärä"
+        }
+    },
+    "releaseType": {
+        "primary": {
+            "album": "$t(entity.album_one)",
+            "broadcast": "lähetys",
+            "ep": "EP",
+            "other": "muu",
+            "single": "single"
+        },
+        "secondary": {
+            "audiobook": "änikirja",
+            "audioDrama": "kuunnelma",
+            "compilation": "kokoomateos",
+            "djMix": "DJ mix",
+            "demo": "demo",
+            "fieldRecording": "kenttä-äänitys",
+            "interview": "haastattelu",
+            "live": "live",
+            "mixtape": "mixtape",
+            "remix": "remiksi",
+            "soundtrack": "elokuvamusiikki",
+            "spokenWord": "puhetta"
         }
     }
 }

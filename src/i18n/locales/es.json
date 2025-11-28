@@ -301,7 +301,10 @@
         "enableAutoTranslation": "Activar traducción automática",
         "discordRichPresence": "Estado de actividad de {{discord}}",
         "crossfadeStyle": "Estilo del crossfade",
-        "language": "Idioma"
+        "language": "Idioma",
+        "notify": "Activar notificaciones de canciones",
+        "notify_description": "Muestra notificaciones cuando se cambia la canción actual",
+        "transcode": "Activar transcodificación"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",

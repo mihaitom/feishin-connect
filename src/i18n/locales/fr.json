@@ -662,7 +662,10 @@
         "exportImportSettings_importModalTitle": "paramètres d'importation feishin",
         "crossfadeStyle": "style de fondu enchaîné",
         "discordRichPresence": "{{discord}} Rich Presence",
-        "language": "langage"
+        "language": "langage",
+        "notify_description": "affiche une notification lorsque la chanson en cours change",
+        "transcode": "activer le transcodage",
+        "notify": "activer les notifications de chansons"
     },
     "form": {
         "deletePlaylist": {

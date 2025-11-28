@@ -301,7 +301,10 @@
         "discordRichPresence": "stav na {{discord}}u",
         "enableAutoTranslation_description": "povolit automatický překlad při načtení textů",
         "enableAutoTranslation": "povolit automatický překlad",
-        "language": "jazyk"
+        "language": "jazyk",
+        "notify": "povolit oznámení o skladbách",
+        "notify_description": "zobrazit oznámení při změně aktuální skladby",
+        "transcode": "povolit překódování"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist_one)",

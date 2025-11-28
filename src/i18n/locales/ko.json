@@ -115,7 +115,14 @@
         "owner": "소유자",
         "sampleRate": "샘플레이트",
         "tags": "태그",
-        "additionalParticipants": "추가 참여자"
+        "additionalParticipants": "추가 참여자",
+        "explicitStatus": "성인컨텐츠",
+        "private": "비공개",
+        "public": "공개",
+        "recordLabel": "레이블",
+        "releaseType": "발매형태",
+        "explicit": "성인컨텐츠",
+        "clean": "클린"
     },
     "entity": {
         "albumWithCount_other": "{{count}} 앨범",
@@ -228,7 +235,9 @@
             "input_skipDuplicates": "중복 건너뛰기",
             "title": "$t(entity.playlist_one) 에 추가",
             "input_playlists": "$t(entity.playlist_other)",
-            "success": "$t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })에 $t(entity.trackWithCount, {\"count\": {{message}} })가 추가되었습니다"
+            "success": "$t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })에 $t(entity.trackWithCount, {\"count\": {{message}} })가 추가되었습니다",
+            "create": "$t(entity.playlist_one) {{playlist}} 생성",
+            "searchOrCreate": "$t(entity.playlist_other) 검색 또는 입력하여 새로 만들기"
         },
         "lyricSearch": {
             "title": "가사 검색",
@@ -443,6 +452,47 @@
         "accentColor_description": "앱의 강조색상 설정",
         "accentColor": "강조색상",
         "albumBackground_description": "앨범아트가 있는 경우 앨범화면에 배경이미지 추가",
-        "albumBackground": "앨범 배경이미지"
+        "albumBackground": "앨범 배경이미지",
+        "albumBackgroundBlur_description": "앨범 배경이미지의 흐려짐 정도 조정",
+        "albumBackgroundBlur": "앨범배경이미지 흐려짐 크기",
+        "applicationHotkeys_description": "앱의 단축키 설정. 앱 전체에 적용되는 단축키를 설정하기 위해서는 체크박스에 체크하세요(PC만 가능)",
+        "applicationHotkeys": "앱 단축키",
+        "artistBackground": "아티스트 배경이미지",
+        "artistBackground_description": "아티스트 페이지에 아티스트가 포함된 배경이미지를 추가",
+        "artistBackgroundBlur": "아티스트 배경이미지 흐려짐 크기",
+        "artistBackgroundBlur_description": "아티스트 배경이미지에 적용된 흐려짐 크기 조정",
+        "artistConfiguration": "앨범아티스트 페이지 설정",
+        "artistConfiguration_description": "앨범아티스트 페이지에 표시할 정보 및 순서 설정",
+        "audioDevice_description": "음악재생에 사용할 장치 선택(웹플레이어만 가능)",
+        "audioDevice": "오디오 장치",
+        "audioExclusiveMode_description": "단독재생모드 켜기. 이 모드에서는 일반적으로 시스템의 재생장치가 고정되며 MPV로만 오디오가 재생됩니다",
+        "audioExclusiveMode": "오디오 단독재생모드",
+        "audioPlayer_description": "재생을 위한 오디오 플레이어 선택",
+        "audioPlayer": "오디오 플레이어",
+        "buttonSize_description": "플레이어 바 버튼 크기",
+        "buttonSize": "플레이어 바 버튼 크기",
+        "clearCache_description": "페이신 하드클리어. 페이신의 캐시 및 브라우저의 캐시 삭제(저장된 이미지 및 기타 정보). 서버 접속정보 및 설정은 유지됩니다"
+    },
+    "releaseType": {
+        "primary": {
+            "broadcast": "방송",
+            "ep": "ep앨범",
+            "other": "기타",
+            "single": "싱글"
+        },
+        "secondary": {
+            "audiobook": "오디오북",
+            "audioDrama": "오디오 드라마",
+            "compilation": "컴필레이션",
+            "djMix": "DJ 믹스",
+            "demo": "데모",
+            "fieldRecording": "현지녹음",
+            "interview": "인터뷰",
+            "live": "라이브",
+            "mixtape": "믹스테이프",
+            "remix": "리믹스",
+            "soundtrack": "사운드트랙",
+            "spokenWord": "보컬사운드"
+        }
     }
 }

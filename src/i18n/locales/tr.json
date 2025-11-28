@@ -118,7 +118,9 @@
         "year": "yıl",
         "yes": "evet",
         "trackGain": "parça kazancı",
-        "trackPeak": "parça zirvesi"
+        "trackPeak": "parça zirvesi",
+        "private": "gizli",
+        "clean": "temiz"
     },
     "entity": {
         "album_one": "albüm",
@@ -723,7 +725,11 @@
         "discordDisplayType_artistname": "Sanatçı adı(ları)",
         "hotkey_navigateHome": "ana sayfaya git",
         "preventSleepOnPlayback": "oynatma sırasında uykuyu önle",
-        "preventSleepOnPlayback_description": "müzik çalarken ekranın uyku moduna geçmesini önle"
+        "preventSleepOnPlayback_description": "müzik çalarken ekranın uyku moduna geçmesini önle",
+        "releaseChannel_optionBeta": "beta",
+        "releaseChannel_optionLatest": "en son",
+        "language": "dil",
+        "notify": "müzik bildirimi aktivleştir"
     },
     "table": {
         "column": {
@@ -801,5 +807,16 @@
                 "table": "tablo"
             }
         }
+    },
+    "releaseType": {
+        "secondary": {
+            "demo": "demo",
+            "live": "canlı",
+            "remix": "remix"
+        }
+    },
+    "dragDropZone": {
+        "error_oneFileOnly": "lütfen sadece 1 dosya seç",
+        "error_readingFile": "bu dosyayi okurken bir sorun oluştu :{{errorMessage}}"
     }
 }
