@@ -5,6 +5,7 @@ import { UserFavoriteEventPayload, UserRatingEventPayload } from '/@/renderer/ev
 import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
 import { MpvPlayer } from '/@/renderer/features/player/audio-player/mpv-player';
 import { WebPlayer } from '/@/renderer/features/player/audio-player/web-player';
+import { useMPRIS } from '/@/renderer/features/player/hooks/use-mpris';
 import { usePowerSaveBlocker } from '/@/renderer/features/player/hooks/use-power-save-blocker';
 import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
 import {
@@ -23,6 +24,7 @@ export const AudioPlayers = () => {
     useScrobble();
     usePowerSaveBlocker();
     useDiscordRpc();
+    useMPRIS();
 
     // Listen to favorite and rating events to update queue songs
     useEffect(() => {
