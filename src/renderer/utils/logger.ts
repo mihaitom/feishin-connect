@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 export enum LogCategory {
     ANALYTICS = 'analytics',
     API = 'api',
+    EXTERNAL = 'external',
     OTHER = 'other',
     PLAYER = 'player',
     SCROBBLE = 'scrobble',

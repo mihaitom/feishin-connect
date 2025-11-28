@@ -6,6 +6,16 @@ export const logMsg = {
         pageViewTracked: 'Page view tracked',
     },
     [LogCategory.API]: {},
+    [LogCategory.EXTERNAL]: {
+        discordRpcActivityCleared: 'Activity was cleared for Discord RPC',
+        discordRpcActivityUpdate: 'Activity was updated for Discord RPC',
+        discordRpcEnabled: 'Discord RPC was enabled',
+        discordRpcInitialized: 'Discord RPC was initialized',
+        discordRpcQuit: 'Discord RPC was quit',
+        discordRpcSetActivity: 'Activity was set for Discord RPC',
+        discordRpcTrackChanged: 'Track was changed for Discord RPC',
+        discordRpcUpdateSkipped: 'Activity was not updated for Discord RPC',
+    },
     [LogCategory.OTHER]: {},
     [LogCategory.PLAYER]: {
         addToQueueByData: 'Added to queue by data',
