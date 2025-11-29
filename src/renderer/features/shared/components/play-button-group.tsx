@@ -1,58 +1,56 @@
 import i18n from '/@/i18n/i18n';
-import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { PlayButton } from '/@/renderer/features/shared/components/play-button';
 import { Group } from '/@/shared/components/group/group';
 import { AppIconSelection } from '/@/shared/components/icon/icon';
+import { Tooltip } from '/@/shared/components/tooltip/tooltip';
 import { Play } from '/@/shared/types/types';
 
-const playButtons: { icon: AppIconSelection; label: string; type: Play }[] = [
-    {
-        icon: 'mediaPlay',
-        label: i18n.t('player.play', { postProcess: 'sentenceCase' }),
-        type: Play.NOW,
-    },
+const playButtons: { icon: AppIconSelection; label: string; secondary: boolean; type: Play }[] = [
     {
         icon: 'mediaPlayNext',
         label: i18n.t('player.addNext', { postProcess: 'sentenceCase' }),
+        secondary: true,
         type: Play.NEXT,
+    },
+    {
+        icon: 'mediaPlay',
+        label: i18n.t('player.play', { postProcess: 'sentenceCase' }),
+        secondary: false,
+        type: Play.NOW,
     },
     {
         icon: 'mediaPlayLast',
         label: i18n.t('player.addLast', { postProcess: 'sentenceCase' }),
+        secondary: true,
         type: Play.LAST,
-    },
-    {
-        icon: 'mediaShuffle',
-        label: i18n.t('player.shuffle', { postProcess: 'sentenceCase' }),
-        type: Play.SHUFFLE,
     },
 ];
 
+const LONG_PRESS_PLAY_BEHAVIOR = {
+    [Play.LAST]: Play.LAST_SHUFFLE,
+    [Play.NEXT]: Play.NEXT_SHUFFLE,
+    [Play.NOW]: Play.SHUFFLE,
+};
+
 interface PlayButtonGroupProps {
+    loading?: boolean | Play;
     onPlay: (type: Play) => void;
 }
 
-export const PlayButtonGroup = ({ onPlay }: PlayButtonGroupProps) => {
+export const PlayButtonGroup = ({ loading, onPlay }: PlayButtonGroupProps) => {
     return (
-        <Group grow>
+        <Group align="center" gap="md" justify="center">
             {playButtons.map((button) => (
-                <ActionIcon
-                    icon={button.icon}
-                    iconProps={{
-                        size: 'xl',
-                    }}
-                    key={button.type}
-                    onClick={() => onPlay(button.type)}
-                    styles={{
-                        root: {
-                            padding: 'var(--mantine-spacing-lg)',
-                        },
-                    }}
-                    tooltip={{
-                        label: button.label,
-                        openDelay: 0,
-                    }}
-                    variant="default"
-                />
+                <Tooltip key={button.type} label={button.label} openDelay={2000}>
+                    <PlayButton
+                        fill={button.type === Play.NOW}
+                        icon={button.icon}
+                        isSecondary={button.secondary}
+                        loading={loading === button.type}
+                        onClick={() => onPlay(button.type)}
+                        onLongPress={() => onPlay(LONG_PRESS_PLAY_BEHAVIOR[button.type])}
+                    />
+                </Tooltip>
             ))}
         </Group>
     );

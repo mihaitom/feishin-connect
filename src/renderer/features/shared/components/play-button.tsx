@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { t } from 'i18next';
-import { memo } from 'react';
+import { forwardRef, memo } from 'react';
 
 import styles from './play-button.module.css';
 
@@ -85,16 +85,19 @@ interface PlayButtonProps {
     onLongPress?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const PlayButton = memo(
-    ({
-        classNames,
-        fill,
-        icon = 'mediaPlay',
-        isSecondary,
-        loading,
-        onClick,
-        onLongPress,
-    }: PlayButtonProps) => {
+const PlayButtonBase = forwardRef<HTMLButtonElement, PlayButtonProps>(
+    (
+        {
+            classNames,
+            fill,
+            icon = 'mediaPlay',
+            isSecondary,
+            loading,
+            onClick,
+            onLongPress,
+        }: PlayButtonProps,
+        ref,
+    ) => {
         const clickHandlers = usePlayButtonClick({
             loading,
             onClick,
@@ -107,6 +110,7 @@ export const PlayButton = memo(
                     [styles.fill]: fill,
                     [styles.secondary]: isSecondary,
                 })}
+                ref={ref}
                 {...clickHandlers.handlers}
                 {...clickHandlers.props}
             >
@@ -115,5 +119,7 @@ export const PlayButton = memo(
         );
     },
 );
+
+export const PlayButton = memo(PlayButtonBase);
 
 PlayButton.displayName = 'PlayButton';

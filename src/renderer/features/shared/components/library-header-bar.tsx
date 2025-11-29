@@ -1,6 +1,5 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import { CSSProperties, memo, ReactNode, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import styles from './library-header-bar.module.css';
 
@@ -53,7 +52,6 @@ const HeaderPlayButton = ({
     ...props
 }: HeaderPlayButtonProps) => {
     const serverId = useCurrentServerId();
-    const { t } = useTranslation();
     const player = usePlayer();
 
     const handlePlay = useCallback(
@@ -77,9 +75,16 @@ const HeaderPlayButton = ({
         openModal({
             children: <PlayButtonGroup onPlay={handlePlay} />,
             size: 'xs',
-            title: t('player.play', { postProcess: 'titleCase' }),
+            styles: {
+                body: {
+                    padding: 'var(--theme-spacing-md)',
+                },
+                header: {
+                    display: 'none',
+                },
+            },
         });
-    }, [serverId, handlePlay, t]);
+    }, [serverId, handlePlay]);
 
     return (
         <div className={styles.playButtonContainer}>

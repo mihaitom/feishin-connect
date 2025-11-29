@@ -12,7 +12,7 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { PlayButton } from '/@/renderer/features/shared/components/play-button';
+import { PlayButtonGroup } from '/@/renderer/features/shared/components/play-button-group';
 import { useCurrentServer } from '/@/renderer/store';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
 import { Divider } from '/@/shared/components/divider/divider';
@@ -101,16 +101,6 @@ export const ShuffleAllContextModal = () => {
         closeAllModals();
     };
 
-    const isLoadingNext =
-        isFetching &&
-        (fetchTypeRef.current === Play.NEXT || fetchTypeRef.current === Play.NEXT_SHUFFLE);
-
-    const isLoadingLast =
-        isFetching &&
-        (fetchTypeRef.current === Play.LAST || fetchTypeRef.current === Play.LAST_SHUFFLE);
-
-    const isLoadingNow = isFetching && fetchTypeRef.current === Play.NOW;
-
     return (
         <Stack gap="md">
             <NumberInput
@@ -166,60 +156,10 @@ export const ShuffleAllContextModal = () => {
                 />
             )}
             <Divider />
-            <Group align="center" gap="md" justify="center" w="100%">
-                <PlayButton
-                    icon="mediaPlayNext"
-                    isSecondary
-                    loading={isLoadingNext}
-                    onClick={() => handlePlay(Play.NEXT)}
-                    onLongPress={() => handlePlay(Play.NEXT_SHUFFLE)}
-                />
-                <PlayButton
-                    fill
-                    loading={isLoadingNow}
-                    onClick={() => handlePlay(Play.NOW)}
-                    onLongPress={() => handlePlay(Play.SHUFFLE)}
-                />
-                <PlayButton
-                    icon="mediaPlayLast"
-                    isSecondary
-                    loading={isLoadingLast}
-                    onClick={() => handlePlay(Play.LAST)}
-                    onLongPress={() => handlePlay(Play.LAST_SHUFFLE)}
-                />
-            </Group>
-            {/* <Group grow>
-                <Button
-                    disabled={!limit || isFetching}
-                    leftSection={<Icon icon="mediaPlayNext" />}
-                    loading={fetchTypeRef.current === Play.NEXT && isFetching}
-                    onClick={() => handlePlay(Play.NEXT)}
-                    type="submit"
-                    variant="default"
-                >
-                    {t('player.addNext', { postProcess: 'sentenceCase' })}
-                </Button>
-                <Button
-                    disabled={!limit || isFetching}
-                    leftSection={<Icon icon="mediaPlayLast" />}
-                    loading={fetchTypeRef.current === Play.LAST && isFetching}
-                    onClick={() => handlePlay(Play.LAST)}
-                    type="submit"
-                    variant="default"
-                >
-                    {t('player.addLast', { postProcess: 'sentenceCase' })}
-                </Button>
-            </Group>
-            <Button
-                disabled={!limit || isFetching}
-                leftSection={<Icon icon="mediaPlay" />}
-                loading={fetchTypeRef.current === Play.NOW && isFetching}
-                onClick={() => handlePlay(Play.NOW)}
-                type="submit"
-                variant="filled"
-            >
-                {t('player.play', { postProcess: 'sentenceCase' })}
-            </Button> */}
+            <PlayButtonGroup
+                loading={(isFetching && fetchTypeRef.current) || false}
+                onPlay={handlePlay}
+            />
         </Stack>
     );
 };
