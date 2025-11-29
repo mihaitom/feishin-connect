@@ -44,12 +44,12 @@ export const DragPreview = memo(({ data }: DragPreviewProps) => {
             <div className={styles.preview}>
                 <div className={styles.content}>
                     {itemImage ? (
-                        <div className={styles.imageContainer}>
+                        <div className={styles['image-container']}>
                             <img alt={itemName} className={styles.image} src={itemImage} />
-                            <div className={styles.imageOverlay} />
+                            <div className={styles['image-overlay']} />
                         </div>
                     ) : (
-                        <div className={styles.iconContainer}>
+                        <div className={styles['icon-container']}>
                             {data.itemType === LibraryItem.ALBUM && <Icon icon="album" size="xl" />}
                             {data.itemType === LibraryItem.SONG && (
                                 <Icon icon="itemSong" size="xl" />
@@ -64,7 +64,7 @@ export const DragPreview = memo(({ data }: DragPreviewProps) => {
                             {!data.itemType && <Icon icon="library" size="xl" />}
                         </div>
                     )}
-                    <div className={styles.textContainer}>
+                    <div className={styles['text-container']}>
                         <div className={styles.name}>{itemName}</div>
                         {isMultiple && <div className={styles.count}>+{itemCount - 1} more</div>}
                     </div>

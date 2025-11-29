@@ -10,8 +10,8 @@
     position: relative;
     display: flex;
     align-items: center;
-    min-width: 200px;
-    max-width: 300px;
+    width: 300px;
+    min-height: 80px;
     padding: var(--theme-spacing-md);
     color: var(--theme-colors-foreground);
     background: var(--theme-colors-background);
