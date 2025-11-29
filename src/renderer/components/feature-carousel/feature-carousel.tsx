@@ -6,18 +6,21 @@ import { generatePath, Link } from 'react-router';
 
 import styles from './feature-carousel.module.css';
 
-import { ItemCard } from '/@/renderer/components/item-card/item-card';
-import { useDefaultItemListControls } from '/@/renderer/components/item-list/helpers/item-list-controls';
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { BackgroundOverlay } from '/@/renderer/features/shared/components/library-background-overlay';
+import { PlayButtonGroup } from '/@/renderer/features/shared/components/play-button-group';
 import { useContainerQuery, useFastAverageColor } from '/@/renderer/hooks';
 import { AppRoute } from '/@/renderer/router/routes';
+import { useCurrentServer } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Group } from '/@/shared/components/group/group';
+import { Image } from '/@/shared/components/image/image';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
 import { Album, LibraryItem } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 const containerVariants = {
     animate: (custom: { isNext: boolean }) => ({
@@ -98,11 +101,17 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
         srcLoaded: true,
     });
 
-    const controls = useDefaultItemListControls();
+    const server = useCurrentServer();
+    const { addToQueueByFetch } = usePlayer();
+
+    const handlePlay = (type: Play) => {
+        if (!server?.id) return;
+        addToQueueByFetch(server.id, [album.id], LibraryItem.ALBUM, type);
+    };
 
     return (
         <div className={styles.carouselItem}>
-            <BackgroundOverlay backgroundColor={backgroundColor} opacity={1} />
+            <BackgroundOverlay backgroundColor={backgroundColor} opacity={0.7} />
             <Link
                 className={styles.carouselLink}
                 state={{ item: album }}
@@ -112,21 +121,20 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
             >
                 <div className={styles.content}>
                     <div className={styles.titleSection}>
-                        <TextTitle className={styles.title} fw={700} lineClamp={2} order={3}>
+                        <TextTitle className={styles.title} fw={800} lineClamp={2} order={3}>
                             {album.name}
                         </TextTitle>
                     </div>
 
                     <div className={styles.imageSection}>
-                        <ItemCard
-                            controls={controls}
-                            data={album}
-                            enableNavigation={false}
-                            itemType={LibraryItem.ALBUM}
-                            rows={[]}
-                            type="poster"
-                            withControls
+                        <Image
+                            className={styles.albumImage}
+                            containerClassName={styles.albumImageContainer}
+                            src={album.imageUrl || undefined}
                         />
+                        <div className={styles.playButtonOverlay}>
+                            <PlayButtonGroup onPlay={handlePlay} />
+                        </div>
                     </div>
 
                     <div className={styles.metadataSection}>
@@ -136,18 +144,26 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
                                     className={styles.artist}
                                     fw={600}
                                     key={`artist-${artist.id}`}
-                                    size="md"
+                                    size="xl"
                                 >
                                     {artist.name}
                                 </Text>
                             ))}
                             <Group gap="sm" justify="center" wrap="wrap">
                                 {album.genres?.slice(0, 2).map((genre) => (
-                                    <Badge key={`genre-${genre.id}`} size="sm">
+                                    <Badge
+                                        key={`genre-${genre.id}`}
+                                        size="lg"
+                                        variant="transparent"
+                                    >
                                         {genre.name}
                                     </Badge>
                                 ))}
-                                {album.releaseYear && <Badge size="sm">{album.releaseYear}</Badge>}
+                                {album.releaseYear && (
+                                    <Badge size="lg" variant="transparent">
+                                        {album.releaseYear}
+                                    </Badge>
+                                )}
                             </Group>
                         </Stack>
                     </div>

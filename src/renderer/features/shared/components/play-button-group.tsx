@@ -1,6 +1,7 @@
+import styles from './play-button-group.module.css';
+
 import i18n from '/@/i18n/i18n';
 import { PlayButton } from '/@/renderer/features/shared/components/play-button';
-import { Group } from '/@/shared/components/group/group';
 import { AppIconSelection } from '/@/shared/components/icon/icon';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
 import { Play } from '/@/shared/types/types';
@@ -39,7 +40,7 @@ interface PlayButtonGroupProps {
 
 export const PlayButtonGroup = ({ loading, onPlay }: PlayButtonGroupProps) => {
     return (
-        <Group align="center" gap="md" justify="center">
+        <div className={styles.playButtonGroup}>
             {playButtons.map((button) => (
                 <Tooltip key={button.type} label={button.label} openDelay={2000}>
                     <PlayButton
@@ -52,6 +53,6 @@ export const PlayButtonGroup = ({ loading, onPlay }: PlayButtonGroupProps) => {
                     />
                 </Tooltip>
             ))}
-        </Group>
+        </div>
     );
 };
