@@ -11,19 +11,24 @@ import { Select } from '/@/shared/components/select/select';
 import { Stack } from '/@/shared/components/stack/stack';
 import { QueryBuilderGroup, QueryBuilderRule } from '/@/shared/types/types';
 
+export type FilterGroup = { group: string; items: FilterItem[] };
+
+export type FilterItem = { label: string; type: string; value: string };
+
+export type Filters = FilterGroup[] | FilterItem[];
 type AddArgs = {
     groupIndex: number[];
     level: number;
 };
-
 type DeleteArgs = {
     groupIndex: number[];
     level: number;
     uniqueId: string;
 };
+
 interface QueryBuilderProps {
     data: Record<string, any>;
-    filters: { label: string; type: string; value: string }[];
+    filters: Filters;
     groupIndex: number[];
     level: number;
     onAddRule: (args: AddArgs) => void;

@@ -481,6 +481,7 @@
             "updates": "update",
             "cache": "cache",
             "application": "application",
+            "queryBuilder": "query builder",
             "theme": "theme",
             "controls": "controls",
             "sidebar": "sidebar",
@@ -552,6 +553,10 @@
         "unfavorite": "unfavorite",
         "pause": "pause",
         "viewQueue": "view queue"
+    },
+    "queryBuilder": {
+        "standardTags": "standard tags",
+        "customTags": "custom tags"
     },
     "releaseType": {
         "primary": {
@@ -856,7 +861,12 @@
         "windowBarStyle_description": "select the style of the window bar",
         "windowBarStyle": "window bar style",
         "zoom_description": "sets the zoom percentage for the application",
-        "zoom": "zoom percentage"
+        "zoom": "zoom percentage",
+        "queryBuilder": "query builder",
+        "queryBuilderCustomFields_inputLabel": "label",
+        "queryBuilderCustomFields_inputTag": "tag",
+        "queryBuilderCustomFields": "custom fields",
+        "queryBuilderCustomFields_description": "add custom fields to use in query builders"
     },
     "table": {
         "column": {

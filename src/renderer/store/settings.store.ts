@@ -330,6 +330,25 @@ const WindowSettingsSchema = z.object({
     windowBarStyle: z.nativeEnum(Platform),
 });
 
+const QueryValueInputTypeSchema = z.enum([
+    'boolean',
+    'date',
+    'dateRange',
+    'number',
+    'playlist',
+    'string',
+]);
+
+const QueryBuilderCustomFieldSchema = z.object({
+    label: z.string(),
+    type: QueryValueInputTypeSchema,
+    value: z.string(),
+});
+
+const QueryBuilderSettingsSchema = z.object({
+    tag: z.array(QueryBuilderCustomFieldSchema),
+});
+
 /**
  * This schema is used for validation of the imported settings json
  */
@@ -342,6 +361,7 @@ export const ValidationSettingsStateSchema = z.object({
     lists: z.record(z.nativeEnum(ItemListKey), ItemListConfigSchema),
     lyrics: LyricsSettingsSchema,
     playback: PlaybackSettingsSchema,
+    queryBuilder: QueryBuilderSettingsSchema,
     remote: RemoteSettingsSchema,
     tab: z.union([
         z.literal('general'),
@@ -1105,6 +1125,9 @@ const initialState: SettingsState = {
         type: PlayerType.WEB,
         webAudio: true,
     },
+    queryBuilder: {
+        tag: [],
+    },
     remote: {
         enabled: false,
         password: randomString(8),
@@ -1296,6 +1319,9 @@ export const useFontSettings = () => useSettingsStore((state) => state.font, sha
 export const useDiscordSettings = () => useSettingsStore((state) => state.discord, shallow);
 
 export const useCssSettings = () => useSettingsStore((state) => state.css, shallow);
+
+export const useQueryBuilderSettings = () =>
+    useSettingsStore((state) => state.queryBuilder, shallow);
 
 const getSettingsStoreVersion = () => useSettingsStore.persist.getOptions().version!;
 

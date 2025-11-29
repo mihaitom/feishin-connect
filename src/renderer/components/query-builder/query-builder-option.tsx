@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { Filters } from '/@/renderer/components/query-builder';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
@@ -15,7 +16,7 @@ type DeleteArgs = {
 
 interface QueryOptionProps {
     data: QueryBuilderRule;
-    filters: { label: string; type: string; value: string }[];
+    filters: Filters;
     groupIndex: number[];
     level: number;
     noRemove: boolean;
@@ -165,7 +166,11 @@ export const QueryBuilderOption = ({
         });
     };
 
-    const fieldType = filters.find((f) => f.value === field)?.type;
+    // Handle both grouped and flat filter data
+    const flatFilters = filters.some((f: any) => f.group && f.items)
+        ? filters.flatMap((group: any) => group.items || [])
+        : filters;
+    const fieldType = flatFilters.find((f: any) => f.value === field)?.type;
     const operatorsByFieldType = operators[fieldType as keyof typeof operators];
     const ml = 20;
 

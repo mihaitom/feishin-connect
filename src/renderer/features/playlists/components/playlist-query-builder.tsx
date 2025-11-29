@@ -18,6 +18,7 @@ import { QueryBuilder } from '/@/renderer/components/query-builder';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { convertNDQueryToQueryGroup } from '/@/renderer/features/playlists/utils';
 import { useCurrentServer } from '/@/renderer/store';
+import { useQueryBuilderSettings } from '/@/renderer/store/settings.store';
 import {
     NDSongQueryBooleanOperators,
     NDSongQueryDateOperators,
@@ -168,6 +169,7 @@ export const PlaylistQueryBuilder = forwardRef(
     ) => {
         const { t } = useTranslation();
         const server = useCurrentServer();
+        const queryBuilderSettings = useQueryBuilderSettings();
 
         // Memoize initial filters to avoid recalculation
         const initialFilters = useMemo(
@@ -412,6 +414,54 @@ export const PlaylistQueryBuilder = forwardRef(
             });
         }, []);
 
+        const customFields = useMemo(() => {
+            return queryBuilderSettings.tag
+                .filter((field) => field.value && field.value.trim() !== '')
+                .map((field) => ({
+                    label: field.label,
+                    type: field.type,
+                    value: field.value,
+                }));
+        }, [queryBuilderSettings.tag]);
+
+        const groupedFilters = useMemo(() => {
+            type FilterGroup = {
+                group: string;
+                items: Array<{ label: string; type: string; value: string }>;
+            };
+            const groups: FilterGroup[] = [];
+
+            // Custom Fields group
+            if (customFields.length > 0) {
+                groups.push({
+                    group: t('queryBuilder.customTags', {
+                        postProcess: 'titleCase',
+                    }),
+                    items: customFields,
+                });
+            }
+
+            // Standard Fields group
+            if (NDSongQueryFields.length > 0) {
+                groups.push({
+                    group: t('queryBuilder.standardTags', {
+                        postProcess: 'titleCase',
+                    }),
+                    items: NDSongQueryFields,
+                });
+            }
+
+            if (groups.length === 0) {
+                return NDSongQueryFields;
+            }
+
+            if (groups.length === 1) {
+                return groups[0].items;
+            }
+
+            return groups;
+        }, [customFields, t]);
+
         // Memoize sort options
         const sortOptions = useMemo(
             () => [
@@ -483,7 +533,7 @@ export const PlaylistQueryBuilder = forwardRef(
                     <Stack gap="md" h="100%" p="1rem">
                         <QueryBuilder
                             data={filters}
-                            filters={NDSongQueryFields}
+                            filters={groupedFilters}
                             groupIndex={[]}
                             level={0}
                             onAddRule={handleAddRule}
