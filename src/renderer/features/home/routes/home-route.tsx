@@ -121,7 +121,7 @@ const HomeRoute = () => {
             >
                 <LibraryContainer>
                     <Stack
-                        gap="lg"
+                        gap="2xl"
                         mb="5rem"
                         pt={windowBarStyle === Platform.WEB ? '5rem' : '3rem'}
                         px="2rem"
