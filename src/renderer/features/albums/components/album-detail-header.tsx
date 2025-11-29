@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { forwardRef } from 'react';
-import { useParams } from 'react-router';
+import { generatePath, Link, useParams } from 'react-router';
+
+import styles from './album-detail-header.module.css';
 
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
@@ -12,7 +14,9 @@ import {
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
+import { Text } from '/@/shared/components/text/text';
 import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
@@ -75,6 +79,9 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
         });
     };
 
+    const firstAlbumArtist = detailQuery?.data?.albumArtists?.[0];
+    const releaseYear = detailQuery?.data?.releaseYear;
+
     return (
         <Stack ref={ref}>
             <LibraryHeader
@@ -82,15 +89,44 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
                 item={{ route: AppRoute.LIBRARY_ALBUMS, type: LibraryItem.ALBUM }}
                 title={detailQuery?.data?.name || ''}
             >
-                <LibraryHeaderMenu
-                    favorite={detailQuery?.data?.userFavorite}
-                    onFavorite={handleFavorite}
-                    onMore={handleMoreOptions}
-                    onPlay={() => handlePlay(Play.NOW)}
-                    onRating={handleUpdateRating}
-                    onShuffle={() => handlePlay(Play.SHUFFLE)}
-                    rating={detailQuery?.data?.userRating || 0}
-                />
+                <Stack gap="xl" w="100%">
+                    {(firstAlbumArtist || releaseYear) && (
+                        <Group className={styles.metadataGroup}>
+                            {firstAlbumArtist && (
+                                <Text
+                                    component={Link}
+                                    fw={600}
+                                    isLink
+                                    isNoSelect
+                                    to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
+                                        albumArtistId: firstAlbumArtist.id,
+                                    })}
+                                >
+                                    {firstAlbumArtist.name}
+                                </Text>
+                            )}
+                            {firstAlbumArtist && releaseYear && (
+                                <Text fw={600} isNoSelect>
+                                    •
+                                </Text>
+                            )}
+                            {releaseYear && (
+                                <Text fw={600} isMuted isNoSelect>
+                                    {releaseYear}
+                                </Text>
+                            )}
+                        </Group>
+                    )}
+                    <LibraryHeaderMenu
+                        favorite={detailQuery?.data?.userFavorite}
+                        onFavorite={handleFavorite}
+                        onMore={handleMoreOptions}
+                        onPlay={() => handlePlay(Play.NOW)}
+                        onRating={handleUpdateRating}
+                        onShuffle={() => handlePlay(Play.SHUFFLE)}
+                        rating={detailQuery?.data?.userRating || 0}
+                    />
+                </Stack>
             </LibraryHeader>
         </Stack>
     );
