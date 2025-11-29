@@ -1,7 +1,7 @@
 import type { MouseEvent } from 'react';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './feature-carousel.module.css';
@@ -71,6 +71,7 @@ const itemVariants = {
 
 interface FeatureCarouselProps {
     data: Album[] | undefined;
+    onNearEnd?: () => void;
 }
 
 const getItemsPerRow = (breakpoints: {
@@ -173,7 +174,7 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
     );
 };
 
-export const FeatureCarousel = ({ data }: FeatureCarouselProps) => {
+export const FeatureCarousel = ({ data, onNearEnd }: FeatureCarouselProps) => {
     const [startIndex, setStartIndex] = useState(0);
     const directionRef = useRef<{ isNext: boolean }>({ isNext: true });
     const {
@@ -207,6 +208,16 @@ export const FeatureCarousel = ({ data }: FeatureCarouselProps) => {
         }
         return items;
     }, [data, startIndex, itemsPerRow]);
+
+    // Check if we're near the end and trigger loading more
+    useEffect(() => {
+        if (!data || !onNearEnd) return;
+        const remainingItems = data.length - startIndex;
+        // Trigger when we have less than 2 rows worth of items remaining
+        if (remainingItems < itemsPerRow * 2) {
+            onNearEnd();
+        }
+    }, [data, startIndex, itemsPerRow, onNearEnd]);
 
     const handleNext = (e?: MouseEvent<HTMLButtonElement>) => {
         e?.preventDefault();

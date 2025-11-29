@@ -1,11 +1,9 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { Suspense, useMemo, useRef } from 'react';
+import { Suspense, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { FeatureCarousel } from '/@/renderer/components/feature-carousel/feature-carousel';
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
-import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumInfiniteCarousel } from '/@/renderer/features/albums/components/album-infinite-carousel';
+import { AlbumInfiniteFeatureCarousel } from '/@/renderer/features/home/components/album-infinite-feature-carousel';
 import { FeaturedGenres } from '/@/renderer/features/home/components/featured-genres';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
@@ -30,28 +28,6 @@ const HomeRoute = () => {
     const { homeFeature, homeItems } = useGeneralSettings();
 
     const isJellyfin = server?.type === ServerType.JELLYFIN;
-
-    const feature = useSuspenseQuery({
-        ...albumQueries.list({
-            options: {
-                enabled: homeFeature,
-                gcTime: 1000 * 30,
-                staleTime: 1000 * 30,
-            },
-            query: {
-                limit: 20,
-                sortBy: AlbumListSort.RANDOM,
-                sortOrder: SortOrder.DESC,
-                startIndex: 0,
-            },
-            serverId: server?.id,
-        }),
-        queryKey: ['home', 'feature'],
-    });
-
-    const featureItemsWithImage = useMemo(() => {
-        return feature.data?.items?.filter((item) => item.imageUrl) ?? [];
-    }, [feature.data?.items]);
 
     // Carousel configuration - queries are now handled inside AlbumInfiniteCarousel
     const carousels = {
@@ -126,7 +102,7 @@ const HomeRoute = () => {
                         pt={windowBarStyle === Platform.WEB ? '5rem' : '3rem'}
                         px="2rem"
                     >
-                        {homeFeature && <FeatureCarousel data={featureItemsWithImage} />}
+                        {homeFeature && <AlbumInfiniteFeatureCarousel />}
                         <FeaturedGenres />
                         {sortedCarousel.map((carousel) => {
                             if (carousel.itemType === LibraryItem.ALBUM) {
