@@ -1,7 +1,7 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'motion/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate, useParams } from 'react-router';
 
@@ -9,22 +9,29 @@ import { ListContext } from '/@/renderer/context/list-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { PlaylistDetailSongListContent } from '/@/renderer/features/playlists/components/playlist-detail-song-list-content';
 import { PlaylistDetailSongListHeader } from '/@/renderer/features/playlists/components/playlist-detail-song-list-header';
-import { PlaylistQueryBuilder } from '/@/renderer/features/playlists/components/playlist-query-builder';
+import {
+    PlaylistQueryBuilder,
+    PlaylistQueryBuilderRef,
+} from '/@/renderer/features/playlists/components/playlist-query-builder';
 import { SaveAsPlaylistForm } from '/@/renderer/features/playlists/components/save-as-playlist-form';
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
 import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
+import { convertQueryGroupToNDQuery } from '/@/renderer/features/playlists/utils';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Box } from '/@/shared/components/box/box';
+import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
 import { ConfirmModal } from '/@/shared/components/modal/modal';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { ServerType, SongListSort } from '/@/shared/types/domain-types';
+import { ServerType } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 const PlaylistDetailSongListRoute = () => {
@@ -45,15 +52,17 @@ const PlaylistDetailSongListRoute = () => {
     ) => {
         if (!detailQuery?.data) return;
 
+        // New syntax: sortBy is now a single string with comma-separated fields and +/- prefix
+        // e.g., "+album,-year" means sort by album ascending, then year descending
         const sortValue =
             extraFilters.sortBy && extraFilters.sortBy.length > 0
-                ? extraFilters.sortBy.join(',')
-                : 'dateAdded';
+                ? extraFilters.sortBy[0]
+                : '+dateAdded';
 
         const rules = {
             ...filter,
             limit: extraFilters.limit || undefined,
-            order: extraFilters.sortOrder || 'desc',
+            // order field is now optional - sort direction is embedded in sort field
             sort: sortValue,
         };
 
@@ -100,13 +109,12 @@ const PlaylistDetailSongListRoute = () => {
 
         const sortValue =
             extraFilters.sortBy && extraFilters.sortBy.length > 0
-                ? extraFilters.sortBy.join(',')
-                : 'dateAdded';
+                ? extraFilters.sortBy[0]
+                : '+dateAdded';
 
         const rules = {
             ...filter,
             limit: extraFilters.limit || undefined,
-            order: extraFilters.sortOrder || 'desc',
             sort: sortValue,
         };
 
@@ -178,6 +186,35 @@ const PlaylistDetailSongListRoute = () => {
         });
     };
 
+    const openSaveAndReplaceModal = () => {
+        if (!isQueryBuilderExpanded) {
+            return;
+        }
+
+        const filters = queryBuilderRef.current?.getFilters();
+
+        if (!filters) {
+            return;
+        }
+
+        openModal({
+            children: (
+                <ConfirmModal
+                    onConfirm={() => {
+                        handleSave(
+                            convertQueryGroupToNDQuery(filters.filters),
+                            filters.extraFilters,
+                        );
+                        closeAllModals();
+                    }}
+                >
+                    <Text>{t('common.areYouSure', { postProcess: 'sentenceCase' })}</Text>
+                </ConfirmModal>
+            ),
+            title: t('common.saveAndReplace', { postProcess: 'sentenceCase' }),
+        });
+    };
+
     const isSmartPlaylist =
         !detailQuery?.isLoading &&
         detailQuery?.data?.rules &&
@@ -185,6 +222,7 @@ const PlaylistDetailSongListRoute = () => {
 
     const [showQueryBuilder, setShowQueryBuilder] = useState(false);
     const [isQueryBuilderExpanded, setIsQueryBuilderExpanded] = useState(false);
+    const queryBuilderRef = useRef<PlaylistQueryBuilderRef>(null);
 
     const handleToggleExpand = () => {
         setIsQueryBuilderExpanded((prev) => !prev);
@@ -193,6 +231,34 @@ const PlaylistDetailSongListRoute = () => {
     const handleToggleShowQueryBuilder = () => {
         setShowQueryBuilder((prev) => !prev);
         setIsQueryBuilderExpanded(true);
+    };
+
+    const openPreviewModal = () => {
+        if (!isQueryBuilderExpanded) return;
+        const filters = queryBuilderRef.current?.getFilters();
+        if (!filters) {
+            toast.error({
+                message:
+                    t('error.queryBuilderNotReady', { postProcess: 'sentenceCase' }) ||
+                    'Query builder is not ready. Please expand it first.',
+            });
+            return;
+        }
+
+        const queryValue = convertQueryGroupToNDQuery(filters.filters);
+        const sortString = filters.extraFilters.sortBy?.[0];
+
+        const previewValue = {
+            ...queryValue,
+            ...(filters.extraFilters.limit && { limit: filters.extraFilters.limit }),
+            ...(sortString && { sort: sortString }),
+        };
+
+        openModal({
+            children: <JsonPreview value={previewValue} />,
+            size: 'xl',
+            title: t('common.preview', { postProcess: 'titleCase' }),
+        });
     };
 
     const playlistSongs = useQuery(
@@ -242,42 +308,120 @@ const PlaylistDetailSongListRoute = () => {
                     />
                     {(isSmartPlaylist || showQueryBuilder) && (
                         <motion.div>
-                            <Box h="100%" mah="35vh" p="md" w="100%">
-                                <Group pb="md">
-                                    <ActionIcon
-                                        icon={isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'}
-                                        iconProps={{
-                                            size: 'md',
-                                        }}
-                                        onClick={handleToggleExpand}
-                                        size="xs"
-                                    />
-                                    <Text>
-                                        {t('form.queryEditor.title', { postProcess: 'titleCase' })}
-                                    </Text>
+                            <Box h="100%" mah="50dvh" p="md" w="100%">
+                                <Group justify="space-between" pb="md" wrap="nowrap">
+                                    <Group gap="sm" wrap="nowrap">
+                                        <ActionIcon
+                                            icon={
+                                                isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'
+                                            }
+                                            iconProps={{
+                                                size: 'md',
+                                            }}
+                                            onClick={handleToggleExpand}
+                                            size="xs"
+                                        />
+                                        <Text>
+                                            {t('form.queryEditor.title', {
+                                                postProcess: 'titleCase',
+                                            })}
+                                        </Text>
+                                    </Group>
+                                    <Group gap="xs">
+                                        <Button
+                                            disabled={!isQueryBuilderExpanded}
+                                            onClick={openPreviewModal}
+                                            size="sm"
+                                            variant="subtle"
+                                        >
+                                            {t('common.preview', { postProcess: 'titleCase' })}
+                                        </Button>
+                                        <Button
+                                            disabled={!isQueryBuilderExpanded}
+                                            leftSection={<Icon icon="save" />}
+                                            loading={createPlaylistMutation?.isPending}
+                                            onClick={() => {
+                                                if (!isQueryBuilderExpanded) return;
+                                                const filters =
+                                                    queryBuilderRef.current?.getFilters();
+                                                if (filters) {
+                                                    handleSaveAs(
+                                                        convertQueryGroupToNDQuery(filters.filters),
+                                                        filters.extraFilters,
+                                                    );
+                                                }
+                                            }}
+                                            size="sm"
+                                        >
+                                            {t('common.saveAs', { postProcess: 'titleCase' })}
+                                        </Button>
+                                        <Button
+                                            disabled={!isQueryBuilderExpanded}
+                                            leftSection={<Icon color="error" icon="save" />}
+                                            onClick={openSaveAndReplaceModal}
+                                            size="sm"
+                                            variant="default"
+                                        >
+                                            {t('common.saveAndReplace', {
+                                                postProcess: 'titleCase',
+                                            })}
+                                        </Button>
+                                    </Group>
                                 </Group>
-                                {isQueryBuilderExpanded && (
+                                <div style={{ display: isQueryBuilderExpanded ? 'block' : 'none' }}>
                                     <PlaylistQueryBuilder
-                                        isSaving={createPlaylistMutation?.isPending}
                                         key={JSON.stringify(detailQuery?.data?.rules)}
                                         limit={detailQuery?.data?.rules?.limit}
-                                        onSave={handleSave}
-                                        onSaveAs={handleSaveAs}
                                         playlistId={playlistId}
                                         query={detailQuery?.data?.rules}
+                                        ref={queryBuilderRef}
                                         sortBy={(() => {
                                             const sort = detailQuery?.data?.rules?.sort;
+                                            // Handle new syntax: comma-separated with +/- prefix
+                                            // e.g., "+album,-year" -> return as single string in array
+                                            if (typeof sort === 'string') {
+                                                // Check if it's new syntax (has +/- prefix or commas)
+                                                if (
+                                                    sort.includes(',') ||
+                                                    sort.startsWith('+') ||
+                                                    sort.startsWith('-')
+                                                ) {
+                                                    return [sort];
+                                                }
+                                                // Old syntax: single field, convert to new format with default order
+                                                const order =
+                                                    detailQuery?.data?.rules?.order || 'asc';
+                                                const prefix = order === 'desc' ? '-' : '+';
+                                                return [`${prefix}${sort}`];
+                                            }
                                             if (Array.isArray(sort)) {
-                                                return sort;
+                                                // If array, check if first item has +/- prefix
+                                                if (
+                                                    sort.length > 0 &&
+                                                    typeof sort[0] === 'string' &&
+                                                    (sort[0].startsWith('+') ||
+                                                        sort[0].startsWith('-'))
+                                                ) {
+                                                    return sort;
+                                                }
+                                                // Old array format, convert to new format
+                                                const order =
+                                                    detailQuery?.data?.rules?.order || 'asc';
+                                                const prefix = order === 'desc' ? '-' : '+';
+                                                return sort.map((s) => `${prefix}${s}`);
                                             }
-                                            if (typeof sort === 'string' && sort.includes(',')) {
-                                                return sort.split(',').map((s) => s.trim());
-                                            }
-                                            return sort ? [sort] : [SongListSort.ALBUM];
+                                            return ['+dateAdded'];
                                         })()}
-                                        sortOrder={detailQuery?.data?.rules?.order || 'asc'}
+                                        sortOrder={(() => {
+                                            const sort = detailQuery?.data?.rules?.sort;
+                                            if (typeof sort === 'string' && sort.startsWith('-')) {
+                                                return 'desc';
+                                            }
+                                            // Fall back to old order field or default
+                                            return detailQuery?.data?.rules?.order || 'asc';
+                                        })()}
                                     />
-                                )}
+                                </div>
                             </Box>
                         </motion.div>
                     )}

@@ -123,6 +123,7 @@
         "setting_other": "settings",
         "share": "share",
         "size": "size",
+        "sort": "sort",
         "sortOrder": "order",
         "tags": "tags",
         "title": "title",
@@ -302,7 +303,11 @@
         "queryEditor": {
             "title": "query editor",
             "input_optionMatchAll": "match all",
-            "input_optionMatchAny": "match any"
+            "input_optionMatchAny": "match any",
+            "addRuleGroup": "add rule group",
+            "removeRuleGroup": "remove rule group",
+            "resetToDefault": "reset to default",
+            "clearFilters": "clear filters"
         },
         "shareItem": {
             "allowDownloading": "allow downloading",

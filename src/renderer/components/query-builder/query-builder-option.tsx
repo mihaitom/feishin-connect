@@ -167,7 +167,7 @@ export const QueryBuilderOption = ({
 
     const fieldType = filters.find((f) => f.value === field)?.type;
     const operatorsByFieldType = operators[fieldType as keyof typeof operators];
-    const ml = (level + 1) * 10;
+    const ml = 20;
 
     return (
         <Group gap="sm" ml={ml}>

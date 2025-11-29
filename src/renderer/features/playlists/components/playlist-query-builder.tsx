@@ -1,5 +1,4 @@
 import { useForm } from '@mantine/form';
-import { openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import clone from 'lodash/clone';
 import get from 'lodash/get';
@@ -10,11 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { QueryBuilder } from '/@/renderer/components/query-builder';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
-import {
-    convertNDQueryToQueryGroup,
-    convertQueryGroupToNDQuery,
-} from '/@/renderer/features/playlists/utils';
-import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
+import { convertNDQueryToQueryGroup } from '/@/renderer/features/playlists/utils';
 import { useCurrentServer } from '/@/renderer/store';
 import {
     NDSongQueryBooleanOperators,
@@ -25,15 +20,12 @@ import {
     NDSongQueryStringOperators,
 } from '/@/shared/api/navidrome/navidrome-types';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
-import { Button } from '/@/shared/components/button/button';
-import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
-import { Icon } from '/@/shared/components/icon/icon';
-import { MultiSelect } from '/@/shared/components/multi-select/multi-select';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Select } from '/@/shared/components/select/select';
+import { Stack } from '/@/shared/components/stack/stack';
 import { PlaylistListSort, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { QueryBuilderGroup, QueryBuilderRule } from '/@/shared/types/types';
 
@@ -49,21 +41,17 @@ type DeleteArgs = {
 };
 
 interface PlaylistQueryBuilderProps {
-    isSaving?: boolean;
     limit?: number;
-    onSave?: (
-        parsedFilter: any,
-        extraFilters: { limit?: number; sortBy?: string[]; sortOrder?: string },
-    ) => void;
-    onSaveAs?: (
-        parsedFilter: any,
-        extraFilters: { limit?: number; sortBy?: string[]; sortOrder?: string },
-    ) => void;
     playlistId?: string;
     query: any;
     sortBy: SongListSort | SongListSort[];
     sortOrder: 'asc' | 'desc';
 }
+
+type SortEntry = {
+    field: string;
+    order: 'asc' | 'desc';
+};
 
 const DEFAULT_QUERY = {
     group: [],
@@ -92,16 +80,7 @@ export type PlaylistQueryBuilderRef = {
 
 export const PlaylistQueryBuilder = forwardRef(
     (
-        {
-            isSaving,
-            limit,
-            onSave,
-            onSaveAs,
-            playlistId,
-            query,
-            sortBy,
-            sortOrder,
-        }: PlaylistQueryBuilderProps,
+        { limit, playlistId, query, sortBy, sortOrder }: PlaylistQueryBuilderProps,
         ref: Ref<PlaylistQueryBuilderRef>,
     ) => {
         const { t } = useTranslation();
@@ -131,19 +110,91 @@ export const PlaylistQueryBuilder = forwardRef(
                 }));
         }, [playlistId, playlists]);
 
+        // Parse sortBy and sortOrder into array of sort entries
+        // Handle new syntax: comma-separated fields with +/- prefix (e.g., "+album,-year")
+        // Or old syntax: sortBy array + single sortOrder
+        const parseSortEntries = (): SortEntry[] => {
+            if (Array.isArray(sortBy) && sortBy.length > 0) {
+                const firstSort = sortBy[0];
+                // Check if first entry is a string with commas (new syntax as single string)
+                if (typeof firstSort === 'string' && firstSort.includes(',')) {
+                    // Split the comma-separated string and parse each field
+                    return firstSort.split(',').map((s) => {
+                        const trimmed = s.trim();
+                        const field =
+                            trimmed.startsWith('+') || trimmed.startsWith('-')
+                                ? trimmed.slice(1)
+                                : trimmed;
+                        const order = trimmed.startsWith('-') ? 'desc' : 'asc';
+                        return { field, order };
+                    });
+                }
+                // Check if first entry has +/- prefix (new syntax as array of prefixed strings)
+                if (
+                    typeof firstSort === 'string' &&
+                    (firstSort.startsWith('+') || firstSort.startsWith('-'))
+                ) {
+                    return sortBy.map((s) => {
+                        const field = s.startsWith('+') || s.startsWith('-') ? s.slice(1) : s;
+                        const order = s.startsWith('-') ? 'desc' : 'asc';
+                        return { field, order };
+                    });
+                }
+                // Old syntax: array of fields with single order
+                return sortBy.map((field) => ({ field, order: sortOrder }));
+            }
+            if (sortBy && typeof sortBy === 'string') {
+                // Check if it's new syntax with +/- prefix
+                if (sortBy.includes(',') || sortBy.startsWith('+') || sortBy.startsWith('-')) {
+                    return sortBy.split(',').map((s) => {
+                        const trimmed = s.trim();
+                        const field =
+                            trimmed.startsWith('+') || trimmed.startsWith('-')
+                                ? trimmed.slice(1)
+                                : trimmed;
+                        const order = trimmed.startsWith('-') ? 'desc' : 'asc';
+                        return { field, order };
+                    });
+                }
+                // Single field, use provided sortOrder
+                return [{ field: sortBy, order: sortOrder }];
+            }
+            // Default
+            return [{ field: 'dateAdded', order: 'asc' }];
+        };
+
         const extraFiltersForm = useForm({
             initialValues: {
                 limit,
-                sortBy: Array.isArray(sortBy) ? sortBy : sortBy ? [sortBy] : [],
-                sortOrder,
+                sortEntries: parseSortEntries(),
             },
         });
 
+        // Convert sort entries to new syntax: comma-separated with +/- prefix
+        const convertSortEntriesToSortString = (entries: SortEntry[]): string => {
+            return entries
+                .filter((entry) => entry.field) // Filter out empty fields
+                .map((entry) => {
+                    const prefix = entry.order === 'desc' ? '-' : '+';
+                    return `${prefix}${entry.field}`;
+                })
+                .join(',');
+        };
+
         useImperativeHandle(ref, () => ({
-            getFilters: () => ({
-                extraFilters: extraFiltersForm.values,
-                filters,
-            }),
+            getFilters: () => {
+                const sortString = convertSortEntriesToSortString(
+                    extraFiltersForm.values.sortEntries,
+                );
+                return {
+                    extraFilters: {
+                        limit: extraFiltersForm.values.limit,
+                        sortBy: sortString ? [sortString] : undefined,
+                        // sortOrder is now optional and embedded in sortBy
+                    },
+                    filters,
+                };
+            },
         }));
 
         const handleResetFilters = () => {
@@ -160,24 +211,6 @@ export const PlaylistQueryBuilder = forwardRef(
 
         const setFilterHandler = (newFilters: QueryBuilderGroup) => {
             setFilters(newFilters);
-        };
-
-        const handleSave = () => {
-            onSave?.(convertQueryGroupToNDQuery(filters), extraFiltersForm.values);
-        };
-
-        const handleSaveAs = () => {
-            onSaveAs?.(convertQueryGroupToNDQuery(filters), extraFiltersForm.values);
-        };
-
-        const openPreviewModal = () => {
-            const previewValue = convertQueryGroupToNDQuery(filters);
-
-            openModal({
-                children: <JsonPreview value={previewValue} />,
-                size: 'xl',
-                title: t('common.preview', { postProcess: 'titleCase' }),
-            });
         };
 
         const handleAddRuleGroup = (args: AddArgs) => {
@@ -413,96 +446,127 @@ export const PlaylistQueryBuilder = forwardRef(
             ...NDSongQueryFields,
         ];
 
+        const handleAddSortEntry = () => {
+            extraFiltersForm.insertListItem('sortEntries', { field: '', order: 'asc' });
+        };
+
+        const handleRemoveSortEntry = (index: number) => {
+            extraFiltersForm.removeListItem('sortEntries', index);
+        };
+
+        const handleSortFieldChange = (index: number, value: string) => {
+            extraFiltersForm.setFieldValue(`sortEntries.${index}.field`, value);
+        };
+
+        const handleSortOrderChange = (index: number, value: 'asc' | 'desc') => {
+            extraFiltersForm.setFieldValue(`sortEntries.${index}.order`, value);
+        };
+
         return (
             <Flex direction="column" h="calc(100% - 2rem)" justify="space-between">
                 <ScrollArea>
-                    <QueryBuilder
-                        data={filters}
-                        filters={NDSongQueryFields}
-                        groupIndex={[]}
-                        level={0}
-                        onAddRule={handleAddRule}
-                        onAddRuleGroup={handleAddRuleGroup}
-                        onChangeField={handleChangeField}
-                        onChangeOperator={handleChangeOperator}
-                        onChangeType={handleChangeType}
-                        onChangeValue={handleChangeValue}
-                        onClearFilters={handleClearFilters}
-                        onDeleteRule={handleDeleteRule}
-                        onDeleteRuleGroup={handleDeleteRuleGroup}
-                        onResetFilters={handleResetFilters}
-                        operators={{
-                            boolean: NDSongQueryBooleanOperators,
-                            date: NDSongQueryDateOperators,
-                            number: NDSongQueryNumberOperators,
-                            playlist: NDSongQueryPlaylistOperators,
-                            string: NDSongQueryStringOperators,
-                        }}
-                        playlists={playlistData}
-                        uniqueId={filters.uniqueId}
-                    />
-                </ScrollArea>
-                <Group align="flex-end" justify="space-between" m="1rem" wrap="nowrap">
-                    <Group align="flex-end" gap="sm" w="100%" wrap="nowrap">
-                        <MultiSelect
-                            data={sortOptions}
-                            label="Sort"
-                            maxWidth="50%"
-                            searchable
-                            {...extraFiltersForm.getInputProps('sortBy')}
+                    <Stack gap="md" p="1rem">
+                        <QueryBuilder
+                            data={filters}
+                            filters={NDSongQueryFields}
+                            groupIndex={[]}
+                            level={0}
+                            onAddRule={handleAddRule}
+                            onAddRuleGroup={handleAddRuleGroup}
+                            onChangeField={handleChangeField}
+                            onChangeOperator={handleChangeOperator}
+                            onChangeType={handleChangeType}
+                            onChangeValue={handleChangeValue}
+                            onClearFilters={handleClearFilters}
+                            onDeleteRule={handleDeleteRule}
+                            onDeleteRuleGroup={handleDeleteRuleGroup}
+                            onResetFilters={handleResetFilters}
+                            operators={{
+                                boolean: NDSongQueryBooleanOperators,
+                                date: NDSongQueryDateOperators,
+                                number: NDSongQueryNumberOperators,
+                                playlist: NDSongQueryPlaylistOperators,
+                                string: NDSongQueryStringOperators,
+                            }}
+                            playlists={playlistData}
+                            uniqueId={filters.uniqueId}
                         />
-                        <Select
-                            data={[
-                                {
-                                    label: t('common.ascending', { postProcess: 'sentenceCase' }),
-                                    value: 'asc',
-                                },
-                                {
-                                    label: t('common.descending', { postProcess: 'sentenceCase' }),
-                                    value: 'desc',
-                                },
-                            ]}
-                            label={t('common.sortOrder', { postProcess: 'titleCase' })}
-                            maxWidth="20%"
-                            width={125}
-                            {...extraFiltersForm.getInputProps('sortOrder')}
-                        />
-                        <NumberInput
-                            label={t('common.limit', { postProcess: 'titleCase' })}
-                            maxWidth="20%"
-                            width={75}
-                            {...extraFiltersForm.getInputProps('limit')}
-                        />
-                    </Group>
-                    {onSave && onSaveAs && (
-                        <Group gap="sm" wrap="nowrap">
-                            <Button loading={isSaving} onClick={handleSaveAs}>
-                                {t('common.saveAs', { postProcess: 'titleCase' })}
-                            </Button>
-                            <Button onClick={openPreviewModal} variant="subtle">
-                                {t('common.preview', { postProcess: 'titleCase' })}
-                            </Button>
-                            <DropdownMenu position="bottom-end">
-                                <DropdownMenu.Target>
-                                    <ActionIcon
-                                        disabled={isSaving}
-                                        icon="ellipsisHorizontal"
-                                        variant="subtle"
-                                    />
-                                </DropdownMenu.Target>
-                                <DropdownMenu.Dropdown>
-                                    <DropdownMenu.Item
-                                        isDanger
-                                        leftSection={<Icon color="error" icon="save" />}
-                                        onClick={handleSave}
-                                    >
-                                        {t('common.saveAndReplace', { postProcess: 'titleCase' })}
-                                    </DropdownMenu.Item>
-                                </DropdownMenu.Dropdown>
-                            </DropdownMenu>
+                        <Group align="flex-end" gap="sm" w="100%" wrap="nowrap">
+                            <Stack gap="xs" w="100%">
+                                {extraFiltersForm.values.sortEntries.map((entry, index) => (
+                                    <Group align="flex-end" gap="sm" key={index} wrap="nowrap">
+                                        <Select
+                                            data={sortOptions}
+                                            label={
+                                                index === 0
+                                                    ? t('common.sort', { postProcess: 'titleCase' })
+                                                    : ''
+                                            }
+                                            onChange={(value) =>
+                                                handleSortFieldChange(index, value || '')
+                                            }
+                                            searchable
+                                            value={entry.field}
+                                            width={200}
+                                        />
+                                        <Select
+                                            data={[
+                                                {
+                                                    label: t('common.ascending', {
+                                                        postProcess: 'sentenceCase',
+                                                    }),
+                                                    value: 'asc',
+                                                },
+                                                {
+                                                    label: t('common.descending', {
+                                                        postProcess: 'sentenceCase',
+                                                    }),
+                                                    value: 'desc',
+                                                },
+                                            ]}
+                                            label={
+                                                index === 0
+                                                    ? t('common.sortOrder', {
+                                                          postProcess: 'titleCase',
+                                                      })
+                                                    : ''
+                                            }
+                                            onChange={(value) =>
+                                                handleSortOrderChange(
+                                                    index,
+                                                    (value as 'asc' | 'desc') || 'asc',
+                                                )
+                                            }
+                                            value={entry.order}
+                                            width={125}
+                                        />
+                                        {extraFiltersForm.values.sortEntries.length > 1 && (
+                                            <ActionIcon
+                                                icon="minus"
+                                                onClick={() => handleRemoveSortEntry(index)}
+                                                variant="subtle"
+                                            />
+                                        )}
+                                        {index ===
+                                            extraFiltersForm.values.sortEntries.length - 1 && (
+                                            <ActionIcon
+                                                icon="plus"
+                                                onClick={handleAddSortEntry}
+                                                variant="subtle"
+                                            />
+                                        )}
+                                    </Group>
+                                ))}
+                            </Stack>
+                            <NumberInput
+                                label={t('common.limit', { postProcess: 'titleCase' })}
+                                maxWidth="20%"
+                                width={75}
+                                {...extraFiltersForm.getInputProps('limit')}
+                            />
                         </Group>
-                    )}
-                </Group>
+                    </Stack>
+                </ScrollArea>
             </Flex>
         );
     },

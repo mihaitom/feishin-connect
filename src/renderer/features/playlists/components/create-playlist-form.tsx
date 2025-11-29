@@ -57,9 +57,11 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
 
         const smartPlaylist = queryBuilderRef.current?.getFilters();
 
+        // New syntax: sortBy is now a single string with comma-separated fields and +/- prefix
+        // e.g., "+album,-year" means sort by album ascending, then year descending
         const sortValue =
-            isSmartPlaylist && smartPlaylist?.extraFilters?.sortBy
-                ? smartPlaylist.extraFilters.sortBy.join(',')
+            isSmartPlaylist && smartPlaylist?.extraFilters?.sortBy?.[0]
+                ? smartPlaylist.extraFilters.sortBy[0]
                 : undefined;
 
         const rules =
@@ -67,8 +69,8 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
                 ? {
                       ...convertQueryGroupToNDQuery(smartPlaylist.filters),
                       limit: smartPlaylist.extraFilters.limit,
-                      order: smartPlaylist.extraFilters.sortOrder,
-                      sort: sortValue || 'dateAdded',
+                      // order field is now optional - sort direction is embedded in sort field
+                      sort: sortValue || '+dateAdded',
                   }
                 : undefined;
 
