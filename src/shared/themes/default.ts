@@ -19,7 +19,7 @@ export const defaultTheme: AppThemeConfiguration = {
         'scrollbar-track-hover-background': 'transparent',
     },
     colors: {
-        background: 'rgb(12, 12, 12)',
+        background: 'rgb(14, 14, 14)',
         'background-alternate': 'rgb(8, 8, 8)',
         black: 'rgb(0, 0, 0)',
         foreground: 'rgb(225, 225, 225)',
