@@ -7,6 +7,8 @@ import { generatePath, Link } from 'react-router';
 
 import styles from './sidebar-playlist-list.module.css';
 
+import { getDraggedItems } from '/@/renderer/components/item-list/helpers/get-dragged-items';
+import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { CreatePlaylistForm } from '/@/renderer/features/playlists/components/create-playlist-form';
@@ -30,19 +32,34 @@ import {
 import { DragOperation, DragTarget } from '/@/shared/types/drag-and-drop';
 import { Play } from '/@/shared/types/types';
 
-interface PlaylistRowButtonProps extends Omit<ButtonProps, 'onPlay'> {
+interface PlaylistRowButtonProps extends Omit<ButtonProps, 'onContextMenu' | 'onPlay'> {
+    item: Playlist;
     name: string;
+    onContextMenu: (e: MouseEvent<HTMLButtonElement>, item: Playlist) => void;
     onPlay: (id: string, playType: Play) => void;
     to: string;
 }
 
-const PlaylistRowButton = ({ name, onPlay, to, ...props }: PlaylistRowButtonProps) => {
+const PlaylistRowButton = ({ item, name, onContextMenu, onPlay, to }: PlaylistRowButtonProps) => {
     const url = generatePath(AppRoute.PLAYLISTS_DETAIL_SONGS, { playlistId: to });
     const { t } = useTranslation();
 
     const [isHovered, setIsHovered] = useState(false);
 
-    const { isDraggedOver, ref } = useDragDrop<HTMLDivElement>({
+    const { isDraggedOver, isDragging, ref } = useDragDrop<HTMLDivElement>({
+        drag: {
+            getId: () => {
+                const draggedItems = getDraggedItems(item, undefined);
+                return draggedItems.map((draggedItem) => draggedItem.id);
+            },
+            getItem: () => {
+                const draggedItems = getDraggedItems(item, undefined);
+                return draggedItems;
+            },
+            itemType: LibraryItem.PLAYLIST,
+            operation: [DragOperation.ADD],
+            target: DragTarget.PLAYLIST,
+        },
         drop: {
             canDrop: (args) => {
                 return (
@@ -127,14 +144,17 @@ const PlaylistRowButton = ({ name, onPlay, to, ...props }: PlaylistRowButtonProp
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             ref={ref}
+            style={{
+                opacity: isDragging ? 0.5 : 1,
+            }}
         >
             <SidebarItem
                 className={clsx({
                     [styles.rowHover]: isHovered,
                 })}
+                onContextMenu={(e) => onContextMenu(e, item)}
                 to={url}
                 variant="subtle"
-                {...props}
             >
                 {name}
             </SidebarItem>
@@ -241,6 +261,17 @@ export const SidebarPlaylistList = () => {
         [player, server.id],
     );
 
+    const handleContextMenu = useCallback(
+        (e: MouseEvent<HTMLButtonElement>, playlist: Playlist) => {
+            e.stopPropagation();
+            ContextMenuController.call({
+                cmd: { items: [playlist], type: LibraryItem.PLAYLIST },
+                event: e,
+            });
+        },
+        [],
+    );
+
     const memoizedItemData = useMemo(() => {
         const base = { handlePlay: handlePlayPlaylist };
 
@@ -317,8 +348,10 @@ export const SidebarPlaylistList = () => {
             <Accordion.Panel>
                 {memoizedItemData?.items?.map((item, index) => (
                     <PlaylistRowButton
+                        item={item}
                         key={index}
                         name={item.name}
+                        onContextMenu={handleContextMenu}
                         onPlay={handlePlayPlaylist}
                         to={item.id}
                     />
@@ -350,6 +383,20 @@ export const SidebarSharedPlaylistList = () => {
             player.addToQueueByFetch(server.id, [id], LibraryItem.PLAYLIST, playType);
         },
         [player, server.id],
+    );
+
+    const handleContextMenu = useCallback(
+        (e: MouseEvent<HTMLButtonElement>, playlist: Playlist) => {
+            e.stopPropagation();
+            ContextMenuController.call({
+                cmd: {
+                    items: [playlist],
+                    type: LibraryItem.PLAYLIST,
+                },
+                event: e,
+            });
+        },
+        [],
     );
 
     const memoizedItemData = useMemo(() => {
@@ -386,8 +433,10 @@ export const SidebarSharedPlaylistList = () => {
             <Accordion.Panel>
                 {memoizedItemData?.items?.map((item, index) => (
                     <PlaylistRowButton
+                        item={item}
                         key={index}
                         name={item.name}
+                        onContextMenu={handleContextMenu}
                         onPlay={handlePlayPlaylist}
                         to={item.id}
                     />

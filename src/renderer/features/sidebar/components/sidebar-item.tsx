@@ -15,6 +15,11 @@ export const SidebarItem = ({ children, className, to, ...props }: SidebarItemPr
     const toPath = typeof to === 'string' ? to : to.pathname || '';
     const isActive = location.pathname === toPath;
 
+    const handleLinkDragStart = (e: React.DragEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
     return (
         <Button
             className={clsx(
@@ -31,6 +36,8 @@ export const SidebarItem = ({ children, className, to, ...props }: SidebarItemPr
                 label: styles.label,
             }}
             component={Link}
+            draggable={false}
+            onDragStart={handleLinkDragStart}
             to={to}
             variant="subtle"
             {...props}
