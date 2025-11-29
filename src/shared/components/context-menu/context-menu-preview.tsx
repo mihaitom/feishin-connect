@@ -1,8 +1,10 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import styles from './context-menu-preview.module.css';
 
 import { Icon } from '/@/shared/components/icon/icon';
+import { Text } from '/@/shared/components/text/text';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface ContextMenuPreviewProps {
@@ -32,6 +34,7 @@ const getItemImage = (item: unknown): null | string => {
 };
 
 export const ContextMenuPreview = memo(({ items, itemType }: ContextMenuPreviewProps) => {
+    const { t } = useTranslation();
     const itemCount = items.length;
     const firstItem = items[0];
     const itemName = firstItem ? getItemName(firstItem) : 'Item';
@@ -68,8 +71,14 @@ export const ContextMenuPreview = memo(({ items, itemType }: ContextMenuPreviewP
                         </div>
                     )}
                     <div className={styles.textContainer}>
-                        <div className={styles.name}>{itemName}</div>
-                        {isMultiple && <div className={styles.count}>+{itemCount - 1} more</div>}
+                        <Text className={styles.name} isNoSelect>
+                            {itemName}
+                        </Text>
+                        {isMultiple && (
+                            <Text className={styles.count} isNoSelect>
+                                +{t('common.itemsMore', { count: itemCount - 1 })}
+                            </Text>
+                        )}
                     </div>
                 </div>
             </div>

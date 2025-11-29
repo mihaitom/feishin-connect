@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import styles from './drag-preview.module.css';
 
@@ -33,6 +34,7 @@ const getItemImage = (item: unknown): null | string => {
 
 export const DragPreview = memo(({ data }: DragPreviewProps) => {
     const items = data.item || [];
+    const { t } = useTranslation();
     const itemCount = items.length;
     const firstItem = items[0];
     const itemName = firstItem ? getItemName(firstItem) : 'Item';
@@ -66,7 +68,11 @@ export const DragPreview = memo(({ data }: DragPreviewProps) => {
                     )}
                     <div className={styles['text-container']}>
                         <div className={styles.name}>{itemName}</div>
-                        {isMultiple && <div className={styles.count}>+{itemCount - 1} more</div>}
+                        {isMultiple && (
+                            <div className={styles.count}>
+                                +{t('common.itemsMore', { count: itemCount - 1 })}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

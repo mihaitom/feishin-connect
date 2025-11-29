@@ -137,7 +137,8 @@
         "explicit": "explicit",
         "clean": "clean",
         "gridRows": "grid rows",
-        "tableColumns": "table columns"
+        "tableColumns": "table columns",
+        "itemsMore": "{{count}} more"
     },
     "entity": {
         "album_one": "album",

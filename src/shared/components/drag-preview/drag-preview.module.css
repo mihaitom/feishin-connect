@@ -101,6 +101,7 @@
     flex-direction: column;
     gap: var(--theme-spacing-xs);
     min-width: 0;
+    user-select: none;
 }
 
 .name {
