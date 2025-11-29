@@ -5,20 +5,24 @@ import { DeletePlaylistAction } from '/@/renderer/features/context-menu/actions/
 import { GetInfoAction } from '/@/renderer/features/context-menu/actions/get-info-action';
 import { PlayAction } from '/@/renderer/features/context-menu/actions/play-action';
 import { ContextMenu } from '/@/shared/components/context-menu/context-menu';
+import { ContextMenuPreview } from '/@/shared/components/context-menu/context-menu-preview';
 import { LibraryItem, Playlist } from '/@/shared/types/domain-types';
 
 interface PlaylistContextMenuProps {
     items: Playlist[];
+    type: LibraryItem.PLAYLIST;
 }
 
-export const PlaylistContextMenu = ({ items }: PlaylistContextMenuProps) => {
+export const PlaylistContextMenu = ({ items, type }: PlaylistContextMenuProps) => {
     const { ids } = useMemo(() => {
         const ids = items.map((item) => item.id);
         return { ids };
     }, [items]);
 
     return (
-        <ContextMenu.Content>
+        <ContextMenu.Content
+            bottomStickyContent={<ContextMenuPreview items={items} itemType={type} />}
+        >
             <PlayAction ids={ids} itemType={LibraryItem.ALBUM} />
             <ContextMenu.Divider />
             <AddToPlaylistAction items={ids} itemType={LibraryItem.ALBUM} />

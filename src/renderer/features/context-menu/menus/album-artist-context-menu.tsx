@@ -9,20 +9,24 @@ import { SetFavoriteAction } from '/@/renderer/features/context-menu/actions/set
 import { SetRatingAction } from '/@/renderer/features/context-menu/actions/set-rating-action';
 import { ShareAction } from '/@/renderer/features/context-menu/actions/share-action';
 import { ContextMenu } from '/@/shared/components/context-menu/context-menu';
+import { ContextMenuPreview } from '/@/shared/components/context-menu/context-menu-preview';
 import { AlbumArtist, LibraryItem } from '/@/shared/types/domain-types';
 
 interface AlbumArtistContextMenuProps {
     items: AlbumArtist[];
+    type: LibraryItem.ALBUM_ARTIST;
 }
 
-export const AlbumArtistContextMenu = ({ items }: AlbumArtistContextMenuProps) => {
+export const AlbumArtistContextMenu = ({ items, type }: AlbumArtistContextMenuProps) => {
     const { ids } = useMemo(() => {
         const ids = items.map((item) => item.id);
         return { ids };
     }, [items]);
 
     return (
-        <ContextMenu.Content>
+        <ContextMenu.Content
+            bottomStickyContent={<ContextMenuPreview items={items} itemType={type} />}
+        >
             <PlayAction ids={ids} itemType={LibraryItem.ALBUM_ARTIST} />
             <ContextMenu.Divider />
             <AddToPlaylistAction items={ids} itemType={LibraryItem.ALBUM_ARTIST} />

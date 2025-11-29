@@ -11,20 +11,26 @@ import { SetRatingAction } from '/@/renderer/features/context-menu/actions/set-r
 import { ShareAction } from '/@/renderer/features/context-menu/actions/share-action';
 import { ShuffleItemsAction } from '/@/renderer/features/context-menu/actions/shuffle-items-action';
 import { ContextMenu } from '/@/shared/components/context-menu/context-menu';
+import { ContextMenuPreview } from '/@/shared/components/context-menu/context-menu-preview';
 import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
 
 interface QueueContextMenuProps {
     items: QueueSong[];
+    type: LibraryItem.QUEUE_SONG;
 }
 
-export const QueueContextMenu = ({ items }: QueueContextMenuProps) => {
+export const QueueContextMenu = ({ items, type }: QueueContextMenuProps) => {
     const { ids } = useMemo(() => {
         const ids = items.map((item) => item.id);
         return { ids };
     }, [items]);
 
     return (
-        <ContextMenu.Content>
+        <ContextMenu.Content
+            bottomStickyContent={
+                <ContextMenuPreview items={items} itemType={LibraryItem.SONG} />
+            }
+        >
             <RemoveFromQueueAction items={items} />
             <ContextMenu.Divider />
             <MoveQueueItemsAction items={items} />

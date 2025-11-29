@@ -19,6 +19,7 @@ interface ContextMenuContext {
 export const ContextMenuContext = createContext<ContextMenuContext | null>(null);
 
 interface ContentProps {
+    bottomStickyContent?: ReactNode;
     children: ReactNode;
     onCloseAutoFocus?: (event: FocusEvent) => void;
     onEscapeKeyDown?: (event: KeyboardEvent) => void;
@@ -72,7 +73,7 @@ export function ContextMenu(props: ContextMenuProps) {
 }
 
 function Content(props: ContentProps) {
-    const { children, stickyContent } = props;
+    const { bottomStickyContent, children, stickyContent } = props;
     const { open } = useContext(ContextMenuContext) as ContextMenuContext;
 
     return (
@@ -88,6 +89,7 @@ function Content(props: ContentProps) {
                         >
                             {stickyContent}
                             <ScrollArea className={styles.maxHeight}>{children}</ScrollArea>
+                            {bottomStickyContent}
                         </motion.div>
                     </RadixContextMenu.Content>
                 </RadixContextMenu.Portal>
