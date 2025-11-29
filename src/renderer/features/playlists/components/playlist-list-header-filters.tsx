@@ -8,31 +8,27 @@ import { ListFilters } from '/@/renderer/features/shared/components/list-filters
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
-import { useContainerQuery } from '/@/renderer/hooks';
-import { useCurrentServer } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
-import { LibraryItem, PlaylistListSort, ServerType, SortOrder } from '/@/shared/types/domain-types';
+import { LibraryItem, PlaylistListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 export const PlaylistListHeaderFilters = () => {
     const { t } = useTranslation();
-    const server = useCurrentServer();
-    const { ref, ...cq } = useContainerQuery();
 
     const handleCreatePlaylistModal = () => {
         openModal({
             children: <CreatePlaylistForm onCancel={() => closeAllModals()} />,
-            size: server?.type === ServerType?.NAVIDROME ? 'lg' : 'sm',
+            size: 'lg',
             title: t('form.createPlaylist.title', { postProcess: 'sentenceCase' }),
         });
     };
 
     return (
         <Flex justify="space-between">
-            <Group gap="sm" ref={ref} w="100%">
+            <Group gap="sm" w="100%">
                 <ListSortByDropdown
                     defaultSortByValue={PlaylistListSort.NAME}
                     itemType={LibraryItem.PLAYLIST}

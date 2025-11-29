@@ -144,8 +144,8 @@ export const ModalsProvider = ({ children, ...rest }: ModalsProviderProps) => {
                     icon: <Icon icon="x" size="xl" />,
                 },
                 overlayProps: {
-                    backgroundOpacity: 0.8,
-                    blur: 4,
+                    backgroundOpacity: 0.5,
+                    blur: 1,
                 },
                 radius: 'xl',
                 scrollAreaComponent: ScrollArea,
