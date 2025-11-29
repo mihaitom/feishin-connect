@@ -172,7 +172,7 @@ export const NDSongQueryFields = [
     { label: 'Sort Lyricist', type: 'string', value: 'lyricistsort' },
     { label: 'Sort Name', type: 'string', value: 'titlesort' },
     { label: 'Subtitle', type: 'string', value: 'subtitle' },
-    { label: 'Track Number', type: 'number', value: 'tracknumber' },
+    { label: 'Track Number', type: 'number', value: 'track' },
     { label: 'Track Total', type: 'number', value: 'tracktotal' },
     { label: 'Website', type: 'string', value: 'website' },
     { label: 'Work', type: 'string', value: 'work' },
