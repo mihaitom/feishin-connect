@@ -117,11 +117,10 @@ export const QueryBuilder = ({
                     <Group gap="sm" wrap="nowrap">
                         <Select
                             data={FILTER_GROUP_OPTIONS_DATA}
-                            maxWidth={250}
+                            maxWidth={170}
                             onChange={handleChangeType}
                             size="sm"
                             value={data.type}
-                            width={200}
                         />
                         <ActionIcon icon="add" onClick={handleAddRule} size="sm" variant="subtle" />
                         <DropdownMenu position="bottom-start">

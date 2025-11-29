@@ -4,7 +4,15 @@ import clone from 'lodash/clone';
 import get from 'lodash/get';
 import setWith from 'lodash/setWith';
 import { nanoid } from 'nanoid';
-import { forwardRef, Ref, useImperativeHandle, useMemo, useState } from 'react';
+import {
+    forwardRef,
+    Ref,
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { QueryBuilder } from '/@/renderer/components/query-builder';
@@ -53,7 +61,7 @@ type SortEntry = {
     order: 'asc' | 'desc';
 };
 
-const DEFAULT_QUERY = {
+const DEFAULT_QUERY: QueryBuilderGroup = {
     group: [],
     rules: [
         {
@@ -63,8 +71,83 @@ const DEFAULT_QUERY = {
             value: '',
         },
     ],
-    type: 'all' as 'all' | 'any',
+    type: 'all',
     uniqueId: nanoid(),
+};
+
+// Utility functions for path building
+const getGroupPath = (level: number, groupIndex: number[]): string => {
+    if (level === 0) return 'group';
+    return `${groupIndex.map((idx) => `group[${idx}]`).join('.')}.group`;
+};
+
+const getTypePath = (groupIndex: number[]): string => {
+    return groupIndex.map((idx) => `group[${idx}]`).join('.');
+};
+
+const getRulePath = (level: number, groupIndex: number[]): string => {
+    if (level === 0) return 'rules';
+    return `${groupIndex.map((idx) => `group[${idx}]`).join('.')}.rules`;
+};
+
+// Parse sortBy and sortOrder into array of sort entries
+const parseSortEntries = (
+    sortBy: SongListSort | SongListSort[],
+    sortOrder: 'asc' | 'desc',
+): SortEntry[] => {
+    if (Array.isArray(sortBy) && sortBy.length > 0) {
+        const firstSort = sortBy[0];
+        // Check if first entry is a string with commas (new syntax as single string)
+        if (typeof firstSort === 'string' && firstSort.includes(',')) {
+            return firstSort.split(',').map((s) => {
+                const trimmed = s.trim();
+                const field =
+                    trimmed.startsWith('+') || trimmed.startsWith('-') ? trimmed.slice(1) : trimmed;
+                const order = trimmed.startsWith('-') ? 'desc' : 'asc';
+                return { field, order };
+            });
+        }
+        // Check if first entry has +/- prefix (new syntax as array of prefixed strings)
+        if (
+            typeof firstSort === 'string' &&
+            (firstSort.startsWith('+') || firstSort.startsWith('-'))
+        ) {
+            return sortBy.map((s) => {
+                const field = s.startsWith('+') || s.startsWith('-') ? s.slice(1) : s;
+                const order = s.startsWith('-') ? 'desc' : 'asc';
+                return { field, order };
+            });
+        }
+        // Old syntax: array of fields with single order
+        return sortBy.map((field) => ({ field, order: sortOrder }));
+    }
+    if (sortBy && typeof sortBy === 'string') {
+        // Check if it's new syntax with +/- prefix
+        if (sortBy.includes(',') || sortBy.startsWith('+') || sortBy.startsWith('-')) {
+            return sortBy.split(',').map((s) => {
+                const trimmed = s.trim();
+                const field =
+                    trimmed.startsWith('+') || trimmed.startsWith('-') ? trimmed.slice(1) : trimmed;
+                const order = trimmed.startsWith('-') ? 'desc' : 'asc';
+                return { field, order };
+            });
+        }
+        // Single field, use provided sortOrder
+        return [{ field: sortBy, order: sortOrder }];
+    }
+    // Default
+    return [{ field: 'dateAdded', order: 'asc' }];
+};
+
+// Convert sort entries to new syntax: comma-separated with +/- prefix
+const convertSortEntriesToSortString = (entries: SortEntry[]): string => {
+    return entries
+        .filter((entry) => entry.field)
+        .map((entry) => {
+            const prefix = entry.order === 'desc' ? '-' : '+';
+            return `${prefix}${entry.field}`;
+        })
+        .join(',');
 };
 
 export type PlaylistQueryBuilderRef = {
@@ -85,9 +168,21 @@ export const PlaylistQueryBuilder = forwardRef(
     ) => {
         const { t } = useTranslation();
         const server = useCurrentServer();
-        const [filters, setFilters] = useState<QueryBuilderGroup>(
-            query ? convertNDQueryToQueryGroup(query) : DEFAULT_QUERY,
+
+        // Memoize initial filters to avoid recalculation
+        const initialFilters = useMemo(
+            () => (query ? convertNDQueryToQueryGroup(query) : DEFAULT_QUERY),
+            [query],
         );
+
+        const [filters, setFilters] = useState<QueryBuilderGroup>(initialFilters);
+
+        // Update filters when query changes
+        useEffect(() => {
+            if (query) {
+                setFilters(convertNDQueryToQueryGroup(query));
+            }
+        }, [query]);
 
         const { data: playlists } = useQuery(
             playlistsQueries.list({
@@ -100,372 +195,292 @@ export const PlaylistQueryBuilder = forwardRef(
             if (!playlists) return [];
 
             return playlists.items
-                .filter((p) => {
-                    if (!playlistId) return true;
-                    return p.id !== playlistId;
-                })
+                .filter((p) => !playlistId || p.id !== playlistId)
                 .map((p) => ({
                     label: p.name,
                     value: p.id,
                 }));
         }, [playlistId, playlists]);
 
-        // Parse sortBy and sortOrder into array of sort entries
-        // Handle new syntax: comma-separated fields with +/- prefix (e.g., "+album,-year")
-        // Or old syntax: sortBy array + single sortOrder
-        const parseSortEntries = (): SortEntry[] => {
-            if (Array.isArray(sortBy) && sortBy.length > 0) {
-                const firstSort = sortBy[0];
-                // Check if first entry is a string with commas (new syntax as single string)
-                if (typeof firstSort === 'string' && firstSort.includes(',')) {
-                    // Split the comma-separated string and parse each field
-                    return firstSort.split(',').map((s) => {
-                        const trimmed = s.trim();
-                        const field =
-                            trimmed.startsWith('+') || trimmed.startsWith('-')
-                                ? trimmed.slice(1)
-                                : trimmed;
-                        const order = trimmed.startsWith('-') ? 'desc' : 'asc';
-                        return { field, order };
-                    });
-                }
-                // Check if first entry has +/- prefix (new syntax as array of prefixed strings)
-                if (
-                    typeof firstSort === 'string' &&
-                    (firstSort.startsWith('+') || firstSort.startsWith('-'))
-                ) {
-                    return sortBy.map((s) => {
-                        const field = s.startsWith('+') || s.startsWith('-') ? s.slice(1) : s;
-                        const order = s.startsWith('-') ? 'desc' : 'asc';
-                        return { field, order };
-                    });
-                }
-                // Old syntax: array of fields with single order
-                return sortBy.map((field) => ({ field, order: sortOrder }));
-            }
-            if (sortBy && typeof sortBy === 'string') {
-                // Check if it's new syntax with +/- prefix
-                if (sortBy.includes(',') || sortBy.startsWith('+') || sortBy.startsWith('-')) {
-                    return sortBy.split(',').map((s) => {
-                        const trimmed = s.trim();
-                        const field =
-                            trimmed.startsWith('+') || trimmed.startsWith('-')
-                                ? trimmed.slice(1)
-                                : trimmed;
-                        const order = trimmed.startsWith('-') ? 'desc' : 'asc';
-                        return { field, order };
-                    });
-                }
-                // Single field, use provided sortOrder
-                return [{ field: sortBy, order: sortOrder }];
-            }
-            // Default
-            return [{ field: 'dateAdded', order: 'asc' }];
-        };
+        // Memoize parsed sort entries
+        const initialSortEntries = useMemo(
+            () => parseSortEntries(sortBy, sortOrder),
+            [sortBy, sortOrder],
+        );
 
         const extraFiltersForm = useForm({
             initialValues: {
                 limit,
-                sortEntries: parseSortEntries(),
+                sortEntries: initialSortEntries,
             },
         });
 
-        // Convert sort entries to new syntax: comma-separated with +/- prefix
-        const convertSortEntriesToSortString = (entries: SortEntry[]): string => {
-            return entries
-                .filter((entry) => entry.field) // Filter out empty fields
-                .map((entry) => {
-                    const prefix = entry.order === 'desc' ? '-' : '+';
-                    return `${prefix}${entry.field}`;
-                })
-                .join(',');
-        };
-
-        useImperativeHandle(ref, () => ({
-            getFilters: () => {
-                const sortString = convertSortEntriesToSortString(
-                    extraFiltersForm.values.sortEntries,
-                );
-                return {
-                    extraFilters: {
-                        limit: extraFiltersForm.values.limit,
-                        sortBy: sortString ? [sortString] : undefined,
-                        // sortOrder is now optional and embedded in sortBy
-                    },
-                    filters,
-                };
-            },
-        }));
-
-        const handleResetFilters = () => {
-            if (query) {
-                setFilters(convertNDQueryToQueryGroup(query));
-            } else {
-                setFilters(DEFAULT_QUERY);
-            }
-        };
-
-        const handleClearFilters = () => {
-            setFilters(DEFAULT_QUERY);
-        };
-
-        const setFilterHandler = (newFilters: QueryBuilderGroup) => {
-            setFilters(newFilters);
-        };
-
-        const handleAddRuleGroup = (args: AddArgs) => {
-            const { groupIndex, level } = args;
-            const filtersCopy = clone(filters);
-
-            const getPath = (level: number) => {
-                if (level === 0) return 'group';
-
-                const str: string[] = [];
-                for (const index of groupIndex) {
-                    str.push(`group[${index}]`);
-                }
-
-                return `${str.join('.')}.group`;
-            };
-
-            const path = getPath(level);
-            const updatedFilters = setWith(
-                filtersCopy,
-                path,
-                [
-                    ...get(filtersCopy, path),
-                    {
-                        group: [],
-                        rules: [
-                            {
-                                field: '',
-                                operator: '',
-                                uniqueId: nanoid(),
-                                value: '',
-                            },
-                        ],
-                        type: 'any',
-                        uniqueId: nanoid(),
-                    },
-                ],
-                clone,
-            );
-
-            setFilterHandler(updatedFilters);
-        };
-
-        const handleDeleteRuleGroup = (args: DeleteArgs) => {
-            const { groupIndex, level, uniqueId } = args;
-            const filtersCopy = clone(filters);
-
-            const getPath = (level: number) => {
-                if (level === 0) return 'group';
-
-                const str: string[] = [];
-                for (let i = 0; i < groupIndex.length; i += 1) {
-                    if (i !== groupIndex.length - 1) {
-                        str.push(`group[${groupIndex[i]}]`);
-                    } else {
-                        str.push(`group`);
-                    }
-                }
-
-                return `${str.join('.')}`;
-            };
-
-            const path = getPath(level);
-
-            const updatedFilters = setWith(
-                filtersCopy,
-                path,
-                [
-                    ...get(filtersCopy, path).filter(
-                        (group: QueryBuilderGroup) => group.uniqueId !== uniqueId,
-                    ),
-                ],
-                clone,
-            );
-
-            setFilterHandler(updatedFilters);
-        };
-
-        const getRulePath = (level: number, groupIndex: number[]) => {
-            if (level === 0) return 'rules';
-
-            const str: string[] = [];
-            for (const index of groupIndex) {
-                str.push(`group[${index}]`);
-            }
-
-            return `${str.join('.')}.rules`;
-        };
-
-        const handleAddRule = (args: AddArgs) => {
-            const { groupIndex, level } = args;
-            const filtersCopy = clone(filters);
-
-            const path = getRulePath(level, groupIndex);
-            const updatedFilters = setWith(
-                filtersCopy,
-                path,
-                [
-                    ...get(filtersCopy, path),
-                    {
-                        field: '',
-                        operator: '',
-                        uniqueId: nanoid(),
-                        value: null,
-                    },
-                ],
-                clone,
-            );
-
-            setFilterHandler(updatedFilters);
-        };
-
-        const handleDeleteRule = (args: DeleteArgs) => {
-            const { groupIndex, level, uniqueId } = args;
-            const filtersCopy = clone(filters);
-
-            const path = getRulePath(level, groupIndex);
-            const updatedFilters = setWith(
-                filtersCopy,
-                path,
-                get(filtersCopy, path).filter(
-                    (rule: QueryBuilderRule) => rule.uniqueId !== uniqueId,
-                ),
-                clone,
-            );
-
-            setFilterHandler(updatedFilters);
-        };
-
-        const handleChangeField = (args: any) => {
-            const { groupIndex, level, uniqueId, value } = args;
-            const filtersCopy = clone(filters);
-
-            const path = getRulePath(level, groupIndex);
-            const updatedFilters = setWith(
-                filtersCopy,
-                path,
-                get(filtersCopy, path).map((rule: QueryBuilderGroup) => {
-                    if (rule.uniqueId !== uniqueId) return rule;
+        useImperativeHandle(
+            ref,
+            () => ({
+                getFilters: () => {
+                    const sortString = convertSortEntriesToSortString(
+                        extraFiltersForm.values.sortEntries,
+                    );
                     return {
-                        ...rule,
-                        field: value,
-                        operator: '',
-                        value: '',
+                        extraFilters: {
+                            limit: extraFiltersForm.values.limit,
+                            sortBy: sortString ? [sortString] : undefined,
+                        },
+                        filters,
                     };
-                }),
-                clone,
-            );
+                },
+            }),
+            [extraFiltersForm.values.sortEntries, extraFiltersForm.values.limit, filters],
+        );
 
-            setFilterHandler(updatedFilters);
-        };
+        const handleResetFilters = useCallback(() => {
+            setFilters(query ? convertNDQueryToQueryGroup(query) : DEFAULT_QUERY);
+        }, [query]);
 
-        const handleChangeType = (args: any) => {
+        const handleClearFilters = useCallback(() => {
+            setFilters(DEFAULT_QUERY);
+        }, []);
+
+        const handleAddRuleGroup = useCallback((args: AddArgs) => {
+            const { groupIndex, level } = args;
+            const path = getGroupPath(level, groupIndex);
+
+            setFilters((prev) => {
+                const currentGroups = get(prev, path) || [];
+                return setWith(
+                    clone(prev),
+                    path,
+                    [
+                        ...currentGroups,
+                        {
+                            group: [],
+                            rules: [
+                                {
+                                    field: '',
+                                    operator: '',
+                                    uniqueId: nanoid(),
+                                    value: '',
+                                },
+                            ],
+                            type: 'any',
+                            uniqueId: nanoid(),
+                        },
+                    ],
+                    clone,
+                );
+            });
+        }, []);
+
+        const handleDeleteRuleGroup = useCallback((args: DeleteArgs) => {
+            const { groupIndex, level, uniqueId } = args;
+            const path = level === 0 ? 'group' : getTypePath(groupIndex);
+
+            setFilters((prev) => {
+                const currentGroups = get(prev, path) || [];
+                return setWith(
+                    clone(prev),
+                    path,
+                    currentGroups.filter((group: QueryBuilderGroup) => group.uniqueId !== uniqueId),
+                    clone,
+                );
+            });
+        }, []);
+
+        const handleAddRule = useCallback((args: AddArgs) => {
+            const { groupIndex, level } = args;
+            const path = getRulePath(level, groupIndex);
+
+            setFilters((prev) => {
+                const currentRules = get(prev, path) || [];
+                return setWith(
+                    clone(prev),
+                    path,
+                    [
+                        ...currentRules,
+                        {
+                            field: '',
+                            operator: '',
+                            uniqueId: nanoid(),
+                            value: null,
+                        },
+                    ],
+                    clone,
+                );
+            });
+        }, []);
+
+        const handleDeleteRule = useCallback((args: DeleteArgs) => {
+            const { groupIndex, level, uniqueId } = args;
+            const path = getRulePath(level, groupIndex);
+
+            setFilters((prev) => {
+                const currentRules = get(prev, path) || [];
+                return setWith(
+                    clone(prev),
+                    path,
+                    currentRules.filter((rule: QueryBuilderRule) => rule.uniqueId !== uniqueId),
+                    clone,
+                );
+            });
+        }, []);
+
+        const handleChangeField = useCallback((args: any) => {
+            const { groupIndex, level, uniqueId, value } = args;
+            const path = getRulePath(level, groupIndex);
+
+            setFilters((prev) => {
+                const currentRules = get(prev, path) || [];
+                return setWith(
+                    clone(prev),
+                    path,
+                    currentRules.map((rule: QueryBuilderRule) => {
+                        if (rule.uniqueId !== uniqueId) return rule;
+                        return {
+                            ...rule,
+                            field: value,
+                            operator: '',
+                            value: '',
+                        };
+                    }),
+                    clone,
+                );
+            });
+        }, []);
+
+        const handleChangeType = useCallback((args: any) => {
             const { groupIndex, level, value } = args;
 
-            const filtersCopy = clone(filters);
-
             if (level === 0) {
-                return setFilterHandler({ ...filtersCopy, type: value });
+                setFilters((prev) => ({ ...prev, type: value }));
+                return;
             }
 
-            const getTypePath = () => {
-                const str: string[] = [];
-                for (let i = 0; i < groupIndex.length; i += 1) {
-                    str.push(`group[${groupIndex[i]}]`);
-                }
+            const path = getTypePath(groupIndex);
+            setFilters((prev) =>
+                setWith(
+                    clone(prev),
+                    path,
+                    {
+                        ...get(prev, path),
+                        type: value,
+                    },
+                    clone,
+                ),
+            );
+        }, []);
 
-                return `${str.join('.')}`;
-            };
+        const handleChangeOperator = useCallback((args: any) => {
+            const { groupIndex, level, uniqueId, value } = args;
+            const path = getRulePath(level, groupIndex);
 
-            const path = getTypePath();
-            const updatedFilters = setWith(
-                filtersCopy,
-                path,
+            setFilters((prev) => {
+                const currentRules = get(prev, path) || [];
+                return setWith(
+                    clone(prev),
+                    path,
+                    currentRules.map((rule: QueryBuilderRule) => {
+                        if (rule.uniqueId !== uniqueId) return rule;
+                        return {
+                            ...rule,
+                            operator: value,
+                        };
+                    }),
+                    clone,
+                );
+            });
+        }, []);
+
+        const handleChangeValue = useCallback((args: any) => {
+            const { groupIndex, level, uniqueId, value } = args;
+            const path = getRulePath(level, groupIndex);
+
+            setFilters((prev) => {
+                const currentRules = get(prev, path) || [];
+                return setWith(
+                    clone(prev),
+                    path,
+                    currentRules.map((rule: QueryBuilderRule) => {
+                        if (rule.uniqueId !== uniqueId) return rule;
+                        return {
+                            ...rule,
+                            value,
+                        };
+                    }),
+                    clone,
+                );
+            });
+        }, []);
+
+        // Memoize sort options
+        const sortOptions = useMemo(
+            () => [
                 {
-                    ...get(filtersCopy, path),
-                    type: value,
+                    label: t('filter.random', { postProcess: 'titleCase' }),
+                    type: 'string',
+                    value: 'random',
                 },
-                clone,
-            );
+                ...NDSongQueryFields,
+            ],
+            [t],
+        );
 
-            return setFilterHandler(updatedFilters);
-        };
+        // Memoize order select data
+        const orderSelectData = useMemo(
+            () => [
+                {
+                    label: t('common.ascending', { postProcess: 'sentenceCase' }),
+                    value: 'asc',
+                },
+                {
+                    label: t('common.descending', { postProcess: 'sentenceCase' }),
+                    value: 'desc',
+                },
+            ],
+            [t],
+        );
 
-        const handleChangeOperator = (args: any) => {
-            const { groupIndex, level, uniqueId, value } = args;
-            const filtersCopy = clone(filters);
+        // Memoize operators object
+        const operators = useMemo(
+            () => ({
+                boolean: NDSongQueryBooleanOperators,
+                date: NDSongQueryDateOperators,
+                number: NDSongQueryNumberOperators,
+                playlist: NDSongQueryPlaylistOperators,
+                string: NDSongQueryStringOperators,
+            }),
+            [],
+        );
 
-            const path = getRulePath(level, groupIndex);
-            const updatedFilters = setWith(
-                filtersCopy,
-                path,
-                get(filtersCopy, path).map((rule: QueryBuilderRule) => {
-                    if (rule.uniqueId !== uniqueId) return rule;
-                    return {
-                        ...rule,
-                        operator: value,
-                    };
-                }),
-                clone,
-            );
-
-            setFilterHandler(updatedFilters);
-        };
-
-        const handleChangeValue = (args: any) => {
-            const { groupIndex, level, uniqueId, value } = args;
-            const filtersCopy = clone(filters);
-
-            const path = getRulePath(level, groupIndex);
-            const updatedFilters = setWith(
-                filtersCopy,
-                path,
-                get(filtersCopy, path).map((rule: QueryBuilderRule) => {
-                    if (rule.uniqueId !== uniqueId) return rule;
-                    return {
-                        ...rule,
-                        value,
-                    };
-                }),
-                clone,
-            );
-
-            setFilterHandler(updatedFilters);
-        };
-
-        const sortOptions = [
-            {
-                label: t('filter.random', { postProcess: 'titleCase' }),
-                type: 'string',
-                value: 'random',
-            },
-            ...NDSongQueryFields,
-        ];
-
-        const handleAddSortEntry = () => {
+        const handleAddSortEntry = useCallback(() => {
             extraFiltersForm.insertListItem('sortEntries', { field: '', order: 'asc' });
-        };
+        }, [extraFiltersForm]);
 
-        const handleRemoveSortEntry = (index: number) => {
-            extraFiltersForm.removeListItem('sortEntries', index);
-        };
+        const handleRemoveSortEntry = useCallback(
+            (index: number) => {
+                extraFiltersForm.removeListItem('sortEntries', index);
+            },
+            [extraFiltersForm],
+        );
 
-        const handleSortFieldChange = (index: number, value: string) => {
-            extraFiltersForm.setFieldValue(`sortEntries.${index}.field`, value);
-        };
+        const handleSortFieldChange = useCallback(
+            (index: number, value: string) => {
+                extraFiltersForm.setFieldValue(`sortEntries.${index}.field`, value);
+            },
+            [extraFiltersForm],
+        );
 
-        const handleSortOrderChange = (index: number, value: 'asc' | 'desc') => {
-            extraFiltersForm.setFieldValue(`sortEntries.${index}.order`, value);
-        };
+        const handleSortOrderChange = useCallback(
+            (index: number, value: 'asc' | 'desc') => {
+                extraFiltersForm.setFieldValue(`sortEntries.${index}.order`, value);
+            },
+            [extraFiltersForm],
+        );
 
         return (
-            <Flex direction="column" h="calc(100% - 2rem)" justify="space-between">
-                <ScrollArea>
-                    <Stack gap="md" p="1rem">
+            <Flex direction="column" h="100%" w="100%">
+                <ScrollArea style={{ height: '100%' }}>
+                    <Stack gap="md" h="100%" p="1rem">
                         <QueryBuilder
                             data={filters}
                             filters={NDSongQueryFields}
@@ -481,13 +496,7 @@ export const PlaylistQueryBuilder = forwardRef(
                             onDeleteRule={handleDeleteRule}
                             onDeleteRuleGroup={handleDeleteRuleGroup}
                             onResetFilters={handleResetFilters}
-                            operators={{
-                                boolean: NDSongQueryBooleanOperators,
-                                date: NDSongQueryDateOperators,
-                                number: NDSongQueryNumberOperators,
-                                playlist: NDSongQueryPlaylistOperators,
-                                string: NDSongQueryStringOperators,
-                            }}
+                            operators={operators}
                             playlists={playlistData}
                             uniqueId={filters.uniqueId}
                         />
@@ -510,20 +519,7 @@ export const PlaylistQueryBuilder = forwardRef(
                                             width={200}
                                         />
                                         <Select
-                                            data={[
-                                                {
-                                                    label: t('common.ascending', {
-                                                        postProcess: 'sentenceCase',
-                                                    }),
-                                                    value: 'asc',
-                                                },
-                                                {
-                                                    label: t('common.descending', {
-                                                        postProcess: 'sentenceCase',
-                                                    }),
-                                                    value: 'desc',
-                                                },
-                                            ]}
+                                            data={orderSelectData}
                                             label={
                                                 index === 0
                                                     ? t('common.sortOrder', {

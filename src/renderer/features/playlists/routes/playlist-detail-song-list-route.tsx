@@ -1,7 +1,7 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate, useParams } from 'react-router';
 
@@ -19,20 +19,227 @@ import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/dele
 import { convertQueryGroupToNDQuery } from '/@/renderer/features/playlists/utils';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
-import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
-import { Box } from '/@/shared/components/box/box';
 import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { ConfirmModal } from '/@/shared/components/modal/modal';
+import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { ServerType } from '/@/shared/types/domain-types';
+import { ServerType, SongListSort } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
+
+interface PlaylistQueryEditorProps {
+    createPlaylistMutation: ReturnType<typeof useCreatePlaylist>;
+    detailQuery: ReturnType<typeof useQuery<any>>;
+    handleSave: (
+        filter: Record<string, any>,
+        extraFilters: { limit?: number; sortBy?: string[]; sortOrder?: string },
+    ) => void;
+    handleSaveAs: (
+        filter: Record<string, any>,
+        extraFilters: { limit?: number; sortBy?: string[]; sortOrder?: string },
+    ) => void;
+    isQueryBuilderExpanded: boolean;
+    onToggleExpand: () => void;
+    playlistId: string;
+    queryBuilderRef: React.RefObject<null | PlaylistQueryBuilderRef>;
+}
+
+const PlaylistQueryEditor = ({
+    createPlaylistMutation,
+    detailQuery,
+    handleSave,
+    handleSaveAs,
+    isQueryBuilderExpanded,
+    onToggleExpand,
+    playlistId,
+    queryBuilderRef,
+}: PlaylistQueryEditorProps) => {
+    const { t } = useTranslation();
+
+    const openPreviewModal = useCallback(() => {
+        if (!isQueryBuilderExpanded) {
+            return;
+        }
+
+        const filters = queryBuilderRef.current?.getFilters();
+
+        if (!filters) {
+            return;
+        }
+
+        const queryValue = convertQueryGroupToNDQuery(filters.filters);
+        const sortString = filters.extraFilters.sortBy?.[0];
+
+        const previewValue = {
+            ...queryValue,
+            ...(filters.extraFilters.limit && { limit: filters.extraFilters.limit }),
+            ...(sortString && { sort: sortString }),
+        };
+
+        openModal({
+            children: <JsonPreview value={previewValue} />,
+            size: 'xl',
+            title: t('common.preview', { postProcess: 'titleCase' }),
+        });
+    }, [isQueryBuilderExpanded, queryBuilderRef, t]);
+
+    const openSaveAndReplaceModal = useCallback(() => {
+        if (!isQueryBuilderExpanded) {
+            return;
+        }
+
+        const filters = queryBuilderRef.current?.getFilters();
+
+        if (!filters) {
+            return;
+        }
+
+        openModal({
+            children: (
+                <ConfirmModal
+                    onConfirm={() => {
+                        handleSave(
+                            convertQueryGroupToNDQuery(filters.filters),
+                            filters.extraFilters,
+                        );
+                        closeAllModals();
+                    }}
+                >
+                    <Text>{t('common.areYouSure', { postProcess: 'sentenceCase' })}</Text>
+                </ConfirmModal>
+            ),
+            title: t('common.saveAndReplace', { postProcess: 'sentenceCase' }),
+        });
+    }, [isQueryBuilderExpanded, queryBuilderRef, handleSave, t]);
+
+    const parseSortBy = useCallback((): string[] => {
+        const sort = detailQuery?.data?.rules?.sort;
+        // Handle new syntax: comma-separated with +/- prefix
+        // e.g., "+album,-year" -> return as single string in array
+        if (typeof sort === 'string') {
+            // Check if it's new syntax (has +/- prefix or commas)
+            if (sort.includes(',') || sort.startsWith('+') || sort.startsWith('-')) {
+                return [sort];
+            }
+            // Old syntax: single field, convert to new format with default order
+            const order = detailQuery?.data?.rules?.order || 'asc';
+            const prefix = order === 'desc' ? '-' : '+';
+            return [`${prefix}${sort}`];
+        }
+        if (Array.isArray(sort)) {
+            // If array, check if first item has +/- prefix
+            if (
+                sort.length > 0 &&
+                typeof sort[0] === 'string' &&
+                (sort[0].startsWith('+') || sort[0].startsWith('-'))
+            ) {
+                return sort;
+            }
+            // Old array format, convert to new format
+            const order = detailQuery?.data?.rules?.order || 'asc';
+            const prefix = order === 'desc' ? '-' : '+';
+            return sort.map((s) => `${prefix}${s}`);
+        }
+        return ['+dateAdded'];
+    }, [detailQuery?.data?.rules?.order, detailQuery?.data?.rules?.sort]);
+
+    const parseSortOrder = useCallback((): 'asc' | 'desc' => {
+        const sort = detailQuery?.data?.rules?.sort;
+        if (typeof sort === 'string' && sort.startsWith('-')) {
+            return 'desc';
+        }
+        // Fall back to old order field or default
+        return detailQuery?.data?.rules?.order || 'asc';
+    }, [detailQuery?.data?.rules?.order, detailQuery?.data?.rules?.sort]);
+
+    return (
+        <motion.div>
+            <Stack gap={0} h="100%" mah="50dvh" p="md" w="100%">
+                <Group justify="space-between" pb="md" wrap="nowrap">
+                    <Group gap="sm" wrap="nowrap">
+                        <ActionIcon
+                            icon={isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'}
+                            iconProps={{
+                                size: 'md',
+                            }}
+                            onClick={onToggleExpand}
+                            size="xs"
+                        />
+                        <Text>
+                            {t('form.queryEditor.title', {
+                                postProcess: 'titleCase',
+                            })}
+                        </Text>
+                    </Group>
+                    <Group gap="xs">
+                        <Button
+                            disabled={!isQueryBuilderExpanded}
+                            onClick={openPreviewModal}
+                            size="sm"
+                            variant="subtle"
+                        >
+                            {t('common.preview', { postProcess: 'titleCase' })}
+                        </Button>
+                        <Button
+                            disabled={!isQueryBuilderExpanded}
+                            leftSection={<Icon icon="save" />}
+                            loading={createPlaylistMutation?.isPending}
+                            onClick={() => {
+                                if (!isQueryBuilderExpanded) return;
+                                const filters = queryBuilderRef.current?.getFilters();
+                                if (filters) {
+                                    handleSaveAs(
+                                        convertQueryGroupToNDQuery(filters.filters),
+                                        filters.extraFilters,
+                                    );
+                                }
+                            }}
+                            size="sm"
+                            variant="subtle"
+                        >
+                            {t('common.saveAs', { postProcess: 'titleCase' })}
+                        </Button>
+                        <Button
+                            disabled={!isQueryBuilderExpanded}
+                            leftSection={<Icon color="error" icon="save" />}
+                            onClick={openSaveAndReplaceModal}
+                            size="sm"
+                            variant="subtle"
+                        >
+                            {t('common.saveAndReplace', {
+                                postProcess: 'titleCase',
+                            })}
+                        </Button>
+                    </Group>
+                </Group>
+                <div
+                    style={{
+                        display: isQueryBuilderExpanded ? 'flex' : 'none',
+                        flex: 1,
+                        minHeight: 0,
+                        overflow: 'hidden',
+                    }}
+                >
+                    <PlaylistQueryBuilder
+                        key={JSON.stringify(detailQuery?.data?.rules)}
+                        limit={detailQuery?.data?.rules?.limit}
+                        playlistId={playlistId}
+                        query={detailQuery?.data?.rules}
+                        ref={queryBuilderRef}
+                        sortBy={parseSortBy() as SongListSort | SongListSort[]}
+                        sortOrder={parseSortOrder()}
+                    />
+                </div>
+            </Stack>
+        </motion.div>
+    );
+};
 
 const PlaylistDetailSongListRoute = () => {
     const { t } = useTranslation();
@@ -186,35 +393,6 @@ const PlaylistDetailSongListRoute = () => {
         });
     };
 
-    const openSaveAndReplaceModal = () => {
-        if (!isQueryBuilderExpanded) {
-            return;
-        }
-
-        const filters = queryBuilderRef.current?.getFilters();
-
-        if (!filters) {
-            return;
-        }
-
-        openModal({
-            children: (
-                <ConfirmModal
-                    onConfirm={() => {
-                        handleSave(
-                            convertQueryGroupToNDQuery(filters.filters),
-                            filters.extraFilters,
-                        );
-                        closeAllModals();
-                    }}
-                >
-                    <Text>{t('common.areYouSure', { postProcess: 'sentenceCase' })}</Text>
-                </ConfirmModal>
-            ),
-            title: t('common.saveAndReplace', { postProcess: 'sentenceCase' }),
-        });
-    };
-
     const isSmartPlaylist =
         !detailQuery?.isLoading &&
         detailQuery?.data?.rules &&
@@ -231,34 +409,6 @@ const PlaylistDetailSongListRoute = () => {
     const handleToggleShowQueryBuilder = () => {
         setShowQueryBuilder((prev) => !prev);
         setIsQueryBuilderExpanded(true);
-    };
-
-    const openPreviewModal = () => {
-        if (!isQueryBuilderExpanded) return;
-        const filters = queryBuilderRef.current?.getFilters();
-        if (!filters) {
-            toast.error({
-                message:
-                    t('error.queryBuilderNotReady', { postProcess: 'sentenceCase' }) ||
-                    'Query builder is not ready. Please expand it first.',
-            });
-            return;
-        }
-
-        const queryValue = convertQueryGroupToNDQuery(filters.filters);
-        const sortString = filters.extraFilters.sortBy?.[0];
-
-        const previewValue = {
-            ...queryValue,
-            ...(filters.extraFilters.limit && { limit: filters.extraFilters.limit }),
-            ...(sortString && { sort: sortString }),
-        };
-
-        openModal({
-            children: <JsonPreview value={previewValue} />,
-            size: 'xl',
-            title: t('common.preview', { postProcess: 'titleCase' }),
-        });
     };
 
     const playlistSongs = useQuery(
@@ -294,139 +444,32 @@ const PlaylistDetailSongListRoute = () => {
     return (
         <AnimatedPage key={`playlist-detail-songList-${playlistId}`}>
             <ListContext.Provider value={providerValue}>
-                <LibraryContainer>
-                    <PlaylistDetailSongListHeader
-                        isSmartPlaylist={!!isSmartPlaylist}
-                        onConvertToSmart={() => {
-                            if (!isSmartPlaylist) {
-                                setShowQueryBuilder(true);
-                                setIsQueryBuilderExpanded(true);
-                            }
-                        }}
-                        onDelete={() => openDeletePlaylistModal()}
-                        onToggleQueryBuilder={handleToggleShowQueryBuilder}
-                    />
-                    {(isSmartPlaylist || showQueryBuilder) && (
-                        <motion.div>
-                            <Box h="100%" mah="50dvh" p="md" w="100%">
-                                <Group justify="space-between" pb="md" wrap="nowrap">
-                                    <Group gap="sm" wrap="nowrap">
-                                        <ActionIcon
-                                            icon={
-                                                isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'
-                                            }
-                                            iconProps={{
-                                                size: 'md',
-                                            }}
-                                            onClick={handleToggleExpand}
-                                            size="xs"
-                                        />
-                                        <Text>
-                                            {t('form.queryEditor.title', {
-                                                postProcess: 'titleCase',
-                                            })}
-                                        </Text>
-                                    </Group>
-                                    <Group gap="xs">
-                                        <Button
-                                            disabled={!isQueryBuilderExpanded}
-                                            onClick={openPreviewModal}
-                                            size="sm"
-                                            variant="subtle"
-                                        >
-                                            {t('common.preview', { postProcess: 'titleCase' })}
-                                        </Button>
-                                        <Button
-                                            disabled={!isQueryBuilderExpanded}
-                                            leftSection={<Icon icon="save" />}
-                                            loading={createPlaylistMutation?.isPending}
-                                            onClick={() => {
-                                                if (!isQueryBuilderExpanded) return;
-                                                const filters =
-                                                    queryBuilderRef.current?.getFilters();
-                                                if (filters) {
-                                                    handleSaveAs(
-                                                        convertQueryGroupToNDQuery(filters.filters),
-                                                        filters.extraFilters,
-                                                    );
-                                                }
-                                            }}
-                                            size="sm"
-                                        >
-                                            {t('common.saveAs', { postProcess: 'titleCase' })}
-                                        </Button>
-                                        <Button
-                                            disabled={!isQueryBuilderExpanded}
-                                            leftSection={<Icon color="error" icon="save" />}
-                                            onClick={openSaveAndReplaceModal}
-                                            size="sm"
-                                            variant="default"
-                                        >
-                                            {t('common.saveAndReplace', {
-                                                postProcess: 'titleCase',
-                                            })}
-                                        </Button>
-                                    </Group>
-                                </Group>
-                                <div style={{ display: isQueryBuilderExpanded ? 'block' : 'none' }}>
-                                    <PlaylistQueryBuilder
-                                        key={JSON.stringify(detailQuery?.data?.rules)}
-                                        limit={detailQuery?.data?.rules?.limit}
-                                        playlistId={playlistId}
-                                        query={detailQuery?.data?.rules}
-                                        ref={queryBuilderRef}
-                                        sortBy={(() => {
-                                            const sort = detailQuery?.data?.rules?.sort;
-                                            // Handle new syntax: comma-separated with +/- prefix
-                                            // e.g., "+album,-year" -> return as single string in array
-                                            if (typeof sort === 'string') {
-                                                // Check if it's new syntax (has +/- prefix or commas)
-                                                if (
-                                                    sort.includes(',') ||
-                                                    sort.startsWith('+') ||
-                                                    sort.startsWith('-')
-                                                ) {
-                                                    return [sort];
-                                                }
-                                                // Old syntax: single field, convert to new format with default order
-                                                const order =
-                                                    detailQuery?.data?.rules?.order || 'asc';
-                                                const prefix = order === 'desc' ? '-' : '+';
-                                                return [`${prefix}${sort}`];
-                                            }
-                                            if (Array.isArray(sort)) {
-                                                // If array, check if first item has +/- prefix
-                                                if (
-                                                    sort.length > 0 &&
-                                                    typeof sort[0] === 'string' &&
-                                                    (sort[0].startsWith('+') ||
-                                                        sort[0].startsWith('-'))
-                                                ) {
-                                                    return sort;
-                                                }
-                                                // Old array format, convert to new format
-                                                const order =
-                                                    detailQuery?.data?.rules?.order || 'asc';
-                                                const prefix = order === 'desc' ? '-' : '+';
-                                                return sort.map((s) => `${prefix}${s}`);
-                                            }
-                                            return ['+dateAdded'];
-                                        })()}
-                                        sortOrder={(() => {
-                                            const sort = detailQuery?.data?.rules?.sort;
-                                            if (typeof sort === 'string' && sort.startsWith('-')) {
-                                                return 'desc';
-                                            }
-                                            // Fall back to old order field or default
-                                            return detailQuery?.data?.rules?.order || 'asc';
-                                        })()}
-                                    />
-                                </div>
-                            </Box>
-                        </motion.div>
-                    )}
-                    <PlaylistDetailSongListContent />
-                </LibraryContainer>
+                <PlaylistDetailSongListHeader
+                    isSmartPlaylist={!!isSmartPlaylist}
+                    onConvertToSmart={() => {
+                        if (!isSmartPlaylist) {
+                            setShowQueryBuilder(true);
+                            setIsQueryBuilderExpanded(true);
+                        }
+                    }}
+                    onDelete={() => openDeletePlaylistModal()}
+                    onToggleQueryBuilder={handleToggleShowQueryBuilder}
+                />
+                {(isSmartPlaylist || showQueryBuilder) && (
+                    <AnimatePresence>
+                        <PlaylistQueryEditor
+                            createPlaylistMutation={createPlaylistMutation}
+                            detailQuery={detailQuery}
+                            handleSave={handleSave}
+                            handleSaveAs={handleSaveAs}
+                            isQueryBuilderExpanded={isQueryBuilderExpanded}
+                            onToggleExpand={handleToggleExpand}
+                            playlistId={playlistId}
+                            queryBuilderRef={queryBuilderRef}
+                        />
+                    </AnimatePresence>
+                )}
+                <PlaylistDetailSongListContent />
             </ListContext.Provider>
         </AnimatedPage>
     );

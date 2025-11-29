@@ -39,7 +39,7 @@ export const PlaylistDetailSongListHeader = ({
     return (
         <Stack gap={0}>
             <PageHeader>
-                <LibraryHeaderBar>
+                <LibraryHeaderBar ignoreMaxWidth>
                     <LibraryHeaderBar.PlayButton
                         ids={[playlistId]}
                         itemType={LibraryItem.PLAYLIST}
