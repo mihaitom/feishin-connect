@@ -27,7 +27,7 @@ export const AlbumListHeader = ({ title }: AlbumListHeaderProps) => {
     return (
         <Stack gap={0}>
             <PageHeader>
-                <LibraryHeaderBar>
+                <LibraryHeaderBar ignoreMaxWidth>
                     <PlayButton />
                     <PageTitle title={title} />
                     <LibraryHeaderBar.Badge isLoading={!itemCount}>

@@ -4,7 +4,6 @@ import { useLocation, useParams } from 'react-router';
 import { SearchContent } from '/@/renderer/features/search/components/search-content';
 import { SearchHeader } from '/@/renderer/features/search/components/search-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
-import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 
 const SearchRoute = () => {
@@ -15,10 +14,8 @@ const SearchRoute = () => {
 
     return (
         <AnimatedPage key={`search-${navigationId}`}>
-            <LibraryContainer>
-                <SearchHeader navigationId={navigationId} />
-                <SearchContent key={`page-${itemType}`} />
-            </LibraryContainer>
+            <SearchHeader navigationId={navigationId} />
+            <SearchContent key={`page-${itemType}`} />
         </AnimatedPage>
     );
 };

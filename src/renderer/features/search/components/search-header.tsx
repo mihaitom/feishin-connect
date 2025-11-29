@@ -13,7 +13,6 @@ import { FilterBar } from '/@/renderer/features/shared/components/filter-bar';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { SearchInput } from '/@/renderer/features/shared/components/search-input';
-import { useContainerQuery } from '/@/renderer/hooks';
 import { AppRoute } from '/@/renderer/router/routes';
 import { Button, ButtonGroup } from '/@/shared/components/button/button';
 import { Flex } from '/@/shared/components/flex/flex';
@@ -30,7 +29,6 @@ export const SearchHeader = ({ navigationId }: SearchHeaderProps) => {
     const { t } = useTranslation();
     const { itemType } = useParams() as { itemType: LibraryItem };
     const [searchParams, setSearchParams] = useSearchParams();
-    const { ref, ...cq } = useContainerQuery();
 
     const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
         setSearchParams({ query: e.target.value }, { replace: true, state: { navigationId } });
@@ -52,10 +50,10 @@ export const SearchHeader = ({ navigationId }: SearchHeaderProps) => {
     };
 
     return (
-        <Stack gap={0} ref={ref}>
+        <Stack gap={0}>
             <PageHeader>
                 <Flex justify="space-between" w="100%">
-                    <LibraryHeaderBar>
+                    <LibraryHeaderBar ignoreMaxWidth>
                         <LibraryHeaderBar.Title>Search</LibraryHeaderBar.Title>
                     </LibraryHeaderBar>
                     <Group>

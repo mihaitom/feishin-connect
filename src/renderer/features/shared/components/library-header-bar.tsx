@@ -1,5 +1,5 @@
 import { closeAllModals, openModal } from '@mantine/modals';
-import { memo, ReactNode, useCallback } from 'react';
+import { CSSProperties, memo, ReactNode, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './library-header-bar.module.css';
@@ -16,10 +16,18 @@ import { Play } from '/@/shared/types/types';
 
 interface LibraryHeaderBarProps {
     children: ReactNode;
+    ignoreMaxWidth?: boolean;
 }
 
-const LibraryHeaderBarComponent = ({ children }: LibraryHeaderBarProps) => {
-    return <div className={styles.headerContainer}>{children}</div>;
+const LibraryHeaderBarComponent = ({ children, ignoreMaxWidth }: LibraryHeaderBarProps) => {
+    return (
+        <div
+            className={styles.headerContainer}
+            style={ignoreMaxWidth ? ({ maxWidth: 'none' } as CSSProperties) : undefined}
+        >
+            {children}
+        </div>
+    );
 };
 
 interface HeaderPlayButtonProps {

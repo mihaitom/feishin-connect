@@ -5,7 +5,6 @@ import { ListContext } from '/@/renderer/context/list-context';
 import { AlbumListContent } from '/@/renderer/features/albums/components/album-list-content';
 import { AlbumListHeader } from '/@/renderer/features/albums/components/album-list-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
-import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AlbumListQuery } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
@@ -48,10 +47,8 @@ const AlbumListRoute = () => {
     return (
         <AnimatedPage>
             <ListContext.Provider value={providerValue}>
-                <LibraryContainer>
-                    <AlbumListHeader />
-                    <AlbumListContent />
-                </LibraryContainer>
+                <AlbumListHeader />
+                <AlbumListContent />
             </ListContext.Provider>
         </AnimatedPage>
     );

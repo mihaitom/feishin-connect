@@ -30,7 +30,7 @@ export const SongListHeader = ({ title }: SongListHeaderProps) => {
         <Stack gap={0}>
             <PageHeader>
                 <Flex justify="space-between" w="100%">
-                    <LibraryHeaderBar>
+                    <LibraryHeaderBar ignoreMaxWidth>
                         <PlayButton />
                         <PageTitle title={title} />
                         <LibraryHeaderBar.Badge

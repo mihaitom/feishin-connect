@@ -3,7 +3,6 @@ import { useParams } from 'react-router';
 
 import { ListContext } from '/@/renderer/context/list-context';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
-import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { SongListContent } from '/@/renderer/features/songs/components/song-list-content';
 import { SongListHeader } from '/@/renderer/features/songs/components/song-list-header';
@@ -48,10 +47,8 @@ const SongListRoute = () => {
     return (
         <AnimatedPage>
             <ListContext.Provider value={providerValue}>
-                <LibraryContainer>
-                    <SongListHeader />
-                    <SongListContent />
-                </LibraryContainer>
+                <SongListHeader />
+                <SongListContent />
             </ListContext.Provider>
         </AnimatedPage>
     );
