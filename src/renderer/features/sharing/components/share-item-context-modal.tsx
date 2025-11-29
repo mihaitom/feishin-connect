@@ -1,4 +1,3 @@
-import { useForm } from '@mantine/form';
 import { closeModal, ContextModalProps } from '@mantine/modals';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +11,7 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { Textarea } from '/@/shared/components/textarea/textarea';
 import { toast } from '/@/shared/components/toast/toast';
+import { useForm } from '/@/shared/hooks/use-form';
 
 export const ShareItemContextModal = ({
     id,

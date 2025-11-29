@@ -1,4 +1,3 @@
-import { useForm } from '@mantine/form';
 import { useQuery } from '@tanstack/react-query';
 import clone from 'lodash/clone';
 import get from 'lodash/get';
@@ -34,6 +33,7 @@ import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Select } from '/@/shared/components/select/select';
 import { Stack } from '/@/shared/components/stack/stack';
+import { useForm } from '/@/shared/hooks/use-form';
 import { PlaylistListSort, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { QueryBuilderGroup, QueryBuilderRule } from '/@/shared/types/types';
 

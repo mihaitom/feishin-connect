@@ -1,4 +1,3 @@
-import { useForm } from '@mantine/form';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +17,7 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { Textarea } from '/@/shared/components/textarea/textarea';
 import { toast } from '/@/shared/components/toast/toast';
+import { useForm } from '/@/shared/hooks/use-form';
 import { CreatePlaylistBody, ServerType, SongListSort } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
@@ -168,7 +168,6 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
                     <Stack pt="1rem">
                         <Text>Query Editor</Text>
                         <PlaylistQueryBuilder
-                            isSaving={mutation.isPending}
                             limit={undefined}
                             query={undefined}
                             ref={queryBuilderRef}

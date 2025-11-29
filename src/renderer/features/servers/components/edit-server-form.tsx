@@ -1,4 +1,3 @@
-import { useForm } from '@mantine/form';
 import { closeAllModals } from '@mantine/modals';
 import isElectron from 'is-electron';
 import { useState } from 'react';
@@ -18,6 +17,7 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { toast } from '/@/shared/components/toast/toast';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
 import { useFocusTrap } from '/@/shared/hooks/use-focus-trap';
+import { useForm } from '/@/shared/hooks/use-form';
 import {
     AuthenticationResponse,
     ServerListItem,

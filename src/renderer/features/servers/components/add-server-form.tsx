@@ -1,4 +1,3 @@
-import { useForm } from '@mantine/form';
 import { closeAllModals } from '@mantine/modals';
 import isElectron from 'is-electron';
 import { nanoid } from 'nanoid/non-secure';
@@ -21,6 +20,7 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
 import { useFocusTrap } from '/@/shared/hooks/use-focus-trap';
+import { useForm } from '/@/shared/hooks/use-form';
 import { AuthenticationResponse, ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { DiscoveredServerItem, ServerType, toServerType } from '/@/shared/types/types';
 

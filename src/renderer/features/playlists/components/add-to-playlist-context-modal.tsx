@@ -1,4 +1,3 @@
-import { useForm } from '@mantine/form';
 import { closeModal, ContextModalProps } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
@@ -31,6 +30,7 @@ import { Table } from '/@/shared/components/table/table';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
+import { useForm } from '/@/shared/hooks/use-form';
 import {
     Playlist,
     PlaylistListSort,
