@@ -11,12 +11,19 @@ import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library
 import { ListSearchInput } from '/@/renderer/features/shared/components/list-search-input';
 import { useCurrentServer } from '/@/renderer/store';
 import { formatDurationString } from '/@/renderer/utils';
-import { Badge } from '/@/shared/components/badge/badge';
-import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
-export const PlaylistDetailSongListHeader = () => {
+interface PlaylistDetailSongListHeaderProps {
+    isSmartPlaylist?: boolean;
+    onConvertToSmart?: () => void;
+    onDelete?: () => void;
+    onToggleQueryBuilder?: () => void;
+}
+
+export const PlaylistDetailSongListHeader = ({
+    isSmartPlaylist: isSmartPlaylistProp,
+}: PlaylistDetailSongListHeaderProps) => {
     const { t } = useTranslation();
     const { playlistId } = useParams() as { playlistId: string };
     const { itemCount } = useListContext();
@@ -26,7 +33,7 @@ export const PlaylistDetailSongListHeader = () => {
     );
 
     if (detailQuery.isLoading) return null;
-    const isSmartPlaylist = detailQuery?.data?.rules;
+    const isSmartPlaylist = isSmartPlaylistProp ?? detailQuery?.data?.rules;
     const playlistDuration = detailQuery?.data?.duration;
 
     return (
@@ -38,15 +45,17 @@ export const PlaylistDetailSongListHeader = () => {
                         itemType={LibraryItem.PLAYLIST}
                     />
                     <LibraryHeaderBar.Title>{detailQuery?.data?.name}</LibraryHeaderBar.Title>
-                    {!!playlistDuration && <Badge>{formatDurationString(playlistDuration)}</Badge>}
-                    <Badge>
-                        {itemCount === null || itemCount === undefined ? (
-                            <SpinnerIcon />
-                        ) : (
-                            itemCount
-                        )}
-                    </Badge>
-                    {isSmartPlaylist && <Badge size="lg">{t('entity.smartPlaylist')}</Badge>}
+                    {isSmartPlaylist && (
+                        <LibraryHeaderBar.Badge>{t('entity.smartPlaylist')}</LibraryHeaderBar.Badge>
+                    )}
+                    {!!playlistDuration && (
+                        <LibraryHeaderBar.Badge>
+                            {formatDurationString(playlistDuration)}
+                        </LibraryHeaderBar.Badge>
+                    )}
+                    <LibraryHeaderBar.Badge isLoading={!itemCount}>
+                        {itemCount}
+                    </LibraryHeaderBar.Badge>
                 </LibraryHeaderBar>
                 <ListSearchInput />
             </PageHeader>

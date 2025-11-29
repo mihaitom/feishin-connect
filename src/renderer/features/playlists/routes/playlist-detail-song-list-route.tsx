@@ -1,11 +1,10 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate, useParams } from 'react-router';
 
-import { ItemListHandle } from '/@/renderer/components/item-list/types';
 import { ListContext } from '/@/renderer/context/list-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { PlaylistDetailSongListContent } from '/@/renderer/features/playlists/components/playlist-detail-song-list-content';
@@ -22,15 +21,15 @@ import { useCurrentServer } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Box } from '/@/shared/components/box/box';
 import { Group } from '/@/shared/components/group/group';
+import { ConfirmModal } from '/@/shared/components/modal/modal';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
 import { ServerType, SongListSort } from '/@/shared/types/domain-types';
-import { ItemListKey, Play } from '/@/shared/types/types';
+import { ItemListKey } from '/@/shared/types/types';
 
 const PlaylistDetailSongListRoute = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const tableRef = useRef<ItemListHandle | null>(null);
     const { playlistId } = useParams() as { playlistId: string };
     const server = useCurrentServer();
 
@@ -44,6 +43,8 @@ const PlaylistDetailSongListRoute = () => {
         filter: Record<string, any>,
         extraFilters: { limit?: number; sortBy?: string; sortOrder?: string },
     ) => {
+        if (!detailQuery?.data) return;
+
         const rules = {
             ...filter,
             limit: extraFilters.limit || undefined,
@@ -51,19 +52,15 @@ const PlaylistDetailSongListRoute = () => {
             sort: extraFilters.sortBy || 'dateAdded',
         };
 
-        if (!detailQuery?.data) return;
-
         createPlaylistMutation.mutate(
             {
                 apiClientProps: { serverId: detailQuery?.data?._serverId },
                 body: {
                     _custom: {
-                        navidrome: {
-                            owner: detailQuery?.data?.owner || '',
-                            ownerId: detailQuery?.data?.ownerId || '',
-                            rules,
-                            sync: detailQuery?.data?.sync || false,
-                        },
+                        owner: detailQuery?.data?.owner || '',
+                        ownerId: detailQuery?.data?.ownerId || '',
+                        rules,
+                        sync: detailQuery?.data?.sync || false,
                     },
                     comment: detailQuery?.data?.description || '',
                     name: detailQuery?.data?.name,
@@ -94,6 +91,15 @@ const PlaylistDetailSongListRoute = () => {
         filter: Record<string, any>,
         extraFilters: { limit?: number; sortBy?: string; sortOrder?: string },
     ) => {
+        if (!detailQuery?.data) return;
+
+        const rules = {
+            ...filter,
+            limit: extraFilters.limit || undefined,
+            order: extraFilters.sortOrder || 'desc',
+            sort: extraFilters.sortBy || 'dateAdded',
+        };
+
         openModal({
             children: (
                 <SaveAsPlaylistForm
@@ -102,14 +108,11 @@ const PlaylistDetailSongListRoute = () => {
                             navidrome: {
                                 owner: detailQuery?.data?.owner || '',
                                 ownerId: detailQuery?.data?.ownerId || '',
-                                rules: {
-                                    ...filter,
-                                    limit: extraFilters.limit || undefined,
-                                    order: extraFilters.sortOrder || 'desc',
-                                    sort: extraFilters.sortBy || 'dateAdded',
-                                },
+                                rules,
                                 sync: detailQuery?.data?.sync || false,
                             },
+                            rules,
+                            sync: detailQuery?.data?.sync || false,
                         },
                         comment: detailQuery?.data?.description || '',
                         name: detailQuery?.data?.name,
@@ -127,6 +130,41 @@ const PlaylistDetailSongListRoute = () => {
                 />
             ),
             title: t('common.saveAs', { postProcess: 'sentenceCase' }),
+        });
+    };
+
+    const openDeletePlaylistModal = () => {
+        openModal({
+            children: (
+                <ConfirmModal
+                    onConfirm={() => {
+                        if (!detailQuery?.data) return;
+                        deletePlaylistMutation?.mutate(
+                            {
+                                apiClientProps: { serverId: detailQuery.data._serverId },
+                                query: { id: detailQuery.data.id },
+                            },
+                            {
+                                onError: (err) => {
+                                    toast.error({
+                                        message: err.message,
+                                        title: t('error.genericError', {
+                                            postProcess: 'sentenceCase',
+                                        }),
+                                    });
+                                },
+                                onSuccess: () => {
+                                    navigate(AppRoute.PLAYLISTS, { replace: true });
+                                },
+                            },
+                        );
+                        closeAllModals();
+                    }}
+                >
+                    <Text>Are you sure you want to delete this playlist?</Text>
+                </ConfirmModal>
+            ),
+            title: t('form.deletePlaylist.title', { postProcess: 'sentenceCase' }),
         });
     };
 
@@ -158,13 +196,6 @@ const PlaylistDetailSongListRoute = () => {
 
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
 
-    const handlePlay = (_play: Play) => {
-        // handlePlayQueueAdd?.({
-        //     byData: filterSortedSongs,
-        //     playType: play,
-        // });
-    };
-
     const providerValue = useMemo(() => {
         return {
             customFilters: undefined,
@@ -175,7 +206,6 @@ const PlaylistDetailSongListRoute = () => {
         };
     }, [playlistId, itemCount]);
 
-    // Update item count when playlist songs are loaded
     useEffect(() => {
         if (
             playlistSongs.data?.totalRecordCount !== undefined &&
@@ -190,12 +220,16 @@ const PlaylistDetailSongListRoute = () => {
             <ListContext.Provider value={providerValue}>
                 <LibraryContainer>
                     <PlaylistDetailSongListHeader
-                        handlePlay={handlePlay}
-                        handleToggleShowQueryBuilder={handleToggleShowQueryBuilder}
-                        itemCount={itemCount}
-                        tableRef={tableRef}
+                        isSmartPlaylist={!!isSmartPlaylist}
+                        onConvertToSmart={() => {
+                            if (!isSmartPlaylist) {
+                                setShowQueryBuilder(true);
+                                setIsQueryBuilderExpanded(true);
+                            }
+                        }}
+                        onDelete={() => openDeletePlaylistModal()}
+                        onToggleQueryBuilder={handleToggleShowQueryBuilder}
                     />
-
                     {(isSmartPlaylist || showQueryBuilder) && (
                         <motion.div>
                             <Box h="100%" mah="35vh" p="md" w="100%">
