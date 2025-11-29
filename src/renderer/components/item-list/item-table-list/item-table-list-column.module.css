@@ -139,7 +139,7 @@
 
 .container.data-row.dragged-over-top::after {
     position: absolute;
-    top: 0;
+    top: -1px;
     right: 0;
     left: 0;
     z-index: 3;
@@ -159,7 +159,7 @@
 .container.data-row.dragged-over-bottom::after {
     position: absolute;
     right: 0;
-    bottom: 0;
+    bottom: -1px;
     left: 0;
     z-index: 3;
     height: 2px;
