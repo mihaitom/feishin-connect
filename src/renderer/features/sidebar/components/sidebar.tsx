@@ -59,6 +59,7 @@ export const Sidebar = () => {
 
     const { sidebarItems } = useGeneralSettings();
     const { windowBarStyle } = useWindowSettings();
+    const showImage = useAppStore((state) => state.sidebar.image);
 
     const sidebarItemsWithRoute: SidebarItemType[] = useMemo(() => {
         if (!sidebarItems) return [];
@@ -131,17 +132,18 @@ export const Sidebar = () => {
                     )}
                 </Accordion>
             </ScrollArea>
-            <motion.div className={styles.serverSelectorWrapper} layout>
-                <ServerSelector />
-            </motion.div>
-            <SidebarImage />
+            <AnimatePresence initial={false} mode="popLayout">
+                <motion.div className={styles.serverSelectorWrapper} key="server-selector" layout>
+                    <ServerSelector />
+                </motion.div>
+                {showImage && <SidebarImage />}
+            </AnimatePresence>
         </div>
     );
 };
 
 const SidebarImage = () => {
     const { t } = useTranslation();
-    const showImage = useAppStore((state) => state.sidebar.image);
     const leftWidth = useAppStore((state) => state.sidebar.leftWidth);
     const { setSideBar } = useAppStoreActions();
     const currentSong = usePlayerSong();
@@ -176,66 +178,58 @@ const SidebarImage = () => {
     };
 
     return (
-        <AnimatePresence initial={false} mode="popLayout">
-            {showImage && (
-                <motion.div
-                    animate={{ opacity: 1, y: 0 }}
-                    className={styles.imageContainer}
-                    exit={{ opacity: 0, y: 200 }}
-                    initial={{ opacity: 0, y: 200 }}
-                    key="sidebar-image"
-                    onClick={expandFullScreenPlayer}
-                    onContextMenu={handleToggleContextMenu}
-                    role="button"
-                    style={
-                        {
-                            '--sidebar-image-height': leftWidth,
-                        } as CSSProperties
-                    }
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                >
-                    <Tooltip
-                        label={t('player.toggleFullscreenPlayer', {
-                            postProcess: 'sentenceCase',
-                        })}
-                        openDelay={500}
-                    >
-                        {upsizedImageUrl ? (
-                            <img
-                                className={styles.sidebarImage}
-                                loading="eager"
-                                src={upsizedImageUrl}
-                            />
-                        ) : (
-                            <ImageUnloader />
-                        )}
-                    </Tooltip>
-                    <ActionIcon
-                        icon="arrowDownS"
-                        iconProps={{
-                            size: 'lg',
-                        }}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setSideBar({ image: false });
-                        }}
-                        opacity={0.8}
-                        radius="md"
-                        style={{
-                            cursor: 'default',
-                            position: 'absolute',
-                            right: '1rem',
-                            top: '1rem',
-                        }}
-                        tooltip={{
-                            label: t('common.collapse', {
-                                postProcess: 'titleCase',
-                            }),
-                            openDelay: 500,
-                        }}
-                    />
-                </motion.div>
-            )}
-        </AnimatePresence>
+        <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            className={styles.imageContainer}
+            exit={{ opacity: 0, y: 200 }}
+            initial={{ opacity: 0, y: 200 }}
+            key="sidebar-image"
+            onClick={expandFullScreenPlayer}
+            onContextMenu={handleToggleContextMenu}
+            role="button"
+            style={
+                {
+                    '--sidebar-image-height': leftWidth,
+                } as CSSProperties
+            }
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+        >
+            <Tooltip
+                label={t('player.toggleFullscreenPlayer', {
+                    postProcess: 'sentenceCase',
+                })}
+                openDelay={500}
+            >
+                {upsizedImageUrl ? (
+                    <img className={styles.sidebarImage} loading="eager" src={upsizedImageUrl} />
+                ) : (
+                    <ImageUnloader />
+                )}
+            </Tooltip>
+            <ActionIcon
+                icon="arrowDownS"
+                iconProps={{
+                    size: 'lg',
+                }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setSideBar({ image: false });
+                }}
+                opacity={0.8}
+                radius="md"
+                style={{
+                    cursor: 'default',
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '1rem',
+                }}
+                tooltip={{
+                    label: t('common.collapse', {
+                        postProcess: 'titleCase',
+                    }),
+                    openDelay: 500,
+                }}
+            />
+        </motion.div>
     );
 };
