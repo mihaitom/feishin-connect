@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { useLocation, useParams } from 'react-router';
 
@@ -33,11 +33,8 @@ const AlbumArtistDetailRoute = () => {
 
     const location = useLocation();
 
-    const detailQuery = useQuery({
-        ...artistsQueries.albumArtistDetail({
-            query: { id: routeId },
-            serverId: server?.id,
-        }),
+    const detailQuery = useSuspenseQuery({
+        ...artistsQueries.albumArtistDetail({ query: { id: routeId }, serverId: server?.id }),
         initialData: location.state?.item,
         staleTime: 0,
     });
@@ -49,6 +46,7 @@ const AlbumArtistDetailRoute = () => {
     });
 
     const background = backgroundColor;
+
     const showBlurredImage = Boolean(detailQuery.data?.imageUrl) && artistBackground;
 
     return (
@@ -61,6 +59,7 @@ const AlbumArtistDetailRoute = () => {
                             <LibraryHeaderBar.PlayButton
                                 ids={[routeId]}
                                 itemType={LibraryItem.ALBUM_ARTIST}
+                                variant="default"
                             />
                             <LibraryHeaderBar.Title>
                                 {detailQuery?.data?.name}
@@ -72,11 +71,11 @@ const AlbumArtistDetailRoute = () => {
                 }}
                 ref={scrollAreaRef}
             >
-                {showBlurredImage && detailQuery.data?.imageUrl ? (
+                {showBlurredImage ? (
                     <LibraryBackgroundImage
                         blur={artistBackgroundBlur}
                         headerRef={headerRef}
-                        imageUrl={detailQuery.data.imageUrl}
+                        imageUrl={detailQuery.data?.imageUrl || ''}
                     />
                 ) : (
                     <LibraryBackgroundOverlay backgroundColor={background} headerRef={headerRef} />
