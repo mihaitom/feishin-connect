@@ -2,6 +2,7 @@ import { t } from 'i18next';
 import { useCallback, WheelEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { PopoverPlayQueue } from '/@/renderer/features/now-playing/components/popover-play-queue';
 import { PlayerConfig } from '/@/renderer/features/player/components/player-config';
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
@@ -73,6 +74,7 @@ const QueueButton = () => {
     const { t } = useTranslation();
     const isSidebarRightExpanded = useSidebarRightExpanded();
     const { setSideBar } = useAppStoreActions();
+    const { sideQueueType } = useGeneralSettings();
 
     const { bindings } = useHotkeySettings();
 
@@ -84,24 +86,33 @@ const QueueButton = () => {
         [bindings.toggleQueue.isGlobal ? '' : bindings.toggleQueue.hotkey, handleToggleQueue],
     ]);
 
-    return (
-        <ActionIcon
-            icon={isSidebarRightExpanded ? 'panelRightClose' : 'panelRightOpen'}
-            iconProps={{
-                size: 'lg',
-            }}
-            onClick={(e) => {
-                e.stopPropagation();
-                handleToggleQueue();
-            }}
-            size="sm"
-            tooltip={{
-                label: t('player.viewQueue', { postProcess: 'titleCase' }),
-                openDelay: 0,
-            }}
-            variant="subtle"
-        />
-    );
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+
+        if (sideQueueType === 'sideQueue') {
+            return handleToggleQueue();
+        }
+    };
+
+    if (sideQueueType === 'sideQueue') {
+        return (
+            <ActionIcon
+                icon={isSidebarRightExpanded ? 'panelRightClose' : 'panelRightOpen'}
+                iconProps={{
+                    size: 'lg',
+                }}
+                onClick={handleClick}
+                size="sm"
+                tooltip={{
+                    label: t('player.viewQueue', { postProcess: 'titleCase' }),
+                    openDelay: 0,
+                }}
+                variant="subtle"
+            />
+        );
+    }
+
+    return <PopoverPlayQueue />;
 };
 
 const FavoriteButton = () => {
