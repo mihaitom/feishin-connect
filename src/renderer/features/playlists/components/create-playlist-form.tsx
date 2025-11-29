@@ -57,13 +57,18 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
 
         const smartPlaylist = queryBuilderRef.current?.getFilters();
 
+        const sortValue =
+            isSmartPlaylist && smartPlaylist?.extraFilters?.sortBy
+                ? smartPlaylist.extraFilters.sortBy.join(',')
+                : undefined;
+
         const rules =
             isSmartPlaylist && smartPlaylist?.filters
                 ? {
                       ...convertQueryGroupToNDQuery(smartPlaylist.filters),
                       limit: smartPlaylist.extraFilters.limit,
                       order: smartPlaylist.extraFilters.sortOrder,
-                      sort: smartPlaylist.extraFilters.sortBy,
+                      sort: sortValue || 'dateAdded',
                   }
                 : undefined;
 
@@ -165,7 +170,7 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
                             limit={undefined}
                             query={undefined}
                             ref={queryBuilderRef}
-                            sortBy={SongListSort.ALBUM}
+                            sortBy={[SongListSort.ALBUM]}
                             sortOrder="asc"
                         />
                     </Stack>

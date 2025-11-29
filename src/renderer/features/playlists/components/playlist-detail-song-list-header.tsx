@@ -53,7 +53,7 @@ export const PlaylistDetailSongListHeader = ({
                             {formatDurationString(playlistDuration)}
                         </LibraryHeaderBar.Badge>
                     )}
-                    <LibraryHeaderBar.Badge isLoading={!itemCount}>
+                    <LibraryHeaderBar.Badge isLoading={!!itemCount}>
                         {itemCount}
                     </LibraryHeaderBar.Badge>
                 </LibraryHeaderBar>

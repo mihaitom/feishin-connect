@@ -41,15 +41,20 @@ const PlaylistDetailSongListRoute = () => {
 
     const handleSave = (
         filter: Record<string, any>,
-        extraFilters: { limit?: number; sortBy?: string; sortOrder?: string },
+        extraFilters: { limit?: number; sortBy?: string[]; sortOrder?: string },
     ) => {
         if (!detailQuery?.data) return;
+
+        const sortValue =
+            extraFilters.sortBy && extraFilters.sortBy.length > 0
+                ? extraFilters.sortBy.join(',')
+                : 'dateAdded';
 
         const rules = {
             ...filter,
             limit: extraFilters.limit || undefined,
             order: extraFilters.sortOrder || 'desc',
-            sort: extraFilters.sortBy || 'dateAdded',
+            sort: sortValue,
         };
 
         createPlaylistMutation.mutate(
@@ -89,15 +94,20 @@ const PlaylistDetailSongListRoute = () => {
 
     const handleSaveAs = (
         filter: Record<string, any>,
-        extraFilters: { limit?: number; sortBy?: string; sortOrder?: string },
+        extraFilters: { limit?: number; sortBy?: string[]; sortOrder?: string },
     ) => {
         if (!detailQuery?.data) return;
+
+        const sortValue =
+            extraFilters.sortBy && extraFilters.sortBy.length > 0
+                ? extraFilters.sortBy.join(',')
+                : 'dateAdded';
 
         const rules = {
             ...filter,
             limit: extraFilters.limit || undefined,
             order: extraFilters.sortOrder || 'desc',
-            sort: extraFilters.sortBy || 'dateAdded',
+            sort: sortValue,
         };
 
         openModal({
@@ -255,9 +265,16 @@ const PlaylistDetailSongListRoute = () => {
                                         onSaveAs={handleSaveAs}
                                         playlistId={playlistId}
                                         query={detailQuery?.data?.rules}
-                                        sortBy={
-                                            detailQuery?.data?.rules?.sort || SongListSort.ALBUM
-                                        }
+                                        sortBy={(() => {
+                                            const sort = detailQuery?.data?.rules?.sort;
+                                            if (Array.isArray(sort)) {
+                                                return sort;
+                                            }
+                                            if (typeof sort === 'string' && sort.includes(',')) {
+                                                return sort.split(',').map((s) => s.trim());
+                                            }
+                                            return sort ? [sort] : [SongListSort.ALBUM];
+                                        })()}
                                         sortOrder={detailQuery?.data?.rules?.order || 'asc'}
                                     />
                                 )}

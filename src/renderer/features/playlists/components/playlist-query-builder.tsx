@@ -30,6 +30,7 @@ import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { MultiSelect } from '/@/shared/components/multi-select/multi-select';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Select } from '/@/shared/components/select/select';
@@ -52,15 +53,15 @@ interface PlaylistQueryBuilderProps {
     limit?: number;
     onSave?: (
         parsedFilter: any,
-        extraFilters: { limit?: number; sortBy?: string; sortOrder?: string },
+        extraFilters: { limit?: number; sortBy?: string[]; sortOrder?: string },
     ) => void;
     onSaveAs?: (
         parsedFilter: any,
-        extraFilters: { limit?: number; sortBy?: string; sortOrder?: string },
+        extraFilters: { limit?: number; sortBy?: string[]; sortOrder?: string },
     ) => void;
     playlistId?: string;
     query: any;
-    sortBy: SongListSort;
+    sortBy: SongListSort | SongListSort[];
     sortOrder: 'asc' | 'desc';
 }
 
@@ -82,7 +83,7 @@ export type PlaylistQueryBuilderRef = {
     getFilters: () => {
         extraFilters: {
             limit?: number;
-            sortBy?: string;
+            sortBy?: string[];
             sortOrder?: string;
         };
         filters: QueryBuilderGroup;
@@ -133,7 +134,7 @@ export const PlaylistQueryBuilder = forwardRef(
         const extraFiltersForm = useForm({
             initialValues: {
                 limit,
-                sortBy,
+                sortBy: Array.isArray(sortBy) ? sortBy : sortBy ? [sortBy] : [],
                 sortOrder,
             },
         });
@@ -442,13 +443,12 @@ export const PlaylistQueryBuilder = forwardRef(
                     />
                 </ScrollArea>
                 <Group align="flex-end" justify="space-between" m="1rem" wrap="nowrap">
-                    <Group gap="sm" w="100%" wrap="nowrap">
-                        <Select
+                    <Group align="flex-end" gap="sm" w="100%" wrap="nowrap">
+                        <MultiSelect
                             data={sortOptions}
                             label="Sort"
-                            maxWidth="20%"
+                            maxWidth="50%"
                             searchable
-                            width={150}
                             {...extraFiltersForm.getInputProps('sortBy')}
                         />
                         <Select
