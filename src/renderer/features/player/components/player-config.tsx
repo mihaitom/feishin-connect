@@ -327,7 +327,7 @@ export const PlayerConfig = () => {
                     variant="subtle"
                 />
             </Popover.Target>
-            <Popover.Dropdown p="md">
+            <Popover.Dropdown>
                 <ListConfigTable options={options} />
             </Popover.Dropdown>
         </Popover>
