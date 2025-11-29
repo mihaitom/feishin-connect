@@ -22,7 +22,11 @@ export const PlayAction = ({ ids, itemType, songs }: PlayActionProps) => {
         (playType: Play) => {
             if (ids.length === 0 || !serverId) return;
 
-            if (itemType === LibraryItem.SONG) {
+            if (
+                itemType === LibraryItem.SONG ||
+                itemType === LibraryItem.PLAYLIST_SONG ||
+                itemType === LibraryItem.QUEUE_SONG
+            ) {
                 player.addToQueueByData(songs || [], playType);
             } else {
                 player.addToQueueByFetch(serverId, ids, itemType, playType);

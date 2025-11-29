@@ -26,19 +26,19 @@ export const PlaylistSongContextMenu = ({ items, type }: PlaylistSongContextMenu
 
     return (
         <ContextMenu.Content
-            bottomStickyContent={<ContextMenuPreview items={items} itemType={LibraryItem.SONG} />}
+            bottomStickyContent={<ContextMenuPreview items={items} itemType={type} />}
         >
-            <PlayAction ids={ids} itemType={LibraryItem.SONG} />
+            <PlayAction ids={ids} itemType={type} songs={items} />
             <ContextMenu.Divider />
             <RemoveFromPlaylistAction items={items} />
             <ContextMenu.Divider />
-            <AddToPlaylistAction items={ids} itemType={LibraryItem.SONG} />
+            <AddToPlaylistAction items={ids} itemType={type} />
             <ContextMenu.Divider />
-            <SetFavoriteAction ids={ids} itemType={LibraryItem.SONG} />
-            <SetRatingAction ids={ids} itemType={LibraryItem.SONG} />
+            <SetFavoriteAction ids={ids} itemType={type} />
+            <SetRatingAction ids={ids} itemType={type} />
             <ContextMenu.Divider />
             <DownloadAction ids={ids} />
-            <ShareAction ids={ids} itemType={LibraryItem.SONG} />
+            <ShareAction ids={ids} itemType={type} />
             <ContextMenu.Divider />
             <GoToAction items={items} />
             <ContextMenu.Divider />
