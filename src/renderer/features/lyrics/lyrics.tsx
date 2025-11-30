@@ -1,13 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import styles from './lyrics.module.css';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { ErrorFallback } from '/@/renderer/features/action-required/components/error-fallback';
 import { translateLyrics } from '/@/renderer/features/lyrics/api/lyric-translate';
 import { lyricsQueries } from '/@/renderer/features/lyrics/api/lyrics-api';
 import { LyricsActions } from '/@/renderer/features/lyrics/lyrics-actions';
@@ -20,11 +18,11 @@ import {
     UnsynchronizedLyricsProps,
 } from '/@/renderer/features/lyrics/unsynchronized-lyrics';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
+import { ComponentErrorBoundary } from '/@/renderer/features/shared/components/component-error-boundary';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useLyricsSettings, usePlayerSong } from '/@/renderer/store';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
-import { Icon } from '/@/shared/components/icon/icon';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
 import { FullLyricsMetadata, LyricSource, LyricsOverride } from '/@/shared/types/domain-types';
@@ -145,7 +143,6 @@ export const Lyrics = () => {
         await fetchTranslation();
     }, [translatedLyrics, showTranslation, fetchTranslation]);
 
-
     usePlayerEvents(
         {
             onCurrentSongChange: () => {
@@ -174,9 +171,28 @@ export const Lyrics = () => {
     const isLoadingLyrics = isInitialLoading || isOverrideLoading;
 
     const hasNoLyrics = !lyrics;
+    const [shouldFadeOut, setShouldFadeOut] = useState(false);
+
+    // Trigger fade out after a few seconds when no lyrics are found
+    useEffect(() => {
+        if (!isLoadingLyrics && hasNoLyrics) {
+            // Start fade out after 3 seconds (message visible for 3s, then 0.5s fade)
+            const timer = setTimeout(() => {
+                setShouldFadeOut(true);
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        }
+
+        if (!hasNoLyrics) {
+            setShouldFadeOut(false);
+        }
+
+        return undefined;
+    }, [isLoadingLyrics, hasNoLyrics]);
 
     return (
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <ComponentErrorBoundary>
             <div className={styles.lyricsContainer}>
                 {isLoadingLyrics ? (
                     <Spinner container size={25} />
@@ -184,14 +200,19 @@ export const Lyrics = () => {
                     <AnimatePresence mode="sync">
                         {hasNoLyrics ? (
                             <Center w="100%">
-                                <Group>
-                                    <Icon icon="info" />
-                                    <Text>
-                                        {t('page.fullscreenPlayer.noLyrics', {
-                                            postProcess: 'sentenceCase',
-                                        })}
-                                    </Text>
-                                </Group>
+                                <motion.div
+                                    animate={{ opacity: shouldFadeOut ? 0 : 1 }}
+                                    initial={{ opacity: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <Group>
+                                        <Text fw={500}>
+                                            {t('page.fullscreenPlayer.noLyrics', {
+                                                postProcess: 'sentenceCase',
+                                            })}
+                                        </Text>
+                                    </Group>
+                                </motion.div>
                             </Center>
                         ) : (
                             <motion.div
@@ -231,6 +252,6 @@ export const Lyrics = () => {
                     />
                 </div>
             </div>
-        </ErrorBoundary>
+        </ComponentErrorBoundary>
     );
 };
