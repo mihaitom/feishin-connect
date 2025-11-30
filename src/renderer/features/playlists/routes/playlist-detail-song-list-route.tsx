@@ -1,8 +1,8 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { generatePath, useNavigate, useParams } from 'react-router';
+import { generatePath, useLocation, useNavigate, useParams } from 'react-router';
 
 import { ListContext } from '/@/renderer/context/list-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
@@ -26,6 +26,7 @@ import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { ConfirmModal } from '/@/shared/components/modal/modal';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
@@ -243,12 +244,15 @@ const PlaylistQueryEditor = ({
 const PlaylistDetailSongListRoute = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const location = useLocation();
     const { playlistId } = useParams() as { playlistId: string };
     const server = useCurrentServer();
 
-    const detailQuery = useQuery(
-        playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
-    );
+    const detailQuery = useQuery({
+        ...playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
+        initialData: location.state?.item,
+        staleTime: 0,
+    });
     const createPlaylistMutation = useCreatePlaylist({});
     const deletePlaylistMutation = useDeletePlaylist({});
 
@@ -410,15 +414,6 @@ const PlaylistDetailSongListRoute = () => {
         setIsQueryBuilderExpanded(true);
     };
 
-    const playlistSongs = useQuery(
-        playlistsQueries.songList({
-            query: {
-                id: playlistId,
-            },
-            serverId: server?.id,
-        }),
-    );
-
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
 
     const providerValue = useMemo(() => {
@@ -430,15 +425,6 @@ const PlaylistDetailSongListRoute = () => {
             setItemCount,
         };
     }, [playlistId, itemCount]);
-
-    useEffect(() => {
-        if (
-            playlistSongs.data?.totalRecordCount !== undefined &&
-            playlistSongs.data.totalRecordCount !== null
-        ) {
-            setItemCount(playlistSongs.data.totalRecordCount);
-        }
-    }, [playlistSongs.data?.totalRecordCount]);
 
     return (
         <AnimatedPage key={`playlist-detail-songList-${playlistId}`}>
@@ -466,7 +452,9 @@ const PlaylistDetailSongListRoute = () => {
                         queryBuilderRef={queryBuilderRef}
                     />
                 )}
-                <PlaylistDetailSongListContent />
+                <Suspense fallback={<Spinner container />}>
+                    <PlaylistDetailSongListContent />
+                </Suspense>
             </ListContext.Provider>
         </AnimatedPage>
     );

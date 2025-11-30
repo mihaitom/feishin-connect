@@ -41,7 +41,10 @@ interface PlaylistRowButtonProps extends Omit<ButtonProps, 'onContextMenu' | 'on
 }
 
 const PlaylistRowButton = ({ item, name, onContextMenu, onPlay, to }: PlaylistRowButtonProps) => {
-    const url = generatePath(AppRoute.PLAYLISTS_DETAIL_SONGS, { playlistId: to });
+    const url = {
+        pathname: generatePath(AppRoute.PLAYLISTS_DETAIL_SONGS, { playlistId: to }),
+        state: { item },
+    };
     const { t } = useTranslation();
 
     const [isHovered, setIsHovered] = useState(false);

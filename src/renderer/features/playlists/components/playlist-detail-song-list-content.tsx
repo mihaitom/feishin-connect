@@ -1,6 +1,9 @@
-import { lazy, Suspense } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { lazy, Suspense, useEffect } from 'react';
 import { useParams } from 'react-router';
 
+import { useListContext } from '/@/renderer/context/list-context';
+import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { PlaylistSongListQuery } from '/@/shared/types/domain-types';
@@ -19,10 +22,31 @@ export const PlaylistDetailSongListContent = () => {
         ItemListKey.PLAYLIST_SONG,
     );
     const { playlistId } = useParams() as { playlistId: string };
+    const server = useCurrentServer();
+    const { setItemCount } = useListContext();
+
+    const playlistSongsQuery = useSuspenseQuery(
+        playlistsQueries.songList({
+            query: {
+                id: playlistId,
+            },
+            serverId: server?.id,
+        }),
+    );
+
+    useEffect(() => {
+        if (
+            playlistSongsQuery.data?.totalRecordCount !== undefined &&
+            playlistSongsQuery.data.totalRecordCount !== null
+        ) {
+            setItemCount?.(playlistSongsQuery.data.totalRecordCount);
+        }
+    }, [playlistSongsQuery.data?.totalRecordCount, setItemCount]);
 
     return (
         <Suspense fallback={<Spinner container />}>
             <PlaylistDetailSongListView
+                data={playlistSongsQuery.data}
                 display={display}
                 grid={grid}
                 itemsPerPage={itemsPerPage}
@@ -37,10 +61,12 @@ export const PlaylistDetailSongListContent = () => {
 export type OverridePlaylistSongListQuery = Omit<Partial<PlaylistSongListQuery>, 'id'>;
 
 export const PlaylistDetailSongListView = ({
+    data,
     display,
     playlistId,
     table,
 }: ItemListSettings & {
+    data: any;
     playlistId: string;
 }) => {
     const server = useCurrentServer();
@@ -51,6 +77,7 @@ export const PlaylistDetailSongListView = ({
                 <PlaylistDetailSongListTable
                     autoFitColumns={table.autoFitColumns}
                     columns={table.columns}
+                    data={data}
                     enableAlternateRowColors={table.enableAlternateRowColors}
                     enableHorizontalBorders={table.enableHorizontalBorders}
                     enableRowHoverHighlight={table.enableRowHoverHighlight}

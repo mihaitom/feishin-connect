@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
+import { useLocation, useParams } from 'react-router';
 
 import { PageHeader } from '/@/renderer/components/page-header/page-header';
 import { useListContext } from '/@/renderer/context/list-context';
@@ -28,11 +28,13 @@ export const PlaylistDetailSongListHeader = ({
     const { playlistId } = useParams() as { playlistId: string };
     const { itemCount } = useListContext();
     const server = useCurrentServer();
-    const detailQuery = useQuery(
-        playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
-    );
+    const location = useLocation();
 
-    if (detailQuery.isLoading) return null;
+    const detailQuery = useQuery({
+        ...playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
+        initialData: location.state?.item,
+    });
+
     const isSmartPlaylist = isSmartPlaylistProp ?? detailQuery?.data?.rules;
     const playlistDuration = detailQuery?.data?.duration;
 

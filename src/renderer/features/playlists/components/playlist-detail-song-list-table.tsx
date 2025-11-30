@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import { forwardRef, useMemo } from 'react';
 
 import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
@@ -8,7 +7,6 @@ import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemControls, ItemListTableComponentProps } from '/@/renderer/components/item-list/types';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
@@ -19,6 +17,7 @@ import { ItemListKey, Play } from '/@/shared/types/types';
 
 interface PlaylistDetailSongListTableProps
     extends Omit<ItemListTableComponentProps<PlaylistSongListQuery>, 'query'> {
+    data: any;
     playlistId: string;
 }
 
@@ -27,6 +26,7 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
         {
             autoFitColumns = false,
             columns,
+            data,
             enableAlternateRowColors = false,
             enableHorizontalBorders = false,
             enableRowHoverHighlight = true,
@@ -39,12 +39,6 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
         },
         ref,
     ) => {
-        const playlistSongs = useQuery(
-            playlistsQueries.songList({
-                query: { id: playlistId },
-                serverId: serverId,
-            }),
-        );
 
         const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
             enabled: saveScrollOffset,
@@ -62,7 +56,7 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
         const { query } = usePlaylistSongListFilters();
 
         const filterSortedSongs = useMemo(() => {
-            let items = playlistSongs.data?.items || [];
+            let items = data?.items || [];
 
             if (searchTerm) {
                 if (searchTerm) {
@@ -73,7 +67,7 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
             }
 
             return sortSongList(items, query.sortBy, query.sortOrder);
-        }, [playlistSongs.data?.items, searchTerm, query.sortBy, query.sortOrder]);
+        }, [data?.items, searchTerm, query.sortBy, query.sortOrder]);
 
         const player = usePlayer();
 
