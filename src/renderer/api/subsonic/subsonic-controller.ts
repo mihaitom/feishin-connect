@@ -619,7 +619,7 @@ export const SubsonicController: InternalControllerEndpoint = {
         );
     },
     getGenreList: async ({ apiClientProps, query }) => {
-        const sortOrder = query.sortOrder.toLowerCase() as 'asc' | 'desc';
+        const sortOrder = (query.sortOrder?.toLowerCase() ?? 'asc') as 'asc' | 'desc';
 
         const res = await ssApiClient(apiClientProps).getGenres({});
 

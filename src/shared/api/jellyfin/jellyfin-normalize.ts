@@ -295,16 +295,17 @@ const normalizeAlbum = (
         createdAt: item.DateCreated,
         duration: item.RunTimeTicks / 10000,
         explicitStatus: null,
-        genres: item.GenreItems?.map((entry) => ({
-            _itemType: LibraryItem.GENRE,
-            _serverId: server?.id || '',
-            _serverType: ServerType.JELLYFIN,
-            albumCount: null,
-            id: entry.Id,
-            imageUrl: null,
-            name: entry.Name,
-            songCount: null,
-        })),
+        genres:
+            item.GenreItems?.map((entry) => ({
+                _itemType: LibraryItem.GENRE,
+                _serverId: server?.id || '',
+                _serverType: ServerType.JELLYFIN,
+                albumCount: null,
+                id: entry.Id,
+                imageUrl: null,
+                name: entry.Name,
+                songCount: null,
+            })) || [],
         id: item.Id,
         imagePlaceholderUrl: null,
         imageUrl: getAlbumCoverArtUrl({
