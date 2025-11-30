@@ -6,6 +6,7 @@
         "createPlaylist": "create $t(entity.playlist_one)",
         "deletePlaylist": "delete $t(entity.playlist_one)",
         "deselectAll": "deselect all",
+        "downloadStarted": "started download of {{count}} items",
         "editPlaylist": "edit $t(entity.playlist_one)",
         "goToPage": "go to page",
         "largeFetch": "this action will attempt to fetch {{count}} items from your server",
