@@ -6,7 +6,7 @@ import { useListContext } from '/@/renderer/context/list-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
-import { PlaylistSongListQuery } from '/@/shared/types/domain-types';
+import { PlaylistSongListQuery, PlaylistSongListResponse } from '/@/shared/types/domain-types';
 import { ItemListKey, ListDisplayType } from '/@/shared/types/types';
 
 const PlaylistDetailSongListTable = lazy(() =>
@@ -51,7 +51,6 @@ export const PlaylistDetailSongListContent = () => {
                 grid={grid}
                 itemsPerPage={itemsPerPage}
                 pagination={pagination}
-                playlistId={playlistId}
                 table={table}
             />
         </Suspense>
@@ -63,11 +62,9 @@ export type OverridePlaylistSongListQuery = Omit<Partial<PlaylistSongListQuery>,
 export const PlaylistDetailSongListView = ({
     data,
     display,
-    playlistId,
     table,
 }: ItemListSettings & {
-    data: any;
-    playlistId: string;
+    data: PlaylistSongListResponse;
 }) => {
     const server = useCurrentServer();
 
@@ -82,7 +79,6 @@ export const PlaylistDetailSongListView = ({
                     enableHorizontalBorders={table.enableHorizontalBorders}
                     enableRowHoverHighlight={table.enableRowHoverHighlight}
                     enableVerticalBorders={table.enableVerticalBorders}
-                    playlistId={playlistId}
                     serverId={server.id}
                     size={table.size}
                 />
