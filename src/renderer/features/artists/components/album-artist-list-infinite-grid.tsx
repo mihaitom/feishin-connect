@@ -20,20 +20,17 @@ interface AlbumArtistListInfiniteGridProps
     extends ItemListGridComponentProps<AlbumArtistListQuery> {}
 
 export const AlbumArtistListInfiniteGrid = forwardRef<any, AlbumArtistListInfiniteGridProps>(
-    (
-        {
-            gap = 'md',
-            itemsPerPage = 100,
-            itemsPerRow,
-            query = {
-                sortBy: AlbumArtistListSort.NAME,
-                sortOrder: SortOrder.ASC,
-            },
-            saveScrollOffset = true,
-            serverId,
+    ({
+        gap = 'md',
+        itemsPerPage = 100,
+        itemsPerRow,
+        query = {
+            sortBy: AlbumArtistListSort.NAME,
+            sortOrder: SortOrder.ASC,
         },
-        ref,
-    ) => {
+        saveScrollOffset = true,
+        serverId,
+    }) => {
         const listCountQuery = artistsQueries.albumArtistListCount({
             query: { ...query },
             serverId: serverId,

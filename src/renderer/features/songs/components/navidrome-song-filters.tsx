@@ -7,7 +7,7 @@ import {
     MultiSelectWithInvalidData,
     SelectWithInvalidData,
 } from '/@/renderer/components/select-with-invalid-data';
-import { genresQueries, useGenreList } from '/@/renderer/features/genres/api/genres-api';
+import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import {
     SongListFilter,
@@ -23,7 +23,7 @@ import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
-import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/shared/types/domain-types';
+import { LibraryItem, SongListQuery } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
 interface NavidromeSongFiltersProps {

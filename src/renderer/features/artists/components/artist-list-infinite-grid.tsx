@@ -19,20 +19,17 @@ import { ItemListKey } from '/@/shared/types/types';
 interface ArtistListInfiniteGridProps extends ItemListGridComponentProps<ArtistListQuery> {}
 
 export const ArtistListInfiniteGrid = forwardRef<any, ArtistListInfiniteGridProps>(
-    (
-        {
-            gap = 'md',
-            itemsPerPage = 100,
-            itemsPerRow,
-            query = {
-                sortBy: ArtistListSort.NAME,
-                sortOrder: SortOrder.ASC,
-            },
-            saveScrollOffset = true,
-            serverId,
+    ({
+        gap = 'md',
+        itemsPerPage = 100,
+        itemsPerRow,
+        query = {
+            sortBy: ArtistListSort.NAME,
+            sortOrder: SortOrder.ASC,
         },
-        ref,
-    ) => {
+        saveScrollOffset = true,
+        serverId,
+    }) => {
         const listCountQuery = artistsQueries.artistListCount({
             query: { ...query },
             serverId: serverId,

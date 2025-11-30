@@ -3,7 +3,6 @@ import { Fragment, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate } from 'react-router';
 
-import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { searchQueries } from '/@/renderer/features/search/api/search-api';
 import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
 import { CommandItemSelectable } from '/@/renderer/features/search/components/command-item-selectable';

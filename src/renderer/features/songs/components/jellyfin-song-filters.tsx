@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
-import { genresQueries, useGenreList } from '/@/renderer/features/genres/api/genres-api';
+import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { SongListFilter, useCurrentServer } from '/@/renderer/store';
@@ -14,7 +14,7 @@ import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
-import { GenreListSort, LibraryItem, SortOrder } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface JellyfinSongFiltersProps {
     customFilters?: Partial<SongListFilter>;

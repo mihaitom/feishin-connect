@@ -8,7 +8,6 @@ import { ListSelectFilter } from '/@/renderer/features/shared/components/list-se
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
 import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
-import { useContainerQuery } from '/@/renderer/hooks';
 import { useCurrentServer } from '/@/renderer/store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Flex } from '/@/shared/components/flex/flex';
@@ -17,14 +16,13 @@ import { ArtistListSort, LibraryItem, SortOrder } from '/@/shared/types/domain-t
 import { ItemListKey } from '/@/shared/types/types';
 
 export const ArtistListHeaderFilters = () => {
-    const { ref, ...cq } = useContainerQuery();
     const server = useCurrentServer();
 
     const rolesQuery = useQuery(sharedQueries.roles({ query: {}, serverId: server.id }));
 
     return (
         <Flex justify="space-between">
-            <Group gap="sm" ref={ref} w="100%">
+            <Group gap="sm" w="100%">
                 <ListSortByDropdown
                     defaultSortByValue={ArtistListSort.NAME}
                     itemType={LibraryItem.ARTIST}

@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { openLyricSearchModal } from '/@/renderer/features/lyrics/components/lyrics-search-form';
 import {
-    usePlayerSong,
     useLyricsSettings,
+    usePlayerSong,
     useSettingsStore,
     useSettingsStoreActions,
 } from '/@/renderer/store';

@@ -16,10 +16,9 @@ import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
 
 interface QueueContextMenuProps {
     items: QueueSong[];
-    type: LibraryItem.QUEUE_SONG;
 }
 
-export const QueueContextMenu = ({ items, type }: QueueContextMenuProps) => {
+export const QueueContextMenu = ({ items }: QueueContextMenuProps) => {
     const { ids } = useMemo(() => {
         const ids = items.map((item) => item.id);
         return { ids };
@@ -27,9 +26,7 @@ export const QueueContextMenu = ({ items, type }: QueueContextMenuProps) => {
 
     return (
         <ContextMenu.Content
-            bottomStickyContent={
-                <ContextMenuPreview items={items} itemType={LibraryItem.SONG} />
-            }
+            bottomStickyContent={<ContextMenuPreview items={items} itemType={LibraryItem.SONG} />}
         >
             <RemoveFromQueueAction items={items} />
             <ContextMenu.Divider />

@@ -62,14 +62,16 @@ export const SubsonicAlbumFilters = ({
         }),
     );
 
-    const selectableAlbumArtists = useMemo(() => {
-        if (!albumArtistListQuery?.data?.items) return [];
+    const items = albumArtistListQuery?.data?.items;
 
-        return albumArtistListQuery?.data?.items?.map((artist) => ({
+    const selectableAlbumArtists = useMemo(() => {
+        if (!items) return [];
+
+        return items.map((artist) => ({
             label: artist.name,
             value: artist.id,
         }));
-    }, [albumArtistListQuery?.data?.items]);
+    }, [items]);
 
     const handleAlbumArtistFilter = (e: null | string[]) => {
         setArtistIds(e ?? null);

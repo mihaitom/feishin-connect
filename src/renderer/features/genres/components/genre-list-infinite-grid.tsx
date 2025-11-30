@@ -19,20 +19,17 @@ import { ItemListKey } from '/@/shared/types/types';
 interface GenreListInfiniteGridProps extends ItemListGridComponentProps<GenreListQuery> {}
 
 export const GenreListInfiniteGrid = forwardRef<any, GenreListInfiniteGridProps>(
-    (
-        {
-            gap = 'md',
-            itemsPerPage = 100,
-            itemsPerRow,
-            query = {
-                sortBy: GenreListSort.NAME,
-                sortOrder: SortOrder.ASC,
-            },
-            saveScrollOffset = true,
-            serverId,
+    ({
+        gap = 'md',
+        itemsPerPage = 100,
+        itemsPerRow,
+        query = {
+            sortBy: GenreListSort.NAME,
+            sortOrder: SortOrder.ASC,
         },
-        ref,
-    ) => {
+        saveScrollOffset = true,
+        serverId,
+    }) => {
         const listCountQuery = genresQueries.listCount({
             query: { ...query },
             serverId: serverId,

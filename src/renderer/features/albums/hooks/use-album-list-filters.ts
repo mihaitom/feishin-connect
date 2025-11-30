@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import {
     parseAsArrayOf,
     parseAsBoolean,
@@ -7,6 +6,7 @@ import {
     parseAsString,
     useQueryState,
 } from 'nuqs';
+import { useCallback } from 'react';
 
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
 import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
@@ -16,9 +16,12 @@ import { AlbumListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 export const useAlbumListFilters = () => {
-    const { sortBy, setSortBy } = useSortByFilter<AlbumListSort>(AlbumListSort.NAME, ItemListKey.ALBUM);
+    const { setSortBy, sortBy } = useSortByFilter<AlbumListSort>(
+        AlbumListSort.NAME,
+        ItemListKey.ALBUM,
+    );
 
-    const { sortOrder, setSortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.ALBUM);
+    const { setSortOrder, sortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.ALBUM);
 
     const { searchTerm, setSearchTerm } = useSearchTermFilter('');
 

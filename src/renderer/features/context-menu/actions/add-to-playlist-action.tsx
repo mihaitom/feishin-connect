@@ -52,21 +52,23 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
 
     const { recentPlaylistId } = useRecentPlaylists(serverId);
 
-    const fuse = useMemo(() => {
-        if (!playlistsQuery.data?.items) return null;
+    const playlists = playlistsQuery.data?.items;
 
-        return new Fuse(playlistsQuery.data.items, {
+    const fuse = useMemo(() => {
+        if (!playlists) return null;
+
+        return new Fuse(playlists, {
             fieldNormWeight: 1,
             ignoreLocation: true,
             keys: ['name'],
             threshold: 0.3,
         });
-    }, [playlistsQuery.data?.items]);
+    }, [playlists]);
 
     const recentPlaylist = useMemo(() => {
-        if (!playlistsQuery.data?.items || !recentPlaylistId) return null;
+        if (!playlists || !recentPlaylistId) return null;
 
-        const playlist = playlistsQuery.data.items.find((p) => p.id === recentPlaylistId);
+        const playlist = playlists.find((p) => p.id === recentPlaylistId);
         if (!playlist) return null;
 
         if (searchTerm && fuse) {
@@ -76,22 +78,22 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
         }
 
         return playlist;
-    }, [playlistsQuery.data?.items, recentPlaylistId, searchTerm, fuse]);
+    }, [playlists, recentPlaylistId, searchTerm, fuse]);
 
     const filteredPlaylists = useMemo(() => {
-        if (!playlistsQuery.data?.items) return [];
+        if (!playlists) return [];
         if (!searchTerm || !fuse) {
             // Exclude recent playlist from the list if it exists
             return recentPlaylistId
-                ? playlistsQuery.data.items.filter((p) => p.id !== recentPlaylistId)
-                : playlistsQuery.data.items;
+                ? playlists.filter((p) => p.id !== recentPlaylistId)
+                : playlists;
         }
 
         const results = fuse.search(searchTerm);
         const filtered = results.map((result) => result.item);
         // Exclude recent playlist from the filtered results if it exists
         return recentPlaylistId ? filtered.filter((p) => p.id !== recentPlaylistId) : filtered;
-    }, [playlistsQuery.data?.items, searchTerm, fuse, recentPlaylistId]);
+    }, [playlists, searchTerm, fuse, recentPlaylistId]);
 
     const getSongsByAlbum = useCallback(
         async (albumId: string) => {

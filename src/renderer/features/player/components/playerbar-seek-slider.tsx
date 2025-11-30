@@ -1,11 +1,10 @@
 import formatDuration from 'format-duration';
 import { useEffect, useRef, useState } from 'react';
 
-import styles from './playerbar-slider.module.css';
+import { CustomPlayerbarSlider } from './playerbar-slider';
 
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { usePlayerTimestamp } from '/@/renderer/store';
-import { CustomPlayerbarSlider } from './playerbar-slider';
 
 interface PlayerbarSeekSliderProps {
     max: number;

@@ -40,10 +40,10 @@ export const LibraryCommandItem = ({
         (e: SyntheticEvent, id: string, playType: Play) => {
             e.stopPropagation();
             e.preventDefault();
-            if (!server?.id) return;
+            if (!server.id) return;
             addToQueueByFetch(server.id, [id], itemType, playType);
         },
-        [addToQueueByFetch, itemType, server?.id],
+        [addToQueueByFetch, itemType, server],
     );
 
     const [isHovered, setIsHovered] = useState(false);

@@ -14,20 +14,17 @@ import { ItemListKey } from '/@/shared/types/types';
 interface SongListInfiniteGridProps extends ItemListGridComponentProps<SongListQuery> {}
 
 export const SongListInfiniteGrid = forwardRef<any, SongListInfiniteGridProps>(
-    (
-        {
-            gap = 'md',
-            itemsPerPage = 100,
-            itemsPerRow,
-            query = {
-                sortBy: SongListSort.NAME,
-                sortOrder: SortOrder.ASC,
-            },
-            saveScrollOffset = true,
-            serverId,
+    ({
+        gap = 'md',
+        itemsPerPage = 100,
+        itemsPerRow,
+        query = {
+            sortBy: SongListSort.NAME,
+            sortOrder: SortOrder.ASC,
         },
-        ref,
-    ) => {
+        saveScrollOffset = true,
+        serverId,
+    }) => {
         const listCountQuery = songsQueries.listCount({
             query: { ...query },
             serverId: serverId,

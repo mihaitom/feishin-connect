@@ -44,9 +44,9 @@
 .header {
     display: flex;
     flex-shrink: 0;
+    gap: 0.5rem;
     align-items: center;
     justify-content: flex-start;
-    gap: 0.5rem;
     width: 100%;
     padding: 1rem;
 }
@@ -80,10 +80,10 @@
     box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
 }
 
-.imageNativeAspectRatio {
-    aspect-ratio: auto;
+.image-native-aspect-ratio {
     height: auto;
     max-height: 100%;
+    aspect-ratio: auto;
 }
 
 .album-image {

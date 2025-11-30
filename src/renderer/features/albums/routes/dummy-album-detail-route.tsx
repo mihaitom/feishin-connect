@@ -15,7 +15,7 @@ import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-e
 import { DefaultPlayButton } from '/@/renderer/features/shared/components/play-button';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
-import { useContainerQuery, useFastAverageColor } from '/@/renderer/hooks';
+import { useFastAverageColor } from '/@/renderer/hooks';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
@@ -33,7 +33,6 @@ import { Text } from '/@/shared/components/text/text';
 import { LibraryItem, SongDetailResponse } from '/@/shared/types/domain-types';
 
 const DummyAlbumDetailRoute = () => {
-    const { ref, ...cq } = useContainerQuery();
     const { t } = useTranslation();
 
     const { albumId } = useParams() as { albumId: string };
@@ -117,7 +116,7 @@ const DummyAlbumDetailRoute = () => {
     return (
         <AnimatedPage key={`dummy-album-detail-${albumId}`}>
             <LibraryContainer>
-                <Stack ref={ref}>
+                <Stack>
                     <LibraryHeader
                         imageUrl={detailQuery?.data?.imageUrl}
                         item={{ route: AppRoute.LIBRARY_SONGS, type: LibraryItem.SONG }}
@@ -182,7 +181,7 @@ const DummyAlbumDetailRoute = () => {
                                 />
                                 <ActionIcon
                                     icon="ellipsisHorizontal"
-                                    onClick={(e) => {
+                                    onClick={() => {
                                         if (!detailQuery?.data) return;
                                     }}
                                     variant="subtle"
@@ -199,7 +198,7 @@ const DummyAlbumDetailRoute = () => {
                                         key={`genre-${genre.id}`}
                                         radius={0}
                                         size="compact-md"
-                                        to={generatePath(AppRoute.LIBRARY_GENRES_SONGS, {
+                                        to={generatePath(AppRoute.LIBRARY_GENRES_DETAIL, {
                                             genreId: genre.id,
                                         })}
                                         variant="outline"

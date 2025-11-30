@@ -1,8 +1,4 @@
-import {
-    parseAsJson,
-    parseAsString,
-    useQueryState,
-} from 'nuqs';
+import { parseAsJson, useQueryState } from 'nuqs';
 
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
 import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
@@ -17,16 +13,13 @@ export const usePlaylistListFilters = () => {
 
     const { searchTerm, setSearchTerm } = useSearchTermFilter('');
 
-    const [custom, setCustom] = useQueryState(
-        'playlistCustom',
-        parseAsJson(customFiltersSchema),
-    );
+    const [custom, setCustom] = useQueryState('playlistCustom', parseAsJson(customFiltersSchema));
 
     const query = {
+        _custom: custom ?? undefined,
         searchTerm: searchTerm ?? undefined,
         sortBy: sortByFilter[FILTER_KEYS.SHARED.SORT_BY] ?? undefined,
         sortOrder: sortOrderFilter[FILTER_KEYS.SHARED.SORT_ORDER] ?? undefined,
-        _custom: custom ?? undefined,
     };
 
     return {

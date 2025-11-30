@@ -26,7 +26,6 @@
     max-width: 100%;
     padding: var(--theme-spacing-sm) var(--theme-spacing-md);
     font-size: var(--theme-font-size-sm);
-    word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
     cursor: default;
@@ -43,7 +42,6 @@
     & > *:not(.left-icon, .right-icon) {
         flex: 1;
         min-width: 0;
-        word-wrap: break-word;
         overflow-wrap: break-word;
     }
 
