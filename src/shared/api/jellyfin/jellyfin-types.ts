@@ -108,6 +108,7 @@ const baseParameters = z.object({
     ExcludeItemIds: z.string().optional(),
     ExcludeItemTypes: z.string().optional(),
     Fields: z.string().optional(),
+    FolderId: z.string().optional(),
     ImageTypeLimit: z.number().optional(),
     IncludeArtists: z.boolean().optional(),
     IncludeGenres: z.boolean().optional(),
