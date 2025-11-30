@@ -1,12 +1,17 @@
 import clsx from 'clsx';
 import isElectron from 'is-electron';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import styles from './synchronized-lyrics.module.css';
 
 import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
-import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
-import { useLyricsSettings, usePlaybackType, usePlayerActions } from '/@/renderer/store';
+import {
+    useLyricsSettings,
+    usePlaybackType,
+    usePlayerActions,
+    usePlayerStatus,
+} from '/@/renderer/store';
+import { usePlayerTimestamp } from '/@/renderer/store/timestamp.store';
 import { FullLyricsMetadata, SynchronizedLyricsArray } from '/@/shared/types/domain-types';
 import { PlayerStatus, PlayerType } from '/@/shared/types/types';
 
@@ -30,10 +35,8 @@ export const SynchronizedLyrics = ({
     const playbackType = usePlaybackType();
     const settings = useLyricsSettings();
     const { mediaSeekToTimestamp } = usePlayerActions();
-
-    // State for player status and timestamp from events
-    const [status, setStatus] = useState<PlayerStatus>(PlayerStatus.PAUSED);
-    const [timestamp, setTimestamp] = useState<number>(0);
+    const status = usePlayerStatus();
+    const timestamp = usePlayerTimestamp();
 
     const handleSeek = useCallback(
         (time: number) => {
@@ -153,23 +156,6 @@ export const SynchronizedLyrics = ({
     useEffect(() => {
         setCurrentLyricRef.current = setCurrentLyric;
     }, [setCurrentLyric]);
-
-    // Subscribe to player events
-    usePlayerEvents(
-        {
-            onPlayerProgress: (properties) => {
-                setTimestamp(properties.timestamp);
-            },
-            onPlayerSeekToTimestamp: (properties) => {
-                // When seeking, update timestamp immediately
-                setTimestamp(properties.timestamp);
-            },
-            onPlayerStatus: (properties) => {
-                setStatus(properties.status);
-            },
-        },
-        [],
-    );
 
     useEffect(() => {
         // Copy the follow settings into a ref that can be accessed in the timeout
