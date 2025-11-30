@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { PLAYLIST_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { CreatePlaylistForm } from '/@/renderer/features/playlists/components/create-playlist-form';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
-import { ListFilters } from '/@/renderer/features/shared/components/list-filters';
+import { ListFiltersModal } from '/@/renderer/features/shared/components/list-filters';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
@@ -39,7 +39,7 @@ export const PlaylistListHeaderFilters = () => {
                     defaultSortOrder={SortOrder.ASC}
                     listKey={ItemListKey.PLAYLIST}
                 />
-                <ListFilters itemType={LibraryItem.PLAYLIST} />
+                <ListFiltersModal itemType={LibraryItem.PLAYLIST} />
                 <ListRefreshButton listKey={ItemListKey.PLAYLIST} />
             </Group>
             <Group gap="sm" wrap="nowrap">

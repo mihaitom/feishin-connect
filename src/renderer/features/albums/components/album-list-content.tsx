@@ -2,9 +2,12 @@ import { lazy, Suspense, useMemo } from 'react';
 
 import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
+import { ListFilters } from '/@/renderer/features/shared/components/list-filters';
+import { ListWithSidebarContainer } from '/@/renderer/features/shared/components/list-with-sidebar-container';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
+import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Spinner } from '/@/shared/components/spinner/spinner';
-import { AlbumListQuery } from '/@/shared/types/domain-types';
+import { AlbumListQuery, LibraryItem } from '/@/shared/types/domain-types';
 import { ItemListKey, ListDisplayType, ListPaginationType } from '/@/shared/types/types';
 
 const AlbumListInfiniteGrid = lazy(() =>
@@ -37,16 +40,23 @@ export const AlbumListContent = () => {
     const { customFilters } = useListContext();
 
     return (
-        <Suspense fallback={<Spinner container />}>
-            <AlbumListView
-                display={display}
-                grid={grid}
-                itemsPerPage={itemsPerPage}
-                overrideQuery={customFilters}
-                pagination={pagination}
-                table={table}
-            />
-        </Suspense>
+        <>
+            <ListWithSidebarContainer.SidebarPortal>
+                <ScrollArea>
+                    <ListFilters itemType={LibraryItem.ALBUM} />
+                </ScrollArea>
+            </ListWithSidebarContainer.SidebarPortal>
+            <Suspense fallback={<Spinner container />}>
+                <AlbumListView
+                    display={display}
+                    grid={grid}
+                    itemsPerPage={itemsPerPage}
+                    overrideQuery={customFilters}
+                    pagination={pagination}
+                    table={table}
+                />
+            </Suspense>
+        </>
     );
 };
 
@@ -76,6 +86,10 @@ export const AlbumListView = ({
             sortOrder: overrideQuery.sortOrder || query.sortOrder,
         };
     }, [query, overrideQuery]);
+
+    console.log('query', query);
+    console.log('overrideQuery', overrideQuery);
+    console.log('mergedQuery', mergedQuery);
 
     switch (display) {
         case ListDisplayType.GRID: {

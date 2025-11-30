@@ -31,7 +31,8 @@ export const Select = ({
                 section: styles.section,
                 ...classNames,
             }}
-            clearable={false}
+            clearable={clearable}
+            spellCheck={false}
             style={{ maxWidth, width }}
             variant={variant}
             withCheckIcon={false}

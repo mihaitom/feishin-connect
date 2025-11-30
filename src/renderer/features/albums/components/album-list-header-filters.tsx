@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ALBUM_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
-import { ListFilters } from '/@/renderer/features/shared/components/list-filters';
+import { ListFiltersModal } from '/@/renderer/features/shared/components/list-filters';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
@@ -65,7 +65,7 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
                     defaultSortOrder={SortOrder.ASC}
                     listKey={ItemListKey.ALBUM}
                 />
-                <ListFilters itemType={LibraryItem.ALBUM} />
+                <ListFiltersModal itemType={LibraryItem.ALBUM} />
                 <ListRefreshButton listKey={ItemListKey.ALBUM} />
             </Group>
             <Group gap="sm" wrap="nowrap">

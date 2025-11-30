@@ -40,7 +40,7 @@ enum AlbumFilterKeys {
     ARTIST_IDS = 'artistIds',
     COMPILATION = 'compilation',
     FAVORITE = 'favorite',
-    GENRE_ID = 'genreId',
+    GENRE_ID = 'genreIds',
     HAS_RATING = 'hasRating',
     MAX_YEAR = 'maxYear',
     MIN_YEAR = 'minYear',

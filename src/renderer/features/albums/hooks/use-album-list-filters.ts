@@ -6,7 +6,7 @@ import {
     parseAsString,
     useQueryState,
 } from 'nuqs';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
 import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
@@ -86,20 +86,36 @@ export const useAlbumListFilters = () => {
         setSortOrder,
     ]);
 
-    const query = {
-        [FILTER_KEYS.ALBUM._CUSTOM]: custom ?? undefined,
-        [FILTER_KEYS.ALBUM.ARTIST_IDS]: albumArtist ?? undefined,
-        [FILTER_KEYS.ALBUM.COMPILATION]: compilation ?? undefined,
-        [FILTER_KEYS.ALBUM.FAVORITE]: favorite ?? undefined,
-        [FILTER_KEYS.ALBUM.GENRE_ID]: genreId ?? undefined,
-        [FILTER_KEYS.ALBUM.HAS_RATING]: hasRating ?? undefined,
-        [FILTER_KEYS.ALBUM.MAX_YEAR]: maxYear ?? undefined,
-        [FILTER_KEYS.ALBUM.MIN_YEAR]: minYear ?? undefined,
-        [FILTER_KEYS.ALBUM.RECENTLY_PLAYED]: recentlyPlayed ?? undefined,
-        [FILTER_KEYS.SHARED.SEARCH_TERM]: searchTerm ?? undefined,
-        [FILTER_KEYS.SHARED.SORT_BY]: sortBy ?? undefined,
-        [FILTER_KEYS.SHARED.SORT_ORDER]: sortOrder ?? undefined,
-    };
+    const query = useMemo(
+        () => ({
+            [FILTER_KEYS.ALBUM._CUSTOM]: custom ?? undefined,
+            [FILTER_KEYS.ALBUM.ARTIST_IDS]: albumArtist ?? undefined,
+            [FILTER_KEYS.ALBUM.COMPILATION]: compilation ?? undefined,
+            [FILTER_KEYS.ALBUM.FAVORITE]: favorite ?? undefined,
+            [FILTER_KEYS.ALBUM.GENRE_ID]: genreId ?? undefined,
+            [FILTER_KEYS.ALBUM.HAS_RATING]: hasRating ?? undefined,
+            [FILTER_KEYS.ALBUM.MAX_YEAR]: maxYear ?? undefined,
+            [FILTER_KEYS.ALBUM.MIN_YEAR]: minYear ?? undefined,
+            [FILTER_KEYS.ALBUM.RECENTLY_PLAYED]: recentlyPlayed ?? undefined,
+            [FILTER_KEYS.SHARED.SEARCH_TERM]: searchTerm ?? undefined,
+            [FILTER_KEYS.SHARED.SORT_BY]: sortBy ?? undefined,
+            [FILTER_KEYS.SHARED.SORT_ORDER]: sortOrder ?? undefined,
+        }),
+        [
+            custom,
+            albumArtist,
+            compilation,
+            favorite,
+            genreId,
+            hasRating,
+            maxYear,
+            minYear,
+            recentlyPlayed,
+            searchTerm,
+            sortBy,
+            sortOrder,
+        ],
+    );
 
     return {
         clear,

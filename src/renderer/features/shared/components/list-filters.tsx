@@ -17,7 +17,7 @@ interface ListFiltersProps {
     itemType: LibraryItem;
 }
 
-export const ListFilters = ({ isActive, itemType }: ListFiltersProps) => {
+export const ListFiltersModal = ({ isActive, itemType }: ListFiltersProps) => {
     const { t } = useTranslation();
     const server = useCurrentServer();
 
@@ -39,6 +39,14 @@ export const ListFilters = ({ isActive, itemType }: ListFiltersProps) => {
             </Modal>
         </>
     );
+};
+
+export const ListFilters = ({ itemType }: ListFiltersProps) => {
+    const server = useCurrentServer();
+    const serverType = server.type;
+    const FilterComponent = FILTERS[serverType][itemType];
+
+    return <FilterComponent />;
 };
 
 const FILTERS = {

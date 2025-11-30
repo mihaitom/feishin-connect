@@ -5,6 +5,7 @@ import { ListContext } from '/@/renderer/context/list-context';
 import { AlbumListContent } from '/@/renderer/features/albums/components/album-list-content';
 import { AlbumListHeader } from '/@/renderer/features/albums/components/album-list-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { ListWithSidebarContainer } from '/@/renderer/features/shared/components/list-with-sidebar-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AlbumListQuery } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
@@ -28,10 +29,19 @@ const AlbumListRoute = () => {
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
 
     const customFilters: Partial<AlbumListQuery> = useMemo(() => {
-        return {
-            artistIds: albumArtistId ? [albumArtistId] : undefined,
-            genreIds: genreId ? [genreId] : undefined,
-        };
+        if (albumArtistId) {
+            return {
+                artistIds: [albumArtistId],
+            };
+        }
+
+        if (genreId) {
+            return {
+                genreIds: [genreId],
+            };
+        }
+
+        return {};
     }, [albumArtistId, genreId]);
 
     const providerValue = useMemo(() => {
@@ -48,7 +58,9 @@ const AlbumListRoute = () => {
         <AnimatedPage>
             <ListContext.Provider value={providerValue}>
                 <AlbumListHeader />
-                <AlbumListContent />
+                <ListWithSidebarContainer>
+                    <AlbumListContent />
+                </ListWithSidebarContainer>
             </ListContext.Provider>
         </AnimatedPage>
     );
