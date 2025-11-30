@@ -586,6 +586,7 @@ export const NavidromeController: InternalControllerEndpoint = {
                 library_id: getLibraryId(query.musicFolderId),
                 starred: query.favorite,
                 title: query.searchTerm,
+                year: query.maxYear || query.minYear,
                 ...query._custom,
                 ...excludeMissing(apiClientProps.server),
             },

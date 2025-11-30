@@ -17,10 +17,6 @@ interface ComponentErrorFallbackProps {
 const ComponentErrorFallback = ({ resetErrorBoundary }: ComponentErrorFallbackProps) => {
     const { t } = useTranslation();
 
-    const handleRefresh = () => {
-        window.location.reload();
-    };
-
     return (
         <Box h="100%" pos="relative" w="100%">
             <Center h="100%" p="md" w="100%">
@@ -34,9 +30,6 @@ const ComponentErrorFallback = ({ resetErrorBoundary }: ComponentErrorFallbackPr
                     <Group grow>
                         <Button onClick={resetErrorBoundary} size="xs" variant="default">
                             {t('common.reload', { postProcess: 'sentenceCase' })}
-                        </Button>
-                        <Button onClick={handleRefresh} size="xs" variant="filled">
-                            {t('common.refresh', { postProcess: 'sentenceCase' })}
                         </Button>
                     </Group>
                 </Stack>

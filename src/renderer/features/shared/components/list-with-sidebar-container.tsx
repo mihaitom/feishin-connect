@@ -3,12 +3,10 @@ import { createContext, ReactNode, useContext, useMemo, useRef } from 'react';
 
 import styles from './list-with-sidebar-container.module.css';
 
-import { useContainerQuery } from '/@/renderer/hooks';
 import { animationProps } from '/@/shared/components/animations/animation-props';
 import { Portal } from '/@/shared/components/portal/portal';
 
 interface ListWithSidebarContainerContextValue {
-    showSidebar: boolean;
     sidebarRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -33,10 +31,10 @@ function Sidebar({ children }: SidebarProps) {
     const context = useContext(ListWithSidebarContainerContext);
 
     if (!context) {
-        throw new Error('Sidebar must be used within ResponsiveAnimatedPage');
+        throw new Error('Sidebar must be used within ListWithSidebarContainer');
     }
 
-    if (!context.showSidebar || !context.sidebarRef?.current) {
+    if (!context.sidebarRef?.current) {
         return null;
     }
 
@@ -53,10 +51,10 @@ function SidebarPortal({ children }: SidebarPortalProps) {
     const context = useContext(ListWithSidebarContainerContext);
 
     if (!context) {
-        throw new Error('SidebarPortal must be used within ResponsiveAnimatedPage');
+        throw new Error('SidebarPortal must be used within ListWithSidebarContainer');
     }
 
-    if (!context.showSidebar || !context.sidebarRef?.current) {
+    if (!context.sidebarRef?.current) {
         return null;
     }
 
@@ -65,31 +63,21 @@ function SidebarPortal({ children }: SidebarPortalProps) {
 
 export const ListWithSidebarContainer = ({
     children,
-    sidebarBreakpoint,
+    sidebarBreakpoint = 1200,
 }: ListWithSidebarContainerProps) => {
     const sidebarRef = useRef<HTMLDivElement>(null);
-    const { isLg, ref: containerQueryRef } = useContainerQuery({
-        lg: sidebarBreakpoint,
-    });
-
-    const showSidebar = isLg;
 
     const contextValue = useMemo(
         () => ({
-            showSidebar,
             sidebarRef,
         }),
-        [showSidebar],
+        [],
     );
 
     return (
         <ListWithSidebarContainerContext.Provider value={contextValue}>
-            <div className={styles.container} ref={containerQueryRef}>
-                <div
-                    className={styles.sidebarContainer}
-                    ref={sidebarRef}
-                    style={{ display: showSidebar ? 'block' : 'none' }}
-                />
+            <div className={styles.container} data-sidebar-breakpoint={sidebarBreakpoint}>
+                <div className={styles.sidebarContainer} ref={sidebarRef} />
                 <div className={styles.contentContainer}>{children}</div>
             </div>
         </ListWithSidebarContainerContext.Provider>

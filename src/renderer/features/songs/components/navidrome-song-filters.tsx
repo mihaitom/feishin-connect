@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import debounce from 'lodash/debounce';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -9,53 +8,22 @@ import {
 } from '/@/renderer/components/select-with-invalid-data';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
-import {
-    SongListFilter,
-    useCurrentServer,
-    useListFilterByKey,
-    useListStoreActions,
-} from '/@/renderer/store';
-import { NDSongQueryFields } from '/@/shared/api/navidrome/navidrome-types';
-import { hasFeature } from '/@/shared/api/utils';
+import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
+import { useCurrentServerId } from '/@/renderer/store';
+import { titleCase } from '/@/renderer/utils';
 import { Divider } from '/@/shared/components/divider/divider';
-import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
-import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
-import { LibraryItem, SongListQuery } from '/@/shared/types/domain-types';
-import { ServerFeature } from '/@/shared/types/features-types';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
-interface NavidromeSongFiltersProps {
-    customFilters?: Partial<SongListFilter>;
-    onFilterChange: (filters: SongListFilter) => void;
-    pageKey: string;
-    serverId: string;
-}
-
-export const NavidromeSongFilters = ({
-    customFilters,
-    onFilterChange,
-    pageKey,
-    serverId,
-}: NavidromeSongFiltersProps) => {
+export const NavidromeSongFilters = () => {
     const { t } = useTranslation();
-    const { setFilter } = useListStoreActions();
-    const filter = useListFilterByKey<SongListQuery>({ key: pageKey });
-    const server = useCurrentServer();
 
-    const isGenrePage = customFilters?.genreIds !== undefined;
+    const { query, setFavorite, setGenreId, setMaxYear, setMinYear } = useSongListFilters();
 
     const genreListQuery = useGenreList();
-
-    const tagsQuery = useQuery(
-        sharedQueries.tags({
-            query: {
-                type: LibraryItem.SONG,
-            },
-            serverId,
-        }),
-    );
 
     const genreList = useMemo(() => {
         if (!genreListQuery?.data) return [];
@@ -65,142 +33,189 @@ export const NavidromeSongFilters = ({
         }));
     }, [genreListQuery.data]);
 
-    const hasBFR = hasFeature(server, ServerFeature.BFR);
-
-    const handleGenresFilter = debounce((e: null | string[]) => {
-        const updatedFilters = setFilter({
-            customFilters,
-            data: {
-                _custom: filter._custom,
-                genreIds: e ? e : undefined,
-            },
-            itemType: LibraryItem.SONG,
-            key: pageKey,
-        }) as SongListFilter;
-
-        onFilterChange(updatedFilters);
-    }, 250);
-
-    const handleTagFilter = debounce((tag: string, e: null | string) => {
-        const updatedFilters = setFilter({
-            customFilters,
-            data: {
-                _custom: {
-                    ...filter._custom,
-                    navidrome: {
-                        ...filter._custom?.navidrome,
-                        [tag]: e || undefined,
-                    },
+    const yesNoUndefinedFilters = useMemo(
+        () => [
+            {
+                label: t('filter.isFavorited', { postProcess: 'sentenceCase' }),
+                onChange: (favorite?: boolean) => {
+                    setFavorite(favorite ?? null);
                 },
+                value: query.favorite,
             },
-            itemType: LibraryItem.SONG,
-            key: pageKey,
-        }) as SongListFilter;
+        ],
+        [t, query.favorite, setFavorite],
+    );
 
-        onFilterChange(updatedFilters);
-    }, 250);
+    const handleYearFilter = useMemo(
+        () => (e: number | string) => {
+            // Handle empty string, null, undefined, or invalid numbers as clearing
 
-    const toggleFilters = [
-        {
-            label: t('filter.isFavorited', { postProcess: 'sentenceCase' }),
-            onChange: (favorite: boolean | undefined) => {
-                const updatedFilters = setFilter({
-                    customFilters,
-                    data: {
-                        _custom: filter._custom,
-                        favorite,
-                    },
-                    itemType: LibraryItem.SONG,
-                    key: pageKey,
-                }) as SongListFilter;
+            if (e === '' || e === null || e === undefined) {
+                setMinYear(null);
+                setMaxYear(null);
+                return;
+            }
 
-                onFilterChange(updatedFilters);
-            },
-            value: filter.favorite,
+            const year = typeof e === 'number' ? e : Number(e);
+            // If it's a valid number, set it; otherwise clear
+            if (!isNaN(year) && isFinite(year) && year > 0) {
+                setMinYear(year);
+                setMaxYear(year);
+            } else {
+                setMinYear(null);
+                setMaxYear(null);
+            }
         },
-    ];
-
-    const handleYearFilter = debounce((e: number | string) => {
-        const updatedFilters = setFilter({
-            customFilters,
-            data: {
-                _custom: {
-                    ...filter._custom,
-                    navidrome: {
-                        ...filter._custom?.navidrome,
-                        year: e === '' ? undefined : (e as number),
-                    },
-                },
-            },
-            itemType: LibraryItem.SONG,
-            key: pageKey,
-        }) as SongListFilter;
-
-        onFilterChange(updatedFilters);
-    }, 500);
+        [setMinYear, setMaxYear],
+    );
 
     return (
         <Stack p="0.8rem">
-            {toggleFilters.map((filter) => (
-                <Group justify="space-between" key={`nd-filter-${filter.label}`}>
-                    <Text>{filter.label}</Text>
-                    <YesNoSelect onChange={filter.onChange} size="xs" value={filter.value} />
-                </Group>
+            {yesNoUndefinedFilters.map((filter) => (
+                <YesNoSelect
+                    key={`nd-filter-${filter.label}`}
+                    label={filter.label}
+                    onChange={filter.onChange}
+                    value={filter.value ?? undefined}
+                />
             ))}
             <Divider my="0.5rem" />
-            <Group grow>
-                <NumberInput
-                    label={t('common.year', { postProcess: 'titleCase' })}
-                    max={5000}
-                    min={0}
-                    onChange={(e) => handleYearFilter(e)}
-                    value={filter._custom?.navidrome?.year}
-                    width={50}
-                />
-                {!isGenrePage && !hasBFR && (
-                    <SelectWithInvalidData
-                        clearable
-                        data={genreList}
-                        defaultValue={filter.genreIds ? filter.genreIds[0] : undefined}
-                        label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
-                        onChange={(value) => handleGenresFilter(value !== null ? [value] : null)}
-                        searchable
-                        width={150}
-                    />
-                )}
-            </Group>
-            {!isGenrePage && hasBFR && (
-                <Group grow>
-                    <MultiSelectWithInvalidData
-                        clearable
-                        data={genreList}
-                        defaultValue={filter.genreIds}
-                        label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
-                        onChange={handleGenresFilter}
-                        searchable
-                    />
-                </Group>
-            )}
-            {tagsQuery.data?.enumTags?.length &&
-                tagsQuery.data.enumTags.length > 0 &&
-                tagsQuery.data.enumTags.map((tag) => (
-                    <Group grow key={tag.name}>
-                        <SelectWithInvalidData
-                            clearable
-                            data={tag.options}
-                            defaultValue={
-                                filter._custom?.navidrome?.[tag.name] as string | undefined
-                            }
-                            label={
-                                NDSongQueryFields.find((i) => i.value === tag.name)?.label ||
-                                tag.name
-                            }
-                            onChange={(value) => handleTagFilter(tag.name, value)}
-                            searchable
-                            width={150}
-                        />
-                    </Group>
-                ))}
+            <NumberInput
+                defaultValue={query.minYear ?? undefined}
+                hideControls={false}
+                label={t('common.year', { postProcess: 'titleCase' })}
+                max={5000}
+                min={0}
+                onBlur={(e) => handleYearFilter(e.currentTarget.value)}
+            />
+            <MultiSelectWithInvalidData
+                clearable
+                data={genreList}
+                defaultValue={query.genreId}
+                label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
+                onChange={(e) => (e && e.length > 0 ? setGenreId(e) : setGenreId(null))}
+                searchable
+            />
+            <TagFilters />
         </Stack>
+    );
+};
+
+interface TagFilterItemProps {
+    label: string;
+    onChange: (value: null | string) => void;
+    options: string[];
+    tagValue: string;
+    value: string | undefined;
+}
+
+const TagFilterItem = memo(
+    ({ label, onChange, options, tagValue, value }: TagFilterItemProps) => {
+        return (
+            <SelectWithInvalidData
+                clearable
+                data={options}
+                defaultValue={value}
+                key={tagValue}
+                label={label}
+                limit={100}
+                onChange={onChange}
+                searchable
+            />
+        );
+    },
+    (prevProps, nextProps) => {
+        // Only re-render if the specific tag's value or options change
+        // We don't compare onChange since it's a stable wrapper around handleTagFilter
+        // and handleTagFilter itself is memoized and stable
+        return (
+            prevProps.tagValue === nextProps.tagValue &&
+            prevProps.label === nextProps.label &&
+            prevProps.value === nextProps.value &&
+            prevProps.options === nextProps.options
+        );
+    },
+);
+
+TagFilterItem.displayName = 'TagFilterItem';
+
+const TagFilters = () => {
+    const { query, setCustom } = useSongListFilters();
+
+    const serverId = useCurrentServerId();
+
+    const tagsQuery = useQuery(
+        sharedQueries.tags({
+            options: {
+                gcTime: 1000 * 60 * 60,
+                staleTime: 1000 * 60 * 60,
+            },
+            query: {
+                type: LibraryItem.SONG,
+            },
+            serverId,
+        }),
+    );
+
+    const handleTagFilter = useMemo(
+        () => (tag: string, e: null | string) => {
+            setCustom((prev) => {
+                if (!prev) {
+                    return e ? { [tag]: e } : null;
+                }
+
+                if (e === null) {
+                    const rest = Object.fromEntries(
+                        Object.entries(prev).filter(([key]) => key !== tag),
+                    );
+
+                    return Object.keys(rest).length === 0 ? null : rest;
+                }
+
+                return {
+                    ...prev,
+                    [tag]: e,
+                };
+            });
+        },
+        [setCustom],
+    );
+
+    const tags = useMemo(() => {
+        return (
+            tagsQuery.data?.enumTags?.map((tag) => ({
+                label: titleCase(tag.name),
+                options: tag.options,
+                value: tag.name,
+            })) || []
+        );
+    }, [tagsQuery.data?.enumTags]);
+
+    // Create stable onChange handlers for each tag using useMemo
+    const tagHandlers = useMemo(() => {
+        const handlers = new Map<string, (value: null | string) => void>();
+        tags.forEach((tag) => {
+            handlers.set(tag.value, (value: null | string) => handleTagFilter(tag.value, value));
+        });
+        return handlers;
+    }, [tags, handleTagFilter]);
+
+    if (tagsQuery.isLoading) {
+        return <Spinner container />;
+    }
+
+    return (
+        <>
+            {tags.map((tag) => (
+                <TagFilterItem
+                    key={tag.value}
+                    label={tag.label}
+                    onChange={tagHandlers.get(tag.value)!}
+                    options={tag.options}
+                    tagValue={tag.value}
+                    value={query._custom?.[tag.value] as string | undefined}
+                />
+            ))}
+        </>
     );
 };

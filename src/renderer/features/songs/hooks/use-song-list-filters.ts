@@ -6,7 +6,7 @@ import {
     parseAsString,
     useQueryState,
 } from 'nuqs';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
 import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
@@ -75,18 +75,32 @@ export const useSongListFilters = () => {
         setSortOrder,
     ]);
 
-    const query = {
-        [FILTER_KEYS.SHARED.SEARCH_TERM]: searchTerm ?? undefined,
-        [FILTER_KEYS.SHARED.SORT_BY]: sortBy ?? undefined,
-        [FILTER_KEYS.SHARED.SORT_ORDER]: sortOrder ?? undefined,
-        [FILTER_KEYS.SONG._CUSTOM]: custom ?? undefined,
-        [FILTER_KEYS.SONG.ALBUM_IDS]: albumIds ?? undefined,
-        [FILTER_KEYS.SONG.ARTIST_IDS]: artistIds ?? undefined,
-        [FILTER_KEYS.SONG.FAVORITE]: favorite ?? undefined,
-        [FILTER_KEYS.SONG.GENRE_ID]: genreId ?? undefined,
-        [FILTER_KEYS.SONG.MAX_YEAR]: maxYear ?? undefined,
-        [FILTER_KEYS.SONG.MIN_YEAR]: minYear ?? undefined,
-    };
+    const query = useMemo(
+        () => ({
+            [FILTER_KEYS.SHARED.SEARCH_TERM]: searchTerm ?? undefined,
+            [FILTER_KEYS.SHARED.SORT_BY]: sortBy ?? undefined,
+            [FILTER_KEYS.SHARED.SORT_ORDER]: sortOrder ?? undefined,
+            [FILTER_KEYS.SONG._CUSTOM]: custom ?? undefined,
+            [FILTER_KEYS.SONG.ALBUM_IDS]: albumIds ?? undefined,
+            [FILTER_KEYS.SONG.ARTIST_IDS]: artistIds ?? undefined,
+            [FILTER_KEYS.SONG.FAVORITE]: favorite ?? undefined,
+            [FILTER_KEYS.SONG.GENRE_ID]: genreId ?? undefined,
+            [FILTER_KEYS.SONG.MAX_YEAR]: maxYear ?? undefined,
+            [FILTER_KEYS.SONG.MIN_YEAR]: minYear ?? undefined,
+        }),
+        [
+            searchTerm,
+            sortBy,
+            sortOrder,
+            custom,
+            albumIds,
+            artistIds,
+            favorite,
+            genreId,
+            maxYear,
+            minYear,
+        ],
+    );
 
     return {
         clear,

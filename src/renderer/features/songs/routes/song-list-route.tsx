@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 
 import { ListContext } from '/@/renderer/context/list-context';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { ListWithSidebarContainer } from '/@/renderer/features/shared/components/list-with-sidebar-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { SongListContent } from '/@/renderer/features/songs/components/song-list-content';
 import { SongListHeader } from '/@/renderer/features/songs/components/song-list-header';
@@ -28,10 +29,19 @@ const SongListRoute = () => {
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
 
     const customFilters: Partial<SongListQuery> = useMemo(() => {
-        return {
-            artistIds: albumArtistId ? [albumArtistId] : undefined,
-            genreIds: genreId ? [genreId] : undefined,
-        };
+        if (albumArtistId) {
+            return {
+                artistIds: [albumArtistId],
+            };
+        }
+
+        if (genreId) {
+            return {
+                genreIds: [genreId],
+            };
+        }
+
+        return {};
     }, [albumArtistId, genreId]);
 
     const providerValue = useMemo(() => {
@@ -48,7 +58,9 @@ const SongListRoute = () => {
         <AnimatedPage>
             <ListContext.Provider value={providerValue}>
                 <SongListHeader />
-                <SongListContent />
+                <ListWithSidebarContainer>
+                    <SongListContent />
+                </ListWithSidebarContainer>
             </ListContext.Provider>
         </AnimatedPage>
     );

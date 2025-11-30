@@ -100,7 +100,6 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
             // Handle empty string, null, undefined, or invalid numbers as clearing
 
             if (e === '' || e === null || e === undefined) {
-                console.log('clearing year filters');
                 setMinYear(null);
                 setMaxYear(null);
                 return;
@@ -109,11 +108,9 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
             const year = typeof e === 'number' ? e : Number(e);
             // If it's a valid number, set it; otherwise clear
             if (!isNaN(year) && isFinite(year) && year > 0) {
-                console.log('setting year filters', year);
                 setMinYear(year);
                 setMaxYear(year);
             } else {
-                console.log('clearing year filters', year);
                 setMinYear(null);
                 setMaxYear(null);
             }

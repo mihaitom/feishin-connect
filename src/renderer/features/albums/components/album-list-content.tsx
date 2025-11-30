@@ -87,10 +87,6 @@ export const AlbumListView = ({
         };
     }, [query, overrideQuery]);
 
-    console.log('query', query);
-    console.log('overrideQuery', overrideQuery);
-    console.log('mergedQuery', mergedQuery);
-
     switch (display) {
         case ListDisplayType.GRID: {
             switch (pagination) {

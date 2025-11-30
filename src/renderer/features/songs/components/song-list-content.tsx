@@ -1,10 +1,13 @@
 import { lazy, Suspense, useMemo } from 'react';
 
 import { useListContext } from '/@/renderer/context/list-context';
+import { ListFilters } from '/@/renderer/features/shared/components/list-filters';
+import { ListWithSidebarContainer } from '/@/renderer/features/shared/components/list-with-sidebar-container';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
+import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Spinner } from '/@/shared/components/spinner/spinner';
-import { SongListQuery } from '/@/shared/types/domain-types';
+import { LibraryItem, SongListQuery } from '/@/shared/types/domain-types';
 import { ItemListKey, ListDisplayType, ListPaginationType } from '/@/shared/types/types';
 
 const SongListInfiniteGrid = lazy(() =>
@@ -34,16 +37,23 @@ export const SongListContent = () => {
     const { customFilters } = useListContext();
 
     return (
-        <Suspense fallback={<Spinner container />}>
-            <SongListView
-                display={display}
-                grid={grid}
-                itemsPerPage={itemsPerPage}
-                overrideQuery={customFilters}
-                pagination={pagination}
-                table={table}
-            />
-        </Suspense>
+        <>
+            <ListWithSidebarContainer.SidebarPortal>
+                <ScrollArea>
+                    <ListFilters itemType={LibraryItem.SONG} />
+                </ScrollArea>
+            </ListWithSidebarContainer.SidebarPortal>
+            <Suspense fallback={<Spinner container />}>
+                <SongListView
+                    display={display}
+                    grid={grid}
+                    itemsPerPage={itemsPerPage}
+                    overrideQuery={customFilters}
+                    pagination={pagination}
+                    table={table}
+                />
+            </Suspense>
+        </>
     );
 };
 
