@@ -54,7 +54,34 @@ export const Lyrics = () => {
 
     const [override, setOverride] = useState<LyricsOverride | undefined>(undefined);
 
+    const { data: overrideData, isInitialLoading: isOverrideLoading } = useQuery(
+        lyricsQueries.songLyricsByRemoteId({
+            options: {
+                enabled: !!override,
+            },
+            query: {
+                remoteSongId: override?.id,
+                remoteSource: override?.source as LyricSource | undefined,
+                song: currentSong,
+            },
+            serverId: currentSong?._serverId || '',
+        }),
+    );
+
     const [lyrics, synced] = useMemo(() => {
+        // If override data is available, use it
+        if (override && overrideData) {
+            const overrideLyrics: FullLyricsMetadata = {
+                artist: override.artist,
+                lyrics: overrideData,
+                name: override.name,
+                remote: override.remote ?? true,
+                source: override.source,
+            };
+            return [overrideLyrics, Array.isArray(overrideData)];
+        }
+
+        // Otherwise, use the regular data
         if (Array.isArray(data)) {
             if (data.length > 0) {
                 const selectedLyric = data[Math.min(index, data.length - 1)];
@@ -65,13 +92,14 @@ export const Lyrics = () => {
         }
 
         return [undefined, false];
-    }, [data, index]);
+    }, [data, index, override, overrideData]);
 
     const handleOnSearchOverride = useCallback((params: LyricsOverride) => {
         setOverride(params);
     }, []);
 
     const handleOnResetLyric = useCallback(() => {
+        setOverride(undefined);
         queryClient.invalidateQueries({
             exact: true,
             queryKey: queryKeys.songs.lyrics(currentSong?._serverId, { songId: currentSong?.id }),
@@ -117,19 +145,6 @@ export const Lyrics = () => {
         await fetchTranslation();
     }, [translatedLyrics, showTranslation, fetchTranslation]);
 
-    const { isInitialLoading: isOverrideLoading } = useQuery(
-        lyricsQueries.songLyricsByRemoteId({
-            options: {
-                enabled: !!override,
-            },
-            query: {
-                remoteSongId: override?.id,
-                remoteSource: override?.source as LyricSource | undefined,
-                song: currentSong,
-            },
-            serverId: currentSong?._serverId || '',
-        }),
-    );
 
     usePlayerEvents(
         {

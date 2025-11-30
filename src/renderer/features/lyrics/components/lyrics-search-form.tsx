@@ -1,13 +1,25 @@
-import { openModal } from '@mantine/modals';
+import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
+import clsx from 'clsx';
 import orderBy from 'lodash/orderBy';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './lyrics-search-form.module.css';
 
 import i18n from '/@/i18n/i18n';
 import { lyricsQueries } from '/@/renderer/features/lyrics/api/lyrics-api';
+import {
+    SynchronizedLyrics,
+    SynchronizedLyricsProps,
+} from '/@/renderer/features/lyrics/synchronized-lyrics';
+import {
+    UnsynchronizedLyrics,
+    UnsynchronizedLyricsProps,
+} from '/@/renderer/features/lyrics/unsynchronized-lyrics';
+import { usePlayerSong } from '/@/renderer/store';
+import { Button } from '/@/shared/components/button/button';
+import { Center } from '/@/shared/components/center/center';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
@@ -25,9 +37,10 @@ import {
 
 interface SearchResultProps {
     data: InternetProviderLyricSearchResponse;
+    isSelected?: boolean;
     onClick?: () => void;
 }
-const SearchResult = ({ data, onClick }: SearchResultProps) => {
+const SearchResult = ({ data, isSelected, onClick }: SearchResultProps) => {
     const { artist, id, name, score, source } = data;
 
     const percentageScore = useMemo(() => {
@@ -39,7 +52,12 @@ const SearchResult = ({ data, onClick }: SearchResultProps) => {
         source === LyricSource.GENIUS ? id.replace(/^((http[s]?|ftp):\/)?\/?([^:/\s]+)/g, '') : id;
 
     return (
-        <button className={styles.searchItem} onClick={onClick}>
+        <button
+            className={clsx(styles.searchItem, {
+                [styles.selected]: isSelected,
+            })}
+            onClick={onClick}
+        >
             <Group justify="space-between" wrap="nowrap">
                 <Stack gap={0} maw="65%">
                     <Text fw={600} size="md">
@@ -66,6 +84,10 @@ interface LyricSearchFormProps {
 
 export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearchFormProps) => {
     const { t } = useTranslation();
+    const currentSong = usePlayerSong();
+    const [selectedResult, setSelectedResult] =
+        useState<InternetProviderLyricSearchResponse | null>(null);
+
     const form = useForm({
         initialValues: {
             artist: artist || '',
@@ -82,6 +104,20 @@ export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearch
         }),
     );
 
+    const { data: previewData, isInitialLoading: isPreviewLoading } = useQuery(
+        lyricsQueries.songLyricsByRemoteId({
+            options: {
+                enabled: !!selectedResult,
+            },
+            query: {
+                remoteSongId: selectedResult?.id,
+                remoteSource: selectedResult?.source as LyricSource | undefined,
+                song: currentSong,
+            },
+            serverId: currentSong?._serverId || '',
+        }),
+    );
+
     const searchResults = useMemo(() => {
         if (!data) return [];
 
@@ -95,8 +131,21 @@ export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearch
         return scoredResults;
     }, [data]);
 
+    const handleApply = () => {
+        if (selectedResult && onSearchOverride) {
+            onSearchOverride({
+                artist: selectedResult.artist,
+                id: selectedResult.id,
+                name: selectedResult.name,
+                remote: true,
+                source: selectedResult.source as LyricSource,
+            });
+            closeAllModals();
+        }
+    };
+
     return (
-        <Stack w="100%">
+        <Stack h="100%" w="100%">
             <form>
                 <Group grow>
                     <TextInput
@@ -117,34 +166,81 @@ export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearch
                 </Group>
             </form>
             <Divider />
-            {isInitialLoading ? (
-                <Spinner container />
-            ) : (
-                <ScrollArea
-                    style={{
-                        height: '400px',
-                        paddingRight: '1rem',
-                    }}
-                >
-                    <Stack gap="md">
-                        {searchResults.map((result) => (
-                            <SearchResult
-                                data={result}
-                                key={`${result.source}-${result.id}`}
-                                onClick={() => {
-                                    onSearchOverride?.({
-                                        artist: result.artist,
-                                        id: result.id,
-                                        name: result.name,
+            <Group align="flex-start" grow style={{ flex: 1, minHeight: 0 }}>
+                <Stack style={{ flex: 1, height: '100%', minHeight: 0 }}>
+                    <ScrollArea
+                        style={{
+                            height: '100%',
+                            paddingRight: '1rem',
+                        }}
+                    >
+                        {isInitialLoading ? (
+                            <Spinner container />
+                        ) : (
+                            <Stack gap="md">
+                                {searchResults.map((result) => (
+                                    <SearchResult
+                                        data={result}
+                                        isSelected={
+                                            selectedResult?.id === result.id &&
+                                            selectedResult?.source === result.source
+                                        }
+                                        key={`${result.source}-${result.id}`}
+                                        onClick={() => setSelectedResult(result)}
+                                    />
+                                ))}
+                            </Stack>
+                        )}
+                    </ScrollArea>
+                </Stack>
+                {selectedResult && (
+                    <Stack style={{ flex: 1, height: '100%', minHeight: 0 }}>
+                        {isPreviewLoading ? (
+                            <Spinner container />
+                        ) : previewData ? (
+                            Array.isArray(previewData) ? (
+                                <SynchronizedLyrics
+                                    style={{ padding: 0 }}
+                                    {...({
+                                        artist: selectedResult.artist,
+                                        lyrics: previewData,
+                                        name: selectedResult.name,
                                         remote: true,
-                                        source: result.source as LyricSource,
-                                    });
-                                }}
-                            />
-                        ))}
+                                        source: selectedResult.source,
+                                    } as SynchronizedLyricsProps)}
+                                />
+                            ) : (
+                                <UnsynchronizedLyrics
+                                    {...({
+                                        artist: selectedResult.artist,
+                                        lyrics: previewData,
+                                        name: selectedResult.name,
+                                        remote: true,
+                                        source: selectedResult.source,
+                                    } as UnsynchronizedLyricsProps)}
+                                />
+                            )
+                        ) : (
+                            <Center>
+                                <Text isMuted>
+                                    {t('page.fullscreenPlayer.noLyrics', {
+                                        postProcess: 'sentenceCase',
+                                    })}
+                                </Text>
+                            </Center>
+                        )}
                     </Stack>
-                </ScrollArea>
-            )}
+                )}
+            </Group>
+            <Divider />
+            <Group justify="flex-end">
+                <Button onClick={() => closeAllModals()} variant="default">
+                    {t('common.cancel', { postProcess: 'titleCase' })}
+                </Button>
+                <Button disabled={!selectedResult} onClick={handleApply} variant="filled">
+                    {t('common.confirm', { postProcess: 'titleCase' })}
+                </Button>
+            </Group>
         </Stack>
     );
 };
@@ -154,7 +250,12 @@ export const openLyricSearchModal = ({ artist, name, onSearchOverride }: LyricSe
         children: (
             <LyricsSearchForm artist={artist} name={name} onSearchOverride={onSearchOverride} />
         ),
-        size: 'lg',
+        size: 'xl',
+        styles: {
+            body: {
+                height: '600px',
+            },
+        },
         title: i18n.t('form.lyricSearch.title', { postProcess: 'titleCase' }) as string,
     });
 };

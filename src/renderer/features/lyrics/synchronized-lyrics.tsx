@@ -21,6 +21,7 @@ const mpris = isElectron() && utils?.isLinux() ? window.api.mpris : null;
 
 export interface SynchronizedLyricsProps extends Omit<FullLyricsMetadata, 'lyrics'> {
     lyrics: SynchronizedLyricsArray;
+    style?: React.CSSProperties;
     translatedLyrics?: null | string;
 }
 
@@ -30,6 +31,7 @@ export const SynchronizedLyrics = ({
     name,
     remote,
     source,
+    style,
     translatedLyrics,
 }: SynchronizedLyricsProps) => {
     const playbackType = usePlaybackType();
@@ -245,7 +247,7 @@ export const SynchronizedLyrics = ({
             id="sychronized-lyrics-scroll-container"
             onMouseEnter={showScrollbar}
             onMouseLeave={hideScrollbar}
-            style={{ gap: `${settings.gap}px` }}
+            style={{ gap: `${settings.gap}px`, ...style }}
         >
             {settings.showProvider && source && (
                 <LyricLine
