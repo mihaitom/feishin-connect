@@ -93,6 +93,12 @@
     transition: opacity 0.2s ease-in-out;
     transition: scale 0.2s linear;
 
+    @mixin light {
+        svg {
+            stroke: var(--theme-colors-background);
+        }
+    }
+
     &:hover {
         opacity: 1;
         transform: scale(1.1);
@@ -115,6 +121,12 @@
     top: 0;
     right: 0;
     padding: var(--theme-spacing-md);
+
+    @mixin light {
+        svg {
+            stroke: var(--theme-colors-background);
+        }
+    }
 }
 
 .secondary-button.options {
