@@ -38,6 +38,7 @@ export const artistsQueries = {
     },
     albumArtistListCount: (args: QueryHookArgs<ListCountQuery<AlbumArtistListQuery>>) => {
         return queryOptions({
+            gcTime: 1000 * 60 * 60 * 12,
             queryFn: ({ signal }) => {
                 return api.controller.getAlbumArtistListCount({
                     apiClientProps: { serverId: args.serverId, signal },
@@ -48,6 +49,7 @@ export const artistsQueries = {
                 args.serverId,
                 Object.keys(args.query).length === 0 ? undefined : args.query,
             ),
+            staleTime: 1000 * 60 * 60 * 12,
             ...args.options,
         });
     },
@@ -65,6 +67,7 @@ export const artistsQueries = {
     },
     artistListCount: (args: QueryHookArgs<ListCountQuery<ArtistListQuery>>) => {
         return queryOptions({
+            gcTime: 1000 * 60 * 60 * 12,
             queryFn: ({ signal }) => {
                 return api.controller
                     .getArtistList({
@@ -77,6 +80,7 @@ export const artistsQueries = {
                 args.serverId,
                 Object.keys(args.query).length === 0 ? undefined : args.query,
             ),
+            staleTime: 1000 * 60 * 60 * 12,
             ...args.options,
         });
     },
