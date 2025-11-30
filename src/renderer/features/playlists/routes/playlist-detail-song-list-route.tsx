@@ -1,6 +1,5 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate, useParams } from 'react-router';
@@ -159,7 +158,7 @@ const PlaylistQueryEditor = ({
     }, [detailQuery?.data?.rules?.order, detailQuery?.data?.rules?.sort]);
 
     return (
-        <motion.div>
+        <div className="query-editor-container">
             <Stack gap={0} h="100%" mah="50dvh" p="md" w="100%">
                 <Group justify="space-between" pb="md" wrap="nowrap">
                     <Group gap="sm" wrap="nowrap">
@@ -237,7 +236,7 @@ const PlaylistQueryEditor = ({
                     />
                 </div>
             </Stack>
-        </motion.div>
+        </div>
     );
 };
 
@@ -456,18 +455,16 @@ const PlaylistDetailSongListRoute = () => {
                     onToggleQueryBuilder={handleToggleShowQueryBuilder}
                 />
                 {(isSmartPlaylist || showQueryBuilder) && (
-                    <AnimatePresence>
-                        <PlaylistQueryEditor
-                            createPlaylistMutation={createPlaylistMutation}
-                            detailQuery={detailQuery}
-                            handleSave={handleSave}
-                            handleSaveAs={handleSaveAs}
-                            isQueryBuilderExpanded={isQueryBuilderExpanded}
-                            onToggleExpand={handleToggleExpand}
-                            playlistId={playlistId}
-                            queryBuilderRef={queryBuilderRef}
-                        />
-                    </AnimatePresence>
+                    <PlaylistQueryEditor
+                        createPlaylistMutation={createPlaylistMutation}
+                        detailQuery={detailQuery}
+                        handleSave={handleSave}
+                        handleSaveAs={handleSaveAs}
+                        isQueryBuilderExpanded={isQueryBuilderExpanded}
+                        onToggleExpand={handleToggleExpand}
+                        playlistId={playlistId}
+                        queryBuilderRef={queryBuilderRef}
+                    />
                 )}
                 <PlaylistDetailSongListContent />
             </ListContext.Provider>
