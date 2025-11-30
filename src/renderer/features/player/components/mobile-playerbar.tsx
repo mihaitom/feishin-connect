@@ -65,131 +65,136 @@ export const MobilePlayerbar = () => {
 
     return (
         <div className={clsx(styles.container, PlaybackSelectors.mediaPlayer)}>
-            <LayoutGroup>
-                <AnimatePresence initial={false} mode="popLayout">
-                    {currentSong?.imageUrl && (
-                        <div className={styles.imageWrapper}>
-                            <motion.div
-                                animate={{ opacity: 1, scale: 1 }}
-                                className={styles.image}
-                                exit={{ opacity: 0 }}
-                                initial={{ opacity: 0 }}
-                                key="mobile-playerbar-image"
-                                onClick={handleToggleFullScreenPlayer}
-                                onContextMenu={handleToggleContextMenu}
-                                role="button"
-                                transition={{ duration: 0.2, ease: 'easeIn' }}
-                            >
-                                <Tooltip
-                                    label={t('player.toggleFullscreenPlayer', {
-                                        postProcess: 'sentenceCase',
-                                    })}
-                                    openDelay={500}
+            <div className={styles.contentWrapper}>
+                <LayoutGroup>
+                    <AnimatePresence initial={false} mode="popLayout">
+                        {currentSong?.imageUrl && (
+                            <div className={styles.imageWrapper}>
+                                <motion.div
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className={styles.image}
+                                    exit={{ opacity: 0 }}
+                                    initial={{ opacity: 0 }}
+                                    key="mobile-playerbar-image"
+                                    onClick={handleToggleFullScreenPlayer}
+                                    onContextMenu={handleToggleContextMenu}
+                                    role="button"
+                                    transition={{ duration: 0.2, ease: 'easeIn' }}
                                 >
-                                    <Image
-                                        className={clsx(
-                                            styles.playerbarImage,
-                                            PlaybackSelectors.playerCoverArt,
-                                        )}
-                                        loading="eager"
-                                        src={currentSong.imageUrl}
+                                    <Tooltip
+                                        label={t('player.toggleFullscreenPlayer', {
+                                            postProcess: 'sentenceCase',
+                                        })}
+                                        openDelay={500}
+                                    >
+                                        <Image
+                                            className={clsx(
+                                                styles.playerbarImage,
+                                                PlaybackSelectors.playerCoverArt,
+                                            )}
+                                            loading="eager"
+                                            src={currentSong.imageUrl}
+                                        />
+                                    </Tooltip>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+                    <motion.div className={styles.metadataStack} layout="position">
+                        <div className={styles.lineItem} onClick={stopPropagation}>
+                            <Group align="center" gap="xs" wrap="nowrap">
+                                <Text
+                                    className={PlaybackSelectors.songTitle}
+                                    component={Link}
+                                    fw={500}
+                                    isLink
+                                    onClick={handleToggleFullScreenPlayer}
+                                    onContextMenu={handleToggleContextMenu}
+                                    overflow="hidden"
+                                    size="sm"
+                                    to={AppRoute.NOW_PLAYING}
+                                    truncate
+                                >
+                                    {title || '—'}
+                                </Text>
+                                {isSongDefined && (
+                                    <ActionIcon
+                                        icon="ellipsisVertical"
+                                        onClick={handleToggleContextMenu}
+                                        size="xs"
+                                        styles={{
+                                            root: {
+                                                '--ai-size-xs': '1.15rem',
+                                            },
+                                        }}
+                                        variant="subtle"
                                     />
-                                </Tooltip>
-                            </motion.div>
+                                )}
+                            </Group>
                         </div>
-                    )}
-                </AnimatePresence>
-                <motion.div className={styles.metadataStack} layout="position">
-                    <div className={styles.lineItem} onClick={stopPropagation}>
-                        <Group align="center" gap="xs" wrap="nowrap">
+                        <div
+                            className={clsx(
+                                styles.lineItem,
+                                styles.secondary,
+                                PlaybackSelectors.songArtist,
+                            )}
+                            onClick={stopPropagation}
+                        >
+                            {artists?.map((artist, index) => (
+                                <React.Fragment key={`bar-${artist.id}`}>
+                                    {index > 0 && <Separator />}
+                                    <Text
+                                        component={artist.id ? Link : undefined}
+                                        fw={500}
+                                        isLink={artist.id !== ''}
+                                        onClick={handleToggleFullScreenPlayer}
+                                        overflow="hidden"
+                                        size="xs"
+                                        to={
+                                            artist.id
+                                                ? generatePath(
+                                                      AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL,
+                                                      {
+                                                          albumArtistId: artist.id,
+                                                      },
+                                                  )
+                                                : undefined
+                                        }
+                                    >
+                                        {artist.name || '—'}
+                                    </Text>
+                                </React.Fragment>
+                            ))}
+                        </div>
+                        <div
+                            className={clsx(
+                                styles.lineItem,
+                                styles.secondary,
+                                PlaybackSelectors.songAlbum,
+                            )}
+                            onClick={stopPropagation}
+                        >
                             <Text
-                                className={PlaybackSelectors.songTitle}
                                 component={Link}
                                 fw={500}
                                 isLink
                                 onClick={handleToggleFullScreenPlayer}
-                                onContextMenu={handleToggleContextMenu}
                                 overflow="hidden"
-                                size="sm"
-                                to={AppRoute.NOW_PLAYING}
-                                truncate
+                                size="xs"
+                                to={
+                                    currentSong?.albumId
+                                        ? generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
+                                              albumId: currentSong.albumId,
+                                          })
+                                        : ''
+                                }
                             >
-                                {title || '—'}
+                                {currentSong?.album || '—'}
                             </Text>
-                            {isSongDefined && (
-                                <ActionIcon
-                                    icon="ellipsisVertical"
-                                    onClick={handleToggleContextMenu}
-                                    size="xs"
-                                    styles={{
-                                        root: {
-                                            '--ai-size-xs': '1.15rem',
-                                        },
-                                    }}
-                                    variant="subtle"
-                                />
-                            )}
-                        </Group>
-                    </div>
-                    <div
-                        className={clsx(
-                            styles.lineItem,
-                            styles.secondary,
-                            PlaybackSelectors.songArtist,
-                        )}
-                        onClick={stopPropagation}
-                    >
-                        {artists?.map((artist, index) => (
-                            <React.Fragment key={`bar-${artist.id}`}>
-                                {index > 0 && <Separator />}
-                                <Text
-                                    component={artist.id ? Link : undefined}
-                                    fw={500}
-                                    isLink={artist.id !== ''}
-                                    onClick={handleToggleFullScreenPlayer}
-                                    overflow="hidden"
-                                    size="xs"
-                                    to={
-                                        artist.id
-                                            ? generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
-                                                  albumArtistId: artist.id,
-                                              })
-                                            : undefined
-                                    }
-                                >
-                                    {artist.name || '—'}
-                                </Text>
-                            </React.Fragment>
-                        ))}
-                    </div>
-                    <div
-                        className={clsx(
-                            styles.lineItem,
-                            styles.secondary,
-                            PlaybackSelectors.songAlbum,
-                        )}
-                        onClick={stopPropagation}
-                    >
-                        <Text
-                            component={Link}
-                            fw={500}
-                            isLink
-                            onClick={handleToggleFullScreenPlayer}
-                            overflow="hidden"
-                            size="xs"
-                            to={
-                                currentSong?.albumId
-                                    ? generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
-                                          albumId: currentSong.albumId,
-                                      })
-                                    : ''
-                            }
-                        >
-                            {currentSong?.album || '—'}
-                        </Text>
-                    </div>
-                </motion.div>
-            </LayoutGroup>
+                        </div>
+                    </motion.div>
+                </LayoutGroup>
+            </div>
             <div className={styles.controlsWrapper}>
                 <PlayerButton
                     icon={<Icon fill="default" icon="mediaPrevious" size="md" />}
