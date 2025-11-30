@@ -230,8 +230,6 @@ export function WaveSurferPlayer() {
         return () => clearInterval(interval);
     }, [localPlayerStatus, num, setTimestamp, transitionType]);
 
-    useMainPlayerListener();
-
     const player1Url = useSongUrl(player1, num === 1, transcode);
     const player2Url = useSongUrl(player2, num === 2, transcode);
 

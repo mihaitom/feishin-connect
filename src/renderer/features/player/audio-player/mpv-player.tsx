@@ -133,8 +133,6 @@ export function MpvPlayer() {
         return () => clearInterval(interval);
     }, [localPlayerStatus, setTimestamp]);
 
-    useMainPlayerListener();
-
     const currentUrl = useSongUrl(currentSong, true, transcode);
     const nextUrl = useSongUrl(nextSong, false, transcode);
 

@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { UserFavoriteEventPayload, UserRatingEventPayload } from '/@/renderer/events/events';
 import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
+import { useMainPlayerListener } from '/@/renderer/features/player/audio-player/hooks/use-main-player-listener';
 import { MpvPlayer } from '/@/renderer/features/player/audio-player/mpv-player';
 import { WebPlayer } from '/@/renderer/features/player/audio-player/web-player';
 import { useMediaSession } from '/@/renderer/features/player/hooks/use-media-session';
@@ -26,6 +27,7 @@ export const AudioPlayers = () => {
     usePowerSaveBlocker();
     useDiscordRpc();
     useMPRIS();
+    useMainPlayerListener();
     useMediaSession();
 
     // Listen to favorite and rating events to update queue songs
