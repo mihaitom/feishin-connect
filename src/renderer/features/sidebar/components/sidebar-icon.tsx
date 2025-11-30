@@ -5,6 +5,8 @@ import {
     RiFlag2Line,
     RiFolder3Fill,
     RiFolder3Line,
+    RiHeartFill,
+    RiHeartLine,
     RiHome6Fill,
     RiHome6Line,
     RiMusic2Fill,
@@ -67,6 +69,10 @@ export const SidebarIcon = ({ active, route, size }: SidebarIconProps) => {
             if (active) return <RiSearchFill size={size} />;
             return <RiSearchLine size={size} />;
         default:
+            if (route.startsWith(AppRoute.FAVORITES)) {
+                if (active) return <RiHeartFill size={size} />;
+                return <RiHeartLine size={size} />;
+            }
             return <RiHome6Line size={size} />;
     }
 };

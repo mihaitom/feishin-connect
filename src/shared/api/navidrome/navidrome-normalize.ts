@@ -210,7 +210,6 @@ const normalizeSong = (
         releaseYear: item.year || null,
         sampleRate: item.sampleRate || null,
         size: item.size,
-        streamUrl: `${server?.url}/rest/stream.view?id=${id}&v=1.13.0&c=Feishin&${server?.credential}`,
         tags: item.tags || null,
         trackNumber: item.trackNumber,
         updatedAt: item.updatedAt,

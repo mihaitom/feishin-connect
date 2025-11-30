@@ -661,6 +661,7 @@ export type AlbumArtistListCountArgs = BaseEndpointArgs & {
 
 export interface AlbumArtistListQuery extends BaseQuery<AlbumArtistListSort> {
     _custom?: Record<string, any>;
+    favorite?: boolean;
     limit?: number;
     musicFolderId?: string | string[];
     searchTerm?: string;
@@ -753,6 +754,7 @@ export type ArtistListCountArgs = BaseEndpointArgs & { query: ListCountQuery<Art
 
 export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
     _custom?: Record<string, any>;
+    favorite?: boolean;
     limit?: number;
     musicFolderId?: string | string[];
     role?: string;

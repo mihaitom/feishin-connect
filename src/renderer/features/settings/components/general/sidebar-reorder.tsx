@@ -10,6 +10,7 @@ const SIDEBAR_ITEMS: Array<[string, string]> = [
     ['Now Playing', 'page.sidebar.nowPlaying'],
     ['Playlists', 'page.sidebar.playlists'],
     ['Search', 'page.sidebar.search'],
+    ['Favorites', 'page.sidebar.favorites'],
     ['Settings', 'page.sidebar.settings'],
     ['Tracks', 'page.sidebar.tracks'],
 ];

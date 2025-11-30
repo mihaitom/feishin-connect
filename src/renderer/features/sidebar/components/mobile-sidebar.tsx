@@ -28,6 +28,7 @@ export const MobileSidebar = () => {
             Albums: t('page.sidebar.albums', { postProcess: 'titleCase' }),
             Artists: t('page.sidebar.albumArtists', { postProcess: 'titleCase' }),
             'Artists-all': t('page.sidebar.artists', { postProcess: 'titleCase' }),
+            Favorites: t('page.sidebar.favorites', { postProcess: 'titleCase' }),
             Genres: t('page.sidebar.genres', { postProcess: 'titleCase' }),
             Home: t('page.sidebar.home', { postProcess: 'titleCase' }),
             'Now Playing': t('page.sidebar.nowPlaying', { postProcess: 'titleCase' }),
@@ -105,7 +106,7 @@ export const MobileSidebar = () => {
                 </Accordion>
             </ScrollArea>
             <div className={styles.serverSelectorWrapper}>
-                <ServerSelector showImage={false} />
+                <ServerSelector />
             </div>
         </div>
     );

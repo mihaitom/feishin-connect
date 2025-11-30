@@ -363,6 +363,9 @@
             "genreAlbums": "\"{{genre}}\" $t(entity.album_other)",
             "title": "$t(entity.album_other)"
         },
+        "favorites": {
+            "title": "$t(entity.favorite_other)"
+        },
         "appMenu": {
             "collapseSidebar": "collapse sidebar",
             "expandSidebar": "expand sidebar",
@@ -497,6 +500,7 @@
             "albumArtists": "$t(entity.albumArtist_other)",
             "albums": "$t(entity.album_other)",
             "artists": "$t(entity.artist_other)",
+            "favorites": "$t(entity.favorite_other)",
             "folders": "$t(entity.folder_other)",
             "genres": "$t(entity.genre_other)",
             "home": "$t(common.home)",

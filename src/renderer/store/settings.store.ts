@@ -529,6 +529,12 @@ export const sidebarItems: SidebarItemType[] = [
     { disabled: false, id: 'Home', label: i18n.t('page.sidebar.home'), route: AppRoute.HOME },
     {
         disabled: false,
+        id: 'Favorites',
+        label: i18n.t('page.sidebar.favorites'),
+        route: AppRoute.FAVORITES,
+    },
+    {
+        disabled: false,
         id: 'Albums',
         label: i18n.t('page.sidebar.albums'),
         route: AppRoute.LIBRARY_ALBUMS,
@@ -1291,10 +1297,19 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     return state;
                 }
 
+                if (version <= 10) {
+                    state.general.sidebarItems.push({
+                        disabled: false,
+                        id: 'Favorites',
+                        label: i18n.t('page.sidebar.favorites'),
+                        route: AppRoute.FAVORITES,
+                    });
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 10,
+            version: 11,
         },
     ),
 );

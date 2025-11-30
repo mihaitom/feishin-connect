@@ -195,7 +195,7 @@ const normalizeSong = (
         tags: null,
         trackNumber: item.track || 1,
         updatedAt: '',
-        userFavorite: item.starred || false,
+        userFavorite: Boolean(item.starred) || false,
         userRating: item.userRating || null,
     };
 };
@@ -232,7 +232,7 @@ const normalizeAlbumArtist = (
         playCount: null,
         similarArtists: [],
         songCount: null,
-        userFavorite: false,
+        userFavorite: Boolean(item.starred) || false,
         userRating: null,
     };
 };
@@ -290,7 +290,7 @@ const normalizeAlbum = (
             ) || [],
         tags: null,
         updatedAt: item.created,
-        userFavorite: item.starred || false,
+        userFavorite: Boolean(item.starred) || false,
         userRating: item.userRating || null,
         version: item.version || null,
     };

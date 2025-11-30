@@ -2,6 +2,7 @@ export enum AppRoute {
     ACTION_REQUIRED = '/action-required',
     EXPLORE = '/explore',
     FAKE_LIBRARY_ALBUM_DETAILS = '/library/albums/dummy/:albumId',
+    FAVORITES = '/favorites',
     HOME = '/',
     LIBRARY_ALBUM_ARTISTS = '/library/album-artists',
     LIBRARY_ALBUM_ARTISTS_DETAIL = '/library/album-artists/:albumArtistId',
