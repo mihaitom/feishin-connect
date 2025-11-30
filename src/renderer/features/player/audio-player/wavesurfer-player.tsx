@@ -7,7 +7,6 @@ import {
     WaveSurferPlayerEngine,
     WaveSurferPlayerEngineHandle,
 } from '/@/renderer/features/player/audio-player/engine/wavesurfer-player-engine';
-import { useMainPlayerListener } from '/@/renderer/features/player/audio-player/hooks/use-main-player-listener';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { useSongUrl } from '/@/renderer/features/player/audio-player/hooks/use-stream-url';
 import { PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
