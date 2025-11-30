@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
 import { QueryBuilderOption } from '/@/renderer/components/query-builder/query-builder-option';
@@ -187,41 +186,27 @@ export const QueryBuilder = ({
                     </Group>
                     {level === 0 && saveActions}
                 </Group>
-                <AnimatePresence initial={false}>
-                    {data?.rules?.map((rule: QueryBuilderRule) => (
-                        <motion.div
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -25 }}
-                            initial={{ opacity: 0, x: -25 }}
-                            key={rule.uniqueId}
-                            transition={{ duration: 0.2, ease: 'easeInOut' }}
-                        >
-                            <QueryBuilderOption
-                                data={rule}
-                                filters={filters}
-                                groupIndex={groupIndex || []}
-                                level={level}
-                                noRemove={data?.rules?.length === 1}
-                                onChangeField={onChangeField}
-                                onChangeOperator={onChangeOperator}
-                                onChangeValue={onChangeValue}
-                                onDeleteRule={onDeleteRule}
-                                operators={operators}
-                                selectData={playlists}
-                            />
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
+                {data?.rules?.map((rule: QueryBuilderRule) => (
+                    <div key={rule.uniqueId}>
+                        <QueryBuilderOption
+                            data={rule}
+                            filters={filters}
+                            groupIndex={groupIndex || []}
+                            level={level}
+                            noRemove={data?.rules?.length === 1}
+                            onChangeField={onChangeField}
+                            onChangeOperator={onChangeOperator}
+                            onChangeValue={onChangeValue}
+                            onDeleteRule={onDeleteRule}
+                            operators={operators}
+                            selectData={playlists}
+                        />
+                    </div>
+                ))}
                 {data?.group && (
-                    <AnimatePresence initial={false}>
+                    <>
                         {data.group?.map((group: QueryBuilderGroup, index: number) => (
-                            <motion.div
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -25 }}
-                                initial={{ opacity: 0, x: -25 }}
-                                key={group.uniqueId}
-                                transition={{ duration: 0.2, ease: 'easeInOut' }}
-                            >
+                            <div key={group.uniqueId}>
                                 <QueryBuilder
                                     data={group}
                                     filters={filters}
@@ -241,9 +226,9 @@ export const QueryBuilder = ({
                                     playlists={playlists}
                                     uniqueId={group.uniqueId}
                                 />
-                            </motion.div>
+                            </div>
                         ))}
-                    </AnimatePresence>
+                    </>
                 )}
             </Stack>
         </Box>

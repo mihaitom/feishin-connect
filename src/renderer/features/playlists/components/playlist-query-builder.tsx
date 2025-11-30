@@ -276,10 +276,13 @@ export const PlaylistQueryBuilder = forwardRef(
 
         const handleDeleteRuleGroup = useCallback((args: DeleteArgs) => {
             const { groupIndex, level, uniqueId } = args;
-            const path = level === 0 ? 'group' : getTypePath(groupIndex);
+            const path = level === 0 ? 'group' : getGroupPath(level - 1, groupIndex.slice(0, -1));
 
             setFilters((prev) => {
-                const currentGroups = get(prev, path) || [];
+                const currentGroups = get(prev, path);
+                if (!Array.isArray(currentGroups)) {
+                    return prev;
+                }
                 return setWith(
                     clone(prev),
                     path,

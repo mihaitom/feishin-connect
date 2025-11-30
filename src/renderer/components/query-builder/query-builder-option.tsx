@@ -34,7 +34,15 @@ interface QueryOptionProps {
     selectData?: { label: string; value: string }[];
 }
 
-const QueryValueInput = ({ data, defaultValue, onChange, operator, type, ...props }: any) => {
+const QueryValueInput = ({
+    data,
+    defaultValue,
+    onChange,
+    operator,
+    type,
+    value: valueProp,
+    ...props
+}: any) => {
     const [numberRange, setNumberRange] = useState<number[]>([0, 0]);
 
     // Parse date value helper - converts date string (YYYY-MM-DD) to Date for display
@@ -50,26 +58,45 @@ const QueryValueInput = ({ data, defaultValue, onChange, operator, type, ...prop
         return null;
     };
 
+    const value = valueProp !== undefined ? valueProp : defaultValue;
+
     // Store date range as strings for state management
     const [dateRange, setDateRange] = useState<[null | string, null | string]>(() => {
-        if (defaultValue && Array.isArray(defaultValue)) {
+        const currentValue = value !== undefined ? value : defaultValue;
+        if (currentValue && Array.isArray(currentValue)) {
             return [
-                typeof defaultValue[0] === 'string' ? defaultValue[0] : null,
-                typeof defaultValue[1] === 'string' ? defaultValue[1] : null,
+                typeof currentValue[0] === 'string' ? currentValue[0] : null,
+                typeof currentValue[1] === 'string' ? currentValue[1] : null,
             ];
         }
         return [null, null];
     });
 
-    // Sync dateRange state when defaultValue changes
+    // Sync dateRange state when value changes
     useEffect(() => {
-        if (operator === 'inTheRangeDate' && defaultValue && Array.isArray(defaultValue)) {
+        const currentValue = value !== undefined ? value : defaultValue;
+        if (operator === 'inTheRangeDate' && currentValue && Array.isArray(currentValue)) {
             setDateRange([
-                typeof defaultValue[0] === 'string' ? defaultValue[0] : null,
-                typeof defaultValue[1] === 'string' ? defaultValue[1] : null,
+                typeof currentValue[0] === 'string' ? currentValue[0] : null,
+                typeof currentValue[1] === 'string' ? currentValue[1] : null,
             ]);
         }
-    }, [defaultValue, operator]);
+    }, [value, defaultValue, operator]);
+
+    // Sync numberRange state when value changes
+    useEffect(() => {
+        const currentValue = value !== undefined ? value : defaultValue;
+        if (operator === 'inTheRange' && currentValue && Array.isArray(currentValue)) {
+            setNumberRange([
+                typeof currentValue[0] === 'number'
+                    ? currentValue[0]
+                    : Number(currentValue[0]) || 0,
+                typeof currentValue[1] === 'number'
+                    ? currentValue[1]
+                    : Number(currentValue[1]) || 0,
+            ]);
+        }
+    }, [value, defaultValue, operator]);
 
     // Check if operator requires DatePicker
     const isDatePickerOperator =
@@ -84,12 +111,13 @@ const QueryValueInput = ({ data, defaultValue, onChange, operator, type, ...prop
                         { label: 'false', value: 'false' },
                     ]}
                     onChange={onChange}
+                    value={value}
                     {...props}
                 />
             );
         case 'date':
             if (isDatePickerOperator && operator !== 'inTheRangeDate') {
-                const dateValue = defaultValue ? parseDateValue(defaultValue) : null;
+                const dateValue = value ? parseDateValue(value) : null;
                 return (
                     <DateInput
                         clearable
@@ -107,7 +135,7 @@ const QueryValueInput = ({ data, defaultValue, onChange, operator, type, ...prop
                     />
                 );
             }
-            return <TextInput onChange={onChange} size="sm" {...props} />;
+            return <TextInput onChange={onChange} size="sm" value={value} {...props} />;
         case 'dateRange':
             if (operator === 'inTheRangeDate') {
                 return (
@@ -158,24 +186,24 @@ const QueryValueInput = ({ data, defaultValue, onChange, operator, type, ...prop
                 <>
                     <NumberInput
                         {...props}
-                        defaultValue={props.defaultValue && Number(props.defaultValue?.[0])}
                         maxWidth={81}
                         onChange={(e) => {
                             const newRange = [Number(e) || 0, numberRange[1]];
                             setNumberRange(newRange);
                             onChange(newRange);
                         }}
+                        value={numberRange[0] || undefined}
                         width="10%"
                     />
                     <NumberInput
                         {...props}
-                        defaultValue={props.defaultValue && Number(props.defaultValue?.[1])}
                         maxWidth={81}
                         onChange={(e) => {
                             const newRange = [numberRange[0], Number(e) || 0];
                             setNumberRange(newRange);
                             onChange(newRange);
                         }}
+                        value={numberRange[1] || undefined}
                         width="10%"
                     />
                 </>
@@ -185,14 +213,14 @@ const QueryValueInput = ({ data, defaultValue, onChange, operator, type, ...prop
                 <NumberInput
                     onChange={onChange}
                     size="sm"
+                    value={value !== undefined && value !== null ? Number(value) : undefined}
                     {...props}
-                    defaultValue={props.defaultValue && Number(props.defaultValue)}
                 />
             );
         case 'playlist':
-            return <Select data={data} onChange={onChange} {...props} />;
+            return <Select data={data} onChange={onChange} value={value} {...props} />;
         case 'string':
-            return <TextInput onChange={onChange} size="sm" {...props} />;
+            return <TextInput onChange={onChange} size="sm" value={value || ''} {...props} />;
 
         default:
             return <></>;
@@ -301,7 +329,6 @@ export const QueryBuilderOption = ({
             {field ? (
                 <QueryValueInput
                     data={selectData || []}
-                    defaultValue={value}
                     maxWidth={170}
                     onChange={handleChangeValue}
                     operator={operator}
@@ -311,15 +338,16 @@ export const QueryBuilderOption = ({
                             ? 'dateRange'
                             : fieldType
                     }
+                    value={value}
                     width="25%"
                 />
             ) : (
                 <TextInput
-                    defaultValue={value}
                     disabled
                     maxWidth={170}
                     onChange={handleChangeValue}
                     size="sm"
+                    value={value || ''}
                     width="25%"
                 />
             )}
