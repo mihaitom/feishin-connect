@@ -674,6 +674,7 @@ export const pickTableColumns = (options: {
     alignRightColumns?: TableColumn[];
     autoSizeColumns?: TableColumn[];
     columns: DefaultTableColumn[];
+    columnWidths?: Partial<Record<TableColumn, number>>;
     enabledColumns: TableColumn[];
     pickColumns?: TableColumn[];
     pinnedLeftColumns?: TableColumn[];
@@ -685,6 +686,7 @@ export const pickTableColumns = (options: {
         alignRightColumns = [],
         autoSizeColumns = [],
         columns,
+        columnWidths = {},
         enabledColumns,
         pickColumns = [],
         pinnedLeftColumns = [],
@@ -693,7 +695,27 @@ export const pickTableColumns = (options: {
 
     const columnsToPick: ItemTableListColumnConfig[] = [];
 
+    const columnMap = new Map<TableColumn, DefaultTableColumn>();
     columns.forEach((column) => {
+        columnMap.set(column.value, column);
+    });
+
+    let columnsToProcess: DefaultTableColumn[];
+    if (enabledColumns.length > 0) {
+        columnsToProcess = enabledColumns
+            .map((col) => columnMap.get(col))
+            .filter((col): col is DefaultTableColumn => col !== undefined);
+
+        if (pickColumns.length === 0) {
+            const enabledSet = new Set(enabledColumns);
+            const remaining = columns.filter((col) => !enabledSet.has(col.value));
+            columnsToProcess = [...columnsToProcess, ...remaining];
+        }
+    } else {
+        columnsToProcess = columns;
+    }
+
+    columnsToProcess.forEach((column) => {
         if (pickColumns.length > 0 && !pickColumns?.includes(column.value)) {
             return;
         }
@@ -720,13 +742,16 @@ export const pickTableColumns = (options: {
 
         const autoSize = autoSizeColumns.includes(column.value);
 
+        // Use custom width if provided, otherwise use default
+        const width = columnWidths[column.value] ?? column.width;
+
         columnsToPick.push({
             align,
             autoSize,
             id: column.value,
             isEnabled,
             pinned,
-            width: column.width,
+            width,
         });
     });
 
