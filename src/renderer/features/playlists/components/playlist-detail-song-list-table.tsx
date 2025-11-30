@@ -12,13 +12,17 @@ import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-searc
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { usePlayerSong } from '/@/renderer/store';
 import { sortSongList } from '/@/shared/api/utils';
-import { LibraryItem, PlaylistSongListQuery, Song } from '/@/shared/types/domain-types';
+import {
+    LibraryItem,
+    PlaylistSongListQuery,
+    PlaylistSongListResponse,
+    Song,
+} from '/@/shared/types/domain-types';
 import { ItemListKey, Play } from '/@/shared/types/types';
 
 interface PlaylistDetailSongListTableProps
     extends Omit<ItemListTableComponentProps<PlaylistSongListQuery>, 'query'> {
-    data: any;
-    playlistId: string;
+    data: PlaylistSongListResponse;
 }
 
 export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongListTableProps>(
@@ -32,14 +36,11 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
             enableRowHoverHighlight = true,
             enableSelection = true,
             enableVerticalBorders = false,
-            playlistId,
             saveScrollOffset = true,
-            serverId,
             size = 'default',
         },
         ref,
     ) => {
-
         const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
             enabled: saveScrollOffset,
         });
