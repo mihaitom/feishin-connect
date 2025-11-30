@@ -13,6 +13,7 @@ export const openSettingsModal = () => {
                 height: '80%',
                 maxWidth: '960px',
                 minHeight: '540px',
+                width: '100%',
             },
         },
         transitionProps: {
