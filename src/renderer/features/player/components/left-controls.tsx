@@ -164,7 +164,19 @@ export const LeftControls = () => {
                             {isSongDefined && (
                                 <ActionIcon
                                     icon="ellipsisVertical"
-                                    // onClick={(e) => handleGeneralContextMenu(e, [currentSong!])}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (currentSong) {
+                                            ContextMenuController.call({
+                                                cmd: {
+                                                    items: [currentSong],
+                                                    type: LibraryItem.SONG,
+                                                },
+                                                event: e,
+                                            });
+                                        }
+                                    }}
                                     size="xs"
                                     styles={{
                                         root: {
