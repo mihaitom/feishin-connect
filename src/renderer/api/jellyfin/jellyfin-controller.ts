@@ -397,7 +397,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             query: {
                 EnableTotalRecordCount: true,
                 Fields: 'ItemCounts',
-                Limit: query.limit,
+                Limit: query.limit === -1 ? undefined : query.limit,
                 ParentId: getMusicFolderId(query.musicFolderId),
                 Recursive: true,
                 SearchTerm: query?.searchTerm,
