@@ -4,10 +4,10 @@ import { PageHeader } from '/@/renderer/components/page-header/page-header';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { Badge } from '/@/shared/components/badge/badge';
 import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
-import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { LibraryItem, Song } from '/@/shared/types/domain-types';
 
 interface AlbumArtistDetailTopSongsListHeaderProps {
-    data: QueueSong[];
+    data: Song[];
     itemCount?: number;
     title: string;
 }

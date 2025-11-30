@@ -1,29 +1,43 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createSearchParams, generatePath, Link, useParams } from 'react-router';
 
 import styles from './album-artist-detail-content.module.css';
 
+import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
+import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
+import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/item-table-list';
+import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
+import { ItemControls } from '/@/renderer/components/item-list/types';
 import { AlbumInfiniteCarousel } from '/@/renderer/features/albums/components/album-infinite-carousel';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistGridCarousel } from '/@/renderer/features/artists/components/album-artist-grid-carousel';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { DefaultPlayButton } from '/@/renderer/features/shared/components/play-button';
+import { searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
-import { ArtistItem, useCurrentServer } from '/@/renderer/store';
-import { useGeneralSettings, usePlayButtonBehavior } from '/@/renderer/store/settings.store';
+import { ArtistItem, useCurrentServer, usePlayerSong } from '/@/renderer/store';
+import {
+    useGeneralSettings,
+    usePlayButtonBehavior,
+    useSettingsStore,
+} from '/@/renderer/store/settings.store';
 import { sanitize } from '/@/renderer/utils/sanitize';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { Grid } from '/@/shared/components/grid/grid';
 import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
+import { TextInput } from '/@/shared/components/text-input/text-input';
 import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
 import {
@@ -31,10 +45,11 @@ import {
     AlbumListSort,
     LibraryItem,
     ServerType,
+    Song,
     SortOrder,
     TopSongListResponse,
 } from '/@/shared/types/domain-types';
-import { Play } from '/@/shared/types/types';
+import { ItemListKey, ListDisplayType, Play } from '/@/shared/types/types';
 
 interface AlbumArtistActionButtonsProps {
     albumCount: null | number | undefined;
@@ -175,33 +190,175 @@ const AlbumArtistMetadataTopSongs = ({
     topSongsQuery,
 }: AlbumArtistMetadataTopSongsProps) => {
     const { t } = useTranslation();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showAll, setShowAll] = useState(false);
+    const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.SONG]?.table);
+    const currentSong = usePlayerSong();
+    const player = usePlayer();
+
+    const songs = useMemo(() => topSongsQuery?.data?.items || [], [topSongsQuery?.data?.items]);
+
+    const columns = useMemo(() => {
+        return tableConfig?.columns || [];
+    }, [tableConfig?.columns]);
+
+    const filteredSongs = useMemo(() => {
+        const filtered = searchLibraryItems(songs, searchTerm, LibraryItem.SONG);
+        // When searching, show all results. Otherwise, limit to 5 if not showing all
+        if (searchTerm.trim() || showAll) {
+            return filtered;
+        }
+        return filtered.slice(0, 5);
+    }, [songs, searchTerm, showAll]);
+
+    const { handleColumnReordered } = useItemListColumnReorder({
+        itemListKey: ItemListKey.SONG,
+    });
+
+    const { handleColumnResized } = useItemListColumnResize({
+        itemListKey: ItemListKey.SONG,
+    });
+
+    const overrideControls: Partial<ItemControls> = useMemo(() => {
+        return {
+            onDoubleClick: ({ index, internalState, item }) => {
+                if (!item) {
+                    return;
+                }
+
+                const items = internalState?.getData() as Song[];
+
+                if (index !== undefined) {
+                    player.addToQueueByData(items, Play.NOW);
+                    player.mediaPlayByIndex(index);
+                }
+            },
+        };
+    }, [player]);
 
     if (!topSongsQuery?.data?.items?.length) return null;
 
+    if (!tableConfig || columns.length === 0) {
+        return (
+            <section>
+                <Group justify="space-between" wrap="nowrap">
+                    <Group align="flex-end" wrap="nowrap">
+                        <TextTitle fw={700} order={2}>
+                            {t('page.albumArtistDetail.topSongs', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </TextTitle>
+                        <Button
+                            component={Link}
+                            size="compact-md"
+                            to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_TOP_SONGS, {
+                                albumArtistId: routeId,
+                            })}
+                            uppercase
+                            variant="subtle"
+                        >
+                            {t('page.albumArtistDetail.viewAll', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </Button>
+                    </Group>
+                </Group>
+            </section>
+        );
+    }
+
+    const currentSongId = currentSong?.id;
+
     return (
         <section>
-            <Group justify="space-between" wrap="nowrap">
-                <Group align="flex-end" wrap="nowrap">
-                    <TextTitle fw={700} order={2}>
-                        {t('page.albumArtistDetail.topSongs', {
-                            postProcess: 'sentenceCase',
-                        })}
-                    </TextTitle>
-                    <Button
-                        component={Link}
-                        size="compact-md"
-                        to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_TOP_SONGS, {
-                            albumArtistId: routeId,
-                        })}
-                        uppercase
-                        variant="subtle"
-                    >
-                        {t('page.albumArtistDetail.viewAll', {
-                            postProcess: 'sentenceCase',
-                        })}
-                    </Button>
+            <Stack gap="md">
+                <Group justify="space-between" wrap="nowrap">
+                    <Group align="flex-end" wrap="nowrap">
+                        <TextTitle fw={700} order={2}>
+                            {t('page.albumArtistDetail.topSongs', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </TextTitle>
+                        <Button
+                            component={Link}
+                            size="compact-md"
+                            to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_TOP_SONGS, {
+                                albumArtistId: routeId,
+                            })}
+                            uppercase
+                            variant="subtle"
+                        >
+                            {t('page.albumArtistDetail.viewAll', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </Button>
+                    </Group>
                 </Group>
-            </Group>
+                <Group gap="sm" w="100%">
+                    <TextInput
+                        flex={1}
+                        leftSection={<Icon icon="search" />}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder={t('common.search', { postProcess: 'sentenceCase' })}
+                        radius="xl"
+                        rightSection={
+                            searchTerm ? (
+                                <ActionIcon
+                                    icon="x"
+                                    onClick={() => setSearchTerm('')}
+                                    size="sm"
+                                    variant="transparent"
+                                />
+                            ) : null
+                        }
+                        styles={{
+                            input: {
+                                background: 'transparent',
+                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                            },
+                        }}
+                        value={searchTerm}
+                    />
+                    <ListConfigMenu
+                        displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
+                        listKey={ItemListKey.SONG}
+                        optionsConfig={{
+                            table: {
+                                itemsPerPage: { hidden: true },
+                                pagination: { hidden: true },
+                            },
+                        }}
+                        tableColumnsData={SONG_TABLE_COLUMNS}
+                    />
+                </Group>
+                <ItemTableList
+                    activeRowId={currentSongId}
+                    autoFitColumns={tableConfig.autoFitColumns}
+                    CellComponent={ItemTableListColumn}
+                    columns={columns}
+                    data={filteredSongs}
+                    enableAlternateRowColors={tableConfig.enableAlternateRowColors}
+                    enableDrag
+                    enableExpansion={false}
+                    enableHeader
+                    enableHorizontalBorders={tableConfig.enableHorizontalBorders}
+                    enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
+                    enableSelection
+                    enableVerticalBorders={tableConfig.enableVerticalBorders}
+                    itemType={LibraryItem.SONG}
+                    onColumnReordered={handleColumnReordered}
+                    onColumnResized={handleColumnResized}
+                    overrideControls={overrideControls}
+                    size={tableConfig.size}
+                />
+                {!searchTerm.trim() && songs.length > 5 && !showAll && (
+                    <Group justify="center" w="100%">
+                        <Button onClick={() => setShowAll(true)} variant="subtle">
+                            {t('action.viewMore', { postProcess: 'sentenceCase' })}
+                        </Button>
+                    </Group>
+                )}
+            </Stack>
         </section>
     );
 };
