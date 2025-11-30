@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router';
 
 import packageJson from '../../../../../package.json';
 
-import { openSettingsModal } from '/@/renderer/features/settings/utils/open-settings-modal';
+import { AppRoute } from '/@/renderer/router/routes';
 import { useAppStore, useAppStoreActions } from '/@/renderer/store';
 import { DropdownMenu, MenuItemProps } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -184,7 +184,7 @@ export const AppMenu = () => {
             icon: 'settings',
             id: 'settings',
             label: t('page.appMenu.settings', { postProcess: 'sentenceCase' }),
-            onClick: openSettingsModal,
+            onClick: () => navigate(AppRoute.SETTINGS),
             type: 'item',
         },
         {

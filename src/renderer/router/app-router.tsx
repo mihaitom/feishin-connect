@@ -72,6 +72,8 @@ const SearchRoute = lazy(() => import('/@/renderer/features/search/routes/search
 
 const FavoritesRoute = lazy(() => import('/@/renderer/features/favorites/routes/favorites-route'));
 
+const SettingsRoute = lazy(() => import('/@/renderer/features/settings/routes/settings-route'));
+
 export const AppRouter = () => {
     const router = (
         <HashRouter>
@@ -93,6 +95,7 @@ export const AppRouter = () => {
                                     <Route element={<HomeRoute />} path={AppRoute.HOME} />
                                     <Route element={<SearchRoute />} path={AppRoute.SEARCH} />
                                     <Route element={<FavoritesRoute />} path={AppRoute.FAVORITES} />
+                                    <Route element={<SettingsRoute />} path={AppRoute.SETTINGS} />
                                     <Route
                                         element={<NowPlayingRoute />}
                                         path={AppRoute.NOW_PLAYING}
