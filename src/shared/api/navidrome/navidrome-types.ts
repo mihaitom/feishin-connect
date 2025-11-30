@@ -192,6 +192,9 @@ export const NDSongQueryDateOperators = [
     { label: 'is in the last', value: 'inTheLast' },
     { label: 'is not in the last', value: 'notInTheLast' },
     { label: 'is in the range', value: 'inTheRange' },
+    { label: 'is before (date)', value: 'beforeDate' },
+    { label: 'is after (date)', value: 'afterDate' },
+    { label: 'is in the range (date)', value: 'inTheRangeDate' },
 ];
 
 export const NDSongQueryStringOperators = [

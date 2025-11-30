@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Filters } from '/@/renderer/components/query-builder';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { DateInput } from '/@/shared/components/date-picker/date-picker';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Select } from '/@/shared/components/select/select';
@@ -33,8 +34,46 @@ interface QueryOptionProps {
     selectData?: { label: string; value: string }[];
 }
 
-const QueryValueInput = ({ data, onChange, type, ...props }: any) => {
+const QueryValueInput = ({ data, defaultValue, onChange, operator, type, ...props }: any) => {
     const [numberRange, setNumberRange] = useState<number[]>([0, 0]);
+
+    // Parse date value helper - converts date string (YYYY-MM-DD) to Date for display
+    const parseDateValue = (val: any): Date | null => {
+        if (!val) return null;
+        if (val instanceof Date) return val;
+        if (typeof val === 'string') {
+            // Handle YYYY-MM-DD format strings
+            const parsed = new Date(val);
+            if (isNaN(parsed.getTime())) return null;
+            return parsed;
+        }
+        return null;
+    };
+
+    // Store date range as strings for state management
+    const [dateRange, setDateRange] = useState<[null | string, null | string]>(() => {
+        if (defaultValue && Array.isArray(defaultValue)) {
+            return [
+                typeof defaultValue[0] === 'string' ? defaultValue[0] : null,
+                typeof defaultValue[1] === 'string' ? defaultValue[1] : null,
+            ];
+        }
+        return [null, null];
+    });
+
+    // Sync dateRange state when defaultValue changes
+    useEffect(() => {
+        if (operator === 'inTheRangeDate' && defaultValue && Array.isArray(defaultValue)) {
+            setDateRange([
+                typeof defaultValue[0] === 'string' ? defaultValue[0] : null,
+                typeof defaultValue[1] === 'string' ? defaultValue[1] : null,
+            ]);
+        }
+    }, [defaultValue, operator]);
+
+    // Check if operator requires DatePicker
+    const isDatePickerOperator =
+        operator === 'beforeDate' || operator === 'afterDate' || operator === 'inTheRangeDate';
 
     switch (type) {
         case 'boolean':
@@ -49,8 +88,72 @@ const QueryValueInput = ({ data, onChange, type, ...props }: any) => {
                 />
             );
         case 'date':
+            if (isDatePickerOperator && operator !== 'inTheRangeDate') {
+                const dateValue = defaultValue ? parseDateValue(defaultValue) : null;
+                return (
+                    <DateInput
+                        clearable
+                        defaultLevel="year"
+                        maxWidth={170}
+                        onChange={(date) => {
+                            // DateInput returns string in 'YYYY-MM-DD' format (local timezone)
+                            // Return raw string value - no transformation needed
+                            onChange(date || '');
+                        }}
+                        size="sm"
+                        value={dateValue}
+                        valueFormat="YYYY-MM-DD"
+                        width="25%"
+                    />
+                );
+            }
             return <TextInput onChange={onChange} size="sm" {...props} />;
         case 'dateRange':
+            if (operator === 'inTheRangeDate') {
+                return (
+                    <Group gap="sm" wrap="nowrap">
+                        <DateInput
+                            clearable
+                            defaultLevel="year"
+                            maxWidth={81}
+                            onChange={(date) => {
+                                // DateInput returns string in 'YYYY-MM-DD' format (local timezone)
+                                const newRange: [null | string, null | string] = [
+                                    date || null,
+                                    dateRange[1],
+                                ];
+                                setDateRange(newRange);
+                                // Return raw string values - no transformation needed
+                                onChange([date || null, dateRange[1] || null]);
+                            }}
+                            size="sm"
+                            value={dateRange[0] ? parseDateValue(dateRange[0]) : null}
+                            valueFormat="YYYY-MM-DD"
+                            width="10%"
+                        />
+                        <DateInput
+                            clearable
+                            defaultLevel="year"
+                            maxWidth={81}
+                            onChange={(date) => {
+                                // DateInput returns string in 'YYYY-MM-DD' format (local timezone)
+                                const newRange: [null | string, null | string] = [
+                                    dateRange[0],
+                                    date || null,
+                                ];
+                                setDateRange(newRange);
+                                // Return raw string values - no transformation needed
+                                onChange([dateRange[0] || null, date || null]);
+                            }}
+                            size="sm"
+                            value={dateRange[1] ? parseDateValue(dateRange[1]) : null}
+                            valueFormat="YYYY-MM-DD"
+                            width="10%"
+                        />
+                    </Group>
+                );
+            }
+
             return (
                 <>
                     <NumberInput
@@ -201,8 +304,13 @@ export const QueryBuilderOption = ({
                     defaultValue={value}
                     maxWidth={170}
                     onChange={handleChangeValue}
+                    operator={operator}
                     size="sm"
-                    type={operator === 'inTheRange' ? 'dateRange' : fieldType}
+                    type={
+                        operator === 'inTheRange' || operator === 'inTheRangeDate'
+                            ? 'dateRange'
+                            : fieldType
+                    }
                     width="25%"
                 />
             ) : (
