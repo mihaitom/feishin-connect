@@ -24,6 +24,9 @@ export const GetInfoAction = ({ disabled, item }: GetInfoActionProps) => {
         openModal({
             children: <ItemDetailsModal item={item} />,
             size: 'lg',
+            styles: {
+                body: { paddingBottom: 'var(--theme-spacing-xl)' },
+            },
             title: item.name || t('page.contextMenu.showDetails', { postProcess: 'sentenceCase' }),
         });
     }, [item, server, t]);
