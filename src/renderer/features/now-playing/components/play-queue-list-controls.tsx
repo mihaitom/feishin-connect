@@ -11,7 +11,7 @@ import { usePlayerSong, usePlayerStoreBase } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
 import { QueueSong } from '/@/shared/types/domain-types';
-import { ItemListKey } from '/@/shared/types/types';
+import { ItemListKey, ListDisplayType } from '/@/shared/types/types';
 
 interface PlayQueueListOptionsProps {
     handleSearch: (value: string) => void;
@@ -138,6 +138,12 @@ export const PlayQueueListControls = ({
                     value={searchTerm}
                 />
                 <ListConfigMenu
+                    displayTypes={[
+                        {
+                            hidden: true,
+                            value: ListDisplayType.GRID,
+                        },
+                    ]}
                     listKey={ItemListKey.SIDE_QUEUE}
                     tableColumnsData={SONG_TABLE_COLUMNS}
                 />

@@ -14,7 +14,7 @@ import { Divider } from '/@/shared/components/divider/divider';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { LibraryItem, SongListSort, SortOrder } from '/@/shared/types/domain-types';
-import { ItemListKey } from '/@/shared/types/types';
+import { ItemListKey, ListDisplayType } from '/@/shared/types/types';
 
 export const PlaylistDetailSongListHeaderFilters = () => {
     const { playlistId } = useParams() as { playlistId: string };
@@ -52,6 +52,12 @@ export const PlaylistDetailSongListHeaderFilters = () => {
             </Group>
             <Group gap="sm" wrap="nowrap">
                 <ListConfigMenu
+                    displayTypes={[
+                        {
+                            hidden: true,
+                            value: ListDisplayType.GRID,
+                        },
+                    ]}
                     listKey={ItemListKey.PLAYLIST_SONG}
                     tableColumnsData={PLAYLIST_SONG_TABLE_COLUMNS}
                 />
