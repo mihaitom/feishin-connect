@@ -1,12 +1,14 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ALBUM_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { ListFilters } from '/@/renderer/features/shared/components/list-filters';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
+import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { GenreTarget, useGenreTarget, useSettingsStoreActions } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
@@ -20,6 +22,8 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
     const { t } = useTranslation();
     const target = useGenreTarget();
     const { setGenreBehavior } = useSettingsStoreActions();
+    const albumFilters = useAlbumListFilters();
+    const songFilters = useSongListFilters();
 
     const choice = useMemo(() => {
         return target === GenreTarget.ALBUM
@@ -27,9 +31,14 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
             : t('entity.track_other', { postProcess: 'titleCase' });
     }, [target, t]);
 
-    const handleToggleGenreTarget = () => {
+    const handleToggleGenreTarget = useCallback(() => {
+        // Clear all filter query states
+        albumFilters.clear();
+        songFilters.clear();
+
+        // Toggle the genre target
         setGenreBehavior(target === GenreTarget.ALBUM ? GenreTarget.TRACK : GenreTarget.ALBUM);
-    };
+    }, [target, setGenreBehavior, albumFilters, songFilters]);
 
     return (
         <Flex justify="space-between">

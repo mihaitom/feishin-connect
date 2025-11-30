@@ -6,6 +6,7 @@ import {
     parseAsString,
     useQueryState,
 } from 'nuqs';
+import { useCallback } from 'react';
 
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
 import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
@@ -15,9 +16,12 @@ import { SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 export const useSongListFilters = () => {
-    const { sortBy } = useSortByFilter<SongListSort>(SongListSort.NAME, ItemListKey.SONG);
+    const { setSortBy, sortBy } = useSortByFilter<SongListSort>(
+        SongListSort.NAME,
+        ItemListKey.SONG,
+    );
 
-    const { sortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.SONG);
+    const { setSortOrder, sortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.SONG);
 
     const { searchTerm, setSearchTerm } = useSearchTermFilter('');
 
@@ -47,6 +51,30 @@ export const useSongListFilters = () => {
         parseAsJson(customFiltersSchema),
     );
 
+    const clear = useCallback(() => {
+        setAlbumIds(null);
+        setArtistIds(null);
+        setCustom(null);
+        setFavorite(null);
+        setGenreId(null);
+        setMaxYear(null);
+        setMinYear(null);
+        setSearchTerm(null);
+        setSortBy(SongListSort.NAME);
+        setSortOrder(SortOrder.ASC);
+    }, [
+        setAlbumIds,
+        setArtistIds,
+        setCustom,
+        setFavorite,
+        setGenreId,
+        setMaxYear,
+        setMinYear,
+        setSearchTerm,
+        setSortBy,
+        setSortOrder,
+    ]);
+
     const query = {
         [FILTER_KEYS.SHARED.SEARCH_TERM]: searchTerm ?? undefined,
         [FILTER_KEYS.SHARED.SORT_BY]: sortBy ?? undefined,
@@ -61,6 +89,7 @@ export const useSongListFilters = () => {
     };
 
     return {
+        clear,
         query,
         setAlbumIds,
         setArtistIds,

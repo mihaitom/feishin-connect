@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import {
     parseAsArrayOf,
     parseAsBoolean,
@@ -15,9 +16,9 @@ import { AlbumListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 export const useAlbumListFilters = () => {
-    const { sortBy } = useSortByFilter<AlbumListSort>(AlbumListSort.NAME, ItemListKey.ALBUM);
+    const { sortBy, setSortBy } = useSortByFilter<AlbumListSort>(AlbumListSort.NAME, ItemListKey.ALBUM);
 
-    const { sortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.ALBUM);
+    const { sortOrder, setSortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.ALBUM);
 
     const { searchTerm, setSearchTerm } = useSearchTermFilter('');
 
@@ -54,6 +55,34 @@ export const useAlbumListFilters = () => {
         parseAsJson(customFiltersSchema),
     );
 
+    const clear = useCallback(() => {
+        setAlbumArtist(null);
+        setCompilation(null);
+        setCustom(null);
+        setFavorite(null);
+        setGenreId(null);
+        setHasRating(null);
+        setMaxYear(null);
+        setMinYear(null);
+        setRecentlyPlayed(null);
+        setSearchTerm(null);
+        setSortBy(AlbumListSort.NAME);
+        setSortOrder(SortOrder.ASC);
+    }, [
+        setAlbumArtist,
+        setCompilation,
+        setCustom,
+        setFavorite,
+        setGenreId,
+        setHasRating,
+        setMaxYear,
+        setMinYear,
+        setRecentlyPlayed,
+        setSearchTerm,
+        setSortBy,
+        setSortOrder,
+    ]);
+
     const query = {
         [FILTER_KEYS.ALBUM._CUSTOM]: custom ?? undefined,
         [FILTER_KEYS.ALBUM.ARTIST_IDS]: albumArtist ?? undefined,
@@ -70,6 +99,7 @@ export const useAlbumListFilters = () => {
     };
 
     return {
+        clear,
         query,
         setAlbumArtist,
         setCompilation,
