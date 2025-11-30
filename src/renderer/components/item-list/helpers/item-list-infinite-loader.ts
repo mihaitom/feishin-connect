@@ -93,28 +93,6 @@ export const useItemListInfiniteLoader = ({
         [serverId, itemType, query],
     );
 
-    // Reset the loaded pages when the query changes
-    useEffect(() => {
-        queryClient.setQueryData(dataQueryKey, (oldData: any) => {
-            if (!oldData) return oldData;
-            return {
-                ...oldData,
-                pagesLoaded: {},
-            };
-        });
-        lastFetchedPageRef.current = -1;
-        currentVisibleRangeRef.current = null;
-    }, [query, queryClient, dataQueryKey]);
-
-    const { data } = useQuery<{ data: unknown[]; pagesLoaded: Record<string, boolean> }>({
-        enabled: false,
-        initialData: getInitialData(totalItemCount),
-        queryFn: () => {
-            return getInitialData(totalItemCount);
-        },
-        queryKey: dataQueryKey,
-    });
-
     const fetchPage = useCallback(
         async (pageNumber: number) => {
             const startIndex = pageNumber * itemsPerPage;
@@ -124,8 +102,7 @@ export const useItemListInfiniteLoader = ({
                 ...query,
             };
 
-            const result = await queryClient.ensureQueryData({
-                gcTime: 1000 * 15,
+            const result = await queryClient.fetchQuery({
                 queryFn: async ({ signal }) => {
                     const result = await listQueryFn({
                         apiClientProps: { serverId, signal },
@@ -135,7 +112,6 @@ export const useItemListInfiniteLoader = ({
                     return result;
                 },
                 queryKey: queryKeys[getQueryKeyName(itemType)].list(serverId, queryParams),
-                staleTime: 1000 * 15,
             });
 
             const endIndex = startIndex + itemsPerPage;
@@ -166,6 +142,41 @@ export const useItemListInfiniteLoader = ({
         },
         [itemsPerPage, query, queryClient, serverId, dataQueryKey, listQueryFn, itemType],
     );
+
+    // Reset the loaded pages and refetch current page when the query changes
+    useEffect(() => {
+        // Capture the current visible range before resetting
+        const visibleRange = currentVisibleRangeRef.current;
+
+        // Determine which page to fetch based on current visible range
+        let pageToFetch = 0;
+        if (visibleRange) {
+            pageToFetch = Math.floor(visibleRange.startIndex / itemsPerPage);
+        }
+
+        // Reset the loaded pages
+        queryClient.setQueryData(dataQueryKey, (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+                ...oldData,
+                pagesLoaded: {},
+            };
+        });
+
+        lastFetchedPageRef.current = -1;
+        currentVisibleRangeRef.current = null;
+
+        fetchPage(pageToFetch);
+    }, [query, queryClient, dataQueryKey, fetchPage, itemsPerPage]);
+
+    const { data } = useQuery<{ data: unknown[]; pagesLoaded: Record<string, boolean> }>({
+        enabled: false,
+        initialData: getInitialData(totalItemCount),
+        queryFn: () => {
+            return getInitialData(totalItemCount);
+        },
+        queryKey: dataQueryKey,
+    });
 
     const onRangeChangedBase = useCallback(
         async (range: { startIndex: number; stopIndex: number }) => {
