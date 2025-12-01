@@ -1060,6 +1060,7 @@ export type ArtistInfoQuery = {
 
 export type FullLyricsMetadata = Omit<InternetProviderLyricResponse, 'id' | 'lyrics' | 'source'> & {
     lyrics: LyricsResponse;
+    offsetMs?: number;
     remote: boolean;
     source: string;
 };

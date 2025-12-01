@@ -25,7 +25,12 @@ import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
-import { FullLyricsMetadata, LyricSource, LyricsOverride } from '/@/shared/types/domain-types';
+import {
+    FullLyricsMetadata,
+    LyricSource,
+    LyricsOverride,
+    StructuredLyric,
+} from '/@/shared/types/domain-types';
 
 export const Lyrics = () => {
     const currentSong = usePlayerSong();
@@ -66,6 +71,19 @@ export const Lyrics = () => {
         }),
     );
 
+    // Get the current song's offset from persisted lyrics, default to 0
+    const currentOffsetMs = useMemo(() => {
+        if (Array.isArray(data)) {
+            if (data.length > 0) {
+                const selectedLyric = data[Math.min(index, data.length - 1)];
+                return selectedLyric.offsetMs ?? 0;
+            }
+        } else if (data?.offsetMs !== undefined) {
+            return data.offsetMs;
+        }
+        return 0;
+    }, [data, index]);
+
     const [lyrics, synced] = useMemo(() => {
         // If override data is available, use it
         if (override && overrideData) {
@@ -73,6 +91,7 @@ export const Lyrics = () => {
                 artist: override.artist,
                 lyrics: overrideData,
                 name: override.name,
+                offsetMs: currentOffsetMs,
                 remote: override.remote ?? true,
                 source: override.source,
             };
@@ -90,19 +109,20 @@ export const Lyrics = () => {
         }
 
         return [undefined, false];
-    }, [data, index, override, overrideData]);
+    }, [data, index, override, overrideData, currentOffsetMs]);
 
     const handleOnSearchOverride = useCallback((params: LyricsOverride) => {
         setOverride(params);
     }, []);
 
-    // Persist override lyrics to cache
+    // Persist override lyrics to cache with current offset
     useEffect(() => {
         if (override && overrideData && currentSong) {
             const persistedLyrics: FullLyricsMetadata = {
                 artist: override.artist,
                 lyrics: overrideData,
                 name: override.name,
+                offsetMs: currentOffsetMs,
                 remote: override.remote ?? true,
                 source: override.source,
             };
@@ -112,7 +132,42 @@ export const Lyrics = () => {
                 persistedLyrics,
             );
         }
-    }, [override, overrideData, currentSong]);
+    }, [override, overrideData, currentSong, currentOffsetMs]);
+
+    // Callback to update the song's persisted offset
+    const handleUpdateOffset = useCallback(
+        (offsetMs: number) => {
+            if (!currentSong) return;
+
+            queryClient.setQueryData(
+                queryKeys.songs.lyrics(currentSong._serverId, { songId: currentSong.id }),
+                (prev: FullLyricsMetadata | null | StructuredLyric[] | undefined) => {
+                    if (!prev) return prev;
+
+                    // Handle array of structured lyrics
+                    if (Array.isArray(prev)) {
+                        if (prev.length > 0) {
+                            const selectedIndex = Math.min(index, prev.length - 1);
+                            const updated = [...prev];
+                            updated[selectedIndex] = {
+                                ...updated[selectedIndex],
+                                offsetMs,
+                            };
+                            return updated;
+                        }
+                        return prev;
+                    }
+
+                    // Handle single lyrics object
+                    return {
+                        ...prev,
+                        offsetMs,
+                    };
+                },
+            );
+        },
+        [currentSong, index],
+    );
 
     // const handleOnResetLyric = useCallback(() => {
     //     setOverride(undefined);
@@ -242,6 +297,7 @@ export const Lyrics = () => {
                                 {synced ? (
                                     <SynchronizedLyrics
                                         {...(lyrics as SynchronizedLyricsProps)}
+                                        offsetMs={currentOffsetMs}
                                         translatedLyrics={showTranslation ? translatedLyrics : null}
                                     />
                                 ) : (
@@ -258,6 +314,7 @@ export const Lyrics = () => {
                     <LyricsActions
                         index={index}
                         languages={languages}
+                        offsetMs={currentOffsetMs}
                         onRemoveLyric={handleOnRemoveLyric}
                         onSearchOverride={handleOnSearchOverride}
                         onTranslateLyric={
@@ -265,6 +322,7 @@ export const Lyrics = () => {
                                 ? handleOnTranslateLyric
                                 : undefined
                         }
+                        onUpdateOffset={handleUpdateOffset}
                         setIndex={setIndex}
                     />
                 </div>

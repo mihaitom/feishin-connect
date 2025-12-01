@@ -2,12 +2,7 @@ import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 
 import { openLyricSearchModal } from '/@/renderer/features/lyrics/components/lyrics-search-form';
-import {
-    useLyricsSettings,
-    usePlayerSong,
-    useSettingsStore,
-    useSettingsStoreActions,
-} from '/@/renderer/store';
+import { useLyricsSettings, usePlayerSong } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
@@ -20,9 +15,11 @@ import { LyricsOverride } from '/@/shared/types/domain-types';
 interface LyricsActionsProps {
     index: number;
     languages: { label: string; value: string }[];
+    offsetMs: number;
     onRemoveLyric: () => void;
     onSearchOverride: (params: LyricsOverride) => void;
     onTranslateLyric?: () => void;
+    onUpdateOffset: (offsetMs: number) => void;
     setIndex: (idx: number) => void;
     synced?: boolean;
 }
@@ -30,23 +27,19 @@ interface LyricsActionsProps {
 export const LyricsActions = ({
     index,
     languages,
+    offsetMs,
     onRemoveLyric,
     onSearchOverride,
     onTranslateLyric,
+    onUpdateOffset,
     setIndex,
 }: LyricsActionsProps) => {
     const { t } = useTranslation();
     const currentSong = usePlayerSong();
-    const { setSettings } = useSettingsStoreActions();
-    const { delayMs, sources } = useLyricsSettings();
+    const { sources } = useLyricsSettings();
 
     const handleLyricOffset = (e: number | string) => {
-        setSettings({
-            lyrics: {
-                ...useSettingsStore.getState().lyrics,
-                delayMs: Number(e),
-            },
-        });
+        onUpdateOffset(Number(e));
     };
 
     const isActionsDisabled = !currentSong;
@@ -86,7 +79,7 @@ export const LyricsActions = ({
                 <ActionIcon
                     aria-label="Decrease lyric offset"
                     icon="minus"
-                    onClick={() => handleLyricOffset(delayMs - 50)}
+                    onClick={() => handleLyricOffset(offsetMs - 50)}
                     tooltip={{
                         label: t('common.slower', { postProcess: 'sentenceCase' }),
                         openDelay: 0,
@@ -101,14 +94,14 @@ export const LyricsActions = ({
                         aria-label="Lyric offset"
                         onChange={handleLyricOffset}
                         styles={{ input: { textAlign: 'center' } }}
-                        value={delayMs || 0}
+                        value={offsetMs || 0}
                         width={70}
                     />
                 </Tooltip>
                 <ActionIcon
                     aria-label="Increase lyric offset"
                     icon="plus"
-                    onClick={() => handleLyricOffset(delayMs + 50)}
+                    onClick={() => handleLyricOffset(offsetMs + 50)}
                     tooltip={{
                         label: t('common.faster', { postProcess: 'sentenceCase' }),
                         openDelay: 0,

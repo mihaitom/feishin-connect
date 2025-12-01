@@ -21,6 +21,7 @@ const mpris = isElectron() && utils?.isLinux() ? window.api.mpris : null;
 
 export interface SynchronizedLyricsProps extends Omit<FullLyricsMetadata, 'lyrics'> {
     lyrics: SynchronizedLyricsArray;
+    offsetMs?: number;
     style?: React.CSSProperties;
     translatedLyrics?: null | string;
 }
@@ -29,6 +30,7 @@ export const SynchronizedLyrics = ({
     artist,
     lyrics,
     name,
+    offsetMs,
     remote,
     source,
     style,
@@ -39,6 +41,8 @@ export const SynchronizedLyrics = ({
     const { mediaSeekToTimestamp } = usePlayerActions();
     const status = usePlayerStatus();
     const timestamp = usePlayerTimestamp();
+
+    const effectiveOffsetMs = offsetMs ?? 0;
 
     const handleSeek = useCallback(
         (time: number) => {
@@ -66,7 +70,7 @@ export const SynchronizedLyrics = ({
     // whether to proceed or stop
     const timerEpoch = useRef(0);
 
-    const delayMsRef = useRef(settings.delayMs);
+    const delayMsRef = useRef(effectiveOffsetMs);
     const followRef = useRef(settings.follow);
     const userScrollingRef = useRef(false);
     const scrollTimeoutRef = useRef<null | ReturnType<typeof setTimeout>>(null);
@@ -195,7 +199,8 @@ export const SynchronizedLyrics = ({
         // This handler is used to deal with changes to the current delay. If the offset
         // changes, we should immediately stop the current listening set and calculate
         // the correct one using the new offset. Afterwards, timing can be calculated like normal
-        const changed = delayMsRef.current !== settings.delayMs;
+        const newOffset = offsetMs ?? 0;
+        const changed = delayMsRef.current !== newOffset;
 
         if (!changed) {
             return;
@@ -205,11 +210,11 @@ export const SynchronizedLyrics = ({
             clearTimeout(lyricTimer.current);
         }
 
-        delayMsRef.current = settings.delayMs;
+        delayMsRef.current = newOffset;
 
         // Use the current timestamp from player events
         setCurrentLyric(timestamp * 1000 + delayMsRef.current);
-    }, [setCurrentLyric, settings.delayMs, timestamp]);
+    }, [setCurrentLyric, offsetMs, timestamp]);
 
     useEffect(() => {
         // This handler is used specifically for dealing with seeking and progress updates.
