@@ -116,8 +116,15 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
             merge: (persistedState, currentState) => {
                 return merge(currentState, persistedState);
             },
+            migrate: (persistedState, version) => {
+                if (version <= 2) {
+                    return {} as AppState;
+                }
+
+                return persistedState;
+            },
             name: 'store_app',
-            version: 2,
+            version: 3,
         },
     ),
 );

@@ -1845,9 +1845,8 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                 return merge(currentState, persistedState);
             },
             migrate: (persistedState, version) => {
-                if (version === 1) {
-                    // Replace the old player store state with the new one
-                    persistedState = { ...initialState };
+                if (version <= 3) {
+                    return {} as PlayerState;
                 }
 
                 return persistedState;
@@ -1913,7 +1912,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                 return filteredState;
             },
             storage: createJSONStorage(() => idbStateStorage),
-            version: 2,
+            version: 3,
         },
     ),
 );

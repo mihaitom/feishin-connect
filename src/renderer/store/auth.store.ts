@@ -5,9 +5,6 @@ import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createWithEqualityFn } from 'zustand/traditional';
 
-import { useAlbumArtistListDataStore } from '/@/renderer/store/album-artist-list-data.store';
-import { useAlbumListDataStore } from '/@/renderer/store/album-list-data.store';
-import { useListStore } from '/@/renderer/store/list.store';
 import { ServerListItem, ServerListItemWithCredential } from '/@/shared/types/domain-types';
 
 export interface AuthSlice extends AuthState {
@@ -54,15 +51,6 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
                     setCurrentServer: (server) => {
                         set((state) => {
                             state.currentServer = server;
-
-                            if (server) {
-                                // Reset list filters
-                                useListStore.getState()._actions.resetFilter();
-
-                                // Reset persisted grid list stores
-                                useAlbumListDataStore.getState().actions.setItemData([]);
-                                useAlbumArtistListDataStore.getState().actions.setItemData([]);
-                            }
                         });
                     },
                     setMusicFolderId: (musicFolderId: string[] | undefined) => {

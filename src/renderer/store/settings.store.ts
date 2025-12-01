@@ -1308,10 +1308,14 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
+                if (version <= 11) {
+                    return {};
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 11,
+            version: 12,
         },
     ),
 );
