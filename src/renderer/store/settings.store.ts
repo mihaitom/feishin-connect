@@ -771,7 +771,7 @@ const initialState: SettingsState = {
             },
         },
         [LibraryItem.ALBUM]: {
-            display: ListDisplayType.TABLE,
+            display: ListDisplayType.GRID,
             grid: {
                 itemGap: 'md',
                 itemsPerRow: 6,
@@ -819,7 +819,7 @@ const initialState: SettingsState = {
             },
         },
         [LibraryItem.ALBUM_ARTIST]: {
-            display: ListDisplayType.TABLE,
+            display: ListDisplayType.GRID,
             grid: {
                 itemGap: 'md',
                 itemsPerRow: 6,
@@ -840,14 +840,22 @@ const initialState: SettingsState = {
             pagination: ListPaginationType.INFINITE,
             table: {
                 autoFitColumns: false,
-                columns: ALBUM_ARTIST_TABLE_COLUMNS.map((column) => ({
-                    align: column.align,
-                    autoSize: column.autoSize,
-                    id: column.value,
-                    isEnabled: column.isEnabled,
-                    pinned: column.pinned,
-                    width: column.width,
-                })),
+                columns: pickTableColumns({
+                    autoSizeColumns: [TableColumn.TITLE],
+                    columns: ALBUM_ARTIST_TABLE_COLUMNS,
+                    enabledColumns: [
+                        TableColumn.ROW_INDEX,
+                        TableColumn.IMAGE,
+                        TableColumn.TITLE,
+                        TableColumn.ALBUM_COUNT,
+                        TableColumn.SONG_COUNT,
+                        TableColumn.PLAY_COUNT,
+                        TableColumn.LAST_PLAYED,
+                        TableColumn.USER_FAVORITE,
+                        TableColumn.USER_RATING,
+                        TableColumn.ACTIONS,
+                    ],
+                }),
                 enableAlternateRowColors: false,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
@@ -856,7 +864,7 @@ const initialState: SettingsState = {
             },
         },
         [LibraryItem.ARTIST]: {
-            display: ListDisplayType.TABLE,
+            display: ListDisplayType.GRID,
             grid: {
                 itemGap: 'md',
                 itemsPerRow: 6,
@@ -877,14 +885,22 @@ const initialState: SettingsState = {
             pagination: ListPaginationType.INFINITE,
             table: {
                 autoFitColumns: true,
-                columns: ALBUM_ARTIST_TABLE_COLUMNS.map((column) => ({
-                    align: column.align,
-                    autoSize: column.autoSize,
-                    id: column.value,
-                    isEnabled: column.isEnabled,
-                    pinned: column.pinned,
-                    width: column.width,
-                })),
+                columns: pickTableColumns({
+                    autoSizeColumns: [TableColumn.TITLE],
+                    columns: ALBUM_ARTIST_TABLE_COLUMNS,
+                    enabledColumns: [
+                        TableColumn.ROW_INDEX,
+                        TableColumn.IMAGE,
+                        TableColumn.TITLE,
+                        TableColumn.ALBUM_COUNT,
+                        TableColumn.SONG_COUNT,
+                        TableColumn.PLAY_COUNT,
+                        TableColumn.LAST_PLAYED,
+                        TableColumn.USER_FAVORITE,
+                        TableColumn.USER_RATING,
+                        TableColumn.ACTIONS,
+                    ],
+                }),
                 enableAlternateRowColors: false,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
@@ -920,7 +936,7 @@ const initialState: SettingsState = {
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
             table: {
-                autoFitColumns: true,
+                autoFitColumns: false,
                 columns: GENRE_TABLE_COLUMNS.map((column) => ({
                     align: column.align,
                     autoSize: column.autoSize,
@@ -952,15 +968,18 @@ const initialState: SettingsState = {
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
             table: {
-                autoFitColumns: true,
-                columns: PLAYLIST_TABLE_COLUMNS.map((column) => ({
-                    align: column.align,
-                    autoSize: column.autoSize,
-                    id: column.value,
-                    isEnabled: column.isEnabled,
-                    pinned: column.pinned,
-                    width: column.width,
-                })),
+                autoFitColumns: false,
+                columns: pickTableColumns({
+                    autoSizeColumns: [TableColumn.TITLE],
+                    columns: PLAYLIST_TABLE_COLUMNS,
+                    enabledColumns: [
+                        TableColumn.ROW_INDEX,
+                        TableColumn.TITLE,
+                        TableColumn.DURATION,
+                        TableColumn.SONG_COUNT,
+                        TableColumn.ACTIONS,
+                    ],
+                }),
                 enableAlternateRowColors: false,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
@@ -1049,7 +1068,7 @@ const initialState: SettingsState = {
                 }),
             },
             itemsPerPage: 100,
-            pagination: ListPaginationType.INFINITE,
+            pagination: ListPaginationType.PAGINATED,
             table: {
                 autoFitColumns: false,
                 columns: SONG_TABLE_COLUMNS.map((column) => ({
