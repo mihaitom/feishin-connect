@@ -43,7 +43,6 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
 
     const isFetching = useIsPlayerFetching();
     const tableRef = useRef<ItemListHandle>(null);
-    const previousSongCountRef = useRef<number>(0);
     const mergedRef = useMergedRef(ref, tableRef);
     const { getQueue } = usePlayerActions();
     const queueType = usePlayerQueueType();
@@ -52,7 +51,6 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
 
     const [data, setData] = useState<QueueSong[]>([]);
     const [groups, setGroups] = useState<TableGroupHeader[]>([]);
-    const [containerKey, setContainerKey] = useState<string>(() => Math.random().toString(36));
 
     useEffect(() => {
         const setQueue = () => {
@@ -109,17 +107,6 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
         };
     }, [getQueue, queueType, tableRef]);
 
-    useEffect(() => {
-        const currentCount = data.length;
-        const previousCount = previousSongCountRef.current;
-
-        if (previousCount === 0 && currentCount > 0) {
-            setContainerKey(Math.random().toString(36));
-        }
-
-        previousSongCountRef.current = currentCount;
-    }, [data.length]);
-
     const filteredData: QueueSong[] = useMemo(() => {
         if (debouncedSearchTerm) {
             const searched = searchLibraryItems(data, debouncedSearchTerm, LibraryItem.SONG);
@@ -164,7 +151,7 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
     ]);
 
     return (
-        <div className={styles.container} key={containerKey} ref={containerFocusRef}>
+        <div className={styles.container} ref={containerFocusRef}>
             <LoadingOverlay pos="absolute" visible={isFetching} />
             <ItemTableList
                 activeRowId={currentSongUniqueId}

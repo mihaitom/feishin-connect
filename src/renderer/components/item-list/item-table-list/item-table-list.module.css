@@ -26,6 +26,10 @@
     overflow: hidden;
 }
 
+.item-table-grid-container > div[role='grid'] {
+    height: unset !important;
+}
+
 .item-table-pinned-rows-container {
     position: relative;
     display: flex;
