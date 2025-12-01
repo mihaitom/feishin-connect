@@ -31,28 +31,39 @@ export function MpvPlayer() {
 
     const [localPlayerStatus, setLocalPlayerStatus] = useState<PlayerStatus>(status);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const fadeAndSetStatus = useCallback(
         async (startVolume: number, endVolume: number, duration: number, status: PlayerStatus) => {
-            if (isTransitioning) {
-                return setLocalPlayerStatus(status);
+            // Cancel any in-progress fade
+            if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
             }
+
+            // Set initial volume immediately to ensure we start from the correct position
+            // This is especially important when cancelling a previous fade
+            playerRef.current?.setVolume(startVolume);
 
             const steps = duration / PLAY_PAUSE_FADE_INTERVAL;
             const volumeStep = (endVolume - startVolume) / steps;
             let currentStep = 0;
 
-            const promise = new Promise((resolve) => {
-                const interval = setInterval(() => {
+            const promise = new Promise<void>((resolve) => {
+                fadeIntervalRef.current = setInterval(() => {
                     currentStep++;
                     const newVolume = startVolume + volumeStep * currentStep;
 
                     playerRef.current?.setVolume(newVolume);
 
                     if (currentStep >= steps) {
-                        clearInterval(interval);
-                        setIsTransitioning(false);
-                        resolve(true);
+                        if (fadeIntervalRef.current) {
+                            clearInterval(fadeIntervalRef.current);
+                            fadeIntervalRef.current = null;
+                        }
+                        // Ensure final volume is exactly the target
+                        playerRef.current?.setVolume(endVolume);
+                        resolve();
                     }
                 }, PLAY_PAUSE_FADE_INTERVAL);
             });
@@ -65,7 +76,7 @@ export function MpvPlayer() {
                 await promise;
             }
         },
-        [isTransitioning],
+        [],
     );
 
     const onProgress = useCallback(() => {
@@ -106,8 +117,18 @@ export function MpvPlayer() {
                 playerRef.current?.setVolume(volume);
             },
         },
-        [volume, isTransitioning, fadeAndSetStatus],
+        [volume, fadeAndSetStatus],
     );
+
+    // Cleanup fade interval on unmount
+    useEffect(() => {
+        return () => {
+            if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current);
+                fadeIntervalRef.current = null;
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (localPlayerStatus !== PlayerStatus.PLAYING) {
