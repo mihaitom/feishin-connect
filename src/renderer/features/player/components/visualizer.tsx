@@ -20,10 +20,13 @@ export const Visualizer = () => {
                 audioCtx: context,
                 connectSpeakers: false,
                 gradient: 'prism',
-                mode: 4,
+                ledBars: true,
+                mode: 8,
                 overlay: true,
                 showBgColor: false,
                 showPeaks: false,
+                showScaleX: false,
+                showScaleY: false,
                 smoothing: 0.8,
             });
             setMotion(audioMotion);

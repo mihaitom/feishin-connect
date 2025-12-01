@@ -59,6 +59,48 @@ export const SidebarSettings = () => {
             }),
             title: t('setting.sidebarCollapsedNavigation', { postProcess: 'sentenceCase' }),
         },
+        {
+            control: (
+                <Switch
+                    aria-label="Show lyrics in attached play queue"
+                    defaultChecked={settings.showLyricsInSidebar}
+                    onChange={(e) => {
+                        setSettings({
+                            general: {
+                                ...settings,
+                                showLyricsInSidebar: e.currentTarget.checked,
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.showLyricsInSidebar', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            title: t('setting.showLyricsInSidebar', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Switch
+                    aria-label="Show visualizer in sidebar"
+                    defaultChecked={settings.showVisualizerInSidebar}
+                    onChange={(e) => {
+                        setSettings({
+                            general: {
+                                ...settings,
+                                showVisualizerInSidebar: e.currentTarget.checked,
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.showVisualizerInSidebar', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            title: t('setting.showVisualizerInSidebar', { postProcess: 'sentenceCase' }),
+        },
     ];
 
     return (

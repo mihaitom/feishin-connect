@@ -46,27 +46,6 @@ export const LyricSettings = () => {
         {
             control: (
                 <Switch
-                    aria-label="Show lyrics in attached play queue"
-                    defaultChecked={settings.showLyricsInSidebar}
-                    onChange={(e) => {
-                        setSettings({
-                            lyrics: {
-                                ...settings,
-                                showLyricsInSidebar: e.currentTarget.checked,
-                            },
-                        });
-                    }}
-                />
-            ),
-            description: t('setting.showLyricsInSidebar', {
-                context: 'description',
-                postProcess: 'sentenceCase',
-            }),
-            title: t('setting.showLyricsInSidebar', { postProcess: 'sentenceCase' }),
-        },
-        {
-            control: (
-                <Switch
                     aria-label="Prefer local lyrics"
                     defaultChecked={settings.preferLocalLyrics}
                     onChange={(e) => {
