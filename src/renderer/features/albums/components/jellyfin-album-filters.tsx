@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import debounce from 'lodash/debounce';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,13 +7,12 @@ import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
-import { AlbumListFilter } from '/@/renderer/store';
+import { AlbumListFilter, useCurrentServerId } from '/@/renderer/store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
-import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
 import {
     AlbumArtistListSort,
@@ -27,14 +25,11 @@ interface JellyfinAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
     disableArtistFilter?: boolean;
     onFilterChange: (filters: AlbumListFilter) => void;
-    serverId: string;
 }
 
-export const JellyfinAlbumFilters = ({
-    disableArtistFilter,
-    serverId,
-}: JellyfinAlbumFiltersProps) => {
+export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFiltersProps) => {
     const { t } = useTranslation();
+    const serverId = useCurrentServerId();
 
     const {
         query,
@@ -110,21 +105,50 @@ export const JellyfinAlbumFilters = ({
         setCompilation,
     ]);
 
-    const handleMinYearFilter = debounce((e: number | string) => {
-        if (typeof e === 'number' && (e < 1700 || e > 2300)) return;
-        const year = e === '' ? undefined : (e as number);
-        setMinYear(year ?? null);
-    }, 500);
+    const handleMinYearFilter = useMemo(
+        () => (e: number | string) => {
+            // Handle empty string, null, undefined, or invalid numbers as clearing
+            if (e === '' || e === null || e === undefined || isNaN(Number(e))) {
+                setMinYear(null);
+                return;
+            }
 
-    const handleMaxYearFilter = debounce((e: number | string) => {
-        if (typeof e === 'number' && (e < 1700 || e > 2300)) return;
-        const year = e === '' ? undefined : (e as number);
-        setMaxYear(year ?? null);
-    }, 500);
+            const year = typeof e === 'number' ? e : Number(e);
+            // If it's a valid number within range, set it; otherwise clear
+            if (!isNaN(year) && isFinite(year) && year >= 1700 && year <= 2300) {
+                setMinYear(year);
+            } else {
+                setMinYear(null);
+            }
+        },
+        [setMinYear],
+    );
 
-    const handleGenresFilter = debounce((e: string[] | undefined) => {
-        setGenreId(e ?? null);
-    }, 250);
+    const handleMaxYearFilter = useMemo(
+        () => (e: number | string) => {
+            // Handle empty string, null, undefined, or invalid numbers as clearing
+            if (e === '' || e === null || e === undefined || isNaN(Number(e))) {
+                setMaxYear(null);
+                return;
+            }
+
+            const year = typeof e === 'number' ? e : Number(e);
+            // If it's a valid number within range, set it; otherwise clear
+            if (!isNaN(year) && isFinite(year) && year >= 1700 && year <= 2300) {
+                setMaxYear(year);
+            } else {
+                setMaxYear(null);
+            }
+        },
+        [setMaxYear],
+    );
+
+    const handleGenresFilter = useMemo(
+        () => (e: string[] | undefined) => {
+            setGenreId(e && e.length > 0 ? e : null);
+        },
+        [setGenreId],
+    );
 
     const albumArtistListQuery = useQuery(
         artistsQueries.albumArtistList({
@@ -154,24 +178,46 @@ export const JellyfinAlbumFilters = ({
         setAlbumArtist(e ?? null);
     };
 
-    const handleTagFilter = debounce((e: string[] | undefined) => {
-        setCustom((prev) => ({
-            ...prev,
-            [e?.join('|') || '']: e?.join('|') || undefined,
-        }));
-    }, 250);
+    const handleTagFilter = useMemo(
+        () => (e: string[] | undefined) => {
+            setCustom((prev) => {
+                if (!prev) {
+                    return e && e.length > 0 ? { [e.join('|')]: e.join('|') } : null;
+                }
+
+                if (!e || e.length === 0) {
+                    // Remove all tag-related properties (they use '|' joined keys)
+                    const rest = Object.fromEntries(
+                        Object.entries(prev).filter(([key]) => !key.includes('|')),
+                    );
+
+                    return Object.keys(rest).length === 0 ? null : rest;
+                }
+
+                // Remove old tag entries and add new one
+                const rest = Object.fromEntries(
+                    Object.entries(prev).filter(([key]) => !key.includes('|')),
+                );
+                const tagKey = e.join('|');
+
+                return {
+                    ...rest,
+                    [tagKey]: tagKey,
+                };
+            });
+        },
+        [setCustom],
+    );
 
     return (
         <Stack p="0.8rem">
             {yesNoFilter.map((filter) => (
-                <Group justify="space-between" key={`jf-filter-${filter.label}`}>
-                    <Text>{filter.label}</Text>
-                    <YesNoSelect
-                        onChange={filter.onChange}
-                        size="xs"
-                        value={filter.value ?? undefined}
-                    />
-                </Group>
+                <YesNoSelect
+                    key={`jf-filter-${filter.label}`}
+                    label={filter.label}
+                    onChange={filter.onChange}
+                    value={filter.value ?? undefined}
+                />
             ))}
             <Divider my="0.5rem" />
             <Group grow>
@@ -181,7 +227,7 @@ export const JellyfinAlbumFilters = ({
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    onChange={(e) => handleMinYearFilter(e)}
+                    onBlur={(e) => handleMinYearFilter(e.currentTarget.value)}
                     required={!!query.minYear}
                 />
                 <NumberInput
@@ -190,49 +236,40 @@ export const JellyfinAlbumFilters = ({
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    onChange={(e) => handleMaxYearFilter(e)}
+                    onBlur={(e) => handleMaxYearFilter(e.currentTarget.value)}
                     required={!!query.minYear}
                 />
             </Group>
-            <Group grow>
-                <MultiSelectWithInvalidData
-                    clearable
-                    data={genreList}
-                    defaultValue={query.genreId ?? undefined}
-                    label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
-                    onChange={handleGenresFilter}
-                    searchable
-                />
-            </Group>
+            <MultiSelectWithInvalidData
+                clearable
+                data={genreList}
+                defaultValue={query.genreIds ?? undefined}
+                label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
+                onChange={(e) => handleGenresFilter(e)}
+                searchable
+            />
 
-            <Group grow>
+            <MultiSelectWithInvalidData
+                clearable
+                data={selectableAlbumArtists}
+                defaultValue={query.artistIds ?? undefined}
+                disabled={disableArtistFilter}
+                label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
+                limit={300}
+                onChange={handleAlbumArtistFilter}
+                rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
+                searchable
+            />
+            {tagsQuery.data?.boolTags && tagsQuery.data.boolTags.length > 0 && (
                 <MultiSelectWithInvalidData
                     clearable
-                    data={selectableAlbumArtists}
-                    defaultValue={query.artistIds ?? undefined}
-                    disabled={disableArtistFilter}
-                    label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
-                    limit={300}
-                    onChange={handleAlbumArtistFilter}
-                    placeholder="Type to search for an artist"
-                    rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
+                    data={tagsQuery.data.boolTags}
+                    defaultValue={query._custom?.[tagsQuery.data.boolTags.join('|')] ?? undefined}
+                    label={t('common.tags', { postProcess: 'sentenceCase' })}
+                    onChange={handleTagFilter}
                     searchable
+                    width={250}
                 />
-            </Group>
-            {tagsQuery.data?.boolTags && tagsQuery.data.boolTags.length > 0 && (
-                <Group grow>
-                    <MultiSelectWithInvalidData
-                        clearable
-                        data={tagsQuery.data.boolTags}
-                        defaultValue={
-                            query._custom?.[tagsQuery.data.boolTags.join('|')] ?? undefined
-                        }
-                        label={t('common.tags', { postProcess: 'sentenceCase' })}
-                        onChange={handleTagFilter}
-                        searchable
-                        width={250}
-                    />
-                </Group>
             )}
         </Stack>
     );

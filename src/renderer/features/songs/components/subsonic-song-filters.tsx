@@ -1,5 +1,4 @@
-import debounce from 'lodash/debounce';
-import { useMemo } from 'react';
+import { ChangeEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
@@ -9,8 +8,8 @@ import { SongListFilter } from '/@/renderer/store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
+import { Switch } from '/@/shared/components/switch/switch';
 import { Text } from '/@/shared/components/text/text';
-import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
 
 interface SubsonicSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
@@ -32,26 +31,33 @@ export const SubsonicSongFilters = ({ customFilters }: SubsonicSongFiltersProps)
         }));
     }, [genreListQuery.data]);
 
-    const handleGenresFilter = debounce((e: null | string) => {
-        setGenreId(e ? [e] : null);
-    }, 250);
-
-    const toggleFilters = [
-        {
-            label: t('filter.isFavorited', { postProcess: 'sentenceCase' }),
-            onChange: (favorite: boolean | undefined) => {
-                setFavorite(favorite ?? null);
-            },
-            value: query.favorite,
+    const handleGenresFilter = useMemo(
+        () => (e: null | string) => {
+            setGenreId(e ? [e] : null);
         },
-    ];
+        [setGenreId],
+    );
+
+    const toggleFilters = useMemo(
+        () => [
+            {
+                label: t('filter.isFavorited', { postProcess: 'sentenceCase' }),
+                onChange: (e: ChangeEvent<HTMLInputElement>) => {
+                    const favoriteValue = e.target.checked ? true : undefined;
+                    setFavorite(favoriteValue ?? null);
+                },
+                value: query.favorite,
+            },
+        ],
+        [t, query.favorite, setFavorite],
+    );
 
     return (
         <Stack p="0.8rem">
             {toggleFilters.map((filter) => (
                 <Group justify="space-between" key={`ss-filter-${filter.label}`}>
                     <Text>{filter.label}</Text>
-                    <YesNoSelect onChange={filter.onChange} size="xs" value={filter.value} />
+                    <Switch checked={filter.value ?? false} onChange={filter.onChange} />
                 </Group>
             ))}
             <Divider my="0.5rem" />

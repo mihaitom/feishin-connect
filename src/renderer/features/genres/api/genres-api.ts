@@ -14,7 +14,7 @@ import {
 export const genresQueries = {
     list: (args: QueryHookArgs<GenreListQuery>) => {
         return queryOptions({
-            gcTime: 1000 * 5,
+            gcTime: 1000 * 60 * 60,
             queryFn: ({ signal }) => {
                 return api.controller.getGenreList({
                     apiClientProps: { serverId: args.serverId, signal },
@@ -22,6 +22,7 @@ export const genresQueries = {
                 });
             },
             queryKey: queryKeys.genres.list(args.serverId, args.query),
+            staleTime: 1000 * 60 * 60,
             ...args.options,
         });
     },

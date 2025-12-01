@@ -1,14 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import debounce from 'lodash/debounce';
-import { parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from 'nuqs';
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
+import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
-import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
-import { AlbumListFilter } from '/@/renderer/store';
+import { useCurrentServerId } from '/@/renderer/store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
@@ -21,29 +19,15 @@ import { AlbumArtistListSort, GenreListSort, SortOrder } from '/@/shared/types/d
 
 interface SubsonicAlbumFiltersProps {
     disableArtistFilter?: boolean;
-    onFilterChange: (filters: AlbumListFilter) => void;
-    serverId: string;
 }
 
-export const SubsonicAlbumFilters = ({
-    disableArtistFilter,
-    onFilterChange,
-    serverId,
-}: SubsonicAlbumFiltersProps) => {
+export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFiltersProps) => {
     const { t } = useTranslation();
 
-    const [favorite, setFavorite] = useQueryState(FILTER_KEYS.ALBUM.FAVORITE, parseAsBoolean);
+    const serverId = useCurrentServerId();
 
-    const [minYear, setMinYear] = useQueryState(FILTER_KEYS.ALBUM.MIN_YEAR, parseAsInteger);
-
-    const [maxYear, setMaxYear] = useQueryState(FILTER_KEYS.ALBUM.MAX_YEAR, parseAsInteger);
-
-    const [genreId, setGenreId] = useQueryState(FILTER_KEYS.ALBUM.GENRE_ID, parseAsString);
-
-    const [artistIds, setArtistIds] = useQueryState(
-        FILTER_KEYS.ALBUM.ARTIST_IDS,
-        parseAsArrayOf(parseAsString),
-    );
+    const { query, setAlbumArtist, setFavorite, setGenreId, setMaxYear, setMinYear } =
+        useAlbumListFilters();
 
     const [albumArtistSearchTerm, setAlbumArtistSearchTerm] = useState<string>('');
 
@@ -73,13 +57,12 @@ export const SubsonicAlbumFilters = ({
         }));
     }, [items]);
 
-    const handleAlbumArtistFilter = (e: null | string[]) => {
-        setArtistIds(e ?? null);
-        const updatedFilters: Partial<AlbumListFilter> = {
-            artistIds: e?.length ? e : undefined,
-        };
-        onFilterChange(updatedFilters as AlbumListFilter);
-    };
+    const handleAlbumArtistFilter = useMemo(
+        () => (e: null | string[]) => {
+            setAlbumArtist(e ?? null);
+        },
+        [setAlbumArtist],
+    );
 
     const genreListQuery = useQuery(
         genresQueries.list({
@@ -104,43 +87,64 @@ export const SubsonicAlbumFilters = ({
         }));
     }, [genreListQuery.data]);
 
-    const handleGenresFilter = debounce((e: null | string) => {
-        setGenreId(e ?? null);
-        const updatedFilters: Partial<AlbumListFilter> = {
-            genreIds: e ? [e] : undefined,
-        };
-        onFilterChange(updatedFilters as AlbumListFilter);
-    }, 250);
-
-    const toggleFilters = [
-        {
-            label: t('filter.isFavorited', { postProcess: 'sentenceCase' }),
-            onChange: (e: ChangeEvent<HTMLInputElement>) => {
-                const favoriteValue = e.target.checked ? true : undefined;
-                setFavorite(favoriteValue ?? null);
-                const updatedFilters: Partial<AlbumListFilter> = {
-                    favorite: favoriteValue,
-                };
-                onFilterChange(updatedFilters as AlbumListFilter);
-            },
-            value: favorite,
+    const handleGenresFilter = useMemo(
+        () => (e: null | string) => {
+            setGenreId(e ? [e] : null);
         },
-    ];
+        [setGenreId],
+    );
 
-    const handleYearFilter = debounce((e: number | string, type: 'max' | 'min') => {
-        const year = e ? Number(e) : undefined;
+    const toggleFilters = useMemo(
+        () => [
+            {
+                label: t('filter.isFavorited', { postProcess: 'sentenceCase' }),
+                onChange: (e: ChangeEvent<HTMLInputElement>) => {
+                    const favoriteValue = e.target.checked ? true : undefined;
+                    setFavorite(favoriteValue ?? null);
+                },
+                value: query.favorite,
+            },
+        ],
+        [t, query.favorite, setFavorite],
+    );
 
-        if (type === 'min') {
-            setMinYear(year ?? null);
-        } else {
-            setMaxYear(year ?? null);
-        }
+    const handleMinYearFilter = useMemo(
+        () => (e: number | string) => {
+            // Handle empty string, null, undefined, or invalid numbers as clearing
+            if (e === '' || e === null || e === undefined || isNaN(Number(e))) {
+                setMinYear(null);
+                return;
+            }
 
-        const updatedFilters: Partial<AlbumListFilter> = {
-            [type === 'min' ? 'minYear' : 'maxYear']: year,
-        };
-        onFilterChange(updatedFilters as AlbumListFilter);
-    }, 500);
+            const year = typeof e === 'number' ? e : Number(e);
+            // If it's a valid number, set it; otherwise clear
+            if (!isNaN(year) && isFinite(year) && year > 0) {
+                setMinYear(year);
+            } else {
+                setMinYear(null);
+            }
+        },
+        [setMinYear],
+    );
+
+    const handleMaxYearFilter = useMemo(
+        () => (e: number | string) => {
+            // Handle empty string, null, undefined, or invalid numbers as clearing
+            if (e === '' || e === null || e === undefined || isNaN(Number(e))) {
+                setMaxYear(null);
+                return;
+            }
+
+            const year = typeof e === 'number' ? e : Number(e);
+            // If it's a valid number, set it; otherwise clear
+            if (!isNaN(year) && isFinite(year) && year > 0) {
+                setMaxYear(year);
+            } else {
+                setMaxYear(null);
+            }
+        },
+        [setMaxYear],
+    );
 
     return (
         <Stack p="0.8rem">
@@ -153,51 +157,46 @@ export const SubsonicAlbumFilters = ({
             <Divider my="0.5rem" />
             <Group grow>
                 <NumberInput
-                    defaultValue={minYear ?? undefined}
-                    disabled={genreId !== null}
+                    defaultValue={query.minYear ?? undefined}
+                    disabled={Boolean(query.genreIds && query.genreIds.length > 0)}
                     hideControls={false}
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={5000}
                     min={0}
-                    onChange={(e) => handleYearFilter(e, 'min')}
+                    onBlur={(e) => handleMinYearFilter(e.currentTarget.value)}
                 />
                 <NumberInput
-                    defaultValue={maxYear ?? undefined}
-                    disabled={genreId !== null}
+                    defaultValue={query.maxYear ?? undefined}
+                    disabled={Boolean(query.genreIds && query.genreIds.length > 0)}
                     hideControls={false}
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={5000}
                     min={0}
-                    onChange={(e) => handleYearFilter(e, 'max')}
+                    onBlur={(e) => handleMaxYearFilter(e.currentTarget.value)}
                 />
             </Group>
-            <Group grow>
-                <Select
-                    clearable
-                    data={genreList}
-                    defaultValue={genreId ?? undefined}
-                    disabled={Boolean(minYear || maxYear)}
-                    label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
-                    onChange={handleGenresFilter}
-                    searchable
-                />
-            </Group>
-            <Group grow>
-                <MultiSelectWithInvalidData
-                    clearable
-                    data={selectableAlbumArtists}
-                    defaultValue={artistIds ?? undefined}
-                    disabled={disableArtistFilter}
-                    label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
-                    limit={300}
-                    onChange={handleAlbumArtistFilter}
-                    onSearchChange={setAlbumArtistSearchTerm}
-                    placeholder="Type to search for an artist"
-                    rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
-                    searchable
-                    searchValue={albumArtistSearchTerm}
-                />
-            </Group>
+            <Select
+                clearable
+                data={genreList}
+                defaultValue={query.genreIds?.[0] ?? undefined}
+                disabled={Boolean(query.minYear || query.maxYear)}
+                label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
+                onChange={(e) => handleGenresFilter(e)}
+                searchable
+            />
+            <MultiSelectWithInvalidData
+                clearable
+                data={selectableAlbumArtists}
+                defaultValue={query.artistIds ?? undefined}
+                disabled={disableArtistFilter}
+                label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
+                limit={300}
+                onChange={handleAlbumArtistFilter}
+                onSearchChange={setAlbumArtistSearchTerm}
+                rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
+                searchable
+                searchValue={albumArtistSearchTerm}
+            />
         </Stack>
     );
 };
