@@ -97,7 +97,8 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     const form = useForm({
         initialValues: {
             legacyAuth: false,
-            name: (localSettings ? localSettings.env.SERVER_NAME : window.SERVER_NAME) ?? '',
+            name:
+                (localSettings ? localSettings.env.SERVER_NAME : window.SERVER_NAME) || 'My Server',
             password: '',
             preferInstantMix: undefined,
             savePassword: undefined,
