@@ -96,7 +96,7 @@ const BottomPanel = () => {
                         <div
                             className={styles.visualizerOverlay}
                             style={{
-                                opacity: hasLyrics ? 0.2 : 0.5,
+                                opacity: hasLyrics ? 0.2 : 1,
                             }}
                         >
                             <Suspense fallback={<></>}>
