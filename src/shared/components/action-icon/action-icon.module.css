@@ -75,6 +75,10 @@
                 background: darken(var(--theme-colors-background), 5%);
             }
         }
+
+        &[data-disabled='true'] {
+            background: transparent;
+        }
     }
 
     &[data-variant='secondary'] {

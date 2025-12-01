@@ -3,11 +3,16 @@
     user-select: auto;
     background: alpha(var(--theme-colors-background), 0.5);
     border: 1px solid var(--theme-colors-border);
+    transition: background-color 0.2s ease-in-out;
 
     &[data-variant='outline'] {
         background: transparent;
         border: 1px solid var(--theme-colors-border);
     }
+}
+
+.root.link:hover {
+    background: alpha(var(--theme-colors-surface), 0.5);
 }
 
 .label {
@@ -40,4 +45,24 @@
     &:hover {
         color: var(--theme-colors-foreground-muted);
     }
+}
+
+.group.sm {
+    --pg-gap: var(--theme-spacing-sm) !important;
+}
+
+.group.md {
+    --pg-gap: var(--theme-spacing-md) !important;
+}
+
+.group.lg {
+    --pg-gap: var(--theme-spacing-lg) !important;
+}
+
+.group.xl {
+    --pg-gap: var(--theme-spacing-xl) !important;
+}
+
+.group.xs {
+    --pg-gap: var(--theme-spacing-xs) !important;
 }

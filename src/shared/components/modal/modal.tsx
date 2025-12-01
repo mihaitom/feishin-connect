@@ -28,20 +28,32 @@ export const Modal = ({ children, classNames, handlers, ...rest }: ModalProps) =
     return (
         <MantineModal
             {...rest}
+            centered={true}
             classNames={{
                 body: styles.body,
+                close: styles.close,
                 content: styles.content,
                 header: styles.header,
+                inner: styles.inner,
+                overlay: styles.overlay,
                 root: styles.root,
                 title: styles.title,
                 ...classNames,
             }}
+            closeButtonProps={{
+                icon: <Icon icon="x" size="xl" />,
+            }}
             onClose={handlers.close}
-            radius="lg"
+            overlayProps={{
+                backgroundOpacity: 0.8,
+                blur: 4,
+            }}
+            radius="xl"
+            scrollAreaComponent={ScrollArea}
             transitionProps={{
                 duration: 300,
                 exitDuration: 300,
-                transition: 'fade',
+                transition: 'fade' as const,
             }}
         >
             {children}
@@ -94,10 +106,16 @@ export const ConfirmModal = ({
         <Stack>
             <Flex>{children}</Flex>
             <Group justify="flex-end">
-                <Button data-focus onClick={handleCancel} variant="default">
+                <Button onClick={handleCancel} variant="default">
                     {labels?.cancel ? labels.cancel : 'Cancel'}
                 </Button>
-                <Button disabled={disabled} loading={loading} onClick={onConfirm} variant="filled">
+                <Button
+                    data-autofocus
+                    disabled={disabled}
+                    loading={loading}
+                    onClick={onConfirm}
+                    variant="filled"
+                >
                     {labels?.confirm ? labels.confirm : 'Confirm'}
                 </Button>
             </Group>
@@ -126,8 +144,8 @@ export const ModalsProvider = ({ children, ...rest }: ModalsProviderProps) => {
                     icon: <Icon icon="x" size="xl" />,
                 },
                 overlayProps: {
-                    backgroundOpacity: 0.8,
-                    blur: 4,
+                    backgroundOpacity: 0.5,
+                    blur: 1,
                 },
                 radius: 'xl',
                 scrollAreaComponent: ScrollArea,

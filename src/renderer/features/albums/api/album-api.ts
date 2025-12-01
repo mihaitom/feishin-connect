@@ -36,6 +36,7 @@ export const albumQueries = {
     },
     listCount: (args: QueryHookArgs<ListCountQuery<AlbumListQuery>>) => {
         return queryOptions({
+            gcTime: 1000 * 60 * 60 * 12,
             queryFn: ({ signal }) => {
                 return api.controller.getAlbumListCount({
                     apiClientProps: { serverId: args.serverId, signal },
@@ -47,6 +48,7 @@ export const albumQueries = {
                 args.query,
                 args.query?.artistIds?.length === 1 ? args.query?.artistIds[0] : undefined,
             ),
+            staleTime: 1000 * 60 * 60 * 12,
             ...args.options,
         });
     },

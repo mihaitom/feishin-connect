@@ -1,5 +1,3 @@
-import { useForm } from '@mantine/form';
-import { useFocusTrap } from '@mantine/hooks';
 import { closeAllModals } from '@mantine/modals';
 import isElectron from 'is-electron';
 import { nanoid } from 'nanoid/non-secure';
@@ -21,6 +19,8 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
+import { useFocusTrap } from '/@/shared/hooks/use-focus-trap';
+import { useForm } from '/@/shared/hooks/use-form';
 import { AuthenticationResponse, ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { DiscoveredServerItem, ServerType, toServerType } from '/@/shared/types/types';
 
@@ -97,7 +97,8 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     const form = useForm({
         initialValues: {
             legacyAuth: false,
-            name: (localSettings ? localSettings.env.SERVER_NAME : window.SERVER_NAME) ?? '',
+            name:
+                (localSettings ? localSettings.env.SERVER_NAME : window.SERVER_NAME) || 'My Server',
             password: '',
             preferInstantMix: undefined,
             savePassword: undefined,
@@ -238,6 +239,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                                 context: 'name',
                                 postProcess: 'titleCase',
                             })}
+                            required
                             {...form.getInputProps('name')}
                         />
                         <TextInput
@@ -246,6 +248,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                                 context: 'url',
                                 postProcess: 'titleCase',
                             })}
+                            required
                             {...form.getInputProps('url')}
                         />
                     </Group>
@@ -254,6 +257,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                             context: 'username',
                             postProcess: 'titleCase',
                         })}
+                        required
                         {...form.getInputProps('username')}
                     />
                     <PasswordInput
@@ -298,7 +302,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                             })}
                         />
                     )}
-                    <Group justify="flex-end">
+                    <Group grow justify="flex-end">
                         {onCancel && (
                             <ModalButton onClick={onCancel}>{t('common.cancel')}</ModalButton>
                         )}

@@ -4,6 +4,7 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import {
+    ListCountQuery,
     PlaylistDetailQuery,
     PlaylistListQuery,
     PlaylistSongListQuery,
@@ -32,6 +33,23 @@ export const playlistsQueries = {
                 });
             },
             queryKey: queryKeys.playlists.list(args.serverId || '', args.query),
+            ...args.options,
+        });
+    },
+    listCount: (args: QueryHookArgs<ListCountQuery<PlaylistListQuery>>) => {
+        return queryOptions({
+            gcTime: 1000 * 60 * 60 * 12,
+            queryFn: ({ signal }) => {
+                return api.controller.getPlaylistListCount({
+                    apiClientProps: { serverId: args.serverId, signal },
+                    query: args.query,
+                });
+            },
+            queryKey: queryKeys.playlists.count(
+                args.serverId || '',
+                Object.keys(args.query).length === 0 ? undefined : args.query,
+            ),
+            staleTime: 1000 * 60 * 60 * 12,
             ...args.options,
         });
     },

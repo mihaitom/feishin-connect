@@ -4,11 +4,15 @@ import { type ComponentType, forwardRef } from 'react';
 import { IconBaseProps } from 'react-icons';
 import { FaLastfmSquare } from 'react-icons/fa';
 import {
+    LuAlignCenter,
+    LuAlignLeft,
+    LuAlignRight,
     LuAppWindow,
     LuArrowDown,
     LuArrowDownToLine,
     LuArrowDownWideNarrow,
     LuArrowLeft,
+    LuArrowLeftRight,
     LuArrowLeftToLine,
     LuArrowRight,
     LuArrowRightToLine,
@@ -30,6 +34,7 @@ import {
     LuCloudDownload,
     LuCornerUpRight,
     LuDelete,
+    LuDisc,
     LuDisc3,
     LuDownload,
     LuEllipsis,
@@ -78,6 +83,7 @@ import {
     LuRotateCw,
     LuSave,
     LuSearch,
+    LuSettings,
     LuSettings2,
     LuShare2,
     LuShieldAlert,
@@ -113,11 +119,15 @@ export type AppIconSelection = keyof typeof AppIcon;
 export const AppIcon = {
     add: LuPlus,
     album: LuDisc3,
+    alignCenter: LuAlignCenter,
+    alignLeft: LuAlignLeft,
+    alignRight: LuAlignRight,
     appWindow: LuAppWindow,
     arrowDown: LuArrowDown,
     arrowDownS: LuChevronDown,
     arrowDownToLine: LuArrowDownToLine,
     arrowLeft: LuArrowLeft,
+    arrowLeftRight: LuArrowLeftRight,
     arrowLeftS: LuChevronLeft,
     arrowLeftToLine: LuArrowLeftToLine,
     arrowRight: LuArrowRight,
@@ -135,6 +145,7 @@ export const AppIcon = {
     check: LuCheck,
     clipboardCopy: LuClipboardCopy,
     delete: LuDelete,
+    disc: LuDisc,
     download: LuDownload,
     dragHorizontal: LuGripHorizontal,
     dragVertical: LuGripVertical,
@@ -199,6 +210,7 @@ export const AppIcon = {
     search: LuSearch,
     server: LuHardDrive,
     settings: LuSettings2,
+    settings2: LuSettings,
     share: LuShare2,
     signIn: LuLogIn,
     signOut: LuLogOut,
@@ -237,6 +249,7 @@ type IconColor =
     | 'contrast'
     | 'default'
     | 'error'
+    | 'favorite'
     | 'info'
     | 'inherit'
     | 'muted'

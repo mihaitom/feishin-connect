@@ -1,202 +1,133 @@
 import { useQuery } from '@tanstack/react-query';
-import { forwardRef, Ref, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { generatePath, useParams } from 'react-router';
-import { Link } from 'react-router-dom';
+import { forwardRef } from 'react';
+import { generatePath, Link, useParams } from 'react-router';
 
-import { queryKeys } from '/@/renderer/api/query-keys';
+import styles from './album-detail-header.module.css';
+
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
-import { LibraryHeader } from '/@/renderer/features/shared/components/library-header';
-import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
-import { useContainerQuery } from '/@/renderer/hooks';
-import { useSongChange } from '/@/renderer/hooks/use-song-change';
-import { queryClient } from '/@/renderer/lib/react-query';
+import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import {
+    LibraryHeader,
+    LibraryHeaderMenu,
+} from '/@/renderer/features/shared/components/library-header';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
-import { formatDateAbsoluteUTC, formatDurationString, titleCase } from '/@/renderer/utils';
-import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
+import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { Group } from '/@/shared/components/group/group';
-import { Pill } from '/@/shared/components/pill/pill';
-import { Rating } from '/@/shared/components/rating/rating';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { AlbumDetailResponse, LibraryItem, ServerType } from '/@/shared/types/domain-types';
+import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
-interface AlbumDetailHeaderProps {
-    background: {
-        background?: string;
-        blur: number;
-        loading: boolean;
+export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
+    const { albumId } = useParams() as { albumId: string };
+    const server = useCurrentServer();
+    const detailQuery = useQuery(
+        albumQueries.detail({ query: { id: albumId }, serverId: server?.id }),
+    );
+
+    const showRating =
+        detailQuery?.data?._serverType === ServerType.NAVIDROME ||
+        detailQuery?.data?._serverType === ServerType.SUBSONIC;
+
+    const { addToQueueByFetch, setFavorite, setRating } = usePlayer();
+    const playButtonBehavior = usePlayButtonBehavior();
+
+    const handleFavorite = () => {
+        if (!detailQuery?.data) return;
+        setFavorite(
+            detailQuery.data._serverId,
+            [detailQuery.data.id],
+            LibraryItem.ALBUM,
+            !detailQuery.data.userFavorite,
+        );
     };
-}
 
-export const AlbumDetailHeader = forwardRef(
-    ({ background }: AlbumDetailHeaderProps, ref: Ref<HTMLDivElement>) => {
-        const { albumId } = useParams() as { albumId: string };
-        const server = useCurrentServer();
-        const detailQuery = useQuery(
-            albumQueries.detail({ query: { id: albumId }, serverId: server?.id }),
-        );
-        const cq = useContainerQuery();
-        const { t } = useTranslation();
+    const handleUpdateRating = showRating
+        ? (rating: number) => {
+              if (!detailQuery?.data) return;
 
-        const showRating =
-            detailQuery?.data?.serverType === ServerType.NAVIDROME ||
-            detailQuery?.data?.serverType === ServerType.SUBSONIC;
+              if (detailQuery.data.userRating === rating) {
+                  return setRating(
+                      detailQuery.data._serverId,
+                      [detailQuery.data.id],
+                      LibraryItem.ALBUM,
+                      0,
+                  );
+              }
 
-        const originalDifferentFromRelease =
-            detailQuery.data?.originalDate &&
-            detailQuery.data.originalDate !== detailQuery.data.releaseDate;
+              return setRating(
+                  detailQuery.data._serverId,
+                  [detailQuery.data.id],
+                  LibraryItem.ALBUM,
+                  rating,
+              );
+          }
+        : undefined;
 
-        const releasePrefix = originalDifferentFromRelease
-            ? t('page.albumDetail.released', { postProcess: 'sentenceCase' })
-            : '♫';
+    const handlePlay = (type?: Play) => {
+        if (!server?.id || !albumId) return;
+        addToQueueByFetch(server.id, [albumId], LibraryItem.ALBUM, type || playButtonBehavior);
+    };
 
-        const songIds = useMemo(() => {
-            return new Set(detailQuery.data?.songs?.map((song) => song.id));
-        }, [detailQuery.data?.songs]);
+    const handleMoreOptions = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!detailQuery?.data) return;
+        ContextMenuController.call({
+            cmd: { items: [detailQuery.data], type: LibraryItem.ALBUM },
+            event: e,
+        });
+    };
 
-        const handleSongChange = useCallback(
-            (id: string) => {
-                if (songIds.has(id)) {
-                    const queryKey = queryKeys.albums.detail(server?.id, { id: albumId });
-                    queryClient.setQueryData<AlbumDetailResponse | undefined>(
-                        queryKey,
-                        (previous) => {
-                            if (!previous) return undefined;
+    const firstAlbumArtist = detailQuery?.data?.albumArtists?.[0];
+    const releaseYear = detailQuery?.data?.releaseYear;
 
-                            return {
-                                ...previous,
-                                playCount: previous.playCount ? previous.playCount + 1 : 1,
-                            };
-                        },
-                    );
-                }
-            },
-            [albumId, server?.id, songIds],
-        );
-
-        useSongChange((ids, event) => {
-            if (event.event === 'play') {
-                handleSongChange(ids[0]);
-            }
-        }, detailQuery.data !== undefined);
-
-        const releaseTypes = useMemo(
-            () =>
-                normalizeReleaseTypes(detailQuery.data?.releaseTypes ?? [], t).map((type) => ({
-                    id: type,
-                    value: titleCase(type),
-                })) || [],
-            [detailQuery.data?.releaseTypes, t],
-        );
-
-        const metadataItems = releaseTypes.concat([
-            {
-                id: 'releaseDate',
-                value:
-                    detailQuery?.data?.releaseDate &&
-                    `${releasePrefix} ${formatDateAbsoluteUTC(detailQuery?.data?.releaseDate)}`,
-            },
-            {
-                id: 'songCount',
-                value: t('entity.trackWithCount', {
-                    count: detailQuery?.data?.songCount as number,
-                }),
-            },
-            {
-                id: 'duration',
-                value:
-                    detailQuery?.data?.duration && formatDurationString(detailQuery.data.duration),
-            },
-            {
-                id: 'playCount',
-                value:
-                    typeof detailQuery?.data?.playCount === 'number' &&
-                    t('entity.play', {
-                        count: detailQuery?.data?.playCount,
-                    }),
-            },
-            {
-                id: 'version',
-                value: detailQuery.data?.version,
-            },
-        ]);
-
-        if (originalDifferentFromRelease) {
-            const formatted = `♫ ${formatDateAbsoluteUTC(detailQuery!.data!.originalDate)}`;
-            metadataItems.splice(releaseTypes.length, 0, {
-                id: 'originalDate',
-                value: formatted,
-            });
-        }
-
-        const updateRatingMutation = useSetRating({});
-
-        const handleUpdateRating = (rating: number) => {
-            if (!detailQuery?.data) return;
-
-            updateRatingMutation.mutate({
-                apiClientProps: { serverId: detailQuery.data.serverId },
-                query: {
-                    item: [detailQuery.data],
-                    rating,
-                },
-            });
-        };
-
-        return (
-            <Stack ref={cq.ref}>
-                <LibraryHeader
-                    imageUrl={detailQuery?.data?.imageUrl}
-                    item={{ route: AppRoute.LIBRARY_ALBUMS, type: LibraryItem.ALBUM }}
-                    ref={ref}
-                    title={detailQuery?.data?.name || ''}
-                    {...background}
-                >
-                    <Stack gap="lg">
-                        <Pill.Group>
-                            {metadataItems.map(
-                                (item, index) =>
-                                    item.value && (
-                                        <Pill key={`item-${item.id}-${index}`}>{item.value}</Pill>
-                                    ),
-                            )}
-                        </Pill.Group>
-                        {showRating && (
-                            <Rating
-                                onChange={handleUpdateRating}
-                                readOnly={detailQuery?.isFetching || updateRatingMutation.isPending}
-                                value={detailQuery?.data?.userRating || 0}
-                            />
-                        )}
-                        <Group
-                            gap="md"
-                            mah="4rem"
-                            style={{
-                                overflow: 'hidden',
-                                WebkitBoxOrient: 'vertical',
-                                WebkitLineClamp: 2,
-                            }}
-                        >
-                            {detailQuery?.data?.albumArtists.map((artist) => (
+    return (
+        <Stack ref={ref}>
+            <LibraryHeader
+                imageUrl={detailQuery?.data?.imageUrl}
+                item={{ route: AppRoute.LIBRARY_ALBUMS, type: LibraryItem.ALBUM }}
+                title={detailQuery?.data?.name || ''}
+            >
+                <Stack gap="xl" w="100%">
+                    {(firstAlbumArtist || releaseYear) && (
+                        <Group className={styles.metadataGroup}>
+                            {firstAlbumArtist && (
                                 <Text
                                     component={Link}
                                     fw={600}
                                     isLink
-                                    key={`artist-${artist.id}`}
+                                    isNoSelect
                                     to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
-                                        albumArtistId: artist.id,
+                                        albumArtistId: firstAlbumArtist.id,
                                     })}
-                                    variant="subtle"
                                 >
-                                    {artist.name}
+                                    {firstAlbumArtist.name}
                                 </Text>
-                            ))}
+                            )}
+                            {firstAlbumArtist && releaseYear && (
+                                <Text fw={600} isNoSelect>
+                                    •
+                                </Text>
+                            )}
+                            {releaseYear && (
+                                <Text fw={600} isMuted isNoSelect>
+                                    {releaseYear}
+                                </Text>
+                            )}
                         </Group>
-                    </Stack>
-                </LibraryHeader>
-            </Stack>
-        );
-    },
-);
+                    )}
+                    <LibraryHeaderMenu
+                        favorite={detailQuery?.data?.userFavorite}
+                        onFavorite={handleFavorite}
+                        onMore={handleMoreOptions}
+                        onPlay={() => handlePlay(Play.NOW)}
+                        onRating={handleUpdateRating}
+                        onShuffle={() => handlePlay(Play.SHUFFLE)}
+                        rating={detailQuery?.data?.userRating || 0}
+                    />
+                </Stack>
+            </LibraryHeader>
+        </Stack>
+    );
+});

@@ -1,4 +1,3 @@
-import { useHotkeys } from '@mantine/hooks';
 import { motion, Variants } from 'motion/react';
 import { CSSProperties, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,15 +5,16 @@ import { useLocation } from 'react-router';
 
 import styles from './full-screen-player.module.css';
 
-import { TableConfigDropdown } from '/@/renderer/components/virtual-table';
+import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { FullScreenPlayerImage } from '/@/renderer/features/player/components/full-screen-player-image';
 import { FullScreenPlayerQueue } from '/@/renderer/features/player/components/full-screen-player-queue';
+import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import {
-    useCurrentSong,
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
     useLyricsSettings,
+    usePlayerSong,
     useSettingsStore,
     useSettingsStoreActions,
     useWindowSettings,
@@ -28,7 +28,8 @@ import { Popover } from '/@/shared/components/popover/popover';
 import { Select } from '/@/shared/components/select/select';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
-import { Platform } from '/@/shared/types/types';
+import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
+import { ItemListKey, ListDisplayType, Platform } from '/@/shared/types/types';
 
 const mainBackground = 'var(--theme-colors-background)';
 
@@ -86,7 +87,7 @@ const Controls = ({ isPageHovered }: ControlsProps) => {
             <Popover position="bottom-start">
                 <Popover.Target>
                     <ActionIcon
-                        icon="settings"
+                        icon="settings2"
                         iconProps={{ size: 'lg' }}
                         tooltip={{ label: t('common.configure', { postProcess: 'titleCase' }) }}
                         variant={isPageHovered ? 'default' : 'subtle'}
@@ -348,9 +349,22 @@ const Controls = ({ isPageHovered }: ControlsProps) => {
                         </Option.Control>
                     </Option>
                     <Divider my="sm" />
-                    <TableConfigDropdown type="fullScreen" />
                 </Popover.Dropdown>
             </Popover>
+            <ListConfigMenu
+                buttonProps={{
+                    variant: isPageHovered ? 'default' : 'subtle',
+                }}
+                displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
+                listKey={ItemListKey.FULL_SCREEN}
+                optionsConfig={{
+                    table: {
+                        itemsPerPage: { hidden: true },
+                        pagination: { hidden: true },
+                    },
+                }}
+                tableColumnsData={SONG_TABLE_COLUMNS}
+            />
         </Group>
     );
 };
@@ -421,7 +435,7 @@ export const FullScreenPlayer = () => {
         isOpenedRef.current = true;
     }, [location, setStore]);
 
-    const currentSong = useCurrentSong();
+    const currentSong = usePlayerSong();
     const { background } = useFastAverageColor({
         algorithm: 'dominant',
         src: currentSong?.imageUrl,

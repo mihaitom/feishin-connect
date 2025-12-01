@@ -1,4 +1,3 @@
-import { useForm } from '@mantine/form';
 import { useTranslation } from 'react-i18next';
 
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
@@ -10,6 +9,7 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { toast } from '/@/shared/components/toast/toast';
+import { useForm } from '/@/shared/hooks/use-form';
 import {
     CreatePlaylistBody,
     CreatePlaylistResponse,

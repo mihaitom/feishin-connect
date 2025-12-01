@@ -1,0 +1,34 @@
+.title-combined {
+    display: grid;
+    grid-template-columns: calc(var(--row-height) - var(--theme-spacing-sm)) 1fr;
+    gap: var(--theme-spacing-sm);
+    align-items: center;
+    height: 100%;
+}
+
+.text-container {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: var(--theme-spacing-xs);
+    min-width: 0;
+}
+
+.text-container.compact {
+    gap: 0;
+}
+
+.title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artists {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--theme-font-size-xs) !important;
+    color: var(--theme-colors-foreground-muted);
+    white-space: nowrap;
+    user-select: none;
+}

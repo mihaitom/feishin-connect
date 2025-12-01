@@ -1,55 +1,37 @@
 import { useQuery } from '@tanstack/react-query';
-import debounce from 'lodash/debounce';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
-import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
+import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
-import { SongListFilter, useListFilterByKey, useListStoreActions } from '/@/renderer/store';
+import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
+import { SongListFilter, useCurrentServerId } from '/@/renderer/store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
-import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface JellyfinSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
-    onFilterChange: (filters: SongListFilter) => void;
-    pageKey: string;
-    serverId: string;
 }
 
-export const JellyfinSongFilters = ({
-    customFilters,
-    onFilterChange,
-    pageKey,
-    serverId,
-}: JellyfinSongFiltersProps) => {
+export const JellyfinSongFilters = ({ customFilters }: JellyfinSongFiltersProps) => {
+    const serverId = useCurrentServerId();
     const { t } = useTranslation();
-    const { setFilter } = useListStoreActions();
-    const filter = useListFilterByKey<SongListQuery>({ key: pageKey });
+    const { query, setCustom, setFavorite, setMaxYear, setMinYear } = useSongListFilters();
 
     const isGenrePage = customFilters?.genreIds !== undefined;
 
     // Despite the fact that getTags returns genres, it only returns genre names.
     // We prefer using IDs, hence the double query
-    const genreListQuery = useQuery(
-        genresQueries.list({
-            query: {
-                musicFolderId: filter?.musicFolderId,
-                sortBy: GenreListSort.NAME,
-                sortOrder: SortOrder.ASC,
-                startIndex: 0,
-            },
-            serverId,
-        }),
-    );
+    const genreListQuery = useGenreList();
 
     const genreList = useMemo(() => {
-        if (!genreListQuery?.data) return [];
+        if (!genreListQuery.data) return [];
         return genreListQuery.data.items.map((genre) => ({
             label: genre.name,
             value: genre.id,
@@ -59,7 +41,6 @@ export const JellyfinSongFilters = ({
     const tagsQuery = useQuery(
         sharedQueries.tags({
             query: {
-                folder: filter?.musicFolderId,
                 type: LibraryItem.SONG,
             },
             serverId,
@@ -67,115 +48,108 @@ export const JellyfinSongFilters = ({
     );
 
     const selectedGenres = useMemo(() => {
-        return filter?._custom?.jellyfin?.GenreIds?.split(',');
-    }, [filter?._custom?.jellyfin?.GenreIds]);
+        return query._custom?.GenreIds?.split(',');
+    }, [query._custom?.GenreIds]);
 
     const selectedTags = useMemo(() => {
-        return filter?._custom?.jellyfin?.Tags?.split('|');
-    }, [filter?._custom?.jellyfin?.Tags]);
+        return query._custom?.Tags?.split('|');
+    }, [query._custom?.Tags]);
 
     const yesNoFilters = [
         {
             label: t('filter.isFavorited', { postProcess: 'sentenceCase' }),
-            onChange: (favorite?: boolean) => {
-                const updatedFilters = setFilter({
-                    customFilters,
-                    data: {
-                        _custom: {
-                            ...filter?._custom,
-                            jellyfin: {
-                                ...filter?._custom?.jellyfin,
-                                IncludeItemTypes: 'Audio',
-                            },
-                        },
-                        favorite,
-                    },
-                    itemType: LibraryItem.SONG,
-                    key: pageKey,
-                }) as SongListFilter;
-                onFilterChange(updatedFilters);
+            onChange: (favorite: boolean | undefined) => {
+                setFavorite(favorite ?? null);
             },
-            value: filter.favorite,
+            value: query.favorite,
         },
     ];
 
-    const handleMinYearFilter = debounce((e: number | string) => {
-        if (typeof e === 'number' && (e < 1700 || e > 2300)) return;
-        const updatedFilters = setFilter({
-            customFilters,
-            data: {
-                _custom: {
-                    ...filter?._custom,
-                    jellyfin: {
-                        ...filter?._custom?.jellyfin,
-                        IncludeItemTypes: 'Audio',
-                    },
-                },
-                minYear: e === '' ? undefined : (e as number),
-            },
-            itemType: LibraryItem.SONG,
-            key: pageKey,
-        }) as SongListFilter;
-        onFilterChange(updatedFilters);
-    }, 500);
+    const handleMinYearFilter = useMemo(
+        () => (e: number | string) => {
+            // Handle empty string, null, undefined, or invalid numbers as clearing
+            if (e === '' || e === null || e === undefined || isNaN(Number(e))) {
+                setMinYear(null);
+                return;
+            }
 
-    const handleMaxYearFilter = debounce((e: number | string) => {
-        if (typeof e === 'number' && (e < 1700 || e > 2300)) return;
-        const updatedFilters = setFilter({
-            customFilters,
-            data: {
-                _custom: {
-                    ...filter?._custom,
-                    jellyfin: {
-                        ...filter?._custom?.jellyfin,
-                        IncludeItemTypes: 'Audio',
-                    },
-                },
-                maxYear: e === '' ? undefined : (e as number),
-            },
-            itemType: LibraryItem.SONG,
-            key: pageKey,
-        }) as SongListFilter;
-        onFilterChange(updatedFilters);
-    }, 500);
+            const year = typeof e === 'number' ? e : Number(e);
+            // If it's a valid number within range, set it; otherwise clear
+            if (!isNaN(year) && isFinite(year) && year >= 1700 && year <= 2300) {
+                setMinYear(year);
+            } else {
+                setMinYear(null);
+            }
+        },
+        [setMinYear],
+    );
 
-    const handleGenresFilter = debounce((e: string[] | undefined) => {
-        const updatedFilters = setFilter({
-            customFilters,
-            data: {
-                _custom: {
-                    ...filter?._custom,
-                    jellyfin: {
-                        ...filter?._custom?.jellyfin,
-                        IncludeItemTypes: 'Audio',
-                    },
-                },
-                genreIds: e,
-            },
-            itemType: LibraryItem.SONG,
-            key: pageKey,
-        }) as SongListFilter;
-        onFilterChange(updatedFilters);
-    }, 250);
+    const handleMaxYearFilter = useMemo(
+        () => (e: number | string) => {
+            // Handle empty string, null, undefined, or invalid numbers as clearing
+            if (e === '' || e === null || e === undefined || isNaN(Number(e))) {
+                setMaxYear(null);
+                return;
+            }
 
-    const handleTagFilter = debounce((e: string[] | undefined) => {
-        const updatedFilters = setFilter({
-            customFilters,
-            data: {
-                _custom: {
-                    ...filter?._custom,
-                    jellyfin: {
-                        ...filter?._custom?.jellyfin,
-                        IncludeItemTypes: 'Audio',
-                        Tags: e?.join('|') || undefined,
-                    },
-                },
-            },
-            itemType: LibraryItem.SONG,
-            key: pageKey,
-        }) as SongListFilter;
-        onFilterChange(updatedFilters);
-    }, 250);
+            const year = typeof e === 'number' ? e : Number(e);
+            // If it's a valid number within range, set it; otherwise clear
+            if (!isNaN(year) && isFinite(year) && year >= 1700 && year <= 2300) {
+                setMaxYear(year);
+            } else {
+                setMaxYear(null);
+            }
+        },
+        [setMaxYear],
+    );
+
+    const handleGenresFilter = useMemo(
+        () => (e: string[] | undefined) => {
+            setCustom((prev) => {
+                if (!e || e.length === 0) {
+                    // Remove GenreIds and IncludeItemTypes if genres are cleared
+                    const rest = { ...prev };
+                    delete rest.GenreIds;
+                    delete rest.IncludeItemTypes;
+                    // Keep jellyfin-specific properties
+                    return Object.keys(rest).length === 0 ? null : rest;
+                }
+
+                return {
+                    ...prev,
+                    GenreIds: e.join(','),
+                    IncludeItemTypes: 'Audio',
+                    ...prev?.jellyfin,
+                };
+            });
+        },
+        [setCustom],
+    );
+
+    const handleTagFilter = useMemo(
+        () => (e: string[] | undefined) => {
+            setCustom((prev) => {
+                if (!e || e.length === 0) {
+                    // Remove Tags if cleared
+                    const rest = { ...prev };
+                    delete rest.Tags;
+                    // Keep IncludeItemTypes and jellyfin-specific properties
+                    if (rest.IncludeItemTypes) {
+                        return rest;
+                    }
+                    return Object.keys(rest).length === 0 ? null : rest;
+                }
+
+                return {
+                    ...prev,
+                    IncludeItemTypes: 'Audio',
+                    Tags: e.join('|'),
+                    ...prev?.jellyfin,
+                };
+            });
+        },
+        [setCustom],
+    );
 
     return (
         <Stack p="0.8rem">
@@ -188,20 +162,22 @@ export const JellyfinSongFilters = ({
             <Divider my="0.5rem" />
             <Group grow>
                 <NumberInput
-                    defaultValue={filter?.minYear}
+                    defaultValue={query.minYear ?? undefined}
+                    hideControls={false}
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    onChange={handleMinYearFilter}
-                    required={!!filter?.minYear}
+                    onBlur={(e) => handleMinYearFilter(e.currentTarget.value)}
+                    required={!!query.minYear}
                 />
                 <NumberInput
-                    defaultValue={filter?.maxYear}
+                    defaultValue={query.maxYear ?? undefined}
+                    hideControls={false}
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    onChange={handleMaxYearFilter}
-                    required={!!filter?.minYear}
+                    onBlur={(e) => handleMaxYearFilter(e.currentTarget.value)}
+                    required={!!query.minYear}
                 />
             </Group>
             {!isGenrePage && (
@@ -211,7 +187,7 @@ export const JellyfinSongFilters = ({
                         data={genreList}
                         defaultValue={selectedGenres}
                         label={t('entity.genre', { count: 1, postProcess: 'sentenceCase' })}
-                        onChange={handleGenresFilter}
+                        onChange={(e) => handleGenresFilter(e)}
                         searchable
                         width={250}
                     />
@@ -224,7 +200,7 @@ export const JellyfinSongFilters = ({
                         data={tagsQuery.data.boolTags}
                         defaultValue={selectedTags}
                         label={t('common.tags', { postProcess: 'sentenceCase' })}
-                        onChange={handleTagFilter}
+                        onChange={(e) => handleTagFilter(e)}
                         searchable
                         width={250}
                     />

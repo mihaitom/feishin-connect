@@ -3,7 +3,10 @@ import { t } from 'i18next';
 import { useCallback } from 'react';
 
 import { ExportImportSettingsModal } from '/@/renderer/components/export-import-settings-modal/export-import-settings-modal';
-import { SettingsOptions } from '/@/renderer/features/settings/components/settings-option';
+import {
+    SettingOption,
+    SettingsSection,
+} from '/@/renderer/features/settings/components/settings-section';
 import { useSettingsForExport } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
 
@@ -28,26 +31,41 @@ export const ExportImportSettings = () => {
         openModal({
             children: <ExportImportSettingsModal />,
             size: 'lg',
-            title: t('setting.exportImportSettings_importModalTitle').toString(),
+            title: t('setting.exportImportSettings_importModalTitle', {
+                postProcess: 'sentenceCase',
+            }),
         });
     };
 
+    const options: SettingOption[] = [
+        {
+            control: (
+                <>
+                    <Button onClick={onExportSettings} size="compact-sm">
+                        {t('setting.exportImportSettings_control_exportText', {
+                            postProcess: 'sentenceCase',
+                        })}
+                    </Button>
+                    <Button onClick={openImportModal} size="compact-sm">
+                        {t('setting.exportImportSettings_control_importText', {
+                            postProcess: 'sentenceCase',
+                        })}
+                    </Button>
+                </>
+            ),
+            description: t('setting.exportImportSettings_control_description', {
+                postProcess: 'sentenceCase',
+            }),
+            title: t('setting.exportImportSettings_control_title', {
+                postProcess: 'sentenceCase',
+            }),
+        },
+    ];
+
     return (
-        <>
-            <SettingsOptions
-                control={
-                    <>
-                        <Button onClick={onExportSettings}>
-                            {t('setting.exportImportSettings_control_exportText').toString()}
-                        </Button>
-                        <Button onClick={openImportModal}>
-                            {t('setting.exportImportSettings_control_importText').toString()}
-                        </Button>
-                    </>
-                }
-                description={t('setting.exportImportSettings_control_description').toString()}
-                title={t('setting.exportImportSettings_control_title').toString()}
-            />
-        </>
+        <SettingsSection
+            options={options}
+            title={t('page.setting.exportImport', { postProcess: 'sentenceCase' })}
+        />
     );
 };

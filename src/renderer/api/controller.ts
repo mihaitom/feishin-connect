@@ -2,6 +2,7 @@ import i18n from '/@/i18n/i18n';
 import { JellyfinController } from '/@/renderer/api/jellyfin/jellyfin-controller';
 import { NavidromeController } from '/@/renderer/api/navidrome/navidrome-controller';
 import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
+import { mergeMusicFolderId } from '/@/renderer/api/utils-music-folder';
 import { getServerById, useAuthStore } from '/@/renderer/store';
 import { toast } from '/@/shared/components/toast/toast';
 import {
@@ -167,7 +168,11 @@ export const controller: GeneralController = {
         return apiController(
             'getAlbumArtistList',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getAlbumArtistListCount(args) {
         const server = getServerById(args.apiClientProps.serverId);
@@ -181,7 +186,11 @@ export const controller: GeneralController = {
         return apiController(
             'getAlbumArtistListCount',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getAlbumDetail(args) {
         const server = getServerById(args.apiClientProps.serverId);
@@ -223,7 +232,11 @@ export const controller: GeneralController = {
         return apiController(
             'getAlbumList',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getAlbumListCount(args) {
         const server = getServerById(args.apiClientProps.serverId);
@@ -237,7 +250,11 @@ export const controller: GeneralController = {
         return apiController(
             'getAlbumListCount',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getArtistList(args) {
         const server = getServerById(args.apiClientProps.serverId);
@@ -251,7 +268,11 @@ export const controller: GeneralController = {
         return apiController(
             'getArtistList',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getArtistListCount(args) {
         const server = getServerById(args.apiClientProps.serverId);
@@ -265,7 +286,11 @@ export const controller: GeneralController = {
         return apiController(
             'getArtistListCount',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getDownloadUrl(args) {
         const server = getServerById(args.apiClientProps.serverId);
@@ -293,7 +318,11 @@ export const controller: GeneralController = {
         return apiController(
             'getGenreList',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getLyrics(args) {
         const server = getServerById(args.apiClientProps.serverId);
@@ -461,7 +490,11 @@ export const controller: GeneralController = {
         return apiController(
             'getSongList',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getSongListCount(args) {
         const server = getServerById(args.apiClientProps.serverId);
@@ -474,6 +507,22 @@ export const controller: GeneralController = {
 
         return apiController(
             'getSongListCount',
+            server.type,
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
+    },
+    getStreamUrl(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            return '';
+        }
+
+        return apiController(
+            'getStreamUrl',
             server.type,
         )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
     },
@@ -516,20 +565,6 @@ export const controller: GeneralController = {
 
         return apiController(
             'getTopSongs',
-            server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
-    },
-    getTranscodingUrl(args) {
-        const server = getServerById(args.apiClientProps.serverId);
-
-        if (!server) {
-            throw new Error(
-                `${i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' })}: getTranscodingUrl`,
-            );
-        }
-
-        return apiController(
-            'getTranscodingUrl',
             server.type,
         )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
     },
@@ -601,7 +636,11 @@ export const controller: GeneralController = {
         return apiController(
             'search',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     setRating(args) {
         const server = getServerById(args.apiClientProps.serverId);

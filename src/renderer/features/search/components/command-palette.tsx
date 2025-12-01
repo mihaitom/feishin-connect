@@ -1,10 +1,8 @@
-import { useDebouncedValue, useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { Fragment, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate } from 'react-router';
 
-import { usePlayQueueAdd } from '/@/renderer/features/player/hooks/use-playqueue-add';
 import { searchQueries } from '/@/renderer/features/search/api/search-api';
 import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
 import { CommandItemSelectable } from '/@/renderer/features/search/components/command-item-selectable';
@@ -23,6 +21,8 @@ import { Kbd } from '/@/shared/components/kbd/kbd';
 import { Modal } from '/@/shared/components/modal/modal';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { TextInput } from '/@/shared/components/text-input/text-input';
+import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
+import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface CommandPaletteProps {
@@ -68,8 +68,6 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
     const showAlbumGroup = isHome && Boolean(query && data && data?.albums?.length > 0);
     const showArtistGroup = isHome && Boolean(query && data && data?.albumArtists?.length > 0);
     const showTrackGroup = isHome && Boolean(query && data && data?.songs?.length > 0);
-
-    const handlePlayQueueAdd = usePlayQueueAdd();
 
     return (
         <Modal
@@ -168,7 +166,6 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                 >
                                     {({ isHighlighted }) => (
                                         <LibraryCommandItem
-                                            handlePlayQueueAdd={handlePlayQueueAdd}
                                             id={album.id}
                                             imageUrl={album.imageUrl}
                                             isHighlighted={isHighlighted}
@@ -202,7 +199,6 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                     {({ isHighlighted }) => (
                                         <LibraryCommandItem
                                             disabled={artist?.albumCount === 0}
-                                            handlePlayQueueAdd={handlePlayQueueAdd}
                                             id={artist.id}
                                             imageUrl={artist.imageUrl}
                                             isHighlighted={isHighlighted}
@@ -240,7 +236,6 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                 >
                                     {({ isHighlighted }) => (
                                         <LibraryCommandItem
-                                            handlePlayQueueAdd={handlePlayQueueAdd}
                                             id={song.id}
                                             imageUrl={song.imageUrl}
                                             isHighlighted={isHighlighted}

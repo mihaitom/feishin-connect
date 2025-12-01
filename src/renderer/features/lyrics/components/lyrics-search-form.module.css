@@ -17,3 +17,19 @@
         }
     }
 }
+
+.selected {
+    background-color: alpha(var(--theme-colors-primary), 0.3);
+
+    &:hover,
+    &:active,
+    &:focus-visible {
+        @mixin dark {
+            background-color: alpha(var(--theme-colors-primary), 0.4);
+        }
+
+        @mixin light {
+            background-color: alpha(var(--theme-colors-primary), 0.4);
+        }
+    }
+}

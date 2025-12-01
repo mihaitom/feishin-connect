@@ -6,11 +6,17 @@
         "createPlaylist": "create $t(entity.playlist_one)",
         "deletePlaylist": "delete $t(entity.playlist_one)",
         "deselectAll": "deselect all",
+        "downloadStarted": "started download of {{count}} items",
         "editPlaylist": "edit $t(entity.playlist_one)",
         "goToPage": "go to page",
+        "largeFetch": "this action will attempt to fetch {{count}} items from your server",
         "moveToNext": "move to next",
         "moveToBottom": "move to bottom",
         "moveToTop": "move to top",
+        "moveItems": "move items",
+        "shuffle": "shuffle",
+        "shuffleAll": "shuffle all",
+        "shuffleSelected": "shuffle selected",
         "refresh": "$t(common.refresh)",
         "removeFromFavorites": "remove from $t(entity.favorite_other)",
         "removeFromPlaylist": "remove from $t(entity.playlist_one)",
@@ -18,6 +24,7 @@
         "setRating": "set rating",
         "toggleSmartPlaylistEditor": "toggle $t(entity.smartPlaylist) editor",
         "viewPlaylists": "view $t(entity.playlist_other)",
+        "viewMore": "view more",
         "openIn": {
             "lastfm": "Open in Last.fm",
             "musicbrainz": "Open in MusicBrainz"
@@ -60,10 +67,13 @@
         "disable": "disable",
         "disc": "disc",
         "dismiss": "dismiss",
+        "doNotShowAgain": "do not show this again",
         "duration": "duration",
         "edit": "edit",
         "enable": "enable",
         "expand": "expand",
+        "externalLinks": "external links",
+        "faster": "faster",
         "favorite": "favorite",
         "filter_one": "filter",
         "filter_other": "filters",
@@ -113,8 +123,10 @@
         "setting": "setting",
         "setting_one": "setting",
         "setting_other": "settings",
+        "slower": "slower",
         "share": "share",
         "size": "size",
+        "sort": "sort",
         "sortOrder": "order",
         "tags": "tags",
         "title": "title",
@@ -127,7 +139,10 @@
         "year": "year",
         "yes": "yes",
         "explicit": "explicit",
-        "clean": "clean"
+        "clean": "clean",
+        "gridRows": "grid rows",
+        "tableColumns": "table columns",
+        "itemsMore": "{{count}} more"
     },
     "entity": {
         "album_one": "album",
@@ -253,6 +268,10 @@
             "success": "server added successfully",
             "title": "add server"
         },
+        "largeFetchConfirmation": {
+            "title": "add items to the queue",
+            "description": "This request will attempt to fetch {{count}} items from the server"
+        },
         "addToPlaylist": {
             "create": "create $t(entity.playlist_one) {{playlist}}",
             "input_playlists": "$t(entity.playlist_other)",
@@ -287,7 +306,11 @@
         "queryEditor": {
             "title": "query editor",
             "input_optionMatchAll": "match all",
-            "input_optionMatchAny": "match any"
+            "input_optionMatchAny": "match any",
+            "addRuleGroup": "add rule group",
+            "removeRuleGroup": "remove rule group",
+            "resetToDefault": "reset to default",
+            "clearFilters": "clear filters"
         },
         "shareItem": {
             "allowDownloading": "allow downloading",
@@ -296,6 +319,17 @@
             "success": "share link copied to clipboard (or click here to open)",
             "expireInvalid": "expiration must be in the future",
             "createFailed": "failed to create share (is sharing enabled?)"
+        },
+        "shuffleAll": {
+            "title": "play random",
+            "input_genre": "$t(entity.genre_one)",
+            "input_limit": "how many songs?",
+            "input_minYear": "from year",
+            "input_maxYear": "to year",
+            "input_played": "play filter",
+            "input_played_optionAll": "all tracks",
+            "input_played_optionUnplayed": "only unplayed tracks",
+            "input_played_optionPlayed": "only played tracks"
         },
         "updateServer": {
             "success": "server updated successfully",
@@ -332,6 +366,9 @@
             "genreAlbums": "\"{{genre}}\" $t(entity.album_other)",
             "title": "$t(entity.album_other)"
         },
+        "favorites": {
+            "title": "$t(entity.favorite_other)"
+        },
         "appMenu": {
             "collapseSidebar": "collapse sidebar",
             "expandSidebar": "expand sidebar",
@@ -343,6 +380,9 @@
             "openBrowserDevtools": "open browser devtools",
             "quit": "$t(common.quit)",
             "selectServer": "select server",
+            "selectMusicFolder": "select music folder",
+            "noMusicFolder": "no music folder selected",
+            "multipleMusicFolders": "{{count}} music folders selected",
             "settings": "$t(common.setting_other)",
             "version": "version {{version}}"
         },
@@ -364,6 +404,7 @@
             "deletePlaylist": "$t(action.deletePlaylist)",
             "deselectAll": "$t(action.deselectAll)",
             "download": "download",
+            "moveItems": "$t(action.moveItems)",
             "moveToNext": "$t(action.moveToNext)",
             "moveToBottom": "$t(action.moveToBottom)",
             "moveToTop": "$t(action.moveToTop)",
@@ -376,6 +417,7 @@
             "setRating": "$t(action.setRating)",
             "playShuffled": "$t(player.shuffle)",
             "shareItem": "share item",
+            "goTo": "go to",
             "goToAlbum": "go to $t(entity.album_one)",
             "goToAlbumArtist": "go to $t(entity.albumArtist_one)",
             "showDetails": "get info"
@@ -437,15 +479,31 @@
         },
         "setting": {
             "advanced": "advanced",
+            "analytics": "analytics",
             "generalTab": "general",
             "hotkeysTab": "hotkeys",
             "playbackTab": "playback",
-            "windowTab": "window"
+            "windowTab": "window",
+            "updates": "update",
+            "cache": "cache",
+            "application": "application",
+            "queryBuilder": "query builder",
+            "theme": "theme",
+            "controls": "controls",
+            "sidebar": "sidebar",
+            "remote": "remote",
+            "exportImport": "import/export",
+            "scrobble": "scrobble",
+            "audio": "audio",
+            "lyrics": "lyrics",
+            "transcoding": "transcoding",
+            "discord": "discord"
         },
         "sidebar": {
             "albumArtists": "$t(entity.albumArtist_other)",
             "albums": "$t(entity.album_other)",
             "artists": "$t(entity.artist_other)",
+            "favorites": "$t(entity.favorite_other)",
             "folders": "$t(entity.folder_other)",
             "genres": "$t(entity.genre_other)",
             "home": "$t(common.home)",
@@ -466,6 +524,8 @@
     "player": {
         "addLast": "add last",
         "addNext": "add next",
+        "addLastShuffled": "add last (shuffled)",
+        "addNextShuffled": "add next (shuffled)",
         "favorite": "favorite",
         "mute": "mute",
         "muted": "muted",
@@ -482,12 +542,15 @@
         "queue_moveToBottom": "move selected to top",
         "queue_moveToTop": "move selected to bottom",
         "queue_remove": "remove selected",
+        "queueType": "queue type",
+        "queueType_default": "default",
+        "queueType_priority": "priority",
         "repeat": "repeat",
         "repeat_all": "repeat all",
         "repeat_off": "repeat disabled",
         "repeat_one": "repeat one",
         "repeat_other": "",
-        "shuffle": "play shuffled",
+        "shuffle": "play (shuffled)",
         "shuffle_off": "shuffle disabled",
         "skip": "skip",
         "skip_back": "skip backwards",
@@ -497,6 +560,10 @@
         "unfavorite": "unfavorite",
         "pause": "pause",
         "viewQueue": "view queue"
+    },
+    "queryBuilder": {
+        "standardTags": "standard tags",
+        "customTags": "custom tags"
     },
     "releaseType": {
         "primary": {
@@ -528,6 +595,8 @@
         "albumBackground": "album background image",
         "albumBackgroundBlur_description": "adjusts the amount of blur applied to the album background image",
         "albumBackgroundBlur": "album background image blur size",
+        "analyticsDisable": "Opt-out of usage based analytics",
+        "analyticsDisable_description": "Anonymized usage data is sent to the developer to help improve the application",
         "applicationHotkeys_description": "configure application hotkeys. toggle the checkbox to set as a global hotkey (desktop only)",
         "applicationHotkeys": "application hotkeys",
         "artistBackground": "artist background image",
@@ -590,8 +659,6 @@
         "discordServeImage_description": "share cover art for {{discord}} rich presence from server itself, only available for Jellyfin and Navidrome. {{discord}} uses a bot to fetch images, so your server must be reachable from the public internet",
         "discordUpdateInterval": "{{discord}} rich presence update interval",
         "discordUpdateInterval_description": "the time in seconds between each update (minimum 15 seconds)",
-        "doubleClickBehavior_description": "if true, all matching tracks in a track search will be queued. otherwise, only the clicked one will be queued",
-        "doubleClickBehavior": "queue all searched tracks when double clicking",
         "enableAutoTranslation_description": "enable translation automatically when lyrics are loaded",
         "enableAutoTranslation": "enable auto translation",
         "enableRemote_description": "enables the remote control server to allow other devices to control the application",
@@ -610,8 +677,6 @@
         "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" is incorrect - {{reason}}",
         "externalLinks_description": "enables showing external links (Last.fm, MusicBrainz) on artist/album pages",
         "externalLinks": "show external links",
-        "floatingQueueArea_description": "display a hover icon on the right side of the screen to view the play queue",
-        "floatingQueueArea": "show floating queue hover area",
         "followLyric_description": "scroll the lyric to the current playing position",
         "followLyric": "follow current lyric",
         "font_description": "sets the font to use for the application",
@@ -711,8 +776,22 @@
         "playerAlbumArtResolution": "player album art resolution",
         "playerbarOpenDrawer_description": "allows clicking of the playerbar to open the full screen player",
         "playerbarOpenDrawer": "playerbar fullscreen toggle",
+        "playerbarSlider": "playerbar slider",
+        "playerbarSliderType_optionSlider": "slider",
+        "playerbarSliderType_optionWaveform": "waveform",
+        "playerbarWaveformAlign": "waveform align",
+        "playerbarWaveformAlign_optionTop": "top",
+        "playerbarWaveformAlign_optionCenter": "center",
+        "playerbarWaveformAlign_optionBottom": "bottom",
+        "playerbarWaveformBarWidth": "waveform bar width",
+        "playerbarWaveformGap": "waveform gap",
+        "playerbarWaveformRadius": "waveform radius",
         "preferLocalLyrics_description": "prefer local lyrics over remote lyrics when available",
         "preferLocalLyrics": "prefer local lyrics",
+        "showLyricsInSidebar_description": "a panel will be added to the attached play queue that displays the lyrics",
+        "showLyricsInSidebar": "show lyrics in player sidebar",
+        "showVisualizerInSidebar_description": "a panel will be added to the player sidebar that displays the visualizer",
+        "showVisualizerInSidebar": "show visualizer in player sidebar",
         "preservePitch_description": "preserves pitch when modifying playback speed",
         "preservePitch": "preserve pitch",
         "preventSleepOnPlayback_description": "prevent the display from sleeping while music is playing",
@@ -793,7 +872,12 @@
         "windowBarStyle_description": "select the style of the window bar",
         "windowBarStyle": "window bar style",
         "zoom_description": "sets the zoom percentage for the application",
-        "zoom": "zoom percentage"
+        "zoom": "zoom percentage",
+        "queryBuilder": "query builder",
+        "queryBuilderCustomFields_inputLabel": "label",
+        "queryBuilderCustomFields_inputTag": "tag",
+        "queryBuilderCustomFields": "custom fields",
+        "queryBuilderCustomFields_description": "add custom fields to use in query builders"
     },
     "table": {
         "column": {
@@ -820,22 +904,44 @@
             "size": "$t(common.size)",
             "songCount": "$t(entity.track_other)",
             "title": "title",
-            "trackNumber": "track"
+            "trackNumber": "track",
+            "owner": "owner"
         },
         "config": {
             "general": {
                 "autoFitColumns": "auto fit columns",
+                "autosize": "autosize",
+                "moveUp": "move up",
+                "moveDown": "move down",
+                "pinToLeft": "pin to left",
+                "pinToRight": "pin to right",
+                "alignLeft": "align left",
+                "alignCenter": "align center",
+                "alignRight": "align right",
                 "followCurrentSong": "follow current song",
                 "displayType": "display type",
                 "gap": "$t(common.gap)",
                 "itemGap": "item gap (px)",
                 "itemSize": "item size (px)",
+                "itemsPerRow": "items per row",
                 "size": "$t(common.size)",
-                "tableColumns": "table columns"
+                "size_default": "default",
+                "size_compact": "compact",
+                "size_large": "large",
+                "tableColumns": "table columns",
+                "pagination": "pagination",
+                "pagination_itemsPerPage": "items per page",
+                "pagination_infinite": "infinite",
+                "pagination_paginate": "paginated",
+                "alternateRowColors": "alternate row colors",
+                "horizontalBorders": "horizontal borders",
+                "rowHoverHighlight": "row hover highlight",
+                "verticalBorders": "vertical borders"
             },
             "label": {
                 "actions": "$t(common.action_other)",
                 "album": "$t(entity.album_one)",
+                "albumCount": "$t(entity.album_other)",
                 "albumArtist": "$t(entity.albumArtist_one)",
                 "artist": "$t(entity.artist_one)",
                 "biography": "$t(common.biography)",
@@ -848,6 +954,8 @@
                 "duration": "$t(common.duration)",
                 "favorite": "$t(common.favorite)",
                 "genre": "$t(entity.genre_one)",
+                "genreBadge": "$t(entity.genre_one) (badges)",
+                "image": "image",
                 "lastPlayed": "last played",
                 "note": "$t(common.note)",
                 "owner": "$t(common.owner)",
@@ -864,10 +972,8 @@
                 "year": "$t(common.year)"
             },
             "view": {
-                "card": "card",
                 "grid": "grid",
                 "list": "list",
-                "poster": "poster",
                 "table": "table"
             }
         }

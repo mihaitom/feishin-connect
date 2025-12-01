@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { api } from '/@/renderer/api';
@@ -58,6 +58,11 @@ export const useServerAuthenticated = () => {
     }, 300);
 
     useEffect(() => {
+        if (!server) {
+            setReady(AuthState.INVALID);
+            return;
+        }
+
         if (priorServerId.current !== server?.id) {
             const serverWithAuth = getServerById(server!.id);
             priorServerId.current = server?.id || '';

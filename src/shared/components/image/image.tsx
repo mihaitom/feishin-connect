@@ -1,5 +1,12 @@
 import clsx from 'clsx';
-import { ForwardedRef, forwardRef, HTMLAttributes, type ImgHTMLAttributes, ReactNode } from 'react';
+import {
+    ForwardedRef,
+    forwardRef,
+    HTMLAttributes,
+    type ImgHTMLAttributes,
+    memo,
+    ReactNode,
+} from 'react';
 import { Img } from 'react-image';
 
 import styles from './image.module.css';
@@ -31,13 +38,13 @@ interface ImageUnloaderProps {
     className?: string;
 }
 
-const FALLBACK_SVG =
+export const FALLBACK_SVG =
     'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iLjA1IiBkPSJNMCAwaDMwMHYzMDBIMHoiLz48L3N2Zz4=';
 
-export function Image({
+export function BaseImage({
     className,
     containerClassName,
-    enableAnimation,
+    enableAnimation = false,
     imageContainerProps,
     includeLoader = true,
     includeUnloader = true,
@@ -62,6 +69,8 @@ export function Image({
                         {children}
                     </ImageContainer>
                 )}
+                decoding="async"
+                fetchPriority={inViewport ? 'high' : 'low'}
                 loader={
                     includeLoader ? (
                         <ImageContainer className={containerClassName}>
@@ -69,6 +78,7 @@ export function Image({
                         </ImageContainer>
                     ) : null
                 }
+                loading={inViewport ? 'eager' : 'lazy'}
                 src={inViewport ? src : FALLBACK_SVG}
                 unloader={
                     includeUnloader ? (
@@ -82,8 +92,14 @@ export function Image({
         );
     }
 
-    return <ImageUnloader />;
+    return (
+        <ImageContainer className={containerClassName}>
+            <ImageUnloader />
+        </ImageContainer>
+    );
 }
+
+export const Image = memo(BaseImage);
 
 const ImageContainer = forwardRef(
     (
@@ -106,7 +122,7 @@ const ImageContainer = forwardRef(
     },
 );
 
-function ImageLoader({ className }: ImageLoaderProps) {
+export function ImageLoader({ className }: ImageLoaderProps) {
     return (
         <Skeleton
             className={clsx(styles.skeleton, styles.loader, className)}
@@ -115,7 +131,7 @@ function ImageLoader({ className }: ImageLoaderProps) {
     );
 }
 
-function ImageUnloader({ className }: ImageUnloaderProps) {
+export function ImageUnloader({ className }: ImageUnloaderProps) {
     return (
         <div className={clsx(styles.unloader, className)}>
             <Icon color="default" icon="emptyImage" size="xl" />

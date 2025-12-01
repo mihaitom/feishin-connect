@@ -233,5 +233,10 @@ export const WindowSettings = () => {
         },
     ];
 
-    return <SettingsSection options={windowOptions} />;
+    return (
+        <SettingsSection
+            options={windowOptions}
+            title={t('page.setting.application', { postProcess: 'sentenceCase' })}
+        />
+    );
 };

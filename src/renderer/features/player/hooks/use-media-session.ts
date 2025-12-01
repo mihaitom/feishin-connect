@@ -1,73 +1,66 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import {
-    useCurrentSong,
-    useCurrentStatus,
-    usePlaybackSettings,
-    useSettingsStore,
-} from '/@/renderer/store';
+import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { usePlaybackSettings, useSettingsStore, useTimestampStoreBase } from '/@/renderer/store';
 import { PlayerStatus } from '/@/shared/types/types';
 
-export const useMediaSession = ({
-    handleNextTrack,
-    handlePause,
-    handlePlay,
-    handlePrevTrack,
-    handleSeekSlider,
-    handleSkipBackward,
-    handleSkipForward,
-    handleStop,
-}: {
-    handleNextTrack: () => void;
-    handlePause: () => void;
-    handlePlay: () => void;
-    handlePrevTrack: () => void;
-    handleSeekSlider: (e: any | number) => void;
-    handleSkipBackward: (seconds: number) => void;
-    handleSkipForward: (seconds: number) => void;
-    handleStop: () => void;
-}) => {
+export const useMediaSession = () => {
     const { mediaSession: mediaSessionEnabled } = usePlaybackSettings();
-    const playerStatus = useCurrentStatus();
-    const currentSong = useCurrentSong();
+    const player = usePlayer();
     const mediaSession = navigator.mediaSession;
     const skip = useSettingsStore((state) => state.general.skipButtons);
 
+    const isMediaSessionEnabled = useMemo(() => {
+        return mediaSessionEnabled && mediaSession;
+    }, [mediaSessionEnabled, mediaSession]);
+
     useEffect(() => {
-        if (!mediaSessionEnabled || !mediaSession) {
+        if (!isMediaSessionEnabled) {
             return;
         }
 
         mediaSession.setActionHandler('nexttrack', () => {
-            handleNextTrack();
+            player.mediaNext();
         });
 
         mediaSession.setActionHandler('pause', () => {
-            handlePause();
+            player.mediaPause();
         });
 
         mediaSession.setActionHandler('play', () => {
-            handlePlay();
+            player.mediaPlay();
         });
 
         mediaSession.setActionHandler('previoustrack', () => {
-            handlePrevTrack();
+            player.mediaPrevious();
         });
 
         mediaSession.setActionHandler('seekto', (e) => {
-            handleSeekSlider(e.seekTime);
+            if (e.seekTime) {
+                player.mediaSeekToTimestamp(e.seekTime);
+            } else if (e.seekOffset) {
+                const currentTimestamp = useTimestampStoreBase.getState().timestamp;
+                player.mediaSeekToTimestamp(currentTimestamp + e.seekOffset);
+            }
         });
 
         mediaSession.setActionHandler('stop', () => {
-            handleStop();
+            player.mediaStop();
         });
 
         mediaSession.setActionHandler('seekbackward', (e) => {
-            handleSkipBackward(e.seekOffset || skip?.skipBackwardSeconds || 5);
+            const currentTimestamp = useTimestampStoreBase.getState().timestamp;
+            player.mediaSeekToTimestamp(
+                currentTimestamp - (e.seekOffset || skip?.skipBackwardSeconds || 5),
+            );
         });
 
         mediaSession.setActionHandler('seekforward', (e) => {
-            handleSkipForward(e.seekOffset || skip?.skipForwardSeconds || 5);
+            const currentTimestamp = useTimestampStoreBase.getState().timestamp;
+            player.mediaSeekToTimestamp(
+                currentTimestamp + (e.seekOffset || skip?.skipForwardSeconds || 5),
+            );
         });
 
         return () => {
@@ -81,55 +74,37 @@ export const useMediaSession = ({
             mediaSession.setActionHandler('seekforward', null);
         };
     }, [
-        handleNextTrack,
-        handlePause,
-        handlePlay,
-        handlePrevTrack,
-        handleSeekSlider,
-        handleSkipBackward,
-        handleSkipForward,
-        handleStop,
-        mediaSession,
-        mediaSessionEnabled,
+        player,
         skip?.skipBackwardSeconds,
         skip?.skipForwardSeconds,
+        isMediaSessionEnabled,
+        mediaSession,
     ]);
 
-    useEffect(() => {
-        if (!mediaSessionEnabled || !mediaSession) {
-            return;
-        }
+    usePlayerEvents(
+        {
+            onCurrentSongChange: (properties) => {
+                if (!isMediaSessionEnabled) {
+                    return;
+                }
 
-        const updateMetadata = () => {
-            mediaSession.metadata = new MediaMetadata({
-                album: currentSong?.album ?? '',
-                artist: currentSong?.artistName ?? '',
-                artwork: currentSong?.imageUrl
-                    ? [{ src: currentSong.imageUrl, type: 'image/png' }]
-                    : [],
-                title: currentSong?.name ?? '',
-            });
-        };
+                const song = properties.song;
+                mediaSession.metadata = new MediaMetadata({
+                    album: song?.album ?? '',
+                    artist: song?.artistName ?? '',
+                    artwork: song?.imageUrl ? [{ src: song.imageUrl, type: 'image/png' }] : [],
+                    title: song?.name ?? '',
+                });
+            },
+            onPlayerStatus: (properties) => {
+                if (!isMediaSessionEnabled) {
+                    return;
+                }
 
-        updateMetadata();
-
-        return () => {
-            mediaSession.metadata = null;
-        };
-    }, [currentSong, mediaSession, mediaSessionEnabled]);
-
-    useEffect(() => {
-        if (!mediaSessionEnabled || !mediaSession) {
-            return;
-        }
-
-        if (mediaSession) {
-            const status = playerStatus === PlayerStatus.PLAYING ? 'playing' : 'paused';
-            mediaSession.playbackState = status;
-        }
-
-        return () => {
-            mediaSession.playbackState = 'none';
-        };
-    }, [playerStatus, mediaSession, mediaSessionEnabled]);
+                const status = properties.status;
+                mediaSession.playbackState = status === PlayerStatus.PLAYING ? 'playing' : 'paused';
+            },
+        },
+        [isMediaSessionEnabled, mediaSession],
+    );
 };

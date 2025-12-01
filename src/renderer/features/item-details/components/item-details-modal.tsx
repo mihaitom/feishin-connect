@@ -1,10 +1,9 @@
+import { TFunction } from 'i18next';
 import { ReactNode } from 'react';
-import { TFunction, useTranslation } from 'react-i18next';
-import { generatePath } from 'react-router';
-import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { generatePath, Link } from 'react-router';
 
 import { SongPath } from '/@/renderer/features/item-details/components/song-path';
-import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
 import { formatDurationString, formatSizeString } from '/@/renderer/utils';
 import { formatDateRelative, formatRating } from '/@/renderer/utils/format';
@@ -17,11 +16,12 @@ import { Separator } from '/@/shared/components/separator/separator';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Table } from '/@/shared/components/table/table';
 import { Text } from '/@/shared/components/text/text';
-import { ExplicitStatus } from '/@/shared/types/domain-types';
 import {
     Album,
     AlbumArtist,
     AnyLibraryItem,
+    Artist,
+    ExplicitStatus,
     LibraryItem,
     Playlist,
     RelatedArtist,
@@ -29,17 +29,21 @@ import {
 } from '/@/shared/types/domain-types';
 
 export type ItemDetailsModalProps = {
-    item: Album | AlbumArtist | Playlist | Song;
+    item: Album | AlbumArtist | Artist | Playlist | Song;
 };
 
 type ItemDetailRow<T> = {
     key?: keyof T;
     label: string;
     postprocess?: string[];
-    render?: (item: T, t: TFunction) => ReactNode;
+    render?: (item: T, t: TFunction<'translation'>) => ReactNode;
 };
 
-const handleRow = <T extends AnyLibraryItem>(t: TFunction, item: T, rule: ItemDetailRow<T>) => {
+const handleRow = <T extends AnyLibraryItem>(
+    t: TFunction<'translation'>,
+    item: T,
+    rule: ItemDetailRow<T>,
+) => {
     let value: ReactNode;
 
     if (rule.render) {
@@ -68,7 +72,7 @@ const formatArtists = (artists: null | RelatedArtist[] | undefined) =>
             {artist.id ? (
                 <Text
                     component={Link}
-                    fw={700}
+                    fw={600}
                     isLink
                     overflow="visible"
                     size="md"
@@ -94,8 +98,6 @@ const formatComment = (item: Album | Song) =>
     item.comment ? <Spoiler maxHeight={50}>{replaceURLWithHTMLLinks(item.comment)}</Spoiler> : null;
 
 const FormatGenre = (item: Album | AlbumArtist | Playlist | Song) => {
-    const genreRoute = useGenreRoute();
-
     if (!item.genres?.length) {
         return null;
     }
@@ -105,11 +107,15 @@ const FormatGenre = (item: Album | AlbumArtist | Playlist | Song) => {
             {index > 0 && <Separator />}
             <Text
                 component={Link}
-                fw={700}
+                fw={600}
                 isLink
                 overflow="visible"
                 size="md"
-                to={genre.id ? generatePath(genreRoute, { genreId: genre.id }) : ''}
+                to={
+                    genre.id
+                        ? generatePath(AppRoute.LIBRARY_GENRES_DETAIL, { genreId: genre.id })
+                        : ''
+                }
             >
                 {genre.name || '—'}
             </Text>
@@ -264,7 +270,7 @@ const SongPropertyMapping: ItemDetailRow<Song>[] = [
             song.album && (
                 <Text
                     component={Link}
-                    fw={700}
+                    fw={600}
                     isLink
                     overflow="visible"
                     size="md"
@@ -402,7 +408,7 @@ export const ItemDetailsModal = ({ item }: ItemDetailsModalProps) => {
     const { t } = useTranslation();
     let body: ReactNode[] = [];
 
-    switch (item.itemType) {
+    switch (item._itemType) {
         case LibraryItem.ALBUM:
             body = AlbumPropertyMapping.map((rule) => handleRow(t, item, rule));
             body.push(...handleParticipants(item, t));
@@ -424,7 +430,21 @@ export const ItemDetailsModal = ({ item }: ItemDetailsModalProps) => {
     }
 
     return (
-        <Table highlightOnHover variant="vertical" withRowBorders={false} withTableBorder>
+        <Table
+            highlightOnHover={false}
+            styles={{
+                th: {
+                    color: 'var(--theme-colors-foreground-muted)',
+                    fontWeight: 500,
+                    padding: 'var(--theme-spacing-sm)',
+                },
+                tr: {
+                    color: 'var(--theme-colors-foreground-muted)',
+                    padding: 'var(--theme-spacing-xl)',
+                },
+            }}
+            withRowBorders={true}
+        >
             <Table.Tbody>{body}</Table.Tbody>
         </Table>
     );

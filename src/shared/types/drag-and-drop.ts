@@ -8,9 +8,11 @@ export enum DragTarget {
     ARTIST = LibraryItem.ARTIST,
     GENERIC = 'generic',
     GENRE = LibraryItem.GENRE,
+    GRID_ROW = 'gridRow',
     PLAYLIST = LibraryItem.PLAYLIST,
+    QUEUE_SONG = LibraryItem.QUEUE_SONG,
+    SONG = LibraryItem.SONG,
     TABLE_COLUMN = 'tableColumn',
-    TRACK = LibraryItem.SONG,
 }
 
 export const DragTargetMap = {
@@ -19,7 +21,9 @@ export const DragTargetMap = {
     [LibraryItem.ARTIST]: DragTarget.ARTIST,
     [LibraryItem.GENRE]: DragTarget.GENRE,
     [LibraryItem.PLAYLIST]: DragTarget.PLAYLIST,
-    [LibraryItem.SONG]: DragTarget.TRACK,
+    [LibraryItem.PLAYLIST_SONG]: DragTarget.SONG,
+    [LibraryItem.QUEUE_SONG]: DragTarget.QUEUE_SONG,
+    [LibraryItem.SONG]: DragTarget.SONG,
 };
 
 export enum DragOperation {
@@ -38,6 +42,7 @@ export interface DragData<
 > {
     id: string[];
     item?: TDataType[];
+    itemType?: LibraryItem;
     metadata?: T;
     operation?: DragOperation[];
     type: DragTarget;
@@ -52,14 +57,16 @@ export const dndUtils = {
         args: {
             id: string[];
             item?: TDataType[];
+            itemType?: LibraryItem;
             operation?: DragOperation[];
-            type: DragTarget;
+            type: DragTarget | string;
         },
         metadata?: T,
     ) => {
         return {
             id: args.id,
             item: args.item,
+            itemType: args.itemType,
             metadata,
             operation: args.operation,
             type: args.type,

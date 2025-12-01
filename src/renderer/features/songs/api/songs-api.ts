@@ -21,6 +21,7 @@ export const songsQueries = {
     },
     listCount: (args: QueryHookArgs<ListCountQuery<SongListQuery>>) => {
         return queryOptions({
+            gcTime: 1000 * 60 * 60 * 12,
             queryFn: ({ signal }) => {
                 return api.controller.getSongListCount({
                     apiClientProps: { serverId: args.serverId, signal },
@@ -31,6 +32,7 @@ export const songsQueries = {
                 args.serverId,
                 Object.keys(args.query).length === 0 ? undefined : args.query,
             ),
+            staleTime: 1000 * 60 * 60 * 12,
             ...args.options,
         });
     },

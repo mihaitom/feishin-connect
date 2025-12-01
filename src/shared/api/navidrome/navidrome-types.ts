@@ -76,7 +76,9 @@ export const NDSongQueryFields = [
     { label: 'Arranger', type: 'string', value: 'arranger' },
     { label: 'Artist', type: 'string', value: 'artist' },
     { label: 'Artists', type: 'string', value: 'artists' },
+    { label: 'ASIN', type: 'string', value: 'asin' },
     { label: 'Barcode', type: 'string', value: 'barcode' },
+    { label: 'Bit Depth', type: 'number', value: 'bitdepth' },
     { label: 'Bitrate', type: 'number', value: 'bitrate' },
     { label: 'BPM', type: 'number', value: 'bpm' },
     { label: 'Catalog Number', type: 'string', value: 'catalognumber' },
@@ -110,6 +112,7 @@ export const NDSongQueryFields = [
     { label: 'Key', type: 'string', value: 'key' },
     { label: 'Language', type: 'string', value: 'language' },
     { label: 'License', type: 'string', value: 'license' },
+    { label: 'Library Id', type: 'string', value: 'library_id' },
     { label: 'Lyricist', type: 'string', value: 'lyricist' },
     { label: 'Lyrics', type: 'string', value: 'lyrics' },
     { label: 'Media', type: 'string', value: 'media' },
@@ -118,12 +121,24 @@ export const NDSongQueryFields = [
     { label: 'Movement', type: 'string', value: 'movement' },
     { label: 'Movement Name', type: 'string', value: 'movementname' },
     { label: 'Movement Total', type: 'number', value: 'movementtotal' },
-    { label: 'MusicBrainz Artist Id', type: 'string', value: 'musicbrainz_artistid' },
-    { label: 'MusicBrainz Album Artist Id', type: 'string', value: 'musicbrainz_albumartistid' },
-    { label: 'MusicBrainz Album Id', type: 'string', value: 'musicbrainz_albumid' },
+    { label: 'MusicBrainz Album Artist Id', type: 'string', value: 'mbz_album_artist_id' },
+    { label: 'MusicBrainz Album Id', type: 'string', value: 'mbz_album_id' },
+    { label: 'MusicBrainz Artist Id', type: 'string', value: 'mbz_artist_id' },
+    { label: 'MusicBrainz Arranger Id', type: 'string', value: 'musicbrainz_arrangerid' },
+    { label: 'MusicBrainz Composer Id', type: 'string', value: 'musicbrainz_composerid' },
+    { label: 'MusicBrainz Conductor Id', type: 'string', value: 'musicbrainz_conductorid' },
+    { label: 'MusicBrainz Director Id', type: 'string', value: 'musicbrainz_directorid' },
     { label: 'MusicBrainz Disc Id', type: 'string', value: 'musicbrainz_discid' },
-    { label: 'MusicBrainz Recording Id', type: 'string', value: 'musicbrainz_recordingid' },
-    { label: 'MusicBrainz Release Group Id', type: 'string', value: 'musicbrainz_releasegroupid' },
+    { label: 'MusicBrainz DJ Mixer Id', type: 'string', value: 'musicbrainz_djmixerid' },
+    { label: 'MusicBrainz Engineer Id', type: 'string', value: 'musicbrainz_engineerid' },
+    { label: 'MusicBrainz Lyricist Id', type: 'string', value: 'musicbrainz_lyricistid' },
+    { label: 'MusicBrainz Mixer Id', type: 'string', value: 'musicbrainz_mixerid' },
+    { label: 'MusicBrainz Performer Id', type: 'string', value: 'musicbrainz_performerid' },
+    { label: 'MusicBrainz Producer Id', type: 'string', value: 'musicbrainz_producerid' },
+    { label: 'MusicBrainz Recording Id', type: 'string', value: 'mbz_recording_id' },
+    { label: 'MusicBrainz Release Group Id', type: 'string', value: 'mbz_release_group_id' },
+    { label: 'MusicBrainz Release Track Id', type: 'string', value: 'mbz_release_track_id' },
+    { label: 'MusicBrainz Remixer Id', type: 'string', value: 'musicbrainz_remixerid' },
     { label: 'MusicBrainz Track Id', type: 'string', value: 'musicbrainz_trackid' },
     { label: 'MusicBrainz Work Id', type: 'string', value: 'musicbrainz_workid' },
     { label: 'Name', type: 'string', value: 'title' },
@@ -159,9 +174,9 @@ export const NDSongQueryFields = [
     { label: 'Subtitle', type: 'string', value: 'subtitle' },
     { label: 'Track Number', type: 'number', value: 'track' },
     { label: 'Track Total', type: 'number', value: 'tracktotal' },
-    { label: 'Year', type: 'number', value: 'year' },
     { label: 'Website', type: 'string', value: 'website' },
     { label: 'Work', type: 'string', value: 'work' },
+    { label: 'Year', type: 'number', value: 'year' },
 ];
 
 export const NDSongQueryPlaylistOperators = [
@@ -177,6 +192,9 @@ export const NDSongQueryDateOperators = [
     { label: 'is in the last', value: 'inTheLast' },
     { label: 'is not in the last', value: 'notInTheLast' },
     { label: 'is in the range', value: 'inTheRange' },
+    { label: 'is before (date)', value: 'beforeDate' },
+    { label: 'is after (date)', value: 'afterDate' },
+    { label: 'is in the range (date)', value: 'inTheRangeDate' },
 ];
 
 export const NDSongQueryStringOperators = [
@@ -266,6 +284,7 @@ const genreListSort = {
 
 const genreListParameters = paginationParameters.extend({
     _sort: z.nativeEnum(genreListSort).optional(),
+    library_id: z.array(z.string()).optional(),
     name: z.string().optional(),
 });
 
@@ -308,6 +327,7 @@ const albumArtistList = z.array(albumArtist);
 const albumArtistListParameters = paginationParameters.extend({
     _sort: z.nativeEnum(NDAlbumArtistListSort).optional(),
     genre_id: z.string().optional(),
+    library_id: z.array(z.string()).optional(),
     missing: z.boolean().optional(),
     name: z.string().optional(),
     role: z.string().optional(),
@@ -374,6 +394,7 @@ const albumListParameters = paginationParameters.extend({
     genre_id: z.union([z.string(), z.string().array()]).optional(),
     has_rating: z.boolean().optional(),
     id: z.string().optional(),
+    library_id: z.array(z.string()).optional(),
     name: z.string().optional(),
     recently_added: z.boolean().optional(),
     recently_played: z.boolean().optional(),
@@ -456,6 +477,7 @@ const songListParameters = paginationParameters.extend({
     artist_id: z.array(z.string()).optional(),
     artists_id: z.array(z.string()).optional(),
     genre_id: z.array(z.string()).optional(),
+    library_id: z.array(z.string()).optional(),
     path: z.string().optional(),
     starred: z.boolean().optional(),
     title: z.string().optional(),

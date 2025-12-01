@@ -85,5 +85,10 @@ export const UpdateSettings = () => {
         },
     ];
 
-    return <SettingsSection divider={true} options={updateOptions} />;
+    return (
+        <SettingsSection
+            options={updateOptions}
+            title={t('page.setting.updates', { postProcess: 'sentenceCase' })}
+        />
+    );
 };

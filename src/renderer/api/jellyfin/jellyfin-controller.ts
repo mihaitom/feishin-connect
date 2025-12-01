@@ -206,9 +206,9 @@ export const JellyfinController: InternalControllerEndpoint = {
         const res = await jfApiClient(apiClientProps).getAlbumArtistList({
             query: {
                 Fields: 'Genres, DateCreated, ExternalUrls, Overview',
+                FolderId: getLibraryId(query.musicFolderId),
                 ImageTypeLimit: 1,
                 Limit: query.limit,
-                ParentId: query.musicFolderId,
                 Recursive: true,
                 SearchTerm: query.searchTerm,
                 SortBy: albumArtistListSortMap.jellyfin[query.sortBy] || 'SortName,Name',
@@ -316,17 +316,17 @@ export const JellyfinController: InternalControllerEndpoint = {
             query: {
                 ...artistQuery,
                 Fields: 'People, Tags',
-                GenreIds: query.genres ? query.genres.join(',') : undefined,
+                FolderId: getLibraryId(query.musicFolderId),
+                GenreIds: query.genreIds ? query.genreIds.join(',') : undefined,
                 IncludeItemTypes: 'MusicAlbum',
                 IsFavorite: query.favorite,
                 Limit: query.limit,
-                ParentId: query.musicFolderId,
                 Recursive: true,
                 SearchTerm: query.searchTerm,
                 SortBy: albumListSortMap.jellyfin[query.sortBy] || 'SortName',
                 SortOrder: sortOrderMap.jellyfin[query.sortOrder],
                 StartIndex: query.startIndex,
-                ...query._custom?.jellyfin,
+                ...query._custom,
                 Years: yearsFilter,
             },
         });
@@ -352,9 +352,9 @@ export const JellyfinController: InternalControllerEndpoint = {
         const res = await jfApiClient(apiClientProps).getArtistList({
             query: {
                 Fields: 'Genres, DateCreated, ExternalUrls, Overview',
+                FolderId: getLibraryId(query.musicFolderId),
                 ImageTypeLimit: 1,
                 Limit: query.limit,
-                ParentId: query.musicFolderId,
                 Recursive: true,
                 SearchTerm: query.searchTerm,
                 SortBy: albumArtistListSortMap.jellyfin[query.sortBy] || 'SortName,Name',
@@ -397,8 +397,8 @@ export const JellyfinController: InternalControllerEndpoint = {
             query: {
                 EnableTotalRecordCount: true,
                 Fields: 'ItemCounts',
-                Limit: query.limit,
-                ParentId: query?.musicFolderId,
+                FolderId: getLibraryId(query.musicFolderId),
+                Limit: query.limit === -1 ? undefined : query.limit,
                 Recursive: true,
                 SearchTerm: query?.searchTerm,
                 SortBy: genreListSortMap.jellyfin[query.sortBy] || 'SortName',
@@ -552,7 +552,7 @@ export const JellyfinController: InternalControllerEndpoint = {
         }
 
         return {
-            items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server, '')),
+            items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server)),
             startIndex: 0,
             totalRecordCount: res.body.TotalRecordCount,
         };
@@ -579,6 +579,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             },
             query: {
                 Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
+                FolderId: getLibraryId(query.musicFolderId),
                 GenreIds: query.genre ? query.genre : undefined,
                 IncludeItemTypes: 'Audio',
                 IsPlayed:
@@ -588,7 +589,6 @@ export const JellyfinController: InternalControllerEndpoint = {
                           ? true
                           : undefined,
                 Limit: query.limit,
-                ParentId: query.musicFolderId,
                 Recursive: true,
                 SortBy: JFSongListSort.RANDOM,
                 SortOrder: JFSortOrder.ASC,
@@ -602,7 +602,7 @@ export const JellyfinController: InternalControllerEndpoint = {
         }
 
         return {
-            items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server, '')),
+            items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server)),
             startIndex: 0,
             totalRecordCount: res.body.Items.length || 0,
         };
@@ -647,7 +647,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             if (res.status === 200 && res.body.Items.length) {
                 const results = res.body.Items.reduce<Song[]>((acc, song) => {
                     if (song.Id !== query.songId) {
-                        acc.push(jfNormalize.song(song, apiClientProps.server, ''));
+                        acc.push(jfNormalize.song(song, apiClientProps.server));
                     }
 
                     return acc;
@@ -676,7 +676,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 
         return mix.body.Items.reduce<Song[]>((acc, song) => {
             if (song.Id !== query.songId) {
-                acc.push(jfNormalize.song(song, apiClientProps.server, ''));
+                acc.push(jfNormalize.song(song, apiClientProps.server));
             }
 
             return acc;
@@ -696,7 +696,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             throw new Error('Failed to get song detail');
         }
 
-        return jfNormalize.song(res.body, apiClientProps.server, '');
+        return jfNormalize.song(res.body, apiClientProps.server);
     },
     getSongList: async (args) => {
         const { apiClientProps, query } = args;
@@ -738,17 +738,17 @@ export const JellyfinController: InternalControllerEndpoint = {
                         AlbumIds: albumIdsFilter,
                         ArtistIds: artistIdsFilter,
                         Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
+                        FolderId: getLibraryId(query.musicFolderId),
                         GenreIds: query.genreIds?.join(','),
                         IncludeItemTypes: 'Audio',
                         IsFavorite: query.favorite,
                         Limit: query.limit,
-                        ParentId: query.musicFolderId,
                         Recursive: true,
                         SearchTerm: query.searchTerm,
                         SortBy: songListSortMap.jellyfin[query.sortBy] || 'Album,SortName',
                         SortOrder: sortOrderMap.jellyfin[query.sortOrder],
                         StartIndex: query.startIndex,
-                        ...query._custom?.jellyfin,
+                        ...query._custom,
                         Years: yearsFilter,
                     },
                 });
@@ -765,25 +765,25 @@ export const JellyfinController: InternalControllerEndpoint = {
                 ? formatCommaDelimitedString(query.albumIds)
                 : undefined;
 
+            const parentIdFilter = [albumIdsFilter, artistIdsFilter].filter(Boolean).join(',');
+
             const res = await jfApiClient(apiClientProps).getSongList({
                 params: {
                     userId: apiClientProps.server?.userId,
                 },
                 query: {
-                    AlbumIds: albumIdsFilter,
-                    ArtistIds: artistIdsFilter,
                     Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
                     GenreIds: query.genreIds?.join(','),
                     IncludeItemTypes: 'Audio',
                     IsFavorite: query.favorite,
                     Limit: query.limit,
-                    ParentId: query.musicFolderId,
+                    ParentId: parentIdFilter,
                     Recursive: true,
                     SearchTerm: query.searchTerm,
                     SortBy: songListSortMap.jellyfin[query.sortBy] || 'Album,SortName',
                     SortOrder: sortOrderMap.jellyfin[query.sortOrder],
                     StartIndex: query.startIndex,
-                    ...query._custom?.jellyfin,
+                    ...query._custom,
                     Years: yearsFilter,
                 },
             });
@@ -809,7 +809,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 
         return {
             items: items.map((item) =>
-                jfNormalize.song(item, apiClientProps.server, '', query.imageSize),
+                jfNormalize.song(item, apiClientProps.server, query.imageSize),
             ),
             startIndex: query.startIndex,
             totalRecordCount,
@@ -820,6 +820,39 @@ export const JellyfinController: InternalControllerEndpoint = {
             apiClientProps,
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
+    getStreamUrl: ({ apiClientProps: { server }, query }) => {
+        const { bitrate, format, id, transcode } = query;
+        const deviceId = '';
+
+        let url =
+            `${server?.url}/audio` +
+            `/${id}/universal` +
+            `?userId=${server?.userId}` +
+            `&deviceId=${deviceId}` +
+            '&audioCodec=aac' +
+            `&apiKey=${server?.credential}` +
+            `&playSessionId=${deviceId}` +
+            '&container=opus,mp3,aac,m4a,m4b,flac,wav,ogg';
+
+        if (transcode) {
+            // Some format appears to be required. Fall back to trusty MP3 if not specified
+            // Otherwise, ffmpeg appears to crash
+            const realFormat = format || 'mp3';
+
+            url += `&transcodingProtocol=http&transcodingContainer=${realFormat}`;
+            url = url.replace('audioCodec=aac', `audioCodec=${realFormat}`);
+            url = url.replace(
+                '&container=opus,mp3,aac,m4a,m4b,flac,wav,ogg',
+                `&container=${realFormat}`,
+            );
+
+            if (bitrate !== undefined) {
+                url += `&maxStreamingBitrate=${bitrate * 1000}`;
+            }
+        }
+
+        return url;
+    },
     getTags: async (args) => {
         const { apiClientProps, query } = args;
 
@@ -873,23 +906,10 @@ export const JellyfinController: InternalControllerEndpoint = {
         }
 
         return {
-            items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server, '')),
+            items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server)),
             startIndex: 0,
             totalRecordCount: res.body.TotalRecordCount,
         };
-    },
-    getTranscodingUrl: (args) => {
-        const { base, bitrate, format } = args.query;
-        let url = base.replace('transcodingProtocol=hls', 'transcodingProtocol=http');
-        if (format) {
-            url = url.replace('audioCodec=aac', `audioCodec=${format}`);
-            url = url.replace('transcodingContainer=ts', `transcodingContainer=${format}`);
-        }
-        if (bitrate !== undefined) {
-            url += `&maxStreamingBitrate=${bitrate * 1000}`;
-        }
-
-        return url;
     },
     movePlaylistItem: async (args) => {
         const { apiClientProps, query } = args;
@@ -1082,7 +1102,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 jfNormalize.albumArtist(item, apiClientProps.server),
             ),
             albums: albums.map((item) => jfNormalize.album(item, apiClientProps.server)),
-            songs: songs.map((item) => jfNormalize.song(item, apiClientProps.server, '')),
+            songs: songs.map((item) => jfNormalize.song(item, apiClientProps.server)),
         };
     },
     updatePlaylist: async (args) => {
@@ -1140,3 +1160,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 //         totalRecordCount: res.body.TotalRecordCount,
 //     };
 // };
+
+function getLibraryId(musicFolderId?: string | string[]) {
+    return Array.isArray(musicFolderId) ? musicFolderId[0] : musicFolderId;
+}

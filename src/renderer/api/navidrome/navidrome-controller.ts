@@ -59,6 +59,14 @@ const excludeMissing = (server?: null | ServerListItemWithCredential) => {
     return undefined;
 };
 
+const getLibraryId = (musicFolderId?: string | string[]): string[] | undefined => {
+    if (!musicFolderId) {
+        return undefined;
+    }
+
+    return Array.isArray(musicFolderId) ? musicFolderId : [musicFolderId];
+};
+
 const getArtistSongKey = (server: null | ServerListItemWithCredential) =>
     hasFeature(server, ServerFeature.TRACK_ALBUM_ARTIST_SEARCH) ? 'artists_id' : 'album_artist_id';
 
@@ -111,8 +119,7 @@ export const NavidromeController: InternalControllerEndpoint = {
                 comment: body.comment,
                 name: body.name,
                 public: body.public,
-                rules: body._custom?.navidrome?.rules,
-                sync: body._custom?.navidrome?.sync,
+                ...body._custom,
             },
         });
 
@@ -190,8 +197,10 @@ export const NavidromeController: InternalControllerEndpoint = {
                 _order: sortOrderMap.navidrome[query.sortOrder],
                 _sort: albumArtistListSortMap.navidrome[query.sortBy],
                 _start: query.startIndex,
+                library_id: getLibraryId(query.musicFolderId),
                 name: query.searchTerm,
-                ...query._custom?.navidrome,
+                starred: query.favorite,
+                ...query._custom,
                 role: hasFeature(apiClientProps.server, ServerFeature.BFR) ? 'albumartist' : '',
                 ...excludeMissing(apiClientProps.server),
             },
@@ -276,8 +285,8 @@ export const NavidromeController: InternalControllerEndpoint = {
         const { apiClientProps, query } = args;
 
         const genres = hasFeature(apiClientProps.server, ServerFeature.BFR)
-            ? query.genres
-            : query.genres?.[0];
+            ? query.genreIds
+            : query.genreIds?.[0];
 
         const res = await ndApiClient(apiClientProps).getAlbumList({
             query: {
@@ -288,8 +297,10 @@ export const NavidromeController: InternalControllerEndpoint = {
                 artist_id: query.artistIds?.[0],
                 compilation: query.compilation,
                 genre_id: genres,
+                library_id: getLibraryId(query.musicFolderId),
                 name: query.searchTerm,
-                ...query._custom?.navidrome,
+                year: query.maxYear || query.minYear,
+                ...query._custom,
                 starred: query.favorite,
                 ...excludeMissing(apiClientProps.server),
             },
@@ -319,8 +330,10 @@ export const NavidromeController: InternalControllerEndpoint = {
                 _order: sortOrderMap.navidrome[query.sortOrder],
                 _sort: albumArtistListSortMap.navidrome[query.sortBy],
                 _start: query.startIndex,
+                library_id: getLibraryId(query.musicFolderId),
                 name: query.searchTerm,
-                ...query._custom?.navidrome,
+                starred: query.favorite,
+                ...query._custom,
                 role: query.role || undefined,
                 ...excludeMissing(apiClientProps.server),
             },
@@ -362,6 +375,7 @@ export const NavidromeController: InternalControllerEndpoint = {
                 _order: sortOrderMap.navidrome[query.sortOrder],
                 _sort: genreListSortMap.navidrome[query.sortBy],
                 _start: query.startIndex,
+                library_id: getLibraryId(query.musicFolderId),
                 name: query.searchTerm,
             },
         });
@@ -371,7 +385,7 @@ export const NavidromeController: InternalControllerEndpoint = {
         }
 
         return {
-            items: res.body.data.map((genre) => ndNormalize.genre(genre)),
+            items: res.body.data.map((genre) => ndNormalize.genre(genre, apiClientProps.server)),
             startIndex: query.startIndex || 0,
             totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
         };
@@ -395,7 +409,7 @@ export const NavidromeController: InternalControllerEndpoint = {
     },
     getPlaylistList: async (args) => {
         const { apiClientProps, query } = args;
-        const customQuery = query._custom?.navidrome;
+        const customQuery = query._custom;
 
         // Smart playlists only became available in 0.48.0. Do not filter for previous versions
         if (
@@ -481,6 +495,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             ...navidromeFeatures,
             ...subsonicArgs.features,
             publicPlaylist: [1],
+            [ServerFeature.MUSIC_FOLDER_MULTISELECT]: [1],
         };
 
         return {
@@ -568,9 +583,11 @@ export const NavidromeController: InternalControllerEndpoint = {
                 album_id: query.albumIds,
                 genre_id: query.genreIds,
                 [getArtistSongKey(apiClientProps.server)]: query.artistIds ?? query.albumArtistIds,
+                library_id: getLibraryId(query.musicFolderId),
                 starred: query.favorite,
                 title: query.searchTerm,
-                ...query._custom?.navidrome,
+                year: query.maxYear || query.minYear,
+                ...query._custom,
                 ...excludeMissing(apiClientProps.server),
             },
         });
@@ -592,6 +609,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             apiClientProps,
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
+    getStreamUrl: SubsonicController.getStreamUrl,
     getStructuredLyrics: SubsonicController.getStructuredLyrics,
     getTags: async (args) => {
         const { apiClientProps } = args;
@@ -633,7 +651,6 @@ export const NavidromeController: InternalControllerEndpoint = {
         };
     },
     getTopSongs: SubsonicController.getTopSongs,
-    getTranscodingUrl: SubsonicController.getTranscodingUrl,
     getUserList: async (args) => {
         const { apiClientProps, query } = args;
 
@@ -643,7 +660,7 @@ export const NavidromeController: InternalControllerEndpoint = {
                 _order: sortOrderMap.navidrome[query.sortOrder],
                 _sort: userListSortMap.navidrome[query.sortBy],
                 _start: query.startIndex,
-                ...query._custom?.navidrome,
+                ...query._custom,
             },
         });
 
@@ -724,8 +741,7 @@ export const NavidromeController: InternalControllerEndpoint = {
                 comment: body.comment || '',
                 name: body.name,
                 public: body?.public || false,
-                rules: body._custom?.navidrome?.rules ? body._custom.navidrome.rules : undefined,
-                sync: body._custom?.navidrome?.sync || undefined,
+                ...body._custom,
             },
             params: {
                 id: query.id,

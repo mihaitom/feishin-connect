@@ -38,6 +38,7 @@ export const sharedQueries = {
                 });
             },
             queryKey: queryKeys.tags.list(args.serverId || '', args.query.type),
+            staleTime: 1000 * 60,
             ...args.options,
         });
     },

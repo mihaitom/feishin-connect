@@ -38,6 +38,7 @@ export const artistsQueries = {
     },
     albumArtistListCount: (args: QueryHookArgs<ListCountQuery<AlbumArtistListQuery>>) => {
         return queryOptions({
+            gcTime: 1000 * 60 * 60 * 12,
             queryFn: ({ signal }) => {
                 return api.controller.getAlbumArtistListCount({
                     apiClientProps: { serverId: args.serverId, signal },
@@ -48,21 +49,38 @@ export const artistsQueries = {
                 args.serverId,
                 Object.keys(args.query).length === 0 ? undefined : args.query,
             ),
+            staleTime: 1000 * 60 * 60 * 12,
+            ...args.options,
+        });
+    },
+    artistList: (args: QueryHookArgs<ArtistListQuery>) => {
+        return queryOptions({
+            queryFn: ({ signal }) => {
+                return api.controller.getArtistList({
+                    apiClientProps: { serverId: args.serverId, signal },
+                    query: args.query,
+                });
+            },
+            queryKey: queryKeys.artists.list(args.serverId, args.query),
             ...args.options,
         });
     },
     artistListCount: (args: QueryHookArgs<ListCountQuery<ArtistListQuery>>) => {
         return queryOptions({
+            gcTime: 1000 * 60 * 60 * 12,
             queryFn: ({ signal }) => {
-                return api.controller.getArtistListCount({
-                    apiClientProps: { serverId: args.serverId, signal },
-                    query: args.query,
-                });
+                return api.controller
+                    .getArtistList({
+                        apiClientProps: { serverId: args.serverId, signal },
+                        query: { ...args.query, limit: 1, startIndex: 0 },
+                    })
+                    .then((result) => result?.totalRecordCount ?? 0);
             },
-            queryKey: queryKeys.albumArtists.count(
+            queryKey: queryKeys.artists.count(
                 args.serverId,
                 Object.keys(args.query).length === 0 ? undefined : args.query,
             ),
+            staleTime: 1000 * 60 * 60 * 12,
             ...args.options,
         });
     },

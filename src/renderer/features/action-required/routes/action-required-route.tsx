@@ -1,6 +1,7 @@
 import { openModal } from '@mantine/modals';
+import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 
 import { PageHeader } from '/@/renderer/components/page-header/page-header';
 import { ActionRequiredContainer } from '/@/renderer/features/action-required/components/action-required-container';
@@ -8,6 +9,7 @@ import { ServerCredentialRequired } from '/@/renderer/features/action-required/c
 import { ServerRequired } from '/@/renderer/features/action-required/components/server-required';
 import { ServerList } from '/@/renderer/features/servers/components/server-list';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServerWithCredential } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
@@ -15,6 +17,8 @@ import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
+
+const localSettings = isElectron() ? window.api.localSettings : null;
 
 const ActionRequiredRoute = () => {
     const { t } = useTranslation();
@@ -60,7 +64,7 @@ const ActionRequiredRoute = () => {
                     <Stack mt="2rem">
                         {canReturnHome && <Navigate to={AppRoute.HOME} />}
                         {/* This should be displayed if a credential is required */}
-                        {isCredentialRequired && (
+                        {isCredentialRequired && !localSettings?.env.SERVER_LOCK && (
                             <Group justify="center" wrap="nowrap">
                                 <Button
                                     fullWidth
@@ -81,4 +85,12 @@ const ActionRequiredRoute = () => {
     );
 };
 
-export default ActionRequiredRoute;
+const ActionRequiredRouteWithBoundary = () => {
+    return (
+        <PageErrorBoundary>
+            <ActionRequiredRoute />
+        </PageErrorBoundary>
+    );
+};
+
+export default ActionRequiredRouteWithBoundary;

@@ -5,9 +5,6 @@ import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createWithEqualityFn } from 'zustand/traditional';
 
-import { useAlbumArtistListDataStore } from '/@/renderer/store/album-artist-list-data.store';
-import { useAlbumListDataStore } from '/@/renderer/store/album-list-data.store';
-import { useListStore } from '/@/renderer/store/list.store';
 import { ServerListItem, ServerListItemWithCredential } from '/@/shared/types/domain-types';
 
 export interface AuthSlice extends AuthState {
@@ -16,6 +13,7 @@ export interface AuthSlice extends AuthState {
         deleteServer: (id: string) => void;
         getServer: (id: string) => null | ServerListItemWithCredential;
         setCurrentServer: (server: null | ServerListItemWithCredential) => void;
+        setMusicFolderId: (musicFolderId: string[] | undefined) => void;
         updateServer: (id: string, args: Partial<ServerListItemWithCredential>) => void;
     };
 }
@@ -53,26 +51,38 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
                     setCurrentServer: (server) => {
                         set((state) => {
                             state.currentServer = server;
-
-                            if (server) {
-                                // Reset list filters
-                                useListStore.getState()._actions.resetFilter();
-
-                                // Reset persisted grid list stores
-                                useAlbumListDataStore.getState().actions.setItemData([]);
-                                useAlbumArtistListDataStore.getState().actions.setItemData([]);
+                        });
+                    },
+                    setMusicFolderId: (musicFolderId: string[] | undefined) => {
+                        set((state) => {
+                            if (state.currentServer) {
+                                state.currentServer.musicFolderId = musicFolderId;
+                                const serverId = state.currentServer.id;
+                                if (state.serverList[serverId]) {
+                                    state.serverList[serverId].musicFolderId = musicFolderId;
+                                }
                             }
                         });
                     },
-                    updateServer: (id: string, args: Partial<ServerListItem>) => {
+                    updateServer: (id: string, args: Partial<ServerListItemWithCredential>) => {
                         set((state) => {
                             const updatedServer = {
                                 ...state.serverList[id],
                                 ...args,
                             };
 
+                            if (
+                                state.currentServer?.id === id &&
+                                !('musicFolderId' in args) &&
+                                state.currentServer.musicFolderId !== undefined
+                            ) {
+                                updatedServer.musicFolderId = state.currentServer.musicFolderId;
+                            }
+
                             state.serverList[id] = updatedServer;
-                            state.currentServer = updatedServer;
+                            if (state.currentServer?.id === id) {
+                                state.currentServer = updatedServer;
+                            }
                         });
                     },
                 },
@@ -90,13 +100,27 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
     ),
 );
 
-export const useCurrentServerId = () => useAuthStore((state) => state.currentServer)?.id || '';
+export const useCurrentServerId = (): string =>
+    useAuthStore((state) => {
+        const currentServer = state.currentServer;
+
+        if (!currentServer) {
+            return '';
+        }
+
+        return currentServer.id;
+    }, shallow);
 
 export const useCurrentServer = () =>
     useAuthStore((state) => {
+        if (!state.currentServer) {
+            return null;
+        }
+
         return {
             features: state.currentServer?.features,
             id: state.currentServer?.id,
+            musicFolderId: state.currentServer?.musicFolderId,
             name: state.currentServer?.name,
             preferInstantMix: state.currentServer?.preferInstantMix,
             savePassword: state.currentServer?.savePassword,
