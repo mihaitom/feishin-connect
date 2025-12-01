@@ -1109,7 +1109,7 @@ const initialState: SettingsState = {
         showLyricsInSidebar: true,
         showMatch: true,
         showProvider: true,
-        sources: [LyricSource.NETEASE],
+        sources: [LyricSource.NETEASE, LyricSource.LRCLIB],
         translationApiKey: '',
         translationApiProvider: '',
         translationTargetLanguage: 'en',
