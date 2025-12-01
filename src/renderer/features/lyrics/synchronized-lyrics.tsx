@@ -68,6 +68,10 @@ export const SynchronizedLyrics = ({
 
     const delayMsRef = useRef(settings.delayMs);
     const followRef = useRef(settings.follow);
+    const userScrollingRef = useRef(false);
+    const scrollTimeoutRef = useRef<null | ReturnType<typeof setTimeout>>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const programmaticScrollRef = useRef(false);
 
     const getCurrentLyric = (timeInMs: number) => {
         if (lyricRef.current) {
@@ -134,8 +138,12 @@ export const SynchronizedLyrics = ({
 
             currentLyric.classList.add('active');
 
-            if (followRef.current) {
+            if (followRef.current && !userScrollingRef.current) {
+                programmaticScrollRef.current = true;
                 doc?.scroll({ behavior: 'smooth', top: offsetTop });
+                setTimeout(() => {
+                    programmaticScrollRef.current = false;
+                }, 600);
             }
 
             if (index !== lyricRef.current!.length - 1) {
@@ -231,6 +239,41 @@ export const SynchronizedLyrics = ({
         timerEpoch.current += 1;
     }, []);
 
+    // Handle manual scrolling - pause auto-scroll when user scrolls
+    useEffect(() => {
+        const container =
+            containerRef.current ||
+            (document.getElementById('sychronized-lyrics-scroll-container') as HTMLElement);
+        if (!container) return;
+
+        const handleScroll = () => {
+            // Ignore programmatic scrolls (auto-scroll)
+            if (programmaticScrollRef.current) {
+                return;
+            }
+
+            userScrollingRef.current = true;
+
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+
+            // Re-enable auto-scroll after 3 seconds of no scrolling
+            scrollTimeoutRef.current = setTimeout(() => {
+                userScrollingRef.current = false;
+            }, 3000);
+        };
+
+        container.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            container.removeEventListener('scroll', handleScroll);
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+        };
+    }, []);
+
     const hideScrollbar = () => {
         const doc = document.getElementById('sychronized-lyrics-scroll-container') as HTMLElement;
         doc.classList.add('hide-scrollbar');
@@ -247,6 +290,7 @@ export const SynchronizedLyrics = ({
             id="sychronized-lyrics-scroll-container"
             onMouseEnter={showScrollbar}
             onMouseLeave={hideScrollbar}
+            ref={containerRef}
             style={{ gap: `${settings.gap}px`, ...style }}
         >
             {settings.showProvider && source && (
