@@ -648,7 +648,7 @@ const initialState: SettingsState = {
         },
         resume: true,
         showLyricsInSidebar: true,
-        showVisualizerInSidebar: false,
+        showVisualizerInSidebar: true,
         sidebarCollapsedNavigation: true,
         sidebarCollapseShared: false,
         sidebarItems,
