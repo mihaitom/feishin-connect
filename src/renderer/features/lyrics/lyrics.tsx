@@ -96,6 +96,24 @@ export const Lyrics = () => {
         setOverride(params);
     }, []);
 
+    // Persist override lyrics to cache
+    useEffect(() => {
+        if (override && overrideData && currentSong) {
+            const persistedLyrics: FullLyricsMetadata = {
+                artist: override.artist,
+                lyrics: overrideData,
+                name: override.name,
+                remote: override.remote ?? true,
+                source: override.source,
+            };
+
+            queryClient.setQueryData(
+                queryKeys.songs.lyrics(currentSong._serverId, { songId: currentSong.id }),
+                persistedLyrics,
+            );
+        }
+    }, [override, overrideData, currentSong]);
+
     const handleOnResetLyric = useCallback(() => {
         setOverride(undefined);
         queryClient.invalidateQueries({
