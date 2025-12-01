@@ -20,19 +20,17 @@ import { LyricsOverride } from '/@/shared/types/domain-types';
 interface LyricsActionsProps {
     index: number;
     languages: { label: string; value: string }[];
-
     onRemoveLyric: () => void;
-    onResetLyric: () => void;
     onSearchOverride: (params: LyricsOverride) => void;
     onTranslateLyric?: () => void;
     setIndex: (idx: number) => void;
+    synced?: boolean;
 }
 
 export const LyricsActions = ({
     index,
     languages,
     onRemoveLyric,
-    onResetLyric,
     onSearchOverride,
     onTranslateLyric,
     setIndex,
@@ -89,39 +87,34 @@ export const LyricsActions = ({
                     aria-label="Decrease lyric offset"
                     icon="minus"
                     onClick={() => handleLyricOffset(delayMs - 50)}
+                    tooltip={{
+                        label: t('common.slower', { postProcess: 'sentenceCase' }),
+                        openDelay: 0,
+                    }}
                     variant="subtle"
                 />
                 <Tooltip
                     label={t('setting.lyricOffset', { postProcess: 'sentenceCase' })}
-                    openDelay={500}
+                    openDelay={0}
                 >
                     <NumberInput
                         aria-label="Lyric offset"
                         onChange={handleLyricOffset}
                         styles={{ input: { textAlign: 'center' } }}
                         value={delayMs || 0}
-                        width={55}
+                        width={70}
                     />
                 </Tooltip>
                 <ActionIcon
                     aria-label="Increase lyric offset"
                     icon="plus"
                     onClick={() => handleLyricOffset(delayMs + 50)}
+                    tooltip={{
+                        label: t('common.faster', { postProcess: 'sentenceCase' }),
+                        openDelay: 0,
+                    }}
                     variant="subtle"
                 />
-                {isDesktop && sources.length ? (
-                    <Button
-                        disabled={isActionsDisabled}
-                        onClick={onResetLyric}
-                        uppercase
-                        variant="subtle"
-                    >
-                        {t('common.reset', { postProcess: 'sentenceCase' })}
-                    </Button>
-                ) : null}
-            </Group>
-
-            <div style={{ position: 'absolute', right: 0, top: 0 }}>
                 {isDesktop && sources.length ? (
                     <Button
                         disabled={isActionsDisabled}
@@ -132,7 +125,7 @@ export const LyricsActions = ({
                         {t('common.clear', { postProcess: 'sentenceCase' })}
                     </Button>
                 ) : null}
-            </div>
+            </Group>
 
             <div style={{ position: 'absolute', right: 0, top: -50 }}>
                 {isDesktop && sources.length && onTranslateLyric ? (

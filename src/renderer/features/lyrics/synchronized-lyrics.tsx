@@ -180,7 +180,7 @@ export const SynchronizedLyrics = ({
 
         if (status === PlayerStatus.PLAYING) {
             // Use the current timestamp from player events
-            setCurrentLyric(timestamp * 1000 - delayMsRef.current);
+            setCurrentLyric(timestamp * 1000 + delayMsRef.current);
 
             return () => {
                 // Cleanup: clear the timer when lyrics change or component unmounts
@@ -208,7 +208,7 @@ export const SynchronizedLyrics = ({
         delayMsRef.current = settings.delayMs;
 
         // Use the current timestamp from player events
-        setCurrentLyric(timestamp * 1000 - delayMsRef.current);
+        setCurrentLyric(timestamp * 1000 + delayMsRef.current);
     }, [setCurrentLyric, settings.delayMs, timestamp]);
 
     useEffect(() => {
@@ -226,7 +226,7 @@ export const SynchronizedLyrics = ({
             clearTimeout(lyricTimer.current);
         }
 
-        setCurrentLyric(timestamp * 1000 - delayMsRef.current);
+        setCurrentLyric(timestamp * 1000 + delayMsRef.current);
     }, [timestamp, setCurrentLyric, status]);
 
     useEffect(() => {

@@ -114,13 +114,13 @@ export const Lyrics = () => {
         }
     }, [override, overrideData, currentSong]);
 
-    const handleOnResetLyric = useCallback(() => {
-        setOverride(undefined);
-        queryClient.invalidateQueries({
-            exact: true,
-            queryKey: queryKeys.songs.lyrics(currentSong?._serverId, { songId: currentSong?.id }),
-        });
-    }, [currentSong?.id, currentSong?._serverId]);
+    // const handleOnResetLyric = useCallback(() => {
+    //     setOverride(undefined);
+    //     queryClient.invalidateQueries({
+    //         exact: true,
+    //         queryKey: queryKeys.songs.lyrics(currentSong?._serverId, { songId: currentSong?.id }),
+    //     });
+    // }, [currentSong?.id, currentSong?._serverId]);
 
     const handleOnRemoveLyric = useCallback(() => {
         queryClient.setQueryData(
@@ -259,7 +259,6 @@ export const Lyrics = () => {
                         index={index}
                         languages={languages}
                         onRemoveLyric={handleOnRemoveLyric}
-                        onResetLyric={handleOnResetLyric}
                         onSearchOverride={handleOnSearchOverride}
                         onTranslateLyric={
                             translationApiProvider && translationApiKey
