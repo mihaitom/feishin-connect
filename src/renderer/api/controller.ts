@@ -518,9 +518,7 @@ export const controller: GeneralController = {
         const server = getServerById(args.apiClientProps.serverId);
 
         if (!server) {
-            throw new Error(
-                `${i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' })}: getStreamUrl`,
-            );
+            return '';
         }
 
         return apiController(
