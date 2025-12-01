@@ -52,6 +52,7 @@ import { LibraryItem } from '/@/shared/types/domain-types';
 interface VirtualizedGridListProps {
     _tableMetaVersion: number; // Used to trigger rerenders via React.memo comparison
     controls: ItemControls;
+    currentPage?: number;
     data: unknown[];
     enableDrag?: boolean;
     enableExpansion: boolean;
@@ -78,6 +79,7 @@ interface VirtualizedGridListProps {
 const VirtualizedGridList = React.memo(
     ({
         controls,
+        currentPage,
         data,
         enableDrag,
         enableExpansion,
@@ -149,6 +151,20 @@ const VirtualizedGridList = React.memo(
         }
 
         const calculateInitialScrollOffset = (): number => {
+            // When page changes, always start at top (ignore initialTop)
+            if (currentPage !== undefined) {
+                if (currentPage === 0 && initialTop) {
+                    if (initialTop.type === 'offset') {
+                        return initialTop.to;
+                    }
+                    const columnCount = tableMeta?.columnCount || 1;
+                    const itemHeight = tableMeta?.itemHeight || 0;
+                    const rowIndex = Math.floor(initialTop.to / columnCount);
+                    return rowIndex * itemHeight;
+                }
+                return 0;
+            }
+
             if (!initialTop) return 0;
 
             if (initialTop.type === 'offset') {
@@ -270,6 +286,7 @@ export interface ItemGridListProps {
 }
 
 const BaseItemGridList = ({
+    currentPage,
     data,
     enableDrag = true,
     enableExpansion = false,
@@ -687,6 +704,7 @@ const BaseItemGridList = ({
                     <VirtualizedGridList
                         _tableMetaVersion={tableMetaVersion}
                         controls={controls}
+                        currentPage={currentPage}
                         data={data}
                         enableDrag={enableDrag}
                         enableExpansion={enableExpansion}
