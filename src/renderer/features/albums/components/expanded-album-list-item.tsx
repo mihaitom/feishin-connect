@@ -17,6 +17,8 @@ import {
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { ItemListItem } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { PlayButtonGroup } from '/@/renderer/features/shared/components/play-button-group';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
@@ -29,6 +31,7 @@ import { Text } from '/@/shared/components/text/text';
 import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { DragOperation, DragTarget, DragTargetMap } from '/@/shared/types/drag-and-drop';
+import { Play } from '/@/shared/types/types';
 
 interface AlbumTracksTableProps {
     isDark?: boolean;
@@ -50,11 +53,22 @@ interface ExpandedAlbumListItemProps {
 interface TrackRowProps {
     controls: ReturnType<typeof useDefaultItemListControls>;
     internalState: ItemListStateActions;
+    player: ReturnType<typeof usePlayer>;
     serverId: string;
     song: NonNullable<AlbumTracksTableProps['songs']>[0];
+    songIndex: number;
+    songs: Song[];
 }
 
-const TrackRow = ({ controls, internalState, serverId, song }: TrackRowProps) => {
+const TrackRow = ({
+    controls,
+    internalState,
+    player,
+    serverId,
+    song,
+    songIndex,
+    songs,
+}: TrackRowProps) => {
     const rowId = internalState.extractRowId(song);
     const isSelected = useItemSelectionState(internalState, rowId);
     const isDraggingState = useItemDraggingState(internalState, rowId);
@@ -107,6 +121,13 @@ const TrackRow = ({ controls, internalState, serverId, song }: TrackRowProps) =>
     const containerRef = useRef<HTMLDivElement>(null);
     const mergedRef = useMergedRef(containerRef, dragRef);
 
+    const handleDoubleClick = useCallback(() => {
+        if (songs && songIndex !== undefined) {
+            player.addToQueueByData(songs, Play.NOW);
+            player.mediaPlayByIndex(songIndex);
+        }
+    }, [player, songs, songIndex]);
+
     return (
         <Text
             className={clsx(styles['track-row'], {
@@ -123,6 +144,7 @@ const TrackRow = ({ controls, internalState, serverId, song }: TrackRowProps) =>
                     itemType: LibraryItem.SONG,
                 })
             }
+            onDoubleClick={handleDoubleClick}
             ref={mergedRef}
             size="sm"
         >
@@ -150,18 +172,24 @@ const AlbumTracksTable = ({ isDark, serverId, songs }: AlbumTracksTableProps) =>
     const internalState = useItemListState(getDataFn, extractRowId);
 
     const controls = useDefaultItemListControls();
+    const player = usePlayer();
+
+    const fullSongs = songs as Song[] | undefined;
 
     return (
         <div className={clsx(styles.tracks, { [styles.dark]: isDark })}>
             <ScrollArea>
                 <div className={styles['tracks-list']}>
-                    {songs?.map((song) => (
+                    {songs?.map((song, index) => (
                         <TrackRow
                             controls={controls}
                             internalState={internalState}
                             key={song.id}
+                            player={player}
                             serverId={serverId}
                             song={song}
+                            songIndex={index}
+                            songs={fullSongs || []}
                         />
                     ))}
                 </div>
@@ -178,12 +206,27 @@ export const ExpandedAlbumListItem = ({ internalState, item }: ExpandedAlbumList
         }),
     );
 
+    const player = usePlayer();
+
     const color = useFastAverageColor({
         algorithm: 'sqrt',
         id: item.id,
         src: data?.imageUrl,
         srcLoaded: true,
     });
+
+    const handlePlay = useCallback(
+        (playType: Play) => {
+            if (!data) {
+                return;
+            }
+
+            if (data.songs) {
+                player.addToQueueByData(data.songs, playType);
+            }
+        },
+        [data, player],
+    );
 
     if (color.isLoading) {
         return null;
@@ -271,6 +314,11 @@ export const ExpandedAlbumListItem = ({ internalState, item }: ExpandedAlbumList
                                 backgroundImage: `url(${data?.imageUrl})`,
                             }}
                         />
+                        {data?.songs && data.songs.length > 0 && (
+                            <div className={styles.playButtonGroup}>
+                                <PlayButtonGroup onPlay={handlePlay} />
+                            </div>
+                        )}
                     </div>
                 </div>
             </Suspense>

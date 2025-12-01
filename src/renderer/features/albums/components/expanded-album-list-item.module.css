@@ -105,6 +105,20 @@
     height: 100%;
 }
 
+.play-button-group {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.container:hover .play-button-group {
+    opacity: 1;
+}
+
 .background-image {
     position: absolute;
     right: 0;
