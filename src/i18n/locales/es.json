@@ -135,7 +135,6 @@
         "sidePlayQueueStyle_description": "establece el estilo de la cola de reproducción lateral",
         "replayGainMode": "modo de {{ReplayGain}}",
         "playbackStyle_optionNormal": "normal",
-        "floatingQueueArea": "mostrar área flotante de cola",
         "replayGainFallback_description": "ganancia en db a aplicar si el archivo no tiene etiquetas de {{ReplayGain}}",
         "replayGainPreamp_description": "ajusta la ganancia del preamplificador aplicada a los valores de {{ReplayGain}}",
         "hotkey_toggleRepeat": "alterna repetir",
@@ -161,7 +160,6 @@
         "hotkey_rate0": "Limpiar calificación",
         "discordApplicationId": "id de aplicación {{discord}}",
         "applicationHotkeys_description": "configura las teclas de acceso rápido de la aplicación. marca la casilla para establecerlas como teclas de acceso rápido globales (solo escritorio)",
-        "floatingQueueArea_description": "muestra un icono flotante en el lado derecho de la pantalla para ver la cola de reproducción",
         "hotkey_volumeMute": "silenciar volumen",
         "hotkey_toggleCurrentSongFavorite": "$t(common.currentSong) cambia a favorita",
         "remoteUsername": "nombre de usuario del control remoto del servidor",
@@ -213,8 +211,6 @@
         "homeFeature_description": "Controla si se muestra el gran carrusel destacado en la página de inicio",
         "imageAspectRatio_description": "Si está habilitado, la portada será mostrada usando su relación de aspecto nativa. Para arte que no es 1:1, el espacio restante estará vacío",
         "imageAspectRatio": "Usar relación de aspecto nativa de portada",
-        "doubleClickBehavior": "poner en cola todas las pistas buscadas al hacer doble clic",
-        "doubleClickBehavior_description": "si está activado, se pondrán en cola todas las pistas que coincidan en una búsqueda de pistas. De lo contrario, solo se pondrán en cola las pistas seleccionadas",
         "volumeWidth": "Ancho del deslizador de volumen",
         "volumeWidth_description": "La anchura del deslizador de volumen",
         "discordListening_description": "muestra el estado como Escuchando en lugar de Jugando a",
@@ -803,9 +799,7 @@
                 "followCurrentSong": "seguir la canción actual"
             },
             "view": {
-                "card": "tarjeta",
                 "table": "tabla",
-                "poster": "cartel",
                 "list": "Lista",
                 "grid": "Cuadrícula"
             }
