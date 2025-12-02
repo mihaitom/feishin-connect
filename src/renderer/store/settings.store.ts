@@ -723,16 +723,16 @@ const initialState: SettingsState = {
                     columns: SONG_TABLE_COLUMNS,
                     columnWidths: {
                         [TableColumn.DURATION]: 100,
-                        [TableColumn.GENRE]: 200,
                         [TableColumn.TITLE]: 400,
                         [TableColumn.TRACK_NUMBER]: 50,
                         [TableColumn.USER_FAVORITE]: 60,
+                        [TableColumn.USER_RATING]: 100,
                     },
                     enabledColumns: [
                         TableColumn.TRACK_NUMBER,
                         TableColumn.TITLE,
                         TableColumn.DURATION,
-                        TableColumn.GENRE,
+                        TableColumn.USER_RATING,
                         TableColumn.USER_FAVORITE,
                     ],
                 }),
