@@ -709,7 +709,7 @@ const initialState: SettingsState = {
         ['albumDetail']: {
             display: ListDisplayType.TABLE,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
@@ -746,7 +746,7 @@ const initialState: SettingsState = {
         fullScreen: {
             display: ListDisplayType.TABLE,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
@@ -773,7 +773,7 @@ const initialState: SettingsState = {
         [LibraryItem.ALBUM]: {
             display: ListDisplayType.GRID,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: pickGridRows({
@@ -821,7 +821,7 @@ const initialState: SettingsState = {
         [LibraryItem.ALBUM_ARTIST]: {
             display: ListDisplayType.GRID,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: pickGridRows({
@@ -866,7 +866,7 @@ const initialState: SettingsState = {
         [LibraryItem.ARTIST]: {
             display: ListDisplayType.GRID,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: pickGridRows({
@@ -911,7 +911,7 @@ const initialState: SettingsState = {
         [LibraryItem.GENRE]: {
             display: ListDisplayType.TABLE,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: pickGridRows({
@@ -955,7 +955,7 @@ const initialState: SettingsState = {
         [LibraryItem.PLAYLIST]: {
             display: ListDisplayType.TABLE,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: pickGridRows({
@@ -990,7 +990,7 @@ const initialState: SettingsState = {
         [LibraryItem.PLAYLIST_SONG]: {
             display: ListDisplayType.TABLE,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
@@ -1017,7 +1017,7 @@ const initialState: SettingsState = {
         [LibraryItem.QUEUE_SONG]: {
             display: ListDisplayType.TABLE,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
@@ -1044,7 +1044,7 @@ const initialState: SettingsState = {
         [LibraryItem.SONG]: {
             display: ListDisplayType.TABLE,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: pickGridRows({
@@ -1089,7 +1089,7 @@ const initialState: SettingsState = {
         ['sideQueue']: {
             display: ListDisplayType.TABLE,
             grid: {
-                itemGap: 'md',
+                itemGap: 'sm',
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
