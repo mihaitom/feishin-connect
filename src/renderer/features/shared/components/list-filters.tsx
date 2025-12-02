@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { JellyfinAlbumFilters } from '/@/renderer/features/albums/components/jellyfin-album-filters';
@@ -10,6 +11,7 @@ import { NavidromeSongFilters } from '/@/renderer/features/songs/components/navi
 import { SubsonicSongFilters } from '/@/renderer/features/songs/components/subsonic-song-filters';
 import { useCurrentServer } from '/@/renderer/store';
 import { Modal } from '/@/shared/components/modal/modal';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
 
@@ -49,7 +51,9 @@ export const ListFilters = ({ itemType }: ListFiltersProps) => {
 
     return (
         <ComponentErrorBoundary>
-            <FilterComponent />
+            <Suspense fallback={<Spinner container />}>
+                <FilterComponent />
+            </Suspense>
         </ComponentErrorBoundary>
     );
 };
