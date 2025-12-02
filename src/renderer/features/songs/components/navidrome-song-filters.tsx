@@ -1,11 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import { memo, useMemo } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
     MultiSelectWithInvalidData,
     SelectWithInvalidData,
 } from '/@/renderer/components/select-with-invalid-data';
+import { useListContext } from '/@/renderer/context/list-context';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
@@ -13,15 +14,18 @@ import { useCurrentServerId } from '/@/renderer/store';
 import { titleCase } from '/@/renderer/utils';
 import { Divider } from '/@/shared/components/divider/divider';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
-import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
+import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
 export const NavidromeSongFilters = () => {
     const { t } = useTranslation();
-
     const { query, setFavorite, setGenreId, setMaxYear, setMinYear } = useSongListFilters();
+
+    const { customFilters } = useListContext();
+
+    const isGenrePage = customFilters?.genreIds !== undefined;
 
     const genreListQuery = useGenreList();
 
@@ -69,33 +73,39 @@ export const NavidromeSongFilters = () => {
         [setMinYear, setMaxYear],
     );
 
+    const debouncedHandleYearFilter = useDebouncedCallback(handleYearFilter, 300);
+
     return (
-        <Stack p="0.8rem">
+        <Stack p="md">
             {yesNoUndefinedFilters.map((filter) => (
                 <YesNoSelect
+                    clearable
+                    defaultValue={filter.value ? filter.value.toString() : undefined}
                     key={`nd-filter-${filter.label}`}
                     label={filter.label}
-                    onChange={filter.onChange}
-                    value={filter.value ?? undefined}
+                    onChange={(e) => filter.onChange(e ? e === 'true' : undefined)}
                 />
             ))}
-            <Divider my="0.5rem" />
+            <Divider my="md" />
             <NumberInput
                 defaultValue={query.minYear ?? undefined}
                 hideControls={false}
                 label={t('common.year', { postProcess: 'titleCase' })}
                 max={5000}
                 min={0}
-                onBlur={(e) => handleYearFilter(e.currentTarget.value)}
+                onChange={(e) => debouncedHandleYearFilter(e)}
             />
-            <MultiSelectWithInvalidData
-                clearable
-                data={genreList}
-                defaultValue={query.genreId}
-                label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
-                onChange={(e) => (e && e.length > 0 ? setGenreId(e) : setGenreId(null))}
-                searchable
-            />
+            {!isGenrePage && (
+                <MultiSelectWithInvalidData
+                    clearable
+                    data={genreList}
+                    defaultValue={query.genreIds || []}
+                    label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
+                    onChange={(e) => (e && e.length > 0 ? setGenreId(e) : setGenreId(null))}
+                    searchable
+                />
+            )}
+            <Divider my="md" />
             <TagFilters />
         </Stack>
     );
@@ -104,38 +114,34 @@ export const NavidromeSongFilters = () => {
 interface TagFilterItemProps {
     label: string;
     onChange: (value: null | string) => void;
-    options: string[];
+    options: Array<{ id: string; name: string }>;
     tagValue: string;
     value: string | undefined;
 }
 
-const TagFilterItem = memo(
-    ({ label, onChange, options, tagValue, value }: TagFilterItemProps) => {
-        return (
-            <SelectWithInvalidData
-                clearable
-                data={options}
-                defaultValue={value}
-                key={tagValue}
-                label={label}
-                limit={100}
-                onChange={onChange}
-                searchable
-            />
-        );
-    },
-    (prevProps, nextProps) => {
-        // Only re-render if the specific tag's value or options change
-        // We don't compare onChange since it's a stable wrapper around handleTagFilter
-        // and handleTagFilter itself is memoized and stable
-        return (
-            prevProps.tagValue === nextProps.tagValue &&
-            prevProps.label === nextProps.label &&
-            prevProps.value === nextProps.value &&
-            prevProps.options === nextProps.options
-        );
-    },
-);
+const TagFilterItem = ({ label, onChange, options, tagValue, value }: TagFilterItemProps) => {
+    const selectData = useMemo(
+        () =>
+            options.map((option) => ({
+                label: option.name,
+                value: option.id,
+            })),
+        [options],
+    );
+
+    return (
+        <SelectWithInvalidData
+            clearable
+            data={selectData}
+            defaultValue={value}
+            key={tagValue}
+            label={label}
+            limit={100}
+            onChange={onChange}
+            searchable
+        />
+    );
+};
 
 TagFilterItem.displayName = 'TagFilterItem';
 
@@ -144,65 +150,36 @@ const TagFilters = () => {
 
     const serverId = useCurrentServerId();
 
-    const tagsQuery = useQuery(
+    const tagsQuery = useSuspenseQuery(
         sharedQueries.tags({
-            options: {
-                gcTime: 1000 * 60 * 60,
-                staleTime: 1000 * 60 * 60,
-            },
-            query: {
-                type: LibraryItem.SONG,
-            },
+            query: { type: LibraryItem.SONG },
             serverId,
         }),
     );
 
     const handleTagFilter = useMemo(
         () => (tag: string, e: null | string) => {
-            setCustom((prev) => {
-                if (!prev) {
-                    return e ? { [tag]: e } : null;
-                }
-
-                if (e === null) {
-                    const rest = Object.fromEntries(
-                        Object.entries(prev).filter(([key]) => key !== tag),
-                    );
-
-                    return Object.keys(rest).length === 0 ? null : rest;
-                }
-
-                return {
-                    ...prev,
-                    [tag]: e,
-                };
-            });
+            setCustom({ [tag]: e });
         },
         [setCustom],
     );
 
     const tags = useMemo(() => {
-        return (
-            tagsQuery.data?.enumTags?.map((tag) => ({
-                label: titleCase(tag.name),
-                options: tag.options,
-                value: tag.name,
-            })) || []
-        );
-    }, [tagsQuery.data?.enumTags]);
+        const results: { label: string; options: { id: string; name: string }[]; value: string }[] =
+            [];
 
-    // Create stable onChange handlers for each tag using useMemo
-    const tagHandlers = useMemo(() => {
-        const handlers = new Map<string, (value: null | string) => void>();
-        tags.forEach((tag) => {
-            handlers.set(tag.value, (value: null | string) => handleTagFilter(tag.value, value));
-        });
-        return handlers;
-    }, [tags, handleTagFilter]);
+        for (const tag of tagsQuery.data?.enumTags || []) {
+            if (!tagsQuery.data?.excluded.song.includes(tag.name)) {
+                results.push({
+                    label: titleCase(tag.name),
+                    options: tag.options,
+                    value: tag.name,
+                });
+            }
+        }
 
-    if (tagsQuery.isLoading) {
-        return <Spinner container />;
-    }
+        return results;
+    }, [tagsQuery.data]);
 
     return (
         <>
@@ -210,7 +187,7 @@ const TagFilters = () => {
                 <TagFilterItem
                     key={tag.value}
                     label={tag.label}
-                    onChange={tagHandlers.get(tag.value)!}
+                    onChange={(e) => handleTagFilter(tag.value, e)}
                     options={tag.options}
                     tagValue={tag.value}
                     value={query._custom?.[tag.value] as string | undefined}

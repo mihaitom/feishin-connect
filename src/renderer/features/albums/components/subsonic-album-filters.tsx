@@ -1,11 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
+import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
-import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
+import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { useCurrentServerId } from '/@/renderer/store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
@@ -15,7 +16,8 @@ import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { Text } from '/@/shared/components/text/text';
-import { AlbumArtistListSort, GenreListSort, SortOrder } from '/@/shared/types/domain-types';
+import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
+import { AlbumArtistListSort, SortOrder } from '/@/shared/types/domain-types';
 
 interface SubsonicAlbumFiltersProps {
     disableArtistFilter?: boolean;
@@ -26,12 +28,16 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
 
     const serverId = useCurrentServerId();
 
+    const { customFilters } = useListContext();
+
+    const isGenrePage = customFilters?.genreIds !== undefined;
+
     const { query, setAlbumArtist, setFavorite, setGenreId, setMaxYear, setMinYear } =
         useAlbumListFilters();
 
     const [albumArtistSearchTerm, setAlbumArtistSearchTerm] = useState<string>('');
 
-    const albumArtistListQuery = useQuery(
+    const albumArtistListQuery = useSuspenseQuery(
         artistsQueries.albumArtistList({
             options: {
                 gcTime: 1000 * 60 * 2,
@@ -64,20 +70,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
         [setAlbumArtist],
     );
 
-    const genreListQuery = useQuery(
-        genresQueries.list({
-            options: {
-                gcTime: 1000 * 60 * 2,
-                staleTime: 1000 * 60 * 1,
-            },
-            query: {
-                sortBy: GenreListSort.NAME,
-                sortOrder: SortOrder.ASC,
-                startIndex: 0,
-            },
-            serverId,
-        }),
-    );
+    const genreListQuery = useGenreList();
 
     const genreList = useMemo(() => {
         if (!genreListQuery?.data) return [];
@@ -146,15 +139,18 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
         [setMaxYear],
     );
 
+    const debouncedHandleMinYearFilter = useDebouncedCallback(handleMinYearFilter, 300);
+    const debouncedHandleMaxYearFilter = useDebouncedCallback(handleMaxYearFilter, 300);
+
     return (
-        <Stack p="0.8rem">
+        <Stack p="md">
             {toggleFilters.map((filter) => (
-                <Group justify="space-between" key={`nd-filter-${filter.label}`}>
+                <Group justify="space-between" key={`ss-filter-${filter.label}`}>
                     <Text>{filter.label}</Text>
-                    <Switch checked={filter?.value || false} onChange={filter.onChange} />
+                    <Switch defaultChecked={filter.value ?? false} onChange={filter.onChange} />
                 </Group>
             ))}
-            <Divider my="0.5rem" />
+            <Divider my="md" />
             <Group grow>
                 <NumberInput
                     defaultValue={query.minYear ?? undefined}
@@ -163,7 +159,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={5000}
                     min={0}
-                    onBlur={(e) => handleMinYearFilter(e.currentTarget.value)}
+                    onChange={(e) => debouncedHandleMinYearFilter(e)}
                 />
                 <NumberInput
                     defaultValue={query.maxYear ?? undefined}
@@ -172,22 +168,24 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={5000}
                     min={0}
-                    onBlur={(e) => handleMaxYearFilter(e.currentTarget.value)}
+                    onChange={(e) => debouncedHandleMaxYearFilter(e)}
                 />
             </Group>
-            <Select
-                clearable
-                data={genreList}
-                defaultValue={query.genreIds?.[0] ?? undefined}
-                disabled={Boolean(query.minYear || query.maxYear)}
-                label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
-                onChange={(e) => handleGenresFilter(e)}
-                searchable
-            />
+            {!isGenrePage && (
+                <Select
+                    clearable
+                    data={genreList}
+                    defaultValue={query.genreIds?.[0] ?? undefined}
+                    disabled={Boolean(query.minYear || query.maxYear)}
+                    label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
+                    onChange={(e) => handleGenresFilter(e)}
+                    searchable
+                />
+            )}
             <MultiSelectWithInvalidData
                 clearable
                 data={selectableAlbumArtists}
-                defaultValue={query.artistIds ?? undefined}
+                defaultValue={query.artistIds ?? []}
                 disabled={disableArtistFilter}
                 label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
                 limit={300}

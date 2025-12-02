@@ -1,16 +1,21 @@
-import { parseAsInteger, useQueryState } from 'nuqs';
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router';
+
+import { parseIntParam, setSearchParam } from '/@/renderer/utils/query-params';
 
 interface UseItemListScrollPersistProps {
     enabled: boolean;
 }
 
 export const useItemListScrollPersist = ({ enabled }: UseItemListScrollPersistProps) => {
-    const [scrollOffset, setScrollOffset] = useQueryState('scrollOffset', parseAsInteger);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const scrollOffset = useMemo(() => parseIntParam(searchParams, 'scrollOffset'), [searchParams]);
 
     const handleOnScrollEnd = (offset: number) => {
         if (!enabled) return;
 
-        setScrollOffset(offset);
+        setSearchParams((prev) => setSearchParam(prev, 'scrollOffset', offset), { replace: true });
     };
 
     return { handleOnScrollEnd, scrollOffset };

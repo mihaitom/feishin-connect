@@ -3,17 +3,19 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
+import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
-import { AlbumListFilter, useCurrentServerId } from '/@/renderer/store';
+import { useCurrentServerId } from '/@/renderer/store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
+import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
 import {
     AlbumArtistListSort,
     GenreListSort,
@@ -22,14 +24,16 @@ import {
 } from '/@/shared/types/domain-types';
 
 interface JellyfinAlbumFiltersProps {
-    customFilters?: Partial<AlbumListFilter>;
     disableArtistFilter?: boolean;
-    onFilterChange: (filters: AlbumListFilter) => void;
 }
 
 export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFiltersProps) => {
     const { t } = useTranslation();
     const serverId = useCurrentServerId();
+
+    const { customFilters } = useListContext();
+
+    const isGenrePage = customFilters?.genreIds !== undefined;
 
     const {
         query,
@@ -180,46 +184,25 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
 
     const handleTagFilter = useMemo(
         () => (e: string[] | undefined) => {
-            setCustom((prev) => {
-                if (!prev) {
-                    return e && e.length > 0 ? { [e.join('|')]: e.join('|') } : null;
-                }
-
-                if (!e || e.length === 0) {
-                    // Remove all tag-related properties (they use '|' joined keys)
-                    const rest = Object.fromEntries(
-                        Object.entries(prev).filter(([key]) => !key.includes('|')),
-                    );
-
-                    return Object.keys(rest).length === 0 ? null : rest;
-                }
-
-                // Remove old tag entries and add new one
-                const rest = Object.fromEntries(
-                    Object.entries(prev).filter(([key]) => !key.includes('|')),
-                );
-                const tagKey = e.join('|');
-
-                return {
-                    ...rest,
-                    [tagKey]: tagKey,
-                };
-            });
+            setCustom({ Tags: e?.join('|') ?? null });
         },
         [setCustom],
     );
 
+    const debouncedHandleMinYearFilter = useDebouncedCallback(handleMinYearFilter, 300);
+    const debouncedHandleMaxYearFilter = useDebouncedCallback(handleMaxYearFilter, 300);
+
     return (
-        <Stack p="0.8rem">
+        <Stack p="md">
             {yesNoFilter.map((filter) => (
                 <YesNoSelect
+                    defaultValue={filter.value ? filter.value.toString() : undefined}
                     key={`jf-filter-${filter.label}`}
                     label={filter.label}
-                    onChange={filter.onChange}
-                    value={filter.value ?? undefined}
+                    onChange={(e) => filter.onChange(e ? e === 'true' : undefined)}
                 />
             ))}
-            <Divider my="0.5rem" />
+            <Divider my="md" />
             <Group grow>
                 <NumberInput
                     defaultValue={query.minYear ?? undefined}
@@ -227,7 +210,7 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    onBlur={(e) => handleMinYearFilter(e.currentTarget.value)}
+                    onChange={(e) => debouncedHandleMinYearFilter(e)}
                     required={!!query.minYear}
                 />
                 <NumberInput
@@ -236,23 +219,24 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    onBlur={(e) => handleMaxYearFilter(e.currentTarget.value)}
+                    onChange={(e) => debouncedHandleMaxYearFilter(e)}
                     required={!!query.minYear}
                 />
             </Group>
-            <MultiSelectWithInvalidData
-                clearable
-                data={genreList}
-                defaultValue={query.genreIds ?? undefined}
-                label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
-                onChange={(e) => handleGenresFilter(e)}
-                searchable
-            />
-
+            {!isGenrePage && (
+                <MultiSelectWithInvalidData
+                    clearable
+                    data={genreList}
+                    defaultValue={query.genreIds || []}
+                    label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
+                    onChange={handleGenresFilter}
+                    searchable
+                />
+            )}
             <MultiSelectWithInvalidData
                 clearable
                 data={selectableAlbumArtists}
-                defaultValue={query.artistIds ?? undefined}
+                defaultValue={query.artistIds || []}
                 disabled={disableArtistFilter}
                 label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
                 limit={300}
@@ -264,7 +248,7 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
                 <MultiSelectWithInvalidData
                     clearable
                     data={tagsQuery.data.boolTags}
-                    defaultValue={query._custom?.[tagsQuery.data.boolTags.join('|')] ?? undefined}
+                    defaultValue={query._custom?.[tagsQuery.data.boolTags.join('|')] || []}
                     label={t('common.tags', { postProcess: 'sentenceCase' })}
                     onChange={handleTagFilter}
                     searchable

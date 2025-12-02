@@ -1,7 +1,9 @@
-import { parseAsString, useQueryState } from 'nuqs';
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router';
 
 import { useListFilterPersistence } from '/@/renderer/features/shared/hooks/use-list-filter-persistence';
 import { useCurrentServer } from '/@/renderer/store';
+import { parseStringParam, setSearchParam } from '/@/renderer/utils/query-params';
 import { ItemListKey } from '/@/shared/types/types';
 
 export const useSelectFilter = (
@@ -11,31 +13,29 @@ export const useSelectFilter = (
 ) => {
     const server = useCurrentServer();
     const { getFilter, setFilter } = useListFilterPersistence(server.id, listKey);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const persisted = getFilter(filterKey);
 
-    const [value, setValue] = useQueryState(filterKey, getDefaultValue(defaultValue, persisted));
+    const value = useMemo(() => {
+        const paramValue = parseStringParam(searchParams, filterKey);
+        return paramValue ?? persisted ?? defaultValue ?? undefined;
+    }, [searchParams, filterKey, persisted, defaultValue]);
 
     const handleSetValue = (newValue: string) => {
-        setValue(newValue);
+        setSearchParams(
+            (prev) => {
+                const newParams = setSearchParam(prev, filterKey, newValue);
+                return newParams;
+            },
+            { replace: true },
+        );
         setFilter(filterKey, newValue);
     };
 
     return {
-        [filterKey]: value ?? undefined,
+        [filterKey]: value,
         setValue: handleSetValue,
-        value: value ?? undefined,
+        value,
     };
-};
-
-const getDefaultValue = (defaultValue: null | string, persisted: string | undefined) => {
-    if (persisted) {
-        return parseAsString.withDefault(persisted);
-    }
-
-    if (defaultValue) {
-        return parseAsString.withDefault(defaultValue);
-    }
-
-    return parseAsString;
 };

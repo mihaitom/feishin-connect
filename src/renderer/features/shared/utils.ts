@@ -44,7 +44,7 @@ enum AlbumFilterKeys {
     HAS_RATING = 'hasRating',
     MAX_YEAR = 'maxYear',
     MIN_YEAR = 'minYear',
-    RECENTLY_PLAYED = 'recentlyPlayed',
+    RECENTLY_PLAYED = 'isRecentlyPlayed',
 }
 
 enum ArtistFilterKeys {
@@ -63,7 +63,7 @@ enum SongFilterKeys {
     ALBUM_IDS = 'albumIds',
     ARTIST_IDS = 'artistIds',
     FAVORITE = 'favorite',
-    GENRE_ID = 'genreId',
+    GENRE_ID = 'genreIds',
     MAX_YEAR = 'maxYear',
     MIN_YEAR = 'minYear',
 }
@@ -73,10 +73,15 @@ const PaginationFilterKeys = {
     SCROLL_OFFSET: 'scrollOffset',
 };
 
+enum PlaylistFilterKeys {
+    CUSTOM = '_custom',
+}
+
 export const FILTER_KEYS = {
     ALBUM: AlbumFilterKeys,
     ARTIST: ArtistFilterKeys,
     PAGINATION: PaginationFilterKeys,
+    PLAYLIST: PlaylistFilterKeys,
     SHARED: SharedFilterKeys,
     SONG: SongFilterKeys,
 };

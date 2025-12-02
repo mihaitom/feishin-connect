@@ -1224,7 +1224,7 @@ export type ControllerEndpoint = {
     getSongListCount: (args: SongListCountArgs) => Promise<number>;
     getStreamUrl: (args: StreamArgs) => string;
     getStructuredLyrics?: (args: StructuredLyricsArgs) => Promise<StructuredLyric[]>;
-    getTags?: (args: TagArgs) => Promise<TagResponses>;
+    getTags?: (args: TagArgs) => Promise<TagsResponse>;
     getTopSongs: (args: TopSongListArgs) => Promise<TopSongListResponse>;
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;
     movePlaylistItem?: (args: MoveItemArgs) => Promise<void>;
@@ -1316,7 +1316,7 @@ export type InternalControllerEndpoint = {
     getStructuredLyrics?: (
         args: ReplaceApiClientProps<StructuredLyricsArgs>,
     ) => Promise<StructuredLyric[]>;
-    getTags?: (args: ReplaceApiClientProps<TagArgs>) => Promise<TagResponses>;
+    getTags?: (args: ReplaceApiClientProps<TagArgs>) => Promise<TagsResponse>;
     getTopSongs: (args: ReplaceApiClientProps<TopSongListArgs>) => Promise<TopSongListResponse>;
     getUserList?: (args: ReplaceApiClientProps<UserListArgs>) => Promise<UserListResponse>;
     movePlaylistItem?: (args: ReplaceApiClientProps<MoveItemArgs>) => Promise<void>;
@@ -1408,8 +1408,9 @@ export type StructuredUnsyncedLyric = Omit<FullLyricsMetadata, 'lyrics'> & {
 };
 
 export type Tag = {
+    id: string;
     name: string;
-    options: string[];
+    options: { id: string; name: string }[];
 };
 
 export type TagArgs = BaseEndpointArgs & {
@@ -1421,9 +1422,13 @@ export type TagQuery = {
     type: LibraryItem.ALBUM | LibraryItem.SONG;
 };
 
-export type TagResponses = {
+export type TagsResponse = {
     boolTags?: string[];
-    enumTags?: Tag[];
+    enumTags?: { name: string; options: { id: string; name: string }[] }[];
+    excluded: {
+        album: string[];
+        song: string[];
+    };
 };
 
 type BaseEndpointArgsWithServer = {

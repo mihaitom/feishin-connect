@@ -44,9 +44,6 @@ importers:
       '@mantine/notifications':
         specifier: ^8.3.8
         version: 8.3.8(@mantine/core@8.3.8(@mantine/hooks@8.3.8(react@19.1.0))(@types/react@19.2.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@mantine/hooks@8.3.8(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@offlegacy/nuqs-hash-router':
-        specifier: ^0.1.1
-        version: 0.1.1(nuqs@2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-context-menu':
         specifier: ^2.2.16
         version: 2.2.16(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1397,12 +1394,6 @@ packages:
     resolution: {integrity: sha512-mJd2Z5TjYWq/ttPLLGqArdtnC74J6bOzg4rMDnN+p1xTacZ2yPRCk2y0oSWQtygLR9YVQXgOcONrwtnk3JupxQ==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
     deprecated: This functionality has been moved to @npmcli/fs
-
-  '@offlegacy/nuqs-hash-router@0.1.1':
-    resolution: {integrity: sha512-dRTyovVxKBjRQrFU3qR7zBW/AvnVtYtBXWqIrkhIJXXLwytT05dIAz3dKxhXN9WvLuGdbzOP66p1ML2WR60CSQ==}
-    peerDependencies:
-      nuqs: '2'
-      react: '>=18'
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -7110,11 +7101,6 @@ snapshots:
     dependencies:
       mkdirp: 1.0.4
       rimraf: 3.0.2
-
-  '@offlegacy/nuqs-hash-router@0.1.1(nuqs@2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      nuqs: 2.7.1(react-router-dom@7.9.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-router@7.9.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
-      react: 19.1.0
 
   '@pkgjs/parseargs@0.11.0':
     optional: true

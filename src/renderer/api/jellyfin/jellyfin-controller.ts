@@ -857,7 +857,7 @@ export const JellyfinController: InternalControllerEndpoint = {
         const { apiClientProps, query } = args;
 
         if (!hasFeature(apiClientProps.server, ServerFeature.TAGS)) {
-            return { boolTags: undefined, enumTags: undefined };
+            return { boolTags: undefined, enumTags: undefined, excluded: { album: [], song: [] } };
         }
 
         const res = await jfApiClient(apiClientProps).getFilterList({
@@ -876,6 +876,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             boolTags: res.body.Tags?.sort((a, b) =>
                 a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()),
             ),
+            excluded: { album: [], song: [] },
         };
     },
     getTopSongs: async (args) => {

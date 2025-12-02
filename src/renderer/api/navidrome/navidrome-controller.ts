@@ -45,7 +45,31 @@ const NAVIDROME_ROLES: Array<string | { label: string; value: string }> = [
     'remixer',
 ];
 
-const EXCLUDED_TAGS = new Set<string>(['disctotal', 'genre', 'tracktotal']);
+// Tags that are irrelevant or non-functional as filters
+const EXCLUDED_TAGS = new Set<string>([
+    'genre', // Duplicate of genre filter
+]);
+
+const EXCLUDED_ALBUM_TAGS = new Set<string>([
+    'asin',
+    'barcode',
+    'copyright',
+    'disctotal',
+    'encodedby',
+    'isrc',
+    'key',
+    'language',
+    'musicbrainz_workid',
+    'script',
+    'tracktotal',
+    'website',
+    'work',
+]);
+
+const EXCLUDED_SONG_TAGS = new Set<string>([]);
+
+// Tags that use IDs as values as opposed to the tag value
+const ID_TAGS = new Set<string>(['albumversion', 'mood']);
 
 const excludeMissing = (server?: null | ServerListItemWithCredential) => {
     if (!server) {
@@ -297,8 +321,10 @@ export const NavidromeController: InternalControllerEndpoint = {
                 artist_id: query.artistIds?.[0],
                 compilation: query.compilation,
                 genre_id: genres,
+                has_rating: query.hasRating,
                 library_id: getLibraryId(query.musicFolderId),
                 name: query.searchTerm,
+                recently_played: query.isRecentlyPlayed,
                 year: query.maxYear || query.minYear,
                 ...query._custom,
                 starred: query.favorite,
@@ -615,7 +641,7 @@ export const NavidromeController: InternalControllerEndpoint = {
         const { apiClientProps } = args;
 
         if (!hasFeature(apiClientProps.server, ServerFeature.TAGS)) {
-            return { boolTags: undefined, enumTags: undefined };
+            return { boolTags: undefined, enumTags: undefined, excluded: { album: [], song: [] } };
         }
 
         const res = await ndApiClient(apiClientProps).getTags();
@@ -624,30 +650,47 @@ export const NavidromeController: InternalControllerEndpoint = {
             throw new Error('failed to get tags');
         }
 
-        const tagsToValues = new Map<string, string[]>();
+        const tagsToValues = new Map<string, { id: string; name: string }[]>();
 
         for (const tag of res.body.data) {
             if (!EXCLUDED_TAGS.has(tag.tagName)) {
                 if (tagsToValues.has(tag.tagName)) {
-                    tagsToValues.get(tag.tagName)!.push(tag.tagValue);
+                    tagsToValues.get(tag.tagName)!.push({
+                        id: ID_TAGS.has(tag.tagName) ? tag.id : tag.tagValue,
+                        name: tag.tagValue,
+                    });
                 } else {
-                    tagsToValues.set(tag.tagName, [tag.tagValue]);
+                    tagsToValues.set(tag.tagName, [
+                        {
+                            id: ID_TAGS.has(tag.tagName) ? tag.id : tag.tagValue,
+                            name: tag.tagValue,
+                        },
+                    ]);
                 }
             }
         }
 
+        const enumTags = Array.from(tagsToValues)
+            .map((data) => ({
+                name: data[0],
+                options: data[1]
+                    .sort((a, b) =>
+                        a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()),
+                    )
+                    .map((option) => ({ id: option.id, name: option.name })),
+            }))
+            .sort((a, b) => a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()));
+
+        const excludedAlbumTags = Array.from(EXCLUDED_ALBUM_TAGS.values());
+        const excludedSongTags = Array.from(EXCLUDED_SONG_TAGS.values());
+
         return {
             boolTags: undefined,
-            enumTags: Array.from(tagsToValues)
-                .map((data) => ({
-                    name: data[0],
-                    options: data[1].sort((a, b) =>
-                        a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()),
-                    ),
-                }))
-                .sort((a, b) =>
-                    a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()),
-                ),
+            enumTags,
+            excluded: {
+                album: excludedAlbumTags,
+                song: excludedSongTags,
+            },
         };
     },
     getTopSongs: SubsonicController.getTopSongs,

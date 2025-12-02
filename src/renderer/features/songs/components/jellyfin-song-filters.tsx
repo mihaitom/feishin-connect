@@ -3,26 +3,25 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
+import { useListContext } from '/@/renderer/context/list-context';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
-import { SongListFilter, useCurrentServerId } from '/@/renderer/store';
+import { useCurrentServerId } from '/@/renderer/store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Stack } from '/@/shared/components/stack/stack';
-import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
+import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
-interface JellyfinSongFiltersProps {
-    customFilters?: Partial<SongListFilter>;
-}
-
-export const JellyfinSongFilters = ({ customFilters }: JellyfinSongFiltersProps) => {
+export const JellyfinSongFilters = () => {
     const serverId = useCurrentServerId();
     const { t } = useTranslation();
     const { query, setCustom, setFavorite, setMaxYear, setMinYear } = useSongListFilters();
+
+    const { customFilters } = useListContext();
 
     const isGenrePage = customFilters?.genreIds !== undefined;
 
@@ -103,23 +102,27 @@ export const JellyfinSongFilters = ({ customFilters }: JellyfinSongFiltersProps)
         [setMaxYear],
     );
 
+    const debouncedHandleMinYearFilter = useDebouncedCallback(handleMinYearFilter, 300);
+    const debouncedHandleMaxYearFilter = useDebouncedCallback(handleMaxYearFilter, 300);
+
     const handleGenresFilter = useMemo(
         () => (e: string[] | undefined) => {
             setCustom((prev) => {
+                const current = prev ?? {};
+
                 if (!e || e.length === 0) {
                     // Remove GenreIds and IncludeItemTypes if genres are cleared
-                    const rest = { ...prev };
+                    const rest = { ...current };
                     delete rest.GenreIds;
                     delete rest.IncludeItemTypes;
-                    // Keep jellyfin-specific properties
+                    // Return null if object is empty, otherwise return the rest
                     return Object.keys(rest).length === 0 ? null : rest;
                 }
 
                 return {
-                    ...prev,
+                    ...current,
                     GenreIds: e.join(','),
                     IncludeItemTypes: 'Audio',
-                    ...prev?.jellyfin,
                 };
             });
         },
@@ -128,38 +131,22 @@ export const JellyfinSongFilters = ({ customFilters }: JellyfinSongFiltersProps)
 
     const handleTagFilter = useMemo(
         () => (e: string[] | undefined) => {
-            setCustom((prev) => {
-                if (!e || e.length === 0) {
-                    // Remove Tags if cleared
-                    const rest = { ...prev };
-                    delete rest.Tags;
-                    // Keep IncludeItemTypes and jellyfin-specific properties
-                    if (rest.IncludeItemTypes) {
-                        return rest;
-                    }
-                    return Object.keys(rest).length === 0 ? null : rest;
-                }
-
-                return {
-                    ...prev,
-                    IncludeItemTypes: 'Audio',
-                    Tags: e.join('|'),
-                    ...prev?.jellyfin,
-                };
-            });
+            setCustom({ Tags: e?.join('|') ?? null });
         },
         [setCustom],
     );
 
     return (
-        <Stack p="0.8rem">
+        <Stack p="md">
             {yesNoFilters.map((filter) => (
-                <Group justify="space-between" key={`nd-filter-${filter.label}`}>
-                    <Text>{filter.label}</Text>
-                    <YesNoSelect onChange={filter.onChange} size="xs" value={filter.value} />
-                </Group>
+                <YesNoSelect
+                    defaultValue={filter.value ? filter.value.toString() : undefined}
+                    key={`jf-filter-${filter.label}`}
+                    label={filter.label}
+                    onChange={(e) => filter.onChange(e ? e === 'true' : undefined)}
+                />
             ))}
-            <Divider my="0.5rem" />
+            <Divider my="md" />
             <Group grow>
                 <NumberInput
                     defaultValue={query.minYear ?? undefined}
@@ -167,7 +154,7 @@ export const JellyfinSongFilters = ({ customFilters }: JellyfinSongFiltersProps)
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    onBlur={(e) => handleMinYearFilter(e.currentTarget.value)}
+                    onChange={(e) => debouncedHandleMinYearFilter(e)}
                     required={!!query.minYear}
                 />
                 <NumberInput
@@ -176,35 +163,29 @@ export const JellyfinSongFilters = ({ customFilters }: JellyfinSongFiltersProps)
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
-                    onBlur={(e) => handleMaxYearFilter(e.currentTarget.value)}
+                    onChange={(e) => debouncedHandleMaxYearFilter(e)}
                     required={!!query.minYear}
                 />
             </Group>
             {!isGenrePage && (
-                <Group grow>
-                    <MultiSelectWithInvalidData
-                        clearable
-                        data={genreList}
-                        defaultValue={selectedGenres}
-                        label={t('entity.genre', { count: 1, postProcess: 'sentenceCase' })}
-                        onChange={(e) => handleGenresFilter(e)}
-                        searchable
-                        width={250}
-                    />
-                </Group>
+                <MultiSelectWithInvalidData
+                    clearable
+                    data={genreList}
+                    defaultValue={selectedGenres}
+                    label={t('entity.genre', { count: 1, postProcess: 'sentenceCase' })}
+                    onChange={(e) => handleGenresFilter(e)}
+                    searchable
+                />
             )}
             {tagsQuery.data?.boolTags && tagsQuery.data.boolTags.length > 0 && (
-                <Group grow>
-                    <MultiSelectWithInvalidData
-                        clearable
-                        data={tagsQuery.data.boolTags}
-                        defaultValue={selectedTags}
-                        label={t('common.tags', { postProcess: 'sentenceCase' })}
-                        onChange={(e) => handleTagFilter(e)}
-                        searchable
-                        width={250}
-                    />
-                </Group>
+                <MultiSelectWithInvalidData
+                    clearable
+                    data={tagsQuery.data.boolTags}
+                    defaultValue={selectedTags}
+                    label={t('common.tags', { postProcess: 'sentenceCase' })}
+                    onChange={(e) => handleTagFilter(e)}
+                    searchable
+                />
             )}
         </Stack>
     );

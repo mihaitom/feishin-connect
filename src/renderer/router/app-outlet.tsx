@@ -1,4 +1,3 @@
-import { NuqsAdapter } from '@offlegacy/nuqs-hash-router';
 import isElectron from 'is-electron';
 import { useMemo } from 'react';
 import { Navigate, Outlet } from 'react-router';
@@ -43,9 +42,5 @@ export const AppOutlet = () => {
         return <Navigate replace to={AppRoute.ACTION_REQUIRED} />;
     }
 
-    return (
-        <NuqsAdapter>
-            <Outlet />
-        </NuqsAdapter>
-    );
+    return <Outlet />;
 };
