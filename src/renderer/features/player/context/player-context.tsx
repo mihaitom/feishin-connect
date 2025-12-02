@@ -375,9 +375,21 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 })) as number;
                 totalCount = countResult || 0;
 
-                // Check if we need confirmation
-                if (totalCount > queueFetchConfirmThreshold) {
-                    const confirmed = await confirmLargeFetch(totalCount);
+                const allResults: Song[] | string[] = [];
+                const pageSize = 500;
+
+                // Calculate the number of fetches needed
+                let numberOfFetches = 0;
+                if (itemType === LibraryItem.SONG) {
+                    // For songs, the number of fetches is based on pagination
+                    numberOfFetches = Math.ceil(totalCount / pageSize);
+                } else {
+                    const paginationFetches = Math.ceil(totalCount / pageSize);
+                    numberOfFetches = paginationFetches + totalCount;
+                }
+
+                if (numberOfFetches > queueFetchConfirmThreshold) {
+                    const confirmed = await confirmLargeFetch(numberOfFetches);
                     if (!confirmed) {
                         return;
                     }
@@ -411,10 +423,6 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                         });
                     }, 2000),
                 };
-
-                // Paginate through all items to collect IDs
-                const allResults: Song[] | string[] = [];
-                const pageSize = 500; // Fetch in chunks
                 let startIndex = 0;
 
                 while (startIndex < totalCount) {
