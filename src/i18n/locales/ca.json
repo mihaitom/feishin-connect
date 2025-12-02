@@ -323,7 +323,7 @@
             "input_skipDuplicates": "salta't els duplicats",
             "success": "s'ha afegit $t(entity.trackWithCount, {\"count\": {{message}} }) a $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
             "create": "crea $t(entity.playlist_one) {{playlist}}",
-            "searchOrCreate": "cerca $t(entity.playlist_other) o tipus per crear-ne un de nou"
+            "searchOrCreate": "cerca $t(entity.playlist_other) o escriu per crear-ne una de nova"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
@@ -490,14 +490,10 @@
         "discordServeImage": "serveix imatges de {{discord}} des del servidor",
         "discordServeImage_description": "comparteix la caràtula per l'estat d'activitat de {{discord}} des del servidor; només disponible per Jellyfin i Navidrome. {{discord}} fa ser un bot per trobar les imatges, de manera que el vostre servidor ha de ser visible per l'internet públic",
         "discordUpdateInterval": "interval d'actualització de l'estat d'activitat de {{discord}}",
-        "doubleClickBehavior": "posa en cua totes les pistes cercades en fer doble clic",
-        "doubleClickBehavior_description": "si està actiu, totes les pistes coincidents en una cerca de pistes es posaran a la cua. altrament, només la que seleccioneu s'afegirà a la cua",
         "externalLinks": "mostra enllaços externs",
         "externalLinks_description": "permet mostrar enllaços externs (Last.fm, MusicBrainz) a les pàgines d'artista/àlbum",
         "exitToTray": "surt a la safata",
         "exitToTray_description": "en sortir de l'aplicació, minimitza-la a la safa del sistema",
-        "floatingQueueArea": "mostra la zona flotant de la cua",
-        "floatingQueueArea_description": "mostra una icona flotant al costat dret de la pantalla per veure la cua de reproducció",
         "followLyric": "segueix la lletra actual",
         "followLyric_description": "desplaça la lletra a la posició de reproducció actual",
         "preferLocalLyrics": "prefereix les lletres locals",
@@ -679,7 +675,10 @@
         "exportImportSettings_importSuccess": "la configuració s'ha importat correctament!",
         "exportImportSettings_notValidJSON": "el fitxer que heu seleccionat no és un JSON vàlid",
         "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" és incorrecte: {{reason}}",
-        "language": "llengua"
+        "language": "llengua",
+        "notify": "activa les notificacions de cançons",
+        "notify_description": "mostra notificacions quan la cançó actual canviï",
+        "transcode": "activa la transcodificació"
     },
     "table": {
         "column": {
@@ -751,10 +750,8 @@
             },
             "view": {
                 "table": "taula",
-                "card": "targeta",
                 "grid": "quadrícula",
-                "list": "llista",
-                "poster": "pòster"
+                "list": "llista"
             }
         }
     },
