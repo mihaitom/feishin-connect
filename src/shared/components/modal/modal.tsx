@@ -45,8 +45,8 @@ export const Modal = ({ children, classNames, handlers, ...rest }: ModalProps) =
             }}
             onClose={handlers.close}
             overlayProps={{
-                backgroundOpacity: 0.8,
-                blur: 4,
+                backgroundOpacity: 0.5,
+                blur: 1,
             }}
             radius="xl"
             scrollAreaComponent={ScrollArea}
