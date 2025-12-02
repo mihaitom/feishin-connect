@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router';
 
 import styles from './mobile-sidebar.module.css';
 
@@ -20,7 +19,6 @@ import { Text } from '/@/shared/components/text/text';
 
 export const MobileSidebar = () => {
     const { t } = useTranslation();
-    const location = useLocation();
     const { sidebarPlaylistList } = useGeneralSettings();
 
     const translatedSidebarItemMap = useMemo(
@@ -86,10 +84,7 @@ export const MobileSidebar = () => {
                                 return (
                                     <SidebarItem key={`sidebar-${item.route}`} to={item.route}>
                                         <Group gap="sm">
-                                            <SidebarIcon
-                                                active={location.pathname === item.route}
-                                                route={item.route}
-                                            />
+                                            <SidebarIcon route={item.route} />
                                             {item.label}
                                         </Group>
                                     </SidebarItem>
