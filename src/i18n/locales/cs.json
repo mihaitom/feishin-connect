@@ -14,7 +14,7 @@
         "shuffle": "přehrát náhodně",
         "playbackFetchNoResults": "nenalezeny žádné skladby",
         "playbackFetchInProgress": "načítání skladeb…",
-        "addNext": "přidat další",
+        "addNext": "přidat jako další",
         "playbackSpeed": "rychlost přehrávání",
         "playbackFetchCancel": "chvíli to trvá… zavřete oznámení pro zrušení akce",
         "play": "přehrát",
@@ -144,7 +144,6 @@
         "replayGainMode": "režim {{ReplayGain}}",
         "playbackStyle_optionNormal": "normální",
         "windowBarStyle": "styl záhlaví okna",
-        "floatingQueueArea": "zobrazit plovoucí oblast přejetí nad frontou",
         "replayGainFallback_description": "zesílení v db k použití, když nemá soubor žádné značky {{ReplayGain}}",
         "replayGainPreamp_description": "úprava předběžného zesílení použitého na hodnoty {{ReplayGain}}",
         "hotkey_toggleRepeat": "přepnutí opakování",
@@ -170,7 +169,6 @@
         "hotkey_rate0": "vymazání hodnocení",
         "discordApplicationId": "id aplikace pro {{discord}}",
         "applicationHotkeys_description": "nastavení klávesových zkratek aplikace. přepněte pole pro nastavení jako globální zkratku (pouze na počítači)",
-        "floatingQueueArea_description": "zobrazit ikonu přejetí myší na pravé straně obrazovky pro zobrazení fronty",
         "hotkey_volumeMute": "ztlumení",
         "hotkey_toggleCurrentSongFavorite": "přepnutí oblíbení u $t(common.currentSong)",
         "remoteUsername": "uživatelské jméno serveru vzdáleného ovládání",
@@ -213,8 +211,6 @@
         "homeFeature_description": "ovládá, zda se má zobrazovat velký carousel s doporučenými alby na domovské stránce",
         "imageAspectRatio": "použít nativní poměr stran obalů alb",
         "imageAspectRatio_description": "pokud je povoleno, budou obaly alb zobrazeny s jejich nativním poměrem stran. u obalů, které nemají poměr 1:1, bude zbývající místo prázdné",
-        "doubleClickBehavior": "dvojitým kliknutím zařadit všechny vyhledané skladby do fronty",
-        "doubleClickBehavior_description": "pokud je zapnuto, budou všechny odpovídající skladby ve vyhledávání zařazeny do fronty. v opačném případě bude zařazena pouze ta, na kterou kliknete",
         "volumeWidth": "šířka posuvníku hlasitosti",
         "volumeWidth_description": "horizontální velikost posuvníku hlasitosti",
         "discordListening": "zobrazit stav jako „Poslouchá“",
@@ -328,7 +324,14 @@
             "lastfm": "Otevřít v Last.fm",
             "musicbrainz": "Otevřít v MusicBrainz"
         },
-        "moveToNext": "přesunout na další"
+        "moveToNext": "přesunout na další",
+        "downloadStarted": "spuštěno stahování {{count}} položek",
+        "largeFetch": "tato akce se pokusí načíst {{count}} položek z vašeho serveru",
+        "moveItems": "přesunout položky",
+        "shuffle": "náhodně",
+        "shuffleAll": "vše náhodně",
+        "shuffleSelected": "vybrané náhodně",
+        "viewMore": "zobrazit více"
     },
     "common": {
         "backward": "zpátky",
@@ -435,14 +438,20 @@
         "private": "soukromý",
         "public": "veřejný",
         "recordLabel": "vydavatelství",
-        "releaseType": "typ vydání"
+        "releaseType": "typ vydání",
+        "doNotShowAgain": "již nezobrazovat",
+        "externalLinks": "externí odkazy",
+        "faster": "rychlejší",
+        "slower": "pomalejší",
+        "sort": "seřadit",
+        "gridRows": "řádky mřížky",
+        "tableColumns": "sloupce tabulky",
+        "itemsMore": "{{count}} dalších"
     },
     "table": {
         "config": {
             "view": {
-                "card": "karta",
                 "table": "tabulka",
-                "poster": "plakát",
                 "list": "seznam",
                 "grid": "mřížka"
             },
@@ -636,7 +645,8 @@
             "goBack": "přejít zpět",
             "goForward": "přejít vpřed",
             "privateModeOff": "vypnout soukromý režim",
-            "privateModeOn": "zapnout soukromý režim"
+            "privateModeOn": "zapnout soukromý režim",
+            "selectMusicFolder": "vybrat složku s hudbou"
         },
         "contextMenu": {
             "addToPlaylist": "$t(action.addToPlaylist)",
@@ -739,6 +749,9 @@
             "removeServer": "odstranit server",
             "serverDetails": "podrobnosti o serveru",
             "title": "správa serverů"
+        },
+        "favorites": {
+            "title": "$t(entity.favorite_other)"
         }
     },
     "form": {
@@ -785,7 +798,11 @@
         "queryEditor": {
             "input_optionMatchAll": "shoda všeho",
             "input_optionMatchAny": "shoda libovolného",
-            "title": "editor dotazů"
+            "title": "editor dotazů",
+            "addRuleGroup": "přidat skupinu pravidel",
+            "removeRuleGroup": "odstranit skupinu pravidel",
+            "resetToDefault": "resetovat na výchozí",
+            "clearFilters": "vymazat filtry"
         },
         "lyricSearch": {
             "input_name": "$t(common.name)",
@@ -809,6 +826,21 @@
             "enabled": "soukromý režim povolen, stav přehrávání je nyní skryt před externími integracemi",
             "disabled": "soukromý režim povolen, stav přehrávání je nyní viditelný pro externími integrace",
             "title": "soukromý režim"
+        },
+        "largeFetchConfirmation": {
+            "title": "přidat položky do fronty",
+            "description": "Tento požadavek se pokusí načíst {{count}} položek ze serveru"
+        },
+        "shuffleAll": {
+            "title": "přehrát náhodně",
+            "input_genre": "$t(entity.genre_one)",
+            "input_limit": "kolik skladeb?",
+            "input_minYear": "od roku",
+            "input_maxYear": "do roku",
+            "input_played": "přehrát filtr",
+            "input_played_optionAll": "všechny skladby",
+            "input_played_optionUnplayed": "pouze nepřehrané skladby",
+            "input_played_optionPlayed": "pouze přehrané skladby"
         }
     },
     "entity": {
