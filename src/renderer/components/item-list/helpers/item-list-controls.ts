@@ -6,7 +6,7 @@ import { ItemListStateItemWithRequiredProperties } from '/@/renderer/components/
 import { DefaultItemControlProps, ItemControls } from '/@/renderer/components/item-list/types';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
 import { Play, TableColumn } from '/@/shared/types/types';
 
 interface UseDefaultItemListControlsArgs {
@@ -210,6 +210,47 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                         navigateRef.current(path, { state: { item } });
                         return;
                     }
+                }
+
+                if (itemType === LibraryItem.SONG) {
+                    const data = internalState.getData();
+                    const validSongs = data.filter((d): d is Song => {
+                        if (!d || typeof d !== 'object') {
+                            return false;
+                        }
+                        if (!('_itemType' in d)) {
+                            return false;
+                        }
+                        return (d as { _itemType: LibraryItem })._itemType === LibraryItem.SONG;
+                    });
+
+                    if (validSongs.length === 0) {
+                        return;
+                    }
+
+                    const clickedSongId = item.id;
+                    const clickedIndex = validSongs.findIndex((song) => song.id === clickedSongId);
+
+                    if (clickedIndex === -1) {
+                        return;
+                    }
+
+                    const songsBefore = 100;
+                    const songsAfter = 100;
+                    const startIndex = Math.max(0, clickedIndex - songsBefore);
+                    const endIndex = Math.min(validSongs.length, clickedIndex + songsAfter + 1);
+                    const songsToAdd = validSongs.slice(startIndex, endIndex);
+
+                    if (songsToAdd.length === 0) {
+                        return;
+                    }
+
+                    player.addToQueueByData(songsToAdd, Play.NOW);
+
+                    const targetIndex = clickedIndex - startIndex;
+
+                    player.mediaPlayByIndex(targetIndex);
+                    return;
                 }
 
                 if (itemType === LibraryItem.QUEUE_SONG) {
