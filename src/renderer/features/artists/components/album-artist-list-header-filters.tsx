@@ -1,5 +1,6 @@
 import { ALBUM_ARTIST_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
+import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
@@ -26,6 +27,7 @@ export const AlbumArtistListHeaderFilters = () => {
                 <ListRefreshButton listKey={ItemListKey.ALBUM_ARTIST} />
             </Group>
             <Group gap="sm" wrap="nowrap">
+                <ListDisplayTypeToggleButton listKey={ItemListKey.ALBUM_ARTIST} />
                 <ListConfigMenu
                     listKey={ItemListKey.ALBUM_ARTIST}
                     tableColumnsData={ALBUM_ARTIST_TABLE_COLUMNS}

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ALBUM_ARTIST_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
+import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
 import { ListSelectFilter } from '/@/renderer/features/shared/components/list-select-filter';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
@@ -46,6 +47,7 @@ export const ArtistListHeaderFilters = () => {
                 <ListRefreshButton listKey={ItemListKey.ARTIST} />
             </Group>
             <Group gap="sm" wrap="nowrap">
+                <ListDisplayTypeToggleButton listKey={ItemListKey.ARTIST} />
                 <ListConfigMenu
                     listKey={ItemListKey.ARTIST}
                     tableColumnsData={ALBUM_ARTIST_TABLE_COLUMNS}

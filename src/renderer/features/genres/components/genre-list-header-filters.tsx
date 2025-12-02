@@ -1,5 +1,6 @@
 import { GENRE_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
+import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
 import { ListFiltersModal } from '/@/renderer/features/shared/components/list-filters';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
@@ -28,6 +29,7 @@ export const GenreListHeaderFilters = () => {
                 <ListRefreshButton listKey={ItemListKey.GENRE} />
             </Group>
             <Group gap="sm" wrap="nowrap">
+                <ListDisplayTypeToggleButton listKey={ItemListKey.GENRE} />
                 <ListConfigMenu
                     listKey={ItemListKey.GENRE}
                     tableColumnsData={GENRE_TABLE_COLUMNS}
