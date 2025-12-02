@@ -21,7 +21,6 @@ import { JsonPreview } from '/@/renderer/features/shared/components/json-preview
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
-import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -163,19 +162,20 @@ const PlaylistQueryEditor = ({
             <Stack gap={0} h="100%" mah="50dvh" p="md" w="100%">
                 <Group justify="space-between" pb="md" wrap="nowrap">
                     <Group gap="sm" wrap="nowrap">
-                        <ActionIcon
-                            icon={isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'}
-                            iconProps={{
-                                size: 'md',
-                            }}
+                        <Button
+                            leftSection={
+                                <Icon
+                                    icon={isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'}
+                                    size="lg"
+                                />
+                            }
                             onClick={onToggleExpand}
-                            size="xs"
-                        />
-                        <Text>
+                            size="compact-md"
+                        >
                             {t('form.queryEditor.title', {
                                 postProcess: 'titleCase',
                             })}
-                        </Text>
+                        </Button>
                     </Group>
                     <Group gap="xs">
                         <Button
