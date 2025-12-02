@@ -36,7 +36,7 @@ export function WebPlayer() {
     const { crossfadeDuration, crossfadeStyle, speed, transitionType } = usePlayerProperties();
     const isMuted = usePlayerMuted();
     const volume = usePlayerVolume();
-    const { transcode } = usePlaybackSettings();
+    const { preservePitch, transcode } = usePlaybackSettings();
 
     const [localPlayerStatus, setLocalPlayerStatus] = useState<PlayerStatus>(status);
     const [isTransitioning, setIsTransitioning] = useState<boolean | string>(false);
@@ -432,6 +432,7 @@ export function WebPlayer() {
             playerNum={num}
             playerRef={playerRef}
             playerStatus={localPlayerStatus}
+            preservesPitch={preservePitch}
             speed={speed}
             src1={player1Url}
             src2={player2Url}

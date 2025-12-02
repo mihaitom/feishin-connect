@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 
-import { useImperativeHandle, useRef, useState } from 'react';
+import { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import ReactPlayer from 'react-player';
 
 import { AudioPlayer, PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
@@ -32,6 +32,7 @@ interface WebPlayerEngineProps {
     playerNum: number;
     playerRef: RefObject<null | WebPlayerEngineHandle>;
     playerStatus: PlayerStatus;
+    preservesPitch: boolean;
     speed?: number;
     src1: string | undefined;
     src2: string | undefined;
@@ -59,6 +60,7 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
         playerNum,
         playerRef,
         playerStatus,
+        preservesPitch,
         speed,
         src1,
         src2,
@@ -148,6 +150,17 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
             onEnded();
         };
     };
+
+    useEffect(() => {
+        const player1 = player1Ref.current?.getInternalPlayer();
+        if (player1) {
+            player1.preservesPitch = preservesPitch;
+        }
+        const player2 = player2Ref.current?.getInternalPlayer();
+        if (player2) {
+            player2.preservesPitch = preservesPitch;
+        }
+    }, [preservesPitch]);
 
     return (
         <div id="web-player-engine" style={{ display: 'none' }}>
