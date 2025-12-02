@@ -132,30 +132,32 @@ export const ListConfigMenu = (props: ListConfigMenuProps) => {
                 title={t('common.configure', { postProcess: 'sentenceCase' })}
             >
                 <Stack gap="xs">
-                    <ListConfigTable
-                        options={[
-                            {
-                                component: (
-                                    <SegmentedControl
-                                        data={availableDisplayTypes}
-                                        fullWidth
-                                        onChange={(value) => {
-                                            setList(props.listKey, {
-                                                display: value as ListDisplayType,
-                                            });
-                                        }}
-                                        size="sm"
-                                        value={displayType}
-                                        withItemsBorders={false}
-                                    />
-                                ),
-                                id: 'displayType',
-                                label: t('table.config.general.displayType', {
-                                    postProcess: 'sentenceCase',
-                                }),
-                            },
-                        ]}
-                    />
+                    {availableDisplayTypes.length > 1 && (
+                        <ListConfigTable
+                            options={[
+                                {
+                                    component: (
+                                        <SegmentedControl
+                                            data={availableDisplayTypes}
+                                            fullWidth
+                                            onChange={(value) => {
+                                                setList(props.listKey, {
+                                                    display: value as ListDisplayType,
+                                                });
+                                            }}
+                                            size="sm"
+                                            value={displayType}
+                                            withItemsBorders={false}
+                                        />
+                                    ),
+                                    id: 'displayType',
+                                    label: t('table.config.general.displayType', {
+                                        postProcess: 'sentenceCase',
+                                    }),
+                                },
+                            ]}
+                        />
+                    )}
                     <Config displayType={displayType} {...props} />
                 </Stack>
             </Modal>
