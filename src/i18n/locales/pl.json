@@ -559,7 +559,6 @@
         "fontType_description": "wbudowana czcionka pozwala na wybranie czcionki dostarczonej z feishin. systemowa czcionka pozwala na wybranie czcionki dostarczonej przez system operacyjny. niestandardowa czcionka pozwala na wybranie własnej czcionki",
         "accentColor": "kolor akcentujący",
         "accentColor_description": "ustaw kolor akcentujący dla aplikacji",
-        "floatingQueueArea": "pokaż pływającą kolejkę podczas najechania kursorem",
         "hotkey_toggleRepeat": "przełącz powtarzanie",
         "lyricOffset_description": "opóźnienie tekstu przez podaną liczbę milisekund",
         "fontType": "typ czcionki",
@@ -578,7 +577,6 @@
         "hotkey_rate0": "wyczyść oceny",
         "discordApplicationId": "ID aplikacji {{discord}}",
         "applicationHotkeys_description": "ustaw skróty klawiszowe aplikacji. przełącz pole wyboru aby ustawić skrót globalny (tylko komputery)",
-        "floatingQueueArea_description": "wyświetl ikonę najechania kursorem po prawej stronie ekranu, aby wyświetlić kolejkę odtwarzania",
         "hotkey_volumeMute": "wycisz",
         "hotkey_toggleCurrentSongFavorite": "dodaj $t(common.currentSong) do ulubionych",
         "hotkey_browserBack": "przeglądarka wstecz",
@@ -697,7 +695,6 @@
         "customCssNotice": "Ostrzeżenie: chociaż istnieje pewne filtrowanie (uniemożliwia używanie url() i content:), używanie niestandardowego css-a może stwarzać ryzyko przez zmiany w interfejsie",
         "customCss_description": "zawartość niestandardowego css. Uwaga: content i zdalne url są niedozwolonymi właściwościami. Podgląd twojej zawartości jest pokazana poniżej. Dodatkowe pola których nie ustawiłeś, są obecne z powodu sanityzacji",
         "customCss": "niestandardowy css",
-        "doubleClickBehavior": "zakolejkuj wszystkie wyszukane utwory gdy podwójnie kliknięto",
         "trayEnabled_description": "pokaż/ukryj ikonę/menu w zasobniku. jeżeli wyłączone, wyłącza też minimalizowanie.wyjście do zasobnika",
         "webAudio_description": "używaj web audio. włącza to zaawansowane funkcje takie jak replaygain. wyłącz jeżeli nie działa poprawnie",
         "artistConfiguration": "konfiguracja strony albumu wykonawcy",
@@ -717,7 +714,6 @@
         "trayEnabled": "pokazuj w zasobniku",
         "webAudio": "używaj web audio",
         "homeFeature_description": "ustawienie powoduje to czy wyświetlana jest karuzela z polecanymi utworami na stronie głównej",
-        "doubleClickBehavior_description": "jeżeli włączone, wszystkie pasujące utwory w wyszukiwaniu zostaną zakolejkowane. w przeciwnym wypadku, tylko kliknięty będzie zakolejkowany",
         "lastfmApiKey": "klucz API {{lastfm}}",
         "lastfmApiKey_description": "klucz API dla {{lastfm}}. wymagany dla okładek",
         "translationTargetLanguage": "docelowy język tłumaczenia",
@@ -735,9 +731,7 @@
     "table": {
         "config": {
             "view": {
-                "card": "karta",
-                "table": "tabela",
-                "poster": "plakat"
+                "table": "tabela"
             },
             "general": {
                 "displayType": "typ wyświetlania",
