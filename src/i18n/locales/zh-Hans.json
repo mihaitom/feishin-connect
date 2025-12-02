@@ -293,7 +293,6 @@
         "replayGainMode": "{{ReplayGain}}模式",
         "playbackStyle_optionNormal": "正常",
         "windowBarStyle": "窗口顶栏风格",
-        "floatingQueueArea": "显示浮动队列悬停区域",
         "replayGainFallback_description": "如果文件没有 {{ReplayGain}} 标签，则在数据库中应用增益",
         "hotkey_toggleRepeat": "切换循环",
         "lyricOffset_description": "将歌词偏移指定的毫秒数",
@@ -308,7 +307,6 @@
         "hotkey_zoomOut": "缩小",
         "hotkey_unfavoriteCurrentSong": "取消收藏$t(common.currentSong)",
         "hotkey_rate0": "清除评分",
-        "floatingQueueArea_description": "在屏幕右侧显示一个悬停图标，以查看播放队列",
         "hotkey_volumeMute": "静音",
         "hotkey_toggleCurrentSongFavorite": "切换收藏$t(common.currentSong)",
         "remoteUsername": "远程控制服务器用户名",
@@ -360,8 +358,6 @@
         "homeFeature": "首页 精选 轮播",
         "imageAspectRatio": "保留封面图像纵横比",
         "imageAspectRatio_description": "如果启用，封面图像将保留纵横比显示。对于不是1:1的图像，剩余的空间将是空的",
-        "doubleClickBehavior_description": "如果为真，则曲目搜索中所有匹配的曲目都将被加入播放队列。否则，只有单击的曲目才会被加入播放队列",
-        "doubleClickBehavior": "双击时将所有搜索到的曲目加入播放队列",
         "volumeWidth": "音量滑块宽度",
         "volumeWidth_description": "音量滑块的宽度",
         "discordListening": "显示状态为正在监听",
@@ -756,8 +752,6 @@
             },
             "view": {
                 "table": "表格",
-                "poster": "海报",
-                "card": "卡片",
                 "grid": "网格",
                 "list": "列表"
             },
