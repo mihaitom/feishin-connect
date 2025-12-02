@@ -32,28 +32,40 @@ const SongListPaginatedTable = lazy(() =>
 );
 
 export const SongListContent = () => {
+    return (
+        <>
+            <SongListFilters />
+            <SongListSuspenseContainer />
+        </>
+    );
+};
+
+const SongListFilters = () => {
+    return (
+        <ListWithSidebarContainer.SidebarPortal>
+            <ScrollArea>
+                <ListFilters itemType={LibraryItem.SONG} />
+            </ScrollArea>
+        </ListWithSidebarContainer.SidebarPortal>
+    );
+};
+
+const SongListSuspenseContainer = () => {
     const { display, grid, itemsPerPage, pagination, table } = useListSettings(ItemListKey.SONG);
 
     const { customFilters } = useListContext();
 
     return (
-        <>
-            <ListWithSidebarContainer.SidebarPortal>
-                <ScrollArea>
-                    <ListFilters itemType={LibraryItem.SONG} />
-                </ScrollArea>
-            </ListWithSidebarContainer.SidebarPortal>
-            <Suspense fallback={<Spinner container />}>
-                <SongListView
-                    display={display}
-                    grid={grid}
-                    itemsPerPage={itemsPerPage}
-                    overrideQuery={customFilters}
-                    pagination={pagination}
-                    table={table}
-                />
-            </Suspense>
-        </>
+        <Suspense fallback={<Spinner container />}>
+            <SongListView
+                display={display}
+                grid={grid}
+                itemsPerPage={itemsPerPage}
+                overrideQuery={customFilters}
+                pagination={pagination}
+                table={table}
+            />
+        </Suspense>
     );
 };
 

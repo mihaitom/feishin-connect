@@ -34,29 +34,41 @@ const AlbumListPaginatedTable = lazy(() =>
     })),
 );
 
+const AlbumListFilters = () => {
+    return (
+        <ListWithSidebarContainer.SidebarPortal>
+            <ScrollArea>
+                <ListFilters itemType={LibraryItem.ALBUM} />
+            </ScrollArea>
+        </ListWithSidebarContainer.SidebarPortal>
+    );
+};
+
 export const AlbumListContent = () => {
+    return (
+        <>
+            <AlbumListFilters />
+            <AlbumListSuspenseContainer />
+        </>
+    );
+};
+
+const AlbumListSuspenseContainer = () => {
     const { display, grid, itemsPerPage, pagination, table } = useListSettings(ItemListKey.ALBUM);
 
     const { customFilters } = useListContext();
 
     return (
-        <>
-            <ListWithSidebarContainer.SidebarPortal>
-                <ScrollArea>
-                    <ListFilters itemType={LibraryItem.ALBUM} />
-                </ScrollArea>
-            </ListWithSidebarContainer.SidebarPortal>
-            <Suspense fallback={<Spinner container />}>
-                <AlbumListView
-                    display={display}
-                    grid={grid}
-                    itemsPerPage={itemsPerPage}
-                    overrideQuery={customFilters}
-                    pagination={pagination}
-                    table={table}
-                />
-            </Suspense>
-        </>
+        <Suspense fallback={<Spinner container />}>
+            <AlbumListView
+                display={display}
+                grid={grid}
+                itemsPerPage={itemsPerPage}
+                overrideQuery={customFilters}
+                pagination={pagination}
+                table={table}
+            />
+        </Suspense>
     );
 };
 
