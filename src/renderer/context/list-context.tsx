@@ -1,12 +1,12 @@
 import { createContext, useContext } from 'react';
 
-import { ListKey } from '/@/renderer/store';
+import { ItemListKey } from '/@/shared/types/types';
 
 interface ListContextProps {
     customFilters?: Record<string, unknown>;
     id?: string;
     itemCount?: number;
-    pageKey: ListKey;
+    pageKey: ItemListKey | string;
     setItemCount?: (itemCount: number) => void;
 }
 
