@@ -27,7 +27,7 @@ const playButtons: { icon: AppIconSelection; label: string; secondary: boolean; 
     },
 ];
 
-const LONG_PRESS_PLAY_BEHAVIOR = {
+export const LONG_PRESS_PLAY_BEHAVIOR = {
     [Play.LAST]: Play.LAST_SHUFFLE,
     [Play.NEXT]: Play.NEXT_SHUFFLE,
     [Play.NOW]: Play.SHUFFLE,
