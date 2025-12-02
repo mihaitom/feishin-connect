@@ -13,6 +13,7 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { Modal } from '/@/shared/components/modal/modal';
 import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
 import { Stack } from '/@/shared/components/stack/stack';
+import { Switch } from '/@/shared/components/switch/switch';
 import { Table } from '/@/shared/components/table/table';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { ItemListKey, ListDisplayType } from '/@/shared/types/types';
@@ -56,26 +57,9 @@ export const ListConfigBooleanControl = ({
     value: boolean;
 }) => {
     return (
-        <SegmentedControl
-            data={[
-                {
-                    label: i18n.t('common.enable', {
-                        postProcess: 'sentenceCase',
-                    }) as string,
-                    value: 'true',
-                },
-                {
-                    label: i18n.t('common.disable', {
-                        postProcess: 'sentenceCase',
-                    }) as string,
-                    value: 'false',
-                },
-            ]}
-            onChange={(value) => onChange(value === 'true' ? true : false)}
-            size="sm"
-            value={value ? 'true' : 'false'}
-            w="100%"
-        />
+        <Group justify="flex-end" w="100%">
+            <Switch checked={value} onChange={(e) => onChange(e.currentTarget.checked)} />
+        </Group>
     );
 };
 
@@ -147,17 +131,30 @@ export const ListConfigMenu = (props: ListConfigMenuProps) => {
                 size="lg"
                 title={t('common.configure', { postProcess: 'sentenceCase' })}
             >
-                <Stack>
-                    <SegmentedControl
-                        data={availableDisplayTypes}
-                        fullWidth
-                        onChange={(value) => {
-                            setList(props.listKey, {
-                                display: value as ListDisplayType,
-                            });
-                        }}
-                        value={displayType}
-                        withItemsBorders={false}
+                <Stack gap="xs">
+                    <ListConfigTable
+                        options={[
+                            {
+                                component: (
+                                    <SegmentedControl
+                                        data={availableDisplayTypes}
+                                        fullWidth
+                                        onChange={(value) => {
+                                            setList(props.listKey, {
+                                                display: value as ListDisplayType,
+                                            });
+                                        }}
+                                        size="sm"
+                                        value={displayType}
+                                        withItemsBorders={false}
+                                    />
+                                ),
+                                id: 'displayType',
+                                label: t('table.config.general.displayType', {
+                                    postProcess: 'sentenceCase',
+                                }),
+                            },
+                        ]}
                     />
                     <Config displayType={displayType} {...props} />
                 </Stack>

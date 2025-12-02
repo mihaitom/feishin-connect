@@ -909,6 +909,7 @@
         },
         "config": {
             "general": {
+                "advancedSettings": "advanced settings",
                 "autoFitColumns": "auto fit columns",
                 "autosize": "autosize",
                 "moveUp": "move up",
@@ -934,9 +935,9 @@
                 "pagination_infinite": "infinite",
                 "pagination_paginate": "paginated",
                 "alternateRowColors": "alternate row colors",
-                "horizontalBorders": "horizontal borders",
+                "horizontalBorders": "row borders",
                 "rowHoverHighlight": "row hover highlight",
-                "verticalBorders": "vertical borders"
+                "verticalBorders": "column borders"
             },
             "label": {
                 "actions": "$t(common.action_other)",

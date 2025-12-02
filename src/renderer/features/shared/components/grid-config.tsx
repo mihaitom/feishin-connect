@@ -24,6 +24,7 @@ import {
     useSettingsStore,
     useSettingsStoreActions,
 } from '/@/renderer/store';
+import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
@@ -246,7 +247,25 @@ export const GridConfig = ({
 
     return (
         <>
-            <ListConfigTable options={options} />
+            <Accordion
+                styles={{
+                    control: { padding: '0' },
+                    item: { border: 'none' },
+                }}
+            >
+                <Accordion.Item value="grid">
+                    <Accordion.Control>
+                        <Text size="sm">
+                            {t('table.config.general.advancedSettings', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </Text>
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                        <ListConfigTable options={options} />
+                    </Accordion.Panel>
+                </Accordion.Item>
+            </Accordion>
             <Divider />
             <GridRowConfig
                 data={gridRowsData}

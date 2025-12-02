@@ -22,6 +22,7 @@ import {
     ListConfigTable,
 } from '/@/renderer/features/shared/components/list-config-menu';
 import { ItemListSettings, useSettingsStore, useSettingsStoreActions } from '/@/renderer/store';
+import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
@@ -65,7 +66,7 @@ export const TableConfig = ({
     const list = useSettingsStore((state) => state.lists[listKey]) as ItemListSettings;
     const { setList } = useSettingsStoreActions();
 
-    const options = useMemo(() => {
+    const advancedSettings = useMemo(() => {
         const allOptions = [
             {
                 component: (
@@ -248,7 +249,25 @@ export const TableConfig = ({
 
     return (
         <>
-            <ListConfigTable options={options} />
+            <Accordion
+                styles={{
+                    control: { padding: '0' },
+                    item: { border: 'none' },
+                }}
+            >
+                <Accordion.Item value="table">
+                    <Accordion.Control>
+                        <Text size="sm">
+                            {t('table.config.general.advancedSettings', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </Text>
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                        <ListConfigTable options={advancedSettings} />
+                    </Accordion.Panel>
+                </Accordion.Item>
+            </Accordion>
             <Divider />
             <TableColumnConfig
                 data={tableColumnsData}
