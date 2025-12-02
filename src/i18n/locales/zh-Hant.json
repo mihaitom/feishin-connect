@@ -91,7 +91,17 @@
         "tags": "標籤",
         "trackGain": "曲目增益",
         "trackPeak": "歌曲峰值",
-        "translation": "翻譯"
+        "translation": "翻譯",
+        "doNotShowAgain": "不再顯示",
+        "externalLinks": "外部連結",
+        "faster": "更快",
+        "private": "私人",
+        "public": "公開",
+        "recordLabel": "唱片公司",
+        "releaseType": "發行類型",
+        "slower": "更慢",
+        "sort": "排序",
+        "tableColumns": "表格欄位"
     },
     "error": {
         "endpointNotImplementedError": "{{serverType}} 尚未實現端點 {{endpoint}}",
@@ -343,7 +353,6 @@
         "enableRemote": "啟用遠端控制伺服器",
         "enableRemote_description": "啟用遠端控制伺服器，以允許其他設備控制此應用程式",
         "exitToTray": "退出時最小化到托盤",
-        "floatingQueueArea_description": "在螢幕右側顯示一個懸停圖示，以查看佇列",
         "followLyric": "跟隨目前歌詞",
         "font_description": "設定應用程式使用的字體",
         "fontType": "字體類型",
@@ -447,7 +456,6 @@
         "showSkipButtons_description": "在播放條顯示/隱藏播放按鈕",
         "playbackStyle": "播放風格",
         "exitToTray_description": "退出應用程式時最小化到系統托盤而非關閉",
-        "floatingQueueArea": "顯示浮動佇列懸停區域",
         "followLyric_description": "滾動歌詞到目前播放位置",
         "font": "字體",
         "globalMediaHotkeys_description": "啟用或禁用系統媒體快捷鍵以控制播放",
@@ -491,8 +499,6 @@
         "discordListening_description": "將狀態顯示為\"正在聽\"而不是\"正在玩\"",
         "discordServeImage": "從伺服器提供{{discord}}圖片",
         "discordServeImage_description": "從伺服器本身分享 {{discord}} Rich Presence的封面圖片，僅支援 Jellyfin 與 Navidrome。{{discord}} 會透過機器人擷取圖片，因此您的伺服器必須能從公開網路連線",
-        "doubleClickBehavior": "雙擊時將所有搜尋到的曲目加入佇列",
-        "doubleClickBehavior_description": "如果為 true，則歌曲搜尋中所有符合的歌曲都會被加入佇列。否則，只有被點擊的歌曲才會被加入佇列",
         "externalLinks": "顯示外部連結",
         "externalLinks_description": "在藝術家/專輯頁面顯示外部連結(Last.fm, MusicBrainz)",
         "preferLocalLyrics": "偏好本地歌詞",
@@ -607,8 +613,6 @@
                 "songCount": "$t(entity.track_other)"
             },
             "view": {
-                "card": "卡片",
-                "poster": "海報",
                 "table": "表格",
                 "grid": "網格",
                 "list": "列表"
@@ -663,7 +667,14 @@
         "openIn": {
             "lastfm": "在Last.fm開啟",
             "musicbrainz": "在MusicBrainz開啟"
-        }
+        },
+        "downloadStarted": "已開始下載 {{count}} 項內容",
+        "largeFetch": "這項操作將會嘗試從您的伺服器擷取 {{count}} 個項目",
+        "moveItems": "移動項目",
+        "shuffle": "隨機播放",
+        "shuffleAll": "全部隨機播放",
+        "shuffleSelected": "隨機播放選取項目",
+        "viewMore": "查看更多"
     },
     "entity": {
         "album_other": "專輯",
@@ -727,7 +738,8 @@
         "search": "搜尋",
         "title": "標題",
         "toYear": "從年份",
-        "trackNumber": "曲目"
+        "trackNumber": "曲目",
+        "explicitStatus": "$t(common.explicitStatus)"
     },
     "form": {
         "addServer": {
@@ -749,7 +761,9 @@
             "input_playlists": "$t(entity.playlist_other)",
             "input_skipDuplicates": "跳過重複",
             "success": "新增 $t(entity.trackWithCount, {\"count\": {{message}} }) 到 $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
-            "title": "新增到$t(entity.playlist_one)"
+            "title": "新增到$t(entity.playlist_one)",
+            "create": "創建 $t(entity.playlist_one) {{playlist}}",
+            "searchOrCreate": "搜尋$t(entity.playlist_other) 或輸入內容以建立新項目"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
@@ -767,7 +781,11 @@
         "queryEditor": {
             "input_optionMatchAll": "匹配全部",
             "input_optionMatchAny": "匹配任何",
-            "title": "查詢編輯器"
+            "title": "查詢編輯器",
+            "addRuleGroup": "新增規則群組",
+            "removeRuleGroup": "移除規則群組",
+            "resetToDefault": "恢復為預設值",
+            "clearFilters": "清除篩選"
         },
         "updateServer": {
             "success": "伺服器已更新成功",
@@ -795,6 +813,16 @@
             "enabled": "已啟用私人模式，播放狀態將對外部整合隱藏",
             "disabled": "已停用私人模式，播放狀態現對已啟用的外部整合可見",
             "title": "私人模式"
+        },
+        "largeFetchConfirmation": {
+            "title": "將項目加入佇列"
+        },
+        "shuffleAll": {
+            "title": "隨機播放",
+            "input_genre": "$t(entity.genre_one)",
+            "input_limit": "多少曲目？",
+            "input_minYear": "起始年份",
+            "input_maxYear": "結束年份"
         }
     }
 }
