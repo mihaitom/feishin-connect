@@ -116,16 +116,22 @@
     right: 0;
 }
 
+.favorite {
+    svg {
+        stroke: white;
+        stroke-width: 1.5px;
+    }
+}
+
 .rating {
     position: absolute;
     top: 0;
     right: 0;
     padding: var(--theme-spacing-md);
 
-    @mixin light {
-        svg {
-            stroke: var(--theme-colors-background);
-        }
+    svg {
+        stroke: white;
+        stroke-width: 1.5px;
     }
 }
 

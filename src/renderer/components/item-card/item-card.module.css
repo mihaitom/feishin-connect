@@ -55,15 +55,42 @@
 
 .favorite-badge {
     position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    width: 0;
-    height: 0;
+    top: -50px;
+    left: -50px;
+    width: 80px;
+    height: 80px;
     pointer-events: none;
-    border-color: var(--theme-colors-primary) transparent transparent transparent;
-    border-style: solid;
-    border-width: 24px 24px 0 0;
+    background-color: var(--theme-colors-primary);
+    box-shadow: 0 0 10px 8px rgb(0 0 0 / 80%);
+    opacity: 1;
+    transform: rotate(-45deg);
+    transition: opacity 0.2s ease-in-out;
+}
+
+.rating-badge {
+    position: absolute;
+    top: var(--theme-spacing-sm);
+    right: var(--theme-spacing-sm);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--theme-spacing-xs) var(--theme-spacing-sm);
+    font-size: var(--theme-font-size-md);
+    font-weight: 600;
+    color: var(--theme-colors-foreground);
+    text-shadow: 0 1px 2px rgb(0 0 0 / 80%);
+    pointer-events: none;
+    background-color: var(--theme-colors-primary);
+    border-radius: var(--theme-radius-md);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 50%);
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.image-container:hover .favorite-badge,
+.image-container:hover .rating-badge {
+    opacity: 0;
 }
 
 .image {

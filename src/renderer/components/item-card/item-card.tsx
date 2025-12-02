@@ -232,20 +232,29 @@ const CompactItemCard = ({
             e.stopPropagation();
         };
 
+        const isFavorite =
+            'userFavorite' in data && (data as { userFavorite: boolean }).userFavorite;
+        const userRating =
+            'userRating' in data &&
+            typeof (data as { userRating: null | number }).userRating === 'number'
+                ? (data as { userRating: null | number }).userRating
+                : null;
+        const hasRating = userRating !== null && userRating > 0;
+
         const imageContainerClassName = clsx(styles.imageContainer, {
             [styles.isRound]: isRound,
         });
 
-        const isFavorite =
-            'userFavorite' in data && (data as { userFavorite: boolean }).userFavorite;
-
         const imageContainerContent = (
             <>
                 <Image
-                    className={clsx(styles.image, { [styles.isRound]: isRound })}
+                    className={clsx(styles.image, {
+                        [styles.isRound]: isRound,
+                    })}
                     src={imageUrl}
                 />
                 {isFavorite && <div className={styles.favoriteBadge} />}
+                {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
                     {withControls && showControls && (
                         <ItemCardControls
@@ -443,6 +452,12 @@ const DefaultItemCard = ({
 
         const isFavorite =
             'userFavorite' in data && (data as { userFavorite: boolean }).userFavorite;
+        const userRating =
+            'userRating' in data &&
+            typeof (data as { userRating: null | number }).userRating === 'number'
+                ? (data as { userRating: null | number }).userRating
+                : null;
+        const hasRating = userRating !== null && userRating > 0;
 
         const imageContainerContent = (
             <>
@@ -451,6 +466,7 @@ const DefaultItemCard = ({
                     src={imageUrl}
                 />
                 {isFavorite && <div className={styles.favoriteBadge} />}
+                {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
                     {withControls && showControls && (
                         <ItemCardControls
@@ -695,6 +711,12 @@ const PosterItemCard = ({
 
         const isFavorite =
             'userFavorite' in data && (data as { userFavorite: boolean }).userFavorite;
+        const userRating =
+            'userRating' in data &&
+            typeof (data as { userRating: null | number }).userRating === 'number'
+                ? (data as { userRating: null | number }).userRating
+                : null;
+        const hasRating = userRating !== null && userRating > 0;
 
         const imageContainerContent = (
             <>
@@ -703,6 +725,7 @@ const PosterItemCard = ({
                     src={imageUrl}
                 />
                 {isFavorite && <div className={styles.favoriteBadge} />}
+                {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
                     {withControls && showControls && data && (
                         <ItemCardControls
