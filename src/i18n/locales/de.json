@@ -298,9 +298,7 @@
     "table": {
         "config": {
             "view": {
-                "table": "Tabelle",
-                "card": "Karte",
-                "poster": "Poster"
+                "table": "Tabelle"
             },
             "general": {
                 "tableColumns": "Tabellenspalten",
@@ -691,10 +689,8 @@
         "font": "Schriftart",
         "exitToTray": "In die Taskleiste minimieren",
         "enableRemote": "server für Fernzugriff aktivieren",
-        "floatingQueueArea": "Beim Darüberfahren schwebende Warteschlange anzeigen",
         "fontType": "schriftartenquelle",
         "followLyric": "songtext synchronisieren",
-        "floatingQueueArea_description": "zeige ein Icon auf der rechten Seite, um beim Darüberfahren die Wartschlange anzuzeigen",
         "font_description": "wähle die Schriftart für die Anwendung",
         "themeLight": "Thema (hell)",
         "sidePlayQueueStyle_optionDetached": "lösgelöst",
@@ -725,7 +721,6 @@
         "clearCacheSuccess": "Cache erfolgreich geleert",
         "contextMenu": "Kontextmenü-Einstellungen (Rechtsklick)",
         "customCssEnable_description": "ermöglicht das Schreiben benutzerdefinierten CSS",
-        "doubleClickBehavior": "bei Doppelklick alle gesuchten Tracks zur Warteschlange hinzufügen",
         "artistBackground": "Künstler Hintergrundbild",
         "artistBackground_description": "fügt ein Hintergrundbild für die Künstlerseite hinzu",
         "artistConfiguration": "künstler Albumseite Konfiguration",
