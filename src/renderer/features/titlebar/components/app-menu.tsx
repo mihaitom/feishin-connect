@@ -124,10 +124,6 @@ export const AppMenu = () => {
             type: 'item',
         },
         {
-            id: 'divider-0',
-            type: 'divider',
-        },
-        {
             id: 'divider-1',
             type: 'divider',
         },

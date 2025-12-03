@@ -73,12 +73,12 @@ const PaginationFilterKeys = {
     SCROLL_OFFSET: 'scrollOffset',
 };
 
-enum PlaylistFilterKeys {
-    CUSTOM = '_custom',
-}
-
 enum FolderFilterKeys {
     FOLDER_PATH = 'folderPath',
+}
+
+enum PlaylistFilterKeys {
+    CUSTOM = '_custom',
 }
 
 export const FILTER_KEYS = {

@@ -68,9 +68,7 @@ const GenreDetailRoute = lazy(
     () => import('/@/renderer/features/genres/routes/genre-detail-route'),
 );
 
-const FolderListRoute = lazy(
-    () => import('/@/renderer/features/folders/routes/folder-list-route'),
-);
+const FolderListRoute = lazy(() => import('/@/renderer/features/folders/routes/folder-list-route'));
 
 const SearchRoute = lazy(() => import('/@/renderer/features/search/routes/search-route'));
 
