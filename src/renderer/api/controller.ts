@@ -540,7 +540,7 @@ export const controller: GeneralController = {
             server.type,
         )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
     },
-    getTags(args) {
+    getTagList(args) {
         const server = getServerById(args.apiClientProps.serverId);
 
         if (!server) {
@@ -550,7 +550,7 @@ export const controller: GeneralController = {
         }
 
         return apiController(
-            'getTags',
+            'getTagList',
             server.type,
         )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
     },
