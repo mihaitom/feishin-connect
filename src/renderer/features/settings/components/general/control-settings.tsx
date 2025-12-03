@@ -6,7 +6,6 @@ import {
 } from '/@/renderer/features/settings/components/settings-section';
 import {
     BarAlign,
-    GenreTarget,
     PlayerbarSliderType,
     useGeneralSettings,
     usePlayerbarSlider,
@@ -232,63 +231,6 @@ export const ControlSettings = () => {
             }),
             isHidden: false,
             title: t('setting.volumeWidth', { postProcess: 'sentenceCase' }),
-        },
-
-        {
-            control: (
-                <Switch
-                    defaultChecked={settings.externalLinks}
-                    onChange={(e) => {
-                        setSettings({
-                            general: {
-                                ...settings,
-                                externalLinks: e.currentTarget.checked,
-                            },
-                        });
-                    }}
-                />
-            ),
-            description: t('setting.externalLinks', {
-                context: 'description',
-                postProcess: 'sentenceCase',
-            }),
-            title: t('setting.externalLinks', { postProcess: 'sentenceCase' }),
-        },
-
-        {
-            control: (
-                <Select
-                    data={[
-                        {
-                            label: t('entity.album_other', {
-                                postProcess: 'titleCase',
-                            }),
-                            value: GenreTarget.ALBUM,
-                        },
-                        {
-                            label: t('entity.track_other', {
-                                postProcess: 'titleCase',
-                            }),
-                            value: GenreTarget.TRACK,
-                        },
-                    ]}
-                    defaultValue={settings.genreTarget}
-                    onChange={(e) =>
-                        setSettings({
-                            general: {
-                                ...settings,
-                                genreTarget: e as GenreTarget,
-                            },
-                        })
-                    }
-                />
-            ),
-            description: t('setting.genreBehavior', {
-                context: 'description',
-                postProcess: 'sentenceCase',
-            }),
-            isHidden: false,
-            title: t('setting.genreBehavior', { postProcess: 'sentenceCase' }),
         },
         {
             control: (
