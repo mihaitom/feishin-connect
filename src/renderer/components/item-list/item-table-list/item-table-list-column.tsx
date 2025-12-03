@@ -53,7 +53,7 @@ import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Text } from '/@/shared/components/text/text';
 import { useDoubleClick } from '/@/shared/hooks/use-double-click';
 import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
-import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
+import { Folder, LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
 import {
     dndUtils,
     DragData,
@@ -80,6 +80,7 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
     const isDataRow = isHeaderEnabled ? props.rowIndex > 0 : true;
     const item = isDataRow ? props.data[props.rowIndex] : null;
     const shouldEnableDrag = !!props.enableDrag && isDataRow && !!item;
+    const itemType = (item as unknown as { _itemType?: LibraryItem })?._itemType || props.itemType;
 
     // Check if this row should render a group header (must be before conditional returns)
     // Group headers need to be rendered consistently across all grids (pinned left, main, pinned right)
@@ -239,6 +240,48 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
                             );
                             break;
                         }
+                        case DragTarget.FOLDER: {
+                            const items = args.source.item;
+
+                            const { folders, songs } = (items || []).reduce<{
+                                folders: Folder[];
+                                songs: Song[];
+                            }>(
+                                (acc, item) => {
+                                    if ((item as unknown as Song)._itemType === LibraryItem.SONG) {
+                                        acc.songs.push(item as unknown as Song);
+                                    } else if (
+                                        (item as unknown as Folder)._itemType === LibraryItem.FOLDER
+                                    ) {
+                                        acc.folders.push(item as unknown as Folder);
+                                    }
+                                    return acc;
+                                },
+                                { folders: [], songs: [] },
+                            );
+
+                            const folderIds = folders.map((folder) => folder.id);
+
+                            // Handle folders: fetch and add to queue
+                            if (folderIds.length > 0) {
+                                props.playerContext.addToQueueByFetch(
+                                    sourceServerId,
+                                    folderIds,
+                                    LibraryItem.FOLDER,
+                                    { edge: args.edge, uniqueId: droppedOnUniqueId },
+                                );
+                            }
+
+                            // Handle songs: add directly to queue
+                            if (songs.length > 0) {
+                                props.playerContext.addToQueueByData(songs, {
+                                    edge: args.edge,
+                                    uniqueId: droppedOnUniqueId,
+                                });
+                            }
+
+                            break;
+                        }
                         case DragTarget.GENRE: {
                             props.playerContext.addToQueueByFetch(
                                 sourceServerId,
@@ -366,64 +409,105 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
         );
     }
 
+    if (itemType !== LibraryItem.FOLDER) {
+        switch (type) {
+            case TableColumn.ACTIONS:
+            case TableColumn.SKIP:
+                return <ActionsColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.ALBUM:
+                return <AlbumColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.ALBUM_ARTIST:
+                return (
+                    <AlbumArtistsColumn {...props} {...dragProps} controls={controls} type={type} />
+                );
+
+            case TableColumn.ALBUM_COUNT:
+            case TableColumn.PLAY_COUNT:
+            case TableColumn.SONG_COUNT:
+                return <CountColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.ARTIST:
+                return <ArtistsColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.BIOGRAPHY:
+            case TableColumn.COMMENT:
+                return <TextColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.BIT_RATE:
+            case TableColumn.BPM:
+            case TableColumn.CHANNELS:
+            case TableColumn.DISC_NUMBER:
+            case TableColumn.TRACK_NUMBER:
+            case TableColumn.YEAR:
+                return <NumericColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.DATE_ADDED:
+            case TableColumn.RELEASE_DATE:
+                return <DateColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.DURATION:
+                return <DurationColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.GENRE:
+                return <GenreColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.GENRE_BADGE:
+                return (
+                    <GenreBadgeColumn {...props} {...dragProps} controls={controls} type={type} />
+                );
+
+            case TableColumn.IMAGE:
+                return <ImageColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.LAST_PLAYED:
+                return (
+                    <RelativeDateColumn {...props} {...dragProps} controls={controls} type={type} />
+                );
+
+            case TableColumn.PATH:
+                return <PathColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.ROW_INDEX:
+                return <RowIndexColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.SIZE:
+                return <SizeColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.TITLE:
+                return <TitleColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.TITLE_COMBINED:
+                return (
+                    <TitleCombinedColumn
+                        {...props}
+                        {...dragProps}
+                        controls={controls}
+                        type={type}
+                    />
+                );
+
+            case TableColumn.USER_FAVORITE:
+                return <FavoriteColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.USER_RATING:
+                return <RatingColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            default:
+                return <DefaultColumn {...props} {...dragProps} controls={controls} type={type} />;
+        }
+    }
+
     switch (type) {
         case TableColumn.ACTIONS:
-        case TableColumn.SKIP:
             return <ActionsColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.ALBUM:
-            return <AlbumColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.ALBUM_ARTIST:
-            return <AlbumArtistsColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.ALBUM_COUNT:
-        case TableColumn.PLAY_COUNT:
-        case TableColumn.SONG_COUNT:
-            return <CountColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.ARTIST:
-            return <ArtistsColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.BIOGRAPHY:
-        case TableColumn.COMMENT:
-            return <TextColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.BIT_RATE:
-        case TableColumn.BPM:
-        case TableColumn.CHANNELS:
-        case TableColumn.DISC_NUMBER:
-        case TableColumn.TRACK_NUMBER:
-        case TableColumn.YEAR:
-            return <NumericColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.DATE_ADDED:
-        case TableColumn.RELEASE_DATE:
-            return <DateColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.DURATION:
-            return <DurationColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.GENRE:
-            return <GenreColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.GENRE_BADGE:
-            return <GenreBadgeColumn {...props} {...dragProps} controls={controls} type={type} />;
 
         case TableColumn.IMAGE:
             return <ImageColumn {...props} {...dragProps} controls={controls} type={type} />;
 
-        case TableColumn.LAST_PLAYED:
-            return <RelativeDateColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.PATH:
-            return <PathColumn {...props} {...dragProps} controls={controls} type={type} />;
-
         case TableColumn.ROW_INDEX:
             return <RowIndexColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.SIZE:
-            return <SizeColumn {...props} {...dragProps} controls={controls} type={type} />;
 
         case TableColumn.TITLE:
             return <TitleColumn {...props} {...dragProps} controls={controls} type={type} />;
@@ -433,14 +517,8 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
                 <TitleCombinedColumn {...props} {...dragProps} controls={controls} type={type} />
             );
 
-        case TableColumn.USER_FAVORITE:
-            return <FavoriteColumn {...props} {...dragProps} controls={controls} type={type} />;
-
-        case TableColumn.USER_RATING:
-            return <RatingColumn {...props} {...dragProps} controls={controls} type={type} />;
-
         default:
-            return <DefaultColumn {...props} {...dragProps} controls={controls} type={type} />;
+            return <ColumnNullFallback {...props} {...dragProps} controls={controls} type={type} />;
     }
 };
 

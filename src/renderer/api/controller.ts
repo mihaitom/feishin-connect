@@ -306,6 +306,24 @@ export const controller: GeneralController = {
             server.type,
         )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
     },
+    getFolder(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            throw new Error(
+                `${i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' })}: getFolder`,
+            );
+        }
+
+        return apiController(
+            'getFolder',
+            server.type,
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
+    },
     getGenreList(args) {
         const server = getServerById(args.apiClientProps.serverId);
 

@@ -5,6 +5,7 @@ import {
     Album,
     AlbumArtist,
     ExplicitStatus,
+    Folder,
     Genre,
     LibraryItem,
     Playlist,
@@ -342,9 +343,48 @@ const normalizeGenre = (
     };
 };
 
+const normalizeFolder = (
+    item: z.infer<typeof ssType._response.directory>,
+    server?: null | ServerListItemWithCredential,
+): Folder => {
+    const results = item.child?.reduce(
+        (acc: { folders: Folder[]; songs: Song[] }, item) => {
+            const isDirectory = item.isDir === true;
+
+            if (isDirectory) {
+                const folder = normalizeFolder(item, server);
+                acc.folders.push(folder);
+            } else {
+                const song = normalizeSong(item, server);
+                acc.songs.push(song);
+            }
+
+            return acc;
+        },
+        {
+            folders: [],
+            songs: [],
+        },
+    );
+
+    return {
+        _itemType: LibraryItem.FOLDER,
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.SUBSONIC,
+        children: {
+            folders: results?.folders || [],
+            songs: results?.songs || [],
+        },
+        id: item.id.toString(),
+        name: item.title,
+        parentId: item.parent,
+    };
+};
+
 export const ssNormalize = {
     album: normalizeAlbum,
     albumArtist: normalizeAlbumArtist,
+    folder: normalizeFolder,
     genre: normalizeGenre,
     playlist: normalizePlaylist,
     song: normalizeSong,

@@ -2,11 +2,12 @@ import { QueryClient } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { folderQueries } from '/@/renderer/features/folders/api/folder-api';
 import { sortSongList } from '/@/shared/api/utils';
 import {
     PlaylistSongListQuery,
     PlaylistSongListQueryClientSide,
-    ServerListItem,
+    Song,
     SongDetailQuery,
     SongListQuery,
     SongListResponse,
@@ -18,22 +19,22 @@ export const getPlaylistSongsById = async (args: {
     id: string;
     query?: Partial<PlaylistSongListQueryClientSide>;
     queryClient: QueryClient;
-    server: ServerListItem;
+    serverId: string;
 }) => {
-    const { id, query, queryClient, server } = args;
+    const { id, query, queryClient, serverId } = args;
 
     const queryFilter: PlaylistSongListQuery = {
         id,
     };
 
-    const queryKey = queryKeys.playlists.songList(server?.id, id);
+    const queryKey = queryKeys.playlists.songList(serverId, id);
 
     const res = await queryClient.fetchQuery({
         gcTime: 1000 * 60,
         queryFn: async ({ signal }) =>
             api.controller.getPlaylistSongList({
                 apiClientProps: {
-                    serverId: server?.id || '',
+                    serverId,
                     signal,
                 },
                 query: queryFilter,
@@ -58,9 +59,9 @@ export const getAlbumSongsById = async (args: {
     orderByIds?: boolean;
     query?: Partial<SongListQuery>;
     queryClient: QueryClient;
-    server: ServerListItem;
+    serverId: string;
 }) => {
-    const { id, query, queryClient, server } = args;
+    const { id, query, queryClient, serverId } = args;
 
     const queryFilter: SongListQuery = {
         albumIds: id,
@@ -70,14 +71,14 @@ export const getAlbumSongsById = async (args: {
         ...query,
     };
 
-    const queryKey = queryKeys.songs.list(server?.id, queryFilter);
+    const queryKey = queryKeys.songs.list(serverId, queryFilter);
 
     const res = await queryClient.fetchQuery({
         gcTime: 1000 * 60,
         queryFn: async ({ signal }) =>
             api.controller.getSongList({
                 apiClientProps: {
-                    serverId: server?.id || '',
+                    serverId,
                     signal,
                 },
                 query: queryFilter,
@@ -94,9 +95,9 @@ export const getGenreSongsById = async (args: {
     orderByIds?: boolean;
     query?: Partial<SongListQuery>;
     queryClient: QueryClient;
-    server: null | ServerListItem;
+    serverId: string;
 }) => {
-    const { id, query, queryClient, server } = args;
+    const { id, query, queryClient, serverId } = args;
 
     const data: SongListResponse = {
         items: [],
@@ -112,14 +113,14 @@ export const getGenreSongsById = async (args: {
             ...query,
         };
 
-        const queryKey = queryKeys.songs.list(server?.id, queryFilter);
+        const queryKey = queryKeys.songs.list(serverId, queryFilter);
 
         const res = await queryClient.fetchQuery({
             gcTime: 1000 * 60,
             queryFn: async ({ signal }) =>
                 api.controller.getSongList({
                     apiClientProps: {
-                        serverId: server?.id || '',
+                        serverId,
                         signal,
                     },
                     query: queryFilter,
@@ -142,9 +143,9 @@ export const getAlbumArtistSongsById = async (args: {
     orderByIds?: boolean;
     query?: Partial<SongListQuery>;
     queryClient: QueryClient;
-    server: ServerListItem;
+    serverId: string;
 }) => {
-    const { id, query, queryClient, server } = args;
+    const { id, query, queryClient, serverId } = args;
 
     const queryFilter: SongListQuery = {
         albumArtistIds: id || [],
@@ -154,14 +155,14 @@ export const getAlbumArtistSongsById = async (args: {
         ...query,
     };
 
-    const queryKey = queryKeys.songs.list(server?.id, queryFilter);
+    const queryKey = queryKeys.songs.list(serverId, queryFilter);
 
     const res = await queryClient.fetchQuery({
         gcTime: 1000 * 60,
         queryFn: async ({ signal }) =>
             api.controller.getSongList({
                 apiClientProps: {
-                    serverId: server?.id || '',
+                    serverId,
                     signal,
                 },
                 query: queryFilter,
@@ -177,9 +178,9 @@ export const getArtistSongsById = async (args: {
     id: string[];
     query?: Partial<SongListQuery>;
     queryClient: QueryClient;
-    server: ServerListItem;
+    serverId: string;
 }) => {
-    const { id, query, queryClient, server } = args;
+    const { id, query, queryClient, serverId } = args;
 
     const queryFilter: SongListQuery = {
         artistIds: id,
@@ -189,14 +190,14 @@ export const getArtistSongsById = async (args: {
         ...query,
     };
 
-    const queryKey = queryKeys.songs.list(server?.id, queryFilter);
+    const queryKey = queryKeys.songs.list(serverId, queryFilter);
 
     const res = await queryClient.fetchQuery({
         gcTime: 1000 * 60,
         queryFn: async ({ signal }) =>
             api.controller.getSongList({
                 apiClientProps: {
-                    serverId: server?.id || '',
+                    serverId,
                     signal,
                 },
                 query: queryFilter,
@@ -211,9 +212,9 @@ export const getArtistSongsById = async (args: {
 export const getSongsByQuery = async (args: {
     query?: Partial<SongListQuery>;
     queryClient: QueryClient;
-    server: ServerListItem;
+    serverId: string;
 }) => {
-    const { query, queryClient, server } = args;
+    const { query, queryClient, serverId } = args;
 
     const queryFilter: SongListQuery = {
         sortBy: SongListSort.ALBUM,
@@ -222,14 +223,14 @@ export const getSongsByQuery = async (args: {
         ...query,
     };
 
-    const queryKey = queryKeys.songs.list(server?.id, queryFilter);
+    const queryKey = queryKeys.songs.list(serverId, queryFilter);
 
     const res = await queryClient.fetchQuery({
         gcTime: 1000 * 60,
         queryFn: async ({ signal }) => {
             return api.controller.getSongList({
                 apiClientProps: {
-                    serverId: server?.id || '',
+                    serverId,
                     signal,
                 },
                 query: queryFilter,
@@ -242,23 +243,77 @@ export const getSongsByQuery = async (args: {
     return res;
 };
 
+export const getSongsByFolder = async (args: {
+    id: string[];
+    orderByIds?: boolean;
+    query?: Partial<SongListQuery>;
+    queryClient: QueryClient;
+    serverId: string;
+}) => {
+    const { id, queryClient, serverId } = args;
+
+    const collectSongsFromFolder = async (folderId: string): Promise<Song[]> => {
+        const folderSongs: Song[] = [];
+        const folder = await queryClient.fetchQuery({
+            ...folderQueries.folder({
+                query: {
+                    id: folderId,
+                    sortBy: SongListSort.ID,
+                    sortOrder: SortOrder.ASC,
+                },
+                serverId,
+            }),
+            gcTime: 0,
+            staleTime: 0,
+        });
+
+        if (folder.children?.songs) {
+            folderSongs.push(...folder.children.songs);
+        }
+
+        if (folder.children?.folders) {
+            for (const subFolder of folder.children.folders) {
+                const subFolderSongs = await collectSongsFromFolder(subFolder.id);
+                folderSongs.push(...subFolderSongs);
+            }
+        }
+
+        return folderSongs;
+    };
+
+    const data: SongListResponse = {
+        items: [],
+        startIndex: 0,
+        totalRecordCount: 0,
+    };
+
+    // Process folders sequentially to maintain order
+    for (const folderId of id) {
+        const folderSongs = await collectSongsFromFolder(folderId);
+        data.items.push(...folderSongs);
+        data.totalRecordCount = (data.totalRecordCount || 0) + folderSongs.length;
+    }
+
+    return data;
+};
+
 export const getSongById = async (args: {
     id: string;
     queryClient: QueryClient;
-    server: ServerListItem;
+    serverId: string;
 }): Promise<SongListResponse> => {
-    const { id, queryClient, server } = args;
+    const { id, queryClient, serverId } = args;
 
     const queryFilter: SongDetailQuery = { id };
 
-    const queryKey = queryKeys.songs.detail(server?.id, queryFilter);
+    const queryKey = queryKeys.songs.detail(serverId, queryFilter);
 
     const res = await queryClient.fetchQuery({
         gcTime: 1000 * 60,
         queryFn: async ({ signal }) =>
             api.controller.getSongDetail({
                 apiClientProps: {
-                    serverId: server?.id || '',
+                    serverId,
                     signal,
                 },
                 query: queryFilter,

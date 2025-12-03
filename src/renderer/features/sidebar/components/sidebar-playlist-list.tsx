@@ -92,6 +92,7 @@ const PlaylistRowButton = ({ item, name, onContextMenu, onPlay, to }: PlaylistRo
                 const modalProps: {
                     albumId?: string[];
                     artistId?: string[];
+                    folderId?: string[];
                     genreId?: string[];
                     initialSelectedIds?: string[];
                     playlistId?: string[];
@@ -107,6 +108,9 @@ const PlaylistRowButton = ({ item, name, onContextMenu, onPlay, to }: PlaylistRo
                     case LibraryItem.ALBUM_ARTIST:
                     case LibraryItem.ARTIST:
                         modalProps.artistId = sourceIds;
+                        break;
+                    case LibraryItem.FOLDER:
+                        modalProps.folderId = sourceIds;
                         break;
                     case LibraryItem.GENRE:
                         modalProps.genreId = sourceIds;

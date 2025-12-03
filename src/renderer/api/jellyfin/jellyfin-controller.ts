@@ -1,20 +1,26 @@
 import chunk from 'lodash/chunk';
+import filter from 'lodash/filter';
+import orderBy from 'lodash/orderBy';
 import { z } from 'zod';
 
 import { jfApiClient } from '/@/renderer/api/jellyfin/jellyfin-api';
 import { jfNormalize } from '/@/shared/api/jellyfin/jellyfin-normalize';
 import { JFSongListSort, JFSortOrder, jfType } from '/@/shared/api/jellyfin/jellyfin-types';
-import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
+import { getFeatures, hasFeature, sortSongList, VersionInfo } from '/@/shared/api/utils';
 import {
     albumArtistListSortMap,
     albumListSortMap,
+    Folder,
     genreListSortMap,
     InternalControllerEndpoint,
     LibraryItem,
     Played,
     playlistListSortMap,
+    ServerType,
     Song,
+    SongListSort,
     songListSortMap,
+    SortOrder,
     sortOrderMap,
 } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
@@ -385,6 +391,213 @@ export const JellyfinController: InternalControllerEndpoint = {
         const { apiClientProps, query } = args;
 
         return `${apiClientProps.server?.url}/items/${query.id}/download?api_key=${apiClientProps.server?.credential}`;
+    },
+    getFolder: async ({ apiClientProps, query }) => {
+        const userId = apiClientProps.server?.userId;
+
+        if (!userId) throw new Error('No userId found');
+
+        const sortOrder = (query.sortOrder?.toLowerCase() ?? 'asc') as 'asc' | 'desc';
+        const isRootFolderId = query.id === '0';
+
+        if (isRootFolderId) {
+            if (query.musicFolderId) {
+                // If music folder is provided, directly get the folder
+                const musicFolderRes = await jfApiClient(apiClientProps).getFolder({
+                    params: {
+                        userId,
+                    },
+                    query: {
+                        ParentId: getLibraryId(query.musicFolderId)!,
+                    },
+                });
+
+                if (musicFolderRes.status !== 200) {
+                    throw new Error('Failed to get music folder list');
+                }
+
+                let items = musicFolderRes.body.Items.filter((item) => item.Type !== 'Audio');
+
+                if (query.searchTerm) {
+                    items = filter(items, (item) => {
+                        return item.Name.toLowerCase().includes(query.searchTerm!.toLowerCase());
+                    });
+                }
+
+                const folders = items
+                    .filter((item) => item.Type !== 'Audio')
+                    .map((item) => jfNormalize.folder(item, apiClientProps.server));
+
+                const sortedFolders = orderBy(folders, [(v) => v.name.toLowerCase()], [sortOrder]);
+
+                return {
+                    _itemType: LibraryItem.FOLDER,
+                    _serverId: apiClientProps.server?.id || 'unknown',
+                    _serverType: ServerType.JELLYFIN,
+                    children: {
+                        folders: sortedFolders,
+                        songs: [],
+                    },
+                    id: query.id,
+                    name: '~',
+                    parentId: undefined,
+                };
+            } else {
+                // Use the root music folder list if no music folder id is provided
+                const musicFolderRes = await jfApiClient(apiClientProps).getMusicFolderList({
+                    params: {
+                        userId,
+                    },
+                });
+
+                if (musicFolderRes.status !== 200) {
+                    throw new Error('Failed to get music folder list');
+                }
+
+                let items = musicFolderRes.body.Items.filter((item) => item.Type !== 'Audio');
+
+                if (query.searchTerm) {
+                    items = filter(items, (item) => {
+                        return item.Name.toLowerCase().includes(query.searchTerm!.toLowerCase());
+                    });
+                }
+
+                const folders = items
+                    .filter((item) => item.Type !== 'Audio')
+                    .map((item) =>
+                        jfNormalize.folder(
+                            item as unknown as z.infer<typeof jfType._response.folder>,
+                            apiClientProps.server,
+                        ),
+                    );
+
+                const sortedFolders = orderBy(folders, [(v) => v.name.toLowerCase()], [sortOrder]);
+
+                return {
+                    _itemType: LibraryItem.FOLDER,
+                    _serverId: apiClientProps.server?.id || 'unknown',
+                    _serverType: ServerType.JELLYFIN,
+                    children: {
+                        folders: sortedFolders,
+                        songs: [],
+                    },
+                    id: query.id,
+                    name: '~',
+                    parentId: undefined,
+                };
+            }
+        }
+
+        const folderDetailRes = await jfApiClient(apiClientProps).getFolder({
+            params: {
+                userId,
+            },
+            query: {
+                Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId',
+                ParentId: query.id,
+                SortBy: query.sortBy
+                    ? (songListSortMap.jellyfin[query.sortBy] as string) || 'SortName'
+                    : 'SortName',
+                SortOrder: sortOrderMap.jellyfin[query.sortOrder || SortOrder.ASC],
+            },
+        });
+
+        if (folderDetailRes.status !== 200) {
+            throw new Error('Failed to get folder');
+        }
+
+        // Get parent folder info - we'll use the first child's ParentId to infer the folder's parentId
+        // The folder name will be inferred from the query.id or we can try to get it from a parent query
+        let parentId: string | undefined;
+        let folderName = 'Unknown folder';
+
+        if (folderDetailRes.body.Items?.length > 0) {
+            const firstItem = folderDetailRes.body.Items[0];
+            parentId = firstItem.ParentId;
+
+            // Try to get the folder name by querying its parent's children
+            if (parentId) {
+                const parentFolderRes = await jfApiClient(apiClientProps).getFolder({
+                    params: {
+                        userId,
+                    },
+                    query: {
+                        Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId',
+                        ParentId: parentId,
+                    },
+                });
+
+                if (parentFolderRes.status === 200) {
+                    const parentFolderItem = parentFolderRes.body.Items?.find(
+                        (item) => item.Id === query.id,
+                    );
+                    if (parentFolderItem) {
+                        folderName = parentFolderItem.Name || 'Unknown folder';
+                        parentId = parentFolderItem.ParentId;
+                    }
+                }
+            }
+        }
+
+        const items = folderDetailRes.body.Items || [];
+
+        let filteredFolders = items
+            .filter((item) => item.Type !== 'Audio')
+            .map((item) => jfNormalize.folder(item, apiClientProps.server));
+        let filteredSongs = items
+            .filter(
+                (item) =>
+                    item.Type === 'Audio' &&
+                    (item as unknown as z.infer<typeof jfType._response.song>).MediaSources,
+            )
+            .map((item) =>
+                jfNormalize.song(
+                    item as unknown as z.infer<typeof jfType._response.song>,
+                    apiClientProps.server,
+                ),
+            );
+
+        if (query.searchTerm) {
+            const searchTermLower = query.searchTerm.toLowerCase();
+            filteredFolders = filter(filteredFolders, (f) =>
+                f.name.toLowerCase().includes(searchTermLower),
+            );
+            filteredSongs = filter(filteredSongs, (s) => {
+                const name = s.name?.toLowerCase() || '';
+                const album = s.album?.toLowerCase() || '';
+                const artist = s.artistName?.toLowerCase() || '';
+                return (
+                    name.includes(searchTermLower) ||
+                    album.includes(searchTermLower) ||
+                    artist.includes(searchTermLower)
+                );
+            });
+        }
+
+        filteredFolders = orderBy(filteredFolders, [(v) => v.name.toLowerCase()], [sortOrder]);
+
+        if (filteredSongs.length > 0) {
+            filteredSongs = sortSongList(
+                filteredSongs,
+                query.sortBy || SongListSort.NAME,
+                query.sortOrder || SortOrder.ASC,
+            );
+        }
+
+        const folder: Folder = {
+            _itemType: LibraryItem.FOLDER,
+            _serverId: apiClientProps.server?.id || 'unknown',
+            _serverType: ServerType.JELLYFIN,
+            children: {
+                folders: filteredFolders,
+                songs: filteredSongs,
+            },
+            id: query.id,
+            name: folderName,
+            parentId,
+        };
+
+        return folder;
     },
     getGenreList: async (args) => {
         const { apiClientProps, query } = args;

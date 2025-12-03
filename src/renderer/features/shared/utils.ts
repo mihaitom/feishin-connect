@@ -77,9 +77,14 @@ enum PlaylistFilterKeys {
     CUSTOM = '_custom',
 }
 
+enum FolderFilterKeys {
+    FOLDER_PATH = 'folderPath',
+}
+
 export const FILTER_KEYS = {
     ALBUM: AlbumFilterKeys,
     ARTIST: ArtistFilterKeys,
+    FOLDER: FolderFilterKeys,
     PAGINATION: PaginationFilterKeys,
     PLAYLIST: PlaylistFilterKeys,
     SHARED: SharedFilterKeys,

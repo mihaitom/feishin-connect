@@ -245,6 +245,11 @@ export const sortSongsByFetchedOrder = (
     fetchedIds: string[],
     itemType: LibraryItem,
 ): Song[] => {
+    // For folders, songs are already in the correct order
+    if (itemType === LibraryItem.FOLDER) {
+        return songs;
+    }
+
     // Group songs by the fetched ID they belong to
     const songsByFetchedId = new Map<string, Song[]>();
 

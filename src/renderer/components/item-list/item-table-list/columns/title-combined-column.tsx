@@ -12,9 +12,10 @@ import {
     TableColumnContainer,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { AppRoute } from '/@/renderer/router/routes';
+import { Icon } from '/@/shared/components/icon/icon';
 import { Image } from '/@/shared/components/image/image';
 import { Text } from '/@/shared/components/text/text';
-import { LibraryItem, QueueSong, RelatedAlbumArtist } from '/@/shared/types/domain-types';
+import { Folder, LibraryItem, QueueSong, RelatedAlbumArtist } from '/@/shared/types/domain-types';
 
 export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
     const row: object | undefined = (props.data as (any | undefined)[])[props.rowIndex];
@@ -166,6 +167,44 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
         );
     }
 
+    if ((props.data[props.rowIndex] as unknown as Folder)?._itemType === LibraryItem.FOLDER) {
+        const rowHeight = props.getRowHeight(props.rowIndex, props);
+        const path = getTitlePath(props.itemType, (props.data[props.rowIndex] as any).id as string);
+
+        const item = props.data[props.rowIndex] as any;
+        const textStyles = isActive ? { color: 'var(--theme-colors-primary)' } : {};
+
+        const titleLinkProps = path
+            ? {
+                  component: Link,
+                  isLink: true,
+                  state: { item },
+                  to: path,
+              }
+            : {};
+
+        const title = (props.data[props.rowIndex] as unknown as Folder)?.name;
+
+        return (
+            <TableColumnContainer
+                className={styles.titleCombined}
+                containerStyle={{ '--row-height': `${rowHeight}px` } as CSSProperties}
+                {...props}
+            >
+                <Icon className={styles.folderIcon} icon="folder" size="2xl" />
+                <Text
+                    className={styles.title}
+                    isNoSelect
+                    size="md"
+                    {...titleLinkProps}
+                    style={textStyles}
+                >
+                    {title}
+                </Text>
+            </TableColumnContainer>
+        );
+    }
+
     if (row === null) {
         return <ColumnNullFallback {...props} />;
     }
@@ -177,6 +216,7 @@ export const TitleCombinedColumn = (props: ItemTableListInnerColumn) => {
     const { itemType } = props;
 
     switch (itemType) {
+        case LibraryItem.FOLDER:
         case LibraryItem.PLAYLIST_SONG:
         case LibraryItem.QUEUE_SONG:
         case LibraryItem.SONG:

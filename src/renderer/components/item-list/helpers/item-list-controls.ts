@@ -299,10 +299,15 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                     return;
                 }
 
+                // Use the item's _itemType if available, otherwise fall back to the prop itemType
+                // This allows mixed lists (e.g., folders + songs) to show the correct context menu
+                const actualItemType =
+                    (item as any)?._itemType || itemTypeMapping[itemType] || itemType;
+
                 // If no internalState, call ContextMenuController directly
                 if (!internalState) {
                     return ContextMenuController.call({
-                        cmd: { items: [item] as any[], type: itemType as any },
+                        cmd: { items: [item] as any[], type: actualItemType as any },
                         event,
                     });
                 }
@@ -315,7 +320,7 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                 if (internalState.getSelected().length === 0) {
                     internalState.setSelected([item]);
                     return ContextMenuController.call({
-                        cmd: { items: [item] as any[], type: itemType as any },
+                        cmd: { items: [item] as any[], type: actualItemType as any },
                         event,
                     });
                 }
@@ -323,15 +328,21 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                 else if (!internalState.isSelected(rowId)) {
                     internalState.setSelected([item]);
                     return ContextMenuController.call({
-                        cmd: { items: [item] as any[], type: itemType as any },
+                        cmd: { items: [item] as any[], type: actualItemType as any },
                         event,
                     });
                 }
 
                 const selectedItems = internalState.getSelected();
 
+                // For multiple selected items, use the itemType prop (assumes all selected items are of the same type)
+                const selectedItemType =
+                    selectedItems.length > 0 && (selectedItems[0] as any)?._itemType
+                        ? (selectedItems[0] as any)._itemType
+                        : actualItemType;
+
                 return ContextMenuController.call({
-                    cmd: { items: selectedItems as any[], type: itemType as any },
+                    cmd: { items: selectedItems as any[], type: selectedItemType as any },
                     event,
                 });
             },

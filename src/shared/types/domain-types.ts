@@ -24,6 +24,7 @@ export enum LibraryItem {
     ALBUM = 'album',
     ALBUM_ARTIST = 'albumArtist',
     ARTIST = 'artist',
+    FOLDER = 'folder',
     GENRE = 'genre',
     PLAYLIST = 'playlist',
     PLAYLIST_SONG = 'playlistSong',
@@ -256,6 +257,29 @@ export interface BaseQuery<T> {
 export type EndpointDetails = {
     server: ServerListItem;
 };
+
+export type Folder = {
+    _itemType: LibraryItem.FOLDER;
+    _serverId: string;
+    _serverType: ServerType;
+    children?: {
+        folders: Folder[];
+        songs: Song[];
+    };
+    id: string;
+    name: string;
+    parentId?: string;
+};
+
+export type FolderArgs = BaseEndpointArgs & { query: FolderQuery };
+
+export interface FolderQuery extends BaseQuery<SongListSort> {
+    id: string;
+    musicFolderId?: string | string[];
+    searchTerm?: string;
+}
+
+export type FolderResponse = Folder;
 
 export type GainInfo = {
     album?: number;
@@ -1231,6 +1255,7 @@ export type ControllerEndpoint = {
     getArtistList: (args: ArtistListArgs) => Promise<ArtistListResponse>;
     getArtistListCount: (args: ArtistListCountArgs) => Promise<number>;
     getDownloadUrl: (args: DownloadArgs) => string;
+    getFolder: (args: FolderArgs) => Promise<FolderResponse>;
     getGenreList: (args: GenreListArgs) => Promise<GenreListResponse>;
     getLyrics?: (args: LyricsArgs) => Promise<LyricsResponse>;
     getMusicFolderList: (args: MusicFolderListArgs) => Promise<MusicFolderListResponse>;
@@ -1309,6 +1334,7 @@ export type InternalControllerEndpoint = {
     getArtistList: (args: ReplaceApiClientProps<ArtistListArgs>) => Promise<ArtistListResponse>;
     getArtistListCount: (args: ReplaceApiClientProps<ArtistListCountArgs>) => Promise<number>;
     getDownloadUrl: (args: ReplaceApiClientProps<DownloadArgs>) => string;
+    getFolder: (args: ReplaceApiClientProps<FolderArgs>) => Promise<FolderResponse>;
     getGenreList: (args: ReplaceApiClientProps<GenreListArgs>) => Promise<GenreListResponse>;
     getLyrics?: (args: ReplaceApiClientProps<LyricsArgs>) => Promise<LyricsResponse>;
     getMusicFolderList: (

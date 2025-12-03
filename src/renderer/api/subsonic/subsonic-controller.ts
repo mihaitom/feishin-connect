@@ -21,7 +21,9 @@ import {
     InternalControllerEndpoint,
     LibraryItem,
     PlaylistListSort,
+    ServerType,
     Song,
+    SongListSort,
     SortOrder,
 } from '/@/shared/types/domain-types';
 import { ServerFeatures } from '/@/shared/types/features-types';
@@ -649,6 +651,106 @@ export const SubsonicController: InternalControllerEndpoint = {
             '&v=1.13.0' +
             '&c=Feishin'
         );
+    },
+    getFolder: async ({ apiClientProps, query }) => {
+        const sortOrder = (query.sortOrder?.toLowerCase() ?? 'asc') as 'asc' | 'desc';
+
+        const isRootFolderId = /^\d+$/.test(query.id);
+
+        if (isRootFolderId) {
+            const res = await ssApiClient(apiClientProps).getIndexes({
+                query: {
+                    musicFolderId: getLibraryId(query.musicFolderId),
+                },
+            });
+
+            if (res.status !== 200) {
+                throw new Error(`Failed to get folder list: ${JSON.stringify(res.body)}`);
+            }
+
+            let items =
+                res.body.indexes?.index?.flatMap((idx) =>
+                    idx.artist.map((artist) => ({
+                        artist: artist.name,
+                        id: artist.id.toString(),
+                        isDir: true,
+                        title: artist.name,
+                    })),
+                ) || [];
+
+            if (query.searchTerm) {
+                items = filter(items, (item) => {
+                    return item.title.toLowerCase().includes(query.searchTerm!.toLowerCase());
+                });
+            }
+
+            let folders = items.map((item) => ssNormalize.folder(item, apiClientProps.server));
+
+            folders = orderBy(folders, [(v) => v.name.toLowerCase()], [sortOrder]);
+
+            return {
+                _itemType: LibraryItem.FOLDER,
+                _serverId: apiClientProps.server?.id || 'unknown',
+                _serverType: ServerType.SUBSONIC,
+                children: {
+                    folders,
+                    songs: [],
+                },
+                id: query.id,
+                name: '~',
+                parentId: undefined,
+            };
+        }
+
+        const directoryRes = await ssApiClient(apiClientProps).getMusicDirectory({
+            query: {
+                id: query.id,
+            },
+        });
+
+        if (directoryRes.status !== 200) {
+            throw new Error('Failed to get folder');
+        }
+
+        const folder = ssNormalize.folder(directoryRes.body.directory, apiClientProps.server);
+
+        let filteredFolders = folder.children?.folders || [];
+        let filteredSongs = folder.children?.songs || [];
+
+        if (query.searchTerm) {
+            const searchTermLower = query.searchTerm.toLowerCase();
+            filteredFolders = filter(filteredFolders, (f) =>
+                f.name.toLowerCase().includes(searchTermLower),
+            );
+            filteredSongs = filter(filteredSongs, (s) => {
+                const name = s.name?.toLowerCase() || '';
+                const album = s.album?.toLowerCase() || '';
+                const artist = s.artistName?.toLowerCase() || '';
+                return (
+                    name.includes(searchTermLower) ||
+                    album.includes(searchTermLower) ||
+                    artist.includes(searchTermLower)
+                );
+            });
+        }
+
+        filteredFolders = orderBy(filteredFolders, [(v) => v.name.toLowerCase()], [sortOrder]);
+
+        if (filteredSongs.length > 0) {
+            filteredSongs = sortSongList(
+                filteredSongs,
+                query.sortBy || SongListSort.NAME,
+                query.sortOrder || SortOrder.ASC,
+            );
+        }
+
+        return {
+            ...folder,
+            children: {
+                folders: filteredFolders,
+                songs: filteredSongs,
+            },
+        };
     },
     getGenreList: async ({ apiClientProps, query }) => {
         const sortOrder = (query.sortOrder?.toLowerCase() ?? 'asc') as 'asc' | 'desc';

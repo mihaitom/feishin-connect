@@ -444,6 +444,35 @@ const SONG_LIST_FILTERS: Partial<
     ],
 };
 
+const FOLDER_LIST_FILTERS: Partial<
+    Record<ServerType, Array<{ defaultOrder: SortOrder; name: string; value: string }>>
+> = {
+    [ServerType.JELLYFIN]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.id', { postProcess: 'titleCase' }),
+            value: SongListSort.ID,
+        },
+        ...(SONG_LIST_FILTERS[ServerType.JELLYFIN] || []),
+    ],
+    [ServerType.NAVIDROME]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.id', { postProcess: 'titleCase' }),
+            value: SongListSort.ID,
+        },
+        ...(SONG_LIST_FILTERS[ServerType.NAVIDROME] || []),
+    ],
+    [ServerType.SUBSONIC]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.id', { postProcess: 'titleCase' }),
+            value: SongListSort.ID,
+        },
+        ...(SONG_LIST_FILTERS[ServerType.SUBSONIC] || []),
+    ],
+};
+
 const PLAYLIST_SONG_LIST_FILTERS: Partial<
     Record<ServerType, Array<{ defaultOrder: SortOrder; name: string; value: string }>>
 > = {
@@ -715,6 +744,7 @@ const FILTERS: Partial<Record<LibraryItem, any>> = {
     [LibraryItem.ALBUM]: ALBUM_LIST_FILTERS,
     [LibraryItem.ALBUM_ARTIST]: ALBUM_ARTIST_LIST_FILTERS,
     [LibraryItem.ARTIST]: ARTIST_LIST_FILTERS,
+    [LibraryItem.FOLDER]: FOLDER_LIST_FILTERS,
     [LibraryItem.GENRE]: GENRE_LIST_FILTERS,
     [LibraryItem.PLAYLIST]: PLAYLIST_LIST_FILTERS,
     [LibraryItem.PLAYLIST_SONG]: PLAYLIST_SONG_LIST_FILTERS,

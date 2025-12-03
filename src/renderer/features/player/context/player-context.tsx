@@ -7,6 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
+import {
+    getAlbumArtistSongsById,
+    getAlbumSongsById,
+    getGenreSongsById,
+    getPlaylistSongsById,
+    getSongsByFolder,
+} from '/@/renderer/features/player/utils';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
@@ -28,9 +35,6 @@ import {
     PlaylistSongListResponse,
     QueueSong,
     Song,
-    SongListResponse,
-    SongListSort,
-    SortOrder,
 } from '/@/shared/types/domain-types';
 import { Play, PlayerRepeat, PlayerShuffle } from '/@/shared/types/types';
 
@@ -911,88 +915,57 @@ export async function fetchSongsByItemType(
 
     switch (args.itemType) {
         case LibraryItem.ALBUM: {
-            const promises: Promise<SongListResponse>[] = [];
-
-            for (const id of args.id) {
-                promises.push(
-                    queryClient.fetchQuery({
-                        ...songsQueries.list({
-                            query: {
-                                albumIds: [id],
-                                sortBy: SongListSort.ID,
-                                sortOrder: SortOrder.ASC,
-                                startIndex: 0,
-                                ...args.params,
-                            },
-                            serverId: serverId,
-                        }),
-                        gcTime: 0,
-                        staleTime: 0,
-                    }),
-                );
-            }
-
-            const results = await Promise.all(promises);
-            songs.push(...results.flatMap((r) => r.items));
-
+            const albumSongsResponse = await getAlbumSongsById({
+                id: args.id,
+                query: args.params,
+                queryClient,
+                serverId,
+            });
+            songs.push(...albumSongsResponse.items);
             break;
         }
 
-        case LibraryItem.ALBUM_ARTIST:
+        case LibraryItem.ALBUM_ARTIST: {
+            const albumArtistSongsResponse = await getAlbumArtistSongsById({
+                id: args.id,
+                query: args.params,
+                queryClient,
+                serverId,
+            });
+            songs.push(...albumArtistSongsResponse.items);
+            break;
+        }
+
         case LibraryItem.ARTIST: {
-            const promises: Promise<SongListResponse>[] = [];
+            const artistSongsResponse = await getAlbumArtistSongsById({
+                id: args.id,
+                query: args.params,
+                queryClient,
+                serverId,
+            });
+            songs.push(...artistSongsResponse.items);
+            break;
+        }
 
-            for (const id of args.id) {
-                promises.push(
-                    queryClient.fetchQuery({
-                        ...songsQueries.list({
-                            query: {
-                                albumArtistIds: [id],
-                                limit: -1,
-                                sortBy: SongListSort.ID,
-                                sortOrder: SortOrder.ASC,
-                                startIndex: 0,
-                                ...args.params,
-                            },
-                            serverId: serverId,
-                        }),
-                        gcTime: 0,
-                        staleTime: 0,
-                    }),
-                );
-            }
-
-            const results = await Promise.all(promises);
-            songs.push(...results.flatMap((r) => r.items));
-
+        case LibraryItem.FOLDER: {
+            const folderSongsResponse = await getSongsByFolder({
+                id: args.id,
+                query: args.params,
+                queryClient,
+                serverId,
+            });
+            songs.push(...folderSongsResponse.items);
             break;
         }
 
         case LibraryItem.GENRE: {
-            const promises: Promise<SongListResponse>[] = [];
-
-            for (const id of args.id) {
-                promises.push(
-                    queryClient.fetchQuery({
-                        ...songsQueries.list({
-                            query: {
-                                genreIds: [id],
-                                limit: -1,
-                                sortBy: SongListSort.ID,
-                                sortOrder: SortOrder.ASC,
-                                startIndex: 0,
-                                ...args.params,
-                            },
-                            serverId: serverId,
-                        }),
-                        gcTime: 0,
-                        staleTime: 0,
-                    }),
-                );
-            }
-
-            const results = await Promise.all(promises);
-            songs.push(...results.flatMap((r) => r.items));
+            const genreSongsResponse = await getGenreSongsById({
+                id: args.id,
+                query: args.params,
+                queryClient,
+                serverId,
+            });
+            songs.push(...genreSongsResponse.items);
             break;
         }
 
@@ -1001,22 +974,16 @@ export async function fetchSongsByItemType(
 
             for (const id of args.id) {
                 promises.push(
-                    queryClient.fetchQuery({
-                        ...playlistsQueries.songList({
-                            query: {
-                                id: id,
-                                ...args.params,
-                            },
-                            serverId: serverId,
-                        }),
-                        gcTime: 0,
-                        staleTime: 0,
+                    getPlaylistSongsById({
+                        id,
+                        query: args.params,
+                        queryClient,
+                        serverId,
                     }),
                 );
             }
 
             const results = await Promise.all(promises);
-
             songs.push(...results.flatMap((r) => r.items));
             break;
         }

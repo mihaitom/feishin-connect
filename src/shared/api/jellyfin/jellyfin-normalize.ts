@@ -4,6 +4,7 @@ import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import {
     Album,
     AlbumArtist,
+    Folder,
     Genre,
     LibraryItem,
     MusicFolder,
@@ -496,17 +497,20 @@ const normalizeGenre = (
     };
 };
 
-// const normalizeFolder = (item: any) => {
-//   return {
-//     created: item.DateCreated,
-//     id: item.Id,
-//     image: getCoverArtUrl(item, 150),
-//     isDir: true,
-//     title: item.Name,
-//     type: Item.Folder,
-//     uniqueId: nanoid(),
-//   };
-// };
+const normalizeFolder = (
+    item: z.infer<typeof jfType._response.folder>,
+    server: null | ServerListItem,
+): Folder => {
+    return {
+        _itemType: LibraryItem.FOLDER,
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.JELLYFIN,
+        children: undefined,
+        id: item.Id,
+        name: item.Name || 'Unknown folder',
+        parentId: item.ParentId,
+    };
+};
 
 // const normalizeScanStatus = () => {
 //   return {
@@ -518,6 +522,7 @@ const normalizeGenre = (
 export const jfNormalize = {
     album: normalizeAlbum,
     albumArtist: normalizeAlbumArtist,
+    folder: normalizeFolder,
     genre: normalizeGenre,
     musicFolder: normalizeMusicFolder,
     playlist: normalizePlaylist,

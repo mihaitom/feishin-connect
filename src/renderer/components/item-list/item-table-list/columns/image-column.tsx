@@ -10,9 +10,10 @@ import {
 import { PlayButton } from '/@/renderer/features/shared/components/play-button';
 import { LONG_PRESS_PLAY_BEHAVIOR } from '/@/renderer/features/shared/components/play-button-group';
 import { usePlayButtonBehavior } from '/@/renderer/store';
+import { Icon } from '/@/shared/components/icon/icon';
 import { Image } from '/@/shared/components/image/image';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { Folder, LibraryItem } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
 export const ImageColumn = (props: ItemTableListInnerColumn) => {
@@ -94,6 +95,14 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
                         </div>
                     )}
                 </div>
+            </TableColumnContainer>
+        );
+    }
+
+    if ((props.data[props.rowIndex] as unknown as Folder)?._itemType === LibraryItem.FOLDER) {
+        return (
+            <TableColumnContainer {...props}>
+                <Icon className={styles.folderIcon} icon="folder" size="2xl" />
             </TableColumnContainer>
         );
     }

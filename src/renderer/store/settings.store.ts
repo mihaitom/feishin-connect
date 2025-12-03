@@ -566,6 +566,12 @@ export const sidebarItems: SidebarItemType[] = [
         route: AppRoute.LIBRARY_GENRES,
     },
     {
+        disabled: false,
+        id: 'Folders',
+        label: i18n.t('page.sidebar.folders'),
+        route: AppRoute.LIBRARY_FOLDERS,
+    },
+    {
         disabled: true,
         id: 'Playlists',
         label: i18n.t('page.sidebar.playlists'),
@@ -1333,10 +1339,19 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     return {};
                 }
 
+                if (version <= 12) {
+                    state.general.sidebarItems.push({
+                        disabled: false,
+                        id: 'Folders',
+                        label: i18n.t('page.sidebar.folders'),
+                        route: AppRoute.LIBRARY_FOLDERS,
+                    });
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 12,
+            version: 13,
         },
     ),
 );

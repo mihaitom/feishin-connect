@@ -393,6 +393,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
     getDownloadUrl: SubsonicController.getDownloadUrl,
+    getFolder: SubsonicController.getFolder,
     getGenreList: async (args) => {
         const { apiClientProps, query } = args;
 

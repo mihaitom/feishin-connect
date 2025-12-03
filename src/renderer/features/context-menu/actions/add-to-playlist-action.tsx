@@ -9,6 +9,7 @@ import {
     getAlbumSongsById,
     getGenreSongsById,
     getPlaylistSongsById,
+    getSongsByFolder,
 } from '/@/renderer/features/player/utils';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { useRecentPlaylists } from '/@/renderer/features/playlists/hooks/use-recent-playlists';
@@ -97,48 +98,63 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
 
     const getSongsByAlbum = useCallback(
         async (albumId: string) => {
-            if (!server) return null;
             return getAlbumSongsById({
                 id: [albumId],
                 queryClient,
-                server,
+                serverId,
             });
         },
-        [queryClient, server],
+        [queryClient, serverId],
     );
 
     const getSongsByArtist = useCallback(
         async (artistId: string) => {
-            if (!server) return null;
             return getAlbumArtistSongsById({
                 id: [artistId],
                 queryClient,
-                server,
+                serverId,
             });
         },
-        [queryClient, server],
+        [queryClient, serverId],
     );
 
     const getSongsByGenre = useCallback(
         async (genreIds: string[]) => {
-            if (!server) return null;
             return getGenreSongsById({
                 id: genreIds,
                 queryClient,
-                server,
+                serverId,
             });
         },
-        [queryClient, server],
+        [queryClient, serverId],
     );
 
     const getSongsByPlaylist = useCallback(
         async (playlistId: string) => {
-            if (!server) return null;
             return getPlaylistSongsById({
                 id: playlistId,
                 queryClient,
-                server,
+                serverId,
             });
+        },
+        [queryClient, serverId],
+    );
+
+    const getSongsByFolderLocal = useCallback(
+        async (folderId: string) => {
+            if (!server) return null;
+
+            const songsResponse = await getSongsByFolder({
+                id: [folderId],
+                queryClient,
+                serverId: server.id,
+            });
+
+            return {
+                items: songsResponse.items.map((song) => song.id),
+                startIndex: 0,
+                totalRecordCount: songsResponse.items.length,
+            };
         },
         [queryClient, server],
     );
@@ -172,6 +188,11 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
                     for (const id of items) {
                         const songs = await getSongsByPlaylist(id);
                         allSongIds.push(...(songs?.items?.map((song) => song.id) || []));
+                    }
+                } else if (itemType === LibraryItem.FOLDER) {
+                    for (const id of items) {
+                        const songs = await getSongsByFolderLocal(id);
+                        allSongIds.push(...(songs?.items || []));
                     }
                 }
 
@@ -213,6 +234,7 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
             addToPlaylistMutation,
             getSongsByAlbum,
             getSongsByArtist,
+            getSongsByFolderLocal,
             getSongsByGenre,
             getSongsByPlaylist,
             itemType,
@@ -226,6 +248,7 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
         const modalProps: {
             albumId?: string[];
             artistId?: string[];
+            folderId?: string[];
             genreId?: string[];
             initialSelectedIds?: string[];
             playlistId?: string[];
@@ -239,6 +262,9 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
             case LibraryItem.ALBUM_ARTIST:
             case LibraryItem.ARTIST:
                 modalProps.artistId = items;
+                break;
+            case LibraryItem.FOLDER:
+                modalProps.folderId = items;
                 break;
             case LibraryItem.GENRE:
                 modalProps.genreId = items;

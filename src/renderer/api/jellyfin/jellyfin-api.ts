@@ -116,6 +116,15 @@ export const contract = c.router({
             400: jfType._response.error,
         },
     },
+    getFolder: {
+        method: 'GET',
+        path: 'users/:userId/items',
+        query: jfType._parameters.folder,
+        responses: {
+            200: jfType._response.folderList,
+            400: jfType._response.error,
+        },
+    },
     getGenreList: {
         method: 'GET',
         path: 'musicgenres',

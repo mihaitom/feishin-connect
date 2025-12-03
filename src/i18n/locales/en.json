@@ -450,6 +450,9 @@
             "showTracks": "show $t(entity.genre_one) $t(entity.track_other)",
             "title": "$t(entity.genre_other)"
         },
+        "folderList": {
+            "title": "$t(entity.folder_other)"
+        },
         "globalSearch": {
             "commands": {
                 "goToPage": "go to page",
@@ -689,8 +692,6 @@
         "gaplessAudio_description": "sets the gapless audio setting for mpv",
         "gaplessAudio_optionWeak": "weak (recommended)",
         "gaplessAudio": "gapless audio",
-        "genreBehavior_description": "determines whether clicking on a genre opens by default in track or album list",
-        "genreBehavior": "genre page default behavior",
         "globalMediaHotkeys_description": "enable or disable the usage of your system media hotkeys to control playback",
         "globalMediaHotkeys": "global media hotkeys",
         "homeConfiguration_description": "configure what items are shown, and in what order, on the home page",
