@@ -21,7 +21,6 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
     ];
     const playButtonBehavior = usePlayButtonBehavior();
     const item = props.data[props.rowIndex] as any;
-    const showPlayButton = props.size === 'default' || props.size === 'large';
     const internalState = (props as any).internalState;
     const [isHovered, setIsHovered] = useState(false);
 
@@ -66,20 +65,25 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
         return (
             <TableColumnContainer {...props}>
                 <div
-                    className={styles.imageContainer}
+                    className={clsx(styles.imageContainer, {
+                        [styles.compactImageContainer]: props.size === 'compact',
+                    })}
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
                     <Image
                         containerClassName={clsx({
-                            [styles.compactImageContainer]: props.size === 'compact',
                             [styles.imageContainerWithAspectRatio]:
                                 props.size === 'default' || props.size === 'large',
                         })}
                         src={row}
                     />
-                    {showPlayButton && isHovered && (
-                        <div className={styles.playButtonOverlay}>
+                    {isHovered && (
+                        <div
+                            className={clsx(styles.playButtonOverlay, {
+                                [styles.compactPlayButtonOverlay]: props.size === 'compact',
+                            })}
+                        >
                             <PlayButton
                                 fill
                                 onClick={(e) => handlePlay(playButtonBehavior, e)}
