@@ -619,6 +619,34 @@ const VirtualizedTableGrid = React.memo(
             </div>
         );
     },
+    (prevProps, nextProps) => {
+        const prevColumnIds = prevProps.parsedColumns.map((col) => col.id).join(',');
+        const nextColumnIds = nextProps.parsedColumns.map((col) => col.id).join(',');
+
+        const columnWidthsEqual = prevProps.calculatedColumnWidths.every(
+            (width, index) => width === nextProps.calculatedColumnWidths[index],
+        );
+
+        if (prevColumnIds !== nextColumnIds) {
+            return false;
+        }
+
+        return (
+            columnWidthsEqual &&
+            prevProps.activeRowId === nextProps.activeRowId &&
+            prevProps.data === nextProps.data &&
+            prevProps.size === nextProps.size &&
+            prevProps.startRowIndex === nextProps.startRowIndex &&
+            prevProps.enableVerticalBorders === nextProps.enableVerticalBorders &&
+            prevProps.enableHorizontalBorders === nextProps.enableHorizontalBorders &&
+            prevProps.enableRowHoverHighlight === nextProps.enableRowHoverHighlight &&
+            prevProps.enableAlternateRowColors === nextProps.enableAlternateRowColors &&
+            prevProps.pinnedLeftColumnCount === nextProps.pinnedLeftColumnCount &&
+            prevProps.pinnedRightColumnCount === nextProps.pinnedRightColumnCount &&
+            prevProps.totalColumnCount === nextProps.totalColumnCount &&
+            prevProps.totalRowCount === nextProps.totalRowCount
+        );
+    },
 );
 
 VirtualizedTableGrid.displayName = 'VirtualizedTableGrid';
