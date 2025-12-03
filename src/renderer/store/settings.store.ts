@@ -304,6 +304,7 @@ const ScrobbleSettingsSchema = z.object({
 
 const PlaybackSettingsSchema = z.object({
     audioDeviceId: z.string().nullable().optional(),
+    audioFadeOnStatusChange: z.boolean(),
     mediaSession: z.boolean(),
     mpvExtraParameters: z.array(z.string()),
     mpvProperties: MpvSettingsSchema,
@@ -1137,6 +1138,7 @@ const initialState: SettingsState = {
     },
     playback: {
         audioDeviceId: undefined,
+        audioFadeOnStatusChange: true,
         mediaSession: false,
         mpvExtraParameters: [],
         mpvProperties: {

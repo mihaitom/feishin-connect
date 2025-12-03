@@ -794,6 +794,8 @@
         "showVisualizerInSidebar": "show visualizer in player sidebar",
         "preservePitch_description": "preserves pitch when modifying playback speed",
         "preservePitch": "preserve pitch",
+        "audioFadeOnStatusChange": "audio fade on status change",
+        "audioFadeOnStatusChange_description": "enables fade out and fade in when play/pause status changes",
         "preventSleepOnPlayback_description": "prevent the display from sleeping while music is playing",
         "preventSleepOnPlayback": "prevent sleep on playback",
         "remotePassword_description": "sets the password for the remote control server. These credentials are by default transferred insecurely, so you should use a unique password that you do not care about",
