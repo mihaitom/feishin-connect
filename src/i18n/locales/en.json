@@ -371,6 +371,7 @@
         },
         "appMenu": {
             "collapseSidebar": "collapse sidebar",
+            "commandPalette": "open command palette",
             "expandSidebar": "expand sidebar",
             "goBack": "go back",
             "goForward": "go forward",

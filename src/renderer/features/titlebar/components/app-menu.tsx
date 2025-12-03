@@ -8,7 +8,7 @@ import packageJson from '../../../../../package.json';
 
 import { ServerList } from '/@/renderer/features/servers/components/server-list';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useAppStore, useAppStoreActions } from '/@/renderer/store';
+import { useAppStore, useAppStoreActions, useCommandPalette } from '/@/renderer/store';
 import { DropdownMenu, MenuItemProps } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Icon } from '/@/shared/components/icon/icon';
 import { toast } from '/@/shared/components/toast/toast';
@@ -74,6 +74,7 @@ export const AppMenu = () => {
     const collapsed = useAppStore((state) => state.sidebar.collapsed);
     const privateMode = useAppStore((state) => state.privateMode);
     const { setPrivateMode, setSideBar } = useAppStoreActions();
+    const { open: openCommandPalette } = useCommandPalette();
 
     const handleBrowserDevTools = () => {
         browser?.devtools();
@@ -116,27 +117,15 @@ export const AppMenu = () => {
 
     const menuConfig: MenuItem[] = [
         {
-            condition: privateMode,
-            id: 'private-mode-off',
-            item: {
-                icon: 'lock',
-                iconColor: 'error',
-                label: t('page.appMenu.privateModeOff', { postProcess: 'sentenceCase' }),
-                onClick: handlePrivateModeOff,
-                type: 'item',
-            },
-            type: 'conditional-item',
+            icon: 'search',
+            id: 'command-palette',
+            label: t('page.appMenu.commandPalette', { postProcess: 'sentenceCase' }),
+            onClick: openCommandPalette,
+            type: 'item',
         },
         {
-            condition: !privateMode,
-            id: 'private-mode-on',
-            item: {
-                icon: 'lockOpen',
-                label: t('page.appMenu.privateModeOn', { postProcess: 'sentenceCase' }),
-                onClick: handlePrivateModeOn,
-                type: 'item',
-            },
-            type: 'conditional-item',
+            id: 'divider-0',
+            type: 'divider',
         },
         {
             id: 'divider-1',
@@ -212,6 +201,29 @@ export const AppMenu = () => {
             label: t('page.appMenu.settings', { postProcess: 'sentenceCase' }),
             onClick: () => navigate(AppRoute.SETTINGS),
             type: 'item',
+        },
+        {
+            condition: privateMode,
+            id: 'private-mode-off',
+            item: {
+                icon: 'lock',
+                iconColor: 'error',
+                label: t('page.appMenu.privateModeOff', { postProcess: 'sentenceCase' }),
+                onClick: handlePrivateModeOff,
+                type: 'item',
+            },
+            type: 'conditional-item',
+        },
+        {
+            condition: !privateMode,
+            id: 'private-mode-on',
+            item: {
+                icon: 'lockOpen',
+                label: t('page.appMenu.privateModeOn', { postProcess: 'sentenceCase' }),
+                onClick: handlePrivateModeOn,
+                type: 'item',
+            },
+            type: 'conditional-item',
         },
         {
             id: 'divider-4',
