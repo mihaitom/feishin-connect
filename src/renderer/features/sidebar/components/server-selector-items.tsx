@@ -41,6 +41,7 @@ export const ServerSelectorItems = () => {
     const supportsMultiSelect = hasFeature(currentServer, ServerFeature.MUSIC_FOLDER_MULTISELECT);
 
     const queryClient = useQueryClient();
+
     const handleToggleMusicFolder = (musicFolderId: string) => {
         if (supportsMultiSelect) {
             const currentIds = currentServer.musicFolderId || [];
@@ -67,12 +68,12 @@ export const ServerSelectorItems = () => {
             }
         }
 
-        queryClient.resetQueries();
+        queryClient.removeQueries();
     };
 
     const handleClearMusicFolders = () => {
         setMusicFolderId(undefined);
-        queryClient.resetQueries();
+        queryClient.removeQueries();
     };
 
     if (!currentServer) {
