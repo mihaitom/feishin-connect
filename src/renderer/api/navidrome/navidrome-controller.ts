@@ -18,6 +18,7 @@ import {
     Song,
     songListSortMap,
     sortOrderMap,
+    tagListSortMap,
     userListSortMap,
 } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
@@ -395,6 +396,40 @@ export const NavidromeController: InternalControllerEndpoint = {
     getGenreList: async (args) => {
         const { apiClientProps, query } = args;
 
+        if (hasFeature(apiClientProps.server, ServerFeature.BFR)) {
+            const res = await ndApiClient(apiClientProps).getTagList({
+                query: {
+                    _end: query.startIndex + (query.limit || 0),
+                    _order: sortOrderMap.navidrome[query.sortOrder],
+                    _sort: tagListSortMap.navidrome[query.sortBy],
+                    _start: query.startIndex,
+                    library_id: getLibraryId(query.musicFolderId),
+                    tag_name: 'genre',
+                    tag_value: query.searchTerm,
+                },
+            });
+
+            if (res.status !== 200) {
+                throw new Error('Failed to get genre list');
+            }
+
+            return {
+                items: res.body.data.map((genre) =>
+                    ndNormalize.genre(
+                        {
+                            albumCount: genre.albumCount,
+                            id: genre.id,
+                            name: genre.tagValue,
+                            songCount: genre.songCount,
+                        },
+                        apiClientProps.server,
+                    ),
+                ),
+                startIndex: query.startIndex || 0,
+                totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
+            };
+        }
+
         const res = await ndApiClient(apiClientProps).getGenreList({
             query: {
                 _end: query.startIndex + (query.limit || 0),
@@ -637,14 +672,16 @@ export const NavidromeController: InternalControllerEndpoint = {
         }).then((result) => result!.totalRecordCount!),
     getStreamUrl: SubsonicController.getStreamUrl,
     getStructuredLyrics: SubsonicController.getStructuredLyrics,
-    getTags: async (args) => {
+    getTagList: async (args) => {
         const { apiClientProps } = args;
 
         if (!hasFeature(apiClientProps.server, ServerFeature.TAGS)) {
             return { boolTags: undefined, enumTags: undefined, excluded: { album: [], song: [] } };
         }
 
-        const res = await ndApiClient(apiClientProps).getTags();
+        const res = await ndApiClient(apiClientProps).getTagList({
+            query: {},
+        });
 
         if (res.status !== 200) {
             throw new Error('failed to get tags');

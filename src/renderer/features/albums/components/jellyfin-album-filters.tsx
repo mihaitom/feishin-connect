@@ -67,7 +67,7 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
     }, [genreListQuery.data]);
 
     const tagsQuery = useQuery(
-        sharedQueries.tags({
+        sharedQueries.tagList({
             options: {
                 gcTime: 1000 * 60 * 2,
                 staleTime: 1000 * 60 * 1,

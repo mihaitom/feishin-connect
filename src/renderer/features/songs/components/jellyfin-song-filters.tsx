@@ -38,7 +38,7 @@ export const JellyfinSongFilters = () => {
     }, [genreListQuery.data]);
 
     const tagsQuery = useQuery(
-        sharedQueries.tags({
+        sharedQueries.tagList({
             query: {
                 type: LibraryItem.SONG,
             },

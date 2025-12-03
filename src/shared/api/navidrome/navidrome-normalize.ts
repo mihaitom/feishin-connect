@@ -442,18 +442,18 @@ const normalizePlaylist = (
 };
 
 const normalizeGenre = (
-    item: z.infer<typeof ndType._response.genre>,
+    item: z.infer<typeof ndType._response.genre> & { albumCount?: number; songCount?: number },
     server: null | ServerListItem,
 ): Genre => {
     return {
         _itemType: LibraryItem.GENRE,
         _serverId: server?.id || 'unknown',
         _serverType: ServerType.NAVIDROME,
-        albumCount: null,
+        albumCount: item.albumCount ?? null,
         id: item.id,
         imageUrl: null,
         name: item.name,
-        songCount: null,
+        songCount: item.songCount ?? null,
     };
 };
 

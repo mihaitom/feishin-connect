@@ -151,7 +151,7 @@ const TagFilters = () => {
     const serverId = useCurrentServerId();
 
     const tagsQuery = useSuspenseQuery(
-        sharedQueries.tags({
+        sharedQueries.tagList({
             query: { type: LibraryItem.SONG },
             serverId,
         }),

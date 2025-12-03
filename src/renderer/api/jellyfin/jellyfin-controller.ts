@@ -853,7 +853,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 
         return url;
     },
-    getTags: async (args) => {
+    getTagList: async (args) => {
         const { apiClientProps, query } = args;
 
         if (!hasFeature(apiClientProps.server, ServerFeature.TAGS)) {

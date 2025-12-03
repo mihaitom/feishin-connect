@@ -235,6 +235,8 @@ const paginationParameters = z.object({
     _start: z.number().optional(),
 });
 
+const optionalPaginationParameters = paginationParameters.partial();
+
 const authenticate = z.object({
     id: z.string(),
     isAdmin: z.boolean(),
@@ -578,7 +580,18 @@ const tag = z.object({
     tagValue: z.string(),
 });
 
-const tags = z.array(tag);
+const tagList = z.array(tag);
+
+export enum NDTagListSort {
+    TAG_VALUE = 'tagValue',
+}
+
+const tagListParameters = optionalPaginationParameters.extend({
+    _sort: z.nativeEnum(NDTagListSort).optional(),
+    library_id: z.array(z.string()).optional(),
+    tag_name: z.string().optional(),
+    tag_value: z.string().optional(), // Search
+});
 
 export const ndType = {
     _enum: {
@@ -587,6 +600,7 @@ export const ndType = {
         genreList: genreListSort,
         playlistList: NDPlaylistListSort,
         songList: NDSongListSort,
+        tagList: NDTagListSort,
         userList: ndUserListSort,
     },
     _parameters: {
@@ -601,6 +615,7 @@ export const ndType = {
         removeFromPlaylist: removeFromPlaylistParameters,
         shareItem: shareItemParameters,
         songList: songListParameters,
+        tagList: tagListParameters,
         updatePlaylist: updatePlaylistParameters,
         userList: userListParameters,
     },
@@ -625,7 +640,7 @@ export const ndType = {
         shareItem,
         song,
         songList,
-        tags,
+        tagList,
         updatePlaylist,
         user,
         userList,

@@ -14,6 +14,7 @@ import {
     NDPlaylistListSort,
     NDSongListSort,
     NDSortOrder,
+    NDTagListSort,
     NDUserListSort,
 } from '/@/shared/api/navidrome/navidrome-types';
 import { ServerFeatures } from '/@/shared/types/features-types';
@@ -157,6 +158,10 @@ export enum ImageType {
     LOGO = 'LOGO',
     PRIMARY = 'PRIMARY',
     SCREENSHOT = 'SCREENSHOT',
+}
+
+export enum TagListSort {
+    TAG_VALUE = 'tagValue',
 }
 
 export type Album = {
@@ -396,6 +401,24 @@ export const genreListSortMap: GenreListSortMap = {
     },
     subsonic: {
         name: undefined,
+    },
+};
+
+type TagListSortMap = {
+    jellyfin: Record<TagListSort, undefined>;
+    navidrome: Record<TagListSort, NDTagListSort | undefined>;
+    subsonic: Record<TagListSort, undefined>;
+};
+
+export const tagListSortMap: TagListSortMap = {
+    jellyfin: {
+        tagValue: undefined,
+    },
+    navidrome: {
+        tagValue: NDTagListSort.TAG_VALUE,
+    },
+    subsonic: {
+        tagValue: undefined,
     },
 };
 
@@ -1224,7 +1247,7 @@ export type ControllerEndpoint = {
     getSongListCount: (args: SongListCountArgs) => Promise<number>;
     getStreamUrl: (args: StreamArgs) => string;
     getStructuredLyrics?: (args: StructuredLyricsArgs) => Promise<StructuredLyric[]>;
-    getTags?: (args: TagArgs) => Promise<TagsResponse>;
+    getTagList?: (args: TagListArgs) => Promise<TagListResponse>;
     getTopSongs: (args: TopSongListArgs) => Promise<TopSongListResponse>;
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;
     movePlaylistItem?: (args: MoveItemArgs) => Promise<void>;
@@ -1316,7 +1339,7 @@ export type InternalControllerEndpoint = {
     getStructuredLyrics?: (
         args: ReplaceApiClientProps<StructuredLyricsArgs>,
     ) => Promise<StructuredLyric[]>;
-    getTags?: (args: ReplaceApiClientProps<TagArgs>) => Promise<TagsResponse>;
+    getTagList?: (args: ReplaceApiClientProps<TagListArgs>) => Promise<TagListResponse>;
     getTopSongs: (args: ReplaceApiClientProps<TopSongListArgs>) => Promise<TopSongListResponse>;
     getUserList?: (args: ReplaceApiClientProps<UserListArgs>) => Promise<UserListResponse>;
     movePlaylistItem?: (args: ReplaceApiClientProps<MoveItemArgs>) => Promise<void>;
@@ -1413,16 +1436,17 @@ export type Tag = {
     options: { id: string; name: string }[];
 };
 
-export type TagArgs = BaseEndpointArgs & {
-    query: TagQuery;
+export type TagListArgs = BaseEndpointArgs & {
+    query: TagListQuery;
 };
 
-export type TagQuery = {
+export type TagListQuery = {
     folder?: string;
+    tagName?: string;
     type: LibraryItem.ALBUM | LibraryItem.SONG;
 };
 
-export type TagsResponse = {
+export type TagListResponse = {
     boolTags?: string[];
     enumTags?: { name: string; options: { id: string; name: string }[] }[];
     excluded: {
