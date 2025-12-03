@@ -28,7 +28,7 @@ export const PlaylistContextMenu = ({ items, type }: PlaylistContextMenuProps) =
             <ContextMenu.Divider />
             <AddToPlaylistAction items={ids} itemType={LibraryItem.ALBUM} />
             <ContextMenu.Divider />
-            <GetInfoAction disabled={items.length === 0} item={items[0]} />
+            <GetInfoAction disabled={items.length === 0} items={items} />
             <ContextMenu.Divider />
             <EditPlaylistAction items={items} />
             <DeletePlaylistAction items={items} />
