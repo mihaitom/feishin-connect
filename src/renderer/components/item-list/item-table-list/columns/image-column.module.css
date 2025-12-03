@@ -1,11 +1,26 @@
 .skeleton {
-    width: initial;
-    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+}
+
+.compact-image-container .skeleton {
+    border-radius: 0;
 }
 
 .compact-image-container {
     width: 100%;
+    height: 100%;
     overflow: hidden;
+    border-radius: var(--theme-radius-md);
+}
+
+.compact-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 0;
 }
 
 .image-container-with-aspect-ratio {
