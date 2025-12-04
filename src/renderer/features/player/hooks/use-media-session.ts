@@ -3,17 +3,19 @@ import { useEffect, useMemo } from 'react';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { usePlaybackSettings, useSettingsStore, useTimestampStoreBase } from '/@/renderer/store';
-import { PlayerStatus } from '/@/shared/types/types';
+import { PlayerStatus, PlayerType } from '/@/shared/types/types';
+
+const mediaSession = navigator.mediaSession;
 
 export const useMediaSession = () => {
     const { mediaSession: mediaSessionEnabled } = usePlaybackSettings();
     const player = usePlayer();
-    const mediaSession = navigator.mediaSession;
     const skip = useSettingsStore((state) => state.general.skipButtons);
+    const playbackType = useSettingsStore((state) => state.playback.type);
 
     const isMediaSessionEnabled = useMemo(() => {
-        return mediaSessionEnabled && mediaSession;
-    }, [mediaSessionEnabled, mediaSession]);
+        return Boolean(mediaSessionEnabled && playbackType === PlayerType.WEB);
+    }, [mediaSessionEnabled, playbackType]);
 
     useEffect(() => {
         if (!isMediaSessionEnabled) {
@@ -21,6 +23,7 @@ export const useMediaSession = () => {
         }
 
         mediaSession.setActionHandler('nexttrack', () => {
+            console.log('mediaSession.nexttrack');
             player.mediaNext();
         });
 
@@ -73,13 +76,7 @@ export const useMediaSession = () => {
             mediaSession.setActionHandler('seekbackward', null);
             mediaSession.setActionHandler('seekforward', null);
         };
-    }, [
-        player,
-        skip?.skipBackwardSeconds,
-        skip?.skipForwardSeconds,
-        isMediaSessionEnabled,
-        mediaSession,
-    ]);
+    }, [player, skip?.skipBackwardSeconds, skip?.skipForwardSeconds, isMediaSessionEnabled]);
 
     usePlayerEvents(
         {
