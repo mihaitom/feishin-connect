@@ -45,12 +45,13 @@ const pageVariants: Variants = {
 function BaseGridCarousel(props: GridCarouselProps) {
     const { cards, hasNextPage, loadNextPage, onNextPage, onPrevPage, rowCount = 1, title } = props;
     const { ref, ...cq } = useContainerQuery({
-        '2xl': 1024,
-        '3xl': 1280,
-        lg: 768,
-        md: 600,
-        sm: 360,
-        xl: 900,
+        '2xl': 1280,
+        '3xl': 1440,
+        lg: 960,
+        md: 720,
+        sm: 520,
+        xl: 1152,
+        xs: 360,
     });
 
     const [currentPage, setCurrentPage] = useState({
@@ -209,19 +210,19 @@ function getCardsToShow(breakpoints: {
     }
 
     if (breakpoints.isLargerThan2xl) {
-        return 6;
+        return 7;
     }
 
     if (breakpoints.isLargerThanXl) {
-        return 5;
+        return 6;
     }
 
     if (breakpoints.isLargerThanLg) {
-        return 4;
+        return 5;
     }
 
     if (breakpoints.isLargerThanMd) {
-        return 3;
+        return 4;
     }
 
     if (breakpoints.isLargerThanSm) {
