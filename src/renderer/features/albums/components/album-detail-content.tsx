@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ReactNode, Suspense, useMemo, useState } from 'react';
+import { ReactNode, Suspense, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useParams } from 'react-router';
 
@@ -39,6 +39,7 @@ import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
+import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
 import {
     Album,
     AlbumListSort,
@@ -579,6 +580,19 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
         };
     }, [player]);
 
+    const binding = useSettingsStore((state) => state.hotkeys.bindings.localSearch);
+
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    useHotkeys([
+        [
+            binding.hotkey,
+            () => {
+                searchInputRef.current?.focus();
+            },
+        ],
+    ]);
+
     if (!tableConfig || columns.length === 0) {
         return null;
     }
@@ -594,6 +608,7 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder={t('common.search', { postProcess: 'sentenceCase' })}
                     radius="xl"
+                    ref={searchInputRef}
                     rightSection={
                         searchTerm ? (
                             <ActionIcon
