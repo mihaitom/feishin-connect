@@ -11,6 +11,7 @@ import { useFolderListFilters } from '/@/renderer/features/folders/hooks/use-fol
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
+import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
 import { Folder, LibraryItem } from '/@/shared/types/domain-types';
 import { DragOperation, DragTarget } from '/@/shared/types/drag-and-drop';
 
@@ -39,10 +40,12 @@ interface FolderTreeBrowserProps {
 }
 
 export const FolderTreeBrowser = ({ fetchFolder, rootFolderQuery }: FolderTreeBrowserProps) => {
-    const { currentFolderId, setFolderPath } = useFolderListFilters();
+    const { currentFolderId, folderPath, setFolderPath } = useFolderListFilters();
     const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
     const [loadedNodes, setLoadedNodes] = useState<Map<string, Folder[]>>(new Map());
     const containerRef = useRef<HTMLDivElement>(null);
+    const previousFolderPathRef = useRef<Array<{ id: string; name: string }>>([]);
+    const lastInternalFolderPathRef = useRef<Array<{ id: string; name: string }> | null>(null);
 
     // Initialize root folder children when data is loaded
     useEffect(() => {
@@ -274,6 +277,8 @@ export const FolderTreeBrowser = ({ fetchFolder, rootFolderQuery }: FolderTreeBr
             // Set current folder path (full path from root to clicked folder)
             // Skip the root folder (id: '0') from the path
             const pathWithoutRoot = path.filter((item) => item.id !== '0');
+            // Mark this path as internal navigation to prevent auto-scroll
+            lastInternalFolderPathRef.current = pathWithoutRoot;
             setFolderPath(pathWithoutRoot);
         },
         [expandNode, loadedNodes, setFolderPath, toggleNode],
@@ -327,6 +332,94 @@ export const FolderTreeBrowser = ({ fetchFolder, rootFolderQuery }: FolderTreeBr
         return () => osInstance()?.destroy();
     }, [initialize, osInstance]);
 
+    // Track when we need to scroll (set by external navigation detection)
+    const [shouldScrollToFolder, setShouldScrollToFolder] = useState<null | string>(null);
+
+    // Handle external navigation - expand parent folders
+    useEffect(() => {
+        // Skip if folderPath hasn't actually changed
+        const pathChanged =
+            previousFolderPathRef.current.length !== folderPath.length ||
+            previousFolderPathRef.current.some((item, index) => item.id !== folderPath[index]?.id);
+
+        if (!pathChanged || !currentFolderId || currentFolderId === '0') {
+            previousFolderPathRef.current = folderPath;
+            setShouldScrollToFolder(null);
+            return;
+        }
+
+        // Check if this is an internal navigation (from clicking in tree browser)
+        const isInternalNavigation =
+            lastInternalFolderPathRef.current &&
+            lastInternalFolderPathRef.current.length === folderPath.length &&
+            lastInternalFolderPathRef.current.every(
+                (item, index) => item.id === folderPath[index]?.id,
+            );
+
+        if (isInternalNavigation) {
+            // Clear the internal navigation marker
+            lastInternalFolderPathRef.current = null;
+            previousFolderPathRef.current = folderPath;
+            setShouldScrollToFolder(null);
+            return;
+        }
+
+        previousFolderPathRef.current = folderPath;
+
+        // Expand all parent folders in the path to make current folder visible
+        const expandPath = async () => {
+            const foldersToExpand = folderPath.slice(0, -1); // All except the current folder
+
+            for (const pathItem of foldersToExpand) {
+                if (!expandedNodes.has(pathItem.id)) {
+                    // Fetch children if not loaded
+                    if (!loadedNodes.has(pathItem.id)) {
+                        await fetchFolderChildren(pathItem.id);
+                    }
+
+                    // Expand the folder
+                    setExpandedNodes((prev) => {
+                        const newSet = new Set(prev);
+                        newSet.add(pathItem.id);
+                        return newSet;
+                    });
+                }
+            }
+
+            // Mark that we should scroll to this folder once it appears in the tree
+            setShouldScrollToFolder(currentFolderId);
+        };
+
+        expandPath();
+    }, [folderPath, currentFolderId, expandedNodes, fetchFolderChildren, loadedNodes]);
+
+    // Scroll to current folder when it becomes visible in the tree
+    useEffect(() => {
+        if (!shouldScrollToFolder || !containerRef.current) {
+            return;
+        }
+
+        const currentIndex = flattenedNodes.findIndex(
+            (node) => node.folder.id === shouldScrollToFolder,
+        );
+
+        if (currentIndex !== -1) {
+            const viewport = containerRef.current.firstElementChild as HTMLElement;
+            if (viewport) {
+                const viewportHeight = viewport.clientHeight;
+                const scrollOffset = currentIndex * ITEM_HEIGHT;
+                const centeredOffset = scrollOffset - viewportHeight / 2 + ITEM_HEIGHT / 2;
+
+                viewport.scrollTo({
+                    behavior: 'auto',
+                    top: Math.max(0, centeredOffset),
+                });
+
+                setShouldScrollToFolder(null);
+            }
+        }
+    }, [flattenedNodes, shouldScrollToFolder]);
+
     return (
         <div className={styles.container} ref={containerRef}>
             <List
@@ -364,33 +457,6 @@ const RowComponent = ({
     const rowRef = useRef<HTMLDivElement>(null);
     const [tooltipOffset, setTooltipOffset] = useState(0);
 
-    useLayoutEffect(() => {
-        if (!item) {
-            return;
-        }
-
-        const calculateOffset = () => {
-            if (rowRef.current && folderIconRef.current && expandIconRef.current) {
-                const width = rowRef.current.offsetWidth;
-                const paddingLeft = item.depth * INDENT_SIZE;
-                const folderIconWidth = folderIconRef.current.offsetWidth;
-                const expandIconWidth = expandIconRef.current.offsetWidth;
-                const itemPadding = 8;
-                setTooltipOffset(
-                    -width + paddingLeft + folderIconWidth + expandIconWidth + itemPadding,
-                );
-            }
-        };
-
-        calculateOffset();
-
-        const handleResize = () => {
-            calculateOffset();
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [item]);
-
     const { isDragging, ref: dragRef } = useDragDrop<HTMLDivElement>({
         drag: {
             getId: () => (item ? [item.folder.id] : []),
@@ -402,12 +468,49 @@ const RowComponent = ({
         isEnabled: !!item,
     });
 
-    // Use dragRef for the element and also update rowRef for tooltip calculations
-    useEffect(() => {
-        if (dragRef && 'current' in dragRef && dragRef.current) {
-            rowRef.current = dragRef.current;
+    // Merge dragRef with rowRef
+    const mergedRef = useMergedRef(rowRef, dragRef);
+
+    const calculateOffset = useCallback(() => {
+        const rowElement = rowRef.current;
+        if (rowElement && folderIconRef.current && expandIconRef.current) {
+            const width = rowElement.offsetWidth;
+            const paddingLeft = item.depth * INDENT_SIZE;
+            const folderIconWidth = folderIconRef.current.offsetWidth;
+            const expandIconWidth = expandIconRef.current.offsetWidth;
+            const itemPadding = 8;
+            setTooltipOffset(
+                -width + paddingLeft + folderIconWidth + expandIconWidth + itemPadding,
+            );
         }
-    }, [dragRef]);
+    }, [item.depth]);
+
+    useLayoutEffect(() => {
+        if (!item) {
+            return;
+        }
+
+        // Use requestAnimationFrame to ensure DOM is fully laid out
+        const rafId = requestAnimationFrame(() => {
+            calculateOffset();
+        });
+
+        const handleResize = () => {
+            calculateOffset();
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+            cancelAnimationFrame(rafId);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [item, calculateOffset]);
+
+    // Recalculate offset when refs become available
+    useEffect(() => {
+        if (rowRef.current && folderIconRef.current && expandIconRef.current) {
+            calculateOffset();
+        }
+    }, [calculateOffset]);
 
     if (!item) {
         return <div style={style} />;
@@ -455,7 +558,7 @@ const RowComponent = ({
                 })}
                 onClick={handleRowClick}
                 onContextMenu={handleContextMenu}
-                ref={dragRef}
+                ref={mergedRef}
                 style={{
                     ...style,
                     paddingLeft: `${paddingLeft}px`,
