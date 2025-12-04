@@ -180,7 +180,6 @@ export const PlayerConfig = () => {
                             },
                         ]}
                         disabled={
-                            !isElectron() ||
                             playbackSettings.type !== PlayerType.WEB ||
                             status === PlayerStatus.PLAYING
                         }
