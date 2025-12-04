@@ -280,15 +280,12 @@ const PlaylistDetailSongListRoute = () => {
             {
                 apiClientProps: { serverId: detailQuery?.data?._serverId },
                 body: {
-                    _custom: {
-                        owner: detailQuery?.data?.owner || '',
-                        ownerId: detailQuery?.data?.ownerId || '',
-                        rules,
-                        sync: detailQuery?.data?.sync || false,
-                    },
                     comment: detailQuery?.data?.description || '',
                     name: detailQuery?.data?.name,
+                    ownerId: detailQuery?.data?.ownerId || '',
                     public: detailQuery?.data?.public || false,
+                    queryBuilderRules: rules,
+                    sync: detailQuery?.data?.sync || false,
                 },
             },
             {
@@ -332,19 +329,12 @@ const PlaylistDetailSongListRoute = () => {
             children: (
                 <SaveAsPlaylistForm
                     body={{
-                        _custom: {
-                            navidrome: {
-                                owner: detailQuery?.data?.owner || '',
-                                ownerId: detailQuery?.data?.ownerId || '',
-                                rules,
-                                sync: detailQuery?.data?.sync || false,
-                            },
-                            rules,
-                            sync: detailQuery?.data?.sync || false,
-                        },
                         comment: detailQuery?.data?.description || '',
                         name: detailQuery?.data?.name,
+                        ownerId: detailQuery?.data?.ownerId || '',
                         public: detailQuery?.data?.public || false,
+                        queryBuilderRules: rules,
+                        sync: detailQuery?.data?.sync || false,
                     }}
                     onCancel={closeAllModals}
                     onSuccess={(data) =>

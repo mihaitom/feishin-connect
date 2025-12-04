@@ -327,11 +327,6 @@ export const AlbumDetailContent = () => {
             excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
             isHidden: !detailQuery?.data?.albumArtists?.[0]?.id,
             query: {
-                _custom: {
-                    jellyfin: {
-                        ExcludeItemIds: detailQuery?.data?.id,
-                    },
-                },
                 artistIds: detailQuery?.data?.albumArtists.length
                     ? [detailQuery?.data?.albumArtists[0].id]
                     : undefined,
@@ -346,11 +341,11 @@ export const AlbumDetailContent = () => {
             excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
             isHidden: !detailQuery?.data?.genres?.[0],
             query: {
-                genres: detailQuery?.data?.genres.length
+                genreIds: detailQuery?.data?.genres.length
                     ? [detailQuery?.data?.genres[0].id]
                     : undefined,
             },
-            rowCount: 2,
+            rowCount: 1,
             sortBy: AlbumListSort.RANDOM,
             sortOrder: SortOrder.ASC,
             title: `${t('page.albumDetail.moreFromGeneric', {

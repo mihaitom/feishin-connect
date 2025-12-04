@@ -143,8 +143,10 @@ export const NavidromeController: InternalControllerEndpoint = {
             body: {
                 comment: body.comment,
                 name: body.name,
+                ownerId: body.ownerId,
                 public: body.public,
-                ...body._custom,
+                rules: body.queryBuilderRules,
+                sync: body.sync,
             },
         });
 
@@ -326,9 +328,9 @@ export const NavidromeController: InternalControllerEndpoint = {
                 library_id: getLibraryId(query.musicFolderId),
                 name: query.searchTerm,
                 recently_played: query.isRecentlyPlayed,
+                starred: query.favorite,
                 year: query.maxYear || query.minYear,
                 ...query._custom,
-                starred: query.favorite,
                 ...excludeMissing(apiClientProps.server),
             },
         });
@@ -359,9 +361,9 @@ export const NavidromeController: InternalControllerEndpoint = {
                 _start: query.startIndex,
                 library_id: getLibraryId(query.musicFolderId),
                 name: query.searchTerm,
+                role: query.role || undefined,
                 starred: query.favorite,
                 ...query._custom,
-                role: query.role || undefined,
                 ...excludeMissing(apiClientProps.server),
             },
         });
@@ -471,16 +473,6 @@ export const NavidromeController: InternalControllerEndpoint = {
     },
     getPlaylistList: async (args) => {
         const { apiClientProps, query } = args;
-        const customQuery = query._custom;
-
-        // Smart playlists only became available in 0.48.0. Do not filter for previous versions
-        if (
-            customQuery &&
-            customQuery.smart !== undefined &&
-            !hasFeature(apiClientProps.server, ServerFeature.PLAYLISTS_SMART)
-        ) {
-            customQuery.smart = undefined;
-        }
 
         const res = await ndApiClient(apiClientProps).getPlaylistList({
             query: {
@@ -489,7 +481,7 @@ export const NavidromeController: InternalControllerEndpoint = {
                 _sort: query.sortBy ? playlistListSortMap.navidrome[query.sortBy] : undefined,
                 _start: query.startIndex,
                 q: query.searchTerm,
-                ...customQuery,
+                smart: query.excludeSmartPlaylists ? false : undefined,
             },
         });
 
@@ -821,7 +813,10 @@ export const NavidromeController: InternalControllerEndpoint = {
             body: {
                 comment: body.comment || '',
                 name: body.name,
+                ownerId: body.ownerId,
                 public: body?.public || false,
+                rules: body.queryBuilderRules,
+                sync: body.sync,
                 ...body._custom,
             },
             params: {

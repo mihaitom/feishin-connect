@@ -893,7 +893,10 @@ export type CreatePlaylistBody = {
     _custom?: Record<string, any>;
     comment?: string;
     name: string;
+    ownerId?: string;
     public?: boolean;
+    queryBuilderRules?: Record<string, any>;
+    sync?: boolean;
 };
 
 // Create Playlist
@@ -924,6 +927,7 @@ export type PlaylistListCountArgs = BaseEndpointArgs & { query: ListCountQuery<P
 
 export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
     _custom?: Record<string, any>;
+    excludeSmartPlaylists?: boolean;
     limit?: number;
     searchTerm?: string;
     startIndex: number;
@@ -978,7 +982,10 @@ export type UpdatePlaylistBody = {
     comment?: string;
     genres?: Genre[];
     name: string;
+    ownerId?: string;
     public?: boolean;
+    queryBuilderRules?: Record<string, any>;
+    sync?: boolean;
 };
 
 export type UpdatePlaylistQuery = {

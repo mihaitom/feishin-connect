@@ -38,11 +38,7 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
     const playlistsQuery = useQuery(
         playlistsQueries.list({
             query: {
-                _custom: {
-                    navidrome: {
-                        smart: false,
-                    },
-                },
+                excludeSmartPlaylists: true,
                 sortBy: PlaylistListSort.NAME,
                 sortOrder: SortOrder.ASC,
                 startIndex: 0,

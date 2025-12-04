@@ -33,13 +33,9 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
 
     const form = useForm<CreatePlaylistBody>({
         initialValues: {
-            _custom: {
-                navidrome: {
-                    rules: undefined,
-                },
-            },
             comment: '',
             name: '',
+            queryBuilderRules: undefined,
         },
     });
     const [isSmartPlaylist, setIsSmartPlaylist] = useState(false);
@@ -79,14 +75,7 @@ export const CreatePlaylistForm = ({ onCancel }: CreatePlaylistFormProps) => {
                 apiClientProps: { serverId: server.id },
                 body: {
                     ...values,
-                    _custom: {
-                        navidrome: {
-                            ...values._custom?.navidrome,
-                            rules,
-                        },
-                        // Top-level rules field is what Navidrome expects for smart playlists.
-                        ...(rules ? { rules } : {}),
-                    },
+                    ...(rules ? { queryBuilderRules: rules } : {}),
                 },
             },
             {

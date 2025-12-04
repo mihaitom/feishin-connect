@@ -527,6 +527,7 @@ const createPlaylist = playlist.pick({
 const createPlaylistParameters = z.object({
     comment: z.string().optional(),
     name: z.string(),
+    ownerId: z.string().optional(),
     public: z.boolean().optional(),
     rules: z.record(z.any()).optional(),
     sync: z.boolean().optional(),

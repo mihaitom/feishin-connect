@@ -48,17 +48,12 @@ export const UpdatePlaylistForm = ({ body, onCancel, query, users }: UpdatePlayl
 
     const form = useForm<UpdatePlaylistBody>({
         initialValues: {
-            _custom: {
-                navidrome: {
-                    owner: body?._custom?.navidrome?.owner || '',
-                    ownerId: body?._custom?.navidrome?.ownerId || '',
-                    rules: undefined,
-                    sync: body?._custom?.navidrome?.sync || false,
-                },
-            },
             comment: body?.comment || '',
             name: body?.name || '',
+            ownerId: body.ownerId,
             public: body.public,
+            queryBuilderRules: body.queryBuilderRules,
+            sync: body.sync,
         },
     });
 
@@ -114,7 +109,7 @@ export const UpdatePlaylistForm = ({ body, onCancel, query, users }: UpdatePlayl
                 {isOwnerDisplayed && (
                     <Select
                         data={userList || []}
-                        {...form.getInputProps('_custom.navidrome.ownerId')}
+                        {...form.getInputProps('ownerId')}
                         label={t('form.createPlaylist.input', {
                             context: 'owner',
                             postProcess: 'titleCase',
@@ -191,18 +186,13 @@ export const openUpdatePlaylistModal = async (args: {
         children: (
             <UpdatePlaylistForm
                 body={{
-                    _custom: {
-                        navidrome: {
-                            owner: playlist?.owner || undefined,
-                            ownerId: playlist?.ownerId || undefined,
-                            rules: playlist?.rules || undefined,
-                            sync: playlist?.sync || undefined,
-                        },
-                    },
                     comment: playlist?.description || undefined,
                     genres: playlist?.genres,
                     name: playlist?.name,
+                    ownerId: playlist?.ownerId || undefined,
                     public: playlist?.public || false,
+                    queryBuilderRules: playlist?.rules || undefined,
+                    sync: playlist?.sync || undefined,
                 }}
                 onCancel={closeAllModals}
                 query={{ id: playlist?.id }}
