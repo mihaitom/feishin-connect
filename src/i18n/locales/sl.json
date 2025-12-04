@@ -580,8 +580,6 @@
         "gaplessAudio": "neprekinjen avdio",
         "gaplessAudio_description": "nastavi neprekinjen avdio za mpv",
         "gaplessAudio_optionWeak": "šibko (priporočeno)",
-        "genreBehavior": "privzeto vedenje strani z zvrstmi",
-        "genreBehavior_description": "določa, ali se ob kliku na zvrst privzeto odpre seznam skladb ali albumov",
         "globalMediaHotkeys": "globalne bližnjične tipke za vsebino",
         "globalMediaHotkeys_description": "omogočite ali onemogočite uporabo bližnjic za sistemske medije za nadzor predvajanja",
         "homeConfiguration": "konfiguracija domače strani",

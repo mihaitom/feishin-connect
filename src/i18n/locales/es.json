@@ -11,7 +11,7 @@
         "skip_back": "retroceder",
         "favorite": "favorito",
         "next": "siguiente",
-        "shuffle": "Reproducir aleatoriamente",
+        "shuffle": "Reproducir (mezclado)",
         "playbackFetchNoResults": "ninguna canción encontrada",
         "playbackFetchInProgress": "cargando canciones…",
         "addNext": "añadir siguiente",
@@ -30,7 +30,12 @@
         "skip_forward": "saltar hacia delante",
         "pause": "pausa",
         "playSimilarSongs": "Reproducir canciones similares",
-        "viewQueue": "ver cola"
+        "viewQueue": "ver cola",
+        "addLastShuffled": "Añadir al final (mezclado)",
+        "addNextShuffled": "Añadir al siguiente (mezclado)",
+        "queueType": "Tipo de cola",
+        "queueType_default": "Predeterminado",
+        "queueType_priority": "Prioridad"
     },
     "setting": {
         "crossfadeStyle_description": "selecciona el estilo de crossfade a usar por el reproductor de audio",
@@ -201,9 +206,7 @@
         "playerAlbumArtResolution": "resolución de la carátula del álbum del reproductor",
         "homeConfiguration": "Configuración de la página de inicio",
         "mpvExtraParameters_help": "Uno por línea",
-        "genreBehavior": "Comportamiento predeterminado de la página de géneros",
         "externalLinks_description": "Permite mostrar enlaces externos (Last.fm, MusicBrainz) en las páginas del artista/álbum",
-        "genreBehavior_description": "Determina si al hacer clic en un género se abre por defecto la lista de pistas o de álbumes",
         "homeConfiguration_description": "Configura qué elementos son mostrados y en qué orden en la página de inicio",
         "clearCacheSuccess": "Caché limpiada correctamente",
         "externalLinks": "Mostrar enlaces externos",
@@ -300,7 +303,30 @@
         "language": "Idioma",
         "notify": "Activar notificaciones de canciones",
         "notify_description": "Muestra notificaciones cuando se cambia la canción actual",
-        "transcode": "Activar transcodificación"
+        "transcode": "Activar transcodificación",
+        "analyticsDisable": "Exclusión voluntaria de analíticas basadas en el uso",
+        "analyticsDisable_description": "Se envía el uso de datos anónimos al desarrollador para ayudar a mejorar la aplicación",
+        "playerbarSlider": "Barra de reproducción deslizante",
+        "playerbarSliderType_optionWaveform": "Forma de onda",
+        "playerbarWaveformAlign": "Alineación de la forma de onda",
+        "playerbarSliderType_optionSlider": "Deslizador",
+        "playerbarWaveformAlign_optionTop": "Superior",
+        "playerbarWaveformAlign_optionCenter": "Centrado",
+        "playerbarWaveformAlign_optionBottom": "Inferior",
+        "playerbarWaveformBarWidth": "Ancho de barra de la forma de onda",
+        "playerbarWaveformGap": "Brecha de la forma de onda",
+        "playerbarWaveformRadius": "Radio de la forma de onda",
+        "showLyricsInSidebar_description": "Se añadirá un panel a la cola de reproducción acoplada que muestra las letras",
+        "showLyricsInSidebar": "Mostrar letras en la barra lateral del reproductor",
+        "showVisualizerInSidebar_description": "Se añadirá un panel a la barra lateral de reproducción que muestra el visualizador",
+        "showVisualizerInSidebar": "Mostrar visualizador en la barra lateral de reproducción",
+        "queryBuilder": "Generador de consultas",
+        "queryBuilderCustomFields_inputTag": "Etiqueta",
+        "queryBuilderCustomFields": "Campos personalizados",
+        "queryBuilderCustomFields_description": "Añade campos personalizados a usar en los generadores de consultas",
+        "queryBuilderCustomFields_inputLabel": "Rótulo",
+        "audioFadeOnStatusChange": "Fundido del audio al cambiar de estado",
+        "audioFadeOnStatusChange_description": "Activa el fundido de salida y el de entrada cuando cambia el estado al reproducir/pausar"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
@@ -324,7 +350,14 @@
             "lastfm": "Abrir en Last.fm",
             "musicbrainz": "Abrir en MusicBrainz"
         },
-        "moveToNext": "pasar al siguiente"
+        "moveToNext": "pasar al siguiente",
+        "downloadStarted": "Iniciada descarga de {{count}} elementos",
+        "largeFetch": "Esta acción hará {{count}} peticiones de red a tu servidor",
+        "moveItems": "Mover elementos",
+        "shuffle": "Mezclar",
+        "shuffleAll": "Mezclar todo",
+        "shuffleSelected": "Mezclar seleccionados",
+        "viewMore": "Ver más"
     },
     "common": {
         "backward": "hacia atrás",
@@ -431,7 +464,15 @@
         "private": "Privado",
         "public": "Público",
         "recordLabel": "Sello discográfico",
-        "releaseType": "Tipo de lanzamiento"
+        "releaseType": "Tipo de lanzamiento",
+        "doNotShowAgain": "No mostrar esto de nuevo",
+        "externalLinks": "Enlaces externos",
+        "faster": "Más rápido",
+        "slower": "Más lento",
+        "sort": "Ordenar",
+        "gridRows": "Filas de la cuadrícula",
+        "tableColumns": "Columnas de la tabla",
+        "itemsMore": "{{count}} más"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",
@@ -518,7 +559,8 @@
             "artists": "$t(entity.artist_other)",
             "albumArtists": "$t(entity.albumArtist_other)",
             "shared": "compartido $t(entity.playlist_other)",
-            "myLibrary": "Mi biblioteca"
+            "myLibrary": "Mi biblioteca",
+            "favorites": "$t(entity.favorite_other)"
         },
         "appMenu": {
             "selectServer": "seleccionar servidor",
@@ -532,7 +574,10 @@
             "goBack": "retroceder",
             "goForward": "avanzar",
             "privateModeOff": "Desactivar modo privado",
-            "privateModeOn": "Activar modo privado"
+            "privateModeOn": "Activar modo privado",
+            "selectMusicFolder": "Seleccionar carpeta de música",
+            "noMusicFolder": "Ninguna carpeta de música seleccionada",
+            "multipleMusicFolders": "{{count}} carpetas de música seleccionadas"
         },
         "contextMenu": {
             "addToPlaylist": "$t(action.addToPlaylist)",
@@ -558,7 +603,9 @@
             "playShuffled": "$t(player.shuffle)",
             "moveToNext": "$t(action.moveToNext)",
             "goToAlbum": "Ir a $t(entity.album_one)",
-            "goToAlbumArtist": "Ir a $t(entity.albumArtist_one)"
+            "goToAlbumArtist": "Ir a $t(entity.albumArtist_one)",
+            "moveItems": "$t(action.moveItems)",
+            "goTo": "Ir a"
         },
         "home": {
             "mostPlayed": "más reproducidos",
@@ -601,7 +648,22 @@
             "generalTab": "general",
             "hotkeysTab": "teclas de acceso rápido",
             "windowTab": "ventana",
-            "advanced": "Avanzado"
+            "advanced": "Avanzado",
+            "analytics": "Analíticas",
+            "updates": "Actualización",
+            "cache": "Caché",
+            "application": "Aplicación",
+            "queryBuilder": "Generador de consultas",
+            "theme": "Tema",
+            "controls": "Controles",
+            "remote": "Remoto",
+            "exportImport": "Importar/Exportar",
+            "scrobble": "Scrobble",
+            "audio": "Audio",
+            "lyrics": "Letras",
+            "transcoding": "Transcodificación",
+            "discord": "Discord",
+            "sidebar": "Barra lateral"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist_other)"
@@ -658,6 +720,9 @@
             "username": "nombre de usuario",
             "editServerDetailsTooltip": "editar detalles del servidor",
             "url": "URL"
+        },
+        "favorites": {
+            "title": "$t(entity.favorite_other)"
         }
     },
     "form": {
@@ -714,7 +779,11 @@
         "queryEditor": {
             "input_optionMatchAll": "coincidir todos",
             "input_optionMatchAny": "coincidir cualquiera",
-            "title": "Editor de consultas"
+            "title": "Editor de consultas",
+            "addRuleGroup": "Añadir regla de grupo",
+            "removeRuleGroup": "Eliminar regla de grupo",
+            "resetToDefault": "Restablecer al valor predeterminado",
+            "clearFilters": "Limpiar filtros"
         },
         "shareItem": {
             "createFailed": "No se pudo crear el recurso compartido (¿está habilitado el uso compartido?)",
@@ -728,6 +797,21 @@
             "enabled": "Modo privado activado, el estado de reproducción ahora está oculto de integraciones externas",
             "disabled": "Modo privado desactivado, el estado de reproducción ahora es visible a las integraciones externas habilitadas",
             "title": "Modo privado"
+        },
+        "largeFetchConfirmation": {
+            "title": "Añadir elementos a la cola",
+            "description": "Esta petición intentará obtener {{count}} elementos del servidor"
+        },
+        "shuffleAll": {
+            "title": "Reproducir aleatorio",
+            "input_genre": "$t(entity.genre_one)",
+            "input_limit": "¿Cuántas canciones?",
+            "input_minYear": "Del año",
+            "input_maxYear": "Hasta el año",
+            "input_played": "Reproducir filtro",
+            "input_played_optionAll": "Todas las pistas",
+            "input_played_optionUnplayed": "Solo las pistas sin reproducir",
+            "input_played_optionPlayed": "Solo las pistas reproducidas"
         }
     },
     "table": {
@@ -755,7 +839,8 @@
             "discNumber": "disco",
             "channels": "$t(common.channel_other)",
             "size": "$t(common.size)",
-            "codec": "$t(common.codec)"
+            "codec": "$t(common.codec)",
+            "owner": "Propietario"
         },
         "config": {
             "label": {
@@ -786,7 +871,10 @@
                 "favorite": "$t(common.favorite)",
                 "year": "$t(common.year)",
                 "codec": "$t(common.codec)",
-                "songCount": "$t(entity.track_other)"
+                "songCount": "$t(entity.track_other)",
+                "albumCount": "$t(entity.album_other)",
+                "genreBadge": "$t(entity.genre_one) (insignias)",
+                "image": "Imagen"
             },
             "general": {
                 "gap": "$t(common.gap)",
@@ -796,7 +884,28 @@
                 "displayType": "tipo de visualización",
                 "itemGap": "espacio entre elementos (px)",
                 "itemSize": "tamaño del elemento (px)",
-                "followCurrentSong": "seguir la canción actual"
+                "followCurrentSong": "seguir la canción actual",
+                "advancedSettings": "Opciones avanzadas",
+                "autosize": "Autodimensionar",
+                "moveUp": "Ascender",
+                "moveDown": "Descender",
+                "pinToLeft": "Anclar a la izquierda",
+                "pinToRight": "Anclar a la derecha",
+                "alignLeft": "Alinear a la izquierda",
+                "alignCenter": "Alinear al centro",
+                "alignRight": "Alinear a la derecha",
+                "itemsPerRow": "Elementos por fila",
+                "size_default": "Predeterminado",
+                "size_compact": "Compacto",
+                "size_large": "Grande",
+                "pagination": "Paginación",
+                "pagination_itemsPerPage": "Elementos por página",
+                "pagination_infinite": "Infinita",
+                "pagination_paginate": "Paginada",
+                "alternateRowColors": "Colores de fila alternativos",
+                "horizontalBorders": "Bordes de fila",
+                "verticalBorders": "Bordes de columna",
+                "rowHoverHighlight": "Resaltar al pasar el cursor por la fila"
             },
             "view": {
                 "table": "tabla",
@@ -886,5 +995,9 @@
             "spokenWord": "Palabra hablada",
             "demo": "Maqueta"
         }
+    },
+    "queryBuilder": {
+        "standardTags": "Etiquetas estándar",
+        "customTags": "Etiquetas personalizadas"
     }
 }

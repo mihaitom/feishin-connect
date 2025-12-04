@@ -510,8 +510,6 @@
         "gaplessAudio": "audio tanpa jeda",
         "gaplessAudio_description": "tentukan pengaturan audio tanpa jeda untuk mpv",
         "gaplessAudio_optionWeak": "lemah (disarankan)",
-        "genreBehavior": "Perilaku default halaman genre",
-        "genreBehavior_description": "Menentukan apakah klik pada genre akan membuka daftar lagu atau album secara default",
         "globalMediaHotkeys": "tombol pintasan media global",
         "globalMediaHotkeys_description": "aktifkan atau nonaktifkan penggunaan tombol pintasan sistem media untuk mengontrol pemutaran",
         "homeConfiguration": "Pengaturan halaman beranda",

@@ -349,8 +349,6 @@
         "clearCacheSuccess": "缓存清除成功",
         "playerAlbumArtResolution": "播放器专辑封面分辨率",
         "playerAlbumArtResolution_description": "大型播放器专辑封面预览的分辨率。较大使其看起来更清晰，但可能会减慢加载速度。默认为0，表示自动",
-        "genreBehavior": "类型页面默认行为",
-        "genreBehavior_description": "确定单击流派是否默认在曲目或专辑列表中打开",
         "homeConfiguration": "主页配置",
         "homeConfiguration_description": "配置主页上显示的项目以及显示顺序",
         "passwordStore": "密码/密钥存储",

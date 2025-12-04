@@ -11,7 +11,7 @@
         "skip_back": "přeskočit dozadu",
         "favorite": "oblíbené",
         "next": "další",
-        "shuffle": "přehrát náhodně",
+        "shuffle": "přehrát (náhodně)",
         "playbackFetchNoResults": "nenalezeny žádné skladby",
         "playbackFetchInProgress": "načítání skladeb…",
         "addNext": "přidat jako další",
@@ -30,7 +30,12 @@
         "mute": "ztlumit",
         "skip_forward": "přeskočit dopředu",
         "playSimilarSongs": "přehrát podobné skladby",
-        "viewQueue": "zobrazit frontu"
+        "viewQueue": "zobrazit frontu",
+        "addLastShuffled": "přidat jako poslední (náhodně)",
+        "addNextShuffled": "přidat jako další (náhodně)",
+        "queueType": "typ fronty",
+        "queueType_default": "výchozí",
+        "queueType_priority": "priorita"
     },
     "setting": {
         "crossfadeStyle_description": "vyberte způsob prolnutí u přehrávače zvuku",
@@ -200,9 +205,7 @@
         "homeConfiguration": "nastavení domovské stránky",
         "playerAlbumArtResolution_description": "rozlišení náhledu obalu alba ve velkém přehrávači. větší hodnota znamená kvalitnější obrázek, ale může se déle načítat. výchozí hodnota je 0, což znamená automatické rozlišení",
         "playerAlbumArtResolution": "rozlišení obalu alba v přehrávači",
-        "genreBehavior": "výchozí chování stránky žánrů",
         "externalLinks_description": "zapne zobrazování externích odkazů (Last.fm, MusicBrainz) na stránce umělce/alba",
-        "genreBehavior_description": "určuje, zda kliknutí na žánr otevře seznam skladeb nebo alb",
         "clearCacheSuccess": "mezipaměť úspěšně vymazána",
         "externalLinks": "zobrazit externí odkazy",
         "startMinimized_description": "spustit aplikaci do systémové lišty",
@@ -300,7 +303,30 @@
         "language": "jazyk",
         "notify": "povolit oznámení o skladbách",
         "notify_description": "zobrazit oznámení při změně aktuální skladby",
-        "transcode": "povolit překódování"
+        "transcode": "povolit překódování",
+        "analyticsDisable": "Odhlásit se z analytiky používání aplikace",
+        "analyticsDisable_description": "Pro zlepšení aplikace jsou vývojáři odesílána anonymizovaná data o používání",
+        "playerbarSlider": "posuvník lišty přehrávače",
+        "playerbarSliderType_optionSlider": "posuvník",
+        "playerbarSliderType_optionWaveform": "vlnová křivka",
+        "playerbarWaveformAlign": "pozice vlnové křivky",
+        "playerbarWaveformAlign_optionTop": "nahoře",
+        "playerbarWaveformAlign_optionCenter": "uprostřed",
+        "playerbarWaveformAlign_optionBottom": "dole",
+        "playerbarWaveformBarWidth": "šířka sloupců vlnové křivky",
+        "playerbarWaveformGap": "mezera vlnové křivky",
+        "playerbarWaveformRadius": "poloměr vlnové křivky",
+        "showLyricsInSidebar_description": "do připojené fronty přehrávání bude přidán panel, který zobrazuje texty",
+        "showLyricsInSidebar": "zobrazit texty v postranní liště přehrávače",
+        "showVisualizerInSidebar_description": "do postranní lišty přehrávače bude přidán panel, který zobrazuje vizualizér",
+        "showVisualizerInSidebar": "zobrazit vizualizér v postranní liště přehrávače",
+        "queryBuilder": "sestavení dotazu",
+        "queryBuilderCustomFields_inputLabel": "štítek",
+        "queryBuilderCustomFields_inputTag": "značka",
+        "queryBuilderCustomFields": "vlastní pole",
+        "queryBuilderCustomFields_description": "přidat vlasntí pole k použití při sestavování dotazů",
+        "audioFadeOnStatusChange": "zeslabení zvuku při změně stavu",
+        "audioFadeOnStatusChange_description": "povolí postupné zeslabení a zesílení zvuku při změně stavu přehrávání/pozastavení"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist_one)",
@@ -326,7 +352,7 @@
         },
         "moveToNext": "přesunout na další",
         "downloadStarted": "spuštěno stahování {{count}} položek",
-        "largeFetch": "tato akce se pokusí načíst {{count}} položek z vašeho serveru",
+        "largeFetch": "tato akce provede {{count}} síťových žádostí na váš server",
         "moveItems": "přesunout položky",
         "shuffle": "náhodně",
         "shuffleAll": "vše náhodně",
@@ -463,7 +489,28 @@
                 "size": "$t(common.size)",
                 "itemGap": "mezera mezi položkami (px)",
                 "itemSize": "velikost položek (px)",
-                "followCurrentSong": "následovat aktuální skladbu"
+                "followCurrentSong": "následovat aktuální skladbu",
+                "advancedSettings": "pokročilá nastavení",
+                "autosize": "automatická velikost",
+                "moveUp": "posunout nahoru",
+                "moveDown": "posunout dolů",
+                "pinToLeft": "připnout doleva",
+                "pinToRight": "připnout doprava",
+                "alignLeft": "zarovnat doleva",
+                "alignCenter": "zarovnat doprostřed",
+                "alignRight": "zarovat doprava",
+                "itemsPerRow": "položky na řádek",
+                "size_default": "výchozí",
+                "size_compact": "kompaktní",
+                "size_large": "velký",
+                "pagination": "stránkování",
+                "pagination_itemsPerPage": "položky na stránku",
+                "pagination_infinite": "nekonečno",
+                "pagination_paginate": "stránkované",
+                "alternateRowColors": "střídat barvy řádků",
+                "horizontalBorders": "okraje řádků",
+                "rowHoverHighlight": "zvýraznění řádku při přejetí myší",
+                "verticalBorders": "okraje sloupců"
             },
             "label": {
                 "releaseDate": "datum vydání",
@@ -493,7 +540,10 @@
                 "year": "$t(common.year)",
                 "albumArtist": "$t(entity.albumArtist_one)",
                 "codec": "$t(common.codec)",
-                "songCount": "$t(entity.track_other)"
+                "songCount": "$t(entity.track_other)",
+                "albumCount": "$t(entity.album_other)",
+                "genreBadge": "$t(entity.genre_one) (značky)",
+                "image": "obrázek"
             }
         },
         "column": {
@@ -520,7 +570,8 @@
             "discNumber": "disk",
             "channels": "$t(common.channel_other)",
             "size": "$t(common.size)",
-            "codec": "$t(common.codec)"
+            "codec": "$t(common.codec)",
+            "owner": "majitel"
         }
     },
     "error": {
@@ -608,7 +659,8 @@
             "artists": "$t(entity.artist_other)",
             "albumArtists": "$t(entity.albumArtist_other)",
             "shared": "$t(entity.playlist_other) sdíleny",
-            "myLibrary": "moje knihovna"
+            "myLibrary": "moje knihovna",
+            "favorites": "$t(entity.favorite_other)"
         },
         "fullscreenPlayer": {
             "config": {
@@ -646,7 +698,9 @@
             "goForward": "přejít vpřed",
             "privateModeOff": "vypnout soukromý režim",
             "privateModeOn": "zapnout soukromý režim",
-            "selectMusicFolder": "vybrat složku s hudbou"
+            "selectMusicFolder": "vybrat složku s hudbou",
+            "noMusicFolder": "není vybrána žádná složka s hudbou",
+            "multipleMusicFolders": "Vybráno {{count}} složek s hudbou"
         },
         "contextMenu": {
             "addToPlaylist": "$t(action.addToPlaylist)",
@@ -672,7 +726,9 @@
             "playShuffled": "$t(player.shuffle)",
             "moveToNext": "$t(action.moveToNext)",
             "goToAlbum": "přejít na $t(entity.album_one)",
-            "goToAlbumArtist": "přejít na $t(entity.albumArtist_one)"
+            "goToAlbumArtist": "přejít na $t(entity.albumArtist_one)",
+            "moveItems": "$t(action.moveItems)",
+            "goTo": "přejít na"
         },
         "home": {
             "mostPlayed": "nejpřehrávanější",
@@ -692,7 +748,22 @@
             "generalTab": "obecné",
             "hotkeysTab": "klávesové zkratky",
             "windowTab": "okno",
-            "advanced": "pokročilé"
+            "advanced": "pokročilé",
+            "analytics": "analytika",
+            "updates": "aktualizace",
+            "cache": "mezipaměť",
+            "application": "aplikace",
+            "queryBuilder": "sestavení dotazu",
+            "theme": "motiv",
+            "controls": "ovládání",
+            "sidebar": "postranní lišta",
+            "remote": "vzdálené",
+            "exportImport": "import/export",
+            "scrobble": "scrobblování",
+            "audio": "zvuk",
+            "lyrics": "texty",
+            "transcoding": "překódování",
+            "discord": "discord"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist_other)"
@@ -924,5 +995,9 @@
             "soundtrack": "soundtrack",
             "spokenWord": "mluvené slovo"
         }
+    },
+    "queryBuilder": {
+        "standardTags": "standardní značky",
+        "customTags": "vlastní značky"
     }
 }

@@ -337,8 +337,6 @@
         "externalLinks_description": "consente di visualizzare link esterni (Last.fm, MusicBrainz) sulle pagine di artista/album",
         "preferLocalLyrics": "utilizza i testi locali",
         "preferLocalLyrics_description": "usa i testi locali anziché quelli online, quando disponibili",
-        "genreBehavior": "comportamento predefinito della pagina genere",
-        "genreBehavior_description": "determina se cliccando su un genere si apre di default la lista dei brani o degli album",
         "homeConfiguration": "configurazione della home page",
         "homeConfiguration_description": "configura quali elementi vengono mostrati e in quale ordine nella home page",
         "homeFeature": "carosello in evidenza nella home page",

@@ -577,8 +577,6 @@
         "gaplessAudio": "prehrávanie bez prerušení",
         "gaplessAudio_description": "nastaví prehrávanie bez prerušení pre mpv",
         "gaplessAudio_optionWeak": "slabo (odporúčané)",
-        "genreBehavior": "predvolené správanie stránky žánru",
-        "genreBehavior_description": "určuje, či kliknutie na žáner otvorí zoznam skladieb alebo zoznam albumov",
         "globalMediaHotkeys": "globálne klávesové skratky médií",
         "globalMediaHotkeys_description": "povoliť alebo zakázať použitie vašich klávesových skratiek médií na ovládanie prehrávania",
         "homeConfiguration": "konfigurácia domovskej stránky",

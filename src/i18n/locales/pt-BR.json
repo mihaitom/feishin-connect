@@ -279,8 +279,6 @@
         "gaplessAudio": "Áudio sem intervalos",
         "gaplessAudio_description": "Define a configuração de áudio sem intervalos para o MPV",
         "gaplessAudio_optionWeak": "Fraco (recomendado)",
-        "genreBehavior": "Comportamento padrão da página de gênero",
-        "genreBehavior_description": "Determina se ao clicar em um gênero ele é aberto por padrão na lista de faixas ou de álbuns",
         "globalMediaHotkeys": "Teclas de atalho globais de mídia",
         "globalMediaHotkeys_description": "Ativar ou desativar o uso das teclas de atalho de mídia do sistema para controlar a reprodução",
         "homeConfiguration": "Configuração da página inicial",

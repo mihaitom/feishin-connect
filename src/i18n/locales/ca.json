@@ -503,8 +503,6 @@
         "gaplessAudio": "àudio sense pauses",
         "gaplessAudio_description": "estableix la configuració d'àudio sense pauses per mpv",
         "gaplessAudio_optionWeak": "feble (recomanat)",
-        "genreBehavior": "comportament predeterminat per les pàgines de gènere",
-        "genreBehavior_description": "determina si clicar sobre un gènere obre per defecte la llista de pistes o d'àlbums",
         "globalMediaHotkeys": "tecles de drecera globals",
         "globalMediaHotkeys_description": "activa o desactiva l'ús de les tecles multimèdia del sistema per controlar la reproducció",
         "homeConfiguration_description": "configura quins objectes es mostren, i en quin ordre, a la pàgina d'inici",
