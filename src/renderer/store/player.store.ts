@@ -2087,7 +2087,12 @@ export const subscribeCurrentTrack = (
     return usePlayerStoreBase.subscribe(
         (state) => {
             const queue = state.getQueue();
-            const index = state.player.index;
+            let index = state.player.index;
+
+            if (isShuffleEnabled(state)) {
+                index = mapShuffledToQueueIndex(index, state.queue.shuffled);
+            }
+
             return { index, song: queue.items[index] };
         },
         (song, prevSong) => {
