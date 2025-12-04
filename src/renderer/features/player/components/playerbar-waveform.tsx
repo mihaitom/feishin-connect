@@ -1,8 +1,10 @@
+import { useQuery } from '@tanstack/react-query';
 import { useWavesurfer } from '@wavesurfer/react';
 import formatDuration from 'format-duration';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { PlayerbarSeekSlider } from './playerbar-seek-slider';
 import { CustomPlayerbarSlider } from './playerbar-slider';
 import styles from './playerbar-waveform.module.css';
 
@@ -29,6 +31,7 @@ export const PlayerbarWaveform = () => {
     const { mediaSeekToTimestamp } = usePlayer();
     const [isLoading, setIsLoading] = useState(true);
     const [isDragging, setIsDragging] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState<null | { x: number; y: number }>(null);
     const [tooltipValue, setTooltipValue] = useState(0);
     const seekTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -38,6 +41,21 @@ export const PlayerbarWaveform = () => {
     const songDuration = currentSong?.duration ? currentSong.duration / 1000 : 0;
 
     const streamUrl = useSongUrl(currentSong, true, transcode);
+
+    // Fetch blob from stream URL
+    const { data: streamBlob } = useQuery({
+        enabled: !!streamUrl && !!currentSong,
+        queryFn: async () => {
+            if (!streamUrl) return undefined;
+
+            const response = await fetch(streamUrl);
+            if (!response.ok) {
+                throw new Error('Failed to fetch stream blob');
+            }
+            return await response.blob();
+        },
+        queryKey: [currentSong?._serverId, streamUrl],
+    });
 
     const primaryColor = usePrimaryColor();
 
@@ -65,22 +83,37 @@ export const PlayerbarWaveform = () => {
         interact: false,
         normalize: false,
         progressColor: primaryColor,
-        url: streamUrl || undefined,
+        url: undefined, // URL will be loaded separately via useEffect
         waveColor,
     });
 
-    // Reset loading state when stream URL changes and ensure media is muted
+    // Update wavesurfer with blob when it becomes available
     useEffect(() => {
+        if (!wavesurfer || !streamBlob) return;
+
+        wavesurfer.loadBlob(streamBlob);
         setIsLoading(true);
-        if (wavesurfer) {
-            wavesurfer.setVolume(0);
-            const mediaElement = wavesurfer.getMediaElement();
-            if (mediaElement) {
-                mediaElement.muted = true;
-                mediaElement.volume = 0;
-            }
+        wavesurfer.setVolume(0);
+        const mediaElement = wavesurfer.getMediaElement();
+        if (mediaElement) {
+            mediaElement.muted = true;
+            mediaElement.volume = 0;
         }
-    }, [streamUrl, wavesurfer]);
+    }, [streamBlob, wavesurfer]);
+
+    // Reset loading state when song changes
+    useEffect(() => {
+        if (!wavesurfer) return;
+
+        setIsLoading(true);
+
+        wavesurfer.setVolume(0);
+        const mediaElement = wavesurfer.getMediaElement();
+        if (mediaElement) {
+            mediaElement.muted = true;
+            mediaElement.volume = 0;
+        }
+    }, [wavesurfer]);
 
     // Handle waveform ready state
     useEffect(() => {
@@ -351,6 +384,8 @@ export const PlayerbarWaveform = () => {
             onClick={(e) => {
                 e?.stopPropagation();
             }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             style={{ position: 'relative' }}
         >
             <motion.div
@@ -361,7 +396,7 @@ export const PlayerbarWaveform = () => {
                 transition={{ duration: 0.2 }}
             />
             <AnimatePresence>
-                {isLoading && (
+                {isLoading && !isHovered && (
                     <motion.div
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -379,6 +414,19 @@ export const PlayerbarWaveform = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            {isLoading && isHovered && (
+                <div
+                    style={{
+                        height: '100%',
+                        left: 0,
+                        position: 'absolute',
+                        top: 0,
+                        width: '100%',
+                    }}
+                >
+                    <PlayerbarSeekSlider max={songDuration} min={0} />
+                </div>
+            )}
             {tooltipPosition && isDragging && (
                 <motion.div
                     animate={{ opacity: 1, scale: 1, x: '-50%' }}
