@@ -1,8 +1,9 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect } from 'react';
 import { useParams } from 'react-router';
 
 import { useListContext } from '/@/renderer/context/list-context';
+import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
@@ -24,6 +25,7 @@ export const PlaylistDetailSongListContent = () => {
     const { playlistId } = useParams() as { playlistId: string };
     const server = useCurrentServer();
     const { setItemCount } = useListContext();
+    const queryClient = useQueryClient();
 
     const playlistSongsQuery = useSuspenseQuery(
         playlistsQueries.songList({
@@ -42,6 +44,30 @@ export const PlaylistDetailSongListContent = () => {
             setItemCount?.(playlistSongsQuery.data.totalRecordCount);
         }
     }, [playlistSongsQuery.data?.totalRecordCount, setItemCount]);
+
+    useEffect(() => {
+        const handleRefresh = async (payload: { key: string }) => {
+            if (payload.key !== ItemListKey.PLAYLIST_SONG) {
+                return;
+            }
+
+            const queryKey = playlistsQueries.songList({
+                query: {
+                    id: playlistId,
+                },
+                serverId: server?.id,
+            }).queryKey;
+
+            await queryClient.invalidateQueries({ queryKey });
+            await queryClient.refetchQueries({ queryKey });
+        };
+
+        eventEmitter.on('ITEM_LIST_REFRESH', handleRefresh);
+
+        return () => {
+            eventEmitter.off('ITEM_LIST_REFRESH', handleRefresh);
+        };
+    }, [playlistId, queryClient, server.id]);
 
     return (
         <Suspense fallback={<Spinner container />}>
