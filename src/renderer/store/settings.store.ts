@@ -40,6 +40,7 @@ type DeepPartial<T> = {
 };
 
 const HomeItemSchema = z.enum([
+    'genres',
     'mostPlayed',
     'random',
     'recentlyAdded',
@@ -456,6 +457,7 @@ export enum GenreTarget {
 }
 
 export enum HomeItem {
+    GENRES = 'genres',
     MOST_PLAYED = 'mostPlayed',
     RANDOM = 'random',
     RECENTLY_ADDED = 'recentlyAdded',
@@ -1350,10 +1352,17 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
+                if (version <= 13) {
+                    state.general.homeItems.push({
+                        disabled: false,
+                        id: HomeItem.GENRES,
+                    });
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 13,
+            version: 14,
         },
     ),
 );

@@ -464,6 +464,7 @@
         },
         "home": {
             "explore": "explore from your library",
+            "genres": "$t(entity.genre_other)",
             "mostPlayed": "most played",
             "newlyAdded": "newly added releases",
             "recentlyPlayed": "recently played",
