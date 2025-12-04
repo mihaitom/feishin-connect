@@ -187,6 +187,28 @@ export const ControlSettings = () => {
         },
         {
             control: (
+                <Switch
+                    aria-label="Follow current song"
+                    defaultChecked={settings.followCurrentSong}
+                    onChange={(e) =>
+                        setSettings({
+                            general: {
+                                ...settings,
+                                followCurrentSong: e.currentTarget.checked,
+                            },
+                        })
+                    }
+                />
+            ),
+            description: t('setting.followCurrentSong', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: false,
+            title: t('setting.followCurrentSong', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
                 <Slider
                     defaultValue={settings.volumeWheelStep}
                     max={20}

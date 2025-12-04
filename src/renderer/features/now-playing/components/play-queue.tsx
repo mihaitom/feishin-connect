@@ -21,6 +21,7 @@ import {
     usePlayerActions,
     usePlayerQueueType,
     usePlayerSong,
+    useSettingsStore,
 } from '/@/renderer/store';
 import { Flex } from '/@/shared/components/flex/flex';
 import { LoadingOverlay } from '/@/shared/components/loading-overlay/loading-overlay';
@@ -46,6 +47,7 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
     const mergedRef = useMergedRef(ref, tableRef);
     const { getQueue } = usePlayerActions();
     const queueType = usePlayerQueueType();
+    const followCurrentSong = useSettingsStore((state) => state.general.followCurrentSong);
 
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 200);
 
@@ -91,10 +93,10 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
         });
 
         const unsubCurrentTrack = subscribeCurrentTrack((e) => {
-            if (e.index !== -1) {
+            if (followCurrentSong && e.index !== -1) {
                 tableRef.current?.scrollToIndex(e.index, {
-                    align: 'top',
-                    behavior: 'smooth',
+                    align: 'center',
+                    behavior: 'auto',
                 });
             }
         });
@@ -105,7 +107,7 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
             unsub();
             unsubCurrentTrack();
         };
-    }, [getQueue, queueType, tableRef]);
+    }, [getQueue, queueType, tableRef, followCurrentSong]);
 
     const filteredData: QueueSong[] = useMemo(() => {
         if (debouncedSearchTerm) {
@@ -127,6 +129,7 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
     });
 
     const currentSong = usePlayerSong();
+
     const currentSongUniqueId = currentSong?._uniqueId;
 
     const { focused, ref: containerFocusRef } = useFocusWithin();
