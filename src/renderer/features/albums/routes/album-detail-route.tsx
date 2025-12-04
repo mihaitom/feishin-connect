@@ -42,7 +42,7 @@ const AlbumDetailRoute = () => {
 
     const background = backgroundColor;
 
-    const showBlurredImage = Boolean(detailQuery.data?.imageUrl) && albumBackground;
+    const showBlurredImage = albumBackground;
 
     return (
         <AnimatedPage key={`album-detail-${albumId}`}>
@@ -70,7 +70,7 @@ const AlbumDetailRoute = () => {
                     <LibraryBackgroundImage
                         blur={albumBackgroundBlur}
                         headerRef={headerRef}
-                        imageUrl={detailQuery.data.imageUrl!}
+                        imageUrl={detailQuery.data?.imageUrl}
                     />
                 ) : (
                     <LibraryBackgroundOverlay backgroundColor={background} headerRef={headerRef} />

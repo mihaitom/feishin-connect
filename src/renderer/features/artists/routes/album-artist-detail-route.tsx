@@ -47,7 +47,7 @@ const AlbumArtistDetailRoute = () => {
 
     const background = backgroundColor;
 
-    const showBlurredImage = Boolean(detailQuery.data?.imageUrl) && artistBackground;
+    const showBlurredImage = artistBackground;
 
     return (
         <AnimatedPage key={`album-artist-detail-${routeId}`}>
