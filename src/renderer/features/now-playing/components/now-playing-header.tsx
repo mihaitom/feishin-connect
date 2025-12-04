@@ -7,7 +7,7 @@ export const NowPlayingHeader = () => {
 
     return (
         <PageHeader>
-            <LibraryHeaderBar>
+            <LibraryHeaderBar ignoreMaxWidth>
                 <LibraryHeaderBar.Title>Queue</LibraryHeaderBar.Title>
             </LibraryHeaderBar>
         </PageHeader>
