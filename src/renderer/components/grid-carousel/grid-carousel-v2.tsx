@@ -22,6 +22,7 @@ interface GridCarouselProps {
     loadNextPage?: () => void;
     onNextPage: (page: number) => void;
     onPrevPage: (page: number) => void;
+    onRefresh?: () => void;
     rowCount?: number;
     title?: ReactNode | string;
 }
@@ -43,7 +44,16 @@ const pageVariants: Variants = {
 };
 
 function BaseGridCarousel(props: GridCarouselProps) {
-    const { cards, hasNextPage, loadNextPage, onNextPage, onPrevPage, rowCount = 1, title } = props;
+    const {
+        cards,
+        hasNextPage,
+        loadNextPage,
+        onNextPage,
+        onPrevPage,
+        onRefresh,
+        rowCount = 1,
+        title,
+    } = props;
     const { ref, ...cq } = useContainerQuery({
         '2xl': 1280,
         '3xl': 1440,
@@ -128,30 +138,44 @@ function BaseGridCarousel(props: GridCarouselProps) {
             {cq.isCalculated && (
                 <>
                     <div className={styles.navigation}>
-                        {typeof title === 'string' ? (
-                            <TextTitle fw={700} isNoSelect order={3}>
-                                {title}
-                            </TextTitle>
-                        ) : (
-                            title
-                        )}
-                        <Group gap="xs" justify="end">
-                            <ActionIcon
-                                disabled={isPrevDisabled}
-                                icon="arrowLeftS"
-                                iconProps={{ size: 'lg' }}
-                                onClick={handlePrevPage}
-                                size="xs"
-                                variant="subtle"
-                            />
-                            <ActionIcon
-                                disabled={isNextDisabled}
-                                icon="arrowRightS"
-                                iconProps={{ size: 'lg' }}
-                                onClick={handleNextPage}
-                                size="xs"
-                                variant="subtle"
-                            />
+                        <Group gap="xs" justify="space-between" w="100%">
+                            <Group gap="xs">
+                                {typeof title === 'string' ? (
+                                    <TextTitle fw={700} isNoSelect order={3}>
+                                        {title}
+                                    </TextTitle>
+                                ) : (
+                                    title
+                                )}
+                                {onRefresh && (
+                                    <ActionIcon
+                                        icon="refresh"
+                                        iconProps={{ size: 'md' }}
+                                        onClick={onRefresh}
+                                        size="xs"
+                                        tooltip={{ label: 'Refresh' }}
+                                        variant="transparent"
+                                    />
+                                )}
+                            </Group>
+                            <Group gap="xs" justify="end">
+                                <ActionIcon
+                                    disabled={isPrevDisabled}
+                                    icon="arrowLeftS"
+                                    iconProps={{ size: 'lg' }}
+                                    onClick={handlePrevPage}
+                                    size="xs"
+                                    variant="subtle"
+                                />
+                                <ActionIcon
+                                    disabled={isNextDisabled}
+                                    icon="arrowRightS"
+                                    iconProps={{ size: 'lg' }}
+                                    onClick={handleNextPage}
+                                    size="xs"
+                                    variant="subtle"
+                                />
+                            </Group>
                         </Group>
                     </div>
                     <AnimatePresence custom={currentPage} initial={false} mode="wait">
