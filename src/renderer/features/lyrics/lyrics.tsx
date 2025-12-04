@@ -178,10 +178,17 @@ export const Lyrics = () => {
     // }, [currentSong?.id, currentSong?._serverId]);
 
     const handleOnRemoveLyric = useCallback(() => {
+        setOverride(undefined);
+
+        // Clear the main lyrics query cache
         queryClient.setQueryData(
             queryKeys.songs.lyrics(currentSong?._serverId, { songId: currentSong?.id }),
-            (prev: FullLyricsMetadata | undefined) => {
+            (prev: FullLyricsMetadata | StructuredLyric[] | undefined) => {
                 if (!prev) {
+                    return undefined;
+                }
+
+                if (Array.isArray(prev)) {
                     return undefined;
                 }
 
@@ -191,7 +198,17 @@ export const Lyrics = () => {
                 };
             },
         );
-    }, [currentSong?.id, currentSong?._serverId]);
+
+        // Clear the override query cache if it exists
+        if (override) {
+            queryClient.removeQueries({
+                queryKey: queryKeys.songs.lyricsByRemoteId({
+                    remoteSongId: override.id,
+                    remoteSource: override.source,
+                }),
+            });
+        }
+    }, [currentSong?.id, currentSong?._serverId, override]);
 
     const fetchTranslation = useCallback(async () => {
         if (!lyrics) return;
