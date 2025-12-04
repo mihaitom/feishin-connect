@@ -145,6 +145,12 @@ export const PlayQueueListControls = ({
                         },
                     ]}
                     listKey={ItemListKey.SIDE_QUEUE}
+                    optionsConfig={{
+                        table: {
+                            itemsPerPage: { hidden: true },
+                            pagination: { hidden: true },
+                        },
+                    }}
                     tableColumnsData={SONG_TABLE_COLUMNS}
                 />
             </Group>
