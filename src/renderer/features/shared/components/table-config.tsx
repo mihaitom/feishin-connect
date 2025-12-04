@@ -774,7 +774,7 @@ const TableColumnItem = memo(
                                     postProcess: 'sentenceCase',
                                 }),
                             }}
-                            variant={item.align === 'end' ? 'filled' : 'subtle'}
+                            variant={item.align === 'end' ? 'outline' : 'subtle'}
                         />
                     </ActionIconGroup>
                     <NumberInput
