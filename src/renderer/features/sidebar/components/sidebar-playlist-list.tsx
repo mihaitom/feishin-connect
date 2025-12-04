@@ -192,7 +192,6 @@ const RowControls = ({
                 size="xs"
                 tooltip={{
                     label: t('player.play', { postProcess: 'sentenceCase' }),
-                    openDelay: 500,
                 }}
                 variant="subtle"
             />
@@ -207,7 +206,6 @@ const RowControls = ({
                 size="xs"
                 tooltip={{
                     label: t('player.shuffle', { postProcess: 'sentenceCase' }),
-                    openDelay: 500,
                 }}
                 variant="subtle"
             />
@@ -222,7 +220,6 @@ const RowControls = ({
                 size="xs"
                 tooltip={{
                     label: t('player.addLast', { postProcess: 'sentenceCase' }),
-                    openDelay: 500,
                 }}
                 variant="subtle"
             />
@@ -237,7 +234,6 @@ const RowControls = ({
                 size="xs"
                 tooltip={{
                     label: t('player.addNext', { postProcess: 'sentenceCase' }),
-                    openDelay: 500,
                 }}
                 variant="subtle"
             />
@@ -328,7 +324,6 @@ export const SidebarPlaylistList = () => {
                                 label: t('action.createPlaylist', {
                                     postProcess: 'sentenceCase',
                                 }),
-                                openDelay: 500,
                             }}
                             variant="subtle"
                         />
@@ -345,7 +340,6 @@ export const SidebarPlaylistList = () => {
                                 label: t('action.viewPlaylists', {
                                     postProcess: 'sentenceCase',
                                 }),
-                                openDelay: 500,
                             }}
                             variant="subtle"
                         />

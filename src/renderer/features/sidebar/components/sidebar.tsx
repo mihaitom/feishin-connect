@@ -197,7 +197,6 @@ const SidebarImage = () => {
                 label={t('player.toggleFullscreenPlayer', {
                     postProcess: 'sentenceCase',
                 })}
-                openDelay={500}
             >
                 {upsizedImageUrl ? (
                     <img className={styles.sidebarImage} loading="eager" src={upsizedImageUrl} />

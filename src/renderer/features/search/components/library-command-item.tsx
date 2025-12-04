@@ -90,7 +90,6 @@ export const LibraryCommandItem = ({
                         tabIndex={disabled ? -1 : 0}
                         tooltip={{
                             label: t('player.play', { postProcess: 'sentenceCase' }),
-                            openDelay: 500,
                         }}
                         variant="subtle"
                     />
@@ -108,7 +107,6 @@ export const LibraryCommandItem = ({
                             tabIndex={disabled ? -1 : 0}
                             tooltip={{
                                 label: t('player.shuffle', { postProcess: 'sentenceCase' }),
-                                openDelay: 500,
                             }}
                             variant="subtle"
                         />
@@ -126,8 +124,6 @@ export const LibraryCommandItem = ({
                         tabIndex={disabled ? -1 : 0}
                         tooltip={{
                             label: t('player.addLast', { postProcess: 'sentenceCase' }),
-
-                            openDelay: 500,
                         }}
                         variant="subtle"
                     />
@@ -144,7 +140,6 @@ export const LibraryCommandItem = ({
                         tabIndex={disabled ? -1 : 0}
                         tooltip={{
                             label: t('player.addNext', { postProcess: 'sentenceCase' }),
-                            openDelay: 500,
                         }}
                         variant="subtle"
                     />

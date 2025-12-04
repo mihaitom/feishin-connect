@@ -16,6 +16,7 @@ export interface DefaultItemControlProps {
     internalState?: ItemListStateActions;
     item: ItemListItem | undefined;
     itemType: LibraryItem;
+    meta?: Record<string, any>;
 }
 
 export interface ItemControls {

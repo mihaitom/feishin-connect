@@ -110,7 +110,7 @@ export const LeftControls = () => {
                                     label={t('player.toggleFullscreenPlayer', {
                                         postProcess: 'sentenceCase',
                                     })}
-                                    openDelay={500}
+                                    openDelay={0}
                                 >
                                     <Image
                                         className={clsx(
@@ -139,7 +139,7 @@ export const LeftControls = () => {
                                             label: t('common.expand', {
                                                 postProcess: 'titleCase',
                                             }),
-                                            openDelay: 500,
+                                            openDelay: 0,
                                         }}
                                     />
                                 )}

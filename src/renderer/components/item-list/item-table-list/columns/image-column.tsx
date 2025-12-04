@@ -8,7 +8,10 @@ import {
     TableColumnContainer,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { PlayButton } from '/@/renderer/features/shared/components/play-button';
-import { LONG_PRESS_PLAY_BEHAVIOR } from '/@/renderer/features/shared/components/play-button-group';
+import {
+    LONG_PRESS_PLAY_BEHAVIOR,
+    PlayTooltip,
+} from '/@/renderer/features/shared/components/play-button-group';
 import { usePlayButtonBehavior } from '/@/renderer/store';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Image } from '/@/shared/components/image/image';
@@ -85,13 +88,15 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
                                 [styles.compactPlayButtonOverlay]: props.size === 'compact',
                             })}
                         >
-                            <PlayButton
-                                fill
-                                onClick={(e) => handlePlay(playButtonBehavior, e)}
-                                onLongPress={(e) =>
-                                    handlePlay(LONG_PRESS_PLAY_BEHAVIOR[playButtonBehavior], e)
-                                }
-                            />
+                            <PlayTooltip type={playButtonBehavior}>
+                                <PlayButton
+                                    fill
+                                    onClick={(e) => handlePlay(playButtonBehavior, e)}
+                                    onLongPress={(e) =>
+                                        handlePlay(LONG_PRESS_PLAY_BEHAVIOR[playButtonBehavior], e)
+                                    }
+                                />
+                            </PlayTooltip>
                         </div>
                     )}
                 </div>

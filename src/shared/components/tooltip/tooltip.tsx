@@ -34,3 +34,5 @@ export const Tooltip = ({
         </MantineTooltip>
     );
 };
+
+Tooltip.Group = MantineTooltip.Group;
