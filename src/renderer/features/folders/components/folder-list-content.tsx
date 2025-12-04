@@ -117,7 +117,7 @@ export const FolderListView = ({ folderQuery }: FolderListViewProps) => {
 
     const overrideControls = useMemo(() => {
         return {
-            onDoubleClick: ({ index, internalState, item }: DefaultItemControlProps) => {
+            onDoubleClick: ({ internalState, item, meta }: DefaultItemControlProps) => {
                 if (!item) {
                     return;
                 }
@@ -127,17 +127,24 @@ export const FolderListView = ({ folderQuery }: FolderListViewProps) => {
                     return navigateToFolder(folder.id, folder.name);
                 }
 
-                const items = internalState?.getData() as Song[];
+                const playType = (meta?.playType as Play) || Play.NOW;
 
-                const songCount = items.filter(
-                    (item) => item._itemType === LibraryItem.SONG,
-                ).length;
+                const data = internalState?.getData();
+                if (!data) {
+                    return;
+                }
 
-                const indexesToSkip = items.length - songCount;
+                const validSongs = data.filter((d): d is Song => {
+                    return (
+                        (d as unknown as { _itemType: LibraryItem })._itemType === LibraryItem.SONG
+                    );
+                }) as Song[];
 
-                const startIndex = indexesToSkip + (index ?? 0);
-                player.addToQueueByData(items, Play.NOW);
-                player.mediaPlayByIndex(startIndex);
+                if (validSongs.length === 0) {
+                    return;
+                }
+
+                player.addToQueueByData(validSongs, playType, item.id);
             },
         };
     }, [navigateToFolder, player]);

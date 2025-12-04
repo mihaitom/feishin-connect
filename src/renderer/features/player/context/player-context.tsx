@@ -39,7 +39,7 @@ import {
 import { Play, PlayerRepeat, PlayerShuffle } from '/@/shared/types/types';
 
 export interface PlayerContext {
-    addToQueueByData: (data: Song[], type: AddToQueueType) => void;
+    addToQueueByData: (data: Song[], type: AddToQueueType, playSongId?: string) => void;
     addToQueueByFetch: (
         serverId: string,
         id: string[],
@@ -208,7 +208,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const addToQueueByData = useCallback(
-        (data: Song[], type: AddToQueueType) => {
+        (data: Song[], type: AddToQueueType, playSongId?: string) => {
             if (typeof type === 'object' && 'edge' in type && type.edge !== null) {
                 const edge = type.edge === 'top' ? 'top' : 'bottom';
 
@@ -217,14 +217,14 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                     meta: { data: data.length, edge, type, uniqueId: type.uniqueId },
                 });
 
-                storeActions.addToQueueByUniqueId(data, type.uniqueId, edge);
+                storeActions.addToQueueByUniqueId(data, type.uniqueId, edge, playSongId);
             } else {
                 logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByType, {
                     category: LogCategory.PLAYER,
                     meta: { data: data.length, type },
                 });
 
-                storeActions.addToQueueByType(data, type as Play);
+                storeActions.addToQueueByType(data, type as Play, playSongId);
             }
         },
         [storeActions],

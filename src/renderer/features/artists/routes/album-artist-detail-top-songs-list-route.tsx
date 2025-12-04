@@ -65,16 +65,16 @@ const AlbumArtistDetailTopSongsListRoute = () => {
 
     const overrideControls: Partial<ItemControls> = useMemo(() => {
         return {
-            onDoubleClick: ({ index, internalState, item }) => {
+            onDoubleClick: ({ index, internalState, item, meta }) => {
                 if (!item) {
                     return;
                 }
 
+                const playType = (meta?.playType as Play) || Play.NOW;
                 const items = internalState?.getData() as Song[];
 
                 if (index !== undefined) {
-                    player.addToQueueByData(items, Play.NOW);
-                    player.mediaPlayByIndex(index);
+                    player.addToQueueByData(items, playType, item.id);
                 }
             },
         };

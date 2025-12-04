@@ -29,8 +29,13 @@ export interface PlayerState extends Actions, State {}
 export type QueueGroupingProperty = keyof QueueSong;
 
 interface Actions {
-    addToQueueByType: (items: Song[], playType: Play) => void;
-    addToQueueByUniqueId: (items: Song[], uniqueId: string, edge: 'bottom' | 'top') => void;
+    addToQueueByType: (items: Song[], playType: Play, playSongId?: string) => void;
+    addToQueueByUniqueId: (
+        items: Song[],
+        uniqueId: string,
+        edge: 'bottom' | 'top',
+        playSongId?: string,
+    ) => void;
     clearQueue: () => void;
     clearSelected: (items: QueueSong[]) => void;
     decreaseVolume: (value: number) => void;
@@ -260,9 +265,14 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
     persist(
         subscribeWithSelector(
             immer((set, get) => ({
-                addToQueueByType: (items, playType) => {
+                addToQueueByType: (items, playType, playSongId) => {
                     const newItems = items.map(toQueueSong);
                     const newUniqueIds = newItems.map((item) => item._uniqueId);
+
+                    // Find the target song's uniqueId if playSongId is provided
+                    const targetSongUniqueId = playSongId
+                        ? newItems.find((item) => item.id === playSongId)?._uniqueId
+                        : undefined;
 
                     const queueType = getQueueType();
 
@@ -760,10 +770,47 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                             break;
                         }
                     }
+
+                    // If playSongId is provided, find the song and start playback on it
+                    if (targetSongUniqueId) {
+                        set((state) => {
+                            const queue = state.getQueue();
+                            const queueIndex = queue.items.findIndex(
+                                (item) => item._uniqueId === targetSongUniqueId,
+                            );
+
+                            if (queueIndex !== -1) {
+                                if (
+                                    state.player.shuffle === PlayerShuffle.TRACK &&
+                                    state.queue.shuffled.length > 0
+                                ) {
+                                    // Find the shuffled position for this queue index
+                                    const shuffledPosition = state.queue.shuffled.findIndex(
+                                        (idx) => idx === queueIndex,
+                                    );
+                                    if (shuffledPosition !== -1) {
+                                        state.player.index = shuffledPosition;
+                                    } else {
+                                        state.player.index = queueIndex;
+                                    }
+                                } else {
+                                    state.player.index = queueIndex;
+                                }
+                                state.player.status = PlayerStatus.PLAYING;
+                                setTimestampStore(0);
+                            }
+                        });
+                    }
                 },
-                addToQueueByUniqueId: (items, uniqueId, edge) => {
+                addToQueueByUniqueId: (items, uniqueId, edge, playSongId) => {
                     const newItems = items.map(toQueueSong);
                     const newUniqueIds = newItems.map((item) => item._uniqueId);
+
+                    // Find the target song's uniqueId if playSongId is provided
+                    const targetSongUniqueId = playSongId
+                        ? newItems.find((item) => item.id === playSongId)?._uniqueId
+                        : undefined;
+
                     const queueType = getQueueType();
 
                     set((state) => {
@@ -888,6 +935,37 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                             }
                         }
                     });
+
+                    // If playSongId is provided, find the song and start playback on it
+                    if (targetSongUniqueId) {
+                        set((state) => {
+                            const queue = state.getQueue();
+                            const queueIndex = queue.items.findIndex(
+                                (item) => item._uniqueId === targetSongUniqueId,
+                            );
+
+                            if (queueIndex !== -1) {
+                                if (
+                                    state.player.shuffle === PlayerShuffle.TRACK &&
+                                    state.queue.shuffled.length > 0
+                                ) {
+                                    // Find the shuffled position for this queue index
+                                    const shuffledPosition = state.queue.shuffled.findIndex(
+                                        (idx) => idx === queueIndex,
+                                    );
+                                    if (shuffledPosition !== -1) {
+                                        state.player.index = shuffledPosition;
+                                    } else {
+                                        state.player.index = queueIndex;
+                                    }
+                                } else {
+                                    state.player.index = queueIndex;
+                                }
+                                state.player.status = PlayerStatus.PLAYING;
+                                setTimestampStore(0);
+                            }
+                        });
+                    }
                 },
                 clearQueue: () => {
                     set((state) => {

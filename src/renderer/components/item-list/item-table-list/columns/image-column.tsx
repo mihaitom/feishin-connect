@@ -35,7 +35,9 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
 
         // For SONG items, use double click behavior
         if (
-            (props.itemType === LibraryItem.SONG || props.itemType === LibraryItem.PLAYLIST_SONG) &&
+            (props.itemType === LibraryItem.SONG ||
+                props.itemType === LibraryItem.PLAYLIST_SONG ||
+                item._itemType === LibraryItem.SONG) &&
             props.controls?.onDoubleClick
         ) {
             // Calculate the index based on rowIndex, accounting for header if enabled
@@ -48,6 +50,9 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
                 internalState,
                 item,
                 itemType: props.itemType,
+                meta: {
+                    playType,
+                },
             });
             return;
         }

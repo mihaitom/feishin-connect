@@ -245,11 +245,7 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                         return;
                     }
 
-                    player.addToQueueByData(songsToAdd, Play.NOW);
-
-                    const targetIndex = clickedIndex - startIndex;
-
-                    player.mediaPlayByIndex(targetIndex);
+                    player.addToQueueByData(songsToAdd, Play.NOW, item.id);
                     return;
                 }
 
