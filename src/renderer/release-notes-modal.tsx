@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import packageJson from '../../package.json';
-import styles from './release-notes-modal.module.css';
 
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
@@ -96,10 +95,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
     if (isLoading || isConverting) {
         return (
             <Center h={400}>
-                <Stack align="center" gap="md">
-                    <Spinner />
-                    <Text size="sm">{t('common.loading', { postProcess: 'sentenceCase' })}</Text>
-                </Stack>
+                <Spinner />
             </Center>
         );
     }
@@ -108,9 +104,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         return (
             <Stack gap="md">
                 <Text>{t('common.newVersion', { postProcess: 'sentenceCase', version })}</Text>
-                <Text c="dimmed" size="sm">
-                    {t('error.genericError', { postProcess: 'sentenceCase' })}
-                </Text>
+                <Text size="sm">{t('error.genericError', { postProcess: 'sentenceCase' })}</Text>
                 <Group justify="flex-end">
                     <Button
                         component="a"
@@ -134,13 +128,10 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         <Stack gap="md">
             <ScrollArea
                 style={{
-                    height: '500px',
+                    height: '400px',
                 }}
             >
-                <div
-                    className={styles.markdownContent}
-                    dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-                />
+                <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
             </ScrollArea>
             <Group justify="flex-end">
                 <Button
@@ -176,12 +167,8 @@ export const ReleaseNotesModal = () => {
         if (value !== version) {
             openModal({
                 children: <ReleaseNotesContent onDismiss={handleDismiss} version={version} />,
+                onClose: handleDismiss,
                 size: 'xl',
-                styles: {
-                    body: {
-                        padding: 'var(--mantine-spacing-xl)',
-                    },
-                },
                 title: t('common.newVersion', {
                     postProcess: 'sentenceCase',
                     version,
