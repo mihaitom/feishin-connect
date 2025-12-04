@@ -295,10 +295,15 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                     return;
                 }
 
-                // Use the item's _itemType if available, otherwise fall back to the prop itemType
-                // This allows mixed lists (e.g., folders + songs) to show the correct context menu
+                console.log(item, itemType);
+
+                // For context menus, prioritize the itemType prop when it's PLAYLIST_SONG or QUEUE_SONG
+                // This is because playlist/queue songs are Song objects (_itemType: SONG) but need special context menus
+                // Otherwise, use the item's _itemType if available, or fall back to the mapped itemType
                 const actualItemType =
-                    (item as any)?._itemType || itemTypeMapping[itemType] || itemType;
+                    itemType === LibraryItem.PLAYLIST_SONG || itemType === LibraryItem.QUEUE_SONG
+                        ? itemType
+                        : (item as any)?._itemType || itemTypeMapping[itemType] || itemType;
 
                 // If no internalState, call ContextMenuController directly
                 if (!internalState) {
@@ -331,11 +336,14 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
 
                 const selectedItems = internalState.getSelected();
 
-                // For multiple selected items, use the itemType prop (assumes all selected items are of the same type)
+                // For multiple selected items, prioritize the itemType prop for PLAYLIST_SONG/QUEUE_SONG
+                // Otherwise use the first item's _itemType or the mapped type
                 const selectedItemType =
-                    selectedItems.length > 0 && (selectedItems[0] as any)?._itemType
-                        ? (selectedItems[0] as any)._itemType
-                        : actualItemType;
+                    itemType === LibraryItem.PLAYLIST_SONG || itemType === LibraryItem.QUEUE_SONG
+                        ? itemType
+                        : selectedItems.length > 0 && (selectedItems[0] as any)?._itemType
+                          ? (selectedItems[0] as any)._itemType
+                          : itemTypeMapping[itemType] || itemType;
 
                 return ContextMenuController.call({
                     cmd: { items: selectedItems as any[], type: selectedItemType as any },
