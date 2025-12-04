@@ -8,6 +8,7 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import {
+    filterSongsByPlayerFilters,
     getAlbumArtistSongsById,
     getAlbumSongsById,
     getGenreSongsById,
@@ -19,7 +20,7 @@ import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
-import { AddToQueueType, usePlayerActions } from '/@/renderer/store';
+import { AddToQueueType, usePlayerActions, useSettingsStore } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { logMsg } from '/@/renderer/utils/logger-message';
 import { sortSongsByFetchedOrder } from '/@/shared/api/utils';
@@ -209,22 +210,31 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const addToQueueByData = useCallback(
         (data: Song[], type: AddToQueueType, playSongId?: string) => {
+            const filters = useSettingsStore.getState().playback.filters;
+            const filteredData = filterSongsByPlayerFilters(data, filters);
+
             if (typeof type === 'object' && 'edge' in type && type.edge !== null) {
                 const edge = type.edge === 'top' ? 'top' : 'bottom';
 
                 logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByData, {
                     category: LogCategory.PLAYER,
-                    meta: { data: data.length, edge, type, uniqueId: type.uniqueId },
+                    meta: {
+                        data: data.length,
+                        edge,
+                        filtered: filteredData.length,
+                        type,
+                        uniqueId: type.uniqueId,
+                    },
                 });
 
-                storeActions.addToQueueByUniqueId(data, type.uniqueId, edge, playSongId);
+                storeActions.addToQueueByUniqueId(filteredData, type.uniqueId, edge, playSongId);
             } else {
                 logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByType, {
                     category: LogCategory.PLAYER,
-                    meta: { data: data.length, type },
+                    meta: { data: data.length, filtered: filteredData.length, type },
                 });
 
-                storeActions.addToQueueByType(data, type as Play, playSongId);
+                storeActions.addToQueueByType(filteredData, type as Play, playSongId);
             }
         },
         [storeActions],
@@ -295,11 +305,14 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
                 const sortedSongs = sortSongsByFetchedOrder(songs, id, itemType);
 
+                const filters = useSettingsStore.getState().playback.filters;
+                const filteredSongs = filterSongsByPlayerFilters(sortedSongs, filters);
+
                 if (typeof type === 'object' && 'edge' in type && type.edge !== null) {
                     const edge = type.edge === 'top' ? 'top' : 'bottom';
-                    storeActions.addToQueueByUniqueId(sortedSongs, type.uniqueId, edge);
+                    storeActions.addToQueueByUniqueId(filteredSongs, type.uniqueId, edge);
                 } else {
-                    storeActions.addToQueueByType(sortedSongs, type as Play);
+                    storeActions.addToQueueByType(filteredSongs, type as Play);
                 }
             } catch (err: any) {
                 if (instanceOfCancellationError(err)) {

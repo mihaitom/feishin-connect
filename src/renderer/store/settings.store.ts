@@ -304,9 +304,56 @@ const ScrobbleSettingsSchema = z.object({
     scrobbleAtPercentage: z.number(),
 });
 
+const PlayerFilterFieldSchema = z.enum([
+    'name',
+    'albumArtist',
+    'artist',
+    'duration',
+    'genre',
+    'year',
+    'note',
+    'path',
+    'playCount',
+    'favorite',
+    'rating',
+]);
+
+const PlayerFilterOperatorSchema = z.enum([
+    'is',
+    'isNot',
+    'contains',
+    'notContains',
+    'startsWith',
+    'endsWith',
+    'regex',
+    'gt',
+    'lt',
+    'inTheRange',
+    'before',
+    'after',
+    'beforeDate',
+    'afterDate',
+    'inTheRangeDate',
+    'inTheLast',
+    'notInTheLast',
+]);
+
+const PlayerFilterSchema = z.object({
+    field: PlayerFilterFieldSchema,
+    id: z.string(),
+    operator: PlayerFilterOperatorSchema,
+    value: z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.array(z.union([z.string(), z.number()])),
+    ]),
+});
+
 const PlaybackSettingsSchema = z.object({
     audioDeviceId: z.string().nullable().optional(),
     audioFadeOnStatusChange: z.boolean(),
+    filters: z.array(PlayerFilterSchema),
     mediaSession: z.boolean(),
     mpvExtraParameters: z.array(z.string()),
     mpvProperties: MpvSettingsSchema,
@@ -486,6 +533,12 @@ export type ItemListSettings = {
     table: DataTableProps;
 };
 
+export type PlayerFilter = z.infer<typeof PlayerFilterSchema>;
+
+export type PlayerFilterField = z.infer<typeof PlayerFilterFieldSchema>;
+
+export type PlayerFilterOperator = z.infer<typeof PlayerFilterOperatorSchema>;
+
 export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
     actions: {
         reset: () => void;
@@ -494,6 +547,7 @@ export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
         setGenreBehavior: (target: GenreTarget) => void;
         setHomeItems: (item: SortableItem<HomeItem>[]) => void;
         setList: (type: ItemListKey, data: DeepPartial<ItemListSettings>) => void;
+        setPlaybackFilters: (filters: PlayerFilter[]) => void;
         setSettings: (data: Partial<SettingsState>) => void;
         setSidebarItems: (items: SidebarItemType[]) => void;
         setTable: (type: ItemListKey, data: DataTableProps) => void;
@@ -502,9 +556,7 @@ export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
         toggleSidebarCollapseShare: () => void;
     };
 }
-
 export interface SettingsState extends z.infer<typeof SettingsStateSchema> {}
-
 export type SidebarItemType = z.infer<typeof SidebarItemTypeSchema>;
 
 export type SideQueueType = z.infer<typeof SideQueueTypeSchema>;
@@ -1149,6 +1201,7 @@ const initialState: SettingsState = {
     playback: {
         audioDeviceId: undefined,
         audioFadeOnStatusChange: true,
+        filters: [],
         mediaSession: false,
         mpvExtraParameters: [],
         mpvProperties: {
@@ -1251,6 +1304,11 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                             if (listState) {
                                 Object.assign(listState, data);
                             }
+                        });
+                    },
+                    setPlaybackFilters: (filters: PlayerFilter[]) => {
+                        set((state) => {
+                            state.playback.filters = filters;
                         });
                     },
                     setSettings: (data) => {

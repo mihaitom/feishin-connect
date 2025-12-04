@@ -95,6 +95,7 @@
         "no": "no",
         "none": "none",
         "noResultsFromQuery": "the query returned no results",
+        "noFilters": "no filters configured",
         "note": "note",
         "ok": "ok",
         "owner": "owner",
@@ -251,6 +252,27 @@
         "toYear": "to year",
         "trackNumber": "track",
         "explicitStatus": "$t(common.explicitStatus)"
+    },
+    "filterOperator": {
+        "after": "is after",
+        "afterDate": "is after (date)",
+        "before": "is before",
+        "beforeDate": "is before (date)",
+        "contains": "contains",
+        "endsWith": "ends with",
+        "inPlaylist": "is in",
+        "inTheLast": "is in the last",
+        "inTheRange": "is in the range",
+        "inTheRangeDate": "is in the range (date)",
+        "is": "is",
+        "isNot": "is not",
+        "isGreaterThan": "is greater than",
+        "isLessThan": "is less than",
+        "matchesRegex": "matches regex",
+        "notContains": "does not contain",
+        "notInPlaylist": "is not in",
+        "notInTheLast": "is not in the last",
+        "startsWith": "starts with"
     },
     "form": {
         "addServer": {
@@ -502,7 +524,8 @@
             "audio": "audio",
             "lyrics": "lyrics",
             "transcoding": "transcoding",
-            "discord": "discord"
+            "discord": "discord",
+            "playerFilters": "player filters"
         },
         "sidebar": {
             "albumArtists": "$t(entity.albumArtist_other)",
@@ -768,6 +791,8 @@
         "notify_description": "show notifications when changing the current song",
         "passwordStore_description": "what password/secret store to use. change this if you are having issues storing passwords",
         "passwordStore": "passwords/secret store",
+        "playerFilters": "Filter songs from the queue",
+        "playerFilters_description": "omit songs from being added to the queue based on the following criteria",
         "playbackStyle_description": "select the playback style to use for the audio player",
         "playbackStyle_optionCrossFade": "crossfade",
         "playbackStyle_optionNormal": "normal",
