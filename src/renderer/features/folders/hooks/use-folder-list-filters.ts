@@ -6,7 +6,7 @@ import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-f
 import { useSortOrderFilter } from '/@/renderer/features/shared/hooks/use-sort-order-filter';
 import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
 import { parseJsonParam, setJsonSearchParam } from '/@/renderer/utils/query-params';
-import { SongListSort } from '/@/shared/types/domain-types';
+import { SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 export type FolderPathItem = {
@@ -15,9 +15,9 @@ export type FolderPathItem = {
 };
 
 export const useFolderListFilters = () => {
-    const { sortBy } = useSortByFilter<SongListSort>(null, ItemListKey.SONG);
+    const { sortBy } = useSortByFilter<SongListSort>(SongListSort.ID, ItemListKey.FOLDER);
 
-    const { sortOrder } = useSortOrderFilter(null, ItemListKey.SONG);
+    const { sortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.FOLDER);
 
     const { searchTerm, setSearchTerm } = useSearchTermFilter('');
 

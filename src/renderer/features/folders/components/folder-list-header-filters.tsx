@@ -229,12 +229,12 @@ export const FolderListHeaderFilters = () => {
                     <ListSortByDropdown
                         defaultSortByValue={SongListSort.ID}
                         itemType={LibraryItem.FOLDER}
-                        listKey={ItemListKey.SONG}
+                        listKey={ItemListKey.FOLDER}
                     />
                     <Divider orientation="vertical" />
                     <ListSortOrderToggleButton
                         defaultSortOrder={SortOrder.ASC}
-                        listKey={ItemListKey.SONG}
+                        listKey={ItemListKey.FOLDER}
                     />
                     <ListRefreshButton listKey={ItemListKey.SONG} />
                 </Group>

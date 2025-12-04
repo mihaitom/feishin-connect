@@ -20,6 +20,7 @@ export enum ItemListKey {
     ALBUM_ARTIST_SONG = 'albumArtistSong',
     ALBUM_DETAIL = 'albumDetail',
     ARTIST = LibraryItem.ARTIST,
+    FOLDER = LibraryItem.FOLDER,
     FULL_SCREEN = 'fullScreen',
     GENRE = LibraryItem.GENRE,
     GENRE_ALBUM = 'genreAlbum',
