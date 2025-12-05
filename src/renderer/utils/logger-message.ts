@@ -16,7 +16,10 @@ export const logMsg = {
         discordRpcTrackChanged: 'Track was changed for Discord RPC',
         discordRpcUpdateSkipped: 'Activity was not updated for Discord RPC',
     },
-    [LogCategory.OTHER]: {},
+    [LogCategory.OTHER]: {
+        error: 'An error occurred',
+        warning: 'A warning occurred',
+    },
     [LogCategory.PLAYER]: {
         addToQueueByData: 'Added to queue by data',
         addToQueueByFetch: 'Added to queue by fetch',

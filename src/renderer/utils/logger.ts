@@ -4,6 +4,7 @@ export enum LogCategory {
     ANALYTICS = 'analytics',
     API = 'api',
     EXTERNAL = 'external',
+    GENERAL = 'general',
     OTHER = 'other',
     PLAYER = 'player',
     SCROBBLE = 'scrobble',

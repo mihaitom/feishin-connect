@@ -19,6 +19,8 @@ import {
     usePrimaryColor,
 } from '/@/renderer/store';
 import { useColorScheme } from '/@/renderer/themes/use-app-theme';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
+import { logMsg } from '/@/renderer/utils/logger-message';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
 
@@ -34,17 +36,24 @@ export const PlayerbarWaveform = () => {
     const [isHovered, setIsHovered] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState<null | { x: number; y: number }>(null);
     const [tooltipValue, setTooltipValue] = useState(0);
+    const [shouldFallback, setShouldFallback] = useState(false);
     const seekTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastSeekValueRef = useRef<null | number>(null);
     const containerPositionRef = useRef<DOMRect | null>(null);
+    const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const wavesurferLoadFailureRef = useRef(false);
 
     const songDuration = currentSong?.duration ? currentSong.duration / 1000 : 0;
 
     const streamUrl = useSongUrl(currentSong, true, transcode);
 
     // Fetch blob from stream URL
-    const { data: streamBlob } = useQuery({
-        enabled: !!streamUrl && !!currentSong,
+    const {
+        data: streamBlob,
+        failureCount,
+        isError: isStreamBlobError,
+    } = useQuery({
+        enabled: !!streamUrl && !!currentSong && !shouldFallback,
         queryFn: async () => {
             if (!streamUrl) return undefined;
 
@@ -55,6 +64,8 @@ export const PlayerbarWaveform = () => {
             return await response.blob();
         },
         queryKey: [currentSong?._serverId, streamUrl],
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff, max 30s
     });
 
     const primaryColor = usePrimaryColor();
@@ -91,13 +102,34 @@ export const PlayerbarWaveform = () => {
     useEffect(() => {
         if (!wavesurfer || !streamBlob) return;
 
-        wavesurfer.loadBlob(streamBlob);
-        setIsLoading(true);
-        wavesurfer.setVolume(0);
-        const mediaElement = wavesurfer.getMediaElement();
-        if (mediaElement) {
-            mediaElement.muted = true;
-            mediaElement.volume = 0;
+        if (loadingTimeoutRef.current) {
+            clearTimeout(loadingTimeoutRef.current);
+            loadingTimeoutRef.current = null;
+        }
+
+        // Reset wavesurfer failure flag when loading new blob
+        wavesurferLoadFailureRef.current = false;
+
+        try {
+            wavesurfer.loadBlob(streamBlob);
+            setIsLoading(true);
+            wavesurfer.setVolume(0);
+            const mediaElement = wavesurfer.getMediaElement();
+            if (mediaElement) {
+                mediaElement.muted = true;
+                mediaElement.volume = 0;
+            }
+        } catch (error) {
+            logFn.error(logMsg[LogCategory.OTHER].error, {
+                category: LogCategory.OTHER,
+                meta: {
+                    error,
+                    message: 'Failed to load blob into wavesurfer',
+                },
+            });
+            wavesurferLoadFailureRef.current = true;
+            setIsLoading(false);
+            setShouldFallback(true);
         }
     }, [streamBlob, wavesurfer]);
 
@@ -106,6 +138,8 @@ export const PlayerbarWaveform = () => {
         if (!wavesurfer) return;
 
         setIsLoading(true);
+        setShouldFallback(false);
+        wavesurferLoadFailureRef.current = false;
 
         wavesurfer.setVolume(0);
         const mediaElement = wavesurfer.getMediaElement();
@@ -113,13 +147,23 @@ export const PlayerbarWaveform = () => {
             mediaElement.muted = true;
             mediaElement.volume = 0;
         }
-    }, [wavesurfer]);
+    }, [currentSong?._serverId, currentSong?.id, wavesurfer]);
 
-    // Handle waveform ready state
+    // Handle waveform ready state and errors
     useEffect(() => {
         if (!wavesurfer) return;
 
+        // Clear any existing loading timeout
+        if (loadingTimeoutRef.current) {
+            clearTimeout(loadingTimeoutRef.current);
+            loadingTimeoutRef.current = null;
+        }
+
         const handleReady = () => {
+            if (loadingTimeoutRef.current) {
+                clearTimeout(loadingTimeoutRef.current);
+                loadingTimeoutRef.current = null;
+            }
             setIsLoading(false);
             const mediaElement = wavesurfer.getMediaElement();
             if (mediaElement) {
@@ -128,7 +172,23 @@ export const PlayerbarWaveform = () => {
             }
         };
 
+        const handleError = (error: Error) => {
+            logFn.error(logMsg[LogCategory.OTHER].error, {
+                category: LogCategory.OTHER,
+                meta: { error },
+            });
+
+            if (loadingTimeoutRef.current) {
+                clearTimeout(loadingTimeoutRef.current);
+                loadingTimeoutRef.current = null;
+            }
+            wavesurferLoadFailureRef.current = true;
+            setIsLoading(false);
+            setShouldFallback(true);
+        };
+
         wavesurfer.on('ready', handleReady);
+        wavesurfer.on('error', handleError);
 
         // Check if already loaded
         if (wavesurfer.getDuration() > 0) {
@@ -138,12 +198,33 @@ export const PlayerbarWaveform = () => {
                 mediaElement.muted = true;
                 mediaElement.volume = 0;
             }
+        } else if (isLoading) {
+            // Set up a timeout fallback to prevent infinite loading
+            loadingTimeoutRef.current = setTimeout(() => {
+                if (wavesurfer.getDuration() <= 0) {
+                    logFn.warn(logMsg[LogCategory.OTHER].warning, {
+                        category: LogCategory.OTHER,
+                        meta: {
+                            message: 'Wavesurfer loading timeout - falling back to regular slider',
+                        },
+                    });
+                    wavesurferLoadFailureRef.current = true;
+                    setIsLoading(false);
+                    setShouldFallback(true);
+                }
+                loadingTimeoutRef.current = null;
+            }, 30000); // 30 second timeout
         }
 
         return () => {
             wavesurfer.un('ready', handleReady);
+            wavesurfer.un('error', handleError);
+            if (loadingTimeoutRef.current) {
+                clearTimeout(loadingTimeoutRef.current);
+                loadingTimeoutRef.current = null;
+            }
         };
-    }, [wavesurfer]);
+    }, [wavesurfer, isLoading]);
 
     useEffect(() => {
         if (!wavesurfer) return;
@@ -361,7 +442,21 @@ export const PlayerbarWaveform = () => {
         }
     }, [wavesurfer, currentTime, songDuration, isDragging]);
 
-    // Show disabled slider when there's no current song
+    // Handle error state - if blob fetch failed after all retries, fallback to regular slider
+    useEffect(() => {
+        if (isStreamBlobError && failureCount !== undefined && failureCount >= 4) {
+            logFn.warn(logMsg[LogCategory.OTHER].warning, {
+                category: LogCategory.OTHER,
+                meta: {
+                    message: `Stream blob fetch failed after all retries (${failureCount} attempts) - falling back to regular slider`,
+                },
+            });
+            setIsLoading(false);
+            setShouldFallback(true);
+        }
+    }, [isStreamBlobError, failureCount]);
+
+    // Show regular disabled slider when there's no current song
     if (!currentSong) {
         return (
             <CustomPlayerbarSlider
@@ -376,6 +471,11 @@ export const PlayerbarWaveform = () => {
                 w="100%"
             />
         );
+    }
+
+    // Fallback to regular seek slider when waveform fails
+    if (shouldFallback || (isStreamBlobError && failureCount !== undefined && failureCount >= 4)) {
+        return <PlayerbarSeekSlider max={songDuration} min={0} />;
     }
 
     return (
