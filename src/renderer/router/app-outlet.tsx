@@ -34,11 +34,12 @@ export const AppOutlet = () => {
         );
     }
 
+    // When server lock is enabled always redirect to login
     if (serverLock && !currentServer) {
         return <Navigate replace to={AppRoute.LOGIN} />;
     }
 
-    if (isActionsRequired || authState === AuthState.INVALID) {
+    if (!serverLock && (isActionsRequired || authState === AuthState.INVALID)) {
         return <Navigate replace to={AppRoute.ACTION_REQUIRED} />;
     }
 

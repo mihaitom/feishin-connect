@@ -15,10 +15,12 @@ import { AppRoute } from '/@/renderer/router/routes';
 import { useAuthStoreActions, useCurrentServer } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
+import { Code } from '/@/shared/components/code/code';
 import { Paper } from '/@/shared/components/paper/paper';
 import { PasswordInput } from '/@/shared/components/password-input/password-input';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
+import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
 import { useForm } from '/@/shared/hooks/use-form';
@@ -53,6 +55,29 @@ const LoginRoute = () => {
     const serverName = localSettings?.env.SERVER_NAME || '';
     const serverUrl = localSettings?.env.SERVER_URL || '';
 
+    const config = [
+        {
+            isValid: true,
+            key: 'SERVER_LOCK',
+            value: serverLock,
+        },
+        {
+            isValid: serverType !== null,
+            key: 'SERVER_TYPE',
+            value: serverType,
+        },
+        {
+            isValid: true,
+            key: 'SERVER_NAME',
+            value: serverName,
+        },
+        {
+            isValid: serverUrl !== '',
+            key: 'SERVER_URL',
+            value: serverUrl,
+        },
+    ];
+
     const form = useForm({
         initialValues: {
             password: '',
@@ -60,8 +85,29 @@ const LoginRoute = () => {
         },
     });
 
-    if (!serverLock || !serverType || currentServer) {
+    // If server lock is not enabled, or we already have a server, redirect to home
+    if (currentServer) {
         return <Navigate replace to={AppRoute.HOME} />;
+    }
+
+    // If any of the config values are invalid, show error
+    if (config.some((c) => !c.isValid)) {
+        return (
+            <AnimatedPage>
+                <PageHeader />
+                <Center style={{ height: '100%', width: '100vw' }}>
+                    <Stack>
+                        <TextTitle fw={600}>
+                            {t('error.genericError', { postProcess: 'sentenceCase' })}
+                        </TextTitle>
+                        <Text fw={500}>
+                            {t('error.serverNotSelectedError', { postProcess: 'sentenceCase' })}
+                        </Text>
+                        <Code block>{JSON.stringify(config, null, 2)}</Code>
+                    </Stack>
+                </Center>
+            </AnimatedPage>
+        );
     }
 
     const handleSubmit = form.onSubmit(async (values) => {
@@ -82,7 +128,7 @@ const LoginRoute = () => {
                     password: values.password,
                     username: values.username,
                 },
-                serverType,
+                serverType as ServerType,
             );
 
             if (!data) {
@@ -95,7 +141,7 @@ const LoginRoute = () => {
                 credential: data.credential,
                 id: nanoid(),
                 name: serverName,
-                type: serverType,
+                type: serverType as ServerType,
                 url: serverUrl.replace(/\/$/, ''),
                 userId: data.userId,
                 username: data.username,
@@ -132,8 +178,8 @@ const LoginRoute = () => {
     });
 
     const isSubmitDisabled = !form.values.username || !form.values.password;
-    const serverIcon = SERVER_ICONS[serverType];
-    const serverDisplayName = SERVER_NAMES[serverType];
+    const serverIcon = SERVER_ICONS[serverType as ServerType];
+    const serverDisplayName = SERVER_NAMES[serverType as ServerType];
 
     return (
         <AnimatedPage>
@@ -150,11 +196,11 @@ const LoginRoute = () => {
                                     width="80"
                                 />
                                 <Text fw={600} size="xl">
-                                    {serverDisplayName}
+                                    {serverName}
                                 </Text>
                                 {serverName && (
                                     <Text c="dimmed" size="sm">
-                                        {serverName}
+                                        {serverDisplayName}
                                     </Text>
                                 )}
                             </Stack>
