@@ -1249,23 +1249,66 @@ const initialState: SettingsState = {
     },
 };
 
+// Helper function to create a deep clone of initialState
+const getInitialState = (): SettingsState => {
+    const freshHomeItems = Object.values(HomeItem).map((item) => ({
+        disabled: false,
+        id: item,
+    }));
+
+    const freshArtistItems = Object.values(ArtistItem).map((item) => ({
+        disabled: false,
+        id: item,
+    }));
+
+    // Deep clone using JSON to ensure all nested objects/arrays are fresh copies
+    const clonedState = JSON.parse(JSON.stringify(initialState)) as SettingsState;
+
+    // Replace arrays that need fresh references
+    clonedState.general.homeItems = freshHomeItems;
+    clonedState.general.artistItems = freshArtistItems;
+    clonedState.general.sidebarItems = JSON.parse(
+        JSON.stringify(sidebarItems),
+    ) as SidebarItemType[];
+
+    // Regenerate random password for remote settings
+    clonedState.remote.password = randomString(8);
+
+    return clonedState;
+};
+
 export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
     persist(
         devtools(
             immer((set, get) => ({
                 actions: {
                     reset: () => {
-                        if (!isElectron()) {
-                            set({
-                                ...initialState,
-                                playback: {
-                                    ...initialState.playback,
-                                    type: PlayerType.WEB,
-                                },
-                            });
-                        } else {
-                            set(initialState);
-                        }
+                        const freshState = getInitialState();
+                        set((state) => {
+                            // Deep clone the fresh state to ensure all nested objects/arrays are new references
+                            const resetState = JSON.parse(
+                                JSON.stringify(freshState),
+                            ) as SettingsState;
+
+                            // Override playback type for web if not electron
+                            if (!isElectron()) {
+                                resetState.playback.type = PlayerType.WEB;
+                            }
+
+                            // Replace all state properties (except actions) with the reset state
+                            state.css = resetState.css;
+                            state.discord = resetState.discord;
+                            state.font = resetState.font;
+                            state.general = resetState.general;
+                            state.hotkeys = resetState.hotkeys;
+                            state.lists = resetState.lists;
+                            state.lyrics = resetState.lyrics;
+                            state.playback = resetState.playback;
+                            state.queryBuilder = resetState.queryBuilder;
+                            state.remote = resetState.remote;
+                            state.tab = resetState.tab;
+                            state.window = resetState.window;
+                        });
                     },
                     resetSampleRate: () => {
                         set((state) => {
