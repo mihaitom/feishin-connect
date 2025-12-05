@@ -2234,8 +2234,25 @@ export const usePlayerData = (): PlayerData => {
             }
 
             const currentSong = queue.items[queueIndex];
-            const previousSong = queueIndex > 0 ? queue.items[queueIndex - 1] : undefined;
             const repeat = state.player.repeat;
+
+            // For previousSong calculation, we need to consider the shuffled order (only if not in priority mode)
+            let previousSong: QueueSong | undefined;
+            if (isShuffleEnabled(state)) {
+                // Calculate previous in shuffled order
+                const previousShuffledIndex = index - 1;
+                if (previousShuffledIndex >= 0) {
+                    const previousQueueIndex = state.queue.shuffled[previousShuffledIndex];
+                    previousSong = queue.items[previousQueueIndex];
+                } else if (repeat === PlayerRepeat.ALL) {
+                    // Wrap to last in shuffled order
+                    const lastShuffledIndex = state.queue.shuffled.length - 1;
+                    const lastQueueIndex = state.queue.shuffled[lastShuffledIndex];
+                    previousSong = queue.items[lastQueueIndex];
+                }
+            } else {
+                previousSong = queueIndex > 0 ? queue.items[queueIndex - 1] : undefined;
+            }
 
             // For nextSong calculation, we need to consider the shuffled order (only if not in priority mode)
             let nextSong: QueueSong | undefined;
