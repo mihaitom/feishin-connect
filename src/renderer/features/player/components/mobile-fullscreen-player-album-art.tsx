@@ -4,7 +4,12 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 
 import styles from './mobile-fullscreen-player.module.css';
 
-import { useFullScreenPlayerStore, useGeneralSettings, usePlayerData, usePlayerSong } from '/@/renderer/store';
+import {
+    useFullScreenPlayerStore,
+    useGeneralSettings,
+    usePlayerData,
+    usePlayerSong,
+} from '/@/renderer/store';
 import { Center } from '/@/shared/components/center/center';
 import { Icon } from '/@/shared/components/icon/icon';
 import { PlaybackSelectors } from '/@/shared/constants/playback-selectors';
@@ -74,11 +79,7 @@ const ImageWithPlaceholder = ({
     );
 };
 
-interface MobileFullscreenPlayerAlbumArtProps {
-    currentSong?: QueueSong;
-}
-
-export const MobileFullscreenPlayerAlbumArt = ({ currentSong: _currentSong }: MobileFullscreenPlayerAlbumArtProps) => {
+export const MobileFullscreenPlayerAlbumArt = () => {
     const mainImageRef = useRef<HTMLImageElement | null>(null);
     const [mainImageDimensions, setMainImageDimensions] = useState({ idealSize: 1000 });
 
@@ -107,12 +108,7 @@ export const MobileFullscreenPlayerAlbumArt = ({ currentSong: _currentSong }: Mo
                 topImage: scaleImageUrl(idealSize, currentSong?.imageUrl),
             });
         }
-    }, [
-        albumArtRes,
-        currentSong?.imageUrl,
-        nextSong?.imageUrl,
-        setImageState,
-    ]);
+    }, [albumArtRes, currentSong?.imageUrl, nextSong?.imageUrl, setImageState]);
 
     useLayoutEffect(() => {
         updateImageSize();

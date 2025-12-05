@@ -457,7 +457,7 @@ export const MobileFullscreenPlayer = () => {
                     isPageHovered={isPageHovered}
                     onClose={handleToggleFullScreenPlayer}
                 />
-                <MobileFullscreenPlayerAlbumArt currentSong={currentSong} />
+                <MobileFullscreenPlayerAlbumArt />
                 <MobileFullscreenPlayerMetadata
                     currentSong={currentSong}
                     onToggleFavorite={handleToggleFavorite}
