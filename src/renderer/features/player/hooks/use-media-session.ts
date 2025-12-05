@@ -1,3 +1,4 @@
+import isElectron from 'is-electron';
 import { useEffect, useMemo } from 'react';
 
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
@@ -14,6 +15,11 @@ export const useMediaSession = () => {
     const playbackType = useSettingsStore((state) => state.playback.type);
 
     const isMediaSessionEnabled = useMemo(() => {
+        // Always enable media session on web
+        if (!isElectron()) {
+            return true;
+        }
+
         return Boolean(mediaSessionEnabled && playbackType === PlayerType.WEB);
     }, [mediaSessionEnabled, playbackType]);
 
@@ -23,7 +29,6 @@ export const useMediaSession = () => {
         }
 
         mediaSession.setActionHandler('nexttrack', () => {
-            console.log('mediaSession.nexttrack');
             player.mediaNext();
         });
 
