@@ -93,7 +93,10 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
                                 [styles.compactPlayButtonOverlay]: props.size === 'compact',
                             })}
                         >
-                            <PlayTooltip type={playButtonBehavior}>
+                            <PlayTooltip
+                                disabled={props.itemType === LibraryItem.QUEUE_SONG}
+                                type={playButtonBehavior}
+                            >
                                 <PlayButton
                                     fill
                                     onClick={(e) => handlePlay(playButtonBehavior, e)}

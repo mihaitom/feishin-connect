@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { CSSProperties, useMemo } from 'react';
+import { CSSProperties, useMemo, useState } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './title-combined-column.module.css';
@@ -11,14 +11,67 @@ import {
     ItemTableListInnerColumn,
     TableColumnContainer,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
+import { PlayButton } from '/@/renderer/features/shared/components/play-button';
+import {
+    LONG_PRESS_PLAY_BEHAVIOR,
+    PlayTooltip,
+} from '/@/renderer/features/shared/components/play-button-group';
 import { AppRoute } from '/@/renderer/router/routes';
+import { usePlayButtonBehavior } from '/@/renderer/store';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Image } from '/@/shared/components/image/image';
 import { Text } from '/@/shared/components/text/text';
 import { Folder, LibraryItem, QueueSong, RelatedAlbumArtist } from '/@/shared/types/domain-types';
+import { Play } from '/@/shared/types/types';
 
 export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
     const row: object | undefined = (props.data as (any | undefined)[])[props.rowIndex];
+    const item = props.data[props.rowIndex] as any;
+    const internalState = (props as any).internalState;
+    const playButtonBehavior = usePlayButtonBehavior();
+    const [isHovered, setIsHovered] = useState(false);
+
+    const handlePlay = (playType: Play, event: React.MouseEvent<HTMLButtonElement>) => {
+        if (!item) {
+            return;
+        }
+
+        // For SONG items, use double click behavior
+        if (
+            (props.itemType === LibraryItem.SONG ||
+                props.itemType === LibraryItem.PLAYLIST_SONG ||
+                item._itemType === LibraryItem.SONG) &&
+            props.controls?.onDoubleClick
+        ) {
+            // Calculate the index based on rowIndex, accounting for header if enabled
+            const isHeaderEnabled = !!props.enableHeader;
+            const index = isHeaderEnabled ? props.rowIndex - 1 : props.rowIndex;
+
+            props.controls.onDoubleClick({
+                event: null,
+                index,
+                internalState,
+                item,
+                itemType: props.itemType,
+                meta: {
+                    playType,
+                },
+            });
+            return;
+        }
+
+        // For other item types, use regular onPlay
+        if (!props.controls?.onPlay) {
+            return;
+        }
+
+        props.controls.onPlay({
+            event,
+            item,
+            itemType: props.itemType,
+            playType,
+        });
+    };
 
     const artists = useMemo(() => {
         if (row && 'artists' in row && Array.isArray(row.artists)) {
@@ -52,8 +105,38 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
                 containerStyle={{ '--row-height': `${rowHeight}px` } as CSSProperties}
                 {...props}
             >
-                <Image containerClassName={styles.image} src={row.imageUrl as string} />
-                <div className={styles.textContainer}>
+                <div
+                    className={styles.imageContainer}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    <Image containerClassName={styles.image} src={row.imageUrl as string} />
+                    {isHovered && (
+                        <div
+                            className={clsx(styles.playButtonOverlay, {
+                                [styles.compactPlayButtonOverlay]: props.size === 'compact',
+                            })}
+                        >
+                            <PlayTooltip
+                                disabled={props.itemType === LibraryItem.QUEUE_SONG}
+                                type={playButtonBehavior}
+                            >
+                                <PlayButton
+                                    fill
+                                    onClick={(e) => handlePlay(playButtonBehavior, e)}
+                                    onLongPress={(e) =>
+                                        handlePlay(LONG_PRESS_PLAY_BEHAVIOR[playButtonBehavior], e)
+                                    }
+                                />
+                            </PlayTooltip>
+                        </div>
+                    )}
+                </div>
+                <div
+                    className={clsx(styles.textContainer, {
+                        [styles.compact]: props.size === 'compact',
+                    })}
+                >
                     <Text className={styles.title} isNoSelect size="md" {...titleLinkProps}>
                         {row.name as string}
                     </Text>
@@ -91,9 +174,55 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
     const row: object | undefined = (props.data as (any | undefined)[])[props.rowIndex];
 
     const song = props.data[props.rowIndex] as QueueSong;
+    const item = props.data[props.rowIndex] as any;
+    const internalState = (props as any).internalState;
+    const playButtonBehavior = usePlayButtonBehavior();
+    const [isHovered, setIsHovered] = useState(false);
     const isActive =
         !!props.activeRowId &&
         (props.activeRowId === song?.id || props.activeRowId === song?._uniqueId);
+
+    const handlePlay = (playType: Play, event: React.MouseEvent<HTMLButtonElement>) => {
+        if (!item) {
+            return;
+        }
+
+        // For SONG items, use double click behavior
+        if (
+            (props.itemType === LibraryItem.SONG ||
+                props.itemType === LibraryItem.PLAYLIST_SONG ||
+                item._itemType === LibraryItem.SONG) &&
+            props.controls?.onDoubleClick
+        ) {
+            // Calculate the index based on rowIndex, accounting for header if enabled
+            const isHeaderEnabled = !!props.enableHeader;
+            const index = isHeaderEnabled ? props.rowIndex - 1 : props.rowIndex;
+
+            props.controls.onDoubleClick({
+                event: null,
+                index,
+                internalState,
+                item,
+                itemType: props.itemType,
+                meta: {
+                    playType,
+                },
+            });
+            return;
+        }
+
+        // For other item types, use regular onPlay
+        if (!props.controls?.onPlay) {
+            return;
+        }
+
+        props.controls.onPlay({
+            event,
+            item,
+            itemType: props.itemType,
+            playType,
+        });
+    };
 
     const artists = useMemo(() => {
         if (row && 'artists' in row && Array.isArray(row.artists)) {
@@ -129,7 +258,33 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
                 containerStyle={{ '--row-height': `${rowHeight}px` } as CSSProperties}
                 {...props}
             >
-                <Image containerClassName={styles.image} src={row.imageUrl as string} />
+                <div
+                    className={styles.imageContainer}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    <Image containerClassName={styles.image} src={row.imageUrl as string} />
+                    {isHovered && (
+                        <div
+                            className={clsx(styles.playButtonOverlay, {
+                                [styles.compactPlayButtonOverlay]: props.size === 'compact',
+                            })}
+                        >
+                            <PlayTooltip
+                                disabled={props.itemType === LibraryItem.QUEUE_SONG}
+                                type={playButtonBehavior}
+                            >
+                                <PlayButton
+                                    fill
+                                    onClick={(e) => handlePlay(playButtonBehavior, e)}
+                                    onLongPress={(e) =>
+                                        handlePlay(LONG_PRESS_PLAY_BEHAVIOR[playButtonBehavior], e)
+                                    }
+                                />
+                            </PlayTooltip>
+                        </div>
+                    )}
+                </div>
                 <div
                     className={clsx(styles.textContainer, {
                         [styles.compact]: props.size === 'compact',
