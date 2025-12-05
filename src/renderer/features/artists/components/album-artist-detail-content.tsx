@@ -175,7 +175,9 @@ const AlbumArtistMetadataBiography = ({
                     artist: artistName,
                 })}
             </TextTitle>
-            <Spoiler dangerouslySetInnerHTML={{ __html: sanitizedBiography }} />
+            <Spoiler maxHeight={50}>
+                <div dangerouslySetInnerHTML={{ __html: sanitizedBiography }}></div>
+            </Spoiler>
         </section>
     );
 };
