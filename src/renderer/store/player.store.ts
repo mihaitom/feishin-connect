@@ -824,20 +824,66 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
 
                             const insertIndex = Math.max(0, edge === 'top' ? index : index + 1);
 
-                            // Recalculate the player index if we're inserting items above the current index
-                            if (insertIndex <= state.player.index) {
-                                state.player.index = state.player.index + newUniqueIds.length;
-                            }
-
                             const newQueue = [
                                 ...state.queue.default.slice(0, insertIndex),
                                 ...newUniqueIds,
                                 ...state.queue.default.slice(insertIndex),
                             ];
 
-                            recalculatePlayerIndex(state, newQueue);
-
                             state.queue.default = newQueue;
+
+                            if (state.player.shuffle === PlayerShuffle.TRACK) {
+                                const currentTrack = state.getCurrentSong() as
+                                    | QueueSong
+                                    | undefined;
+                                const currentTrackUniqueId = currentTrack?._uniqueId;
+
+                                if (currentTrackUniqueId) {
+                                    // Adjust existing shuffled indexes that are >= insertIndex
+                                    const adjustedShuffled = state.queue.shuffled.map((idx) => {
+                                        if (idx >= insertIndex) {
+                                            return idx + newUniqueIds.length;
+                                        }
+                                        return idx;
+                                    });
+
+                                    // New items will be at indexes starting from insertIndex
+                                    const newIndexes = Array.from(
+                                        { length: newUniqueIds.length },
+                                        (_, i) => insertIndex + i,
+                                    );
+
+                                    const currentShuffledIndex = state.player.index;
+                                    state.queue.shuffled = addIndexesToShuffled(
+                                        adjustedShuffled,
+                                        currentShuffledIndex,
+                                        newIndexes,
+                                    );
+
+                                    // Recalculate player index to the shuffled position
+                                    const queueIndex = newQueue.findIndex(
+                                        (id) => id === currentTrackUniqueId,
+                                    );
+                                    if (queueIndex !== -1) {
+                                        const shuffledPosition = state.queue.shuffled.findIndex(
+                                            (idx) => idx === queueIndex,
+                                        );
+                                        if (shuffledPosition !== -1) {
+                                            state.player.index = shuffledPosition;
+                                        }
+                                    }
+                                } else {
+                                    // No current track, regenerate shuffled indexes
+                                    state.queue.shuffled = generateShuffledIndexes(newQueue.length);
+                                }
+                            } else {
+                                // Recalculate the player index if we're inserting items above the current index
+                                if (insertIndex <= state.player.index) {
+                                    state.player.index = state.player.index + newUniqueIds.length;
+                                }
+
+                                recalculatePlayerIndex(state, newQueue);
+                            }
                         } else {
                             const currentTrack = state.getCurrentSong() as QueueSong | undefined;
                             const currentTrackUniqueId = currentTrack?._uniqueId;
@@ -877,18 +923,9 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                             }
 
                             const combinedQueue = [...state.queue.priority, ...state.queue.default];
-                            recalculatePlayerIndexByUniqueId(
-                                state,
-                                currentTrackUniqueId,
-                                combinedQueue,
-                            );
 
                             if (state.player.shuffle === PlayerShuffle.TRACK) {
                                 const currentShuffledIndex = state.player.index;
-                                const combinedQueue = [
-                                    ...state.queue.priority,
-                                    ...state.queue.default,
-                                ];
 
                                 // Find insert position in combined queue
                                 let insertPosition: number;
@@ -931,6 +968,27 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                                     adjustedShuffled,
                                     currentShuffledIndex,
                                     newIndexes,
+                                );
+
+                                // Recalculate player index to the shuffled position
+                                if (currentTrackUniqueId) {
+                                    const queueIndex = combinedQueue.findIndex(
+                                        (id) => id === currentTrackUniqueId,
+                                    );
+                                    if (queueIndex !== -1) {
+                                        const shuffledPosition = state.queue.shuffled.findIndex(
+                                            (idx) => idx === queueIndex,
+                                        );
+                                        if (shuffledPosition !== -1) {
+                                            state.player.index = shuffledPosition;
+                                        }
+                                    }
+                                }
+                            } else {
+                                recalculatePlayerIndexByUniqueId(
+                                    state,
+                                    currentTrackUniqueId,
+                                    combinedQueue,
                                 );
                             }
                         }
