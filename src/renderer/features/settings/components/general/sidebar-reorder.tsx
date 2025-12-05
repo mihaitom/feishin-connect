@@ -30,32 +30,19 @@ export const SidebarReorder = () => {
         const settingsMap = new Map(sidebarItems.map((item) => [item.id, item]));
         const defaultMap = new Map(defaultSidebarItems.map((item) => [item.id, item]));
 
-        const merged = SIDEBAR_ITEMS.map(([itemId]) => {
-            const existing = settingsMap.get(itemId);
-            if (existing) {
-                return {
-                    ...existing,
-                    id: itemId,
-                };
-            }
+        const merged = sidebarItems.map((item) => ({
+            ...item,
+            id: item.id,
+        }));
 
-            // Item not in settings, get default values and add it as disabled
-            const defaultItem = defaultMap.get(itemId);
-            return {
-                disabled: true,
-                id: itemId,
-                label: defaultItem?.label ?? itemId,
-                route: defaultItem?.route ?? '',
-            };
-        });
-
-        // Add any items from settings that aren't in SIDEBAR_ITEMS (for backwards compatibility)
-        sidebarItems.forEach((item) => {
-            const existsInSidebarItems = SIDEBAR_ITEMS.some(([itemId]) => itemId === item.id);
-            if (!existsInSidebarItems) {
+        SIDEBAR_ITEMS.forEach(([itemId]) => {
+            if (!settingsMap.has(itemId)) {
+                const defaultItem = defaultMap.get(itemId);
                 merged.push({
-                    ...item,
-                    id: item.id,
+                    disabled: true,
+                    id: itemId,
+                    label: defaultItem?.label ?? itemId,
+                    route: defaultItem?.route ?? '',
                 });
             }
         });

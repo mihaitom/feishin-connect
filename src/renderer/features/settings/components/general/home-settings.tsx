@@ -26,30 +26,17 @@ export const HomeSettings = () => {
             homeItems.map((item) => [item.id, item as SortableItem<HomeItem>]),
         );
 
-        const merged = HOME_ITEMS.map(([itemId]) => {
+        const merged = homeItems.map((item) => ({
+            ...item,
+            id: item.id as HomeItem,
+        }));
+
+        HOME_ITEMS.forEach(([itemId]) => {
             const homeItemId = itemId as HomeItem;
-            const existing = settingsMap.get(homeItemId);
-            if (existing) {
-                return {
-                    ...existing,
-                    id: homeItemId,
-                };
-            }
-
-            // Item not in settings, add it as disabled
-            return {
-                disabled: true,
-                id: homeItemId,
-            };
-        });
-
-        // Add any items from settings that aren't in HOME_ITEMS (for backwards compatibility)
-        homeItems.forEach((item) => {
-            const existsInHomeItems = HOME_ITEMS.some(([itemId]) => itemId === item.id);
-            if (!existsInHomeItems) {
+            if (!settingsMap.has(homeItemId)) {
                 merged.push({
-                    ...item,
-                    id: item.id as HomeItem,
+                    disabled: true,
+                    id: homeItemId,
                 });
             }
         });

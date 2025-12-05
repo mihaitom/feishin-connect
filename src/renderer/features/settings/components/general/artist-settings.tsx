@@ -25,30 +25,17 @@ export const ArtistSettings = () => {
             artistItems.map((item) => [item.id, item as SortableItem<ArtistItem>]),
         );
 
-        const merged = ARTIST_ITEMS.map(([itemId]) => {
+        const merged = artistItems.map((item) => ({
+            ...item,
+            id: item.id as ArtistItem,
+        }));
+
+        ARTIST_ITEMS.forEach(([itemId]) => {
             const artistItemId = itemId as ArtistItem;
-            const existing = settingsMap.get(artistItemId);
-            if (existing) {
-                return {
-                    ...existing,
-                    id: artistItemId,
-                };
-            }
-
-            // Item not in settings, add it as disabled
-            return {
-                disabled: true,
-                id: artistItemId,
-            };
-        });
-
-        // Add any items from settings that aren't in ARTIST_ITEMS (for backwards compatibility)
-        artistItems.forEach((item) => {
-            const existsInArtistItems = ARTIST_ITEMS.some(([itemId]) => itemId === item.id);
-            if (!existsInArtistItems) {
+            if (!settingsMap.has(artistItemId)) {
                 merged.push({
-                    ...item,
-                    id: item.id as ArtistItem,
+                    disabled: true,
+                    id: artistItemId,
                 });
             }
         });
