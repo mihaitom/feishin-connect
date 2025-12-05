@@ -8,7 +8,6 @@ export const logMsg = {
     [LogCategory.API]: {},
     [LogCategory.EXTERNAL]: {
         discordRpcActivityCleared: 'Activity was cleared for Discord RPC',
-        discordRpcActivityUpdate: 'Activity was updated for Discord RPC',
         discordRpcEnabled: 'Discord RPC was enabled',
         discordRpcInitialized: 'Discord RPC was initialized',
         discordRpcQuit: 'Discord RPC was quit',

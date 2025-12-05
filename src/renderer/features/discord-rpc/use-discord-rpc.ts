@@ -33,6 +33,8 @@ export const useDiscordRpc = () => {
     const [lastUniqueId, setlastUniqueId] = useState('');
 
     const previousEnabledRef = useRef<boolean>(discordSettings.enabled);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const previousActivityStateRef = useRef<ActivityState | null>(null);
 
     const setActivity = useCallback(
         async (current: ActivityState, previous: ActivityState) => {
@@ -98,18 +100,6 @@ export const useDiscordRpc = () => {
                 } else {
                     reason = 'player_state_changed';
                 }
-
-                logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcActivityUpdate, {
-                    category: LogCategory.EXTERNAL,
-                    meta: {
-                        currentStatus: current[2],
-                        currentTime: current[1],
-                        previousStatus: previous[2],
-                        previousTime: previous[1],
-                        reason,
-                        trackChanged,
-                    },
-                });
 
                 const start = Math.round(Date.now() - current[1] * 1000);
                 const end = Math.round(start + song.duration);
@@ -235,12 +225,17 @@ export const useDiscordRpc = () => {
                     meta: {
                         albumName: song.album,
                         artistName: song.artists?.[0]?.name,
+                        currentStatus: current[2],
+                        currentTime: current[1],
                         displayType: discordSettings.displayType,
                         hasLargeImage: !!activity.largeImageKey,
                         hasTimestamps: !!(activity.startTimestamp && activity.endTimestamp),
+                        previousStatus: previous[2],
+                        previousTime: previous[1],
+                        reason,
                         showAsListening: discordSettings.showAsListening,
                         songName: song.name,
-                        status: current[2],
+                        trackChanged,
                     },
                 });
                 discordRpc?.setActivity(activity);
@@ -300,16 +295,65 @@ export const useDiscordRpc = () => {
             },
         });
 
-        const unsubSongChange = usePlayerStore.subscribe((state): ActivityState => {
+        const getCurrentActivityState = (): ActivityState => {
+            const state = usePlayerStore.getState();
             const currentSong = state.getCurrentSong();
             const currentTime = useTimestampStoreBase.getState().timestamp;
             const status = state.player.status;
-
             return [currentSong, currentTime, status];
-        }, setActivity);
+        };
+
+        const resetInterval = () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+            intervalRef.current = setInterval(() => {
+                const current = getCurrentActivityState();
+                const previous = previousActivityStateRef.current || current;
+                setActivity(current, previous);
+                previousActivityStateRef.current = current;
+            }, 15000);
+        };
+
+        resetInterval();
+
+        const initialState = getCurrentActivityState();
+        let previousUniqueId = initialState[0]?._uniqueId || '';
+
+        previousActivityStateRef.current = initialState;
+
+        // Set activity immediately when Discord RPC is enabled
+        setActivity(initialState, initialState);
+
+        const unsubSongChange = usePlayerStore.subscribe(
+            (state): ActivityState => {
+                const currentSong = state.getCurrentSong();
+                const currentTime = useTimestampStoreBase.getState().timestamp;
+                const status = state.player.status;
+
+                return [currentSong, currentTime, status];
+            },
+            (current, previous) => {
+                const currentUniqueId = current[0]?._uniqueId || '';
+                const trackChanged = previousUniqueId !== currentUniqueId;
+
+                if (trackChanged && current[0]) {
+                    resetInterval();
+                    previousUniqueId = currentUniqueId;
+                }
+
+                previousActivityStateRef.current = previous;
+
+                setActivity(current, previous);
+            },
+        );
 
         return () => {
             unsubSongChange();
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
         };
     }, [discordSettings.clientId, discordSettings.enabled, privateMode, setActivity]);
 };
