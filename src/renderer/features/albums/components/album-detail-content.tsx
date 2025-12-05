@@ -134,10 +134,9 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
             },
             {
                 id: 'isCompilation',
-                value:
-                    album.isCompilation !== null
-                        ? t('filter.isCompilation', { postProcess: 'sentenceCase' })
-                        : undefined,
+                value: album?.isCompilation
+                    ? t('filter.isCompilation', { postProcess: 'sentenceCase' })
+                    : undefined,
             },
             {
                 id: 'recordLabels',
