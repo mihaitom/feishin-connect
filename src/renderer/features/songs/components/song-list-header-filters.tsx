@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
@@ -25,6 +26,8 @@ export const SongListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarget
     const { setGenreBehavior } = useSettingsStoreActions();
     const albumFilters = useAlbumListFilters();
     const songFilters = useSongListFilters();
+
+    const { pageKey } = useListContext();
 
     const handleToggleGenreTarget = useCallback(() => {
         // Clear all filter query states
@@ -59,15 +62,15 @@ export const SongListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarget
                 <ListSortByDropdown
                     defaultSortByValue={SongListSort.NAME}
                     itemType={LibraryItem.SONG}
-                    listKey={ItemListKey.SONG}
+                    listKey={pageKey as ItemListKey}
                 />
                 <Divider orientation="vertical" />
                 <ListSortOrderToggleButton
                     defaultSortOrder={SortOrder.ASC}
-                    listKey={ItemListKey.SONG}
+                    listKey={pageKey as ItemListKey}
                 />
                 <ListFiltersModal itemType={LibraryItem.SONG} />
-                <ListRefreshButton listKey={ItemListKey.SONG} />
+                <ListRefreshButton listKey={pageKey as ItemListKey} />
             </Group>
             <Group gap="sm" wrap="nowrap">
                 <ListDisplayTypeToggleButton listKey={ItemListKey.SONG} />

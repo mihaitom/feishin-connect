@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ALBUM_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
@@ -25,6 +26,8 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
     const { setGenreBehavior } = useSettingsStoreActions();
     const albumFilters = useAlbumListFilters();
     const songFilters = useSongListFilters();
+
+    const { pageKey } = useListContext();
 
     const choice = useMemo(() => {
         return target === GenreTarget.ALBUM
@@ -59,15 +62,15 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
                 <ListSortByDropdown
                     defaultSortByValue={AlbumListSort.NAME}
                     itemType={LibraryItem.ALBUM}
-                    listKey={ItemListKey.ALBUM}
+                    listKey={pageKey as ItemListKey}
                 />
                 <Divider orientation="vertical" />
                 <ListSortOrderToggleButton
                     defaultSortOrder={SortOrder.ASC}
-                    listKey={ItemListKey.ALBUM}
+                    listKey={pageKey as ItemListKey}
                 />
                 <ListFiltersModal itemType={LibraryItem.ALBUM} />
-                <ListRefreshButton listKey={ItemListKey.ALBUM} />
+                <ListRefreshButton listKey={pageKey as ItemListKey} />
             </Group>
             <Group gap="sm" wrap="nowrap">
                 <ListDisplayTypeToggleButton listKey={ItemListKey.ALBUM} />
