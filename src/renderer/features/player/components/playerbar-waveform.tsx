@@ -1,10 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
 import { useWavesurfer } from '@wavesurfer/react';
 import formatDuration from 'format-duration';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { PlayerbarSeekSlider } from './playerbar-seek-slider';
 import { CustomPlayerbarSlider } from './playerbar-slider';
 import styles from './playerbar-waveform.module.css';
 
@@ -19,8 +17,6 @@ import {
     usePrimaryColor,
 } from '/@/renderer/store';
 import { useColorScheme } from '/@/renderer/themes/use-app-theme';
-import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
 
@@ -33,40 +29,15 @@ export const PlayerbarWaveform = () => {
     const { mediaSeekToTimestamp } = usePlayer();
     const [isLoading, setIsLoading] = useState(true);
     const [isDragging, setIsDragging] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState<null | { x: number; y: number }>(null);
     const [tooltipValue, setTooltipValue] = useState(0);
-    const [shouldFallback, setShouldFallback] = useState(false);
     const seekTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastSeekValueRef = useRef<null | number>(null);
     const containerPositionRef = useRef<DOMRect | null>(null);
-    const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const wavesurferLoadFailureRef = useRef(false);
 
     const songDuration = currentSong?.duration ? currentSong.duration / 1000 : 0;
 
     const streamUrl = useSongUrl(currentSong, true, transcode);
-
-    // Fetch blob from stream URL
-    const {
-        data: streamBlob,
-        failureCount,
-        isError: isStreamBlobError,
-    } = useQuery({
-        enabled: !!streamUrl && !!currentSong && !shouldFallback,
-        queryFn: async () => {
-            if (!streamUrl) return undefined;
-
-            const response = await fetch(streamUrl);
-            if (!response.ok) {
-                throw new Error('Failed to fetch stream blob');
-            }
-            return await response.blob();
-        },
-        queryKey: [currentSong?._serverId, streamUrl],
-        retry: 3,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff, max 30s
-    });
 
     const primaryColor = usePrimaryColor();
 
@@ -94,76 +65,28 @@ export const PlayerbarWaveform = () => {
         interact: false,
         normalize: false,
         progressColor: primaryColor,
-        url: undefined, // URL will be loaded separately via useEffect
+        url: streamUrl || undefined,
         waveColor,
     });
 
-    // Update wavesurfer with blob when it becomes available
+    // Reset loading state when stream URL changes and ensure media is muted
     useEffect(() => {
-        if (!wavesurfer || !streamBlob) return;
-
-        if (loadingTimeoutRef.current) {
-            clearTimeout(loadingTimeoutRef.current);
-            loadingTimeoutRef.current = null;
-        }
-
-        // Reset wavesurfer failure flag when loading new blob
-        wavesurferLoadFailureRef.current = false;
-
-        try {
-            wavesurfer.loadBlob(streamBlob);
-            setIsLoading(true);
+        setIsLoading(true);
+        if (wavesurfer) {
             wavesurfer.setVolume(0);
             const mediaElement = wavesurfer.getMediaElement();
             if (mediaElement) {
                 mediaElement.muted = true;
                 mediaElement.volume = 0;
             }
-        } catch (error) {
-            logFn.error(logMsg[LogCategory.OTHER].error, {
-                category: LogCategory.OTHER,
-                meta: {
-                    error,
-                    message: 'Failed to load blob into wavesurfer',
-                },
-            });
-            wavesurferLoadFailureRef.current = true;
-            setIsLoading(false);
-            setShouldFallback(true);
         }
-    }, [streamBlob, wavesurfer]);
+    }, [streamUrl, wavesurfer]);
 
-    // Reset loading state when song changes
+    // Handle waveform ready state
     useEffect(() => {
         if (!wavesurfer) return;
-
-        setIsLoading(true);
-        setShouldFallback(false);
-        wavesurferLoadFailureRef.current = false;
-
-        wavesurfer.setVolume(0);
-        const mediaElement = wavesurfer.getMediaElement();
-        if (mediaElement) {
-            mediaElement.muted = true;
-            mediaElement.volume = 0;
-        }
-    }, [currentSong?._serverId, currentSong?.id, wavesurfer]);
-
-    // Handle waveform ready state and errors
-    useEffect(() => {
-        if (!wavesurfer) return;
-
-        // Clear any existing loading timeout
-        if (loadingTimeoutRef.current) {
-            clearTimeout(loadingTimeoutRef.current);
-            loadingTimeoutRef.current = null;
-        }
 
         const handleReady = () => {
-            if (loadingTimeoutRef.current) {
-                clearTimeout(loadingTimeoutRef.current);
-                loadingTimeoutRef.current = null;
-            }
             setIsLoading(false);
             const mediaElement = wavesurfer.getMediaElement();
             if (mediaElement) {
@@ -172,23 +95,7 @@ export const PlayerbarWaveform = () => {
             }
         };
 
-        const handleError = (error: Error) => {
-            logFn.error(logMsg[LogCategory.OTHER].error, {
-                category: LogCategory.OTHER,
-                meta: { error },
-            });
-
-            if (loadingTimeoutRef.current) {
-                clearTimeout(loadingTimeoutRef.current);
-                loadingTimeoutRef.current = null;
-            }
-            wavesurferLoadFailureRef.current = true;
-            setIsLoading(false);
-            setShouldFallback(true);
-        };
-
         wavesurfer.on('ready', handleReady);
-        wavesurfer.on('error', handleError);
 
         // Check if already loaded
         if (wavesurfer.getDuration() > 0) {
@@ -198,33 +105,12 @@ export const PlayerbarWaveform = () => {
                 mediaElement.muted = true;
                 mediaElement.volume = 0;
             }
-        } else if (isLoading) {
-            // Set up a timeout fallback to prevent infinite loading
-            loadingTimeoutRef.current = setTimeout(() => {
-                if (wavesurfer.getDuration() <= 0) {
-                    logFn.warn(logMsg[LogCategory.OTHER].warning, {
-                        category: LogCategory.OTHER,
-                        meta: {
-                            message: 'Wavesurfer loading timeout - falling back to regular slider',
-                        },
-                    });
-                    wavesurferLoadFailureRef.current = true;
-                    setIsLoading(false);
-                    setShouldFallback(true);
-                }
-                loadingTimeoutRef.current = null;
-            }, 30000); // 30 second timeout
         }
 
         return () => {
             wavesurfer.un('ready', handleReady);
-            wavesurfer.un('error', handleError);
-            if (loadingTimeoutRef.current) {
-                clearTimeout(loadingTimeoutRef.current);
-                loadingTimeoutRef.current = null;
-            }
         };
-    }, [wavesurfer, isLoading]);
+    }, [wavesurfer]);
 
     useEffect(() => {
         if (!wavesurfer) return;
@@ -442,21 +328,7 @@ export const PlayerbarWaveform = () => {
         }
     }, [wavesurfer, currentTime, songDuration, isDragging]);
 
-    // Handle error state - if blob fetch failed after all retries, fallback to regular slider
-    useEffect(() => {
-        if (isStreamBlobError && failureCount !== undefined && failureCount >= 4) {
-            logFn.warn(logMsg[LogCategory.OTHER].warning, {
-                category: LogCategory.OTHER,
-                meta: {
-                    message: `Stream blob fetch failed after all retries (${failureCount} attempts) - falling back to regular slider`,
-                },
-            });
-            setIsLoading(false);
-            setShouldFallback(true);
-        }
-    }, [isStreamBlobError, failureCount]);
-
-    // Show regular disabled slider when there's no current song
+    // Show disabled slider when there's no current song
     if (!currentSong) {
         return (
             <CustomPlayerbarSlider
@@ -473,19 +345,12 @@ export const PlayerbarWaveform = () => {
         );
     }
 
-    // Fallback to regular seek slider when waveform fails
-    if (shouldFallback || (isStreamBlobError && failureCount !== undefined && failureCount >= 4)) {
-        return <PlayerbarSeekSlider max={songDuration} min={0} />;
-    }
-
     return (
         <div
             className={styles.wavesurferContainer}
             onClick={(e) => {
                 e?.stopPropagation();
             }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
             style={{ position: 'relative' }}
         >
             <motion.div
@@ -496,7 +361,7 @@ export const PlayerbarWaveform = () => {
                 transition={{ duration: 0.2 }}
             />
             <AnimatePresence>
-                {isLoading && !isHovered && (
+                {isLoading && (
                     <motion.div
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -514,19 +379,6 @@ export const PlayerbarWaveform = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-            {isLoading && isHovered && (
-                <div
-                    style={{
-                        height: '100%',
-                        left: 0,
-                        position: 'absolute',
-                        top: 0,
-                        width: '100%',
-                    }}
-                >
-                    <PlayerbarSeekSlider max={songDuration} min={0} />
-                </div>
-            )}
             {tooltipPosition && isDragging && (
                 <motion.div
                     animate={{ opacity: 1, scale: 1, x: '-50%' }}
