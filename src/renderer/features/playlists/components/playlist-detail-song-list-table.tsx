@@ -1,4 +1,5 @@
 import { forwardRef, useMemo } from 'react';
+import { useEffect } from 'react';
 
 import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
 import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
@@ -6,6 +7,7 @@ import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpe
 import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemControls, ItemListTableComponentProps } from '/@/renderer/components/item-list/types';
+import { useListContext } from '/@/renderer/context/list-context';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
@@ -55,20 +57,23 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
 
         const { searchTerm } = useSearchTermFilter();
         const { query } = usePlaylistSongListFilters();
+        const { setListData } = useListContext();
 
-        const filterSortedSongs = useMemo(() => {
+        const songData = useMemo(() => {
             let items = data?.items || [];
 
             if (searchTerm) {
-                if (searchTerm) {
-                    items = searchLibraryItems(items, searchTerm, LibraryItem.SONG);
-                }
-
-                return sortSongList(items, query.sortBy, query.sortOrder);
+                items = searchLibraryItems(items, searchTerm, LibraryItem.SONG);
             }
 
             return sortSongList(items, query.sortBy, query.sortOrder);
         }, [data?.items, searchTerm, query.sortBy, query.sortOrder]);
+
+        useEffect(() => {
+            if (setListData) {
+                setListData(songData);
+            }
+        }, [songData, setListData]);
 
         const player = usePlayer();
 
@@ -97,7 +102,7 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
                 autoFitColumns={autoFitColumns}
                 CellComponent={ItemTableListColumn}
                 columns={columns}
-                data={filterSortedSongs}
+                data={songData}
                 enableAlternateRowColors={enableAlternateRowColors}
                 enableExpansion={false}
                 enableHorizontalBorders={enableHorizontalBorders}

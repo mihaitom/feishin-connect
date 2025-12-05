@@ -12,7 +12,7 @@ import { ListSearchInput } from '/@/renderer/features/shared/components/list-sea
 import { useCurrentServer } from '/@/renderer/store';
 import { formatDurationString } from '/@/renderer/utils';
 import { Stack } from '/@/shared/components/stack/stack';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem, Song } from '/@/shared/types/domain-types';
 
 interface PlaylistDetailSongListHeaderProps {
     isSmartPlaylist?: boolean;
@@ -26,7 +26,7 @@ export const PlaylistDetailSongListHeader = ({
 }: PlaylistDetailSongListHeaderProps) => {
     const { t } = useTranslation();
     const { playlistId } = useParams() as { playlistId: string };
-    const { itemCount } = useListContext();
+    const { itemCount, listData } = useListContext();
     const server = useCurrentServer();
     const location = useLocation();
 
@@ -43,8 +43,8 @@ export const PlaylistDetailSongListHeader = ({
             <PageHeader>
                 <LibraryHeaderBar ignoreMaxWidth>
                     <LibraryHeaderBar.PlayButton
-                        ids={[playlistId]}
                         itemType={LibraryItem.PLAYLIST}
+                        songs={listData as Song[]}
                     />
                     <LibraryHeaderBar.Title>{detailQuery?.data?.name}</LibraryHeaderBar.Title>
                     {isSmartPlaylist && (

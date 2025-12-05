@@ -405,16 +405,19 @@ const PlaylistDetailSongListRoute = () => {
     };
 
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
+    const [listData, setListData] = useState<unknown[]>([]);
 
     const providerValue = useMemo(() => {
         return {
             customFilters: undefined,
             id: playlistId,
             itemCount,
+            listData,
             pageKey: ItemListKey.PLAYLIST_SONG,
             setItemCount,
+            setListData,
         };
-    }, [playlistId, itemCount]);
+    }, [playlistId, itemCount, listData]);
 
     return (
         <AnimatedPage key={`playlist-detail-songList-${playlistId}`}>
