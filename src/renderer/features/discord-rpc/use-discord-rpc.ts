@@ -15,6 +15,7 @@ import {
 import { sentenceCase } from '/@/renderer/utils';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { logMsg } from '/@/renderer/utils/logger-message';
+import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
 import { QueueSong, ServerType } from '/@/shared/types/domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
@@ -38,9 +39,17 @@ export const useDiscordRpc = () => {
 
     const setActivity = useCallback(
         async (current: ActivityState, previous: ActivityState) => {
+            // Check if track changed by comparing with previous state
+            const song = current[0];
+            const previousSong = previous[0];
+            const trackChangedByState =
+                song && previousSong
+                    ? song._uniqueId !== previousSong._uniqueId
+                    : song !== previousSong;
+            const trackChanged = song ? lastUniqueId !== song._uniqueId : false;
+
             if (
                 !current[0] || // No track
-                current[1] === 0 || // Start of track
                 (current[2] === 'paused' && !discordSettings.showPaused) // Track paused with show paused setting disabled
             ) {
                 let reason: string;
@@ -62,9 +71,9 @@ export const useDiscordRpc = () => {
                 return discordRpc?.clearActivity();
             }
 
-            // Handle change detection
-            const song = current[0];
-            const trackChanged = lastUniqueId !== song._uniqueId;
+            if (!song) {
+                return;
+            }
 
             /*
                 1. If the song has just started, update status
@@ -75,10 +84,11 @@ export const useDiscordRpc = () => {
             if (
                 previous[1] === 0 ||
                 Math.abs(current[1] - previous[1]) > 1.2 ||
+                trackChangedByState ||
                 trackChanged ||
                 current[2] !== previous[2]
             ) {
-                if (trackChanged) {
+                if (trackChangedByState || trackChanged) {
                     logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcTrackChanged, {
                         category: LogCategory.EXTERNAL,
                         meta: {
@@ -91,12 +101,12 @@ export const useDiscordRpc = () => {
                 }
 
                 let reason: string;
-                if (previous[1] === 0) {
+                if (trackChangedByState || trackChanged) {
+                    reason = 'track_changed';
+                } else if (previous[1] === 0) {
                     reason = 'song_started';
                 } else if (Math.abs(current[1] - previous[1]) > 1.2) {
                     reason = 'time_jump';
-                } else if (trackChanged) {
-                    reason = 'track_changed';
                 } else {
                     reason = 'player_state_changed';
                 }
@@ -217,6 +227,9 @@ export const useDiscordRpc = () => {
                             clientId: discordSettings.clientId,
                         },
                     });
+
+                    previousEnabledRef.current = true;
+
                     await discordRpc?.initialize(discordSettings.clientId);
                 }
 
@@ -235,7 +248,7 @@ export const useDiscordRpc = () => {
                         reason,
                         showAsListening: discordSettings.showAsListening,
                         songName: song.name,
-                        trackChanged,
+                        trackChanged: trackChangedByState || trackChanged,
                     },
                 });
                 discordRpc?.setActivity(activity);
@@ -248,7 +261,7 @@ export const useDiscordRpc = () => {
                         previousStatus: previous[2],
                         previousTime: previous[1],
                         timeDiff: Math.abs(current[1] - previous[1]),
-                        trackChanged,
+                        trackChanged: trackChangedByState || trackChanged,
                     },
                 });
             }
@@ -264,6 +277,8 @@ export const useDiscordRpc = () => {
             lastUniqueId,
         ],
     );
+
+    const debouncedSetActivity = useDebouncedCallback(setActivity, 500);
 
     // Quit Discord RPC if it was enabled and is now disabled
     useEffect(() => {
@@ -310,7 +325,7 @@ export const useDiscordRpc = () => {
             intervalRef.current = setInterval(() => {
                 const current = getCurrentActivityState();
                 const previous = previousActivityStateRef.current || current;
-                setActivity(current, previous);
+                debouncedSetActivity(current, previous);
                 previousActivityStateRef.current = current;
             }, 15000);
         };
@@ -323,7 +338,7 @@ export const useDiscordRpc = () => {
         previousActivityStateRef.current = initialState;
 
         // Set activity immediately when Discord RPC is enabled
-        setActivity(initialState, initialState);
+        debouncedSetActivity(initialState, initialState);
 
         const unsubSongChange = usePlayerStore.subscribe(
             (state): ActivityState => {
@@ -342,9 +357,26 @@ export const useDiscordRpc = () => {
                     previousUniqueId = currentUniqueId;
                 }
 
-                previousActivityStateRef.current = previous;
+                const activity: ActivityState = [
+                    current[0] as QueueSong,
+                    current[1] as number,
+                    current[2] as PlayerStatus,
+                ];
 
-                setActivity(current, previous);
+                // Use the ref as the source of truth for previous state
+                const previousActivity: ActivityState =
+                    previousActivityStateRef.current ||
+                    (previous
+                        ? [
+                              previous[0] as QueueSong,
+                              previous[1] as number,
+                              previous[2] as PlayerStatus,
+                          ]
+                        : activity);
+
+                debouncedSetActivity(activity, previousActivity);
+
+                previousActivityStateRef.current = activity;
             },
         );
 
@@ -355,5 +387,11 @@ export const useDiscordRpc = () => {
                 intervalRef.current = null;
             }
         };
-    }, [discordSettings.clientId, discordSettings.enabled, privateMode, setActivity]);
+    }, [
+        debouncedSetActivity,
+        discordSettings.clientId,
+        discordSettings.enabled,
+        privateMode,
+        setActivity,
+    ]);
 };
