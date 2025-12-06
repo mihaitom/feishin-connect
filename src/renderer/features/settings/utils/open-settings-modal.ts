@@ -10,9 +10,8 @@ export const openSettingsModal = () => {
         size: '2xl',
         styles: {
             content: {
-                height: '80%',
-                maxWidth: '960px',
-                minHeight: '540px',
+                height: '100%',
+                maxWidth: 'var(--theme-content-max-width)',
                 width: '100%',
             },
         },
