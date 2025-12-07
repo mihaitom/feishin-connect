@@ -219,6 +219,14 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
                         onSuccess: () => {},
                     },
                 );
+
+                toast.success({
+                    message: t('form.addToPlaylist.success', {
+                        message: allSongIds.length,
+                        numOfPlaylists: 1,
+                        postProcess: 'sentenceCase',
+                    }),
+                });
             } catch (error) {
                 toast.error({
                     message: (error as Error).message,
