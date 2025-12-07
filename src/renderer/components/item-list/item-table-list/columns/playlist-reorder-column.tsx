@@ -2,7 +2,10 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
+import styles from './playlist-reorder-column.module.css';
+
 import { getDraggedItems } from '/@/renderer/components/item-list/helpers/get-dragged-items';
+import { useItemDraggingState } from '/@/renderer/components/item-list/helpers/item-list-state';
 import {
     ItemTableListInnerColumn,
     TableColumnContainer,
@@ -25,7 +28,11 @@ export const PlaylistReorderColumn = (props: ItemTableListInnerColumn) => {
 
     const isPlaylistSong = props.itemType === LibraryItem.PLAYLIST_SONG;
 
-    const { isDraggedOver, ref: dragRef } = useDragDrop<HTMLButtonElement>({
+    const {
+        isDraggedOver,
+        isDragging: isDraggingLocal,
+        ref: dragRef,
+    } = useDragDrop<HTMLButtonElement>({
         drag: {
             getId: () => {
                 if (!item || !isDataRow || !isPlaylistSong) {
@@ -133,6 +140,17 @@ export const PlaylistReorderColumn = (props: ItemTableListInnerColumn) => {
 
     const draggedOverEdge: 'bottom' | 'top' | null =
         isDraggedOver === 'top' || isDraggedOver === 'bottom' ? isDraggedOver : null;
+
+    const itemRowId =
+        item && typeof item === 'object' && 'id' in item && props.internalState
+            ? props.internalState.extractRowId(item)
+            : undefined;
+    const isDraggingState = useItemDraggingState(
+        props.internalState,
+        itemRowId ||
+            (item && typeof item === 'object' && 'id' in item ? (item as any).id : undefined),
+    );
+    const isDragging = props.internalState ? isDraggingState : isDraggingLocal;
 
     const getValidDataItems = useCallback(() => {
         return props.data.filter((d) => d !== null && (d as any).id);
@@ -281,8 +299,8 @@ export const PlaylistReorderColumn = (props: ItemTableListInnerColumn) => {
     });
 
     return (
-        <TableColumnContainer {...props} isDraggedOver={draggedOverEdge}>
-            <ActionIconGroup w="100%">
+        <TableColumnContainer {...props} isDraggedOver={draggedOverEdge} isDragging={isDragging}>
+            <ActionIconGroup className={styles.group} w="100%">
                 <ActionIcon
                     {...upButtonHandlers}
                     icon="arrowUp"
