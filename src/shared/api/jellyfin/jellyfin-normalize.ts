@@ -203,12 +203,14 @@ const normalizeSong = (
             name: entry.Name,
         })),
         albumId: item.AlbumId || `dummy/${item.Id}`,
-        artistName: item?.ArtistItems?.[0]?.Name,
-        artists: item?.ArtistItems?.map((entry) => ({
-            id: entry.Id,
-            imageUrl: null,
-            name: entry.Name,
-        })),
+        artistName: item?.ArtistItems?.[0]?.Name || item?.AlbumArtists?.[0]?.Name,
+        artists: (item?.ArtistItems?.length ? item.ArtistItems : item.AlbumArtists)?.map(
+            (entry) => ({
+                id: entry.Id,
+                imageUrl: null,
+                name: entry.Name,
+            }),
+        ),
         bitDepth: null,
         bitRate,
         bpm: null,
@@ -286,11 +288,13 @@ const normalizeAlbum = (
                 imageUrl: null,
                 name: entry.Name,
             })) || [],
-        artists: item.ArtistItems?.map((entry) => ({
-            id: entry.Id,
-            imageUrl: null,
-            name: entry.Name,
-        })),
+        artists: (item.ArtistItems?.length ? item.ArtistItems : item.AlbumArtists)?.map(
+            (entry) => ({
+                id: entry.Id,
+                imageUrl: null,
+                name: entry.Name,
+            }),
+        ),
         backdropImageUrl: null,
         comment: null,
         createdAt: item.DateCreated,
