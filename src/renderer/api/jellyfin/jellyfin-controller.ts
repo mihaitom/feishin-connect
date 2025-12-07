@@ -1110,7 +1110,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 IncludeItemTypes: 'Audio',
                 Limit: query.limit,
                 Recursive: true,
-                SortBy: 'PlayCount,SortName',
+                SortBy: 'CommunityRating,SortName',
                 SortOrder: 'Descending',
                 UserId: apiClientProps.server?.userId,
             },
