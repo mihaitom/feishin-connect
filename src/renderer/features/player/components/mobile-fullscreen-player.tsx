@@ -344,18 +344,18 @@ MobilePlayerContainer.displayName = 'MobilePlayerContainer';
 
 const mobileContainerVariants: Variants = {
     closed: {
-        y: '100%',
         transition: {
             duration: 0.5,
             ease: 'easeInOut',
         },
+        y: '100%',
     },
     open: {
-        y: 0,
         transition: {
             duration: 0.5,
             ease: 'easeInOut',
         },
+        y: 0,
     },
 };
 

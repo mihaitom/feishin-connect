@@ -1,5 +1,5 @@
-import { AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
+import { AnimatePresence } from 'motion/react';
 import { lazy } from 'react';
 import { Outlet } from 'react-router';
 
