@@ -531,6 +531,7 @@
             "lyrics": "lyrics",
             "transcoding": "transcoding",
             "discord": "discord",
+            "logger": "logger",
             "playerFilters": "player filters"
         },
         "sidebar": {
@@ -780,6 +781,12 @@
         "lyricFetchProvider": "providers to fetch lyrics from",
         "lyricOffset_description": "offset the lyric by the specified amount of milliseconds",
         "lyricOffset": "lyric offset (ms)",
+        "logLevel": "log level",
+        "logLevel_description": "sets the minimum log level to display. debug shows all logs, error only shows errors",
+        "logLevel_optionDebug": "debug",
+        "logLevel_optionError": "error",
+        "logLevel_optionInfo": "info",
+        "logLevel_optionWarn": "warn",
         "minimizeToTray_description": "minimize the application to the system tray",
         "minimizeToTray": "minimize to tray",
         "minimumScrobblePercentage_description": "the minimum percentage of the song that must be played before it is scrobbled",

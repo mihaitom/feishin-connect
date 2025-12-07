@@ -27,6 +27,7 @@ interface Logger {
     debug: LogFn;
     error: LogFn;
     info: LogFn;
+    updateLogLevel: (level: LogLevel) => void;
     warn: LogFn;
 }
 
@@ -73,14 +74,21 @@ setInterval(() => {
 }, DEBOUNCE_INTERVAL);
 
 class ConsoleLogger implements Logger {
-    readonly debug: LogFn;
-    readonly error: LogFn;
-    readonly info: LogFn;
-    readonly warn: LogFn;
+    debug: LogFn = NO_OP;
+    error: LogFn = NO_OP;
+    info: LogFn = NO_OP;
+    updateLogLevel: (level: LogLevel) => void;
+    warn: LogFn = NO_OP;
 
     constructor() {
-        const level = localStorage.getItem('log_level') || DEFAULT_LOG_LEVEL;
+        const level = (localStorage.getItem('log_level') || DEFAULT_LOG_LEVEL) as LogLevel;
+        this.initializeLoggers(level);
+        this.updateLogLevel = (newLevel: LogLevel) => {
+            this.initializeLoggers(newLevel);
+        };
+    }
 
+    private initializeLoggers(level: LogLevel) {
         // Create timestamp wrapper function with colors and debouncing
         const withTimestamp = (logLevel: string): LogFn => {
             return (message?: any, options?: { category?: string; meta?: any }) => {
