@@ -302,14 +302,6 @@ export const useDiscordRpc = () => {
             return;
         }
 
-        logFn.info(logMsg[LogCategory.EXTERNAL].discordRpcEnabled, {
-            category: LogCategory.EXTERNAL,
-            meta: {
-                clientId: discordSettings.clientId,
-                subscribed: true,
-            },
-        });
-
         const getCurrentActivityState = (): ActivityState => {
             const state = usePlayerStore.getState();
             const currentSong = state.getCurrentSong();
