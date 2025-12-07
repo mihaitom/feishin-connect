@@ -3,6 +3,11 @@ import { LibraryItem } from '/@/shared/types/domain-types';
 export type EventMap = {
     ITEM_LIST_REFRESH: ItemListRefreshEventPayload;
     ITEM_LIST_UPDATE_ITEM: ItemListUpdateItemEventPayload;
+    PLAYLIST_MOVE_DOWN: PlaylistMoveEventPayload;
+    PLAYLIST_MOVE_TO_BOTTOM: PlaylistMoveEventPayload;
+    PLAYLIST_MOVE_TO_TOP: PlaylistMoveEventPayload;
+    PLAYLIST_MOVE_UP: PlaylistMoveEventPayload;
+    PLAYLIST_REORDER: PlaylistReorderEventPayload;
     USER_FAVORITE: UserFavoriteEventPayload;
     USER_RATING: UserRatingEventPayload;
 };
@@ -15,6 +20,18 @@ export type ItemListUpdateItemEventPayload = {
     index: number;
     item: unknown;
     key: string;
+};
+
+export type PlaylistMoveEventPayload = {
+    playlistId: string;
+    sourceIds: string[];
+};
+
+export type PlaylistReorderEventPayload = {
+    edge: 'bottom' | 'top' | null;
+    playlistId: string;
+    sourceIds: string[];
+    targetId: string;
 };
 
 export type UserFavoriteEventPayload = {

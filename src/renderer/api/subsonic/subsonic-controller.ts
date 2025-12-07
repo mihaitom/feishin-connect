@@ -1,6 +1,7 @@
 import type { ServerInferResponses } from '@ts-rest/core';
 
 import dayjs from 'dayjs';
+import { set } from 'idb-keyval';
 import filter from 'lodash/filter';
 import orderBy from 'lodash/orderBy';
 import md5 from 'md5';
@@ -1475,6 +1476,87 @@ export const SubsonicController: InternalControllerEndpoint = {
 
         if (res.status !== 200) {
             throw new Error('Failed to add to playlist');
+        }
+
+        return null;
+    },
+    replacePlaylist: async (args) => {
+        const { apiClientProps, body, query } = args;
+
+        // 1. Fetch existing songs from the playlist
+        const existingSongsRes = await ssApiClient(apiClientProps).getPlaylist({
+            query: {
+                id: query.id,
+            },
+        });
+
+        if (existingSongsRes.status !== 200) {
+            throw new Error('Failed to fetch existing playlist songs');
+        }
+
+        const existingSongs =
+            existingSongsRes.body.playlist.entry?.map((song) =>
+                ssNormalize.song(song, apiClientProps.server),
+            ) || [];
+
+        // 2. Get playlist detail to get the name
+        const playlistDetailRes = await ssApiClient(apiClientProps).getPlaylist({
+            query: {
+                id: query.id,
+            },
+        });
+
+        if (playlistDetailRes.status !== 200) {
+            throw new Error('Failed to get playlist detail');
+        }
+
+        const playlist = ssNormalize.playlist(
+            playlistDetailRes.body.playlist,
+            apiClientProps.server,
+        );
+
+        // 3. Make a backup of the playlist ids and their order, along with the id of the playlist and name
+        const backup = {
+            id: query.id,
+            name: playlist.name,
+            songIds: existingSongs.map((song) => song.id),
+            timestamp: Date.now(),
+        };
+
+        // Store backup in IndexedDB using idb-keyval
+        const backupKey = `playlist-backup-${query.id}`;
+        await set(backupKey, backup);
+
+        // 4. Remove all songs from the playlist (Subsonic uses indices, not IDs)
+        if (existingSongs.length > 0) {
+            // Get indices of all songs (0-based)
+            // Remove in reverse order to avoid index shifting issues
+            const songIndices = existingSongs.map((_, index) => index).reverse();
+
+            const removeRes = await ssApiClient(apiClientProps).updatePlaylist({
+                query: {
+                    playlistId: query.id,
+                    songIndexToRemove: songIndices.map((index) => index.toString()),
+                },
+            });
+
+            if (removeRes.status !== 200) {
+                throw new Error('Failed to remove songs from playlist');
+            }
+        }
+
+        // 5. Add the new song ids to the playlist
+        if (body.songId.length > 0) {
+            const addRes = await ssApiClient(apiClientProps).updatePlaylist({
+                query: {
+                    playlistId: query.id,
+                    songIdToAdd: body.songId,
+                },
+            });
+
+            if (addRes.status !== 200) {
+                throw new Error('Failed to add songs to playlist');
+            }
         }
 
         return null;

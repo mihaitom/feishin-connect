@@ -1198,6 +1198,29 @@ const BaseItemTableList = ({
         };
     }, [enableDrag, initialize, osInstance, pinnedRightColumnCount]);
 
+    useEffect(() => {
+        if (pinnedLeftColumnCount === 0) {
+            return;
+        }
+
+        const { current: root } = pinnedLeftColumnRef;
+
+        if (!root || !root.firstElementChild) {
+            return;
+        }
+
+        const viewport = root.firstElementChild as HTMLElement;
+
+        if (enableDrag) {
+            autoScrollForElements({
+                canScroll: () => true,
+                element: viewport,
+                getAllowedAxis: () => 'vertical',
+                getConfiguration: () => ({ maxScrollSpeed: 'fast' }),
+            });
+        }
+    }, [enableDrag, pinnedLeftColumnCount]);
+
     // Initialize overlayscrollbars for right pinned columns
     useEffect(() => {
         if (pinnedRightColumnCount === 0) {

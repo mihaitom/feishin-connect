@@ -295,8 +295,6 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                     return;
                 }
 
-                console.log(item, itemType);
-
                 // For context menus, prioritize the itemType prop when it's PLAYLIST_SONG or QUEUE_SONG
                 // This is because playlist/queue songs are Song objects (_itemType: SONG) but need special context menus
                 // Otherwise, use the item's _itemType if available, or fall back to the mapped itemType

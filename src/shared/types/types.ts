@@ -177,6 +177,7 @@ export enum TableColumn {
     OWNER = 'username',
     PATH = 'path',
     PLAY_COUNT = 'playCount',
+    PLAYLIST_REORDER = 'playlistReorder',
     RELEASE_DATE = 'releaseDate',
     ROW_INDEX = 'rowIndex',
     SIZE = 'size',

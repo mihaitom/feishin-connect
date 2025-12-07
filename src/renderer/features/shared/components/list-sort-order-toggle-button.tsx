@@ -5,11 +5,13 @@ import { ItemListKey } from '/@/shared/types/types';
 
 interface ListSortOrderToggleButtonProps {
     defaultSortOrder: SortOrder;
+    disabled?: boolean;
     listKey: ItemListKey;
 }
 
 export const ListSortOrderToggleButton = ({
     defaultSortOrder,
+    disabled,
     listKey,
 }: ListSortOrderToggleButtonProps) => {
     const { setSortOrder, sortOrder } = useSortOrderFilter(defaultSortOrder, listKey);
@@ -20,6 +22,10 @@ export const ListSortOrderToggleButton = ({
     };
 
     return (
-        <OrderToggleButton onToggle={handleToggleSortOrder} sortOrder={sortOrder as SortOrder} />
+        <OrderToggleButton
+            disabled={disabled}
+            onToggle={handleToggleSortOrder}
+            sortOrder={sortOrder as SortOrder}
+        />
     );
 };

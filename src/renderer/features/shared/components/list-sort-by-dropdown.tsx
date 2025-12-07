@@ -18,6 +18,7 @@ import { ItemListKey } from '/@/shared/types/types';
 
 interface ListSortByDropdownProps {
     defaultSortByValue: string;
+    disabled?: boolean;
     itemType: LibraryItem;
     listKey: ItemListKey;
     onChange?: (value: string) => void;
@@ -26,6 +27,7 @@ interface ListSortByDropdownProps {
 
 export const ListSortByDropdown = ({
     defaultSortByValue,
+    disabled,
     itemType,
     listKey,
     onChange,
@@ -44,9 +46,15 @@ export const ListSortByDropdown = ({
     };
 
     return (
-        <DropdownMenu position="bottom-start">
+        <DropdownMenu disabled={disabled} position="bottom-start">
             <DropdownMenu.Target>
-                {target ? target : <Button variant="subtle">{sortByLabel}</Button>}
+                {target ? (
+                    target
+                ) : (
+                    <Button disabled={disabled} variant="subtle">
+                        {sortByLabel}
+                    </Button>
+                )}
             </DropdownMenu.Target>
             <DropdownMenu.Dropdown>
                 {FILTERS[itemType][server.type].map((f) => (

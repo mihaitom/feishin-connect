@@ -1,3 +1,5 @@
+import { set } from 'idb-keyval';
+
 import { ndApiClient } from '/@/renderer/api/navidrome/navidrome-api';
 import { ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
 import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
@@ -778,6 +780,95 @@ export const NavidromeController: InternalControllerEndpoint = {
 
         if (res.status !== 200) {
             throw new Error('Failed to remove from playlist');
+        }
+
+        return null;
+    },
+    replacePlaylist: async (args) => {
+        const { apiClientProps, body, query } = args;
+
+        // 1. Fetch existing songs from the playlist without any sorts
+        const existingSongsRes = await ndApiClient(apiClientProps as any).getPlaylistSongList({
+            params: {
+                id: query.id,
+            },
+            query: {
+                _end: -1,
+                _order: 'ASC',
+                _start: 0,
+                ...excludeMissing(apiClientProps.server),
+            },
+        });
+
+        if (existingSongsRes.status !== 200) {
+            throw new Error('Failed to fetch existing playlist songs');
+        }
+
+        const existingSongs = existingSongsRes.body.data.map((item) =>
+            ndNormalize.song(item, apiClientProps.server),
+        );
+
+        // 2. Get playlist detail to get the name
+        const playlistDetailRes = await ndApiClient(apiClientProps).getPlaylistDetail({
+            params: {
+                id: query.id,
+            },
+        });
+
+        if (playlistDetailRes.status !== 200) {
+            throw new Error('Failed to get playlist detail');
+        }
+
+        const playlist = ndNormalize.playlist(playlistDetailRes.body.data, apiClientProps.server);
+
+        // 3. Make a backup of the playlist ids and their order, along with the id of the playlist and name
+        const backup = {
+            id: query.id,
+            name: playlist.name,
+            songIds: existingSongs.map((song) => song.id),
+            timestamp: Date.now(),
+        };
+
+        // Store backup in IndexedDB using idb-keyval
+        const backupKey = `playlist-backup-${query.id}`;
+        await set(backupKey, backup);
+
+        // 4. Remove all songs from the playlist
+        if (existingSongs.length > 0) {
+            const existingPlaylistItemIds = existingSongs
+                .map((song) => song.playlistItemId)
+                .filter((id): id is string => id !== undefined && id !== null);
+
+            if (existingPlaylistItemIds.length > 0) {
+                const removeRes = await ndApiClient(apiClientProps).removeFromPlaylist({
+                    params: {
+                        id: query.id,
+                    },
+                    query: {
+                        id: existingPlaylistItemIds,
+                    },
+                });
+
+                if (removeRes.status !== 200) {
+                    throw new Error('Failed to remove songs from playlist');
+                }
+            }
+        }
+
+        // 5. Add the new song ids to the playlist
+        if (body.songId.length > 0) {
+            const addRes = await ndApiClient(apiClientProps).addToPlaylist({
+                body: {
+                    ids: body.songId,
+                },
+                params: {
+                    id: query.id,
+                },
+            });
+
+            if (addRes.status !== 200) {
+                throw new Error('Failed to add songs to playlist');
+            }
         }
 
         return null;

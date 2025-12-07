@@ -22,7 +22,7 @@ interface PlaylistDetailSongListHeaderProps {
 }
 
 export const PlaylistDetailSongListHeader = ({
-    isSmartPlaylist: isSmartPlaylistProp,
+    isSmartPlaylist,
 }: PlaylistDetailSongListHeaderProps) => {
     const { t } = useTranslation();
     const { playlistId } = useParams() as { playlistId: string };
@@ -35,7 +35,6 @@ export const PlaylistDetailSongListHeader = ({
         initialData: location.state?.item,
     });
 
-    const isSmartPlaylist = isSmartPlaylistProp ?? detailQuery?.data?.rules;
     const playlistDuration = detailQuery?.data?.duration;
 
     return (
@@ -64,7 +63,7 @@ export const PlaylistDetailSongListHeader = ({
                 <ListSearchInput />
             </PageHeader>
             <FilterBar>
-                <PlaylistDetailSongListHeaderFilters />
+                <PlaylistDetailSongListHeaderFilters isSmartPlaylist={isSmartPlaylist} />
             </FilterBar>
         </Stack>
     );

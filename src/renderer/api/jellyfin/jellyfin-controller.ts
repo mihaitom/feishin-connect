@@ -1,3 +1,4 @@
+import { set } from 'idb-keyval';
 import chunk from 'lodash/chunk';
 import filter from 'lodash/filter';
 import orderBy from 'lodash/orderBy';
@@ -1157,6 +1158,113 @@ export const JellyfinController: InternalControllerEndpoint = {
 
             if (res.status !== 204) {
                 throw new Error('Failed to remove from playlist');
+            }
+        }
+
+        return null;
+    },
+    replacePlaylist: async (args) => {
+        const { apiClientProps, body, query } = args;
+
+        if (!apiClientProps.server?.userId) {
+            throw new Error('No userId found');
+        }
+
+        // 1. Fetch existing songs from the playlist
+        const existingSongsRes = await jfApiClient(apiClientProps).getPlaylistSongList({
+            params: {
+                id: query.id,
+            },
+            query: {
+                Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId, People, Tags',
+                IncludeItemTypes: 'Audio',
+                UserId: apiClientProps.server?.userId,
+            },
+        });
+
+        if (existingSongsRes.status !== 200) {
+            throw new Error('Failed to fetch existing playlist songs');
+        }
+
+        const existingSongs = existingSongsRes.body.Items.map((item) =>
+            jfNormalize.song(item, apiClientProps.server),
+        );
+
+        // 2. Get playlist detail to get the name
+        const playlistDetailRes = await jfApiClient(apiClientProps).getPlaylistDetail({
+            params: {
+                id: query.id,
+                userId: apiClientProps.server?.userId,
+            },
+            query: {
+                Fields: 'Genres, DateCreated, MediaSources, ChildCount, ParentId',
+                Ids: query.id,
+            },
+        });
+
+        if (playlistDetailRes.status !== 200) {
+            throw new Error('Failed to get playlist detail');
+        }
+
+        const playlist = jfNormalize.playlist(playlistDetailRes.body, apiClientProps.server);
+
+        // 3. Make a backup of the playlist ids and their order, along with the id of the playlist and name
+        const backup = {
+            id: query.id,
+            name: playlist.name,
+            songIds: existingSongs.map((song) => song.id),
+            timestamp: Date.now(),
+        };
+
+        // Store backup in IndexedDB using idb-keyval
+        const backupKey = `playlist-backup-${query.id}`;
+        await set(backupKey, backup);
+
+        // 4. Remove all songs from the playlist
+        if (existingSongs.length > 0) {
+            const existingPlaylistItemIds = existingSongs
+                .map((song) => song.playlistItemId)
+                .filter((id): id is string => id !== undefined && id !== null);
+
+            if (existingPlaylistItemIds.length > 0) {
+                const chunks = chunk(existingPlaylistItemIds, MAX_ITEMS_PER_PLAYLIST_ADD);
+
+                for (const chunk of chunks) {
+                    const removeRes = await jfApiClient(apiClientProps).removeFromPlaylist({
+                        params: {
+                            id: query.id,
+                        },
+                        query: {
+                            EntryIds: chunk.join(','),
+                        },
+                    });
+
+                    if (removeRes.status !== 204) {
+                        throw new Error('Failed to remove songs from playlist');
+                    }
+                }
+            }
+        }
+
+        // 5. Add the new song ids to the playlist
+        if (body.songId.length > 0) {
+            const chunks = chunk(body.songId, MAX_ITEMS_PER_PLAYLIST_ADD);
+
+            for (const chunk of chunks) {
+                const addRes = await jfApiClient(apiClientProps).addToPlaylist({
+                    body: null,
+                    params: {
+                        id: query.id,
+                    },
+                    query: {
+                        Ids: chunk.join(','),
+                        UserId: apiClientProps.server?.userId,
+                    },
+                });
+
+                if (addRes.status !== 204) {
+                    throw new Error('Failed to add songs to playlist');
+                }
             }
         }
 

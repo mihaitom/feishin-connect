@@ -96,6 +96,16 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
             };
         }, [player]);
 
+        const getRowId = useMemo(() => {
+            return (item: unknown) => {
+                if (!item || typeof item !== 'object') {
+                    return 'id';
+                }
+                const song = item as Song;
+                return song.playlistItemId || song.id;
+            };
+        }, []);
+
         return (
             <ItemTableList
                 activeRowId={currentSong?.id}
@@ -109,7 +119,97 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
                 enableRowHoverHighlight={enableRowHoverHighlight}
                 enableSelection={enableSelection}
                 enableVerticalBorders={enableVerticalBorders}
-                getRowId="playlistItemId"
+                getRowId={getRowId}
+                initialTop={{
+                    to: scrollOffset ?? 0,
+                    type: 'offset',
+                }}
+                itemType={LibraryItem.PLAYLIST_SONG}
+                onColumnReordered={handleColumnReordered}
+                onColumnResized={handleColumnResized}
+                onScrollEnd={handleOnScrollEnd}
+                overrideControls={overrideControls}
+                ref={ref}
+                size={size}
+            />
+        );
+    },
+);
+
+export const PlaylistDetailSongListEditTable = forwardRef<any, PlaylistDetailSongListTableProps>(
+    (
+        {
+            autoFitColumns = false,
+            columns,
+            data,
+            enableAlternateRowColors = false,
+            enableHorizontalBorders = false,
+            enableRowHoverHighlight = true,
+            enableSelection = true,
+            enableVerticalBorders = false,
+            saveScrollOffset = true,
+            size = 'default',
+        },
+        ref,
+    ) => {
+        const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
+            enabled: saveScrollOffset,
+        });
+
+        const { handleColumnReordered } = useItemListColumnReorder({
+            itemListKey: ItemListKey.PLAYLIST_SONG,
+        });
+
+        const { handleColumnResized } = useItemListColumnResize({
+            itemListKey: ItemListKey.PLAYLIST_SONG,
+        });
+
+        const player = usePlayer();
+
+        const currentSong = usePlayerSong();
+
+        const overrideControls: Partial<ItemControls> = useMemo(() => {
+            return {
+                onDoubleClick: ({ index, internalState, item, meta }) => {
+                    if (!item) {
+                        return;
+                    }
+
+                    const playType = (meta?.playType as Play) || Play.NOW;
+                    const items = internalState?.getData() as Song[];
+
+                    if (index !== undefined) {
+                        player.addToQueueByData(items, playType, item.id);
+                    }
+                },
+            };
+        }, [player]);
+
+        const getRowId = useMemo(() => {
+            return (item: unknown) => {
+                if (!item || typeof item !== 'object') {
+                    return 'id';
+                }
+                const song = item as Song;
+                return song.playlistItemId || song.id;
+            };
+        }, []);
+
+        return (
+            <ItemTableList
+                activeRowId={currentSong?.id}
+                autoFitColumns={autoFitColumns}
+                CellComponent={ItemTableListColumn}
+                columns={columns}
+                data={data.items}
+                enableAlternateRowColors={enableAlternateRowColors}
+                enableDrag
+                enableExpansion={false}
+                enableHorizontalBorders={enableHorizontalBorders}
+                enableRowHoverHighlight={enableRowHoverHighlight}
+                enableSelection={enableSelection}
+                enableVerticalBorders={enableVerticalBorders}
+                getRowId={getRowId}
                 initialTop={{
                     to: scrollOffset ?? 0,
                     type: 'offset',

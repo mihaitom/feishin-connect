@@ -24,8 +24,6 @@ export const PlaylistSongContextMenu = ({ items, type }: PlaylistSongContextMenu
         return { ids };
     }, [items]);
 
-    console.log('items', items, ids);
-
     return (
         <ContextMenu.Content
             bottomStickyContent={<ContextMenuPreview items={items} itemType={type} />}

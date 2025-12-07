@@ -386,10 +386,11 @@ const PlaylistDetailSongListRoute = () => {
         });
     };
 
-    const isSmartPlaylist =
+    const isSmartPlaylist = Boolean(
         !detailQuery?.isLoading &&
-        detailQuery?.data?.rules &&
-        server?.type === ServerType.NAVIDROME;
+            detailQuery?.data?.rules &&
+            server?.type === ServerType.NAVIDROME,
+    );
 
     const [showQueryBuilder, setShowQueryBuilder] = useState(false);
     const [isQueryBuilderExpanded, setIsQueryBuilderExpanded] = useState(false);
@@ -406,18 +407,22 @@ const PlaylistDetailSongListRoute = () => {
 
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
     const [listData, setListData] = useState<unknown[]>([]);
+    const [mode, setMode] = useState<'edit' | 'view'>('view');
 
     const providerValue = useMemo(() => {
         return {
             customFilters: undefined,
             id: playlistId,
+            isSmartPlaylist,
             itemCount,
             listData,
+            mode,
             pageKey: ItemListKey.PLAYLIST_SONG,
             setItemCount,
             setListData,
+            setMode,
         };
-    }, [playlistId, itemCount, listData]);
+    }, [playlistId, isSmartPlaylist, itemCount, listData, mode]);
 
     return (
         <AnimatedPage key={`playlist-detail-songList-${playlistId}`}>

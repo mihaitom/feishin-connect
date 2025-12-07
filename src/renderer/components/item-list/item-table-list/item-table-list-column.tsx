@@ -11,6 +11,7 @@ import {
 import { disableNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/disable-native-drag-preview';
 import clsx from 'clsx';
 import React, { CSSProperties, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router';
 import { CellComponentProps } from 'react-window-v2';
 
 import styles from './item-table-list-column.module.css';
@@ -38,6 +39,7 @@ import { GenreColumn } from '/@/renderer/components/item-list/item-table-list/co
 import { ImageColumn } from '/@/renderer/components/item-list/item-table-list/columns/image-column';
 import { NumericColumn } from '/@/renderer/components/item-list/item-table-list/columns/numeric-column';
 import { PathColumn } from '/@/renderer/components/item-list/item-table-list/columns/path-column';
+import { PlaylistReorderColumn } from '/@/renderer/components/item-list/item-table-list/columns/playlist-reorder-column';
 import { RatingColumn } from '/@/renderer/components/item-list/item-table-list/columns/rating-column';
 import { RowIndexColumn } from '/@/renderer/components/item-list/item-table-list/columns/row-index-column';
 import { SizeColumn } from '/@/renderer/components/item-list/item-table-list/columns/size-column';
@@ -46,6 +48,7 @@ import { TitleColumn } from '/@/renderer/components/item-list/item-table-list/co
 import { TitleCombinedColumn } from '/@/renderer/components/item-list/item-table-list/columns/title-combined-column';
 import { TableItemProps } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemControls, ItemListItem } from '/@/renderer/components/item-list/types';
+import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -74,6 +77,7 @@ export interface ItemTableListInnerColumn extends ItemTableListColumn {
 }
 
 export const ItemTableListColumn = (props: ItemTableListColumn) => {
+    const { playlistId } = useParams() as { playlistId?: string };
     const type = props.columns[props.columnIndex].id as TableColumn;
 
     const isHeaderEnabled = !!props.enableHeader;
@@ -171,7 +175,9 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
             operation:
                 props.itemType === LibraryItem.QUEUE_SONG
                     ? [DragOperation.REORDER, DragOperation.ADD]
-                    : [DragOperation.ADD],
+                    : props.itemType === LibraryItem.PLAYLIST_SONG
+                      ? [DragOperation.REORDER]
+                      : [DragOperation.ADD],
             target: DragTargetMap[props.itemType] || DragTarget.GENERIC,
         },
         drop: {
@@ -180,7 +186,18 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
                     return false;
                 }
 
+                // Allow drops for QUEUE_SONG (queue reordering)
                 if (props.itemType === LibraryItem.QUEUE_SONG) {
+                    return true;
+                }
+
+                // Allow drops for PLAYLIST_SONG (playlist reordering)
+                // Only allow drops when drag is started from the reorder handle
+                if (
+                    props.itemType === LibraryItem.PLAYLIST_SONG &&
+                    args.source.itemType === LibraryItem.PLAYLIST_SONG &&
+                    args.source.metadata?.fromReorderHandle === true
+                ) {
                     return true;
                 }
 
@@ -331,6 +348,33 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
                     }
                 }
 
+                // Handle PLAYLIST_SONG reordering
+                // Only allow drops when drag is started from the reorder handle
+                if (
+                    args.self.itemType === LibraryItem.PLAYLIST_SONG &&
+                    args.source.itemType === LibraryItem.PLAYLIST_SONG &&
+                    args.source.metadata?.fromReorderHandle === true &&
+                    playlistId
+                ) {
+                    const sourceItems = (args.source.item || []) as any[];
+                    const targetItem = item as any;
+
+                    if (
+                        sourceItems.length > 0 &&
+                        args.edge &&
+                        (args.edge === 'top' || args.edge === 'bottom') &&
+                        targetItem
+                    ) {
+                        // Emit event to reorder playlist songs
+                        eventEmitter.emit('PLAYLIST_REORDER', {
+                            edge: args.edge,
+                            playlistId,
+                            sourceIds: args.source.id,
+                            targetId: targetItem.id,
+                        });
+                    }
+                }
+
                 if (props.internalState) {
                     props.internalState.setDragging([]);
                 }
@@ -468,6 +512,9 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
 
             case TableColumn.PATH:
                 return <PathColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.PLAYLIST_REORDER:
+                return <PlaylistReorderColumn {...props} controls={controls} type={type} />;
 
             case TableColumn.ROW_INDEX:
                 return <RowIndexColumn {...props} {...dragProps} controls={controls} type={type} />;
@@ -1213,6 +1260,11 @@ const columnLabelMap: Record<TableColumn, ReactNode | string> = {
     [TableColumn.PLAY_COUNT]: i18n.t('table.column.playCount', {
         postProcess: 'upperCase',
     }) as string,
+    [TableColumn.PLAYLIST_REORDER]: (
+        <Flex className={styles.headerIconWrapper}>
+            <Icon icon="dragVertical" />
+        </Flex>
+    ),
     [TableColumn.RELEASE_DATE]: i18n.t('table.column.releaseDate', {
         postProcess: 'upperCase',
     }) as string,

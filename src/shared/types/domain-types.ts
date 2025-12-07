@@ -957,6 +957,22 @@ export type RemoveFromPlaylistQuery = {
 // Remove from playlist
 export type RemoveFromPlaylistResponse = null | undefined;
 
+export type ReplacePlaylistArgs = BaseEndpointArgs & {
+    body: ReplacePlaylistBody;
+    query: ReplacePlaylistQuery;
+};
+
+export type ReplacePlaylistBody = {
+    songId: string[];
+};
+
+export type ReplacePlaylistQuery = {
+    id: string;
+};
+
+// Replace playlist
+export type ReplacePlaylistResponse = null | undefined;
+
 export type SetRatingArgs = BaseEndpointArgs & { query: RatingQuery };
 
 export type ShareItemArgs = BaseEndpointArgs & { body: ShareItemBody };
@@ -1284,6 +1300,7 @@ export type ControllerEndpoint = {
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;
     movePlaylistItem?: (args: MoveItemArgs) => Promise<void>;
     removeFromPlaylist: (args: RemoveFromPlaylistArgs) => Promise<RemoveFromPlaylistResponse>;
+    replacePlaylist: (args: ReplacePlaylistArgs) => Promise<ReplacePlaylistResponse>;
     scrobble: (args: ScrobbleArgs) => Promise<ScrobbleResponse>;
     search: (args: SearchArgs) => Promise<SearchResponse>;
     setRating?: (args: SetRatingArgs) => Promise<RatingResponse>;
@@ -1379,6 +1396,9 @@ export type InternalControllerEndpoint = {
     removeFromPlaylist: (
         args: ReplaceApiClientProps<RemoveFromPlaylistArgs>,
     ) => Promise<RemoveFromPlaylistResponse>;
+    replacePlaylist: (
+        args: ReplaceApiClientProps<ReplacePlaylistArgs>,
+    ) => Promise<ReplacePlaylistResponse>;
     scrobble: (args: ReplaceApiClientProps<ScrobbleArgs>) => Promise<ScrobbleResponse>;
     search: (args: ReplaceApiClientProps<SearchArgs>) => Promise<SearchResponse>;
     setRating?: (args: ReplaceApiClientProps<SetRatingArgs>) => Promise<RatingResponse>;

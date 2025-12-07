@@ -628,6 +628,20 @@ export const controller: GeneralController = {
             server.type,
         )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
     },
+    replacePlaylist(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            throw new Error(
+                `${i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' })}: replacePlaylist`,
+            );
+        }
+
+        return apiController(
+            'replacePlaylist',
+            server.type,
+        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+    },
     scrobble(args) {
         const server = getServerById(args.apiClientProps.serverId);
 
