@@ -566,7 +566,7 @@ const containerVariants: Variants = {
                 ease: 'easeInOut',
             },
             width: '100vw',
-            y: -100,
+            y: 0,
         };
     },
     open: (custom) => {

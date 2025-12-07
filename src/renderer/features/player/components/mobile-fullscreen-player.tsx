@@ -320,23 +320,44 @@ const MobilePlayerContainer = memo(
         }
 
         return (
-            <div
+            <motion.div
+                animate="open"
                 className={styles.container}
+                exit="closed"
+                initial="closed"
                 style={{
                     backgroundColor,
                 }}
+                variants={mobileContainerVariants}
             >
                 <BackgroundImage
                     dynamicBackground={dynamicBackground}
                     dynamicIsImage={dynamicIsImage}
                 />
                 {children}
-            </div>
+            </motion.div>
         );
     },
 );
 
 MobilePlayerContainer.displayName = 'MobilePlayerContainer';
+
+const mobileContainerVariants: Variants = {
+    closed: {
+        y: '100%',
+        transition: {
+            duration: 0.5,
+            ease: 'easeInOut',
+        },
+    },
+    open: {
+        y: 0,
+        transition: {
+            duration: 0.5,
+            ease: 'easeInOut',
+        },
+    },
+};
 
 export const MobileFullscreenPlayer = () => {
     const { t } = useTranslation();

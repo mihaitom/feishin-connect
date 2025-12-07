@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
 import { lazy } from 'react';
 import { Outlet } from 'react-router';
@@ -66,13 +67,13 @@ export const MobileLayout = ({ shell }: MobileLayoutProps) => {
             >
                 <MobileSidebar />
             </Drawer>
-            <div
-                className={clsx(styles.fullScreenPlayerOverlay, {
-                    [styles.fullScreenPlayerVisible]: isFullScreenPlayerExpanded,
-                })}
-            >
-                <MobileFullscreenPlayer />
-            </div>
+            <AnimatePresence initial={false}>
+                {isFullScreenPlayerExpanded && (
+                    <div className={styles.fullScreenPlayerOverlay}>
+                        <MobileFullscreenPlayer />
+                    </div>
+                )}
+            </AnimatePresence>
             <CommandPalette modalProps={{ handlers, opened }} />
             <ContextMenuController.Root />
         </>
