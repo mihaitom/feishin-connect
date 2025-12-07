@@ -86,31 +86,6 @@ export const useScrobble = () => {
                 currentTime < 5 && // Reset to near 0
                 previousTime >= 10 // Was playing for at least 10 seconds
             ) {
-                // Send start event for Jellyfin on restart
-                if (currentSong._serverType === ServerType.JELLYFIN) {
-                    sendScrobble.mutate(
-                        {
-                            apiClientProps: { serverId: currentSong._serverId || '' },
-                            query: {
-                                event: 'start',
-                                id: currentSong.id,
-                                position: 0,
-                                submission: false,
-                            },
-                        },
-                        {
-                            onSuccess: () => {
-                                logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledStart, {
-                                    category: LogCategory.SCROBBLE,
-                                    meta: {
-                                        id: currentSong.id,
-                                    },
-                                });
-                            },
-                        },
-                    );
-                }
-
                 setIsCurrentSongScrobbled(false);
                 lastProgressEventRef.current = 0;
                 previousTimestampRef.current = 0;
