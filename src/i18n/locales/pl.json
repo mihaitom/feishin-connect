@@ -143,7 +143,8 @@
         "clean": "czyste",
         "gridRows": "siatka wierszy",
         "tableColumns": "tabela kolumn",
-        "itemsMore": "{{count}} więcej"
+        "itemsMore": "{{count}} więcej",
+        "noFilters": "nie skonfigurowano filtrów"
     },
     "entity": {
         "genre_one": "gatunek",
@@ -398,7 +399,8 @@
             "privateModeOn": "włącz tryb prywatny",
             "selectMusicFolder": "wybierz folder muzyki",
             "noMusicFolder": "nie wybrano folderu muzyki",
-            "multipleMusicFolders": "wybrano {{count}} folderów muzyki"
+            "multipleMusicFolders": "wybrano {{count}} folderów muzyki",
+            "commandPalette": "otwórz paletę komend"
         },
         "contextMenu": {
             "addToPlaylist": "$t(action.addToPlaylist)",
@@ -468,7 +470,8 @@
             "title": "$t(common.home)",
             "explore": "przeglądaj z biblioteki",
             "recentlyPlayed": "ostatnio odtwarzane",
-            "recentlyReleased": "ostatnio wydane"
+            "recentlyReleased": "ostatnio wydane",
+            "genres": "$t(entity.genre_other)"
         },
         "setting": {
             "playbackTab": "odtworzenia",
@@ -490,7 +493,8 @@
             "audio": "audio",
             "lyrics": "tekst",
             "transcoding": "transkodowanie",
-            "discord": "discord"
+            "discord": "discord",
+            "playerFilters": "filtry odtwarzacza"
         },
         "trackList": {
             "title": "$t(entity.track_other)",
@@ -537,6 +541,9 @@
         },
         "favorites": {
             "title": "$t(entity.favorite_other)"
+        },
+        "folderList": {
+            "title": "$t(entity.folder_other)"
         }
     },
     "player": {
@@ -575,7 +582,8 @@
         "addNextShuffled": "dodaj następne (wylosowane)",
         "queueType": "typ kolejki",
         "queueType_default": "domyślna",
-        "queueType_priority": "priorytetowa"
+        "queueType_priority": "priorytetowa",
+        "holdToShuffle": "przytrzymaj aby odtwarzać losowo"
     },
     "setting": {
         "crossfadeStyle_description": "wybierz styl przenikania, który ma być używany do odtwarzania dźwięku",
@@ -864,7 +872,14 @@
         "queryBuilderCustomFields_inputLabel": "label",
         "queryBuilderCustomFields_inputTag": "tag",
         "queryBuilderCustomFields": "niestandardowe pola",
-        "queryBuilderCustomFields_description": "dodaj niestandardowe pola do użycia w kreatorach zapytań"
+        "queryBuilderCustomFields_description": "dodaj niestandardowe pola do użycia w kreatorach zapytań",
+        "followCurrentSong_description": "automatycznie przewija kolejkę odtwarzania do aktualnie odtwarzanej piosenki",
+        "followCurrentSong": "śledź aktualną piosenkę",
+        "playerFilters": "Filtruj piosenki z kolejki",
+        "playerFilters_description": "nie dodawaj piosenek do kolejki na podstawie poniższych kryteriów",
+        "playerbarSlider_description": "krzywe nie są zalecane w przypadku wolnego lub ograniczonego połączenia internetowego",
+        "audioFadeOnStatusChange": "przenikanie dźwięku przy zmianie statusu",
+        "audioFadeOnStatusChange_description": "umożliwia zanikanie lub pojawianie się dźwięku gdy zmieni się status play/pauza"
     },
     "table": {
         "config": {
@@ -997,5 +1012,26 @@
         "error_oneFileOnly": "Wybierz tylko 1 plik",
         "error_readingFile": "wystąpił problem z odczytaniem pliku: {{errorMessage}}",
         "mainText": "upuść plik tutaj"
+    },
+    "filterOperator": {
+        "after": "jest po",
+        "afterDate": "jest po (dacie)",
+        "before": "jest przed",
+        "beforeDate": "jest przed (datą)",
+        "contains": "zawiera",
+        "endsWith": "kończy się na",
+        "inPlaylist": "jest w",
+        "inTheLast": "jest w ostatnim",
+        "inTheRange": "jest w zakresie",
+        "inTheRangeDate": "jest w zakresie (dat)",
+        "is": "jest",
+        "isNot": "nie jest",
+        "isGreaterThan": "jest większe od",
+        "isLessThan": "jest mniejsze od",
+        "matchesRegex": "pasuje do wyrażenia regularnego (regex)",
+        "notContains": "nie zawiera",
+        "notInPlaylist": "nie jest w",
+        "notInTheLast": "nie jest w ostatnim",
+        "startsWith": "zaczyna się od"
     }
 }

@@ -105,7 +105,8 @@
         "clean": "清除",
         "explicitStatus": "Explicit狀態",
         "explicit": "Explicit",
-        "gridRows": "網格行"
+        "gridRows": "網格行",
+        "noFilters": "未設定任何過濾器"
     },
     "error": {
         "endpointNotImplementedError": "{{serverType}} 尚未實現端點 {{endpoint}}",
@@ -242,7 +243,8 @@
             "lyrics": "歌詞",
             "transcoding": "轉碼",
             "discord": "Discord",
-            "queryBuilder": "查詢建構器"
+            "queryBuilder": "查詢建構器",
+            "playerFilters": "播放過濾器"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist_other)"
@@ -353,7 +355,8 @@
         "addNextShuffled": "新增到下一首 (隨機)",
         "queueType": "佇列類型",
         "queueType_default": "預設",
-        "queueType_priority": "優先"
+        "queueType_priority": "優先",
+        "holdToShuffle": "按住以隨機"
     },
     "setting": {
         "audioPlayer_description": "選擇用於播放的音訊播放器",
@@ -647,7 +650,9 @@
         "queryBuilderCustomFields_description": "在查詢建構器中新增自訂欄位",
         "followCurrentSong_description": "自動將播放佇列捲動至當前播放的歌曲",
         "followCurrentSong": "跟隨當前歌曲",
-        "playerbarSlider_description": "不建議在網路速度緩慢或計費的網路下使用波形"
+        "playerbarSlider_description": "不建議在網路速度緩慢或計費的網路下使用波形",
+        "playerFilters": "從佇列中過濾歌曲",
+        "playerFilters_description": "根據以下條件，排除要新增至佇列中的歌曲"
     },
     "table": {
         "config": {
@@ -964,5 +969,24 @@
     "queryBuilder": {
         "standardTags": "標準標籤",
         "customTags": "自訂標籤"
+    },
+    "filterOperator": {
+        "after": "在…之後",
+        "afterDate": "晚於 (日期)",
+        "before": "在…之前",
+        "beforeDate": "早於 (日期)",
+        "contains": "包含",
+        "endsWith": "以…結尾",
+        "inPlaylist": "在…之中",
+        "inTheRange": "在範圍內",
+        "inTheRangeDate": "在（日期）範圍內",
+        "is": "是",
+        "isNot": "不是",
+        "isGreaterThan": "大於",
+        "isLessThan": "小於",
+        "matchesRegex": "符合正規表達式",
+        "notContains": "不包含",
+        "notInPlaylist": "不在…之中",
+        "startsWith": "以…開頭"
     }
 }

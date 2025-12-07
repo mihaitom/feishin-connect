@@ -35,7 +35,8 @@
         "addNextShuffled": "přidat jako další (náhodně)",
         "queueType": "typ fronty",
         "queueType_default": "výchozí",
-        "queueType_priority": "priorita"
+        "queueType_priority": "priorita",
+        "holdToShuffle": "podržte pro zamíchání"
     },
     "setting": {
         "crossfadeStyle_description": "vyberte způsob prolnutí u přehrávače zvuku",
@@ -326,7 +327,12 @@
         "queryBuilderCustomFields": "vlastní pole",
         "queryBuilderCustomFields_description": "přidat vlasntí pole k použití při sestavování dotazů",
         "audioFadeOnStatusChange": "zeslabení zvuku při změně stavu",
-        "audioFadeOnStatusChange_description": "povolí postupné zeslabení a zesílení zvuku při změně stavu přehrávání/pozastavení"
+        "audioFadeOnStatusChange_description": "povolí postupné zeslabení a zesílení zvuku při změně stavu přehrávání/pozastavení",
+        "followCurrentSong_description": "automaticky posouvat frontu přehrávání na právě hrající skladbu",
+        "followCurrentSong": "následovat aktuální skladbu",
+        "playerFilters": "Filtrovat skladby z fronty",
+        "playerFilters_description": "vynechat skladby z přidání do fronty na základě následujících kritérií",
+        "playerbarSlider_description": "vlnová křivka není doporučena, pokud se nacházíte na pomalém nebo měřeném internetovém připojení"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist_one)",
@@ -352,7 +358,7 @@
         },
         "moveToNext": "přesunout na další",
         "downloadStarted": "spuštěno stahování {{count}} položek",
-        "largeFetch": "tato akce provede {{count}} síťových žádostí na váš server",
+        "largeFetch": "tato akce se pokusí načíst {{count}} položek z vašeho serveru",
         "moveItems": "přesunout položky",
         "shuffle": "náhodně",
         "shuffleAll": "vše náhodně",
@@ -472,7 +478,8 @@
         "sort": "seřadit",
         "gridRows": "řádky mřížky",
         "tableColumns": "sloupce tabulky",
-        "itemsMore": "{{count}} dalších"
+        "itemsMore": "{{count}} dalších",
+        "noFilters": "nejsou nastaveny žádné filtry"
     },
     "table": {
         "config": {
@@ -700,7 +707,8 @@
             "privateModeOn": "zapnout soukromý režim",
             "selectMusicFolder": "vybrat složku s hudbou",
             "noMusicFolder": "není vybrána žádná složka s hudbou",
-            "multipleMusicFolders": "Vybráno {{count}} složek s hudbou"
+            "multipleMusicFolders": "Vybráno {{count}} složek s hudbou",
+            "commandPalette": "otevřít paletu příkazů"
         },
         "contextMenu": {
             "addToPlaylist": "$t(action.addToPlaylist)",
@@ -736,7 +744,8 @@
             "title": "$t(common.home)",
             "explore": "procházet z vaší knihovny",
             "recentlyPlayed": "nedávno přehráno",
-            "recentlyReleased": "nedávno vydáno"
+            "recentlyReleased": "nedávno vydáno",
+            "genres": "$t(entity.genre_other)"
         },
         "albumDetail": {
             "moreFromArtist": "více od tohoto $t(entity.artist_one)",
@@ -763,7 +772,8 @@
             "audio": "zvuk",
             "lyrics": "texty",
             "transcoding": "překódování",
-            "discord": "discord"
+            "discord": "discord",
+            "playerFilters": "filtry přehrávače"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist_other)"
@@ -823,6 +833,9 @@
         },
         "favorites": {
             "title": "$t(entity.favorite_other)"
+        },
+        "folderList": {
+            "title": "$t(entity.folder_other)"
         }
     },
     "form": {
@@ -999,5 +1012,26 @@
     "queryBuilder": {
         "standardTags": "standardní značky",
         "customTags": "vlastní značky"
+    },
+    "filterOperator": {
+        "after": "je po",
+        "afterDate": "je po (datum)",
+        "before": "je před",
+        "beforeDate": "je před (datum)",
+        "contains": "obsahuje",
+        "endsWith": "končí na",
+        "inPlaylist": "je v",
+        "inTheLast": "je v posledním",
+        "inTheRange": "je v rozsahu",
+        "inTheRangeDate": "je v rozsahu (datum)",
+        "is": "je",
+        "isNot": "není",
+        "isGreaterThan": "je větší než",
+        "isLessThan": "je menší než",
+        "matchesRegex": "odpovídá regulárnímu výrazu",
+        "notContains": "neobsahuje",
+        "notInPlaylist": "není v",
+        "notInTheLast": "není v posledním",
+        "startsWith": "začíná na"
     }
 }

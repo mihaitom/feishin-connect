@@ -61,7 +61,7 @@
         },
         "moveToNext": "passer au suivant",
         "downloadStarted": "téléchargement de {{count}} éléments en cours",
-        "largeFetch": "cette action effectuera {{count}} requêtes réseau vers votre serveur",
+        "largeFetch": "cette action tentera de récupérer {{count}} éléments depuis votre serveur.",
         "moveItems": "déplacer les entrées",
         "shuffle": "mélanger",
         "shuffleAll": "mélanger tout",

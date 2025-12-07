@@ -35,7 +35,8 @@
         "addNextShuffled": "Añadir al siguiente (mezclado)",
         "queueType": "Tipo de cola",
         "queueType_default": "Predeterminado",
-        "queueType_priority": "Prioridad"
+        "queueType_priority": "Prioridad",
+        "holdToShuffle": "Mantener para mezclar"
     },
     "setting": {
         "crossfadeStyle_description": "selecciona el estilo de crossfade a usar por el reproductor de audio",
@@ -326,7 +327,12 @@
         "queryBuilderCustomFields_description": "Añade campos personalizados a usar en los generadores de consultas",
         "queryBuilderCustomFields_inputLabel": "Rótulo",
         "audioFadeOnStatusChange": "Fundido del audio al cambiar de estado",
-        "audioFadeOnStatusChange_description": "Activa el fundido de salida y el de entrada cuando cambia el estado al reproducir/pausar"
+        "audioFadeOnStatusChange_description": "Activa el fundido de salida y el de entrada cuando cambia el estado al reproducir/pausar",
+        "followCurrentSong_description": "Desplaza automáticamente la cola de reproducción a la canción en reproducción actual",
+        "followCurrentSong": "Seguir la canción actual",
+        "playerFilters": "Filtrar las canciones de la cola",
+        "playerFilters_description": "Omite la adición de canciones a la cola basado en los siguientes criterios",
+        "playerbarSlider_description": "La forma de onda no es recomendable en una conexión a Internet lenta o medida"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
@@ -352,7 +358,7 @@
         },
         "moveToNext": "pasar al siguiente",
         "downloadStarted": "Iniciada descarga de {{count}} elementos",
-        "largeFetch": "Esta acción hará {{count}} peticiones de red a tu servidor",
+        "largeFetch": "Esta acción intentará obtener {{count}} elementos de tu servidor",
         "moveItems": "Mover elementos",
         "shuffle": "Mezclar",
         "shuffleAll": "Mezclar todo",
@@ -472,7 +478,8 @@
         "sort": "Ordenar",
         "gridRows": "Filas de la cuadrícula",
         "tableColumns": "Columnas de la tabla",
-        "itemsMore": "{{count}} más"
+        "itemsMore": "{{count}} más",
+        "noFilters": "Ningún filtro configurado"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",
@@ -577,7 +584,8 @@
             "privateModeOn": "Activar modo privado",
             "selectMusicFolder": "Seleccionar carpeta de música",
             "noMusicFolder": "Ninguna carpeta de música seleccionada",
-            "multipleMusicFolders": "{{count}} carpetas de música seleccionadas"
+            "multipleMusicFolders": "{{count}} carpetas de música seleccionadas",
+            "commandPalette": "Abrir paleta de comandos"
         },
         "contextMenu": {
             "addToPlaylist": "$t(action.addToPlaylist)",
@@ -613,7 +621,8 @@
             "title": "$t(common.home)",
             "explore": "explora desde tu biblioteca",
             "recentlyPlayed": "reproducidos recientemente",
-            "recentlyReleased": "Lanzado recientemente"
+            "recentlyReleased": "Lanzado recientemente",
+            "genres": "$t(entity.genre_other)"
         },
         "fullscreenPlayer": {
             "upNext": "siguiente",
@@ -663,7 +672,8 @@
             "lyrics": "Letras",
             "transcoding": "Transcodificación",
             "discord": "Discord",
-            "sidebar": "Barra lateral"
+            "sidebar": "Barra lateral",
+            "playerFilters": "Filtros del reproductor"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist_other)"
@@ -723,6 +733,9 @@
         },
         "favorites": {
             "title": "$t(entity.favorite_other)"
+        },
+        "folderList": {
+            "title": "$t(entity.folder_other)"
         }
     },
     "form": {
@@ -999,5 +1012,26 @@
     "queryBuilder": {
         "standardTags": "Etiquetas estándar",
         "customTags": "Etiquetas personalizadas"
+    },
+    "filterOperator": {
+        "after": "es después",
+        "afterDate": "es después (fecha)",
+        "before": "es antes",
+        "beforeDate": "es antes (fecha)",
+        "contains": "contiene",
+        "endsWith": "termina con",
+        "inPlaylist": "está en",
+        "inTheLast": "está en el último",
+        "inTheRange": "está en el rango",
+        "inTheRangeDate": "está en el rango (fecha)",
+        "is": "es",
+        "isNot": "no es",
+        "isGreaterThan": "es mayor que",
+        "isLessThan": "es menor que",
+        "notContains": "no contiene",
+        "notInPlaylist": "no está en",
+        "notInTheLast": "no está en el último",
+        "startsWith": "empieza con",
+        "matchesRegex": "coincide con expresión regular"
     }
 }
