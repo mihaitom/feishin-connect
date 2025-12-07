@@ -130,6 +130,26 @@ export function calculateNextSong(
     }
 }
 
+// Helper function to check if shuffle is enabled and not in priority mode
+export function isShuffleEnabled(state: {
+    player: { queueType: PlayerQueueType; shuffle: PlayerShuffle };
+    queue: { shuffled: number[] };
+}): boolean {
+    return (
+        state.player.shuffle === PlayerShuffle.TRACK &&
+        state.queue.shuffled.length > 0 &&
+        state.player.queueType !== PlayerQueueType.PRIORITY
+    );
+}
+
+// Helper function to map shuffled position to actual queue position
+export function mapShuffledToQueueIndex(shuffledIndex: number, shuffled: number[]): number {
+    if (shuffledIndex >= 0 && shuffledIndex < shuffled.length) {
+        return shuffled[shuffledIndex];
+    }
+    return shuffledIndex;
+}
+
 // Helper function to add new indexes to shuffled array after current position
 function addIndexesToShuffled(
     shuffled: number[],
@@ -204,26 +224,6 @@ function generateShuffledIndexes(length: number): number[] {
 // Helper function to get combined queue length
 function getCombinedQueueLength(priority: string[], defaultQueue: string[]): number {
     return priority.length + defaultQueue.length;
-}
-
-// Helper function to check if shuffle is enabled and not in priority mode
-function isShuffleEnabled(state: {
-    player: { queueType: PlayerQueueType; shuffle: PlayerShuffle };
-    queue: { shuffled: number[] };
-}): boolean {
-    return (
-        state.player.shuffle === PlayerShuffle.TRACK &&
-        state.queue.shuffled.length > 0 &&
-        state.player.queueType !== PlayerQueueType.PRIORITY
-    );
-}
-
-// Helper function to map shuffled position to actual queue position
-function mapShuffledToQueueIndex(shuffledIndex: number, shuffled: number[]): number {
-    if (shuffledIndex >= 0 && shuffledIndex < shuffled.length) {
-        return shuffled[shuffledIndex];
-    }
-    return shuffledIndex;
 }
 
 // Helper function to regenerate shuffled indexes if shuffle is enabled

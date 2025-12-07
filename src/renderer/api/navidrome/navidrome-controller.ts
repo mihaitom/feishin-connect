@@ -17,7 +17,6 @@ import {
     PlaylistSongListArgs,
     PlaylistSongListResponse,
     ServerListItemWithCredential,
-    Song,
     songListSortMap,
     sortOrderMap,
     tagListSortMap,
@@ -575,42 +574,15 @@ export const NavidromeController: InternalControllerEndpoint = {
             },
         });
 
-        if (res.status === 200 && res.body.similarSongs?.song) {
-            const similar = res.body.similarSongs.song.reduce<Song[]>((acc, song) => {
-                if (song.id !== query.songId) {
-                    acc.push(ssNormalize.song(song, apiClientProps.server));
-                }
-
-                return acc;
-            }, []);
-
-            if (similar.length > 0) {
-                return similar;
-            }
-        }
-
-        const fallback = await ndApiClient(apiClientProps).getSongList({
-            query: {
-                _end: 50,
-                _order: 'ASC',
-                _sort: NDSongListSort.RANDOM,
-                _start: 0,
-                [getArtistSongKey(apiClientProps.server)]: query.albumArtistIds,
-                ...excludeMissing(apiClientProps.server),
-            },
-        });
-
-        if (fallback.status !== 200) {
+        if (res.status !== 200) {
             throw new Error('Failed to get similar songs');
         }
 
-        return fallback.body.data.reduce<Song[]>((acc, song) => {
-            if (song.id !== query.songId) {
-                acc.push(ndNormalize.song(song, apiClientProps.server));
-            }
-
-            return acc;
-        }, []);
+        return (
+            (res.body.similarSongs?.song || [])
+                .filter((song) => song.id !== query.songId)
+                .map((song) => ssNormalize.song(song, apiClientProps.server)) || []
+        );
     },
     getSongDetail: async (args) => {
         const { apiClientProps, query } = args;

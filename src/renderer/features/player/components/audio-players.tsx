@@ -7,6 +7,7 @@ import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc'
 import { useMainPlayerListener } from '/@/renderer/features/player/audio-player/hooks/use-main-player-listener';
 import { MpvPlayer } from '/@/renderer/features/player/audio-player/mpv-player';
 import { WebPlayer } from '/@/renderer/features/player/audio-player/web-player';
+import { useAutoDJ } from '/@/renderer/features/player/hooks/use-auto-dj';
 import { useMediaSession } from '/@/renderer/features/player/hooks/use-media-session';
 import { useMPRIS } from '/@/renderer/features/player/hooks/use-mpris';
 import { usePlaybackHotkeys } from '/@/renderer/features/player/hooks/use-playback-hotkeys';
@@ -44,6 +45,7 @@ export const AudioPlayers = () => {
     useMainPlayerListener();
     useMediaSession();
     usePlaybackHotkeys();
+    useAutoDJ();
 
     useEffect(() => {
         if (webAudio && 'AudioContext' in window) {

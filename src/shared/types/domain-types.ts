@@ -1449,7 +1449,6 @@ export type SimilarSongsArgs = BaseEndpointArgs & {
 };
 
 export type SimilarSongsQuery = {
-    albumArtistIds: string[];
     count?: number;
     songId: string;
 };

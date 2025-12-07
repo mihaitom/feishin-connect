@@ -22,8 +22,8 @@ interface PlayerEvents {
 
 interface PlayerEventsCallbacks {
     onCurrentSongChange?: (
-        properties: { index: number; song: QueueSong | undefined },
-        prev: { index: number; song: QueueSong | undefined },
+        properties: { index: number; remaining: number; song: QueueSong | undefined },
+        prev: { index: number; remaining: number; song: QueueSong | undefined },
     ) => void;
     onPlayerMute?: (properties: { muted: boolean }, prev: { muted: boolean }) => void;
     onPlayerProgress?: (properties: { timestamp: number }, prev: { timestamp: number }) => void;

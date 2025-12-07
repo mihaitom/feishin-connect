@@ -624,6 +624,12 @@
         }
     },
     "setting": {
+        "autoDJ": "auto DJ",
+        "autoDJ_description": "automatically add similar songs to the queue",
+        "autoDJ_itemCount": "item count",
+        "autoDJ_itemCount_description": "the number of items attempted to be added to the queue when auto DJ is enabled",
+        "autoDJ_timing": "timing",
+        "autoDJ_timing_description": "the number of songs remaining in the queue before auto DJ is triggered",
         "accentColor_description": "sets the accent color for the application",
         "accentColor": "accent color",
         "albumBackground_description": "adds a background image for album pages containing the album art",

@@ -4,7 +4,12 @@ import { api } from '/@/renderer/api';
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { ListCountQuery, SimilarSongsQuery, SongListQuery } from '/@/shared/types/domain-types';
+import {
+    ListCountQuery,
+    RandomSongListQuery,
+    SimilarSongsQuery,
+    SongListQuery,
+} from '/@/shared/types/domain-types';
 
 export const songsQueries = {
     list: (args: QueryHookArgs<SongListQuery>, imageSize?: number) => {
@@ -36,13 +41,24 @@ export const songsQueries = {
             ...args.options,
         });
     },
+    random: (args: QueryHookArgs<RandomSongListQuery>) => {
+        return queryOptions({
+            queryFn: ({ signal }) => {
+                return api.controller.getRandomSongList({
+                    apiClientProps: { serverId: args.serverId, signal },
+                    query: args.query,
+                });
+            },
+            queryKey: queryKeys.songs.randomSongList(args.serverId, args.query),
+            ...args.options,
+        });
+    },
     similar: (args: QueryHookArgs<SimilarSongsQuery>) => {
         return queryOptions({
             queryFn: ({ signal }) => {
                 return api.controller.getSimilarSongs({
                     apiClientProps: { serverId: args.serverId, signal },
                     query: {
-                        albumArtistIds: args.query.albumArtistIds,
                         count: args.query.count ?? 50,
                         songId: args.query.songId,
                     },

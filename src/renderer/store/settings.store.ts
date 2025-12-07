@@ -401,10 +401,17 @@ const QueryBuilderSettingsSchema = z.object({
     tag: z.array(QueryBuilderCustomFieldSchema),
 });
 
+const AutoDJSettingsSchema = z.object({
+    enabled: z.boolean(),
+    itemCount: z.number(),
+    timing: z.number(),
+});
+
 /**
  * This schema is used for validation of the imported settings json
  */
 export const ValidationSettingsStateSchema = z.object({
+    autoDJ: AutoDJSettingsSchema,
     css: CssSettingsSchema,
     discord: DiscordSettingsSchema,
     font: FontSettingsSchema,
@@ -659,6 +666,11 @@ const getPlatformDefaultWindowBarStyle = (): Platform => {
 const platformDefaultWindowBarStyle: Platform = getPlatformDefaultWindowBarStyle();
 
 const initialState: SettingsState = {
+    autoDJ: {
+        enabled: false,
+        itemCount: 10,
+        timing: 3,
+    },
     css: {
         content: '',
         enabled: false,
@@ -1529,3 +1541,5 @@ export const usePrimaryColor = () => useSettingsStore((store) => store.general.a
 export const usePlayerbarSlider = () => useSettingsStore((store) => store.general.playerbarSlider);
 
 export const useGenreTarget = () => useSettingsStore((store) => store.general.genreTarget);
+
+export const useAutoDJSettings = () => useSettingsStore((store) => store.autoDJ, shallow);

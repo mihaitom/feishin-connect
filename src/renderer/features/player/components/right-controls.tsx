@@ -11,6 +11,7 @@ import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-
 import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import {
     useAppStoreActions,
+    useAutoDJSettings,
     useCurrentServer,
     useGeneralSettings,
     useHotkeySettings,
@@ -19,9 +20,11 @@ import {
     usePlayerSong,
     usePlayerVolume,
     useSettingsStore,
+    useSettingsStoreActions,
     useSidebarRightExpanded,
 } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { Button } from '/@/shared/components/button/button';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Rating } from '/@/shared/components/rating/rating';
@@ -58,6 +61,7 @@ export const RightControls = () => {
         <Flex align="flex-end" direction="column" h="100%" px="1rem" py="0.5rem">
             <Group h="calc(100% / 3)">
                 <RatingButton />
+                <AutoDJButton />
             </Group>
             <Group align="center" gap="xs" wrap="nowrap">
                 <PlayerConfig />
@@ -67,6 +71,33 @@ export const RightControls = () => {
             </Group>
             <Group h="calc(100% / 3)" />
         </Flex>
+    );
+};
+
+const AutoDJButton = () => {
+    const { t } = useTranslation();
+    const settings = useAutoDJSettings();
+    const { setSettings } = useSettingsStoreActions();
+
+    const toggleAutoDJ = () => {
+        setSettings({
+            autoDJ: {
+                ...settings,
+                enabled: !settings.enabled,
+            },
+        });
+    };
+
+    return (
+        <Button
+            onClick={toggleAutoDJ}
+            size="compact-xs"
+            style={{ color: settings.enabled ? 'var(--theme-colors-primary)' : undefined }}
+            uppercase
+            variant="transparent"
+        >
+            {t('setting.autoDJ')}
+        </Button>
     );
 };
 

@@ -23,6 +23,8 @@ export const logMsg = {
         addToQueueByFetch: 'Added to queue by fetch',
         addToQueueByListQuery: 'Added to queue by list query',
         addToQueueByType: 'Added to queue by type',
+        autoPlayFailed: 'Auto play failed',
+        autoPlayTriggered: 'Auto play triggered',
         cancelledFetch: 'Cancelled fetch',
         clearQueue: 'Cleared queue',
         clearSelected: 'Cleared selected',
