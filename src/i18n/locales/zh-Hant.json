@@ -778,7 +778,6 @@
             "musicbrainz": "在MusicBrainz開啟"
         },
         "downloadStarted": "已開始下載 {{count}} 項內容",
-        "largeFetch": "這項操作將會嘗試從您的伺服器擷取 {{count}} 個項目",
         "moveItems": "移動項目",
         "shuffle": "隨機播放",
         "shuffleAll": "全部隨機播放",
@@ -925,7 +924,7 @@
         },
         "largeFetchConfirmation": {
             "title": "將項目加入佇列",
-            "description": "這個請求將嘗試從伺服器擷取 {{count}} 個項目"
+            "description": "此操作將新增目前篩選檢視中的所有項目"
         },
         "shuffleAll": {
             "title": "隨機播放",

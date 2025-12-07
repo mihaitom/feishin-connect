@@ -151,62 +151,57 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     const queryClient = useQueryClient();
     const storeActions = usePlayerActions();
     const timeoutIds = useRef<null | Record<string, ReturnType<typeof setTimeout>>>({});
-    const queueFetchConfirmThreshold = 100;
 
     const [doNotShowAgain, setDoNotShowAgain] = useLocalStorage({
         defaultValue: false,
         key: 'large_fetch_confirmation',
     });
 
-    const confirmLargeFetch = useCallback(
-        (itemCount: number): Promise<boolean> => {
-            if (doNotShowAgain) {
-                return Promise.resolve(true);
-            }
+    const confirmLargeFetch = useCallback((): Promise<boolean> => {
+        if (doNotShowAgain) {
+            return Promise.resolve(true);
+        }
 
-            return new Promise((resolve) => {
-                openModal({
-                    children: (
-                        <ConfirmModal
-                            labels={{
-                                cancel: t('common.cancel', { postProcess: 'titleCase' }),
-                                confirm: t('common.confirm', { postProcess: 'titleCase' }),
-                            }}
-                            onCancel={() => {
-                                resolve(false);
-                                closeAllModals();
-                            }}
-                            onConfirm={() => {
-                                resolve(true);
-                                closeAllModals();
-                            }}
-                        >
-                            <Stack>
-                                <Text>
-                                    {t('action.largeFetch', {
-                                        count: itemCount,
-                                        postProcess: 'sentenceCase',
-                                    })}
-                                </Text>
-                                <Checkbox
-                                    label={t('common.doNotShowAgain', {
-                                        postProcess: 'sentenceCase',
-                                    })}
-                                    onChange={(event) => {
-                                        setDoNotShowAgain(event.currentTarget.checked);
-                                    }}
-                                />
-                            </Stack>
-                        </ConfirmModal>
-                    ),
-                    title: t('common.areYouSure', {
-                        postProcess: 'sentenceCase',
-                    }),
-                });
+        return new Promise((resolve) => {
+            openModal({
+                children: (
+                    <ConfirmModal
+                        labels={{
+                            cancel: t('common.cancel', { postProcess: 'titleCase' }),
+                            confirm: t('common.confirm', { postProcess: 'titleCase' }),
+                        }}
+                        onCancel={() => {
+                            resolve(false);
+                            closeAllModals();
+                        }}
+                        onConfirm={() => {
+                            resolve(true);
+                            closeAllModals();
+                        }}
+                    >
+                        <Stack>
+                            <Text>
+                                {t('form.largeFetchConfirmation.description', {
+                                    postProcess: 'sentenceCase',
+                                })}
+                            </Text>
+                            <Checkbox
+                                label={t('common.doNotShowAgain', {
+                                    postProcess: 'sentenceCase',
+                                })}
+                                onChange={(event) => {
+                                    setDoNotShowAgain(event.currentTarget.checked);
+                                }}
+                            />
+                        </Stack>
+                    </ConfirmModal>
+                ),
+                title: t('form.largeFetchConfirmation.title', {
+                    postProcess: 'sentenceCase',
+                }),
             });
-        },
-        [doNotShowAgain, setDoNotShowAgain, t],
-    );
+        });
+    }, [doNotShowAgain, setDoNotShowAgain, t]);
 
     const addToQueueByData = useCallback(
         (data: Song[], type: AddToQueueType, playSongId?: string) => {
@@ -248,8 +243,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             type: AddToQueueType,
             skipConfirmation?: boolean,
         ) => {
-            if (!skipConfirmation && id.length > queueFetchConfirmThreshold) {
-                const confirmed = await confirmLargeFetch(id.length);
+            if (!skipConfirmation) {
+                const confirmed = await confirmLargeFetch();
                 if (!confirmed) {
                     return;
                 }
@@ -270,6 +265,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                             queryClient.cancelQueries({
                                 exact: false,
                                 queryKey: getRootQueryKey(itemType, serverId),
+                            });
+
+                            queryClient.cancelQueries({
+                                exact: false,
+                                queryKey: queryKeys.player.fetch(),
                             });
                         },
                         title: t('player.playbackFetchInProgress', {
@@ -331,7 +331,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 });
             }
         },
-        [confirmLargeFetch, queueFetchConfirmThreshold, queryClient, storeActions, t],
+        [confirmLargeFetch, queryClient, storeActions, t],
     );
 
     const addToQueueByListQuery = useCallback(
@@ -388,6 +388,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                         serverId,
                     }),
                     gcTime: 0,
+                    queryKey: queryKeys.player.fetch(),
                     staleTime: 0,
                 })) as number;
                 totalCount = countResult || 0;
@@ -395,21 +396,9 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 const allResults: Song[] | string[] = [];
                 const pageSize = 500;
 
-                // Calculate the number of fetches needed
-                let numberOfFetches = 0;
-                if (itemType === LibraryItem.SONG) {
-                    // For songs, the number of fetches is based on pagination
-                    numberOfFetches = Math.ceil(totalCount / pageSize);
-                } else {
-                    const paginationFetches = Math.ceil(totalCount / pageSize);
-                    numberOfFetches = paginationFetches + totalCount;
-                }
-
-                if (numberOfFetches > queueFetchConfirmThreshold) {
-                    const confirmed = await confirmLargeFetch(numberOfFetches);
-                    if (!confirmed) {
-                        return;
-                    }
+                const confirmed = await confirmLargeFetch();
+                if (!confirmed) {
+                    return;
                 }
 
                 // Start timeout only after confirmation (if needed)
@@ -433,6 +422,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                                     exact: false,
                                     queryKey: getRootQueryKey(itemType, serverId),
                                 });
+
+                                queryClient.cancelQueries({
+                                    exact: false,
+                                    queryKey: queryKeys.player.fetch(),
+                                });
                             },
                             title: t('player.playbackFetchInProgress', {
                                 postProcess: 'sentenceCase',
@@ -455,6 +449,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                             serverId,
                         }),
                         gcTime: 0,
+                        queryKey: queryKeys.player.fetch({ startIndex }),
                         staleTime: 0,
                     })) as { items: any[] };
 
@@ -1006,6 +1001,7 @@ export async function fetchSongsByItemType(
 }
 
 export const useIsPlayerFetching = () => {
-    const fetcherCount = useIsFetching({ queryKey: queryKeys.player.fetch() });
-    return fetcherCount > 0;
+    const playerFetchCount = useIsFetching({ queryKey: queryKeys.player.fetch() });
+
+    return playerFetchCount > 0;
 };

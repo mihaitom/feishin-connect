@@ -358,7 +358,6 @@
         },
         "moveToNext": "pasar al siguiente",
         "downloadStarted": "Iniciada descarga de {{count}} elementos",
-        "largeFetch": "Esta acción intentará obtener {{count}} elementos de tu servidor",
         "moveItems": "Mover elementos",
         "shuffle": "Mezclar",
         "shuffleAll": "Mezclar todo",
@@ -813,7 +812,7 @@
         },
         "largeFetchConfirmation": {
             "title": "Añadir elementos a la cola",
-            "description": "Esta petición intentará obtener {{count}} elementos del servidor"
+            "description": "Esta acción agregará todos los elementos en la vista filtrada actual"
         },
         "shuffleAll": {
             "title": "Reproducir aleatorio",

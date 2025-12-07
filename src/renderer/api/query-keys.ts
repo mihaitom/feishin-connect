@@ -266,7 +266,11 @@ export const queryKeys: Record<
         list: (serverId: string) => [serverId, 'musicFolders', 'list'] as const,
     },
     player: {
-        fetch: () => {
+        fetch: (meta?: any) => {
+            if (meta) {
+                return ['player', 'fetch', meta] as const;
+            }
+
             return ['player', 'fetch'] as const;
         },
     },

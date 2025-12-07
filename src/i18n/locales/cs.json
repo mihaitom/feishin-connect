@@ -358,7 +358,6 @@
         },
         "moveToNext": "přesunout na další",
         "downloadStarted": "spuštěno stahování {{count}} položek",
-        "largeFetch": "tato akce se pokusí načíst {{count}} položek z vašeho serveru",
         "moveItems": "přesunout položky",
         "shuffle": "náhodně",
         "shuffleAll": "vše náhodně",
@@ -913,7 +912,7 @@
         },
         "largeFetchConfirmation": {
             "title": "přidat položky do fronty",
-            "description": "Tento požadavek se pokusí načíst {{count}} položek ze serveru"
+            "description": "Tato akce přidá všechny položky v aktuálně filtrovaném zobrazení"
         },
         "shuffleAll": {
             "title": "přehrát náhodně",

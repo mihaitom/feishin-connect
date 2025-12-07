@@ -61,7 +61,6 @@
         },
         "moveToNext": "passer au suivant",
         "downloadStarted": "téléchargement de {{count}} éléments en cours",
-        "largeFetch": "cette action tentera de récupérer {{count}} éléments depuis votre serveur.",
         "moveItems": "déplacer les entrées",
         "shuffle": "mélanger",
         "shuffleAll": "mélanger tout",
@@ -807,7 +806,7 @@
         },
         "largeFetchConfirmation": {
             "title": "ajouter des entrées à la file d'attente",
-            "description": "cette requête tentera de récupérer {{count}} éléments depuis le serveur"
+            "description": "Cette action ajoutera tous les éléments dans la vue filtrée actuelle"
         },
         "shuffleAll": {
             "title": "jouer aléatoirement",

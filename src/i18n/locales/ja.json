@@ -324,7 +324,6 @@
         },
         "moveToNext": "次",
         "downloadStarted": "{{count}} 曲のダウンロードを開始しました",
-        "largeFetch": "この操作により、サーバーに対して {{count}} 回のネットワークリクエストが送信されます",
         "moveItems": "曲を移動",
         "shuffle": "シャッフル",
         "shuffleAll": "すべてシャッフル",
@@ -807,7 +806,7 @@
         },
         "largeFetchConfirmation": {
             "title": "キューにアイテムを追加する",
-            "description": "このリクエストはサーバーから {{count}} 個のアイテムを取得しようと試みます"
+            "description": "このアクションは、現在のフィルターされたビュー内のすべてのアイテムを追加します"
         }
     },
     "entity": {

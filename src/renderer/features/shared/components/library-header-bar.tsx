@@ -3,7 +3,7 @@ import { CSSProperties, memo, ReactNode, useCallback } from 'react';
 
 import styles from './library-header-bar.module.css';
 
-import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { useIsPlayerFetching, usePlayer } from '/@/renderer/features/player/context/player-context';
 import { DefaultPlayButton } from '/@/renderer/features/shared/components/play-button';
 import { PlayButtonGroup } from '/@/renderer/features/shared/components/play-button-group';
 import { useCurrentServerId } from '/@/renderer/store';
@@ -86,10 +86,13 @@ const HeaderPlayButton = ({
         });
     }, [serverId, handlePlay]);
 
+    const isPlayerFetching = useIsPlayerFetching();
+
     return (
         <div className={styles.playButtonContainer}>
             <DefaultPlayButton
                 className={className}
+                loading={isPlayerFetching}
                 onClick={openPlayTypeModal}
                 variant={variant}
                 {...props}

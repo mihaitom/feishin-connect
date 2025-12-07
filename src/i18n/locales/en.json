@@ -9,7 +9,6 @@
         "downloadStarted": "started download of {{count}} items",
         "editPlaylist": "edit $t(entity.playlist_one)",
         "goToPage": "go to page",
-        "largeFetch": "this action will attempt to fetch {{count}} items from your server",
         "moveToNext": "move to next",
         "moveToBottom": "move to bottom",
         "moveToTop": "move to top",
@@ -297,7 +296,7 @@
         },
         "largeFetchConfirmation": {
             "title": "add items to the queue",
-            "description": "This request will attempt to fetch {{count}} items from the server"
+            "description": "This action will add all items in the current filtered view"
         },
         "addToPlaylist": {
             "create": "create $t(entity.playlist_one) {{playlist}}",

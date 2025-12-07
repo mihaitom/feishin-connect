@@ -23,7 +23,6 @@
         "addToPlaylist": "hozzáadás lejátszási listához: $t(entity.playlist_one)",
         "refresh": "$t(common.refresh)",
         "downloadStarted": "megkezdődött {{count}} elem letöltése",
-        "largeFetch": "ez a művelet {{count}} hálózati kérést fog küldeni a szerverednek",
         "moveItems": "elemek mozgatása",
         "shuffle": "keverés",
         "shuffleAll": "összes keverése",
@@ -325,7 +324,7 @@
         },
         "largeFetchConfirmation": {
             "title": "műsorlistához ad",
-            "description": "Ez a kérés megpróbál letölteni {{count}} elemet a szerverről"
+            "description": "Ez a művelet hozzáadja az összes elemet az aktuális szűrt nézetben"
         },
         "shuffleAll": {
             "title": "véletlenszerű lejátszás",

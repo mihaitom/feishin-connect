@@ -23,7 +23,6 @@
         },
         "moveToNext": "ga naar volgende",
         "downloadStarted": "begonnen met downloaden van {{count}} items",
-        "largeFetch": "deze actie zal {{count}} netwerkverzoeken naar je server sturen",
         "moveItems": "verplaats items",
         "shuffle": "shuffle",
         "shuffleAll": "shuffle alles",
@@ -557,7 +556,7 @@
         },
         "largeFetchConfirmation": {
             "title": "items toevoegen aan de wachtrij",
-            "description": "Dit verzoek zal proberen {{count}} items van de server op te halen"
+            "description": "Deze actie voegt alle items in de huidige gefilterde weergave toe"
         },
         "shuffleAll": {
             "title": "willekeurig afspelen",

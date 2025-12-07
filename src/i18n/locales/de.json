@@ -23,7 +23,6 @@
         },
         "moveToNext": "Als nächstes",
         "downloadStarted": "Download von {{count}} Elementen gestartet",
-        "largeFetch": "Diese Aktion wird versuchen {{count}} Elemente von Deinem Server zu laden",
         "moveItems": "Elemente verschieben",
         "shuffle": "Zufällig wiedergeben",
         "shuffleAll": "Alle zufällig wiedergeben",
@@ -294,7 +293,7 @@
         },
         "largeFetchConfirmation": {
             "title": "Elemente der Warteschlange hinzufügen",
-            "description": "Diese Anfrage wird versuchen {{count}} Elemente vom Server abzurufen"
+            "description": "Diese Aktion fügt alle Elemente in der aktuell gefilterten Ansicht hinzu"
         },
         "shuffleAll": {
             "title": "Zufallswiedergabe",

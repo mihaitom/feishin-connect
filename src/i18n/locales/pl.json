@@ -23,7 +23,6 @@
         },
         "moveToNext": "przesuń na następne",
         "downloadStarted": "rozpoczęto pobieranie {{count}} elementów",
-        "largeFetch": "ta akcja wykona {{count}} żądań sieciowych do twojego serwera",
         "moveItems": "przenieś elementy",
         "shuffle": "odtwarzaj losowo",
         "shuffleAll": "odtwarzaj wszystkie losowo",
@@ -346,7 +345,7 @@
         },
         "largeFetchConfirmation": {
             "title": "dodaj elementy do kolejki",
-            "description": "To żądanie spróbuje pobrać {{count}} elementów z serwera"
+            "description": "Ta akcja doda wszystkie elementy w aktualnie przefiltrowanym widoku"
         },
         "shuffleAll": {
             "title": "odtwarzaj losowo",
