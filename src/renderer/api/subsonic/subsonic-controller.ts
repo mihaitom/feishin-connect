@@ -998,7 +998,7 @@ export const SubsonicController: InternalControllerEndpoint = {
         }
 
         if (subsonicFeatures[SubsonicExtensions.FORM_POST]) {
-            features.formPost = [1];
+            features.osFormPost = [1];
         }
 
         return { features, id: apiClientProps.server?.id, version: ping.body.serverVersion };
