@@ -46,7 +46,6 @@ export interface PlayerContext {
         id: string[],
         itemType: LibraryItem,
         type: AddToQueueType,
-        skipConfirmation?: boolean,
     ) => void;
     addToQueueByListQuery: (
         serverId: string,
@@ -236,20 +235,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const addToQueueByFetch = useCallback(
-        async (
-            serverId: string,
-            id: string[],
-            itemType: LibraryItem,
-            type: AddToQueueType,
-            skipConfirmation?: boolean,
-        ) => {
-            if (!skipConfirmation) {
-                const confirmed = await confirmLargeFetch();
-                if (!confirmed) {
-                    return;
-                }
-            }
-
+        async (serverId: string, id: string[], itemType: LibraryItem, type: AddToQueueType) => {
             let toastId: null | string = null;
             const fetchId = nanoid();
 
@@ -331,7 +317,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 });
             }
         },
-        [confirmLargeFetch, queryClient, storeActions, t],
+        [queryClient, storeActions, t],
     );
 
     const addToQueueByListQuery = useCallback(
@@ -482,7 +468,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 if (itemType === LibraryItem.SONG) {
                     addToQueueByData(allResults as Song[], type);
                 } else {
-                    await addToQueueByFetch(serverId, allResults as string[], itemType, type, true);
+                    await addToQueueByFetch(serverId, allResults as string[], itemType, type);
                 }
             } catch (err: any) {
                 if (instanceOfCancellationError(err)) {
