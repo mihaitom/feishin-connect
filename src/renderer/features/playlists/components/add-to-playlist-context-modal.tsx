@@ -37,6 +37,7 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
 import { useForm } from '/@/shared/hooks/use-form';
+import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 import { Playlist, PlaylistListSort, SortOrder } from '/@/shared/types/domain-types';
 
 export const AddToPlaylistContextModal = ({
@@ -61,12 +62,21 @@ export const AddToPlaylistContextModal = ({
     const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
     const formRef = useRef<HTMLFormElement>(null);
 
+    const [skipDuplicates, setSkipDuplicates] = useLocalStorage({
+        defaultValue: true,
+        key: 'playlist-skip-duplicate',
+    });
+
     const form = useForm({
         initialValues: {
             newPlaylists: [] as string[],
             selectedPlaylistIds: initialSelectedIds || [],
-            skipDuplicates: true,
+            skipDuplicates: skipDuplicates,
         },
+    });
+
+    form.watch('skipDuplicates', (event) => {
+        setSkipDuplicates(event.value);
     });
 
     const addToPlaylistMutation = useAddToPlaylist({});
