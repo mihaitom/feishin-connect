@@ -176,7 +176,7 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
                 props.itemType === LibraryItem.QUEUE_SONG
                     ? [DragOperation.REORDER, DragOperation.ADD]
                     : props.itemType === LibraryItem.PLAYLIST_SONG
-                      ? [DragOperation.REORDER]
+                      ? [DragOperation.REORDER, DragOperation.ADD]
                       : [DragOperation.ADD],
             target: DragTargetMap[props.itemType] || DragTarget.GENERIC,
         },
