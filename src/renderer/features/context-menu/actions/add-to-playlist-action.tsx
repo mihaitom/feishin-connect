@@ -162,7 +162,7 @@ export const AddToPlaylistAction = ({ items, itemType }: AddToPlaylistActionProp
             try {
                 let allSongIds: string[] = [];
 
-                if (itemType === LibraryItem.SONG) {
+                if (itemType === LibraryItem.SONG || itemType === LibraryItem.PLAYLIST_SONG) {
                     allSongIds = items;
                 } else if (itemType === LibraryItem.ALBUM) {
                     for (const id of items) {
