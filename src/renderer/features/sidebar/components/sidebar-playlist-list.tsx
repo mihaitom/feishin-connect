@@ -12,10 +12,15 @@ import { ContextMenuController } from '/@/renderer/features/context-menu/context
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { CreatePlaylistForm } from '/@/renderer/features/playlists/components/create-playlist-form';
+import {
+    LONG_PRESS_PLAY_BEHAVIOR,
+    PlayTooltip,
+} from '/@/renderer/features/shared/components/play-button-group';
+import { usePlayButtonClick } from '/@/renderer/features/shared/hooks/use-play-button-click';
 import { SidebarItem } from '/@/renderer/features/sidebar/components/sidebar-item';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer } from '/@/renderer/store';
+import { useCurrentServer, useCurrentServerId } from '/@/renderer/store';
 import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { ButtonProps } from '/@/shared/components/button/button';
@@ -36,11 +41,10 @@ interface PlaylistRowButtonProps extends Omit<ButtonProps, 'onContextMenu' | 'on
     item: Playlist;
     name: string;
     onContextMenu: (e: MouseEvent<HTMLButtonElement>, item: Playlist) => void;
-    onPlay: (id: string, playType: Play) => void;
     to: string;
 }
 
-const PlaylistRowButton = ({ item, name, onContextMenu, onPlay, to }: PlaylistRowButtonProps) => {
+const PlaylistRowButton = ({ item, name, onContextMenu, to }: PlaylistRowButtonProps) => {
     const url = {
         pathname: generatePath(AppRoute.PLAYLISTS_DETAIL_SONGS, { playlistId: to }),
         state: { item },
@@ -143,6 +147,16 @@ const PlaylistRowButton = ({ item, name, onContextMenu, onPlay, to }: PlaylistRo
         isEnabled: true,
     });
 
+    const player = usePlayer();
+    const serverId = useCurrentServerId();
+
+    const handlePlay = useCallback(
+        (id: string, type: Play) => {
+            player.addToQueueByFetch(serverId, [id], LibraryItem.PLAYLIST, type);
+        },
+        [player, serverId],
+    );
+
     return (
         <div
             className={clsx(styles.row, {
@@ -165,7 +179,7 @@ const PlaylistRowButton = ({ item, name, onContextMenu, onPlay, to }: PlaylistRo
             >
                 {name}
             </SidebarItem>
-            {isHovered && <RowControls id={to} onPlay={onPlay} />}
+            {isHovered && <RowControls id={to} onPlay={handlePlay} />}
         </div>
     );
 };
@@ -177,66 +191,71 @@ const RowControls = ({
     id: string;
     onPlay: (id: string, playType: Play) => void;
 }) => {
-    const { t } = useTranslation();
+    const handlePlayNext = usePlayButtonClick({
+        onClick: () => {
+            onPlay(id, Play.NEXT);
+        },
+        onLongPress: () => {
+            onPlay(id, LONG_PRESS_PLAY_BEHAVIOR[Play.NEXT]);
+        },
+    });
+
+    const handlePlayNow = usePlayButtonClick({
+        onClick: () => {
+            onPlay(id, Play.NOW);
+        },
+        onLongPress: () => {
+            onPlay(id, LONG_PRESS_PLAY_BEHAVIOR[Play.NOW]);
+        },
+    });
+
+    const handlePlayLast = usePlayButtonClick({
+        onClick: () => {
+            onPlay(id, Play.LAST);
+        },
+        onLongPress: () => {
+            onPlay(id, LONG_PRESS_PLAY_BEHAVIOR[Play.LAST]);
+        },
+    });
 
     return (
         <ActionIconGroup className={styles.controls}>
-            <ActionIcon
-                icon="mediaPlay"
-                iconProps={{
-                    size: 'md',
-                }}
-                onClick={() => {
-                    onPlay(id, Play.NOW);
-                }}
-                size="xs"
-                tooltip={{
-                    label: t('player.play', { postProcess: 'sentenceCase' }),
-                }}
-                variant="subtle"
-            />
-            <ActionIcon
-                icon="mediaShuffle"
-                iconProps={{
-                    size: 'md',
-                }}
-                onClick={() => {
-                    onPlay(id, Play.SHUFFLE);
-                }}
-                size="xs"
-                tooltip={{
-                    label: t('player.shuffle', { postProcess: 'sentenceCase' }),
-                }}
-                variant="subtle"
-            />
-            <ActionIcon
-                icon="mediaPlayLast"
-                iconProps={{
-                    size: 'md',
-                }}
-                onClick={() => {
-                    onPlay(id, Play.LAST);
-                }}
-                size="xs"
-                tooltip={{
-                    label: t('player.addLast', { postProcess: 'sentenceCase' }),
-                }}
-                variant="subtle"
-            />
-            <ActionIcon
-                icon="mediaPlayNext"
-                iconProps={{
-                    size: 'md',
-                }}
-                onClick={() => {
-                    onPlay(id, Play.NEXT);
-                }}
-                size="xs"
-                tooltip={{
-                    label: t('player.addNext', { postProcess: 'sentenceCase' }),
-                }}
-                variant="subtle"
-            />
+            <PlayTooltip type={Play.NOW}>
+                <ActionIcon
+                    icon="mediaPlay"
+                    iconProps={{
+                        size: 'md',
+                    }}
+                    size="xs"
+                    variant="subtle"
+                    {...handlePlayNow.handlers}
+                    {...handlePlayNow.props}
+                />
+            </PlayTooltip>
+            <PlayTooltip type={Play.NEXT}>
+                <ActionIcon
+                    icon="mediaPlayNext"
+                    iconProps={{
+                        size: 'md',
+                    }}
+                    size="xs"
+                    variant="subtle"
+                    {...handlePlayNext.handlers}
+                    {...handlePlayNext.props}
+                />
+            </PlayTooltip>
+            <PlayTooltip type={Play.LAST}>
+                <ActionIcon
+                    icon="mediaPlayLast"
+                    iconProps={{
+                        size: 'md',
+                    }}
+                    size="xs"
+                    variant="subtle"
+                    {...handlePlayLast.handlers}
+                    {...handlePlayLast.props}
+                />
+            </PlayTooltip>
         </ActionIconGroup>
     );
 };
@@ -353,7 +372,6 @@ export const SidebarPlaylistList = () => {
                         key={index}
                         name={item.name}
                         onContextMenu={handleContextMenu}
-                        onPlay={handlePlayPlaylist}
                         to={item.id}
                     />
                 ))}
@@ -438,7 +456,6 @@ export const SidebarSharedPlaylistList = () => {
                         key={index}
                         name={item.name}
                         onContextMenu={handleContextMenu}
-                        onPlay={handlePlayPlaylist}
                         to={item.id}
                     />
                 ))}

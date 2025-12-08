@@ -289,7 +289,14 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                     toast.hide(toastId);
                 }
 
-                const sortedSongs = sortSongsByFetchedOrder(songs, id, itemType);
+                let sortedSongs: Song[] = [];
+
+                // Playlists should use the native order of the playlist
+                if (itemType === LibraryItem.PLAYLIST) {
+                    sortedSongs = songs;
+                } else {
+                    sortedSongs = sortSongsByFetchedOrder(songs, id, itemType);
+                }
 
                 const filters = useSettingsStore.getState().playback.filters;
                 const filteredSongs = filterSongsByPlayerFilters(sortedSongs, filters);
