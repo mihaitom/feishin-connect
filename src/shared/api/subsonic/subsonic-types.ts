@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { object, z } from 'zod';
 
 const baseResponse = z.object({
     'subsonic-response': z.object({
