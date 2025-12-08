@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from 'react';
+
 import i18n from '/@/i18n/i18n';
 import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
 import { useCurrentServer } from '/@/renderer/store';
@@ -19,6 +21,7 @@ import { ItemListKey } from '/@/shared/types/types';
 interface ListSortByDropdownProps {
     defaultSortByValue: string;
     disabled?: boolean;
+    includeId?: boolean;
     itemType: LibraryItem;
     listKey: ItemListKey;
     onChange?: (value: string) => void;
@@ -43,6 +46,57 @@ export const ListSortByDropdown = ({
     const handleSortByChange = (sortBy: string) => {
         setSortBy(sortBy);
         onChange?.(sortBy);
+    };
+
+    return (
+        <DropdownMenu disabled={disabled} position="bottom-start">
+            <DropdownMenu.Target>
+                {target ? (
+                    target
+                ) : (
+                    <Button disabled={disabled} variant="subtle">
+                        {sortByLabel}
+                    </Button>
+                )}
+            </DropdownMenu.Target>
+            <DropdownMenu.Dropdown>
+                {FILTERS[itemType][server.type].map((f) => (
+                    <DropdownMenu.Item
+                        isSelected={f.value === sortBy}
+                        key={`filter-${f.name}`}
+                        onClick={() => handleSortByChange(f.value)}
+                        value={f.value}
+                    >
+                        {f.name}
+                    </DropdownMenu.Item>
+                ))}
+            </DropdownMenu.Dropdown>
+        </DropdownMenu>
+    );
+};
+
+interface ListSortByDropdownControlledProps {
+    disabled?: boolean;
+    itemType: LibraryItem;
+    setSortBy: Dispatch<SetStateAction<string>>;
+    sortBy: string;
+    target?: React.ReactNode;
+}
+
+export const ListSortByDropdownControlled = ({
+    disabled,
+    itemType,
+    setSortBy,
+    sortBy,
+    target,
+}: ListSortByDropdownControlledProps) => {
+    const server = useCurrentServer();
+
+    const sortByLabel =
+        (itemType && FILTERS[itemType][server.type].find((f) => f.value === sortBy)?.name) || '—';
+
+    const handleSortByChange = (sortBy: string) => {
+        setSortBy(sortBy);
     };
 
     return (

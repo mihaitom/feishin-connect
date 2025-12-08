@@ -15,6 +15,8 @@ import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumInfiniteCarousel } from '/@/renderer/features/albums/components/album-infinite-carousel';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
+import { ListSortByDropdownControlled } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
+import { ListSortOrderToggleButtonControlled } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -28,6 +30,7 @@ import {
 } from '/@/renderer/utils';
 import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
 import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
+import { sortSongList } from '/@/shared/api/utils';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
 import { Flex } from '/@/shared/components/flex/flex';
@@ -46,6 +49,7 @@ import {
     ExplicitStatus,
     LibraryItem,
     Song,
+    SongListSort,
     SortOrder,
 } from '/@/shared/types/domain-types';
 import { ItemListKey, ListDisplayType, Play } from '/@/shared/types/types';
@@ -426,13 +430,20 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
 
     const currentSong = usePlayerSong();
 
+    const [sortBy, setSortBy] = useState<SongListSort>(SongListSort.ID);
+    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.ASC);
+
     const columns = useMemo(() => {
         return tableConfig?.columns || [];
     }, [tableConfig?.columns]);
 
     const filteredSongs = useMemo(() => {
-        return searchLibraryItems(songs, searchTerm, LibraryItem.SONG);
-    }, [songs, searchTerm]);
+        return sortSongList(
+            searchLibraryItems(songs, searchTerm, LibraryItem.SONG),
+            sortBy,
+            sortOrder,
+        );
+    }, [songs, searchTerm, sortBy, sortOrder]);
 
     const { handleColumnReordered } = useItemListColumnReorder({
         itemListKey: ItemListKey.ALBUM_DETAIL,
@@ -481,6 +492,11 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
     const groups = useMemo(() => {
         // Remove groups when filtering
         if (searchTerm.trim()) {
+            return undefined;
+        }
+
+        // Remove groups when sorting
+        if (sortBy !== SongListSort.ID) {
             return undefined;
         }
 
@@ -561,7 +577,7 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
             },
             rowHeight: 40,
         }));
-    }, [discGroups, t, searchTerm]);
+    }, [searchTerm, sortBy, discGroups, t]);
 
     const player = usePlayer();
 
@@ -629,6 +645,15 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
                         },
                     }}
                     value={searchTerm}
+                />
+                <ListSortByDropdownControlled
+                    itemType={LibraryItem.PLAYLIST_SONG}
+                    setSortBy={(value) => setSortBy(value as SongListSort)}
+                    sortBy={sortBy}
+                />
+                <ListSortOrderToggleButtonControlled
+                    setSortOrder={(value) => setSortOrder(value as SortOrder)}
+                    sortOrder={sortOrder}
                 />
                 <ListConfigMenu
                     displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}

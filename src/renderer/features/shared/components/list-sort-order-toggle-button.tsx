@@ -29,3 +29,25 @@ export const ListSortOrderToggleButton = ({
         />
     );
 };
+
+interface ListSortOrderToggleButtonControlledProps {
+    disabled?: boolean;
+    setSortOrder: (sortOrder: SortOrder) => void;
+    sortOrder: SortOrder;
+}
+
+export const ListSortOrderToggleButtonControlled = ({
+    disabled,
+    setSortOrder,
+    sortOrder,
+}: ListSortOrderToggleButtonControlledProps) => {
+    return (
+        <OrderToggleButton
+            disabled={disabled}
+            onToggle={() =>
+                setSortOrder(sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC)
+            }
+            sortOrder={sortOrder as SortOrder}
+        />
+    );
+};
