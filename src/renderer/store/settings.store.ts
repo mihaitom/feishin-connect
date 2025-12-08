@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 import { generatePath } from 'react-router';
 import { z } from 'zod';
-import { createJSONStorage, devtools, persist } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createWithEqualityFn } from 'zustand/traditional';
@@ -18,7 +18,7 @@ import {
     SONG_TABLE_COLUMNS,
 } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { AppRoute } from '/@/renderer/router/routes';
-import { mergeOverridingColumns, splitSettingsStorage } from '/@/renderer/store/utils';
+import { mergeOverridingColumns } from '/@/renderer/store/utils';
 import { FontValueSchema } from '/@/renderer/types/fonts';
 import { randomString } from '/@/renderer/utils';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
@@ -1405,7 +1405,7 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
         ),
         {
             merge: mergeOverridingColumns,
-            migrate(persistedState, version): SettingsSlice {
+            migrate(persistedState, version) {
                 const state = persistedState as SettingsSlice;
 
                 if (version === 8) {
@@ -1453,7 +1453,7 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                 }
 
                 if (version <= 11) {
-                    return getInitialState() as SettingsSlice;
+                    return {};
                 }
 
                 if (version <= 12) {
@@ -1472,10 +1472,9 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
-                return state;
+                return persistedState;
             },
             name: 'store_settings',
-            storage: createJSONStorage(() => splitSettingsStorage),
             version: 14,
         },
     ),
