@@ -247,6 +247,14 @@ export const contract = c.router({
             400: jfType._response.error,
         },
     },
+    getUser: {
+        method: 'GET',
+        path: 'users/:id',
+        responses: {
+            200: jfType._response.user,
+            400: jfType._response.error,
+        },
+    },
     movePlaylistItem: {
         body: null,
         method: 'POST',

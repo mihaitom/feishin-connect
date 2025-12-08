@@ -1276,7 +1276,6 @@ export type ControllerEndpoint = {
     getAlbumInfo?: (args: AlbumDetailArgs) => Promise<AlbumInfo>;
     getAlbumList: (args: AlbumListArgs) => Promise<AlbumListResponse>;
     getAlbumListCount: (args: AlbumListCountArgs) => Promise<number>;
-    // getArtistInfo?: (args: any) => void;
     getArtistList: (args: ArtistListArgs) => Promise<ArtistListResponse>;
     getArtistListCount: (args: ArtistListCountArgs) => Promise<number>;
     getDownloadUrl: (args: DownloadArgs) => string;
@@ -1299,6 +1298,8 @@ export type ControllerEndpoint = {
     getStructuredLyrics?: (args: StructuredLyricsArgs) => Promise<StructuredLyric[]>;
     getTagList?: (args: TagListArgs) => Promise<TagListResponse>;
     getTopSongs: (args: TopSongListArgs) => Promise<TopSongListResponse>;
+    // getArtistInfo?: (args: any) => void;
+    getUserInfo: (args: UserInfoArgs) => Promise<UserInfoResponse>;
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;
     movePlaylistItem?: (args: MoveItemArgs) => Promise<void>;
     removeFromPlaylist: (args: RemoveFromPlaylistArgs) => Promise<RemoveFromPlaylistResponse>;
@@ -1393,6 +1394,7 @@ export type InternalControllerEndpoint = {
     ) => Promise<StructuredLyric[]>;
     getTagList?: (args: ReplaceApiClientProps<TagListArgs>) => Promise<TagListResponse>;
     getTopSongs: (args: ReplaceApiClientProps<TopSongListArgs>) => Promise<TopSongListResponse>;
+    getUserInfo: (args: ReplaceApiClientProps<UserInfoArgs>) => Promise<UserInfoResponse>;
     getUserList?: (args: ReplaceApiClientProps<UserListArgs>) => Promise<UserListResponse>;
     movePlaylistItem?: (args: ReplaceApiClientProps<MoveItemArgs>) => Promise<void>;
     removeFromPlaylist: (
@@ -1507,6 +1509,18 @@ export type TagListResponse = {
         album: string[];
         song: string[];
     };
+};
+
+export type UserInfoArgs = BaseEndpointArgs & { query: UserInfoQuery };
+
+export type UserInfoQuery = {
+    id: string;
+};
+
+export type UserInfoResponse = {
+    id: string;
+    isAdmin: boolean;
+    name: string;
 };
 
 type BaseEndpointArgsWithServer = {

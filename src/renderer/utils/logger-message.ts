@@ -66,5 +66,12 @@ export const logMsg = {
         scrobbledTimeupdate: 'Scrobbled a timeupdate event',
         scrobbledUnpause: 'Scrobbled an unpause event',
     },
-    [LogCategory.SYSTEM]: {},
+    [LogCategory.SYSTEM]: {
+        authenticatingServer: 'Authenticating server',
+        serverAuthenticationAborted: 'Server authentication aborted',
+        serverAuthenticationError: 'Server authentication error',
+        serverAuthenticationFailed: 'Server authentication failed',
+        serverAuthenticationInvalid: 'Server authentication invalid',
+        serverAuthenticationSuccess: 'Server authentication successful',
+    },
 };

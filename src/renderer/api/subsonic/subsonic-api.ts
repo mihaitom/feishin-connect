@@ -204,6 +204,14 @@ export const contract = c.router({
             200: ssType._response.topSongsList,
         },
     },
+    getUser: {
+        method: 'GET',
+        path: 'getUser.view',
+        query: ssType._parameters.user,
+        responses: {
+            200: ssType._response.user,
+        },
+    },
     ping: {
         method: 'GET',
         path: 'ping.view',

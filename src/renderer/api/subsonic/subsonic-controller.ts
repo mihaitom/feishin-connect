@@ -144,7 +144,7 @@ export const SubsonicController: InternalControllerEndpoint = {
 
         return {
             credential,
-            isAdmin: resp.body.user.adminRoles,
+            isAdmin: Boolean(resp.body.user.adminRole),
             userId: resp.body.user.username,
             username: body.username,
         };
@@ -1472,6 +1472,25 @@ export const SubsonicController: InternalControllerEndpoint = {
             totalRecordCount: res.body.topSongs?.song?.length || 0,
         };
     },
+    getUserInfo: async (args) => {
+        const { apiClientProps, query } = args;
+
+        const res = await ssApiClient(apiClientProps).getUser({
+            query: {
+                id: query.id,
+            },
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to get user info');
+        }
+
+        return {
+            id: res.body.user.username,
+            isAdmin: Boolean(res.body.user.adminRole),
+            name: res.body.user.username,
+        };
+    },
     removeFromPlaylist: async ({ apiClientProps, query }) => {
         const res = await ssApiClient(apiClientProps).updatePlaylist({
             query: {
@@ -1583,7 +1602,6 @@ export const SubsonicController: InternalControllerEndpoint = {
 
         return null;
     },
-
     search: async (args) => {
         const { apiClientProps, query } = args;
 

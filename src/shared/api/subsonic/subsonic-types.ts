@@ -7,9 +7,13 @@ const baseResponse = z.object({
     }),
 });
 
-const authenticate = z.object({
+const userParameters = z.object({
+    id: z.string(),
+});
+
+const user = z.object({
     user: z.object({
-        adminRoles: z.boolean(),
+        adminRole: z.boolean(),
         commentRole: z.boolean(),
         coverArtRole: z.boolean(),
         downloadRole: z.boolean(),
@@ -25,6 +29,8 @@ const authenticate = z.object({
         username: z.string(),
     }),
 });
+
+const authenticate = user;
 
 const authenticateParameters = z.object({
     c: z.string(),
@@ -641,6 +647,7 @@ export const ssType = {
         structuredLyrics: structuredLyricsParameters,
         topSongsList: topSongsListParameters,
         updatePlaylist: updatePlaylistParameters,
+        user: userParameters,
     },
     _response: {
         album,
@@ -683,5 +690,6 @@ export const ssType = {
         song,
         structuredLyrics,
         topSongsList,
+        user,
     },
 };

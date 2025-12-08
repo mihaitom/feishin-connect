@@ -1127,6 +1127,25 @@ export const JellyfinController: InternalControllerEndpoint = {
             totalRecordCount: res.body.TotalRecordCount,
         };
     },
+    getUserInfo: async (args) => {
+        const { apiClientProps, query } = args;
+
+        const res = await jfApiClient(apiClientProps).getUser({
+            params: {
+                id: query.id,
+            },
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to get user info');
+        }
+
+        return {
+            id: res.body.Id,
+            isAdmin: Boolean(res.body.Policy.IsAdministrator),
+            name: res.body.Name,
+        };
+    },
     movePlaylistItem: async (args) => {
         const { apiClientProps, query } = args;
 

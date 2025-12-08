@@ -699,6 +699,7 @@ export const NavidromeController: InternalControllerEndpoint = {
         };
     },
     getTopSongs: SubsonicController.getTopSongs,
+    getUserInfo: SubsonicController.getUserInfo,
     getUserList: async (args) => {
         const { apiClientProps, query } = args;
 

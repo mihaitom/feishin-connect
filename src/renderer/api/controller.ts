@@ -586,6 +586,20 @@ export const controller: GeneralController = {
             server.type,
         )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
     },
+    getUserInfo(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            throw new Error(
+                `${i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' })}: getUserInfo`,
+            );
+        }
+
+        return apiController(
+            'getUserInfo',
+            server.type,
+        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+    },
     getUserList(args) {
         const server = getServerById(args.apiClientProps.serverId);
 
