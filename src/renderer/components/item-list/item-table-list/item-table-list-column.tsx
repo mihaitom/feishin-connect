@@ -479,10 +479,12 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
             case TableColumn.COMMENT:
                 return <TextColumn {...props} {...dragProps} controls={controls} type={type} />;
 
+            case TableColumn.BIT_DEPTH:
             case TableColumn.BIT_RATE:
             case TableColumn.BPM:
             case TableColumn.CHANNELS:
             case TableColumn.DISC_NUMBER:
+            case TableColumn.SAMPLE_RATE:
             case TableColumn.TRACK_NUMBER:
             case TableColumn.YEAR:
                 return <NumericColumn {...props} {...dragProps} controls={controls} type={type} />;
@@ -1228,6 +1230,9 @@ const columnLabelMap: Record<TableColumn, ReactNode | string> = {
     [TableColumn.BIOGRAPHY]: i18n.t('table.column.biography', {
         postProcess: 'upperCase',
     }) as string,
+    [TableColumn.BIT_DEPTH]: i18n.t('table.column.bitDepth', {
+        postProcess: 'upperCase',
+    }) as string,
     [TableColumn.BIT_RATE]: i18n.t('table.column.bitrate', { postProcess: 'upperCase' }) as string,
     [TableColumn.BPM]: i18n.t('table.column.bpm', { postProcess: 'upperCase' }) as string,
     [TableColumn.CHANNELS]: i18n.t('table.column.channels', { postProcess: 'upperCase' }) as string,
@@ -1273,6 +1278,9 @@ const columnLabelMap: Record<TableColumn, ReactNode | string> = {
             <Icon icon="hash" />
         </Flex>
     ),
+    [TableColumn.SAMPLE_RATE]: i18n.t('table.column.sampleRate', {
+        postProcess: 'upperCase',
+    }) as string,
     [TableColumn.SIZE]: i18n.t('table.column.size', { postProcess: 'upperCase' }) as string,
     [TableColumn.SKIP]: '',
     [TableColumn.SONG_COUNT]: i18n.t('table.column.songCount', {

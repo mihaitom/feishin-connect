@@ -1472,10 +1472,41 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
+                if (version <= 14) {
+                    // Add bitDepth and sampleRate columns to song lists
+
+                    const bitDepthColumn: ItemTableListColumnConfig = {
+                        align: 'center',
+                        autoSize: false,
+                        id: TableColumn.BIT_DEPTH,
+                        isEnabled: false,
+                        pinned: null,
+                        width: 100,
+                    };
+
+                    const sampleRateColumn: ItemTableListColumnConfig = {
+                        align: 'center',
+                        autoSize: false,
+                        id: TableColumn.SAMPLE_RATE,
+                        isEnabled: false,
+                        pinned: null,
+                        width: 100,
+                    };
+
+                    const columns = [bitDepthColumn, sampleRateColumn];
+
+                    state.lists[LibraryItem.SONG]?.table.columns.push(...columns);
+                    state.lists[LibraryItem.PLAYLIST_SONG]?.table.columns.push(...columns);
+                    state.lists[LibraryItem.QUEUE_SONG]?.table.columns.push(...columns);
+                    state.lists['albumDetail']?.table.columns.push(...columns);
+                    state.lists['fullscreen']?.table.columns.push(...columns);
+                    state.lists['sidequeue']?.table.columns.push(...columns);
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 14,
+            version: 15,
         },
     ),
 );
