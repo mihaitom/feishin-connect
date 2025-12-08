@@ -24,9 +24,9 @@ export const PlaylistContextMenu = ({ items, type }: PlaylistContextMenuProps) =
         <ContextMenu.Content
             bottomStickyContent={<ContextMenuPreview items={items} itemType={type} />}
         >
-            <PlayAction ids={ids} itemType={LibraryItem.ALBUM} />
+            <PlayAction ids={ids} itemType={LibraryItem.PLAYLIST} />
             <ContextMenu.Divider />
-            <AddToPlaylistAction items={ids} itemType={LibraryItem.ALBUM} />
+            <AddToPlaylistAction items={ids} itemType={LibraryItem.PLAYLIST} />
             <ContextMenu.Divider />
             <GetInfoAction disabled={items.length === 0} items={items} />
             <ContextMenu.Divider />
