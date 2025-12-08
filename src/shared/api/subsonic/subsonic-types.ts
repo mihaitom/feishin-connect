@@ -7,7 +7,24 @@ const baseResponse = z.object({
     }),
 });
 
-const authenticate = z.null();
+const authenticate = z.object({
+    user: z.object({
+        adminRoles: z.boolean(),
+        commentRole: z.boolean(),
+        coverArtRole: z.boolean(),
+        downloadRole: z.boolean(),
+        folder: z.string().array(),
+        jukeboxRole: z.boolean(),
+        playlistRole: z.boolean(),
+        podcastRole: z.boolean(),
+        scrobblingEnabled: z.boolean(),
+        settingsRole: z.boolean(),
+        shareRole: z.boolean(),
+        streamRole: z.boolean(),
+        uploadRole: z.boolean(),
+        username: z.string(),
+    }),
+});
 
 const authenticateParameters = z.object({
     c: z.string(),
@@ -16,6 +33,7 @@ const authenticateParameters = z.object({
     s: z.string().optional(),
     t: z.string().optional(),
     u: z.string(),
+    username: z.string(),
     v: z.string(),
 });
 

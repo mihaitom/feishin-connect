@@ -156,6 +156,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
             const serverItem: ServerListItemWithCredential = {
                 credential: data.credential,
                 id: nanoid(),
+                isAdmin: data.isAdmin,
                 name: values.name,
                 type: values.type as ServerType,
                 url: values.url.replace(/\/$/, ''),

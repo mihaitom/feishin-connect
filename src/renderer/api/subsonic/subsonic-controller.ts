@@ -132,6 +132,7 @@ export const SubsonicController: InternalControllerEndpoint = {
             query: {
                 c: 'Feishin',
                 f: 'json',
+                username: body.username,
                 v: '1.13.0',
                 ...credentialParams,
             },
@@ -143,7 +144,8 @@ export const SubsonicController: InternalControllerEndpoint = {
 
         return {
             credential,
-            userId: null,
+            isAdmin: resp.body.user.adminRoles,
+            userId: resp.body.user.username,
             username: body.username,
         };
     },

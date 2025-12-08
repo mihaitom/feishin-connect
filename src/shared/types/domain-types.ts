@@ -86,6 +86,7 @@ export type QueueSong = Song & {
 export type ServerListItem = {
     features?: ServerFeatures;
     id: string;
+    isAdmin?: boolean;
     musicFolderId?: string[];
     name: string;
     preferInstantMix?: boolean;
@@ -237,6 +238,7 @@ export type Artist = {
 
 export type AuthenticationResponse = {
     credential: string;
+    isAdmin?: boolean;
     ndCredential?: string;
     userId: null | string;
     username: string;

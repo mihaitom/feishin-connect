@@ -16,7 +16,7 @@ const c = initContract();
 export const contract = c.router({
     authenticate: {
         method: 'GET',
-        path: 'ping.view',
+        path: 'getUser.view',
         query: ssType._parameters.authenticate,
         responses: {
             200: ssType._response.authenticate,

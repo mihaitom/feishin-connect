@@ -140,6 +140,7 @@ const LoginRoute = () => {
             const serverItem: ServerListItemWithCredential = {
                 credential: data.credential,
                 id: nanoid(),
+                isAdmin: data.isAdmin,
                 name: serverName,
                 type: serverType as ServerType,
                 url: serverUrl.replace(/\/$/, ''),

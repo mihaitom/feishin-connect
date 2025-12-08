@@ -91,6 +91,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 
         return {
             credential: res.body.AccessToken,
+            isAdmin: Boolean(res.body.User.Policy.IsAdministrator),
             userId: res.body.User.Id,
             username: res.body.User.Name,
         };
