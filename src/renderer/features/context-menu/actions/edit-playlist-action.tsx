@@ -11,10 +11,11 @@ import { toast } from '/@/shared/components/toast/toast';
 import { Playlist } from '/@/shared/types/domain-types';
 
 interface EditPlaylistActionProps {
+    disabled?: boolean;
     items: Playlist[];
 }
 
-export const EditPlaylistAction = ({ items }: EditPlaylistActionProps) => {
+export const EditPlaylistAction = ({ disabled, items }: EditPlaylistActionProps) => {
     const { t } = useTranslation();
     const server = useCurrentServer();
 
@@ -52,7 +53,7 @@ export const EditPlaylistAction = ({ items }: EditPlaylistActionProps) => {
     if (items.length === 0 || items.length > 1) return null;
 
     return (
-        <ContextMenu.Item leftIcon="edit" onSelect={handleEditPlaylist}>
+        <ContextMenu.Item disabled={disabled} leftIcon="edit" onSelect={handleEditPlaylist}>
             {t('action.editPlaylist', { postProcess: 'sentenceCase' })}
         </ContextMenu.Item>
     );
