@@ -30,6 +30,7 @@ import { Group } from '/@/shared/components/group/group';
 import { Rating } from '/@/shared/components/rating/rating';
 import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
 import { useMediaQuery } from '/@/shared/hooks/use-media-query';
+import { useThrottledCallback } from '/@/shared/hooks/use-throttled-callback';
 import { LibraryItem, QueueSong, ServerType } from '/@/shared/types/domain-types';
 
 const calculateVolumeUp = (volume: number, volumeWheelStep: number) => {
@@ -318,11 +319,11 @@ const VolumeButton = () => {
     const isMinWidth = useMediaQuery('(max-width: 480px)');
 
     const handleVolumeDown = useCallback(() => {
-        setVolume(volume - 1);
+        setVolume(Math.max(0, volume - 1));
     }, [setVolume, volume]);
 
     const handleVolumeUp = useCallback(() => {
-        setVolume(volume + 1);
+        setVolume(Math.min(100, volume + 1));
     }, [setVolume, volume]);
 
     const handleVolumeSlider = useCallback(
@@ -349,9 +350,13 @@ const VolumeButton = () => {
         },
         [setVolume, volume, volumeWheelStep],
     );
+
+    const handleVolumeDownThrottled = useThrottledCallback(handleVolumeDown, 50);
+    const handleVolumeUpThrottled = useThrottledCallback(handleVolumeUp, 50);
+
     useHotkeys([
-        [bindings.volumeDown.isGlobal ? '' : bindings.volumeDown.hotkey, handleVolumeDown],
-        [bindings.volumeUp.isGlobal ? '' : bindings.volumeUp.hotkey, handleVolumeUp],
+        [bindings.volumeDown.isGlobal ? '' : bindings.volumeDown.hotkey, handleVolumeDownThrottled],
+        [bindings.volumeUp.isGlobal ? '' : bindings.volumeUp.hotkey, handleVolumeUpThrottled],
         [bindings.volumeMute.isGlobal ? '' : bindings.volumeMute.hotkey, handleMute],
     ]);
 
