@@ -154,7 +154,7 @@ export const AppIcon = {
     edit: LuPencilLine,
     ellipsisHorizontal: LuEllipsis,
     ellipsisVertical: LuEllipsisVertical,
-    emptyImage: LuImageOff,
+    emptyImage: LuDisc3,
     error: LuShieldAlert,
     externalLink: LuExternalLink,
     favorite: LuHeart,
