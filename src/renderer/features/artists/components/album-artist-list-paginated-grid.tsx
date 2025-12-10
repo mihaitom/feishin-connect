@@ -1,5 +1,4 @@
 import { UseSuspenseQueryOptions } from '@tanstack/react-query';
-import { ref } from 'process';
 
 import { api } from '/@/renderer/api';
 import { useItemListPaginatedLoader } from '/@/renderer/components/item-list/helpers/item-list-paginated-loader';
@@ -77,7 +76,6 @@ export const AlbumArtistListPaginatedGrid = ({
                 itemsPerRow={itemsPerRow}
                 itemType={LibraryItem.ALBUM_ARTIST}
                 onScrollEnd={handleOnScrollEnd}
-                ref={ref}
                 rows={rows}
             />
         </ItemListWithPagination>
