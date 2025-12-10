@@ -52,7 +52,6 @@ import {
     LuHeart,
     LuHeartCrack,
     LuImage,
-    LuImageOff,
     LuInfinity,
     LuInfo,
     LuKeyboard,
