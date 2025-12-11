@@ -462,9 +462,40 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                                             state.player.shuffle === PlayerShuffle.TRACK &&
                                             state.player.queueType !== PlayerQueueType.PRIORITY
                                         ) {
-                                            state.queue.shuffled = generateShuffledIndexes(
-                                                newUniqueIds.length,
-                                            );
+                                            // If targetSongUniqueId is provided, ensure it's at position 0 in shuffled array
+                                            if (targetSongUniqueId) {
+                                                const initialIndex = newUniqueIds.findIndex(
+                                                    (id) => id === targetSongUniqueId,
+                                                );
+                                                if (initialIndex !== -1) {
+                                                    const allIndexes = Array.from(
+                                                        { length: newUniqueIds.length },
+                                                        (_, i) => i,
+                                                    );
+
+                                                    const remainingIndexes = allIndexes.filter(
+                                                        (idx) => idx !== initialIndex,
+                                                    );
+
+                                                    const shuffledRemaining = shuffleInPlace([
+                                                        ...remainingIndexes,
+                                                    ]);
+
+                                                    state.queue.shuffled = [
+                                                        initialIndex,
+                                                        ...shuffledRemaining,
+                                                    ];
+                                                } else {
+                                                    // Fallback: if initial song not found, generate normally
+                                                    state.queue.shuffled = generateShuffledIndexes(
+                                                        newUniqueIds.length,
+                                                    );
+                                                }
+                                            } else {
+                                                state.queue.shuffled = generateShuffledIndexes(
+                                                    newUniqueIds.length,
+                                                );
+                                            }
                                         }
                                     });
 
