@@ -256,11 +256,7 @@ const normalizeSong = (
         peak: null,
         playCount: (item.UserData && item.UserData.PlayCount) || 0,
         playlistItemId: item.PlaylistItemId,
-        releaseDate: item.PremiereDate
-            ? new Date(item.PremiereDate).toISOString()
-            : item.ProductionYear
-              ? new Date(item.ProductionYear, 0, 1).toISOString()
-              : null,
+        releaseDate: item.PremiereDate ? item.PremiereDate : null,
         releaseYear: item.ProductionYear || null,
         sampleRate,
         size,
@@ -326,7 +322,7 @@ const normalizeAlbum = (
         participants: getPeople(item),
         playCount: item.UserData?.PlayCount || 0,
         recordLabels: [],
-        releaseDate: item.PremiereDate?.split('T')[0] || null,
+        releaseDate: item.PremiereDate || null,
         releaseTypes: [],
         releaseYear: item.ProductionYear || null,
         size: null,

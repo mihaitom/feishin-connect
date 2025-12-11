@@ -164,6 +164,7 @@ const album = z.object({
     name: z.string(),
     parent: z.string(),
     recordLabels: z.array(recordLabel).optional(),
+    releaseDate: z.object({ day: z.number(), month: z.number(), year: z.number() }).optional(),
     releaseTypes: z.array(z.string()).optional(),
     song: z.array(song),
     songCount: z.number(),
