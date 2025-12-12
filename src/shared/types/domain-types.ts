@@ -1514,6 +1514,7 @@ export type UserInfoArgs = BaseEndpointArgs & { query: UserInfoQuery };
 
 export type UserInfoQuery = {
     id: string;
+    username: string;
 };
 
 export type UserInfoResponse = {
