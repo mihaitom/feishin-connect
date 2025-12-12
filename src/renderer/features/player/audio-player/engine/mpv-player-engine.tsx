@@ -123,7 +123,12 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             isInitializedRef.current = false;
             hasPopulatedQueueRef.current = false;
         };
-    }, [mpvExtraParameters, mpvProperties, speed, transcode, volume]);
+        // Note: volume, speed, and transcode are intentionally not in dependencies.
+        // Volume and speed changes are handled by separate useEffects below to avoid
+        // reinitializing the entire player. Transcode changes are handled by queue
+        // update callbacks in usePlayerEvents.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mpvExtraParameters, mpvProperties]);
 
     // Update volume
     useEffect(() => {
