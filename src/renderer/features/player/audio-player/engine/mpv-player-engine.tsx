@@ -53,15 +53,10 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const isInitializedRef = useRef<boolean>(false);
     const hasPopulatedQueueRef = useRef<boolean>(false);
     const isMountedRef = useRef<boolean>(true);
-    // const currentSrcRef = useRef<string | undefined>(currentSrc);
-    // const nextSrcRef = useRef<string | undefined>(nextSrc);
 
     const { transcode } = usePlaybackSettings();
     const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
     const mpvProperties = useSettingsStore((store) => store.playback.mpvProperties);
-
-    // const [previousCurrentSrc, setPreviousCurrentSrc] = useState<string | undefined>(currentSrc);
-    // const [previousNextSrc, setPreviousNextSrc] = useState<string | undefined>(nextSrc);
 
     // Start the mpv instance on startup
     useEffect(() => {

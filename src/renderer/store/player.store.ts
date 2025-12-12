@@ -501,6 +501,21 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                                         }
                                     });
 
+                                    const currentState = get();
+                                    const queue = currentState.getQueue();
+                                    const currentIndex = currentState.player.index;
+                                    const currentSong = queue.items[currentIndex];
+
+                                    if (
+                                        currentSong &&
+                                        currentIndex !== undefined &&
+                                        currentIndex >= 0
+                                    ) {
+                                        eventEmitter.emit('PLAYER_PLAY', {
+                                            id: currentSong._uniqueId,
+                                            index: currentIndex,
+                                        });
+                                    }
                                     break;
                                 }
                                 case Play.SHUFFLE: {
@@ -527,6 +542,22 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                                         }
                                     });
 
+                                    // Emit PLAYER_PLAY event after state is updated
+                                    const currentState = get();
+                                    const queue = currentState.getQueue();
+                                    const currentIndex = currentState.player.index;
+                                    const currentSong = queue.items[currentIndex];
+
+                                    if (
+                                        currentSong &&
+                                        currentIndex !== undefined &&
+                                        currentIndex >= 0
+                                    ) {
+                                        eventEmitter.emit('PLAYER_PLAY', {
+                                            id: currentSong._uniqueId,
+                                            index: currentIndex,
+                                        });
+                                    }
                                     break;
                                 }
                             }
@@ -769,6 +800,22 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                                                 generateShuffledIndexes(combinedLength);
                                         }
                                     });
+
+                                    const currentState = get();
+                                    const queue = currentState.getQueue();
+                                    const currentIndex = currentState.player.index;
+                                    const currentSong = queue.items[currentIndex];
+
+                                    if (
+                                        currentSong &&
+                                        currentIndex !== undefined &&
+                                        currentIndex >= 0
+                                    ) {
+                                        eventEmitter.emit('PLAYER_PLAY', {
+                                            id: currentSong._uniqueId,
+                                            index: currentIndex,
+                                        });
+                                    }
                                     break;
                                 }
                                 case Play.SHUFFLE: {
@@ -797,6 +844,18 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                                             shuffledIds.length,
                                         );
                                     });
+
+                                    // Emit PLAYER_PLAY event after state is updated
+                                    const currentState = get();
+                                    const queue = currentState.getQueue();
+                                    const currentIndex = currentState.player.index;
+                                    const currentSong = queue.items[currentIndex];
+                                    if (currentSong && currentIndex !== undefined) {
+                                        eventEmitter.emit('PLAYER_PLAY', {
+                                            id: currentSong._uniqueId,
+                                            index: currentIndex,
+                                        });
+                                    }
                                     break;
                                 }
                             }
@@ -806,6 +865,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
 
                     // If playSongId is provided, find the song and start playback on it
                     if (targetSongUniqueId) {
+                        let playIndex: number | undefined;
                         set((state) => {
                             const queue = state.getQueue();
                             const queueIndex = queue.items.findIndex(
@@ -823,16 +883,27 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                                     );
                                     if (shuffledPosition !== -1) {
                                         state.player.index = shuffledPosition;
+                                        playIndex = shuffledPosition;
                                     } else {
                                         state.player.index = queueIndex;
+                                        playIndex = queueIndex;
                                     }
                                 } else {
                                     state.player.index = queueIndex;
+                                    playIndex = queueIndex;
                                 }
                                 state.player.status = PlayerStatus.PLAYING;
                                 setTimestampStore(0);
                             }
                         });
+
+                        // Emit PLAYER_PLAY event if playback was started
+                        if (playIndex !== undefined) {
+                            eventEmitter.emit('PLAYER_PLAY', {
+                                id: targetSongUniqueId,
+                                index: playIndex,
+                            });
+                        }
                     }
                 },
                 addToQueueByUniqueId: (items, uniqueId, edge, playSongId) => {
@@ -1029,6 +1100,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
 
                     // If playSongId is provided, find the song and start playback on it
                     if (targetSongUniqueId) {
+                        let playIndex: number | undefined;
                         set((state) => {
                             const queue = state.getQueue();
                             const queueIndex = queue.items.findIndex(
@@ -1046,16 +1118,27 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                                     );
                                     if (shuffledPosition !== -1) {
                                         state.player.index = shuffledPosition;
+                                        playIndex = shuffledPosition;
                                     } else {
                                         state.player.index = queueIndex;
+                                        playIndex = queueIndex;
                                     }
                                 } else {
                                     state.player.index = queueIndex;
+                                    playIndex = queueIndex;
                                 }
                                 state.player.status = PlayerStatus.PLAYING;
                                 setTimestampStore(0);
                             }
                         });
+
+                        // Emit PLAYER_PLAY event if playback was started
+                        if (playIndex !== undefined) {
+                            eventEmitter.emit('PLAYER_PLAY', {
+                                id: targetSongUniqueId,
+                                index: playIndex,
+                            });
+                        }
                     }
                 },
                 clearQueue: () => {
