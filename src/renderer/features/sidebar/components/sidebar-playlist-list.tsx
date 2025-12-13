@@ -1,4 +1,4 @@
-import { closeAllModals, openContextModal, openModal } from '@mantine/modals';
+import { openContextModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { memo, MouseEvent, useCallback, useMemo, useState } from 'react';
@@ -11,7 +11,7 @@ import { getDraggedItems } from '/@/renderer/components/item-list/helpers/get-dr
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
-import { CreatePlaylistForm } from '/@/renderer/features/playlists/components/create-playlist-form';
+import { openCreatePlaylistModal } from '/@/renderer/features/playlists/components/create-playlist-form';
 import {
     LONG_PRESS_PLAY_BEHAVIOR,
     PlayTooltip,
@@ -32,7 +32,6 @@ import {
     LibraryItem,
     Playlist,
     PlaylistListSort,
-    ServerType,
     Song,
     SortOrder,
 } from '/@/shared/types/domain-types';
@@ -331,13 +330,7 @@ export const SidebarPlaylistList = () => {
     }, [playlistsQuery.data?.items, handlePlayPlaylist, server?.type, server.username]);
 
     const handleCreatePlaylistModal = (e: MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-
-        openModal({
-            children: <CreatePlaylistForm onCancel={() => closeAllModals()} />,
-            size: server?.type === ServerType?.NAVIDROME ? 'lg' : 'sm',
-            title: t('form.createPlaylist.title', { postProcess: 'titleCase' }),
-        });
+        openCreatePlaylistModal(server, e);
     };
 
     return (
