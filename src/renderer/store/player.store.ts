@@ -2383,12 +2383,7 @@ export const subscribeCurrentTrack = (
     );
 };
 
-export const subscribeNextSong = (
-    onChange: (
-        properties: { index: number; song: QueueSong | undefined },
-        prev: { index: number; song: QueueSong | undefined },
-    ) => void,
-) => {
+export const subscribeNextSongInsertion = (onChange: (song: QueueSong | undefined) => void) => {
     return usePlayerStoreBase.subscribe(
         (state) => {
             const queue = state.getQueue();
@@ -2417,21 +2412,25 @@ export const subscribeNextSong = (
                 nextSong = calculateNextSong(queueIndex, queue.items, repeat);
             }
 
-            // Calculate the index for the next song
-            let nextIndex: number | undefined;
-            if (nextSong) {
-                nextIndex = queue.items.findIndex((item) => item._uniqueId === nextSong?._uniqueId);
-            }
-
-            return { index: nextIndex ?? -1, song: nextSong };
+            return { index: queueIndex, song: nextSong };
         },
-        (nextSong, prevNextSong) => {
-            onChange(nextSong, prevNextSong);
+        (current, prev) => {
+            // Only trigger if:
+            // 1. We have a previous value (not the first call)
+            // 2. Index hasn't changed (not a natural advance)
+            // 3. Next song has changed (song was inserted)
+            if (
+                prev &&
+                current.index === prev.index &&
+                current.song?._uniqueId !== prev.song?._uniqueId
+            ) {
+                // Index stayed the same but next song changed = insertion at next position
+                onChange(current.song);
+            }
         },
         {
-            equalityFn: (a, b) => {
-                return a.song?._uniqueId === b.song?._uniqueId;
-            },
+            // Always allow the subscription to fire so we can check conditions in the callback
+            equalityFn: () => false,
         },
     );
 };
