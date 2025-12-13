@@ -2383,6 +2383,59 @@ export const subscribeCurrentTrack = (
     );
 };
 
+export const subscribeNextSong = (
+    onChange: (
+        properties: { index: number; song: QueueSong | undefined },
+        prev: { index: number; song: QueueSong | undefined },
+    ) => void,
+) => {
+    return usePlayerStoreBase.subscribe(
+        (state) => {
+            const queue = state.getQueue();
+            let queueIndex = state.player.index;
+            const repeat = state.player.repeat;
+
+            // If shuffle is enabled and not in priority mode, map shuffled position to actual queue position
+            if (isShuffleEnabled(state)) {
+                queueIndex = mapShuffledToQueueIndex(queueIndex, state.queue.shuffled);
+            }
+
+            // Calculate next song based on shuffle and repeat settings
+            let nextSong: QueueSong | undefined;
+            if (isShuffleEnabled(state)) {
+                // Calculate next in shuffled order
+                const nextShuffledIndex = state.player.index + 1;
+                if (nextShuffledIndex < state.queue.shuffled.length) {
+                    const nextQueueIndex = state.queue.shuffled[nextShuffledIndex];
+                    nextSong = queue.items[nextQueueIndex];
+                } else if (repeat === PlayerRepeat.ALL) {
+                    // Wrap to first in shuffled order
+                    const firstQueueIndex = state.queue.shuffled[0];
+                    nextSong = queue.items[firstQueueIndex];
+                }
+            } else {
+                nextSong = calculateNextSong(queueIndex, queue.items, repeat);
+            }
+
+            // Calculate the index for the next song
+            let nextIndex: number | undefined;
+            if (nextSong) {
+                nextIndex = queue.items.findIndex((item) => item._uniqueId === nextSong?._uniqueId);
+            }
+
+            return { index: nextIndex ?? -1, song: nextSong };
+        },
+        (nextSong, prevNextSong) => {
+            onChange(nextSong, prevNextSong);
+        },
+        {
+            equalityFn: (a, b) => {
+                return a.song?._uniqueId === b.song?._uniqueId;
+            },
+        },
+    );
+};
+
 export const subscribePlayerVolume = (
     onChange: (properties: { volume: number }, prev: { volume: number }) => void,
 ) => {

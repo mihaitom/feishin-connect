@@ -224,11 +224,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
         const handleOnAutoNext = () => {
             mediaAutoNext();
-            const playerData = usePlayerStore.getState().getPlayerData();
-            const nextSongUrl = playerData.nextSong
-                ? getSongUrl(playerData.nextSong, transcode)
-                : undefined;
-            mpvPlayer?.setQueueNext(nextSongUrl);
+            handleMpvAutoNext(transcode);
         };
 
         mpvPlayerListener.rendererAutoNext(handleOnAutoNext);
@@ -241,37 +237,20 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     usePlayerEvents(
         {
             onMediaNext: () => {
-                const playerData = usePlayerStore.getState().getPlayerData();
-                const currentSongUrl = playerData.currentSong
-                    ? getSongUrl(playerData.currentSong, transcode)
-                    : undefined;
-                const nextSongUrl = playerData.nextSong
-                    ? getSongUrl(playerData.nextSong, transcode)
-                    : undefined;
-                mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false);
+                replaceMpvQueue(transcode);
             },
             onMediaPrev: () => {
-                const playerData = usePlayerStore.getState().getPlayerData();
-                const currentSongUrl = playerData.currentSong
-                    ? getSongUrl(playerData.currentSong, transcode)
-                    : undefined;
-                const nextSongUrl = playerData.nextSong
-                    ? getSongUrl(playerData.nextSong, transcode)
-                    : undefined;
-                mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false);
+                replaceMpvQueue(transcode);
+            },
+            onNextSongInsertion: (song) => {
+                const nextSongUrl = song ? getSongUrl(song, transcode) : undefined;
+                mpvPlayer?.setQueueNext(nextSongUrl);
             },
             onPlayerPlay: () => {
-                const playerData = usePlayerStore.getState().getPlayerData();
-                const currentSongUrl = playerData.currentSong
-                    ? getSongUrl(playerData.currentSong, transcode)
-                    : undefined;
-                const nextSongUrl = playerData.nextSong
-                    ? getSongUrl(playerData.nextSong, transcode)
-                    : undefined;
-                mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false);
+                replaceMpvQueue(transcode);
             },
         },
-        [mpvPlayer, transcode],
+        [transcode],
     );
 
     useImperativeHandle<MpvPlayerEngineHandle, MpvPlayerEngineHandle>(playerRef, () => ({
@@ -317,3 +296,30 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 };
 
 MpvPlayerEngine.displayName = 'MpvPlayerEngine';
+
+function handleMpvAutoNext(transcode: {
+    bitrate?: number | undefined;
+    enabled: boolean;
+    format?: string | undefined;
+}) {
+    const playerData = usePlayerStore.getState().getPlayerData();
+    const nextSongUrl = playerData.nextSong
+        ? getSongUrl(playerData.nextSong, transcode)
+        : undefined;
+    mpvPlayer?.autoNext(nextSongUrl);
+}
+
+function replaceMpvQueue(transcode: {
+    bitrate?: number | undefined;
+    enabled: boolean;
+    format?: string | undefined;
+}) {
+    const playerData = usePlayerStore.getState().getPlayerData();
+    const currentSongUrl = playerData.currentSong
+        ? getSongUrl(playerData.currentSong, transcode)
+        : undefined;
+    const nextSongUrl = playerData.nextSong
+        ? getSongUrl(playerData.nextSong, transcode)
+        : undefined;
+    mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false);
+}

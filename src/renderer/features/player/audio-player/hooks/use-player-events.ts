@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { eventEmitter } from '/@/renderer/events/event-emitter';
 import {
     subscribeCurrentTrack,
+    subscribeNextSongInsertion,
     subscribePlayerMute,
     subscribePlayerProgress,
     subscribePlayerQueue,
@@ -27,6 +28,7 @@ interface PlayerEventsCallbacks {
     ) => void;
     onMediaNext?: (properties: { currentIndex: number; nextIndex: number }) => void;
     onMediaPrev?: (properties: { currentIndex: number; prevIndex: number }) => void;
+    onNextSongInsertion?: (song: QueueSong | undefined) => void;
     onPlayerMute?: (properties: { muted: boolean }, prev: { muted: boolean }) => void;
     onPlayerPlay?: (properties: { id: string; index: number }) => void;
     onPlayerProgress?: (properties: { timestamp: number }, prev: { timestamp: number }) => void;
@@ -75,6 +77,12 @@ function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
     // Subscribe to current track changes
     if (callbacks.onCurrentSongChange) {
         const unsubscribe = subscribeCurrentTrack(callbacks.onCurrentSongChange);
+        unsubscribers.push(unsubscribe);
+    }
+
+    // Subscribe to next song insertions (when a song is added at next position)
+    if (callbacks.onNextSongInsertion) {
+        const unsubscribe = subscribeNextSongInsertion(callbacks.onNextSongInsertion);
         unsubscribers.push(unsubscribe);
     }
 
