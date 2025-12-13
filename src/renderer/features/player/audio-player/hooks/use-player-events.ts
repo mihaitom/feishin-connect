@@ -13,6 +13,7 @@ import {
     subscribePlayerSpeed,
     subscribePlayerStatus,
     subscribePlayerVolume,
+    subscribeQueueCleared,
 } from '/@/renderer/store';
 import { LibraryItem, QueueData, QueueSong, Song } from '/@/shared/types/domain-types';
 import { PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
@@ -46,6 +47,7 @@ interface PlayerEventsCallbacks {
     onPlayerSpeed?: (properties: { speed: number }, prev: { speed: number }) => void;
     onPlayerStatus?: (properties: { status: PlayerStatus }, prev: { status: PlayerStatus }) => void;
     onPlayerVolume?: (properties: { volume: number }, prev: { volume: number }) => void;
+    onQueueCleared?: () => void;
     onQueueRestored?: (properties: { data: Song[]; index: number; position: number }) => void;
     onUserFavorite?: (properties: {
         favorite: boolean;
@@ -96,6 +98,12 @@ function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
     // Subscribe to queue changes
     if (callbacks.onPlayerQueueChange) {
         const unsubscribe = subscribePlayerQueue(callbacks.onPlayerQueueChange);
+        unsubscribers.push(unsubscribe);
+    }
+
+    // Subscribe to queue cleared events
+    if (callbacks.onQueueCleared) {
+        const unsubscribe = subscribeQueueCleared(callbacks.onQueueCleared);
         unsubscribers.push(unsubscribe);
     }
 

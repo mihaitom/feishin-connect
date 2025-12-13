@@ -2538,6 +2538,21 @@ export const subscribePlayerShuffle = (
     );
 };
 
+export const subscribeQueueCleared = (onChange: () => void) => {
+    return usePlayerStoreBase.subscribe(
+        (state) => state.queue,
+        (queue, prevQueue) => {
+            // Detect if queue became empty
+            const wasNotEmpty = prevQueue.default.length > 0 || prevQueue.priority.length > 0;
+            const isEmpty = queue.default.length === 0 && queue.priority.length === 0;
+
+            if (wasNotEmpty && isEmpty) {
+                onChange();
+            }
+        },
+    );
+};
+
 export const usePlayerProperties = () => {
     return usePlayerStoreBase(
         useShallow((state) => ({
