@@ -41,7 +41,7 @@ import { Play } from '/@/shared/types/types';
 interface PlaylistRowButtonProps extends Omit<ButtonProps, 'onContextMenu' | 'onPlay'> {
     item: Playlist;
     name: string;
-    onContextMenu: (e: MouseEvent<HTMLButtonElement>, item: Playlist) => void;
+    onContextMenu: (e: MouseEvent<HTMLAnchorElement>, item: Playlist) => void;
     to: string;
 }
 
@@ -164,7 +164,10 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
                 [styles.rowDraggedOver]: isDraggedOver,
                 [styles.rowHover]: isHovered,
             })}
-            onContextMenu={(e: unknown) => onContextMenu(e as MouseEvent<HTMLButtonElement>, item)}
+            onContextMenu={(e: MouseEvent<HTMLAnchorElement>) => {
+                e.preventDefault();
+                onContextMenu(e, item);
+            }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             ref={ref}
@@ -301,7 +304,8 @@ export const SidebarPlaylistList = () => {
     );
 
     const handleContextMenu = useCallback(
-        (e: MouseEvent<HTMLButtonElement>, playlist: Playlist) => {
+        (e: MouseEvent<HTMLAnchorElement>, playlist: Playlist) => {
+            e.preventDefault();
             e.stopPropagation();
             ContextMenuController.call({
                 cmd: { items: [playlist], type: LibraryItem.PLAYLIST },
@@ -416,7 +420,8 @@ export const SidebarSharedPlaylistList = () => {
     );
 
     const handleContextMenu = useCallback(
-        (e: MouseEvent<HTMLButtonElement>, playlist: Playlist) => {
+        (e: MouseEvent<HTMLAnchorElement>, playlist: Playlist) => {
+            e.preventDefault();
             e.stopPropagation();
             ContextMenuController.call({
                 cmd: {
