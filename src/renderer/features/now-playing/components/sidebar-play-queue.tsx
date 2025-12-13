@@ -53,6 +53,9 @@ const BottomPanel = () => {
     const { data: lyricsData } = useQuery(
         lyricsQueries.songLyrics(
             {
+                options: {
+                    enabled: showLyricsInSidebar && !!currentSong?.id,
+                },
                 query: { songId: currentSong?.id || '' },
                 serverId: currentSong?._serverId || '',
             },
