@@ -772,6 +772,9 @@ export const JellyfinController: InternalControllerEndpoint = {
             totalRecordCount: res.body.TotalRecordCount,
         };
     },
+    getPlayQueue: async () => {
+        throw new Error('Not supported');
+    },
     getRandomSongList: async (args) => {
         const { apiClientProps, query } = args;
 
@@ -1291,6 +1294,9 @@ export const JellyfinController: InternalControllerEndpoint = {
         }
 
         return null;
+    },
+    savePlayQueue: async () => {
+        throw new Error('Not supported');
     },
     scrobble: async (args) => {
         const { apiClientProps, query } = args;

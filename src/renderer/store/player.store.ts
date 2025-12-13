@@ -68,6 +68,7 @@ interface Actions {
     moveSelectedToTop: (items: QueueSong[]) => void;
     setCrossfadeDuration: (duration: number) => void;
     setCrossfadeStyle: (style: CrossfadeStyle) => void;
+    setQueue: (data: Song[], index?: number, position?: number) => void;
     setQueueType: (queueType: PlayerQueueType) => void;
     setRepeat: (repeat: PlayerRepeat) => void;
     setShuffle: (shuffle: PlayerShuffle) => void;
@@ -1943,6 +1944,27 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         }
                     });
                 },
+                setQueue: (items, index, position) => {
+                    const newItems = items.map(toQueueSong);
+                    const newUniqueIds = newItems.map((item) => item._uniqueId);
+
+                    set((state) => {
+                        newItems.forEach((item) => {
+                            state.queue.songs[item._uniqueId] = item;
+                        });
+
+                        state.player.index = index ?? 0;
+                        state.player.status = PlayerStatus.PLAYING;
+                        state.player.playerNum = 1;
+                        state.queue.default = newUniqueIds;
+                    });
+
+                    eventEmitter.emit('QUEUE_RESTORED', {
+                        data: items,
+                        index: index ?? 0,
+                        position: position ?? 0,
+                    });
+                },
                 ...initialState,
                 setCrossfadeDuration: (duration: number) => {
                     set((state) => {
@@ -2304,6 +2326,7 @@ export const usePlayerActions = () => {
             moveSelectedToTop: state.moveSelectedToTop,
             setCrossfadeDuration: state.setCrossfadeDuration,
             setCrossfadeStyle: state.setCrossfadeStyle,
+            setQueue: state.setQueue,
             setQueueType: state.setQueueType,
             setRepeat: state.setRepeat,
             setShuffle: state.setShuffle,
