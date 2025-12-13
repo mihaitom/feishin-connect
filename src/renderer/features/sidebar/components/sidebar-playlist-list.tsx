@@ -176,7 +176,7 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
             <div className={styles.rowGroup}>
                 <Image containerClassName={styles.imageContainer} src={item.imageUrl || ''} />
                 <div className={styles.metadata}>
-                    <Text className={styles.name} size="md">
+                    <Text className={styles.name} fw={500} size="md">
                         {name}
                     </Text>
                     <div className={styles.metadataGroup}>
