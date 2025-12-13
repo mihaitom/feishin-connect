@@ -180,6 +180,14 @@ export const NDSongQueryFields = [
     { label: 'Year', type: 'number', value: 'year' },
 ];
 
+export const NDSongQueryFieldsLabelMap: Record<string, string> = NDSongQueryFields.reduce(
+    (acc, field) => {
+        acc[field.value] = field.label;
+        return acc;
+    },
+    {} as Record<string, string>,
+);
+
 export const NDSongQueryPlaylistOperators = [
     {
         label: i18n.t('filterOperator.inPlaylist', { postProcess: 'titleCase' }),
