@@ -19,7 +19,6 @@ export const DefaultPlayButton = forwardRef<HTMLButtonElement, DefaultPlayButton
     ({ className, variant = 'filled', ...props }, ref) => {
         return (
             <ActionIcon
-                ref={ref}
                 className={clsx(styles.textButton, className, {
                     [styles.unthemed]: variant !== 'filled',
                 })}
@@ -27,6 +26,7 @@ export const DefaultPlayButton = forwardRef<HTMLButtonElement, DefaultPlayButton
                 iconProps={{
                     size: 'xl',
                 }}
+                ref={ref}
                 variant={variant}
                 {...props}
             />
