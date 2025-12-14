@@ -578,10 +578,10 @@
         }
     },
     "player": {
-        "addLast": "add last",
-        "addNext": "add next",
-        "addLastShuffled": "add last (shuffled)",
-        "addNextShuffled": "add next (shuffled)",
+        "addLast": "last",
+        "addNext": "next",
+        "addLastShuffled": "last (shuffled)",
+        "addNextShuffled": "next (shuffled)",
         "holdToShuffle": "hold to shuffle",
         "favorite": "favorite",
         "lyrics": "lyrics",
