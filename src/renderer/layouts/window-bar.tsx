@@ -198,7 +198,7 @@ export const WindowBar = () => {
     }
 
     return (
-        <>
+        <div className={styles.windowBar}>
             {windowBarStyle === Platform.WINDOWS && (
                 <WindowsControls
                     controls={{ handleClose, handleMaximize, handleMinimize }}
@@ -211,6 +211,6 @@ export const WindowBar = () => {
                     title={title}
                 />
             )}
-        </>
+        </div>
     );
 };
