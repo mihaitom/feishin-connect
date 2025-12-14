@@ -77,7 +77,7 @@ export const NavidromeSongFilters = () => {
     const debouncedHandleYearFilter = useDebouncedCallback(handleYearFilter, 300);
 
     return (
-        <Stack p="md">
+        <Stack px="xl" py="md">
             {yesNoUndefinedFilters.map((filter) => (
                 <YesNoSelect
                     clearable

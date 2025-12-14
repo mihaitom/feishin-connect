@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -108,7 +109,7 @@ export const ListFiltersTitle = () => {
     const canUnpin = Boolean(setIsSidebarOpen);
 
     return (
-        <Group justify="space-between" p="md" pb={0}>
+        <Group justify="space-between" pb={0} pl="xl" pr="xl" pt="md">
             <Text fw={500} size="xl">
                 {t('common.filters', { postProcess: 'sentenceCase' })}
             </Text>
