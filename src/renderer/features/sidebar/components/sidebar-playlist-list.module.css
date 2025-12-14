@@ -58,12 +58,16 @@
     flex-wrap: nowrap;
     gap: var(--theme-spacing-md);
     align-items: center;
+    min-width: 0;
 }
 
 .metadata-group-item {
     display: flex;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
     gap: var(--theme-spacing-xs);
     align-items: center;
+    white-space: nowrap;
 }
 
 .name {

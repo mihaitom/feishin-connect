@@ -184,14 +184,14 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
                     </Text>
                     <div className={styles.metadataGroup}>
                         <div className={styles.metadataGroupItem}>
-                            <Icon color="muted" icon="track" size="sm" />
-                            <Text isMuted size="sm">
+                            <Icon color="muted" icon="track" size="xs" />
+                            <Text isMuted size="xs">
                                 {item.songCount || 0}
                             </Text>
                         </div>
                         <div className={styles.metadataGroupItem}>
-                            <Icon color="muted" icon="duration" size="sm" />
-                            <Text isMuted size="sm">
+                            <Icon color="muted" icon="duration" size="xs" />
+                            <Text isMuted size="xs">
                                 {formatDurationStringShort(item.duration ?? 0)}
                             </Text>
                         </div>

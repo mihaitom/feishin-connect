@@ -57,7 +57,16 @@ export const formatDurationString = (duration: number) => {
 
 export const formatDurationStringShort = (duration: number) => {
     const rawDuration = formatDuration(duration).split(':');
-    return `${rawDuration[0]}h ${rawDuration[1]}m`;
+
+    if (rawDuration.length === 2) {
+        // Less than 1 hour: show "0h" and minutes
+        return `0h ${rawDuration[0]}m`;
+    } else if (rawDuration.length >= 3) {
+        // 1 hour or more: show hours and minutes
+        return `${rawDuration[0]}h ${rawDuration[1]}m`;
+    }
+
+    return '0h 0m';
 };
 
 export const formatRating = (item: Album | AlbumArtist | Song) =>
