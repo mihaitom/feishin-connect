@@ -118,5 +118,6 @@ export const logMsg = {
         serverAuthenticationFailed: 'Server authentication failed',
         serverAuthenticationInvalid: 'Server authentication invalid',
         serverAuthenticationSuccess: 'Server authentication successful',
+        settingsSynchronized: 'Differences found between renderer and main process settings',
     },
 };
