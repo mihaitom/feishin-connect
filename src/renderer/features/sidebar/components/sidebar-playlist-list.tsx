@@ -186,28 +186,28 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
                     </Text>
                     <div className={styles.metadataGroup}>
                         <div className={styles.metadataGroupItem}>
-                            <Icon color="muted" icon="track" size="xs" />
-                            <Text isMuted size="xs">
+                            <Icon color="muted" icon="itemSong" size="sm" />
+                            <Text isMuted size="sm">
                                 {item.songCount || 0}
                             </Text>
                         </div>
                         <div className={styles.metadataGroupItem}>
-                            <Icon color="muted" icon="duration" size="xs" />
-                            <Text isMuted size="xs">
+                            <Icon color="muted" icon="duration" size="sm" />
+                            <Text isMuted size="sm">
                                 {formatDurationStringShort(item.duration ?? 0)}
                             </Text>
                         </div>
                         {item.ownerId === permissions.userId && Boolean(item.public) && (
                             <div className={styles.metadataGroupItem}>
-                                <Text isMuted size="xs">
+                                <Text isMuted size="sm">
                                     {t('common.public', { postProcess: 'titleCase' })}
                                 </Text>
                             </div>
                         )}
                         {item.ownerId !== permissions.userId && (
                             <div className={styles.metadataGroupItem}>
-                                <Icon color="muted" icon="user" size="xs" />
-                                <Text isMuted size="xs">
+                                <Icon color="muted" icon="user" size="sm" />
+                                <Text isMuted size="sm">
                                     {item.owner}
                                 </Text>
                             </div>
