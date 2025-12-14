@@ -20,7 +20,7 @@ export const githubDark: AppThemeConfiguration = {
         'state-info': 'rgb(88, 166, 255)',
         'state-success': 'rgb(56, 211, 145)',
         'state-warning': 'rgb(251, 188, 5)',
-        surface: 'rgb(22, 27, 34)',
+        surface: 'rgb(46, 57, 72)',
         'surface-foreground': 'rgb(201, 209, 217)',
         white: 'rgb(255, 255, 255)',
     },

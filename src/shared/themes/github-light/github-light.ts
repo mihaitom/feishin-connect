@@ -20,7 +20,7 @@ export const githubLight: AppThemeConfiguration = {
         'state-info': 'rgb(9, 105, 218)',
         'state-success': 'rgb(26, 127, 100)',
         'state-warning': 'rgb(191, 136, 0)',
-        surface: 'rgb(246, 248, 250)',
+        surface: 'rgb(250, 252, 254)',
         'surface-foreground': 'rgb(31, 35, 40)',
         white: 'rgb(255, 255, 255)',
     },

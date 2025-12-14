@@ -20,7 +20,7 @@ export const materialLight: AppThemeConfiguration = {
         'state-info': 'rgb(33, 150, 243)',
         'state-success': 'rgb(76, 175, 80)',
         'state-warning': 'rgb(255, 152, 0)',
-        surface: 'rgb(255, 255, 255)',
+        surface: 'rgb(245, 245, 245)',
         'surface-foreground': 'rgb(33, 33, 33)',
         white: 'rgb(255, 255, 255)',
     },

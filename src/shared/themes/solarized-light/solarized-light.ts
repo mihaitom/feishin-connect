@@ -20,7 +20,7 @@ export const solarizedLight: AppThemeConfiguration = {
         'state-info': 'rgb(38, 139, 210)',
         'state-success': 'rgb(133, 153, 0)',
         'state-warning': 'rgb(181, 137, 0)',
-        surface: 'rgb(238, 232, 213)',
+        surface: 'rgb(247, 240, 220)',
         'surface-foreground': 'rgb(0, 43, 54)',
         white: 'rgb(255, 255, 255)',
     },
