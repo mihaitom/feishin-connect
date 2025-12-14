@@ -657,6 +657,8 @@
         "autoDJ_timing_description": "the number of songs remaining in the queue before auto DJ is triggered",
         "accentColor_description": "sets the accent color for the application",
         "accentColor": "accent color",
+        "useThemeAccentColor": "use theme accent color",
+        "useThemeAccentColor_description": "use the primary color defined in the selected theme instead of the custom accent color",
         "albumBackground_description": "adds a background image for album pages containing the album art",
         "albumBackground": "album background image",
         "albumBackgroundBlur_description": "adjusts the amount of blur applied to the album background image",
