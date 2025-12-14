@@ -99,6 +99,7 @@ const VirtualizedGridList = React.memo(
         width,
     }: VirtualizedGridListProps) => {
         const tableMeta = tableMetaRef.current;
+        const scrollEndTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
         const itemData: GridItemProps = useMemo(() => {
             return {
@@ -130,10 +131,26 @@ const VirtualizedGridList = React.memo(
         const handleOnScroll = useCallback(
             ({ scrollDirection, scrollOffset }: ListOnScrollProps) => {
                 onScroll?.(scrollOffset, scrollDirection === 'forward' ? 'down' : 'up');
-                onScrollEnd?.(scrollOffset, scrollDirection === 'forward' ? 'down' : 'up');
+
+                if (scrollEndTimeoutRef.current) {
+                    clearTimeout(scrollEndTimeoutRef.current);
+                }
+
+                scrollEndTimeoutRef.current = setTimeout(() => {
+                    onScrollEnd?.(scrollOffset, scrollDirection === 'forward' ? 'down' : 'up');
+                    scrollEndTimeoutRef.current = null;
+                }, 150);
             },
             [onScroll, onScrollEnd],
         );
+
+        useEffect(() => {
+            return () => {
+                if (scrollEndTimeoutRef.current) {
+                    clearTimeout(scrollEndTimeoutRef.current);
+                }
+            };
+        }, []);
 
         const handleOnItemsRendered = useCallback(
             (items: ListOnItemsRenderedProps) => {
