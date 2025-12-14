@@ -19,7 +19,7 @@ import {
 import { usePlayButtonClick } from '/@/renderer/features/shared/hooks/use-play-button-click';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer, useCurrentServerId } from '/@/renderer/store';
+import { useCurrentServer, useCurrentServerId, usePermissions } from '/@/renderer/store';
 import { formatDurationStringShort } from '/@/renderer/utils';
 import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
@@ -151,6 +151,8 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
     const player = usePlayer();
     const serverId = useCurrentServerId();
 
+    const permissions = usePermissions();
+
     const handlePlay = useCallback(
         (id: string, type: Play) => {
             player.addToQueueByFetch(serverId, [id], LibraryItem.PLAYLIST, type);
@@ -195,6 +197,21 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
                                 {formatDurationStringShort(item.duration ?? 0)}
                             </Text>
                         </div>
+                        {item.ownerId === permissions.userId && Boolean(item.public) && (
+                            <div className={styles.metadataGroupItem}>
+                                <Text isMuted size="xs">
+                                    {t('common.public', { postProcess: 'titleCase' })}
+                                </Text>
+                            </div>
+                        )}
+                        {item.ownerId !== permissions.userId && (
+                            <div className={styles.metadataGroupItem}>
+                                <Icon color="muted" icon="user" size="xs" />
+                                <Text isMuted size="xs">
+                                    {item.owner}
+                                </Text>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
