@@ -218,7 +218,8 @@
         "serverNotSelectedError": "no server selected",
         "serverRequired": "server required",
         "sessionExpiredError": "your session has expired",
-        "systemFontError": "an error occurred when trying to get system fonts"
+        "systemFontError": "an error occurred when trying to get system fonts",
+        "settingsSyncError": "discrepancies were found between the settings in the renderer and the main process. restart the application to apply the changes"
     },
     "filter": {
         "album": "$t(entity.album_one)",

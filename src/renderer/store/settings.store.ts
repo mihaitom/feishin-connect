@@ -1530,10 +1530,16 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
+                // Version 16 introduced a bug where the release channel may have been reset
+                // to the latest channel. This is to revert it.
+                if (version === 16) {
+                    state.window.releaseChannel = 'beta';
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 16,
+            version: 17,
         },
     ),
 );

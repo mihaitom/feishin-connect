@@ -1,6 +1,7 @@
 import isElectron from 'is-electron';
 import { useEffect, useRef } from 'react';
 
+import i18n from '/@/i18n/i18n';
 import { openRestartRequiredToast } from '/@/renderer/features/settings/restart-toast';
 import { useSettingsStore } from '/@/renderer/store/settings.store';
 import { logFn } from '/@/renderer/utils/logger';
@@ -10,14 +11,6 @@ import { logMsg } from '/@/renderer/utils/logger-message';
 // on app initialization. If there are differences, it updates the main store and shows
 // a restart required toast.
 export const useSyncSettingsToMain = () => {
-    const settings = useSettingsStore((state) => ({
-        general: state.general,
-        hotkeys: state.hotkeys,
-        lyrics: state.lyrics,
-        playback: state.playback,
-        window: state.window,
-    }));
-
     const hasRunRef = useRef(false);
 
     useEffect(() => {
@@ -30,11 +23,22 @@ export const useSyncSettingsToMain = () => {
             return;
         }
 
-        // Wait a small amount of time to ensure the store is hydrated from localStorage
+        // Wait some before checking for differences to ensure the store is hydrated from localStorage
         const timeoutId = setTimeout(() => {
             if (hasRunRef.current) {
                 return;
             }
+
+            const settingsFromStore = useSettingsStore.getState();
+
+            const settings = {
+                general: settingsFromStore.general,
+                hotkeys: settingsFromStore.hotkeys,
+                lyrics: settingsFromStore.lyrics,
+                playback: settingsFromStore.playback,
+                window: settingsFromStore.window,
+            };
+
             hasRunRef.current = true;
 
             const localSettings = window.api.localSettings;
@@ -113,14 +117,15 @@ export const useSyncSettingsToMain = () => {
             // Show restart toast if there were differences
             if (hasDifferences) {
                 logFn.info(logMsg.system.settingsSynchronized);
-                openRestartRequiredToast();
+                openRestartRequiredToast(
+                    i18n.t('error.settingsSyncError', { postProcess: 'sentenceCase' }),
+                );
             }
-        }, 100);
+        }, 5000);
 
         return () => {
             clearTimeout(timeoutId);
         };
         // Only run once on mount
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 };
