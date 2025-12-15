@@ -15,7 +15,7 @@ export const ayuLight: AppThemeConfiguration = {
         black: 'rgb(0, 0, 0)',
         foreground: 'rgb(57, 58, 52)',
         'foreground-muted': 'rgb(128, 128, 128)',
-        primary: 'rgb(55, 118, 171)',
+        primary: 'rgb(86, 156, 214)',
         'state-error': 'rgb(255, 51, 51)',
         'state-info': 'rgb(55, 118, 171)',
         'state-success': 'rgb(86, 171, 47)',

@@ -25,6 +25,10 @@ const getThemeSwatchColors = (theme: AppTheme) => {
     return {
         background: themeConfig.colors?.background || 'rgb(0, 0, 0)',
         foreground: themeConfig.colors?.foreground || 'rgb(255, 255, 255)',
+        primary:
+            themeConfig.colors?.primary ||
+            themeConfig.colors?.['state-info'] ||
+            'rgb(53, 116, 252)',
         surface: themeConfig.colors?.surface || themeConfig.colors?.background || 'rgb(0, 0, 0)',
     };
 };
@@ -74,6 +78,7 @@ const renderThemeOption = ({ option }: { option: { label: string; value: string 
                 <ColorSwatch color={String(colors.background)} />
                 <ColorSwatch color={String(colors.surface)} />
                 <ColorSwatch color={String(colors.foreground)} />
+                <ColorSwatch color={String(colors.primary)} />
             </Group>
             <span style={{ flex: 1 }}>{option.label}</span>
         </Group>
@@ -144,6 +149,7 @@ export const ThemeSettings = () => {
                         }
                     }}
                     renderOption={renderThemeOption}
+                    width={240}
                 />
             ),
             description: t('setting.theme', {
@@ -167,6 +173,7 @@ export const ThemeSettings = () => {
                         });
                     }}
                     renderOption={renderThemeOption}
+                    width={240}
                 />
             ),
             description: t('setting.themeDark', {
@@ -190,6 +197,7 @@ export const ThemeSettings = () => {
                         });
                     }}
                     renderOption={renderThemeOption}
+                    width={240}
                 />
             ),
             description: t('setting.themeLight', {

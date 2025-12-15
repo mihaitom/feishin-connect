@@ -26,7 +26,7 @@ export const vscodeLightPlus: AppThemeConfiguration = {
     },
     mantineOverride: {
         primaryShade: {
-            light: 4,
+            light: 9,
         },
     },
     mode: 'light',

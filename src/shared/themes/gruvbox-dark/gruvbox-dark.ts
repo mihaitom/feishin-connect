@@ -15,7 +15,7 @@ export const gruvboxDark: AppThemeConfiguration = {
         black: 'rgb(0, 0, 0)',
         foreground: 'rgb(235, 219, 178)',
         'foreground-muted': 'rgb(189, 174, 147)',
-        primary: 'rgb(184, 187, 38)',
+        primary: 'rgb(250, 189, 47)',
         'state-error': 'rgb(251, 73, 52)',
         'state-info': 'rgb(131, 165, 152)',
         'state-success': 'rgb(184, 187, 38)',
