@@ -2,7 +2,7 @@ import { LogCategory } from '/@/renderer/utils/logger';
 
 export const logMsg = {
     [LogCategory.ANALYTICS]: {
-        appTracked: 'App tracked',
+        appTracked: 'Analytics sent',
         pageViewTracked: 'Page view tracked',
     },
     [LogCategory.API]: {},
