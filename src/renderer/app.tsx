@@ -11,7 +11,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import i18n from '/@/i18n/i18n';
 import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
-import { useServerVersion } from '/@/renderer/hooks/use-server-version';
 import { useSyncSettingsToMain } from '/@/renderer/hooks/use-sync-settings-to-main';
 import { ReleaseNotesModal } from './release-notes-modal';
 import { AppRouter } from '/@/renderer/router/app-router';
@@ -32,7 +31,7 @@ export const App = () => {
     const { content, enabled } = useCssSettings();
     const { bindings } = useHotkeySettings();
     const cssRef = useRef<HTMLStyleElement | null>(null);
-    useServerVersion();
+
     useSyncSettingsToMain();
 
     const [webAudio, setWebAudio] = useState<WebAudio>();

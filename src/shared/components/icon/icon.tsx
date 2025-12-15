@@ -109,6 +109,8 @@ import {
     LuVolume1,
     LuVolume2,
     LuVolumeX,
+    LuWifi,
+    LuWifiOff,
     LuX,
 } from 'react-icons/lu';
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md';
@@ -241,6 +243,8 @@ export const AppIcon = {
     volumeMute: LuVolumeX,
     volumeNormal: LuVolume1,
     warn: LuTriangleAlert,
+    wifiOff: LuWifiOff,
+    wifiOn: LuWifi,
     x: LuX,
     xCircle: LuCircleX,
 } as const;
