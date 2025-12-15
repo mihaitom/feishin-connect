@@ -35,6 +35,8 @@ import {
     TableColumn,
 } from '/@/shared/types/types';
 
+const utils = isElectron() ? window.api.utils : null;
+
 type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
@@ -666,8 +668,19 @@ const artistItems = Object.values(ArtistItem).map((item) => ({
 
 // Determines the default/initial windowBarStyle value based on the current platform.
 const getPlatformDefaultWindowBarStyle = (): Platform => {
-    // Prefer native window bar
-    return Platform.LINUX;
+    if (utils?.isWindows()) {
+        return Platform.WINDOWS;
+    }
+
+    if (utils?.isMacOS()) {
+        return Platform.MACOS;
+    }
+
+    if (utils?.isLinux()) {
+        return Platform.WINDOWS;
+    }
+
+    return Platform.WEB;
 };
 
 const platformDefaultWindowBarStyle: Platform = getPlatformDefaultWindowBarStyle();
