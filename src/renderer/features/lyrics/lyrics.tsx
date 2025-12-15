@@ -294,7 +294,7 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true }: LyricsProps) => {
         <ComponentErrorBoundary>
             <div className={styles.lyricsContainer}>
                 {isLoadingLyrics ? (
-                    <Spinner container size={25} />
+                    <Spinner container />
                 ) : (
                     <AnimatePresence mode="sync">
                         {hasNoLyrics ? (

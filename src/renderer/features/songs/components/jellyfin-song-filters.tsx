@@ -137,7 +137,7 @@ export const JellyfinSongFilters = () => {
     );
 
     return (
-        <Stack px="xl" py="md">
+        <Stack px="md" py="md">
             {yesNoFilters.map((filter) => (
                 <YesNoSelect
                     defaultValue={filter.value ? filter.value.toString() : undefined}
