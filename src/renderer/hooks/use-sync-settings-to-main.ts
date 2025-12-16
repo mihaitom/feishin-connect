@@ -110,15 +110,6 @@ export const useSyncSettingsToMain = () => {
                     JSON.stringify(mainValueNormalized) !== JSON.stringify(rendererValueNormalized)
                 ) {
                     hasDifferences = true;
-
-                    logFn.warn(logMsg.system.settingsSynchronized, {
-                        meta: {
-                            mainStoreKey: mapping.mainStoreKey,
-                            mainValue: mainValueNormalized,
-                            rendererValue: rendererValueNormalized,
-                        },
-                    });
-
                     localSettings.set(mapping.mainStoreKey, rendererValue);
                 }
             }

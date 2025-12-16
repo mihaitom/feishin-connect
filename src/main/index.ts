@@ -46,15 +46,24 @@ export default class AppUpdater {
 
         const isBetaVersion = packageJson.version.includes('-beta');
         const releaseChannel = store.get('release_channel');
+        const isNotConfigured = !releaseChannel;
 
-        console.log('[AppUpdater] Release channel from store: ', releaseChannel);
-        console.log('[AppUpdater] Is beta version: ', isBetaVersion);
+        console.log('Release channel: ', releaseChannel);
+        console.log('Is beta version: ', isBetaVersion);
+
+        if (isNotConfigured) {
+            console.log(
+                'Release channel not configured, setting to ',
+                isBetaVersion ? 'beta' : 'latest',
+            );
+            store.set('release_channel', isBetaVersion ? 'beta' : 'latest');
+        }
 
         if (releaseChannel === 'beta') {
             autoUpdater.channel = 'beta';
             autoUpdater.allowPrerelease = true;
             autoUpdater.disableDifferentialDownload = true;
-        } else {
+        } else if (releaseChannel === 'latest') {
             autoUpdater.channel = 'latest';
             autoUpdater.allowDowngrade = true;
             autoUpdater.allowPrerelease = false;
