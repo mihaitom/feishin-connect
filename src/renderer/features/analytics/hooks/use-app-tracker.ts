@@ -127,14 +127,18 @@ const getPlayerProperties = (): Pick<
     const playbackSettings = useSettingsStore.getState().playback;
 
     return {
-        'player.mediaSession': playbackSettings.mediaSession,
+        'player.mediaSession': ignoreWeb(playbackSettings.mediaSession),
         'player.queueType': player.player.queueType,
         'player.style': player.player.transitionType,
         'player.transcoding': playbackSettings.transcode.enabled,
-        'player.type': playbackSettings.type,
-        'player.webAudio': playbackSettings.webAudio,
-    };
+        'player.type': ignoreWeb(playbackSettings.type),
+        'player.webAudio': ignoreWeb(playbackSettings.webAudio),
+    } as any;
 };
+
+function ignoreWeb<T>(value: T): T | undefined {
+    return isElectron() ? value : undefined;
+}
 
 const getSettingsProperties = (): SettingsProperties => {
     const settings = useSettingsStore.getState();
@@ -148,22 +152,30 @@ const getSettingsProperties = (): SettingsProperties => {
         'settings.autoDJItemCount': settings.autoDJ.itemCount,
         'settings.autoDJTiming': settings.autoDJ.timing,
         'settings.customCss': settings.css.enabled,
-        'settings.disableAutoUpdate': settings.window.disableAutoUpdate,
-        'settings.discord': settings.discord.enabled,
-        'settings.exitToTray': settings.window.exitToTray,
+        'settings.disableAutoUpdate': ignoreWeb(settings.window.disableAutoUpdate),
+        'settings.discord': ignoreWeb(settings.discord.enabled),
+        'settings.exitToTray': ignoreWeb(settings.window.exitToTray),
         'settings.followSystemTheme': settings.general.followSystemTheme,
         'settings.fontType': settings.font.type,
         'settings.globalHotkeys': settings.hotkeys.globalMediaHotkeys,
         'settings.homeFeature': settings.general.homeFeature,
         'settings.language': settings.general.language,
         // 'settings.lastFM': settings.general.lastFM,
-        'settings.lyrics.enableAutoTranslation': settings.lyrics.enableAutoTranslation,
-        'settings.lyrics.enableNeteaseTranslation': settings.lyrics.enableNeteaseTranslation,
-        'settings.lyrics.fetch': settings.lyrics.fetch,
-        'settings.lyrics.sources.genius': settings.lyrics.sources.includes(LyricSource.GENIUS),
-        'settings.lyrics.sources.lrclib': settings.lyrics.sources.includes(LyricSource.LRCLIB),
-        'settings.lyrics.sources.netease': settings.lyrics.sources.includes(LyricSource.NETEASE),
-        'settings.minimizeToTray': settings.window.minimizeToTray,
+        'settings.lyrics.enableAutoTranslation': ignoreWeb(settings.lyrics.enableAutoTranslation),
+        'settings.lyrics.enableNeteaseTranslation': ignoreWeb(
+            settings.lyrics.enableNeteaseTranslation,
+        ),
+        'settings.lyrics.fetch': ignoreWeb(settings.lyrics.fetch),
+        'settings.lyrics.sources.genius': ignoreWeb(
+            settings.lyrics.sources.includes(LyricSource.GENIUS),
+        ),
+        'settings.lyrics.sources.lrclib': ignoreWeb(
+            settings.lyrics.sources.includes(LyricSource.LRCLIB),
+        ),
+        'settings.lyrics.sources.netease': ignoreWeb(
+            settings.lyrics.sources.includes(LyricSource.NETEASE),
+        ),
+        'settings.minimizeToTray': ignoreWeb(settings.window.minimizeToTray),
         // 'settings.musicBrainz': settings.general.musicBrainz,
         'settings.nativeAspectRatio': settings.general.nativeAspectRatio,
         'settings.playerbarSliderType': settings.general.playerbarSlider
@@ -172,26 +184,26 @@ const getSettingsProperties = (): SettingsProperties => {
         // 'settings.playerbarWaveformBarWidth': settings.general.playerbarSlider.barWidth,
         // 'settings.playerbarWaveformGap': settings.general.playerbarSlider.barGap,
         // 'settings.playerbarWaveformRadius': settings.general.playerbarSlider.barRadius,
-        'settings.preventSleepOnPlayback': settings.window.preventSleepOnPlayback,
-        'settings.releaseChannel': settings.window.releaseChannel,
+        'settings.preventSleepOnPlayback': ignoreWeb(settings.window.preventSleepOnPlayback),
+        'settings.releaseChannel': ignoreWeb(settings.window.releaseChannel),
         'settings.resume': settings.general.resume,
         'settings.scrobble.enabled': settings.playback.scrobble.enabled,
-        'settings.scrobble.notify': settings.playback.scrobble.notify,
+        'settings.scrobble.notify': ignoreWeb(settings.playback.scrobble.notify),
         'settings.showLyricsInSidebar': settings.general.showLyricsInSidebar,
         'settings.showVisualizerInSidebar': settings.general.showVisualizerInSidebar,
         'settings.sideQueueType': settings.general.sideQueueType,
         // 'settings.skipBackwardSeconds': settings.general.skipButtons.skipBackwardSeconds,
         'settings.skipButtons': settings.general.skipButtons.enabled,
         // 'settings.skipForwardSeconds': settings.general.skipButtons.skipForwardSeconds,
-        'settings.startMinimized': settings.window.startMinimized,
+        'settings.startMinimized': ignoreWeb(settings.window.startMinimized),
         'settings.theme': settings.general.theme,
         'settings.themeDark': settings.general.themeDark,
         'settings.themeLight': settings.general.themeLight,
-        'settings.tray': settings.window.tray,
+        'settings.tray': ignoreWeb(settings.window.tray),
         'settings.useThemeAccentColor': settings.general.useThemeAccentColor,
-        'settings.windowBarStyle': settings.window.windowBarStyle,
-        'settings.zoomFactor': settings.general.zoomFactor,
-    };
+        'settings.windowBarStyle': ignoreWeb(settings.window.windowBarStyle),
+        'settings.zoomFactor': ignoreWeb(settings.general.zoomFactor),
+    } as any;
 };
 
 const getServer = (): 'unknown' | ServerType => {
