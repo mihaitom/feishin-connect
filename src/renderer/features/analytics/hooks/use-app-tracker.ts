@@ -214,6 +214,7 @@ const getServer = (): 'unknown' | ServerType => {
 
 export const useAppTracker = () => {
     const { mutate: trackAppMutation } = useMutation(appTrackerMutation);
+    const { mutate: trackAppViewMutation } = useMutation(appViewMutation);
     const hasRunOnMountRef = useRef(false);
 
     useEffect(() => {
@@ -258,6 +259,10 @@ export const useAppTracker = () => {
                     meta: { properties, todayUTC },
                 });
 
+                trackAppViewMutation(undefined, {
+                    onError: () => {},
+                });
+
                 trackAppMutation(properties, {
                     onError: () => {},
                     onSettled: () => {
@@ -287,9 +292,10 @@ export const useAppTracker = () => {
         const interval = setInterval(checkAndTrack, 1000 * 60 * 60);
 
         return () => clearInterval(interval);
-    }, [trackAppMutation]);
+    }, [trackAppMutation, trackAppViewMutation]);
 };
 
+// Sends the app event to the analytics server which includes usage data
 const appTrackerMutation = mutationOptions({
     mutationFn: (properties: AppTrackerProperties) => {
         try {
@@ -304,6 +310,27 @@ const appTrackerMutation = mutationOptions({
         }
     },
     mutationKey: ['analytics', 'settings-tracker'],
+    onSuccess: () => {},
+    retry: false,
+    throwOnError: false,
+});
+
+// Sends a view event to the analytics server which only includes language, screen, and website
+// and triggers a page view event
+const appViewMutation = mutationOptions({
+    mutationFn: () => {
+        try {
+            window.umami?.track((props) => ({
+                language: props.language,
+                screen: props.screen,
+                website: props.website,
+            }));
+            return Promise.resolve();
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    },
+    mutationKey: ['analytics', 'app-view'],
     onSuccess: () => {},
     retry: false,
     throwOnError: false,
