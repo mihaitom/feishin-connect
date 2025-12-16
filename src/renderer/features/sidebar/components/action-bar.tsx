@@ -5,7 +5,6 @@ import styles from './action-bar.module.css';
 
 import { AppMenu } from '/@/renderer/features/titlebar/components/app-menu';
 import { useCommandPalette } from '/@/renderer/store';
-import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Grid } from '/@/shared/components/grid/grid';
@@ -42,7 +41,9 @@ export const ActionBar = () => {
                     <Group gap="sm" grow wrap="nowrap">
                         <DropdownMenu position="bottom-start">
                             <DropdownMenu.Target>
-                                <ActionIcon icon="menu" iconProps={{ size: 'lg' }} />
+                                <Button p="0">
+                                    <Icon icon="menu" size="lg" />
+                                </Button>
                             </DropdownMenu.Target>
                             <DropdownMenu.Dropdown>
                                 <AppMenu />
@@ -61,8 +62,12 @@ const NavigateButtons = () => {
 
     return (
         <>
-            <ActionIcon icon="arrowLeftS" iconProps={{ size: 'lg' }} onClick={() => navigate(-1)} />
-            <ActionIcon icon="arrowRightS" iconProps={{ size: 'lg' }} onClick={() => navigate(1)} />
+            <Button onClick={() => navigate(-1)} p="0">
+                <Icon icon="arrowLeftS" size="lg" />
+            </Button>
+            <Button onClick={() => navigate(1)} p="0">
+                <Icon icon="arrowRightS" size="lg" />
+            </Button>
         </>
     );
 };
