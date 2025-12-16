@@ -267,6 +267,12 @@
         "trackNumber": "track",
         "explicitStatus": "$t(common.explicitStatus)"
     },
+    "datetime": {
+        "minuteShort": "min",
+        "secondShort": "sec",
+        "hourShort": "hr",
+        "dayShort": "day"
+    },
     "filterOperator": {
         "after": "is after",
         "afterDate": "is after (date)",

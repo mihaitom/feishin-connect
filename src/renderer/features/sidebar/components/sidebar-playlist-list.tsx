@@ -20,7 +20,7 @@ import { usePlayButtonClick } from '/@/renderer/features/shared/hooks/use-play-b
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useCurrentServerId, usePermissions } from '/@/renderer/store';
-import { formatDurationStringShort } from '/@/renderer/utils';
+import { formatDurationString } from '/@/renderer/utils';
 import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { ButtonProps } from '/@/shared/components/button/button';
@@ -194,7 +194,7 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
                         <div className={styles.metadataGroupItem}>
                             <Icon color="muted" icon="duration" size="sm" />
                             <Text isMuted size="sm">
-                                {formatDurationStringShort(item.duration ?? 0)}
+                                {formatDurationString(item.duration ?? 0)}
                             </Text>
                         </div>
                         {item.ownerId === permissions.userId && Boolean(item.public) && (
