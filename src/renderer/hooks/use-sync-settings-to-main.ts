@@ -68,10 +68,12 @@ export const useSyncSettingsToMain = () => {
                     mainStoreKey: 'disable_auto_updates',
                     rendererValue: settings.window.disableAutoUpdate,
                 },
-                {
-                    mainStoreKey: 'release_channel',
-                    rendererValue: settings.window.releaseChannel,
-                },
+                // For some reason after the application is updated, the release channel from the
+                // renderer is always set to the latest channel. This causes an infinite update loop
+                // {
+                //     mainStoreKey: 'release_channel',
+                //     rendererValue: settings.window.releaseChannel,
+                // },
                 {
                     mainStoreKey: 'window_enable_tray',
                     rendererValue: settings.window.tray,
@@ -110,13 +112,19 @@ export const useSyncSettingsToMain = () => {
                     JSON.stringify(mainValueNormalized) !== JSON.stringify(rendererValueNormalized)
                 ) {
                     hasDifferences = true;
+                    logFn.warn(logMsg.system.settingsSynchronized, {
+                        meta: {
+                            mainStoreKey: mapping.mainStoreKey,
+                            mainValue: mainValueNormalized,
+                            rendererValue: rendererValueNormalized,
+                        },
+                    });
                     localSettings.set(mapping.mainStoreKey, rendererValue);
                 }
             }
 
             // Show restart toast if there were differences
             if (hasDifferences) {
-                logFn.info(logMsg.system.settingsSynchronized);
                 openRestartRequiredToast(
                     i18n.t('error.settingsSyncError', { postProcess: 'sentenceCase' }),
                 );
