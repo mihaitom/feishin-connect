@@ -185,7 +185,12 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
                         {name}
                     </Text>
                     <div className={styles.metadataGroup}>
-                        <div className={styles.metadataGroupItem}>
+                        <div
+                            className={clsx(
+                                styles.metadataGroupItem,
+                                styles.metadataGroupItemNoShrink,
+                            )}
+                        >
                             <Icon color="muted" icon="itemSong" size="sm" />
                             <Text isMuted size="sm">
                                 {item.songCount || 0}
