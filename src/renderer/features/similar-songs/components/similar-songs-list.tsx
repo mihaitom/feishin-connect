@@ -55,7 +55,6 @@ export const SimilarSongsList = ({ count, song }: SimilarSongsListProps) => {
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <ItemTableList
-                enableSelectionDialog={false}
                 autoFitColumns={table?.autoFitColumns}
                 CellComponent={ItemTableListColumn}
                 columns={table?.columns || []}
@@ -66,6 +65,7 @@ export const SimilarSongsList = ({ count, song }: SimilarSongsListProps) => {
                 enableHorizontalBorders={fullScreenTable?.enableHorizontalBorders}
                 enableRowHoverHighlight={fullScreenTable?.enableRowHoverHighlight}
                 enableSelection
+                enableSelectionDialog={false}
                 enableVerticalBorders={fullScreenTable?.enableVerticalBorders}
                 itemType={LibraryItem.SONG}
                 onColumnReordered={handleColumnReordered}

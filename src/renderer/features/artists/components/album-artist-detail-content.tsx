@@ -305,7 +305,6 @@ const AlbumArtistMetadataTopSongs = ({
                     />
                 </Group>
                 <ItemTableList
-                    enableSelectionDialog={false}
                     activeRowId={currentSongId}
                     autoFitColumns={tableConfig.autoFitColumns}
                     CellComponent={ItemTableListColumn}
@@ -318,6 +317,7 @@ const AlbumArtistMetadataTopSongs = ({
                     enableHorizontalBorders={tableConfig.enableHorizontalBorders}
                     enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
                     enableSelection
+                    enableSelectionDialog={false}
                     enableVerticalBorders={tableConfig.enableVerticalBorders}
                     itemType={LibraryItem.SONG}
                     onColumnReordered={handleColumnReordered}
