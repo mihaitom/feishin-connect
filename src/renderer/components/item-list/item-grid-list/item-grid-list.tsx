@@ -41,6 +41,7 @@ import {
     useItemListState,
     useItemListStateSubscription,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
+import { SelectionDialog } from '/@/renderer/components/item-list/selection-dialog';
 import { ItemControls, ItemListHandle } from '/@/renderer/components/item-list/types';
 import { animationProps } from '/@/shared/components/animations/animation-props';
 import { useElementSize } from '/@/shared/hooks/use-element-size';
@@ -742,7 +743,10 @@ const BaseItemGridList = ({
                     />
                 )}
             </AutoSizer>
-            <ExpandedContainer internalState={internalState} itemType={itemType} />
+            <AnimatePresence presenceAffectsLayout>
+                <ExpandedContainer internalState={internalState} itemType={itemType} />
+                <SelectionDialog internalState={internalState} />
+            </AnimatePresence>
         </motion.div>
     );
 };

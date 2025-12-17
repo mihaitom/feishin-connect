@@ -2,11 +2,14 @@
     "action": {
         "addToFavorites": "add to $t(entity.favorite_other)",
         "addToPlaylist": "add to $t(entity.playlist_one)",
+        "addOrRemoveFromSelection": "add or remove from selection",
+        "selectRangeOfItems": "select a range of items",
         "clearQueue": "clear queue",
         "createPlaylist": "create $t(entity.playlist_one)",
         "createRadioStation": "create $t(entity.radioStation_one)",
         "deletePlaylist": "delete $t(entity.playlist_one)",
         "deleteRadioStation": "delete $t(entity.radioStation_one)",
+        "selectAll": "select all",
         "deselectAll": "deselect all",
         "downloadStarted": "started download of {{count}} items",
         "editPlaylist": "edit $t(entity.playlist_one)",
@@ -37,6 +40,7 @@
         }
     },
     "common": {
+        "countSelected": "{{count}} selected",
         "explicitStatus": "explicit status",
         "action_one": "action",
         "action_other": "actions",

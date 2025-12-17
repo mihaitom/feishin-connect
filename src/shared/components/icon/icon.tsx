@@ -114,6 +114,7 @@ import {
     LuX,
 } from 'react-icons/lu';
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md';
+import { PiMouseLeftClickFill, PiMouseRightClickFill } from 'react-icons/pi';
 import { RiPlayListAddLine, RiRepeat2Line, RiRepeatOneLine } from 'react-icons/ri';
 import { SiMusicbrainz } from 'react-icons/si';
 
@@ -202,6 +203,8 @@ export const AppIcon = {
     metadata: LuBookOpen,
     microphone: LuMicVocal,
     minus: LuMinus,
+    mouseLeftClick: PiMouseLeftClickFill,
+    mouseRightClick: PiMouseRightClickFill,
     panelRightClose: LuPanelRightClose,
     panelRightOpen: LuPanelRightOpen,
     pin: LuPin,
