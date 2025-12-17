@@ -673,6 +673,7 @@ interface ItemTableListProps {
     enableHorizontalBorders?: boolean;
     enableRowHoverHighlight?: boolean;
     enableSelection?: boolean;
+    enableSelectionDialog?: boolean;
     enableStickyGroupRows?: boolean;
     enableStickyHeader?: boolean;
     enableVerticalBorders?: boolean;
@@ -714,6 +715,7 @@ const BaseItemTableList = ({
     enableHorizontalBorders = false,
     enableRowHoverHighlight = true,
     enableSelection = true,
+    enableSelectionDialog = true,
     enableStickyGroupRows = false,
     enableStickyHeader = false,
     enableVerticalBorders = false,
@@ -2319,7 +2321,7 @@ const BaseItemTableList = ({
                 totalRowCount={totalRowCount}
             />
             <ExpandedContainer internalState={internalState} itemType={itemType} />
-            <SelectionDialog internalState={internalState} />
+            {enableSelectionDialog && <SelectionDialog internalState={internalState} />}
         </motion.div>
     );
 };

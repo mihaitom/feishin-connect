@@ -677,6 +677,7 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
                 enableHorizontalBorders={tableConfig.enableHorizontalBorders}
                 enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
                 enableSelection
+                enableSelectionDialog={false}
                 enableStickyGroupRows
                 enableStickyHeader
                 enableVerticalBorders={tableConfig.enableVerticalBorders}

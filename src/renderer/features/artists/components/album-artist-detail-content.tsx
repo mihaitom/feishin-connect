@@ -305,6 +305,7 @@ const AlbumArtistMetadataTopSongs = ({
                     />
                 </Group>
                 <ItemTableList
+                    enableSelectionDialog={false}
                     activeRowId={currentSongId}
                     autoFitColumns={tableConfig.autoFitColumns}
                     CellComponent={ItemTableListColumn}

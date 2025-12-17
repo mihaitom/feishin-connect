@@ -55,6 +55,7 @@ export const SimilarSongsList = ({ count, song }: SimilarSongsListProps) => {
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <ItemTableList
+                enableSelectionDialog={false}
                 autoFitColumns={table?.autoFitColumns}
                 CellComponent={ItemTableListColumn}
                 columns={table?.columns || []}

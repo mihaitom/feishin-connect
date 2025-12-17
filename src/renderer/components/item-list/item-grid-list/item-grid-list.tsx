@@ -287,6 +287,7 @@ export interface ItemGridListProps {
     enableDrag?: boolean;
     enableExpansion?: boolean;
     enableSelection?: boolean;
+    enableSelectionDialog?: boolean;
     gap?: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
     getRowId?: ((item: unknown) => string) | string;
     initialTop?: {
@@ -309,6 +310,7 @@ const BaseItemGridList = ({
     enableDrag = true,
     enableExpansion = false,
     enableSelection = true,
+    enableSelectionDialog = true,
     gap = 'sm',
     getRowId,
     initialTop,
@@ -745,7 +747,7 @@ const BaseItemGridList = ({
             </AutoSizer>
             <AnimatePresence presenceAffectsLayout>
                 <ExpandedContainer internalState={internalState} itemType={itemType} />
-                <SelectionDialog internalState={internalState} />
+                {enableSelectionDialog && <SelectionDialog internalState={internalState} />}
             </AnimatePresence>
         </motion.div>
     );
