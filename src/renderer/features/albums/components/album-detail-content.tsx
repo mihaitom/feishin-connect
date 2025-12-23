@@ -372,9 +372,7 @@ export const AlbumDetailContent = () => {
             <div className={styles.detailContainer}>
                 {comment && (
                     <Spoiler maxHeight={75}>
-                        <Text
-                            dangerouslySetInnerHTML={{ __html: replaceURLWithHTMLLinks(comment) }}
-                        />
+                        <Text pb="md">{replaceURLWithHTMLLinks(comment)}</Text>
                     </Spoiler>
                 )}
                 <div className={styles.contentLayout}>
