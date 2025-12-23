@@ -203,10 +203,7 @@ const normalizeSong = (
                 : null,
         playCount: item.playCount || 0,
         playlistItemId,
-        releaseDate: (item.releaseDate
-            ? new Date(item.releaseDate)
-            : new Date(Date.UTC(item.year, 0, 1))
-        ).toISOString(),
+        releaseDate: item.releaseDate ? new Date(item.releaseDate).toISOString() : null,
         releaseYear: item.year || null,
         sampleRate: item.sampleRate || null,
         size: item.size,
