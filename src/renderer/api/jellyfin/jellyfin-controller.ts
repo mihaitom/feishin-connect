@@ -429,7 +429,7 @@ export const JellyfinController: InternalControllerEndpoint = {
     getDownloadUrl: (args) => {
         const { apiClientProps, query } = args;
 
-        return `${apiClientProps.server?.url}/items/${query.id}/download?api_key=${apiClientProps.server?.credential}`;
+        return `${apiClientProps.server?.url}/items/${query.id}/download?apiKey=${apiClientProps.server?.credential}`;
     },
     getFolder: async ({ apiClientProps, query }) => {
         const userId = apiClientProps.server?.userId;
@@ -1093,7 +1093,7 @@ export const JellyfinController: InternalControllerEndpoint = {
         const { bitrate, format, id, transcode } = query;
         const deviceId = '';
 
-        let url = `${server?.url}/Items/${id}/Download?api_key=${server?.credential}&playSessionId=${deviceId}`;
+        let url = `${server?.url}/Items/${id}/Download?apiKey=${server?.credential}&playSessionId=${deviceId}`;
 
         if (transcode) {
             // Some format appears to be required. Fall back to trusty MP3 if not specified
