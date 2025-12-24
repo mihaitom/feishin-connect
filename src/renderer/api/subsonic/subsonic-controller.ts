@@ -682,6 +682,28 @@ export const SubsonicController: InternalControllerEndpoint = {
             ...args,
             query: { ...args.query, startIndex: 0 },
         }).then((res) => res!.totalRecordCount!),
+    getArtistRadio: async (args) => {
+        const { apiClientProps, query } = args;
+
+        const res = await ssApiClient(apiClientProps).getSimilarSongs2({
+            query: {
+                count: query.count,
+                id: query.artistId,
+            },
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to get artist radio songs');
+        }
+
+        if (!res.body.similarSongs2?.song) {
+            return [];
+        }
+
+        return res.body.similarSongs2.song.map((song) =>
+            ssNormalize.song(song, apiClientProps.server),
+        );
+    },
     getDownloadUrl: (args) => {
         const { apiClientProps, query } = args;
 
@@ -880,6 +902,7 @@ export const SubsonicController: InternalControllerEndpoint = {
             totalRecordCount: res.body.musicFolders.musicFolder.length,
         };
     },
+
     getPlaylistDetail: async (args) => {
         const { apiClientProps, query } = args;
 
@@ -895,7 +918,6 @@ export const SubsonicController: InternalControllerEndpoint = {
 
         return ssNormalize.playlist(res.body.playlist, apiClientProps.server);
     },
-
     getPlaylistList: async ({ apiClientProps, query }) => {
         const sortOrder = query.sortOrder.toLowerCase() as 'asc' | 'desc';
 

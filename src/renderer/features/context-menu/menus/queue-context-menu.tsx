@@ -5,6 +5,7 @@ import { DownloadAction } from '/@/renderer/features/context-menu/actions/downlo
 import { GetInfoAction } from '/@/renderer/features/context-menu/actions/get-info-action';
 import { GoToAction } from '/@/renderer/features/context-menu/actions/go-to-action';
 import { MoveQueueItemsAction } from '/@/renderer/features/context-menu/actions/move-queue-items-action';
+import { PlayTrackRadioAction } from '/@/renderer/features/context-menu/actions/play-track-radio-action';
 import { RemoveFromQueueAction } from '/@/renderer/features/context-menu/actions/remove-from-queue-action';
 import { SetFavoriteAction } from '/@/renderer/features/context-menu/actions/set-favorite-action';
 import { SetRatingAction } from '/@/renderer/features/context-menu/actions/set-rating-action';
@@ -32,6 +33,8 @@ export const QueueContextMenu = ({ items }: QueueContextMenuProps) => {
             <ContextMenu.Divider />
             <MoveQueueItemsAction items={items} />
             <ShuffleItemsAction items={items} />
+            <ContextMenu.Divider />
+            <PlayTrackRadioAction disabled={items.length > 1} song={items[0]} />
             <ContextMenu.Divider />
             <AddToPlaylistAction items={ids} itemType={LibraryItem.SONG} />
             <ContextMenu.Divider />
