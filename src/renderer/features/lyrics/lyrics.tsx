@@ -8,6 +8,7 @@ import styles from './lyrics.module.css';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { translateLyrics } from '/@/renderer/features/lyrics/api/lyric-translate';
 import { lyricsQueries } from '/@/renderer/features/lyrics/api/lyrics-api';
+import { openLyricsExportModal } from '/@/renderer/features/lyrics/components/lyrics-export-form';
 import { LyricsActions } from '/@/renderer/features/lyrics/lyrics-actions';
 import {
     SynchronizedLyrics,
@@ -258,6 +259,10 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true }: LyricsProps) => {
     const languages = useMemo(() => {
         if (Array.isArray(data)) {
             return data.map((lyric, idx) => ({ label: lyric.lang, value: idx.toString() }));
+        } else if (data?.lyrics) {
+            // xxx denotes undefined lyrics language. If it's a single lyric (from a remote source)
+            // the language is most likely not available, so leave it undefined
+            return [{ label: 'xxx', value: '0' }];
         }
         return [];
     }, [data]);
@@ -289,6 +294,12 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true }: LyricsProps) => {
 
         return undefined;
     }, [isLoadingLyrics, hasNoLyrics, fadeOutNoLyricsMessage]);
+
+    const handleExportLyrics = useCallback(() => {
+        if (lyrics) {
+            openLyricsExportModal({ lyrics, offsetMs: currentOffsetMs, synced });
+        }
+    }, [currentOffsetMs, lyrics, synced]);
 
     return (
         <ComponentErrorBoundary>
@@ -341,6 +352,7 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true }: LyricsProps) => {
                         index={index}
                         languages={languages}
                         offsetMs={currentOffsetMs}
+                        onExportLyrics={handleExportLyrics}
                         onRemoveLyric={handleOnRemoveLyric}
                         onSearchOverride={handleOnSearchOverride}
                         onTranslateLyric={
