@@ -305,10 +305,11 @@ const CompactItemCard = ({
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
-                    {withControls && showControls && (
+                    {withControls && showControls && data && (
                         <ItemCardControls
                             controls={controls}
                             enableExpansion={enableExpansion}
+                            internalState={internalState}
                             item={data}
                             itemType={itemType}
                             type="compact"
