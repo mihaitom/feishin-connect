@@ -18,6 +18,7 @@ interface Card {
 
 interface GridCarouselProps {
     cards: Card[];
+    enableRefresh?: boolean;
     hasNextPage?: boolean;
     loadNextPage?: () => void;
     onNextPage: (page: number) => void;
@@ -46,6 +47,7 @@ const pageVariants: Variants = {
 function BaseGridCarousel(props: GridCarouselProps) {
     const {
         cards,
+        enableRefresh = false,
         hasNextPage,
         loadNextPage,
         onNextPage,
@@ -164,10 +166,10 @@ function BaseGridCarousel(props: GridCarouselProps) {
                                 ) : (
                                     title
                                 )}
-                                {onRefresh && (
+                                {enableRefresh && onRefresh && (
                                     <ActionIcon
                                         icon="refresh"
-                                        iconProps={{ size: 'md' }}
+                                        iconProps={{ size: 'xs' }}
                                         onClick={onRefresh}
                                         size="xs"
                                         tooltip={{ label: 'Refresh' }}

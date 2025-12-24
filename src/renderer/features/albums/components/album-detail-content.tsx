@@ -342,6 +342,7 @@ export const AlbumDetailContent = () => {
             uniqueId: 'moreFromArtist',
         },
         {
+            enableRefresh: true,
             excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
             isHidden: !detailQuery?.data?.genres?.[0],
             query: {
@@ -413,6 +414,7 @@ export const AlbumDetailContent = () => {
                                 .filter((c) => !c.isHidden)
                                 .map((carousel) => (
                                     <AlbumInfiniteCarousel
+                                        enableRefresh={carousel.enableRefresh}
                                         excludeIds={carousel.excludeIds}
                                         key={`carousel-${carousel.uniqueId}`}
                                         query={carousel.query}
