@@ -135,6 +135,7 @@ export interface ItemCardDerivativeProps extends Omit<ItemCardProps, 'type'> {
 const CompactItemCard = ({
     controls,
     data,
+    enableDrag,
     enableExpansion,
     enableNavigation,
     internalState,
@@ -149,6 +150,53 @@ const CompactItemCard = ({
             ? internalState.extractRowId(data)
             : undefined;
     const isSelected = useItemSelectionState(internalState, itemRowId || undefined);
+
+    const { isDragging: isDraggingLocal, ref } = useDragDrop<HTMLDivElement>({
+        drag: {
+            getId: () => {
+                if (!data) {
+                    return [];
+                }
+
+                const draggedItems = getDraggedItems(data, internalState);
+                return draggedItems.map((item) => item.id);
+            },
+            getItem: () => {
+                if (!data) {
+                    return [];
+                }
+
+                const draggedItems = getDraggedItems(data, internalState);
+                return draggedItems;
+            },
+            itemType,
+            onDragStart: () => {
+                if (!data) {
+                    return;
+                }
+
+                const draggedItems = getDraggedItems(data, internalState);
+                if (internalState) {
+                    internalState.setDragging(draggedItems);
+                }
+            },
+            onDrop: () => {
+                if (internalState) {
+                    internalState.setDragging([]);
+                }
+            },
+            operation:
+                itemType === LibraryItem.QUEUE_SONG
+                    ? [DragOperation.REORDER, DragOperation.ADD]
+                    : [DragOperation.ADD],
+            target: DragTarget.ALBUM,
+        },
+        isEnabled: !!enableDrag && !!data,
+    });
+
+    const itemId = data && internalState ? data.id : undefined;
+    const isDraggingState = useItemDraggingState(internalState, itemId);
+    const isDragging = isDraggingState || isDraggingLocal;
 
     const handleClick = useDoubleClick({
         onDoubleClick: (e: React.MouseEvent<HTMLDivElement>) => {
@@ -289,8 +337,10 @@ const CompactItemCard = ({
         return (
             <div
                 className={clsx(styles.container, styles.compact, {
+                    [styles.dragging]: isDragging,
                     [styles.selected]: isSelected,
                 })}
+                ref={ref}
             >
                 {enableNavigation && navigationPath && !internalState ? (
                     <Link

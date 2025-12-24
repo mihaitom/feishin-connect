@@ -152,6 +152,7 @@ const ItemListConfigSchema = z.object({
         itemsPerRow: z.number(),
         itemsPerRowEnabled: z.boolean(),
         rows: z.array(ItemGridListRowConfigSchema),
+        size: z.enum(['compact', 'default', 'large']),
     }),
     itemsPerPage: z.number(),
     pagination: z.nativeEnum(ListPaginationType),
@@ -539,6 +540,7 @@ export type DataGridProps = {
     itemsPerRow: number;
     itemsPerRowEnabled: boolean;
     rows: ItemGridListRowConfig[];
+    size: 'compact' | 'default' | 'large';
 };
 
 export type DataTableProps = z.infer<typeof ItemTableListPropsSchema>;
@@ -823,6 +825,7 @@ const initialState: SettingsState = {
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -860,6 +863,7 @@ const initialState: SettingsState = {
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -908,6 +912,7 @@ const initialState: SettingsState = {
                         TableColumn.YEAR,
                     ],
                 }),
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -945,6 +950,7 @@ const initialState: SettingsState = {
                         TableColumn.SONG_COUNT,
                     ],
                 }),
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -989,6 +995,7 @@ const initialState: SettingsState = {
                         TableColumn.SONG_COUNT,
                     ],
                 }),
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -1040,6 +1047,7 @@ const initialState: SettingsState = {
                         TableColumn.SONG_COUNT,
                     ],
                 }),
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -1072,6 +1080,7 @@ const initialState: SettingsState = {
                     enabledColumns: [TableColumn.TITLE],
                     pickColumns: [TableColumn.TITLE, TableColumn.SONG_COUNT],
                 }),
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -1101,6 +1110,7 @@ const initialState: SettingsState = {
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -1128,6 +1138,7 @@ const initialState: SettingsState = {
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
@@ -1173,6 +1184,7 @@ const initialState: SettingsState = {
                         TableColumn.TRACK_NUMBER,
                     ],
                 }),
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.PAGINATED,
@@ -1200,6 +1212,7 @@ const initialState: SettingsState = {
                 itemsPerRow: 6,
                 itemsPerRowEnabled: false,
                 rows: [],
+                size: 'default',
             },
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,

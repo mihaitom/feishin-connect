@@ -223,6 +223,43 @@ export const GridConfig = ({
                     </Group>
                 ),
             },
+            {
+                component: (
+                    <SegmentedControl
+                        data={[
+                            {
+                                label: t('table.config.general.size_compact', {
+                                    postProcess: 'titleCase',
+                                }),
+                                value: 'compact',
+                            },
+                            {
+                                label: t('table.config.general.size_default', {
+                                    postProcess: 'titleCase',
+                                }),
+                                value: 'default',
+                            },
+                            {
+                                label: t('table.config.general.size_large', {
+                                    postProcess: 'titleCase',
+                                }),
+                                value: 'large',
+                            },
+                        ]}
+                        onChange={(value) =>
+                            setList(listKey, {
+                                grid: { size: value as 'compact' | 'default' | 'large' },
+                            })
+                        }
+                        size="sm"
+                        value={grid.size || 'default'}
+                        w="100%"
+                    />
+                ),
+                id: 'size',
+                label: t('table.config.general.size', { postProcess: 'sentenceCase' }),
+                size: 'sm',
+            },
 
             ...(extraOptions || []),
         ];
