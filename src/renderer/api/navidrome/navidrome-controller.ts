@@ -461,6 +461,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
         };
     },
+    getImageUrl: SubsonicController.getImageUrl,
     getInternetRadioStations: SubsonicController.getInternetRadioStations,
     getLyrics: SubsonicController.getLyrics,
     getMusicFolderList: SubsonicController.getMusicFolderList,
@@ -664,9 +665,7 @@ export const NavidromeController: InternalControllerEndpoint = {
         }
 
         return {
-            items: res.body.data.map((song) =>
-                ndNormalize.song(song, apiClientProps.server, query.imageSize),
-            ),
+            items: res.body.data.map((song) => ndNormalize.song(song, apiClientProps.server)),
             startIndex: query?.startIndex || 0,
             totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
         };
