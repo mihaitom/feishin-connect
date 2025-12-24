@@ -41,7 +41,6 @@ import {
     useItemListState,
     useItemListStateSubscription,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
-import { SelectionDialog } from '/@/renderer/components/item-list/selection-dialog';
 import { ItemControls, ItemListHandle } from '/@/renderer/components/item-list/types';
 import { animationProps } from '/@/shared/components/animations/animation-props';
 import { useElementSize } from '/@/shared/hooks/use-element-size';
@@ -310,7 +309,6 @@ const BaseItemGridList = ({
     enableDrag = true,
     enableExpansion = false,
     enableSelection = true,
-    enableSelectionDialog = true,
     gap = 'sm',
     getRowId,
     initialTop,
@@ -747,7 +745,7 @@ const BaseItemGridList = ({
             </AutoSizer>
             <AnimatePresence presenceAffectsLayout>
                 <ExpandedContainer internalState={internalState} itemType={itemType} />
-                {enableSelectionDialog && <SelectionDialog internalState={internalState} />}
+                {/* {enableSelectionDialog && <SelectionDialog internalState={internalState} />} */}
             </AnimatePresence>
         </motion.div>
     );
