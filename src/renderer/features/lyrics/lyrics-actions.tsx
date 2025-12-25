@@ -22,6 +22,7 @@ interface LyricsActionsProps {
     onTranslateLyric?: () => void;
     onUpdateOffset: (offsetMs: number) => void;
     setIndex: (idx: number) => void;
+    settingsKey?: string;
     synced?: boolean;
 }
 
@@ -35,6 +36,7 @@ export const LyricsActions = ({
     onTranslateLyric,
     onUpdateOffset,
     setIndex,
+    settingsKey = 'default',
 }: LyricsActionsProps) => {
     const { t } = useTranslation();
     const currentSong = usePlayerSong();

@@ -569,6 +569,7 @@
             "scrobble": "scrobble",
             "audio": "audio",
             "lyrics": "lyrics",
+            "lyricsDisplay": "lyrics display",
             "transcoding": "transcoding",
             "discord": "discord",
             "logger": "logger",

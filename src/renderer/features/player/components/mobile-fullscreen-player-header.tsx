@@ -5,7 +5,12 @@ import styles from './mobile-fullscreen-player.module.css';
 
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
-import { useLyricsSettings, useSettingsStore, useSettingsStoreActions } from '/@/renderer/store';
+import {
+    useLyricsDisplaySettings,
+    useLyricsSettings,
+    useSettingsStore,
+    useSettingsStoreActions,
+} from '/@/renderer/store';
 import { useFullScreenPlayerStore, useFullScreenPlayerStoreActions } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Divider } from '/@/shared/components/divider/divider';
@@ -37,15 +42,31 @@ export const MobileFullscreenPlayerHeader = memo(
         } = useFullScreenPlayerStore();
         const { setStore } = useFullScreenPlayerStoreActions();
         const { setSettings } = useSettingsStoreActions();
-        const lyricConfig = useLyricsSettings();
+        const lyricsSettings = useLyricsSettings();
+        const displaySettings = useLyricsDisplaySettings('default');
+        const lyricConfig = { ...lyricsSettings, ...displaySettings };
 
         const handleLyricsSettings = (property: string, value: any) => {
-            setSettings({
-                lyrics: {
-                    ...useSettingsStore.getState().lyrics,
-                    [property]: value,
-                },
-            });
+            const displayProperties = ['fontSize', 'fontSizeUnsync', 'gap', 'gapUnsync'];
+            if (displayProperties.includes(property)) {
+                const currentDisplay = useSettingsStore.getState().lyricsDisplay;
+                setSettings({
+                    lyricsDisplay: {
+                        ...currentDisplay,
+                        default: {
+                            ...currentDisplay.default,
+                            [property]: value,
+                        },
+                    },
+                });
+            } else {
+                setSettings({
+                    lyrics: {
+                        ...useSettingsStore.getState().lyrics,
+                        [property]: value,
+                    },
+                });
+            }
         };
 
         return (

@@ -64,3 +64,13 @@
         transparent 95%
     );
 }
+
+.settings-icon {
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.lyrics-container:hover .settings-icon {
+    opacity: 1;
+}

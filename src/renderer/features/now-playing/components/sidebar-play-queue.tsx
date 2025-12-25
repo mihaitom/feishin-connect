@@ -270,7 +270,7 @@ const LyricsPanel = () => {
     return (
         <div className={styles.lyricsSection}>
             <PanelReorderControls panelType="lyrics" />
-            <Lyrics fadeOutNoLyricsMessage={false} />
+            <Lyrics fadeOutNoLyricsMessage={false} settingsKey="sidebar" />
         </div>
     );
 };
@@ -330,7 +330,7 @@ const CombinedLyricsAndVisualizerPanel = () => {
     return (
         <div className={styles.lyricsSection}>
             <PanelReorderControls panelType="lyrics" />
-            <Lyrics fadeOutNoLyricsMessage={true} />
+            <Lyrics fadeOutNoLyricsMessage={true} settingsKey="sidebar" />
             <div
                 className={styles.visualizerOverlay}
                 style={{

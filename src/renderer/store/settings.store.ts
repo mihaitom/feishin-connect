@@ -406,6 +406,13 @@ const HotkeysSettingsSchema = z.object({
     globalMediaHotkeys: z.boolean(),
 });
 
+const LyricsDisplaySettingsSchema = z.object({
+    fontSize: z.number(),
+    fontSizeUnsync: z.number(),
+    gap: z.number(),
+    gapUnsync: z.number(),
+});
+
 const LyricsSettingsSchema = z.object({
     alignment: z.enum(['center', 'left', 'right']),
     delayMs: z.number(),
@@ -413,10 +420,6 @@ const LyricsSettingsSchema = z.object({
     enableNeteaseTranslation: z.boolean(),
     fetch: z.boolean(),
     follow: z.boolean(),
-    fontSize: z.number(),
-    fontSizeUnsync: z.number(),
-    gap: z.number(),
-    gapUnsync: z.number(),
     preferLocalLyrics: z.boolean(),
     showMatch: z.boolean(),
     showProvider: z.boolean(),
@@ -548,6 +551,7 @@ export const ValidationSettingsStateSchema = z.object({
     hotkeys: HotkeysSettingsSchema,
     lists: z.record(z.nativeEnum(ItemListKey), ItemListConfigSchema),
     lyrics: LyricsSettingsSchema,
+    lyricsDisplay: z.record(z.string(), LyricsDisplaySettingsSchema),
     playback: PlaybackSettingsSchema,
     queryBuilder: QueryBuilderSettingsSchema,
     remote: RemoteSettingsSchema,
@@ -1364,10 +1368,6 @@ const initialState: SettingsState = {
         enableNeteaseTranslation: false,
         fetch: true,
         follow: true,
-        fontSize: 24,
-        fontSizeUnsync: 24,
-        gap: 24,
-        gapUnsync: 24,
         preferLocalLyrics: true,
         showMatch: true,
         showProvider: true,
@@ -1375,6 +1375,14 @@ const initialState: SettingsState = {
         translationApiKey: '',
         translationApiProvider: '',
         translationTargetLanguage: 'en',
+    },
+    lyricsDisplay: {
+        default: {
+            fontSize: 48,
+            fontSizeUnsync: 24,
+            gap: 32,
+            gapUnsync: 24,
+        },
     },
     playback: {
         audioDeviceId: undefined,
@@ -1749,10 +1757,40 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     state.window.releaseChannel = 'beta';
                 }
 
+                if (version <= 17) {
+                    // Migrate lyrics settings from record structure to separate lyrics and lyricsDisplay
+                    if (
+                        state.lyrics &&
+                        typeof state.lyrics === 'object' &&
+                        'default' in state.lyrics
+                    ) {
+                        const oldLyrics = state.lyrics as any;
+                        const defaultSettings = oldLyrics.default || oldLyrics;
+
+                        // Extract display settings
+                        const displaySettings = {
+                            fontSize: defaultSettings.fontSize || 24,
+                            fontSizeUnsync: defaultSettings.fontSizeUnsync || 24,
+                            gap: defaultSettings.gap || 24,
+                            gapUnsync: defaultSettings.gapUnsync || 24,
+                        };
+
+                        // Remove display properties from main settings
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        const { fontSize, fontSizeUnsync, gap, gapUnsync, ...mainSettings } =
+                            defaultSettings;
+
+                        state.lyrics = mainSettings;
+                        state.lyricsDisplay = {
+                            default: displaySettings,
+                        };
+                    }
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 17,
+            version: 18,
         },
     ),
 );
@@ -1779,6 +1817,9 @@ export const useMpvSettings = () =>
     useSettingsStore((state) => state.playback.mpvProperties, shallow);
 
 export const useLyricsSettings = () => useSettingsStore((state) => state.lyrics, shallow);
+
+export const useLyricsDisplaySettings = (key: string = 'default') =>
+    useSettingsStore((state) => state.lyricsDisplay[key] || state.lyricsDisplay.default, shallow);
 
 export const useRemoteSettings = () => useSettingsStore((state) => state.remote, shallow);
 

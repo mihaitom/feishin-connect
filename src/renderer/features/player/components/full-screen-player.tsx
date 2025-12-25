@@ -22,6 +22,7 @@ import { useFastAverageColor } from '/@/renderer/hooks';
 import {
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
+    useLyricsDisplaySettings,
     useLyricsSettings,
     usePlayerData,
     usePlayerSong,
@@ -235,19 +236,35 @@ const Controls = ({ isPageHovered }: ControlsProps) => {
     } = useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { setSettings } = useSettingsStoreActions();
-    const lyricConfig = useLyricsSettings();
+    const lyricsSettings = useLyricsSettings();
+    const displaySettings = useLyricsDisplaySettings('default');
+    const lyricConfig = { ...lyricsSettings, ...displaySettings };
 
     const handleToggleFullScreenPlayer = () => {
         setStore({ expanded: !expanded });
     };
 
     const handleLyricsSettings = (property: string, value: any) => {
-        setSettings({
-            lyrics: {
-                ...useSettingsStore.getState().lyrics,
-                [property]: value,
-            },
-        });
+        const displayProperties = ['fontSize', 'fontSizeUnsync', 'gap', 'gapUnsync'];
+        if (displayProperties.includes(property)) {
+            const currentDisplay = useSettingsStore.getState().lyricsDisplay;
+            setSettings({
+                lyricsDisplay: {
+                    ...currentDisplay,
+                    default: {
+                        ...currentDisplay.default,
+                        [property]: value,
+                    },
+                },
+            });
+        } else {
+            setSettings({
+                lyrics: {
+                    ...useSettingsStore.getState().lyrics,
+                    [property]: value,
+                },
+            });
+        }
     };
 
     useHotkeys([['Escape', handleToggleFullScreenPlayer]]);

@@ -2,10 +2,10 @@ import { openContextModal } from '@mantine/modals';
 
 import i18n from '/@/i18n/i18n';
 
-export const openVisualizerSettingsModal = () => {
+export const openLyricsSettingsModal = (settingsKey: string = 'default') => {
     openContextModal({
-        innerProps: {},
-        modalKey: 'visualizerSettings',
+        innerProps: { settingsKey },
+        modalKey: 'lyricsSettings',
         overlayProps: {
             blur: 0,
             opacity: 0,
