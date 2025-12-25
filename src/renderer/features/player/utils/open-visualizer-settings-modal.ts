@@ -6,7 +6,7 @@ export const openVisualizerSettingsModal = () => {
         modalKey: 'visualizerSettings',
         overlayProps: {
             blur: 0,
-            opacity: 1,
+            opacity: 0,
         },
         size: 'xl',
         styles: {
