@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Group, Panel, Separator } from 'react-resizable-panels';
+import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels';
 
 import styles from './sidebar-play-queue.module.css';
 
@@ -50,6 +50,12 @@ export const SidebarPlayQueue = () => {
     const showVisualizer = showVisualizerInSidebar && type === PlayerType.WEB && webAudio;
     const showPanel = showLyricsInSidebar || showVisualizer;
 
+    // Persist the layout of the sidebar play queue container
+    const { defaultLayout, onLayoutChange } = useDefaultLayout({
+        id: 'sidebar-play-queue-container',
+        storage: localStorage,
+    });
+
     // Filter and order panels based on what's enabled
     const orderedPanels = useMemo(() => {
         if (combinedLyricsAndVisualizer) {
@@ -77,7 +83,7 @@ export const SidebarPlayQueue = () => {
             return (
                 <>
                     {index > 0 && <Separator className={styles.resizeHandle} />}
-                    <Panel defaultSize={50} key="queue" minSize={20}>
+                    <Panel defaultSize={50} id="queue" key="queue" minSize={20}>
                         <div className={styles.playQueueSection}>
                             <PlayQueue
                                 listKey={ItemListKey.SIDE_QUEUE}
@@ -94,7 +100,12 @@ export const SidebarPlayQueue = () => {
             return (
                 <>
                     {index > 0 && <Separator className={styles.resizeHandle} />}
-                    <Panel defaultSize={50} key="combined" minSize={20}>
+                    <Panel
+                        defaultSize={totalPanels > 2 ? 25 : 50}
+                        id="combined"
+                        key="combined"
+                        minSize={20}
+                    >
                         <CombinedLyricsAndVisualizerPanel />
                     </Panel>
                 </>
@@ -105,7 +116,12 @@ export const SidebarPlayQueue = () => {
             return (
                 <>
                     {index > 0 && <Separator className={styles.resizeHandle} />}
-                    <Panel defaultSize={totalPanels > 2 ? 25 : 50} key="lyrics" minSize={15}>
+                    <Panel
+                        defaultSize={totalPanels > 2 ? 25 : 50}
+                        id="lyrics"
+                        key="lyrics"
+                        minSize={15}
+                    >
                         <LyricsPanel />
                     </Panel>
                 </>
@@ -116,7 +132,12 @@ export const SidebarPlayQueue = () => {
             return (
                 <>
                     {index > 0 && <Separator className={styles.resizeHandle} />}
-                    <Panel defaultSize={totalPanels > 2 ? 25 : 50} key="visualizer" minSize={15}>
+                    <Panel
+                        defaultSize={totalPanels > 2 ? 25 : 50}
+                        id="visualizer"
+                        key="visualizer"
+                        minSize={15}
+                    >
                         <VisualizerPanel />
                     </Panel>
                 </>
@@ -134,7 +155,12 @@ export const SidebarPlayQueue = () => {
                 type={ItemListKey.SIDE_QUEUE}
             />
             {showPanel ? (
-                <Group orientation="vertical" style={{ flex: 1, minHeight: 0 }}>
+                <Group
+                    defaultLayout={defaultLayout}
+                    onLayoutChange={onLayoutChange}
+                    orientation="vertical"
+                    style={{ flex: 1, minHeight: 0 }}
+                >
                     {orderedPanels.map((panel, index) =>
                         renderPanel(panel, index, orderedPanels.length),
                     )}
