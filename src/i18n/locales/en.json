@@ -1104,6 +1104,7 @@
         "cyclePresets": "Cycle Presets",
         "cycleTime": "Cycle Time (seconds)",
         "includeAllPresets": "Include All Presets",
+        "ignoredPresets": "Ignored Presets",
         "selectedPresets": "Selected Presets",
         "randomizeNextPreset": "Randomize Next Preset",
         "blendTime": "Blend Time",

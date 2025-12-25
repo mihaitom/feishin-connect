@@ -2022,6 +2022,13 @@ const ButterChurnCycleSettings = () => {
                     onChange={(values) => updateProperty('selectedPresets', values)}
                     value={visualizer.butterchurn.selectedPresets}
                 />
+                <MultiSelect
+                    data={presetOptions}
+                    disabled={!visualizer.butterchurn.cyclePresets}
+                    label={t('visualizer.ignoredPresets')}
+                    onChange={(values) => updateProperty('ignoredPresets', values)}
+                    value={visualizer.butterchurn.ignoredPresets}
+                />
 
                 <Group grow>
                     <VisualizerSlider

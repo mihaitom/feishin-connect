@@ -179,11 +179,18 @@ const VisualizerInner = () => {
         const allPresetNames = Object.keys(presets);
 
         // Get the list of presets to cycle through
-        const presetList = butterchurnSettings.includeAllPresets
+        let presetList = butterchurnSettings.includeAllPresets
             ? allPresetNames
             : butterchurnSettings.selectedPresets.length > 0
               ? butterchurnSettings.selectedPresets.filter((name) => presets[name])
               : allPresetNames;
+
+        // Filter out ignored presets
+        if (butterchurnSettings.ignoredPresets && butterchurnSettings.ignoredPresets.length > 0) {
+            presetList = presetList.filter(
+                (name) => !butterchurnSettings.ignoredPresets.includes(name),
+            );
+        }
 
         if (presetList.length === 0) return;
 
