@@ -1,4 +1,5 @@
 .sidebar-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -11,15 +12,11 @@
     max-height: calc(100vh - 149px);
 }
 
-.sidebar-container {
-    position: relative;
-}
-
 .server-selector-container {
     position: absolute;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,4 +31,8 @@
     height: 2rem;
     object-fit: cover;
     border-radius: var(--theme-radius-md);
+}
+
+.scroll-area-with-server {
+    padding-bottom: calc(2rem + 2 * var(--theme-spacing-md));
 }

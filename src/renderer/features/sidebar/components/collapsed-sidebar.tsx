@@ -80,7 +80,7 @@ export const CollapsedSidebar = () => {
                 [styles.web]: windowBarStyle === Platform.WEB,
             })}
         >
-            <ScrollArea>
+            <ScrollArea className={currentServer ? styles.scrollAreaWithServer : undefined}>
                 {sidebarCollapsedNavigation && (
                     <Group gap={0} grow>
                         <CollapsedSidebarButton onClick={() => navigate(-1)}>
