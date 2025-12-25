@@ -1780,7 +1780,7 @@ const RadialSpectrumSettings = () => {
 
     const isRadialInvertDisabled = !visualizer.audiomotionanalyzer.radial;
     const isRadiusDisabled = !visualizer.audiomotionanalyzer.radial;
-    const isReflexAlphaDisabled = !visualizer.audiomotionanalyzer.radial;
+    const isSpinSpeedDisabled = !visualizer.audiomotionanalyzer.radial;
 
     return (
         <Fieldset legend={t('visualizer.radialSpectrum')}>
@@ -1806,12 +1806,12 @@ const RadialSpectrumSettings = () => {
                     step={0.05}
                 />
                 <VisualizerSlider
-                    defaultValue={visualizer.audiomotionanalyzer.reflexAlpha}
-                    disabled={isReflexAlphaDisabled}
-                    label={t('visualizer.reflexAlpha')}
+                    defaultValue={visualizer.audiomotionanalyzer.spinSpeed}
+                    disabled={isSpinSpeedDisabled}
+                    label={t('visualizer.spinSpeed')}
                     max={5}
                     min={-5}
-                    onChangeEnd={(e) => updateProperty('reflexAlpha', e)}
+                    onChangeEnd={(e) => updateProperty('spinSpeed', e)}
                     step={0.1}
                 />
             </Group>
