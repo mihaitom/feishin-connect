@@ -6,19 +6,20 @@ import styles from './mobile-fullscreen-player.module.css';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import {
+    useFullScreenPlayerStore,
+    useFullScreenPlayerStoreActions,
     useLyricsDisplaySettings,
     useLyricsSettings,
     useSettingsStore,
     useSettingsStoreActions,
 } from '/@/renderer/store';
-import { useFullScreenPlayerStore, useFullScreenPlayerStoreActions } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Option } from '/@/shared/components/option/option';
 import { Popover } from '/@/shared/components/popover/popover';
-import { Select } from '/@/shared/components/select/select';
+import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
 import { QueueSong } from '/@/shared/types/domain-types';
@@ -311,7 +312,7 @@ export const MobileFullscreenPlayerHeader = memo(
                                 })}
                             </Option.Label>
                             <Option.Control>
-                                <Select
+                                <SegmentedControl
                                     data={[
                                         {
                                             label: t('common.left', {

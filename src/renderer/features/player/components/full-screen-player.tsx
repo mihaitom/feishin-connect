@@ -36,7 +36,7 @@ import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Option } from '/@/shared/components/option/option';
 import { Popover } from '/@/shared/components/popover/popover';
-import { Select } from '/@/shared/components/select/select';
+import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
 import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
@@ -508,7 +508,7 @@ const Controls = ({ isPageHovered }: ControlsProps) => {
                             })}
                         </Option.Label>
                         <Option.Control>
-                            <Select
+                            <SegmentedControl
                                 data={[
                                     {
                                         label: t('common.left', {
