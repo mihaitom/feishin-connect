@@ -36,7 +36,6 @@ export const LyricsActions = ({
     onTranslateLyric,
     onUpdateOffset,
     setIndex,
-    settingsKey = 'default',
 }: LyricsActionsProps) => {
     const { t } = useTranslation();
     const currentSong = usePlayerSong();

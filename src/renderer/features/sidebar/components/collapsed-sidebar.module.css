@@ -10,3 +10,28 @@
 .sidebar-container.linux {
     max-height: calc(100vh - 149px);
 }
+
+.sidebar-container {
+    position: relative;
+}
+
+.server-selector-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--theme-spacing-md);
+    cursor: pointer;
+    background: var(--theme-colors-sidebar-background);
+    border-top: 1px solid var(--theme-colors-sidebar-border);
+}
+
+.server-icon {
+    width: 2rem;
+    height: 2rem;
+    object-fit: cover;
+    border-radius: var(--theme-radius-md);
+}
