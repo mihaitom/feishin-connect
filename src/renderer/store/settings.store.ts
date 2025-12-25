@@ -855,7 +855,7 @@ const initialState: SettingsState = {
             header: 300,
             itemCard: 300,
             sidebar: 300,
-            table: 30,
+            table: 80,
         },
         language: 'en',
         lastFM: true,
