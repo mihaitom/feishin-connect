@@ -898,6 +898,8 @@
         "showLyricsInSidebar": "show lyrics in player sidebar",
         "showVisualizerInSidebar_description": "a panel will be added to the player sidebar that displays the visualizer",
         "showVisualizerInSidebar": "show visualizer in player sidebar",
+        "combinedLyricsAndVisualizer_description": "combine lyrics and visualizer into the same panel",
+        "combinedLyricsAndVisualizer": "combine lyrics and visualizer in player sidebar",
         "preservePitch_description": "preserves pitch when modifying playback speed",
         "preservePitch": "preserve pitch",
         "audioFadeOnStatusChange": "audio fade on status change",

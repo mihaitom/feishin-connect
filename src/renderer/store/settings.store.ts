@@ -103,6 +103,8 @@ const GenreTargetSchema = z.enum(['album', 'track']);
 
 const SideQueueTypeSchema = z.enum(['sideDrawerQueue', 'sideQueue']);
 
+const SidebarPanelTypeSchema = z.enum(['queue', 'lyrics', 'visualizer']);
+
 const SidebarItemTypeSchema = z.object({
     disabled: z.boolean(),
     id: z.string(),
@@ -346,6 +348,7 @@ export const GeneralSettingsSchema = z.object({
     artistItems: z.array(SortableItemSchema(ArtistItemSchema)),
     artistRadioCount: z.number(),
     buttonSize: z.number(),
+    combinedLyricsAndVisualizer: z.boolean(),
     disabledContextMenu: z.record(z.string(), z.boolean()),
     externalLinks: z.boolean(),
     followCurrentSong: z.boolean(),
@@ -375,6 +378,7 @@ export const GeneralSettingsSchema = z.object({
     sidebarCollapsedNavigation: z.boolean(),
     sidebarCollapseShared: z.boolean(),
     sidebarItems: z.array(SidebarItemTypeSchema),
+    sidebarPanelOrder: z.array(SidebarPanelTypeSchema),
     sidebarPlaylistList: z.boolean(),
     sideQueueType: SideQueueTypeSchema,
     skipButtons: SkipButtonsSchema,
@@ -843,6 +847,7 @@ const initialState: SettingsState = {
         artistItems,
         artistRadioCount: 20,
         buttonSize: 15,
+        combinedLyricsAndVisualizer: false,
         disabledContextMenu: {},
         externalLinks: true,
         followCurrentSong: true,
@@ -878,6 +883,7 @@ const initialState: SettingsState = {
         sidebarCollapsedNavigation: true,
         sidebarCollapseShared: false,
         sidebarItems,
+        sidebarPanelOrder: ['queue', 'lyrics', 'visualizer'],
         sidebarPlaylistList: true,
         sideQueueType: 'sideQueue',
         skipButtons: {
