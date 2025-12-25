@@ -8,6 +8,7 @@ import { UpdatePlaylistContextModal } from '/@/renderer/features/playlists/compo
 import { SettingsContextModal } from '/@/renderer/features/settings/components/settings-modal';
 import { RouterErrorBoundary } from '/@/renderer/features/shared/components/router-error-boundary';
 import { ShareItemContextModal } from '/@/renderer/features/sharing/components/share-item-context-modal';
+import { VisualizerSettingsContextModal } from '/@/renderer/features/visualizer/components/audiomotionanalyzer/visualizer-settings-modal';
 import { AuthenticationOutlet } from '/@/renderer/layouts/authentication-outlet';
 import { ResponsiveLayout } from '/@/renderer/layouts/responsive-layout';
 import { AppOutlet } from '/@/renderer/router/app-outlet';
@@ -97,6 +98,7 @@ export const AppRouter = () => {
                     shareItem: ShareItemContextModal,
                     shuffleAll: ShuffleAllContextModal,
                     updatePlaylist: UpdatePlaylistContextModal,
+                    visualizerSettings: VisualizerSettingsContextModal,
                 }}
             >
                 <RouterErrorBoundary>
