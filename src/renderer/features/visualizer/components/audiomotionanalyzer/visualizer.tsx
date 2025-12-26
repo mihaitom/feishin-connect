@@ -217,6 +217,10 @@ const VisualizerInner = () => {
         }
     }, [motion, options]);
 
+    return <div className={styles.visualizer} ref={canvasRef} />;
+};
+
+export const Visualizer = () => {
     return (
         <div className={styles.container}>
             <ActionIcon
@@ -229,15 +233,9 @@ const VisualizerInner = () => {
                 top={0}
                 variant="transparent"
             />
-            <div className={styles.visualizer} ref={canvasRef} />
+            <ComponentErrorBoundary>
+                <VisualizerInner />
+            </ComponentErrorBoundary>
         </div>
-    );
-};
-
-export const Visualizer = () => {
-    return (
-        <ComponentErrorBoundary>
-            <VisualizerInner />
-        </ComponentErrorBoundary>
     );
 };

@@ -294,16 +294,6 @@ const VisualizerInner = () => {
 
     return (
         <div className={styles.container} ref={containerRef}>
-            <ActionIcon
-                className={styles.settingsIcon}
-                icon="settings2"
-                iconProps={{ size: 'lg' }}
-                onClick={openVisualizerSettingsModal}
-                pos="absolute"
-                right={0}
-                top={0}
-                variant="transparent"
-            />
             <canvas className={styles.canvas} ref={canvasRef} />
             {butterchurnSettings.currentPreset && (
                 <Text className={styles['preset-overlay']} isNoSelect size="sm">
@@ -316,8 +306,20 @@ const VisualizerInner = () => {
 
 export const Visualizer = () => {
     return (
-        <ComponentErrorBoundary>
-            <VisualizerInner />
-        </ComponentErrorBoundary>
+        <div className={styles.container} style={{ position: 'relative' }}>
+            <ActionIcon
+                className={styles.settingsIcon}
+                icon="settings2"
+                iconProps={{ size: 'lg' }}
+                onClick={openVisualizerSettingsModal}
+                pos="absolute"
+                right={0}
+                top={0}
+                variant="transparent"
+            />
+            <ComponentErrorBoundary>
+                <VisualizerInner />
+            </ComponentErrorBoundary>
+        </div>
     );
 };
