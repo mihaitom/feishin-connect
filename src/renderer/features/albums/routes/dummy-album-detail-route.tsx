@@ -115,7 +115,7 @@ const DummyAlbumDetailRoute = () => {
     ];
 
     const imageUrl = useItemImageUrl({
-        id: albumId,
+        id: detailQuery?.data?.imageId || undefined,
         itemType: LibraryItem.ALBUM,
         type: 'header',
     });

@@ -144,7 +144,7 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
     const showRating = detailQuery?.data?._serverType === ServerType.NAVIDROME;
 
     const imageUrl = useItemImageUrl({
-        id: detailQuery?.data?.id,
+        id: detailQuery?.data?.imageId || undefined,
         itemType: LibraryItem.ALBUM_ARTIST,
         type: 'itemCard',
     });

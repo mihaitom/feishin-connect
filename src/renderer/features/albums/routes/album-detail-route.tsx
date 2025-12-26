@@ -37,7 +37,7 @@ const AlbumDetailRoute = () => {
 
     const imageUrl =
         useItemImageUrl({
-            id: albumId,
+            id: detailQuery?.data?.imageId || undefined,
             itemType: LibraryItem.ALBUM,
             type: 'itemCard',
         }) || '';

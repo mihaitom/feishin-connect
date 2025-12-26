@@ -78,13 +78,13 @@ const BackgroundImage = memo(({ dynamicBackground, dynamicIsImage }: BackgroundI
     const { nextSong } = usePlayerData();
 
     const currentImageUrl = useItemImageUrl({
-        id: currentSong?.id,
+        id: currentSong?.imageId || undefined,
         itemType: LibraryItem.SONG,
         type: 'itemCard',
     });
 
     const nextImageUrl = useItemImageUrl({
-        id: nextSong?.id,
+        id: nextSong?.imageId || undefined,
         itemType: LibraryItem.SONG,
         type: 'itemCard',
     });
@@ -632,7 +632,7 @@ const PlayerContainer = memo(
     }: PlayerContainerProps) => {
         const currentSong = usePlayerSong();
         const imageUrl = useItemImageUrl({
-            id: currentSong?.id,
+            id: currentSong?.imageId || undefined,
             imageUrl: currentSong?.imageUrl,
             itemType: LibraryItem.SONG,
             type: 'itemCard',

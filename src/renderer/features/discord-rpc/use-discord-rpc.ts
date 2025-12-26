@@ -37,7 +37,7 @@ export const useDiscordRpc = () => {
 
     const currentSong = usePlayerSong();
     const imageUrl = useItemImageUrl({
-        id: currentSong?.id,
+        id: currentSong?.imageId || undefined,
         imageUrl: currentSong?.imageUrl,
         itemType: LibraryItem.SONG,
         type: 'table',

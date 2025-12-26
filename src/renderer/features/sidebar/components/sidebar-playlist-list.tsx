@@ -162,7 +162,7 @@ const PlaylistRowButton = memo(({ item, name, onContextMenu, to }: PlaylistRowBu
     );
 
     const imageUrl = useItemImageUrl({
-        id: item.id,
+        id: item.imageId || undefined,
         itemType: LibraryItem.PLAYLIST,
         type: 'table',
     });

@@ -84,7 +84,7 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
     const releaseYear = detailQuery?.data?.releaseYear;
 
     const imageUrl = useItemImageUrl({
-        id: detailQuery?.data?.id,
+        id: detailQuery?.data?.imageId || undefined,
         itemType: LibraryItem.ALBUM,
         type: 'header',
     });

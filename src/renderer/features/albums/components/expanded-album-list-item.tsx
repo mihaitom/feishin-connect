@@ -199,7 +199,7 @@ export const ExpandedAlbumListItem = ({ internalState, item }: ExpandedAlbumList
     const player = usePlayer();
 
     const imageUrl = useItemImageUrl({
-        id: item.id,
+        id: item.imageId || undefined,
         itemType: LibraryItem.ALBUM,
         type: 'itemCard',
     });
