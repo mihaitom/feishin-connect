@@ -1065,7 +1065,48 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         }
                     });
 
-                    emitPlayerPlayEvent(targetSongUniqueId, set, get);
+                    // If playSongId is provided, find the song and start playback on it
+                    if (targetSongUniqueId) {
+                        let playIndex: number | undefined;
+                        set((state) => {
+                            const queue = state.getQueue();
+                            const queueIndex = queue.items.findIndex(
+                                (item) => item._uniqueId === targetSongUniqueId,
+                            );
+
+                            if (queueIndex !== -1) {
+                                if (
+                                    state.player.shuffle === PlayerShuffle.TRACK &&
+                                    state.queue.shuffled.length > 0
+                                ) {
+                                    // Find the shuffled position for this queue index
+                                    const shuffledPosition = state.queue.shuffled.findIndex(
+                                        (idx) => idx === queueIndex,
+                                    );
+                                    if (shuffledPosition !== -1) {
+                                        state.player.index = shuffledPosition;
+                                        playIndex = shuffledPosition;
+                                    } else {
+                                        state.player.index = queueIndex;
+                                        playIndex = queueIndex;
+                                    }
+                                } else {
+                                    state.player.index = queueIndex;
+                                    playIndex = queueIndex;
+                                }
+                                state.player.status = PlayerStatus.PLAYING;
+                                setTimestampStore(0);
+                            }
+                        });
+
+                        // Emit PLAYER_PLAY event if playback was started
+                        if (playIndex !== undefined) {
+                            eventEmitter.emit('PLAYER_PLAY', {
+                                id: targetSongUniqueId,
+                                index: playIndex,
+                            });
+                        }
+                    }
                 },
                 clearQueue: () => {
                     set((state) => {
