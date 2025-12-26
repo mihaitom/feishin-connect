@@ -229,9 +229,9 @@ export const Visualizer = () => {
                 iconProps={{ size: 'lg' }}
                 onClick={openVisualizerSettingsModal}
                 pos="absolute"
-                right={0}
-                top={0}
-                variant="transparent"
+                right="var(--theme-spacing-sm)"
+                top="var(--theme-spacing-sm)"
+                variant="subtle"
             />
             <ComponentErrorBoundary>
                 <VisualizerInner />

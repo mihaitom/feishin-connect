@@ -306,16 +306,16 @@ const VisualizerInner = () => {
 
 export const Visualizer = () => {
     return (
-        <div className={styles.container} style={{ position: 'relative' }}>
+        <div className={styles.container}>
             <ActionIcon
                 className={styles.settingsIcon}
                 icon="settings2"
                 iconProps={{ size: 'lg' }}
                 onClick={openVisualizerSettingsModal}
                 pos="absolute"
-                right={0}
-                top={0}
-                variant="transparent"
+                right="var(--theme-spacing-sm)"
+                top="var(--theme-spacing-sm)"
+                variant="subtle"
             />
             <ComponentErrorBoundary>
                 <VisualizerInner />
