@@ -1,6 +1,6 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Suspense, useRef } from 'react';
-import { useLocation, useParams } from 'react-router';
+import { useParams } from 'react-router';
 
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
@@ -33,11 +33,8 @@ const AlbumArtistDetailRoute = () => {
 
     const routeId = (artistId || albumArtistId) as string;
 
-    const location = useLocation();
-
-    const detailQuery = useSuspenseQuery({
+    const detailQuery = useQuery({
         ...artistsQueries.albumArtistDetail({ query: { id: routeId }, serverId: server?.id }),
-        initialData: location.state?.item,
         staleTime: 0,
     });
 
@@ -66,8 +63,8 @@ const AlbumArtistDetailRoute = () => {
         showBlurredImage,
     });
 
-    if (!isReady) {
-        return null;
+    if (detailQuery.isLoading || !isReady) {
+        return <Spinner container />;
     }
 
     return (
@@ -103,7 +100,9 @@ const AlbumArtistDetailRoute = () => {
                 )}
                 <LibraryContainer>
                     <AlbumArtistDetailHeader ref={headerRef as React.Ref<HTMLDivElement>} />
-                    <AlbumArtistDetailContent />
+                    <Suspense fallback={<Spinner container />}>
+                        <AlbumArtistDetailContent />
+                    </Suspense>
                 </LibraryContainer>
             </NativeScrollArea>
         </AnimatedPage>
@@ -113,9 +112,7 @@ const AlbumArtistDetailRoute = () => {
 const AlbumArtistDetailRouteWithBoundary = () => {
     return (
         <PageErrorBoundary>
-            <Suspense fallback={<Spinner container />}>
-                <AlbumArtistDetailRoute />
-            </Suspense>
+            <AlbumArtistDetailRoute />
         </PageErrorBoundary>
     );
 };
