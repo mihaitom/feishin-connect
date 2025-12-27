@@ -52,7 +52,6 @@ import { Button } from '/@/shared/components/button/button';
 import { Grid } from '/@/shared/components/grid/grid';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
-import { Separator } from '/@/shared/components/separator/separator';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -894,7 +893,18 @@ const ArtistAlbums = () => {
                     return acc;
                 }
 
-                // Priority 3: Single (includes EP and other non-album types)
+                // Priority 3: EP
+                const hasEPType = album.releaseTypes?.some((type) => type.toLowerCase() === 'ep');
+                if (hasEPType) {
+                    const epKey = 'ep';
+                    if (!acc[epKey]) {
+                        acc[epKey] = [];
+                    }
+                    acc[epKey].push(album);
+                    return acc;
+                }
+
+                // Priority 4: Single (other non-album types)
                 const hasAlbumType = album.releaseTypes?.some(
                     (type) => type.toLowerCase() === 'album',
                 );
@@ -907,7 +917,7 @@ const ArtistAlbums = () => {
                     return acc;
                 }
 
-                // Priority 4: Album
+                // Priority 5: Album
                 const albumKey = 'album';
                 if (!acc[albumKey]) {
                     acc[albumKey] = [];
@@ -922,7 +932,7 @@ const ArtistAlbums = () => {
     }, [filteredAndSortedAlbums, routeId]);
 
     const releaseTypeEntries = useMemo(() => {
-        const priorityOrder = ['album', 'single', 'compilation', 'appears-on'];
+        const priorityOrder = ['album', 'ep', 'single', 'compilation', 'appears-on'];
         const getPriority = (releaseType: string) => {
             const index = priorityOrder.indexOf(releaseType);
             return index === -1 ? 999 : index;
@@ -947,18 +957,15 @@ const ArtistAlbums = () => {
                             postProcess: 'sentenceCase',
                         });
                         break;
+                    case 'ep':
+                        displayName = t('releaseType.primary.ep', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
                     case 'single':
-                        displayName = (
-                            <>
-                                {t('releaseType.primary.single', {
-                                    postProcess: 'sentenceCase',
-                                })}
-                                <Separator />
-                                {t('releaseType.primary.ep', {
-                                    postProcess: 'upperCase',
-                                })}
-                            </>
-                        );
+                        displayName = t('releaseType.primary.single', {
+                            postProcess: 'sentenceCase',
+                        });
                         break;
                     default:
                         displayName = releaseType;
