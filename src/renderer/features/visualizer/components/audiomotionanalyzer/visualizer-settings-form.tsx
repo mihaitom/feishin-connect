@@ -988,6 +988,14 @@ const GeneralSettings = () => {
                         min={0}
                         onChangeEnd={(e) => updateProperty('maxFPS', e)}
                     />
+                    <VisualizerSlider
+                        defaultValue={visualizer.audiomotionanalyzer.opacity}
+                        label={t('visualizer.opacity')}
+                        max={1}
+                        min={0}
+                        onChangeEnd={(e) => updateProperty('opacity', e)}
+                        step={0.01}
+                    />
                 </Group>
             </Stack>
         </Fieldset>
@@ -1971,6 +1979,14 @@ const ButterchurnGeneralSettings = () => {
                         min={0}
                         onChangeEnd={(e) => updateProperty('maxFPS', e)}
                         step={1}
+                    />
+                    <VisualizerSlider
+                        defaultValue={visualizer.butterchurn.opacity}
+                        label={t('visualizer.opacity')}
+                        max={1}
+                        min={0}
+                        onChangeEnd={(e) => updateProperty('opacity', e)}
+                        step={0.01}
                     />
                 </Group>
             </Stack>

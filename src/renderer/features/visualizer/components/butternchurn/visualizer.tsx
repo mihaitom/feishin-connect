@@ -30,6 +30,7 @@ const VisualizerInner = () => {
     const cycleTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const cycleStartTimeRef = useRef<number | undefined>(undefined);
     const butterchurnSettings = useSettingsStore((store) => store.visualizer.butterchurn);
+    const opacity = useSettingsStore((store) => store.visualizer.butterchurn.opacity);
     const { setSettings } = useSettingsStoreActions();
     const playerStatus = usePlayerStatus();
     const isPlaying = playerStatus === PlayerStatus.PLAYING;
@@ -293,7 +294,7 @@ const VisualizerInner = () => {
     }, [visualizer, butterchurnSettings.maxFPS]);
 
     return (
-        <div className={styles.container} ref={containerRef}>
+        <div className={styles.container} ref={containerRef} style={{ opacity }}>
             <canvas className={styles.canvas} ref={canvasRef} />
             {butterchurnSettings.currentPreset && (
                 <Text className={styles['preset-overlay']} isNoSelect size="sm">
