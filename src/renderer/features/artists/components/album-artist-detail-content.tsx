@@ -1050,6 +1050,16 @@ const ArtistAlbums = () => {
                             postProcess: 'sentenceCase',
                         });
                         break;
+                    case 'audiobook':
+                        displayName = t('releaseType.secondary.audiobook', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'audio drama':
+                        displayName = t('releaseType.secondary.audioDrama', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
                     case 'broadcast':
                         displayName = t('releaseType.primary.broadcast', {
                             postProcess: 'sentenceCase',
@@ -1060,8 +1070,38 @@ const ArtistAlbums = () => {
                             postProcess: 'sentenceCase',
                         });
                         break;
+                    case 'demo':
+                        displayName = t('releaseType.secondary.demo', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'dj-mix':
+                        displayName = t('releaseType.secondary.djMix', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
                     case 'ep':
                         displayName = t('releaseType.primary.ep', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'field recording':
+                        displayName = t('releaseType.secondary.fieldRecording', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'interview':
+                        displayName = t('releaseType.secondary.interview', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'live':
+                        displayName = t('releaseType.secondary.live', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'mixtape/street':
+                        displayName = t('releaseType.secondary.mixtape', {
                             postProcess: 'sentenceCase',
                         });
                         break;
@@ -1070,8 +1110,23 @@ const ArtistAlbums = () => {
                             postProcess: 'sentenceCase',
                         });
                         break;
+                    case 'remix':
+                        displayName = t('releaseType.secondary.remix', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
                     case 'single':
                         displayName = t('releaseType.primary.single', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'soundtrack':
+                        displayName = t('releaseType.secondary.soundtrack', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'spokenword':
+                        displayName = t('releaseType.secondary.spokenWord', {
                             postProcess: 'sentenceCase',
                         });
                         break;
