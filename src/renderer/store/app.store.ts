@@ -68,7 +68,11 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                     },
                     setAlbumArtistDetailSort: (sortBy, sortOrder) => {
                         set((state) => {
-                            state.albumArtistDetailSort = { ...state.albumArtistDetailSort, sortBy, sortOrder };
+                            state.albumArtistDetailSort = {
+                                ...state.albumArtistDetailSort,
+                                sortBy,
+                                sortOrder,
+                            };
                         });
                     },
                     setAppStore: (data) => {

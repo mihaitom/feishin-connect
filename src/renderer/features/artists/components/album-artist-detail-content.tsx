@@ -927,8 +927,10 @@ const groupAlbumsByReleaseType = (
             }
 
             // Priority 4: Single (other non-album types)
-            const hasAlbumType = album.releaseTypes?.some((type) => type.toLowerCase() === 'album');
-            if (!hasAlbumType) {
+            const hasSingleType = album.releaseTypes?.some(
+                (type) => type.toLowerCase() === 'single',
+            );
+            if (hasSingleType) {
                 const singleKey = 'single';
                 if (!acc[singleKey]) {
                     acc[singleKey] = [];
@@ -937,12 +939,37 @@ const groupAlbumsByReleaseType = (
                 return acc;
             }
 
-            // Priority 5: Album
-            const albumKey = 'album';
-            if (!acc[albumKey]) {
-                acc[albumKey] = [];
+            // Priority 5: Broadcast (if has album type)
+            const hasBroadcastType = album.releaseTypes?.some(
+                (type) => type.toLowerCase() === 'broadcast',
+            );
+
+            if (hasBroadcastType) {
+                const broadcastKey = 'broadcast';
+                if (!acc[broadcastKey]) {
+                    acc[broadcastKey] = [];
+                }
+                acc[broadcastKey].push(album);
+                return acc;
             }
-            acc[albumKey].push(album);
+
+            // Priority 6: Album
+            const hasAlbumType = album.releaseTypes?.some((type) => type.toLowerCase() === 'album');
+            if (hasAlbumType) {
+                const albumKey = 'album';
+                if (!acc[albumKey]) {
+                    acc[albumKey] = [];
+                }
+                acc[albumKey].push(album);
+                return acc;
+            }
+
+            // Priority 7: Other (catch all for unknown release types or specifically other release types)
+            const otherKey = 'other';
+            if (!acc[otherKey]) {
+                acc[otherKey] = [];
+            }
+            acc[otherKey].push(album);
             return acc;
         },
         {} as Record<string, Album[]>,
@@ -995,7 +1022,15 @@ const ArtistAlbums = () => {
     }, [filteredAndSortedAlbums, routeId, groupingType]);
 
     const releaseTypeEntries = useMemo(() => {
-        const priorityOrder = ['album', 'ep', 'single', 'compilation', 'appears-on'];
+        const priorityOrder = [
+            'album',
+            'ep',
+            'single',
+            'broadcast',
+            'other',
+            'compilation',
+            'appears-on',
+        ];
         const getPriority = (releaseType: string) => {
             const index = priorityOrder.indexOf(releaseType);
             return index === -1 ? 999 : index;
@@ -1015,6 +1050,11 @@ const ArtistAlbums = () => {
                             postProcess: 'sentenceCase',
                         });
                         break;
+                    case 'broadcast':
+                        displayName = t('releaseType.primary.broadcast', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
                     case 'compilation':
                         displayName = t('releaseType.secondary.compilation', {
                             postProcess: 'sentenceCase',
@@ -1022,6 +1062,11 @@ const ArtistAlbums = () => {
                         break;
                     case 'ep':
                         displayName = t('releaseType.primary.ep', {
+                            postProcess: 'sentenceCase',
+                        });
+                        break;
+                    case 'other':
+                        displayName = t('releaseType.primary.other', {
                             postProcess: 'sentenceCase',
                         });
                         break;
