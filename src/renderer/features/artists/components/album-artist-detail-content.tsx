@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { LayoutGroup, motion } from 'motion/react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createSearchParams, generatePath, Link, useParams } from 'react-router';
@@ -796,15 +797,25 @@ const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) 
             <Grid columns={24} gutter="md" type="container">
                 {displayedAlbums.map((album) => (
                     <Grid.Col key={album.id} span={span}>
-                        <MemoizedItemCard
-                            controls={controls}
-                            data={album}
-                            enableDrag
-                            itemType={LibraryItem.ALBUM}
-                            rows={rows}
-                            type="poster"
-                            withControls
-                        />
+                        <motion.div
+                            layout
+                            layoutId={album.id}
+                            transition={{
+                                duration: 0.5,
+                                ease: 'easeInOut',
+                                layout: { duration: 0.5, ease: 'easeInOut' },
+                            }}
+                        >
+                            <MemoizedItemCard
+                                controls={controls}
+                                data={album}
+                                enableDrag
+                                itemType={LibraryItem.ALBUM}
+                                rows={rows}
+                                type="poster"
+                                withControls
+                            />
+                        </motion.div>
                     </Grid.Col>
                 ))}
             </Grid>
@@ -1017,17 +1028,20 @@ const ArtistAlbums = () => {
                 />
             </Group>
             <div className={styles.albumSectionContainer} ref={cq.ref}>
-                {cq.isCalculated &&
-                    releaseTypeEntries.map(({ albums, displayName, releaseType }) => (
-                        <AlbumSection
-                            albums={albums}
-                            controls={controls}
-                            cq={cq}
-                            key={releaseType}
-                            rows={rows}
-                            title={displayName}
-                        />
-                    ))}
+                {cq.isCalculated && (
+                    <LayoutGroup>
+                        {releaseTypeEntries.map(({ albums, displayName, releaseType }) => (
+                            <AlbumSection
+                                albums={albums}
+                                controls={controls}
+                                cq={cq}
+                                key={releaseType}
+                                rows={rows}
+                                title={displayName}
+                            />
+                        ))}
+                    </LayoutGroup>
+                )}
             </div>
         </Stack>
     );
