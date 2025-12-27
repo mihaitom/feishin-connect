@@ -25,6 +25,11 @@ import {
     ListSortByDropdownControlled,
 } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButtonControlled } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
+import {
+    LONG_PRESS_PLAY_BEHAVIOR,
+    PlayTooltip,
+} from '/@/renderer/features/shared/components/play-button-group';
+import { usePlayButtonClick } from '/@/renderer/features/shared/hooks/use-play-button-click';
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { useContainerQuery } from '/@/renderer/hooks';
@@ -40,7 +45,7 @@ import {
 import { useGeneralSettings, useSettingsStore } from '/@/renderer/store/settings.store';
 import { sanitize } from '/@/renderer/utils/sanitize';
 import { sortAlbumList } from '/@/shared/api/utils';
-import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Button } from '/@/shared/components/button/button';
 import { Grid } from '/@/shared/components/grid/grid';
@@ -689,6 +694,44 @@ interface AlbumSectionProps {
 const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) => {
     const span = cq.isXl ? 3 : cq.isLg ? 4 : cq.isMd ? 6 : cq.isSm ? 8 : cq.isXs ? 12 : 12;
     const albumCount = albums.length;
+    const player = usePlayer();
+    const serverId = useCurrentServerId();
+
+    const handlePlay = useCallback(
+        (playType: Play) => {
+            if (albums.length === 0) return;
+            const albumIds = albums.map((album) => album.id);
+            player.addToQueueByFetch(serverId, albumIds, LibraryItem.ALBUM, playType);
+        },
+        [albums, player, serverId],
+    );
+
+    const handlePlayNext = usePlayButtonClick({
+        onClick: () => {
+            handlePlay(Play.NEXT);
+        },
+        onLongPress: () => {
+            handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.NEXT]);
+        },
+    });
+
+    const handlePlayNow = usePlayButtonClick({
+        onClick: () => {
+            handlePlay(Play.NOW);
+        },
+        onLongPress: () => {
+            handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.NOW]);
+        },
+    });
+
+    const handlePlayLast = usePlayButtonClick({
+        onClick: () => {
+            handlePlay(Play.LAST);
+        },
+        onLongPress: () => {
+            handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.LAST]);
+        },
+    });
 
     return (
         <Stack gap="md">
@@ -701,6 +744,46 @@ const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) 
                 </Group>
                 <div className={styles.albumSectionDividerContainer}>
                     <div className={styles.albumSectionDivider} />
+                    {albumCount > 0 && (
+                        <ActionIconGroup>
+                            <PlayTooltip type={Play.NOW}>
+                                <ActionIcon
+                                    icon="mediaPlay"
+                                    iconProps={{
+                                        size: 'md',
+                                    }}
+                                    size="xs"
+                                    variant="subtle"
+                                    {...handlePlayNow.handlers}
+                                    {...handlePlayNow.props}
+                                />
+                            </PlayTooltip>
+                            <PlayTooltip type={Play.NEXT}>
+                                <ActionIcon
+                                    icon="mediaPlayNext"
+                                    iconProps={{
+                                        size: 'md',
+                                    }}
+                                    size="xs"
+                                    variant="subtle"
+                                    {...handlePlayNext.handlers}
+                                    {...handlePlayNext.props}
+                                />
+                            </PlayTooltip>
+                            <PlayTooltip type={Play.LAST}>
+                                <ActionIcon
+                                    icon="mediaPlayLast"
+                                    iconProps={{
+                                        size: 'md',
+                                    }}
+                                    size="xs"
+                                    variant="subtle"
+                                    {...handlePlayLast.handlers}
+                                    {...handlePlayLast.props}
+                                />
+                            </PlayTooltip>
+                        </ActionIconGroup>
+                    )}
                 </div>
             </div>
             <Grid columns={24} gutter="md" type="container">
