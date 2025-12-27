@@ -236,11 +236,11 @@ const createThrottledSetTableMeta = (
         let dynamicItemsPerRow = 2;
 
         if (is4xl) {
-            dynamicItemsPerRow = 12;
-        } else if (is3xl) {
             dynamicItemsPerRow = 10;
-        } else if (is2xl) {
+        } else if (is3xl) {
             dynamicItemsPerRow = 8;
+        } else if (is2xl) {
+            dynamicItemsPerRow = 7;
         } else if (isXl) {
             dynamicItemsPerRow = 6;
         } else if (isLg) {
