@@ -44,11 +44,13 @@ import {
     usePlayerSong,
 } from '/@/renderer/store';
 import { useGeneralSettings, useSettingsStore } from '/@/renderer/store/settings.store';
+import { titleCase } from '/@/renderer/utils';
 import { sanitize } from '/@/renderer/utils/sanitize';
 import { sortAlbumList } from '/@/shared/api/utils';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Button } from '/@/shared/components/button/button';
+import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Grid } from '/@/shared/components/grid/grid';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -687,13 +689,14 @@ interface AlbumSectionProps {
     albums: Album[];
     controls: ItemControls;
     cq: ReturnType<typeof useContainerQuery>;
+    releaseType: string;
     rows: DataRow[] | undefined;
     title: React.ReactNode | string;
 }
 
 const MAX_SECTION_CARDS = 20;
 
-const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) => {
+const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumSectionProps) => {
     const { t } = useTranslation();
     const span = cq.isXl ? 3 : cq.isLg ? 4 : cq.isMd ? 6 : cq.isSm ? 8 : cq.isXs ? 12 : 12;
     const albumCount = albums.length;
@@ -798,7 +801,7 @@ const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) 
                     <Grid.Col key={album.id} span={span}>
                         <motion.div
                             layout
-                            layoutId={album.id}
+                            layoutId={`${releaseType}-${album.id}`}
                             transition={{
                                 duration: 0.5,
                                 ease: 'easeInOut',
@@ -829,6 +832,125 @@ const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) 
     );
 };
 
+type GroupingType = 'all' | 'primary';
+
+const groupAlbumsByReleaseType = (
+    albums: Album[],
+    routeId: string,
+    groupingType: GroupingType = 'primary',
+): Record<string, Album[]> => {
+    if (groupingType === 'all') {
+        // Group by all individual release types
+        const grouped = albums.reduce(
+            (acc, album) => {
+                // Priority 1: Appears on - artist is not an album artist
+                const isAlbumArtist = album.albumArtists?.some((artist) => artist.id === routeId);
+                if (!isAlbumArtist) {
+                    const appearsOnKey = 'appears-on';
+                    if (!acc[appearsOnKey]) {
+                        acc[appearsOnKey] = [];
+                    }
+                    acc[appearsOnKey].push(album);
+                    return acc;
+                }
+
+                // Priority 2: Compilations
+                if (album.isCompilation) {
+                    const compilationKey = 'compilation';
+                    if (!acc[compilationKey]) {
+                        acc[compilationKey] = [];
+                    }
+                    acc[compilationKey].push(album);
+                    return acc;
+                }
+
+                // Group by all release types
+                const releaseTypes = album.releaseTypes || [];
+                if (releaseTypes.length > 0) {
+                    releaseTypes.forEach((type) => {
+                        const normalizedType = type.toLowerCase();
+                        if (!acc[normalizedType]) {
+                            acc[normalizedType] = [];
+                        }
+                        acc[normalizedType].push(album);
+                    });
+                } else {
+                    // If no release types, use "other" as fallback
+                    const otherKey = 'other';
+                    if (!acc[otherKey]) {
+                        acc[otherKey] = [];
+                    }
+                    acc[otherKey].push(album);
+                }
+
+                return acc;
+            },
+            {} as Record<string, Album[]>,
+        );
+
+        return grouped;
+    }
+
+    // Primary grouping (original behavior)
+    const grouped = albums.reduce(
+        (acc, album) => {
+            // Priority 1: Appears on - artist is not an album artist
+            const isAlbumArtist = album.albumArtists?.some((artist) => artist.id === routeId);
+            if (!isAlbumArtist) {
+                const appearsOnKey = 'appears-on';
+                if (!acc[appearsOnKey]) {
+                    acc[appearsOnKey] = [];
+                }
+                acc[appearsOnKey].push(album);
+                return acc;
+            }
+
+            // Priority 2: Compilations
+            if (album.isCompilation) {
+                const compilationKey = 'compilation';
+                if (!acc[compilationKey]) {
+                    acc[compilationKey] = [];
+                }
+                acc[compilationKey].push(album);
+                return acc;
+            }
+
+            // Priority 3: EP
+            const hasEPType = album.releaseTypes?.some((type) => type.toLowerCase() === 'ep');
+            if (hasEPType) {
+                const epKey = 'ep';
+                if (!acc[epKey]) {
+                    acc[epKey] = [];
+                }
+                acc[epKey].push(album);
+                return acc;
+            }
+
+            // Priority 4: Single (other non-album types)
+            const hasAlbumType = album.releaseTypes?.some((type) => type.toLowerCase() === 'album');
+            if (!hasAlbumType) {
+                const singleKey = 'single';
+                if (!acc[singleKey]) {
+                    acc[singleKey] = [];
+                }
+                acc[singleKey].push(album);
+                return acc;
+            }
+
+            // Priority 5: Album
+            const albumKey = 'album';
+            if (!acc[albumKey]) {
+                acc[albumKey] = [];
+            }
+            acc[albumKey].push(album);
+            return acc;
+        },
+        {} as Record<string, Album[]>,
+    );
+
+    return grouped;
+};
+
 const ArtistAlbums = () => {
     const { t } = useTranslation();
     const serverId = useCurrentServerId();
@@ -838,6 +960,7 @@ const ArtistAlbums = () => {
     const setAlbumArtistDetailSort = useAppStore((state) => state.actions.setAlbumArtistDetailSort);
     const sortBy = albumArtistDetailSort.sortBy;
     const sortOrder = albumArtistDetailSort.sortOrder;
+    const groupingType = albumArtistDetailSort.groupingType;
 
     const { albumArtistId, artistId } = useParams() as {
         albumArtistId?: string;
@@ -868,68 +991,8 @@ const ArtistAlbums = () => {
     }, [albumsQuery.data?.items, debouncedSearchTerm, sortBy, sortOrder]);
 
     const albumsByReleaseType = useMemo(() => {
-        const albums = filteredAndSortedAlbums;
-
-        const grouped = albums.reduce(
-            (acc, album) => {
-                // Priority 1: Appears on - artist is not an album artist
-                const isAlbumArtist = album.albumArtists?.some((artist) => artist.id === routeId);
-                if (!isAlbumArtist) {
-                    const appearsOnKey = 'appears-on';
-                    if (!acc[appearsOnKey]) {
-                        acc[appearsOnKey] = [];
-                    }
-                    acc[appearsOnKey].push(album);
-                    return acc;
-                }
-
-                // Priority 2: Compilations
-                if (album.isCompilation) {
-                    const compilationKey = 'compilation';
-                    if (!acc[compilationKey]) {
-                        acc[compilationKey] = [];
-                    }
-                    acc[compilationKey].push(album);
-                    return acc;
-                }
-
-                // Priority 3: EP
-                const hasEPType = album.releaseTypes?.some((type) => type.toLowerCase() === 'ep');
-                if (hasEPType) {
-                    const epKey = 'ep';
-                    if (!acc[epKey]) {
-                        acc[epKey] = [];
-                    }
-                    acc[epKey].push(album);
-                    return acc;
-                }
-
-                // Priority 4: Single (other non-album types)
-                const hasAlbumType = album.releaseTypes?.some(
-                    (type) => type.toLowerCase() === 'album',
-                );
-                if (!hasAlbumType) {
-                    const singleKey = 'single';
-                    if (!acc[singleKey]) {
-                        acc[singleKey] = [];
-                    }
-                    acc[singleKey].push(album);
-                    return acc;
-                }
-
-                // Priority 5: Album
-                const albumKey = 'album';
-                if (!acc[albumKey]) {
-                    acc[albumKey] = [];
-                }
-                acc[albumKey].push(album);
-                return acc;
-            },
-            {} as Record<string, Album[]>,
-        );
-
-        return grouped;
-    }, [filteredAndSortedAlbums, routeId]);
+        return groupAlbumsByReleaseType(filteredAndSortedAlbums, routeId, groupingType);
+    }, [filteredAndSortedAlbums, routeId, groupingType]);
 
     const releaseTypeEntries = useMemo(() => {
         const priorityOrder = ['album', 'ep', 'single', 'compilation', 'appears-on'];
@@ -968,7 +1031,7 @@ const ArtistAlbums = () => {
                         });
                         break;
                     default:
-                        displayName = releaseType;
+                        displayName = titleCase(releaseType);
                 }
                 return { albums, displayName, releaseType };
             })
@@ -1033,6 +1096,7 @@ const ArtistAlbums = () => {
                     setSortOrder={(value) => setAlbumArtistDetailSort(sortBy, value as SortOrder)}
                     sortOrder={sortOrder}
                 />
+                <GroupingTypeSelector />
             </Group>
             <div className={styles.albumSectionContainer} ref={cq.ref}>
                 {cq.isCalculated && (
@@ -1043,6 +1107,7 @@ const ArtistAlbums = () => {
                                 controls={controls}
                                 cq={cq}
                                 key={releaseType}
+                                releaseType={releaseType}
                                 rows={rows}
                                 title={displayName}
                             />
@@ -1053,3 +1118,37 @@ const ArtistAlbums = () => {
         </Stack>
     );
 };
+
+function GroupingTypeSelector() {
+    const { t } = useTranslation();
+    const groupingType = useAppStore((state) => state.albumArtistDetailSort.groupingType);
+    const setAlbumArtistDetailGroupingType = useAppStore(
+        (state) => state.actions.setAlbumArtistDetailGroupingType,
+    );
+
+    return (
+        <DropdownMenu>
+            <DropdownMenu.Target>
+                <ActionIcon icon="settings" variant="subtle" />
+            </DropdownMenu.Target>
+            <DropdownMenu.Dropdown>
+                <DropdownMenu.Item
+                    isSelected={groupingType === 'all'}
+                    onClick={() => setAlbumArtistDetailGroupingType('all')}
+                >
+                    {t('page.albumArtistDetail.groupingTypeAll', {
+                        postProcess: 'sentenceCase',
+                    })}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                    isSelected={groupingType === 'primary'}
+                    onClick={() => setAlbumArtistDetailGroupingType('primary')}
+                >
+                    {t('page.albumArtistDetail.groupingTypePrimary', {
+                        postProcess: 'sentenceCase',
+                    })}
+                </DropdownMenu.Item>
+            </DropdownMenu.Dropdown>
+        </DropdownMenu>
+    );
+}

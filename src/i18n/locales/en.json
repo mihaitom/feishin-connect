@@ -410,6 +410,8 @@
         "albumArtistDetail": {
             "about": "About {{artist}}",
             "appearsOn": "appears on",
+            "groupingTypeAll": "all release types",
+            "groupingTypePrimary": "primary release types",
             "recentReleases": "recent releases",
             "viewDiscography": "view discography",
             "relatedArtists": "related $t(entity.artist_other)",

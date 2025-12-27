@@ -8,6 +8,7 @@ import { Platform } from '/@/shared/types/types';
 
 export interface AppSlice extends AppState {
     actions: {
+        setAlbumArtistDetailGroupingType: (groupingType: 'all' | 'primary') => void;
         setAlbumArtistDetailSort: (sortBy: AlbumListSort, sortOrder: SortOrder) => void;
         setAppStore: (data: Partial<AppSlice>) => void;
         setPageSidebar: (key: string, value: boolean) => void;
@@ -20,6 +21,7 @@ export interface AppSlice extends AppState {
 
 export interface AppState {
     albumArtistDetailSort: {
+        groupingType: 'all' | 'primary';
         sortBy: AlbumListSort;
         sortOrder: SortOrder;
     };
@@ -59,9 +61,14 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
         devtools(
             immer((set, get) => ({
                 actions: {
+                    setAlbumArtistDetailGroupingType: (groupingType) => {
+                        set((state) => {
+                            state.albumArtistDetailSort.groupingType = groupingType;
+                        });
+                    },
                     setAlbumArtistDetailSort: (sortBy, sortOrder) => {
                         set((state) => {
-                            state.albumArtistDetailSort = { sortBy, sortOrder };
+                            state.albumArtistDetailSort = { ...state.albumArtistDetailSort, sortBy, sortOrder };
                         });
                     },
                     setAppStore: (data) => {
@@ -98,6 +105,7 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                     },
                 },
                 albumArtistDetailSort: {
+                    groupingType: 'primary',
                     sortBy: AlbumListSort.RELEASE_DATE,
                     sortOrder: SortOrder.DESC,
                 },
