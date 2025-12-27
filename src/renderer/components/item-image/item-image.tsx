@@ -2,7 +2,12 @@ import { memo, useMemo } from 'react';
 import z from 'zod';
 
 import { api } from '/@/renderer/api';
-import { GeneralSettingsSchema, useCurrentServerId, useSettingsStore } from '/@/renderer/store';
+import {
+    GeneralSettingsSchema,
+    useAuthStore,
+    useCurrentServerId,
+    useSettingsStore,
+} from '/@/renderer/store';
 import { BaseImage, ImageProps } from '/@/shared/components/image/image';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
@@ -27,6 +32,7 @@ interface UseItemImageUrlProps {
     id?: string;
     imageUrl?: null | string;
     itemType: LibraryItem;
+    serverId?: string;
     size?: number;
     type?: keyof z.infer<typeof GeneralSettingsSchema>['imageRes'];
 }
@@ -49,9 +55,34 @@ export const useItemImageUrl = (args: UseItemImageUrlProps) => {
 
         return (
             api.controller.getImageUrl({
-                apiClientProps: { serverId },
+                apiClientProps: { serverId: args.serverId || serverId },
                 query: { id, itemType, size: size ?? sizeByType },
             }) || undefined
         );
-    }, [id, imageUrl, itemType, serverId, size, sizeByType]);
+    }, [args.serverId, id, imageUrl, itemType, serverId, size, sizeByType]);
 };
+
+export function getItemImageUrl(args: UseItemImageUrlProps) {
+    const { id, imageUrl, itemType, size, type } = args;
+    const authStore = useAuthStore.getState();
+    const currentServerId = authStore.currentServer?.id;
+    const serverId = (args.serverId || currentServerId) as string;
+
+    const imageRes = useSettingsStore.getState().general.imageRes;
+    const sizeByType: number | undefined = type ? imageRes[type] : undefined;
+
+    if (imageUrl) {
+        return imageUrl;
+    }
+
+    if (!id) {
+        return undefined;
+    }
+
+    return (
+        api.controller.getImageUrl({
+            apiClientProps: { serverId },
+            query: { id, itemType, size: size ?? sizeByType },
+        }) || undefined
+    );
+}
