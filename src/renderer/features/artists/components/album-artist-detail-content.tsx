@@ -1,10 +1,11 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { useMemo, useRef, useState } from 'react';
+import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createSearchParams, generatePath, Link, useParams } from 'react-router';
 
 import styles from './album-artist-detail-content.module.css';
 
+import { queryKeys } from '/@/renderer/api/query-keys';
 import { DataRow, MemoizedItemCard } from '/@/renderer/components/item-card/item-card';
 import { useDefaultItemListControls } from '/@/renderer/components/item-list/helpers/item-list-controls';
 import { useGridRows } from '/@/renderer/components/item-list/helpers/use-grid-rows';
@@ -17,7 +18,7 @@ import { ItemControls } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistGridCarousel } from '/@/renderer/features/artists/components/album-artist-grid-carousel';
-import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { useIsPlayerFetching, usePlayer } from '/@/renderer/features/player/context/player-context';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import {
     CLIENT_SIDE_ALBUM_FILTERS,
@@ -25,6 +26,7 @@ import {
 } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButtonControlled } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
+import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -43,6 +45,7 @@ import { Button } from '/@/shared/components/button/button';
 import { Grid } from '/@/shared/components/grid/grid';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
@@ -66,13 +69,16 @@ import { ItemListKey, ListDisplayType, Play } from '/@/shared/types/types';
 interface AlbumArtistActionButtonsProps {
     artistDiscographyLink: string;
     artistSongsLink: string;
+    onArtistRadio?: () => void;
 }
 
 const AlbumArtistActionButtons = ({
     artistDiscographyLink,
     artistSongsLink,
+    onArtistRadio,
 }: AlbumArtistActionButtonsProps) => {
     const { t } = useTranslation();
+    const isPlayerFetching = useIsPlayerFetching();
 
     return (
         <>
@@ -95,6 +101,28 @@ const AlbumArtistActionButtons = ({
                 >
                     {String(t('page.albumArtistDetail.viewAllTracks')).toUpperCase()}
                 </Button>
+                {onArtistRadio && (
+                    <Button
+                        disabled={isPlayerFetching}
+                        leftSection={
+                            isPlayerFetching ? (
+                                <Spinner color="white" size={16} />
+                            ) : (
+                                <Icon icon="radio" size="lg" />
+                            )
+                        }
+                        onClick={onArtistRadio}
+                        p={0}
+                        size="compact-md"
+                        variant="transparent"
+                    >
+                        {String(
+                            t('player.artistRadio', {
+                                postProcess: 'sentenceCase',
+                            }),
+                        ).toUpperCase()}
+                    </Button>
+                )}
             </Group>
         </>
     );
@@ -506,13 +534,16 @@ const AlbumArtistMetadataSimilarArtists = ({
 };
 
 export const AlbumArtistDetailContent = () => {
-    const { artistItems, externalLinks, lastFM, musicBrainz } = useGeneralSettings();
+    const { artistItems, artistRadioCount, externalLinks, lastFM, musicBrainz } =
+        useGeneralSettings();
     const { albumArtistId, artistId } = useParams() as {
         albumArtistId?: string;
         artistId?: string;
     };
     const routeId = (artistId || albumArtistId) as string;
     const server = useCurrentServer();
+    const { addToQueueByData } = usePlayer();
+    const queryClient = useQueryClient();
 
     const [enabledItem, itemOrder] = useMemo(() => {
         const enabled: { [key in ArtistItem]?: boolean } = {};
@@ -560,6 +591,28 @@ export const AlbumArtistDetailContent = () => {
     const showGenres = detailQuery.data?.genres ? detailQuery.data.genres.length !== 0 : false;
     const mbzId = detailQuery.data?.mbz;
 
+    const handleArtistRadio = useCallback(async () => {
+        if (!server?.id || !routeId) return;
+
+        try {
+            const artistRadioSongs = await queryClient.fetchQuery({
+                ...songsQueries.artistRadio({
+                    query: {
+                        artistId: routeId,
+                        count: artistRadioCount,
+                    },
+                    serverId: server.id,
+                }),
+                queryKey: queryKeys.player.fetch({ artistId: routeId }),
+            });
+            if (artistRadioSongs && artistRadioSongs.length > 0) {
+                addToQueueByData(artistRadioSongs, Play.NOW);
+            }
+        } catch (error) {
+            console.error('Failed to load artist radio:', error);
+        }
+    }, [addToQueueByData, artistRadioCount, queryClient, routeId, server.id]);
+
     // Calculate order for genres and external links (show before other sections)
     // Use a very low order number to ensure they appear first
     const genresOrder = 0;
@@ -571,6 +624,7 @@ export const AlbumArtistDetailContent = () => {
                 <AlbumArtistActionButtons
                     artistDiscographyLink={artistDiscographyLink}
                     artistSongsLink={artistSongsLink}
+                    onArtistRadio={handleArtistRadio}
                 />
                 <Grid gutter="2xl">
                     {showGenres && (
