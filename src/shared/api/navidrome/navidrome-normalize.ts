@@ -156,7 +156,7 @@ const normalizeSong = (
             songCount: null,
         })),
         id,
-        imageId: item.id,
+        imageId: id,
         imageUrl: null,
         lastPlayedAt: normalizePlayDate(item),
         lyrics: item.lyrics ? item.lyrics : null,
