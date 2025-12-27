@@ -691,11 +691,18 @@ interface AlbumSectionProps {
     title: React.ReactNode | string;
 }
 
+const MAX_SECTION_CARDS = 20;
+
 const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) => {
+    const { t } = useTranslation();
     const span = cq.isXl ? 3 : cq.isLg ? 4 : cq.isMd ? 6 : cq.isSm ? 8 : cq.isXs ? 12 : 12;
     const albumCount = albums.length;
+    const [showAll, setShowAll] = useState(false);
     const player = usePlayer();
     const serverId = useCurrentServerId();
+
+    const displayedAlbums = showAll ? albums : albums.slice(0, MAX_SECTION_CARDS);
+    const hasMoreAlbums = albums.length > MAX_SECTION_CARDS;
 
     const handlePlay = useCallback(
         (playType: Play) => {
@@ -787,7 +794,7 @@ const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) 
                 </div>
             </div>
             <Grid columns={24} gutter="md" type="container">
-                {albums.map((album) => (
+                {displayedAlbums.map((album) => (
                     <Grid.Col key={album.id} span={span}>
                         <MemoizedItemCard
                             controls={controls}
@@ -801,6 +808,13 @@ const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) 
                     </Grid.Col>
                 ))}
             </Grid>
+            {hasMoreAlbums && !showAll && (
+                <Group justify="center" w="100%">
+                    <Button onClick={() => setShowAll(true)} variant="subtle">
+                        {t('action.viewMore', { postProcess: 'sentenceCase' })}
+                    </Button>
+                </Group>
+            )}
         </Stack>
     );
 };
