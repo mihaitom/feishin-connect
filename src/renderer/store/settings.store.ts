@@ -1379,9 +1379,9 @@ const initialState: SettingsState = {
     },
     lyricsDisplay: {
         default: {
-            fontSize: 48,
+            fontSize: 24,
             fontSizeUnsync: 24,
-            gap: 32,
+            gap: 24,
             gapUnsync: 24,
         },
     },
