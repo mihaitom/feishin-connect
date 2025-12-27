@@ -157,45 +157,65 @@ function BaseGridCarousel(props: GridCarouselProps) {
             {cq.isCalculated && (
                 <>
                     <div className={styles.navigation}>
-                        <Group gap="xs" justify="space-between" w="100%">
-                            <Group gap="xs">
-                                {typeof title === 'string' ? (
+                        {typeof title === 'string' ? (
+                            <Group gap="xs" justify="space-between" w="100%">
+                                <Group gap="xs">
                                     <TextTitle fw={700} isNoSelect order={3}>
                                         {title}
                                     </TextTitle>
-                                ) : (
-                                    title
-                                )}
-                                {enableRefresh && onRefresh && (
+                                    {enableRefresh && onRefresh && (
+                                        <ActionIcon
+                                            icon="refresh"
+                                            iconProps={{ size: 'xs' }}
+                                            onClick={onRefresh}
+                                            size="xs"
+                                            tooltip={{ label: 'Refresh' }}
+                                            variant="transparent"
+                                        />
+                                    )}
+                                </Group>
+                                <Group gap="xs" justify="end">
                                     <ActionIcon
-                                        icon="refresh"
-                                        iconProps={{ size: 'xs' }}
-                                        onClick={onRefresh}
+                                        disabled={isPrevDisabled}
+                                        icon="arrowLeftS"
+                                        iconProps={{ size: 'lg' }}
+                                        onClick={handlePrevPage}
                                         size="xs"
-                                        tooltip={{ label: 'Refresh' }}
-                                        variant="transparent"
+                                        variant="subtle"
                                     />
-                                )}
+                                    <ActionIcon
+                                        disabled={isNextDisabled}
+                                        icon="arrowRightS"
+                                        iconProps={{ size: 'lg' }}
+                                        onClick={handleNextPage}
+                                        size="xs"
+                                        variant="subtle"
+                                    />
+                                </Group>
                             </Group>
-                            <Group gap="xs" justify="end">
-                                <ActionIcon
-                                    disabled={isPrevDisabled}
-                                    icon="arrowLeftS"
-                                    iconProps={{ size: 'lg' }}
-                                    onClick={handlePrevPage}
-                                    size="xs"
-                                    variant="subtle"
-                                />
-                                <ActionIcon
-                                    disabled={isNextDisabled}
-                                    icon="arrowRightS"
-                                    iconProps={{ size: 'lg' }}
-                                    onClick={handleNextPage}
-                                    size="xs"
-                                    variant="subtle"
-                                />
-                            </Group>
-                        </Group>
+                        ) : (
+                            <div className={styles.customTitleContainer}>
+                                <div className={styles.customTitleContent}>{title}</div>
+                                <Group gap="xs" justify="end">
+                                    <ActionIcon
+                                        disabled={isPrevDisabled}
+                                        icon="arrowLeftS"
+                                        iconProps={{ size: 'lg' }}
+                                        onClick={handlePrevPage}
+                                        size="xs"
+                                        variant="subtle"
+                                    />
+                                    <ActionIcon
+                                        disabled={isNextDisabled}
+                                        icon="arrowRightS"
+                                        iconProps={{ size: 'lg' }}
+                                        onClick={handleNextPage}
+                                        size="xs"
+                                        variant="subtle"
+                                    />
+                                </Group>
+                            </div>
+                        )}
                     </div>
                     <AnimatePresence custom={currentPage} initial={false} mode="wait">
                         <motion.div

@@ -30,11 +30,22 @@
 .album-section-divider-container {
     display: flex;
     align-items: center;
+    gap: var(--theme-spacing-md);
     width: 100%;
 }
 
 .album-section-divider {
-    width: 100%;
+    flex: 1;
     height: 2px;
     background: var(--theme-colors-border);
+}
+
+.similar-artists-title {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--theme-spacing-md);
+    align-items: center;
+    margin-bottom: var(--theme-spacing-md);
+    width: 100%;
+    min-width: 0;
 }

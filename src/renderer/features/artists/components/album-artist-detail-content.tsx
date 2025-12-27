@@ -16,6 +16,7 @@ import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table
 import { ItemControls } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
+import { AlbumArtistGridCarousel } from '/@/renderer/features/artists/components/album-artist-grid-carousel';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import {
@@ -51,9 +52,12 @@ import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
 import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
 import {
     Album,
+    AlbumArtist,
     AlbumArtistDetailResponse,
     AlbumListSort,
     LibraryItem,
+    RelatedArtist,
+    ServerType,
     Song,
     SortOrder,
 } from '/@/shared/types/domain-types';
@@ -237,13 +241,14 @@ const AlbumArtistMetadataTopSongs = ({
     if (!tableConfig || columns.length === 0) {
         return (
             <section>
-                <Group justify="space-between" wrap="nowrap">
-                    <Group align="flex-end" wrap="nowrap">
-                        <TextTitle fw={700} order={3}>
-                            {t('page.albumArtistDetail.topSongs', {
-                                postProcess: 'sentenceCase',
-                            })}
-                        </TextTitle>
+                <div className={styles.albumSectionTitle}>
+                    <TextTitle fw={700} order={3}>
+                        {t('page.albumArtistDetail.topSongs', {
+                            postProcess: 'sentenceCase',
+                        })}
+                    </TextTitle>
+                    <div className={styles.albumSectionDividerContainer}>
+                        <div className={styles.albumSectionDivider} />
                         <Button
                             component={Link}
                             size="compact-md"
@@ -257,8 +262,8 @@ const AlbumArtistMetadataTopSongs = ({
                                 postProcess: 'sentenceCase',
                             })}
                         </Button>
-                    </Group>
-                </Group>
+                    </div>
+                </div>
             </section>
         );
     }
@@ -268,13 +273,14 @@ const AlbumArtistMetadataTopSongs = ({
     return (
         <section>
             <Stack gap="md">
-                <Group justify="space-between" wrap="nowrap">
-                    <Group align="flex-end" wrap="nowrap">
-                        <TextTitle fw={700} order={3}>
-                            {t('page.albumArtistDetail.topSongs', {
-                                postProcess: 'sentenceCase',
-                            })}
-                        </TextTitle>
+                <div className={styles.albumSectionTitle}>
+                    <TextTitle fw={700} order={3}>
+                        {t('page.albumArtistDetail.topSongs', {
+                            postProcess: 'sentenceCase',
+                        })}
+                    </TextTitle>
+                    <div className={styles.albumSectionDividerContainer}>
+                        <div className={styles.albumSectionDivider} />
                         <Button
                             component={Link}
                             size="compact-md"
@@ -288,8 +294,8 @@ const AlbumArtistMetadataTopSongs = ({
                                 postProcess: 'sentenceCase',
                             })}
                         </Button>
-                    </Group>
-                </Group>
+                    </div>
+                </div>
                 <Group gap="sm" w="100%">
                     <TextInput
                         flex={1}
@@ -426,6 +432,79 @@ const AlbumArtistMetadataExternalLinks = ({
     );
 };
 
+interface AlbumArtistMetadataSimilarArtistsProps {
+    detailQuery: ReturnType<typeof useSuspenseQuery<AlbumArtistDetailResponse>>;
+    routeId: string;
+}
+
+const AlbumArtistMetadataSimilarArtists = ({
+    detailQuery,
+    routeId,
+}: AlbumArtistMetadataSimilarArtistsProps) => {
+    const { t } = useTranslation();
+    const server = useCurrentServer();
+    const serverId = useCurrentServerId();
+
+    const similarArtists = useMemo(() => {
+        const relatedArtists = detailQuery.data?.similarArtists;
+        if (!relatedArtists || relatedArtists.length === 0) {
+            return [];
+        }
+
+        return relatedArtists.map(
+            (relatedArtist: RelatedArtist): AlbumArtist => ({
+                _itemType: LibraryItem.ALBUM_ARTIST,
+                _serverId: serverId || '',
+                _serverType: (server?.type as ServerType) || ServerType.JELLYFIN,
+                albumCount: null,
+                biography: null,
+                duration: null,
+                genres: [],
+                id: relatedArtist.id,
+                imageId: relatedArtist.imageId,
+                imageUrl: relatedArtist.imageUrl,
+                lastPlayedAt: null,
+                mbz: null,
+                name: relatedArtist.name,
+                playCount: null,
+                similarArtists: null,
+                songCount: null,
+                userFavorite: false,
+                userRating: null,
+            }),
+        );
+    }, [detailQuery.data?.similarArtists, server?.type, serverId]);
+
+    const carouselTitle = useMemo(
+        () => (
+            <div className={styles.similarArtistsTitle}>
+                <TextTitle fw={700} order={3}>
+                    {t('page.albumArtistDetail.relatedArtists', {
+                        postProcess: 'sentenceCase',
+                    })}
+                </TextTitle>
+                <div className={styles.albumSectionDividerContainer}>
+                    <div className={styles.albumSectionDivider} />
+                </div>
+            </div>
+        ),
+        [t],
+    );
+
+    if (similarArtists.length === 0) {
+        return null;
+    }
+
+    return (
+        <AlbumArtistGridCarousel
+            data={similarArtists}
+            excludeIds={[routeId]}
+            rowCount={1}
+            title={carouselTitle}
+        />
+    );
+};
+
 export const AlbumArtistDetailContent = () => {
     const { artistItems, externalLinks, lastFM, musicBrainz } = useGeneralSettings();
     const { albumArtistId, artistId } = useParams() as {
@@ -493,7 +572,7 @@ export const AlbumArtistDetailContent = () => {
                     artistDiscographyLink={artistDiscographyLink}
                     artistSongsLink={artistSongsLink}
                 />
-                <Grid gutter="xl">
+                <Grid gutter="2xl">
                     {showGenres && (
                         <Grid.Col order={genresOrder} span={12}>
                             <AlbumArtistMetadataGenres genres={detailQuery.data?.genres} />
@@ -521,6 +600,14 @@ export const AlbumArtistDetailContent = () => {
                     <Grid.Col order={itemOrder.recentAlbums} span={12}>
                         <ArtistAlbums />
                     </Grid.Col>
+                    {enabledItem.similarArtists && (
+                        <Grid.Col order={itemOrder.similarArtists} span={12}>
+                            <AlbumArtistMetadataSimilarArtists
+                                detailQuery={detailQuery}
+                                routeId={routeId}
+                            />
+                        </Grid.Col>
+                    )}
                     {enabledItem.topSongs && (
                         <Grid.Col order={itemOrder.topSongs} span={12}>
                             <AlbumArtistMetadataTopSongs
@@ -765,16 +852,17 @@ const ArtistAlbums = () => {
                 />
             </Group>
             <div className={styles.albumSectionContainer} ref={cq.ref}>
-                {releaseTypeEntries.map(({ albums, displayName, releaseType }) => (
-                    <AlbumSection
-                        albums={albums}
-                        controls={controls}
-                        cq={cq}
-                        key={releaseType}
-                        rows={rows}
-                        title={displayName}
-                    />
-                ))}
+                {cq.isCalculated &&
+                    releaseTypeEntries.map(({ albums, displayName, releaseType }) => (
+                        <AlbumSection
+                            albums={albums}
+                            controls={controls}
+                            cq={cq}
+                            key={releaseType}
+                            rows={rows}
+                            title={displayName}
+                        />
+                    ))}
             </div>
         </Stack>
     );

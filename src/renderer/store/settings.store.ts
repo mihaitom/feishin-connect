@@ -578,7 +578,6 @@ export const SettingsStateSchema = ValidationSettingsStateSchema.merge(
 
 export enum ArtistItem {
     BIOGRAPHY = 'biography',
-    COMPILATIONS = 'compilations',
     RECENT_ALBUMS = 'recentAlbums',
     SIMILAR_ARTISTS = 'similarArtists',
     TOP_SONGS = 'topSongs',
