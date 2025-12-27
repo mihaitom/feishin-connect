@@ -268,7 +268,7 @@ const normalizeAlbum = (
         originalDate: item.originalDate ? new Date(item.originalDate).toISOString() : null,
         playCount: item.playCount || 0,
         releaseDate: item.releaseDate ? new Date(item.releaseDate).toISOString() : null,
-        releaseYear: item.minYear || null,
+        releaseYear: item.maxYear || null,
         size: item.size,
         songCount: item.songCount,
         songs: item.songs ? item.songs.map((song) => normalizeSong(song, server)) : undefined,
@@ -285,7 +285,7 @@ const normalizeAlbumArtist = (
     },
     server?: null | ServerListItem,
 ): AlbumArtist => {
-    const imageUrl = getImageUrl({ url: item?.largeImageUrl || null });
+    const imageUrl = getImageUrl({ url: item?.largeImageUrl?.replace(/\?size=\d+/, '') || null });
 
     let albumCount: number;
     let songCount: number;

@@ -17,10 +17,10 @@ export const useContainerQuery = (props?: UseContainerQueryProps) => {
     const isXs = width >= (xs || 360);
     const isSm = width >= (sm || 600);
     const isMd = width >= (md || 768);
-    const isLg = width >= (lg || 1200);
-    const isXl = width >= (xl || 1500);
-    const is2xl = width >= (xxl || 1920);
-    const is3xl = width >= (xxxl || 2560);
+    const isLg = width >= (lg || 960);
+    const isXl = width >= (xl || 1200);
+    const is2xl = width >= (xxl || 1440);
+    const is3xl = width >= (xxxl || 1920);
 
     const isCalculated = width !== 0;
 

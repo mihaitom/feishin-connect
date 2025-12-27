@@ -3,10 +3,12 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { createWithEqualityFn } from 'zustand/traditional';
 
+import { AlbumListSort, SortOrder } from '/@/shared/types/domain-types';
 import { Platform } from '/@/shared/types/types';
 
 export interface AppSlice extends AppState {
     actions: {
+        setAlbumArtistDetailSort: (sortBy: AlbumListSort, sortOrder: SortOrder) => void;
         setAppStore: (data: Partial<AppSlice>) => void;
         setPageSidebar: (key: string, value: boolean) => void;
         setPrivateMode: (enabled: boolean) => void;
@@ -17,6 +19,10 @@ export interface AppSlice extends AppState {
 }
 
 export interface AppState {
+    albumArtistDetailSort: {
+        sortBy: AlbumListSort;
+        sortOrder: SortOrder;
+    };
     commandPalette: CommandPaletteProps;
     isReorderingQueue: boolean;
     pageSidebar: Record<string, boolean>;
@@ -53,6 +59,11 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
         devtools(
             immer((set, get) => ({
                 actions: {
+                    setAlbumArtistDetailSort: (sortBy, sortOrder) => {
+                        set((state) => {
+                            state.albumArtistDetailSort = { sortBy, sortOrder };
+                        });
+                    },
                     setAppStore: (data) => {
                         set({ ...get(), ...data });
                     },
@@ -85,6 +96,10 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                             state.titlebar = { ...state.titlebar, ...options };
                         });
                     },
+                },
+                albumArtistDetailSort: {
+                    sortBy: AlbumListSort.RELEASE_DATE,
+                    sortOrder: SortOrder.DESC,
                 },
                 commandPalette: {
                     close: () => {

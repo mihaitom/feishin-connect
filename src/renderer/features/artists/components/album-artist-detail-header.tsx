@@ -1,5 +1,5 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { forwardRef, Fragment, Ref } from 'react';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { forwardRef, Fragment, Ref, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -34,16 +34,16 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
     const routeId = (artistId || albumArtistId) as string;
     const server = useCurrentServer();
     const { t } = useTranslation();
-    const detailQuery = useQuery(
+    const detailQuery = useSuspenseQuery(
         artistsQueries.albumArtistDetail({
             query: { id: routeId },
             serverId: server?.id,
         }),
     );
 
-    const albumCount = detailQuery?.data?.albumCount;
-    const songCount = detailQuery?.data?.songCount;
-    const duration = detailQuery?.data?.duration;
+    const albumCount = detailQuery.data?.albumCount;
+    const songCount = detailQuery.data?.songCount;
+    const duration = detailQuery.data?.duration;
     const durationEnabled = duration !== null && duration !== undefined;
 
     const metadataItems = [
@@ -93,68 +93,81 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
         }
     };
 
-    const handlePlay = (type?: Play) => {
-        if (!server?.id || !routeId) return;
-        addToQueueByFetch(
-            server.id,
-            [routeId],
-            LibraryItem.ALBUM_ARTIST,
-            type || playButtonBehavior,
-        );
-    };
+    const handlePlay = useCallback(
+        (type?: Play) => {
+            if (!server?.id || !routeId) return;
+            addToQueueByFetch(
+                server.id,
+                [routeId],
+                LibraryItem.ALBUM_ARTIST,
+                type || playButtonBehavior,
+            );
+        },
+        [addToQueueByFetch, playButtonBehavior, routeId, server.id],
+    );
 
-    const handleFavorite = () => {
-        if (!detailQuery?.data) return;
+    const handleFavorite = useCallback(() => {
+        if (!detailQuery.data) return;
         setFavorite(
             detailQuery.data._serverId,
             [detailQuery.data.id],
             LibraryItem.ALBUM_ARTIST,
             !detailQuery.data.userFavorite,
         );
-    };
+    }, [detailQuery.data, setFavorite]);
 
-    const handleUpdateRating = (rating: number) => {
-        if (!detailQuery?.data) return;
+    const handleUpdateRating = useCallback(
+        (rating: number) => {
+            if (!detailQuery.data) return;
 
-        if (detailQuery.data.userRating === rating) {
+            if (detailQuery.data.userRating === rating) {
+                return setRating(
+                    detailQuery.data._serverId,
+                    [detailQuery.data.id],
+                    LibraryItem.ALBUM_ARTIST,
+                    0,
+                );
+            }
+
             return setRating(
                 detailQuery.data._serverId,
                 [detailQuery.data.id],
                 LibraryItem.ALBUM_ARTIST,
-                0,
+                rating,
             );
-        }
+        },
+        [detailQuery.data, setRating],
+    );
 
-        return setRating(
-            detailQuery.data._serverId,
-            [detailQuery.data.id],
-            LibraryItem.ALBUM_ARTIST,
-            rating,
-        );
-    };
+    const handleMoreOptions = useCallback(
+        (e: React.MouseEvent<HTMLButtonElement>) => {
+            if (!detailQuery.data) return;
+            ContextMenuController.call({
+                cmd: { items: [detailQuery.data], type: LibraryItem.ALBUM_ARTIST },
+                event: e,
+            });
+        },
+        [detailQuery.data],
+    );
 
-    const handleMoreOptions = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!detailQuery?.data) return;
-        ContextMenuController.call({
-            cmd: { items: [detailQuery.data], type: LibraryItem.ALBUM_ARTIST },
-            event: e,
-        });
-    };
-
-    const showRating = detailQuery?.data?._serverType === ServerType.NAVIDROME;
+    const showRating = detailQuery.data?._serverType === ServerType.NAVIDROME;
 
     const imageUrl = useItemImageUrl({
-        id: detailQuery?.data?.imageId || undefined,
+        id: detailQuery.data?.imageId || undefined,
         itemType: LibraryItem.ALBUM_ARTIST,
         type: 'itemCard',
     });
 
+    const selectedImageUrl = useMemo(() => {
+        return detailQuery.data?.imageUrl || imageUrl;
+    }, [detailQuery.data?.imageUrl, imageUrl]);
+
     return (
         <LibraryHeader
-            imageUrl={imageUrl}
+            imageUrl={selectedImageUrl}
             item={{ route: AppRoute.LIBRARY_ALBUM_ARTISTS, type: LibraryItem.ALBUM_ARTIST }}
             ref={ref}
-            title={detailQuery?.data?.name || ''}
+            title={detailQuery.data?.name || ''}
         >
             <Stack gap="md" w="100%">
                 <Group className={styles.metadataGroup}>
@@ -168,14 +181,14 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
                         ))}
                 </Group>
                 <LibraryHeaderMenu
-                    favorite={detailQuery?.data?.userFavorite}
+                    favorite={detailQuery.data?.userFavorite}
                     onArtistRadio={handleArtistRadio}
                     onFavorite={handleFavorite}
                     onMore={handleMoreOptions}
                     onPlay={(type) => handlePlay(type)}
                     onRating={showRating ? handleUpdateRating : undefined}
                     onShuffle={() => handlePlay(Play.SHUFFLE)}
-                    rating={detailQuery?.data?.userRating || 0}
+                    rating={detailQuery.data?.userRating || 0}
                 />
             </Stack>
         </LibraryHeader>
