@@ -45,6 +45,7 @@ import { Button } from '/@/shared/components/button/button';
 import { Grid } from '/@/shared/components/grid/grid';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { Separator } from '/@/shared/components/separator/separator';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -681,7 +682,7 @@ interface AlbumSectionProps {
     controls: ItemControls;
     cq: ReturnType<typeof useContainerQuery>;
     rows: DataRow[] | undefined;
-    title: string;
+    title: React.ReactNode | string;
 }
 
 const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) => {
@@ -816,7 +817,7 @@ const ArtistAlbums = () => {
 
         return Object.entries(albumsByReleaseType)
             .map(([releaseType, albums]) => {
-                let displayName: string;
+                let displayName: React.ReactNode | string;
                 switch (releaseType) {
                     case 'album':
                         displayName = t('releaseType.primary.album', {
@@ -834,9 +835,17 @@ const ArtistAlbums = () => {
                         });
                         break;
                     case 'single':
-                        displayName = t('releaseType.primary.single', {
-                            postProcess: 'sentenceCase',
-                        });
+                        displayName = (
+                            <>
+                                {t('releaseType.primary.single', {
+                                    postProcess: 'sentenceCase',
+                                })}
+                                <Separator />
+                                {t('releaseType.primary.ep', {
+                                    postProcess: 'upperCase',
+                                })}
+                            </>
+                        );
                         break;
                     default:
                         displayName = releaseType;
