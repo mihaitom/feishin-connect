@@ -29,8 +29,8 @@
 
 .album-section-divider-container {
     display: flex;
-    align-items: center;
     gap: var(--theme-spacing-md);
+    align-items: center;
     width: 100%;
 }
 
@@ -45,7 +45,7 @@
     grid-template-columns: auto 1fr;
     gap: var(--theme-spacing-md);
     align-items: center;
-    margin-bottom: var(--theme-spacing-md);
     width: 100%;
     min-width: 0;
+    margin-bottom: var(--theme-spacing-md);
 }

@@ -16,10 +16,10 @@
 
 .custom-title-container {
     display: flex;
+    gap: var(--theme-spacing-sm);
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: var(--theme-spacing-sm);
 }
 
 .custom-title-content {
