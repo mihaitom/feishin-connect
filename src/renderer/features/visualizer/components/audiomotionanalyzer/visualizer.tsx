@@ -14,9 +14,7 @@ const VisualizerInner = () => {
     const canvasRef = createRef<HTMLDivElement>();
     const accent = useSettingsStore((store) => store.general.accent);
     const visualizer = useSettingsStore((store) => store.visualizer);
-    const opacity = useSettingsStore(
-        (store) => store.visualizer.audiomotionanalyzer.opacity,
-    );
+    const opacity = useSettingsStore((store) => store.visualizer.audiomotionanalyzer.opacity);
     const [motion, setMotion] = useState<AudioMotionAnalyzer>();
 
     // Check if a gradient name is a custom gradient
@@ -220,13 +218,7 @@ const VisualizerInner = () => {
         }
     }, [motion, options]);
 
-    return (
-        <div
-            className={styles.visualizer}
-            ref={canvasRef}
-            style={{ opacity }}
-        />
-    );
+    return <div className={styles.visualizer} ref={canvasRef} style={{ opacity }} />;
 };
 
 export const Visualizer = () => {

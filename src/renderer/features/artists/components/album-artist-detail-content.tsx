@@ -41,6 +41,7 @@ import { useGeneralSettings, useSettingsStore } from '/@/renderer/store/settings
 import { sanitize } from '/@/renderer/utils/sanitize';
 import { sortAlbumList } from '/@/shared/api/utils';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { Badge } from '/@/shared/components/badge/badge';
 import { Button } from '/@/shared/components/button/button';
 import { Grid } from '/@/shared/components/grid/grid';
 import { Group } from '/@/shared/components/group/group';
@@ -687,13 +688,17 @@ interface AlbumSectionProps {
 
 const AlbumSection = ({ albums, controls, cq, rows, title }: AlbumSectionProps) => {
     const span = cq.isXl ? 3 : cq.isLg ? 4 : cq.isMd ? 6 : cq.isSm ? 8 : cq.isXs ? 12 : 12;
+    const albumCount = albums.length;
 
     return (
         <Stack gap="md">
             <div className={styles.albumSectionTitle}>
-                <TextTitle fw={700} order={3}>
-                    {title}
-                </TextTitle>
+                <Group gap="md">
+                    <TextTitle fw={700} order={3}>
+                        {title}
+                    </TextTitle>
+                    <Badge variant="default">{albumCount}</Badge>
+                </Group>
                 <div className={styles.albumSectionDividerContainer}>
                     <div className={styles.albumSectionDivider} />
                 </div>
