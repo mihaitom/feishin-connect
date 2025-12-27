@@ -848,7 +848,7 @@ const initialState: SettingsState = {
         accent: 'rgb(53, 116, 252)',
         albumBackground: false,
         albumBackgroundBlur: 3,
-        artistBackground: false,
+        artistBackground: true,
         artistBackgroundBlur: 3,
         artistItems,
         artistRadioCount: 20,
