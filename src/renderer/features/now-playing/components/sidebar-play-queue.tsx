@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels';
+// import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels';
+import { Pane, SplitPane, usePersistence } from 'react-split-pane';
 
 import styles from './sidebar-play-queue.module.css';
 
@@ -51,8 +52,8 @@ export const SidebarPlayQueue = () => {
     const showPanel = showLyricsInSidebar || showVisualizer;
 
     // Persist the layout of the sidebar play queue container
-    const { defaultLayout, onLayoutChange } = useDefaultLayout({
-        id: 'sidebar-play-queue-container',
+    const [defaultLayout, onLayoutChange] = usePersistence({
+        key: 'sidebar-play-queue-container',
         storage: localStorage,
     });
 
@@ -78,12 +79,21 @@ export const SidebarPlayQueue = () => {
         return visiblePanels;
     }, [combinedLyricsAndVisualizer, showLyricsInSidebar, showVisualizer, sidebarPanelOrder]);
 
-    const renderPanel = (panelType: SidebarPanelType, index: number, totalPanels: number) => {
+    const renderPanel = (panelType: SidebarPanelType, _index: number, totalPanels: number) => {
         if (panelType === 'queue') {
             return (
                 <>
-                    {index > 0 && <Separator className={styles.resizeHandle} />}
-                    <Panel defaultSize={50} id="queue" key="queue" minSize={20}>
+                    <Pane
+                        defaultSize={50}
+                        key="queue"
+                        minSize={20}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            height: '100%',
+                            overflow: 'hidden',
+                        }}
+                    >
                         <div className={styles.playQueueSection}>
                             <PlayQueue
                                 listKey={ItemListKey.SIDE_QUEUE}
@@ -91,7 +101,7 @@ export const SidebarPlayQueue = () => {
                                 searchTerm={search}
                             />
                         </div>
-                    </Panel>
+                    </Pane>
                 </>
             );
         }
@@ -99,15 +109,20 @@ export const SidebarPlayQueue = () => {
         if (combinedLyricsAndVisualizer && (panelType === 'lyrics' || panelType === 'visualizer')) {
             return (
                 <>
-                    {index > 0 && <Separator className={styles.resizeHandle} />}
-                    <Panel
+                    <Pane
                         defaultSize={totalPanels > 2 ? 25 : 50}
-                        id="combined"
                         key="combined"
                         minSize={20}
+                        size={defaultLayout[0]}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            height: '100%',
+                            overflow: 'hidden',
+                        }}
                     >
                         <CombinedLyricsAndVisualizerPanel />
-                    </Panel>
+                    </Pane>
                 </>
             );
         }
@@ -115,15 +130,20 @@ export const SidebarPlayQueue = () => {
         if (panelType === 'lyrics') {
             return (
                 <>
-                    {index > 0 && <Separator className={styles.resizeHandle} />}
-                    <Panel
+                    <Pane
                         defaultSize={totalPanels > 2 ? 25 : 50}
-                        id="lyrics"
                         key="lyrics"
                         minSize={15}
+                        size={defaultLayout[1]}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            height: '100%',
+                            overflow: 'hidden',
+                        }}
                     >
                         <LyricsPanel />
-                    </Panel>
+                    </Pane>
                 </>
             );
         }
@@ -131,15 +151,20 @@ export const SidebarPlayQueue = () => {
         if (panelType === 'visualizer') {
             return (
                 <>
-                    {index > 0 && <Separator className={styles.resizeHandle} />}
-                    <Panel
+                    <Pane
                         defaultSize={totalPanels > 2 ? 25 : 50}
-                        id="visualizer"
                         key="visualizer"
                         minSize={15}
+                        size={defaultLayout[2]}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            height: '100%',
+                            overflow: 'hidden',
+                        }}
                     >
                         <VisualizerPanel />
-                    </Panel>
+                    </Pane>
                 </>
             );
         }
@@ -155,16 +180,16 @@ export const SidebarPlayQueue = () => {
                 type={ItemListKey.SIDE_QUEUE}
             />
             {showPanel ? (
-                <Group
-                    defaultLayout={defaultLayout}
-                    onLayoutChange={onLayoutChange}
-                    orientation="vertical"
-                    style={{ flex: 1, minHeight: 0 }}
+                <SplitPane
+                    direction="vertical"
+                    dividerClassName={styles.resizeHandle}
+                    onResize={onLayoutChange}
+                    style={{ flex: 1, height: '100%', minHeight: 0 }}
                 >
                     {orderedPanels.map((panel, index) =>
                         renderPanel(panel, index, orderedPanels.length),
                     )}
-                </Group>
+                </SplitPane>
             ) : (
                 <Flex direction="column" style={{ flex: 1, minHeight: 0 }}>
                     <div className={styles.playQueueSection}>
