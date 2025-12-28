@@ -18,8 +18,7 @@ import {
     useSettingsStore,
     useSettingsStoreActions,
 } from '/@/renderer/store';
-import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
-import { ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
+import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Stack } from '/@/shared/components/stack/stack';
 import { ItemListKey, PlayerType } from '/@/shared/types/types';
@@ -51,8 +50,8 @@ export const SidebarPlayQueue = () => {
     const showVisualizer = showVisualizerInSidebar && type === PlayerType.WEB && webAudio;
     const showPanel = showLyricsInSidebar || showVisualizer;
 
-    // Persist the layout of the sidebar play queue container
     const [defaultLayout, onLayoutChange] = usePersistence({
+        debounce: 300,
         key: 'sidebar-play-queue-container',
         storage: localStorage,
     });
@@ -79,98 +78,76 @@ export const SidebarPlayQueue = () => {
         return visiblePanels;
     }, [combinedLyricsAndVisualizer, showLyricsInSidebar, showVisualizer, sidebarPanelOrder]);
 
-    const renderPanel = (panelType: SidebarPanelType, _index: number, totalPanels: number) => {
+    const renderPanel = (panelType: SidebarPanelType) => {
         if (panelType === 'queue') {
             return (
-                <>
-                    <Pane
-                        defaultSize={50}
-                        key="queue"
-                        minSize={20}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: '100%',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <div className={styles.playQueueSection}>
-                            <PlayQueue
-                                listKey={ItemListKey.SIDE_QUEUE}
-                                ref={tableRef}
-                                searchTerm={search}
-                            />
-                        </div>
-                    </Pane>
-                </>
+                <div className={styles.playQueueSection}>
+                    <PlayQueue
+                        listKey={ItemListKey.SIDE_QUEUE}
+                        ref={tableRef}
+                        searchTerm={search}
+                    />
+                </div>
             );
         }
 
         if (combinedLyricsAndVisualizer && (panelType === 'lyrics' || panelType === 'visualizer')) {
-            return (
-                <>
-                    <Pane
-                        defaultSize={totalPanels > 2 ? 25 : 50}
-                        key="combined"
-                        minSize={20}
-                        size={defaultLayout[0]}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: '100%',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <CombinedLyricsAndVisualizerPanel />
-                    </Pane>
-                </>
-            );
+            return <CombinedLyricsAndVisualizerPanel />;
         }
 
         if (panelType === 'lyrics') {
-            return (
-                <>
-                    <Pane
-                        defaultSize={totalPanels > 2 ? 25 : 50}
-                        key="lyrics"
-                        minSize={15}
-                        size={defaultLayout[1]}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: '100%',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <LyricsPanel />
-                    </Pane>
-                </>
-            );
+            return <LyricsPanel />;
         }
 
         if (panelType === 'visualizer') {
-            return (
-                <>
-                    <Pane
-                        defaultSize={totalPanels > 2 ? 25 : 50}
-                        key="visualizer"
-                        minSize={15}
-                        size={defaultLayout[2]}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: '100%',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <VisualizerPanel />
-                    </Pane>
-                </>
-            );
+            return <VisualizerPanel />;
         }
 
         return null;
     };
+
+    const getPanelSize = useCallback(
+        (panelType: SidebarPanelType, index: number) => {
+            // Queue panel should always autofit
+            if (panelType === 'queue') {
+                return undefined;
+            }
+
+            // If defaultLayout exists and has saved sizes, use them
+            if (
+                defaultLayout &&
+                Array.isArray(defaultLayout) &&
+                defaultLayout[index] !== undefined
+            ) {
+                return defaultLayout[index];
+            }
+
+            // Calculate default sizes for non-queue panels based on order
+            const nonQueuePanels = orderedPanels.filter((p) => p !== 'queue');
+            const nonQueueCount = nonQueuePanels.length;
+
+            if (nonQueueCount === 0) {
+                return undefined;
+            }
+
+            // If only one non-queue panel, give it a default size
+            if (nonQueueCount === 1) {
+                return 100;
+            }
+
+            // If multiple non-queue panels, distribute sizes evenly
+            // First non-queue panel gets a size, others get undefined to share remaining
+            const nonQueueIndex = orderedPanels.slice(0, index).filter((p) => p !== 'queue').length;
+            if (nonQueueIndex === 0) {
+                // First non-queue panel gets a default size
+                return 100;
+            }
+
+            // Other non-queue panels autofit
+            return undefined;
+        },
+        [defaultLayout, orderedPanels],
+    );
 
     return (
         <Stack gap={0} h="100%" id="sidebar-play-queue-container" pos="relative" w="100%">
@@ -184,10 +161,19 @@ export const SidebarPlayQueue = () => {
                     direction="vertical"
                     dividerClassName={styles.resizeHandle}
                     onResize={onLayoutChange}
+                    style={{
+                        display: 'flex',
+                        flex: 1,
+                        flexDirection: 'column',
+                        minHeight: 0,
+                        overflow: 'hidden',
+                    }}
                 >
-                    {orderedPanels.map((panel, index) =>
-                        renderPanel(panel, index, orderedPanels.length),
-                    )}
+                    {orderedPanels.map((panel, index) => (
+                        <Pane key={panel} size={getPanelSize(panel, index)}>
+                            {renderPanel(panel)}
+                        </Pane>
+                    ))}
                 </SplitPane>
             ) : (
                 <Flex direction="column" style={{ flex: 1, minHeight: 0 }}>
