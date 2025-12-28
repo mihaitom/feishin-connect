@@ -324,8 +324,6 @@ const normalizeAlbumArtist = (
         songCount = item.songCount;
     }
 
-    console.log('similarArtists', item.similarArtists);
-
     return {
         _itemType: LibraryItem.ALBUM_ARTIST,
         _serverId: server?.id || 'unknown',

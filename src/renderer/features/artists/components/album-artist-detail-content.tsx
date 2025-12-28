@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { LayoutGroup, motion } from 'motion/react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -226,7 +226,7 @@ const AlbumArtistMetadataTopSongs = ({
     const player = usePlayer();
     const serverId = useCurrentServerId();
 
-    const topSongsQuery = useQuery(
+    const topSongsQuery = useSuspenseQuery(
         artistsQueries.topSongs({
             query: { artist: detailQuery.data?.name || '', artistId: routeId },
             serverId: serverId,
