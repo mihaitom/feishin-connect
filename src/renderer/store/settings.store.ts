@@ -867,7 +867,7 @@ const initialState: SettingsState = {
             fullScreenPlayer: 0,
             header: 300,
             itemCard: 300,
-            sidebar: 300,
+            sidebar: 400,
             table: 80,
         },
         language: 'en',
