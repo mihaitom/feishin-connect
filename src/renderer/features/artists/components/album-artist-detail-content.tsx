@@ -696,9 +696,22 @@ interface AlbumSectionProps {
 
 const MAX_SECTION_CARDS = 20;
 
+const getSpan = (cq: ReturnType<typeof useContainerQuery>) => {
+    if (cq.is4xl) return 6;
+    if (cq.is3xl) return 7;
+    if (cq.is2xl) return 8;
+    if (cq.isXl) return 9;
+    if (cq.isLg) return 12;
+    if (cq.isMd) return 12;
+    if (cq.isSm) return 16;
+    if (cq.isXs) return 24;
+    return 24;
+};
+
 const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumSectionProps) => {
     const { t } = useTranslation();
-    const span = cq.isXl ? 3 : cq.isLg ? 4 : cq.isMd ? 6 : cq.isSm ? 8 : cq.isXs ? 12 : 12;
+
+    const span = getSpan(cq);
     const albumCount = albums.length;
     const [showAll, setShowAll] = useState(false);
     const player = usePlayer();
@@ -796,7 +809,7 @@ const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumS
                     )}
                 </div>
             </div>
-            <Grid columns={24} gutter="md" type="container">
+            <Grid columns={48} gutter="md" type="container">
                 {displayedAlbums.map((album) => (
                     <Grid.Col key={album.id} span={span}>
                         <motion.div
