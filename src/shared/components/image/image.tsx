@@ -81,7 +81,7 @@ export function BaseImage({
                     {...props}
                 />
             ) : !src ? (
-                <ImageUnloader icon={unloaderIcon} />
+                <ImageUnloader className={className} icon={unloaderIcon} />
             ) : (
                 <ImageLoader className={className} />
             )}
