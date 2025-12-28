@@ -308,7 +308,6 @@ export const FolderTreeBrowser = ({ fetchFolder, rootFolderQuery }: FolderTreeBr
             scrollbars: {
                 autoHide: 'leave',
                 autoHideDelay: 500,
-                autoHideSuspend: true,
                 pointers: ['mouse', 'pen', 'touch'],
                 theme: 'feishin-os-scrollbar',
                 visibility: 'visible',
