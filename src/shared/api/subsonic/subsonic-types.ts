@@ -416,7 +416,6 @@ const getSongsByGenre = z.object({
 
 const getAlbumParameters = z.object({
     id: z.string(),
-    musicFolderId: z.string().optional(),
 });
 
 const getAlbum = z.object({

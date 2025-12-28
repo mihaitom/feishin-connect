@@ -521,7 +521,11 @@ export const controller: GeneralController = {
         return apiController(
             'getRandomSongList',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getRoles(args) {
         const server = getServerById(args.apiClientProps.serverId);
