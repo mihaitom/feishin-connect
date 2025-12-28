@@ -476,6 +476,7 @@ const PlayerFilterOperatorSchema = z.enum([
 const PlayerFilterSchema = z.object({
     field: PlayerFilterFieldSchema,
     id: z.string(),
+    isEnabled: z.boolean().optional(),
     operator: PlayerFilterOperatorSchema,
     value: z.union([
         z.string(),
@@ -1792,10 +1793,20 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     }
                 }
 
+                if (version <= 18) {
+                    // Add isEnabled property to all existing player filters
+                    if (state.playback?.filters && Array.isArray(state.playback.filters)) {
+                        state.playback.filters = state.playback.filters.map((filter) => ({
+                            ...filter,
+                            isEnabled: true,
+                        }));
+                    }
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 18,
+            version: 19,
         },
     ),
 );
