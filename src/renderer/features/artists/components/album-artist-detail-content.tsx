@@ -895,12 +895,12 @@ const groupAlbumsByReleaseType = (
                         acc[normalizedType].push(album);
                     });
                 } else {
-                    // If no release types, use "other" as fallback
-                    const otherKey = 'other';
-                    if (!acc[otherKey]) {
-                        acc[otherKey] = [];
+                    // If no release types, use "album" as fallback
+                    const albumKey = 'album';
+                    if (!acc[albumKey]) {
+                        acc[albumKey] = [];
                     }
-                    acc[otherKey].push(album);
+                    acc[albumKey].push(album);
                 }
 
                 return acc;
@@ -911,7 +911,7 @@ const groupAlbumsByReleaseType = (
         return grouped;
     }
 
-    // Primary grouping (original behavior)
+    // Group by primary release types
     const grouped = albums.reduce(
         (acc, album) => {
             // Priority 1: Appears on - artist is not an album artist
@@ -973,23 +973,23 @@ const groupAlbumsByReleaseType = (
                 return acc;
             }
 
-            // Priority 6: Album
-            const hasAlbumType = album.releaseTypes?.some((type) => type.toLowerCase() === 'album');
-            if (hasAlbumType) {
-                const albumKey = 'album';
-                if (!acc[albumKey]) {
-                    acc[albumKey] = [];
+            // Priority 6: Other
+            const hasOtherType = album.releaseTypes?.some((type) => type.toLowerCase() === 'other');
+            if (hasOtherType) {
+                const otherKey = 'other';
+                if (!acc[otherKey]) {
+                    acc[otherKey] = [];
                 }
-                acc[albumKey].push(album);
+                acc[otherKey].push(album);
                 return acc;
             }
 
-            // Priority 7: Other (catch all for unknown release types or specifically other release types)
-            const otherKey = 'other';
-            if (!acc[otherKey]) {
-                acc[otherKey] = [];
+            // Priority 7: Album (falls back all unknown release types to album)
+            const albumKey = 'album';
+            if (!acc[albumKey]) {
+                acc[albumKey] = [];
             }
-            acc[otherKey].push(album);
+            acc[albumKey].push(album);
             return acc;
         },
         {} as Record<string, Album[]>,
