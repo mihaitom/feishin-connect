@@ -37,6 +37,8 @@ const getPeople = (item: AlbumOrSong): null | Record<string, RelatedArtist[]> =>
                 imageId: null,
                 imageUrl: null,
                 name: person.Name,
+                userFavorite: false,
+                userRating: null,
             };
 
             if (key in participants) {
@@ -148,6 +150,8 @@ const normalizeSong = (
             imageId: entry.Id,
             imageUrl: null,
             name: entry.Name,
+            userFavorite: false,
+            userRating: null,
         })),
         albumId: item.AlbumId || `dummy/${item.Id}`,
         artistName: item?.ArtistItems?.[0]?.Name || item?.AlbumArtists?.[0]?.Name,
@@ -157,6 +161,8 @@ const normalizeSong = (
                 imageId: null,
                 imageUrl: null,
                 name: entry.Name,
+                userFavorite: false,
+                userRating: null,
             }),
         ),
         bitDepth: null,
@@ -232,6 +238,8 @@ const normalizeAlbum = (
                 imageId: entry.Id,
                 imageUrl: null,
                 name: entry.Name,
+                userFavorite: false,
+                userRating: null,
             })) || [],
         artists: (item.ArtistItems?.length ? item.ArtistItems : item.AlbumArtists)?.map(
             (entry) => ({
@@ -239,6 +247,8 @@ const normalizeAlbum = (
                 imageId: entry.Id,
                 imageUrl: null,
                 name: entry.Name,
+                userFavorite: false,
+                userRating: null,
             }),
         ),
         comment: null,
@@ -295,6 +305,8 @@ const normalizeAlbumArtist = (
                 imageId: getAlbumArtistImageId(entry),
                 imageUrl: null,
                 name: entry.Name,
+                userFavorite: entry.UserData?.IsFavorite || false,
+                userRating: null,
             }),
         ) || [];
 

@@ -27,6 +27,8 @@ const getArtistList = (
               imageId: null,
               imageUrl: null,
               name: item.name,
+              userFavorite: false,
+              userRating: null,
           }))
         : [
               {
@@ -34,6 +36,8 @@ const getArtistList = (
                   imageId: null,
                   imageUrl: null,
                   name: artistName || '',
+                  userFavorite: false,
+                  userRating: null,
               },
           ];
 };
@@ -55,6 +59,8 @@ const getParticipants = (
                 imageId: null,
                 imageUrl: null,
                 name: contributor.artist.name || '',
+                userFavorite: false,
+                userRating: null,
             };
 
             const role = contributor.subRole
@@ -178,8 +184,16 @@ const normalizeSong = (
 
 const normalizeAlbumArtist = (
     item:
-        | z.infer<typeof ssType._response.albumArtist>
-        | z.infer<typeof ssType._response.artistListEntry>,
+        | (z.infer<typeof ssType._response.albumArtist> & {
+              similarArtists?: z.infer<
+                  typeof ssType._response.artistInfo
+              >['artistInfo']['similarArtist'];
+          })
+        | (z.infer<typeof ssType._response.artistListEntry> & {
+              similarArtists?: z.infer<
+                  typeof ssType._response.artistInfo
+              >['artistInfo']['similarArtist'];
+          }),
     server?: null | ServerListItemWithCredential,
 ): AlbumArtist => {
     return {
@@ -197,7 +211,15 @@ const normalizeAlbumArtist = (
         mbz: null,
         name: item.name,
         playCount: null,
-        similarArtists: [],
+        similarArtists:
+            item.similarArtists?.map((artist) => ({
+                id: artist.id,
+                imageId: null,
+                imageUrl: null,
+                name: artist.name,
+                userFavorite: Boolean(artist.starred) || false,
+                userRating: artist.userRating || null,
+            })) || [],
         songCount: null,
         userFavorite: Boolean(item.starred) || false,
         userRating: null,

@@ -236,6 +236,8 @@ const artistInfo = z.object({
                 coverArt: z.string().optional(),
                 id: z.string(),
                 name: z.string(),
+                starred: z.string().optional(),
+                userRating: z.number().optional(),
             }),
         ),
         smallImageUrl: z.string().optional(),

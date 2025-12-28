@@ -279,11 +279,11 @@ export const SubsonicController: InternalControllerEndpoint = {
         }
 
         return {
-            ...ssNormalize.albumArtist(artist, apiClientProps.server, 300),
+            ...ssNormalize.albumArtist(artist, apiClientProps.server),
             albums: artist.album?.map((album) => ssNormalize.album(album, apiClientProps.server)),
             similarArtists:
                 artistInfo?.similarArtist?.map((artist) =>
-                    ssNormalize.albumArtist(artist, apiClientProps.server, 300),
+                    ssNormalize.albumArtist(artist, apiClientProps.server),
                 ) || null,
         };
     },
@@ -303,7 +303,7 @@ export const SubsonicController: InternalControllerEndpoint = {
         const artists = (res.body.artists?.index || []).flatMap((index) => index.artist);
 
         let results = artists.map((artist) =>
-            ssNormalize.albumArtist(artist, apiClientProps.server, 300),
+            ssNormalize.albumArtist(artist, apiClientProps.server),
         );
 
         if (query.searchTerm) {
@@ -488,7 +488,7 @@ export const SubsonicController: InternalControllerEndpoint = {
         return {
             items:
                 res.body.albumList2.album?.map((album) =>
-                    ssNormalize.album(album, apiClientProps.server, 300),
+                    ssNormalize.album(album, apiClientProps.server),
                 ) || [],
             startIndex: query.startIndex,
             totalRecordCount: null,
@@ -658,7 +658,7 @@ export const SubsonicController: InternalControllerEndpoint = {
         }
 
         let results = artists.map((artist) =>
-            ssNormalize.albumArtist(artist, apiClientProps.server, 300),
+            ssNormalize.albumArtist(artist, apiClientProps.server),
         );
 
         if (query.searchTerm) {

@@ -215,11 +215,34 @@ export const applyFavoriteOptimisticUpdates = (
                         queryClient.setQueryData(
                             queryKey,
                             (prev: AlbumArtistDetailResponse | undefined) => {
-                                if (prev && itemIdSet.has(prev.id)) {
+                                if (!prev) {
+                                    return prev;
+                                }
+
+                                // Update the main artist if it matches
+                                if (itemIdSet.has(prev.id)) {
                                     return {
                                         ...prev,
                                         userFavorite: isFavorite,
                                     };
+                                }
+
+                                // Update similar artists if any match
+                                if (prev.similarArtists && prev.similarArtists.length > 0) {
+                                    const hasMatchingSimilarArtist = prev.similarArtists.some(
+                                        (artist) => itemIdSet.has(artist.id),
+                                    );
+
+                                    if (hasMatchingSimilarArtist) {
+                                        return {
+                                            ...prev,
+                                            similarArtists: prev.similarArtists.map((artist) =>
+                                                itemIdSet.has(artist.id)
+                                                    ? { ...artist, userFavorite: isFavorite }
+                                                    : artist,
+                                            ),
+                                        };
+                                    }
                                 }
 
                                 return prev;

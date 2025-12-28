@@ -51,6 +51,8 @@ const getArtists = (
                     imageId: null,
                     imageUrl: null,
                     name: item.name,
+                    userFavorite: false,
+                    userRating: null,
                 }));
 
                 if (role === 'albumartist') {
@@ -67,6 +69,8 @@ const getArtists = (
                         imageId: null,
                         imageUrl: null,
                         name: artist.name,
+                        userFavorite: false,
+                        userRating: null,
                     };
 
                     if (subRoles.has(artist.subRole)) {
@@ -89,12 +93,28 @@ const getArtists = (
 
     if (albumArtists === undefined) {
         albumArtists = [
-            { id: item.albumArtistId, imageId: null, imageUrl: null, name: item.albumArtist },
+            {
+                id: item.albumArtistId,
+                imageId: null,
+                imageUrl: null,
+                name: item.albumArtist,
+                userFavorite: false,
+                userRating: null,
+            },
         ];
     }
 
     if (artists === undefined) {
-        artists = [{ id: item.artistId, imageId: null, imageUrl: null, name: item.artist }];
+        artists = [
+            {
+                id: item.artistId,
+                imageId: null,
+                imageUrl: null,
+                name: item.artist,
+                userFavorite: false,
+                userRating: null,
+            },
+        ];
     }
 
     return { albumArtists, artists, participants };
@@ -304,6 +324,8 @@ const normalizeAlbumArtist = (
         songCount = item.songCount;
     }
 
+    console.log('similarArtists', item.similarArtists);
+
     return {
         _itemType: LibraryItem.ALBUM_ARTIST,
         _serverId: server?.id || 'unknown',
@@ -335,7 +357,9 @@ const normalizeAlbumArtist = (
                 imageId: null,
                 imageUrl: artist?.artistImageUrl?.replace(/\?size=\d+/, '') || null,
                 name: artist.name,
-            })) || null,
+                userFavorite: Boolean(artist.starred) || false,
+                userRating: artist.userRating || null,
+            })) || [],
         songCount,
         userFavorite: item.starred || false,
         userRating: item.rating || null,

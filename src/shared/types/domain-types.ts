@@ -356,6 +356,8 @@ export type RelatedArtist = {
     imageId: null | string;
     imageUrl: null | string;
     name: string;
+    userFavorite: boolean;
+    userRating: null | number;
 };
 
 export type Song = {
