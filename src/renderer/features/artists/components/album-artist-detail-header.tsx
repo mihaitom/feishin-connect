@@ -14,7 +14,7 @@ import {
     LibraryHeaderMenu,
 } from '/@/renderer/features/shared/components/library-header';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer } from '/@/renderer/store';
+import { useCurrentServer, useGeneralSettings } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { formatDurationString } from '/@/renderer/utils';
 import { Group } from '/@/shared/components/group/group';
@@ -30,6 +30,7 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
     };
     const routeId = (artistId || albumArtistId) as string;
     const server = useCurrentServer();
+    const { showRatings } = useGeneralSettings();
     const { t } = useTranslation();
     const detailQuery = useSuspenseQuery(
         artistsQueries.albumArtistDetail({
@@ -124,14 +125,14 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
         [detailQuery.data],
     );
 
-    const showRating = detailQuery.data?._serverType === ServerType.NAVIDROME;
-
     const imageUrl = useItemImageUrl({
         id: detailQuery.data?.imageId || undefined,
         imageUrl: detailQuery.data?.imageUrl,
         itemType: LibraryItem.ALBUM_ARTIST,
         type: 'itemCard',
     });
+
+    const showRating = showRatings && detailQuery?.data?._serverType === ServerType.NAVIDROME;
 
     const selectedImageUrl = useMemo(() => {
         return detailQuery.data?.imageUrl || imageUrl;

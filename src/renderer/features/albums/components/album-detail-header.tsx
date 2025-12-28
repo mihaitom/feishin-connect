@@ -13,7 +13,7 @@ import {
     LibraryHeaderMenu,
 } from '/@/renderer/features/shared/components/library-header';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer } from '/@/renderer/store';
+import { useCurrentServer, useGeneralSettings } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -24,13 +24,15 @@ import { Play } from '/@/shared/types/types';
 export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
     const { albumId } = useParams() as { albumId: string };
     const server = useCurrentServer();
+    const { showRatings } = useGeneralSettings();
     const detailQuery = useQuery(
         albumQueries.detail({ query: { id: albumId }, serverId: server?.id }),
     );
 
     const showRating =
-        detailQuery?.data?._serverType === ServerType.NAVIDROME ||
-        detailQuery?.data?._serverType === ServerType.SUBSONIC;
+        showRatings &&
+        (detailQuery?.data?._serverType === ServerType.NAVIDROME ||
+            detailQuery?.data?._serverType === ServerType.SUBSONIC);
 
     const { addToQueueByFetch, setFavorite, setRating } = usePlayer();
     const playButtonBehavior = usePlayButtonBehavior();

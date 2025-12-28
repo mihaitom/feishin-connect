@@ -899,6 +899,8 @@
         "preferLocalLyrics": "prefer local lyrics",
         "showLyricsInSidebar_description": "a panel will be added to the attached play queue that displays the lyrics",
         "showLyricsInSidebar": "show lyrics in player sidebar",
+        "showRatings_description": "controls if the star ratings feature shows up in the interface",
+        "showRatings": "show star ratings",
         "showVisualizerInSidebar_description": "a panel will be added to the player sidebar that displays the visualizer",
         "showVisualizerInSidebar": "show visualizer in player sidebar",
         "combinedLyricsAndVisualizer_description": "combine lyrics and visualizer into the same panel",

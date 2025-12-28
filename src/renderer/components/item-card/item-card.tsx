@@ -18,6 +18,7 @@ import {
 import { ItemControls } from '/@/renderer/components/item-list/types';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
+import { useGeneralSettings } from '/@/renderer/store';
 import { formatDateAbsolute, formatDateRelative, formatRating } from '/@/renderer/utils/format';
 import { Separator } from '/@/shared/components/separator/separator';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
@@ -67,6 +68,7 @@ export const ItemCard = ({
     type = 'poster',
     withControls,
 }: ItemCardProps) => {
+    const { showRatings } = useGeneralSettings();
     const imageUrl = getImageUrl(data);
     const rows = providedRows || [];
 
@@ -84,6 +86,7 @@ export const ItemCard = ({
                     isRound={isRound}
                     itemType={itemType}
                     rows={rows}
+                    showRating={showRatings}
                     withControls={withControls}
                 />
             );
@@ -100,6 +103,7 @@ export const ItemCard = ({
                     isRound={isRound}
                     itemType={itemType}
                     rows={rows}
+                    showRating={showRatings}
                     withControls={withControls}
                 />
             );
@@ -117,6 +121,7 @@ export const ItemCard = ({
                     isRound={isRound}
                     itemType={itemType}
                     rows={rows}
+                    showRating={showRatings}
                     withControls={withControls}
                 />
             );
@@ -130,6 +135,7 @@ export interface ItemCardDerivativeProps extends Omit<ItemCardProps, 'type'> {
     imageUrl: string | undefined;
     internalState?: ItemListStateActions;
     rows: DataRow[];
+    showRating: boolean;
 }
 
 const CompactItemCard = ({
@@ -142,6 +148,7 @@ const CompactItemCard = ({
     isRound,
     itemType,
     rows,
+    showRating,
     withControls,
 }: ItemCardDerivativeProps) => {
     const [showControls, setShowControls] = useState(false);
@@ -286,7 +293,7 @@ const CompactItemCard = ({
             typeof (data as { userRating: null | number }).userRating === 'number'
                 ? (data as { userRating: null | number }).userRating
                 : null;
-        const hasRating = userRating !== null && userRating > 0;
+        const hasRating = showRating && userRating !== null && userRating > 0;
 
         const imageContainerClassName = clsx(styles.imageContainer, {
             [styles.isRound]: isRound,
@@ -312,6 +319,7 @@ const CompactItemCard = ({
                             internalState={internalState}
                             item={data}
                             itemType={itemType}
+                            showRating={hasRating}
                             type="compact"
                         />
                     )}
@@ -407,6 +415,7 @@ const DefaultItemCard = ({
     isRound,
     itemType,
     rows,
+    showRating,
     withControls,
 }: ItemCardDerivativeProps) => {
     const [showControls, setShowControls] = useState(false);
@@ -508,7 +517,7 @@ const DefaultItemCard = ({
             typeof (data as { userRating: null | number }).userRating === 'number'
                 ? (data as { userRating: null | number }).userRating
                 : null;
-        const hasRating = userRating !== null && userRating > 0;
+        const hasRating = showRating && userRating !== null && userRating > 0;
 
         const imageContainerContent = (
             <>
@@ -527,6 +536,7 @@ const DefaultItemCard = ({
                             enableExpansion={enableExpansion}
                             item={data}
                             itemType={itemType}
+                            showRating={showRating}
                             type="default"
                         />
                     )}
@@ -620,6 +630,7 @@ const PosterItemCard = ({
     isRound,
     itemType,
     rows,
+    showRating,
     withControls,
 }: ItemCardDerivativeProps) => {
     const [showControls, setShowControls] = useState(false);
@@ -768,7 +779,7 @@ const PosterItemCard = ({
             typeof (data as { userRating: null | number }).userRating === 'number'
                 ? (data as { userRating: null | number }).userRating
                 : null;
-        const hasRating = userRating !== null && userRating > 0;
+        const hasRating = showRating && userRating !== null && userRating > 0;
 
         const imageContainerContent = (
             <>
@@ -788,6 +799,7 @@ const PosterItemCard = ({
                             internalState={internalState}
                             item={data}
                             itemType={itemType}
+                            showRating={showRating}
                             type="poster"
                         />
                     )}
