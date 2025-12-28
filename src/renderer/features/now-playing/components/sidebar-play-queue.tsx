@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels';
 import { Pane, SplitPane, usePersistence } from 'react-split-pane';
@@ -12,6 +12,7 @@ import { Lyrics } from '/@/renderer/features/lyrics/lyrics';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { PlayQueueListControls } from '/@/renderer/features/now-playing/components/play-queue-list-controls';
 import {
+    useFullScreenPlayerStore,
     useGeneralSettings,
     usePlaybackSettings,
     usePlayerSong,
@@ -40,6 +41,8 @@ const ButterchurnVisualizer = lazy(() =>
 export const SidebarPlayQueue = () => {
     const tableRef = useRef<ItemListHandle | null>(null);
     const [search, setSearch] = useState<string | undefined>(undefined);
+    const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
+    const [shouldRender, setShouldRender] = useState(!isFullScreenPlayerExpanded);
     const {
         combinedLyricsAndVisualizer,
         showLyricsInSidebar,
@@ -49,6 +52,23 @@ export const SidebarPlayQueue = () => {
     const { type, webAudio } = usePlaybackSettings();
     const showVisualizer = showVisualizerInSidebar && type === PlayerType.WEB && webAudio;
     const showPanel = showLyricsInSidebar || showVisualizer;
+
+    useEffect(() => {
+        if (isFullScreenPlayerExpanded) {
+            // Immediately hide when fullscreen player opens
+            setShouldRender(false);
+            return undefined;
+        } else {
+            // Wait 500ms before re-rendering when fullscreen player closes to avoid performance issues
+            const timeoutId = setTimeout(() => {
+                setShouldRender(true);
+            }, 500);
+
+            return () => {
+                clearTimeout(timeoutId);
+            };
+        }
+    }, [isFullScreenPlayerExpanded]);
 
     const [defaultLayout, onLayoutChange] = usePersistence({
         debounce: 300,
@@ -148,6 +168,11 @@ export const SidebarPlayQueue = () => {
         },
         [defaultLayout, orderedPanels],
     );
+
+    // Unmount when fullscreen player is open
+    if (!shouldRender) {
+        return null;
+    }
 
     return (
         <Stack gap={0} h="100%" id="sidebar-play-queue-container" pos="relative" w="100%">
