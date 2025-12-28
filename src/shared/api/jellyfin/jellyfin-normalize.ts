@@ -154,7 +154,7 @@ const normalizeSong = (
         artists: (item?.ArtistItems?.length ? item.ArtistItems : item.AlbumArtists)?.map(
             (entry) => ({
                 id: entry.Id,
-                imageId: entry.Id,
+                imageId: null,
                 imageUrl: null,
                 name: entry.Name,
             }),
@@ -292,7 +292,7 @@ const normalizeAlbumArtist = (
         item.similarArtists?.Items?.filter((entry) => entry.Name !== 'Various Artists').map(
             (entry) => ({
                 id: entry.Id,
-                imageId: entry.Id,
+                imageId: getAlbumArtistImageId(entry),
                 imageUrl: null,
                 name: entry.Name,
             }),
@@ -392,6 +392,14 @@ const normalizeMusicFolder = (item: z.infer<typeof jfType._response.musicFolder>
 //   };
 // };
 
+const getGenreImageId = (item: z.infer<typeof jfType._response.genre>): null | string => {
+    if (item.ImageTags?.Primary) {
+        return item.Id;
+    }
+
+    return null;
+};
+
 const normalizeGenre = (
     item: z.infer<typeof jfType._response.genre>,
     server: null | ServerListItem,
@@ -402,7 +410,7 @@ const normalizeGenre = (
         _serverType: ServerType.JELLYFIN,
         albumCount: null,
         id: item.Id,
-        imageId: item.Id,
+        imageId: getGenreImageId(item),
         imageUrl: null,
         name: item.Name,
         songCount: null,
