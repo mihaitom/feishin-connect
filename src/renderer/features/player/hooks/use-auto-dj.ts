@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { useIsPlayerFetching, usePlayer } from '/@/renderer/features/player/context/player-context';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import {
@@ -198,6 +199,11 @@ export const useAutoDJ = () => {
 
                     // Add to the end of the queue
                     player.addToQueueByData(songsToAdd, Play.LAST);
+
+                    // Emit event to trigger queue follow
+                    eventEmitter.emit('AUTODJ_QUEUE_ADDED', {
+                        songCount: songsToAdd.length,
+                    });
                 } catch (error) {
                     logFn.error(logMsg[LogCategory.PLAYER].autoPlayFailed, {
                         category: LogCategory.PLAYER,
