@@ -696,22 +696,22 @@ interface AlbumSectionProps {
 
 const MAX_SECTION_CARDS = 20;
 
-const getSpan = (cq: ReturnType<typeof useContainerQuery>) => {
-    if (cq.is4xl) return 6;
-    if (cq.is3xl) return 7;
-    if (cq.is2xl) return 8;
-    if (cq.isXl) return 9;
-    if (cq.isLg) return 12;
-    if (cq.isMd) return 12;
-    if (cq.isSm) return 16;
-    if (cq.isXs) return 24;
-    return 24;
+const getItemsPerRow = (cq: ReturnType<typeof useContainerQuery>) => {
+    // Match grid carousel breakpoints: is3xl: 8, is2xl: 7, isXl: 6, isLg: 5, isMd: 4, isSm: 3, default: 2
+    if (cq.is3xl) return 8;
+    if (cq.is2xl) return 7;
+    if (cq.isXl) return 6;
+    if (cq.isLg) return 5;
+    if (cq.isMd) return 4;
+    if (cq.isSm) return 3;
+    if (cq.isXs) return 2;
+    return 2;
 };
 
 const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumSectionProps) => {
     const { t } = useTranslation();
 
-    const span = getSpan(cq);
+    const itemsPerRow = getItemsPerRow(cq);
     const albumCount = albums.length;
     const [showAll, setShowAll] = useState(false);
     const player = usePlayer();
@@ -809,31 +809,38 @@ const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumS
                     )}
                 </div>
             </div>
-            <Grid columns={48} gutter="md" type="container">
+            <div
+                className={styles.albumGrid}
+                style={
+                    {
+                        '--items-per-row': itemsPerRow,
+                    } as React.CSSProperties
+                }
+            >
                 {displayedAlbums.map((album) => (
-                    <Grid.Col key={album.id} span={span}>
-                        <motion.div
-                            layout
-                            layoutId={`${releaseType}-${album.id}`}
-                            transition={{
-                                duration: 0.5,
-                                ease: 'easeInOut',
-                                layout: { duration: 0.5, ease: 'easeInOut' },
-                            }}
-                        >
-                            <MemoizedItemCard
-                                controls={controls}
-                                data={album}
-                                enableDrag
-                                itemType={LibraryItem.ALBUM}
-                                rows={rows}
-                                type="poster"
-                                withControls
-                            />
-                        </motion.div>
-                    </Grid.Col>
+                    <motion.div
+                        className={styles.albumGridItem}
+                        key={album.id}
+                        layout
+                        layoutId={`${releaseType}-${album.id}`}
+                        transition={{
+                            duration: 0.5,
+                            ease: 'easeInOut',
+                            layout: { duration: 0.5, ease: 'easeInOut' },
+                        }}
+                    >
+                        <MemoizedItemCard
+                            controls={controls}
+                            data={album}
+                            enableDrag
+                            itemType={LibraryItem.ALBUM}
+                            rows={rows}
+                            type="poster"
+                            withControls
+                        />
+                    </motion.div>
                 ))}
-            </Grid>
+            </div>
             {hasMoreAlbums && !showAll && (
                 <Group justify="center" w="100%">
                     <Button onClick={() => setShowAll(true)} variant="subtle">
@@ -1151,7 +1158,15 @@ const ArtistAlbums = () => {
             .sort((a, b) => getPriority(a.releaseType) - getPriority(b.releaseType));
     }, [albumsByReleaseType, t]);
 
-    const cq = useContainerQuery();
+    const cq = useContainerQuery({
+        '2xl': 1280,
+        '3xl': 1440,
+        lg: 960,
+        md: 720,
+        sm: 520,
+        xl: 1152,
+        xs: 360,
+    });
 
     const binding = useSettingsStore((state) => state.hotkeys.bindings.localSearch);
     const searchInputRef = useRef<HTMLInputElement>(null);

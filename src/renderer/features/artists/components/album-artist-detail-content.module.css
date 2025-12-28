@@ -48,3 +48,19 @@
     width: 100%;
     min-width: 0;
 }
+
+.album-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--theme-spacing-md);
+    width: 100%;
+}
+
+.album-grid-item {
+    flex: 1 1
+        calc((100% - (var(--items-per-row) - 1) * var(--theme-spacing-md)) / var(--items-per-row));
+    min-width: 0;
+    max-width: calc(
+        (100% - (var(--items-per-row) - 1) * var(--theme-spacing-md)) / var(--items-per-row)
+    );
+}
