@@ -18,10 +18,14 @@ const BaseItemImage = (
         src?: null | string;
     },
 ) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { src, ...rest } = props;
 
-    const imageUrl = useItemImageUrl({ id: props.id, itemType: props.itemType, size: 300 });
+    const imageUrl = useItemImageUrl({
+        id: props.id,
+        imageUrl: src,
+        itemType: props.itemType,
+        size: 300,
+    });
 
     return <BaseImage src={imageUrl} {...rest} />;
 };

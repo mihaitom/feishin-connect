@@ -40,8 +40,15 @@ const AlbumArtistDetailRoute = () => {
 
     const imageUrl = useItemImageUrl({
         id: detailQuery?.data?.imageId || undefined,
+        imageUrl: detailQuery.data?.imageUrl,
         itemType: LibraryItem.ALBUM_ARTIST,
         type: 'header',
+    });
+
+    const libraryBackgroundImageUrl = useItemImageUrl({
+        id: detailQuery?.data?.imageId || undefined,
+        itemType: LibraryItem.ALBUM_ARTIST,
+        type: 'itemCard',
     });
 
     const selectedImageUrl = imageUrl || detailQuery.data?.imageUrl;
@@ -93,7 +100,7 @@ const AlbumArtistDetailRoute = () => {
                     <LibraryBackgroundImage
                         blur={artistBackgroundBlur}
                         headerRef={headerRef}
-                        imageUrl={selectedImageUrl || ''}
+                        imageUrl={libraryBackgroundImageUrl || ''}
                     />
                 ) : (
                     <LibraryBackgroundOverlay backgroundColor={background} headerRef={headerRef} />
