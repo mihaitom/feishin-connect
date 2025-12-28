@@ -883,7 +883,7 @@ const initialState: SettingsState = {
             barGap: 1,
             barRadius: 4,
             barWidth: 2,
-            type: PlayerbarSliderType.WAVEFORM,
+            type: PlayerbarSliderType.SLIDER,
         },
         resume: true,
         showLyricsInSidebar: false,
