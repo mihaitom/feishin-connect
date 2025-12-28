@@ -51,11 +51,16 @@ const requestToggleShuffle = (
     ipcRenderer.on('mpris-request-toggle-shuffle', cb);
 };
 
+const requestVolume = (cb: (event: IpcRendererEvent, data: { volume: number }) => void) => {
+    ipcRenderer.on('request-volume', cb);
+};
+
 export const mpris = {
     requestPosition,
     requestSeek,
     requestToggleRepeat,
     requestToggleShuffle,
+    requestVolume,
     updatePosition,
     updateRepeat,
     updateSeek,

@@ -43,11 +43,16 @@ export const useMPRIS = () => {
             player.toggleShuffle();
         });
 
+        mpris?.requestVolume((_e: unknown, data: { volume: number }) => {
+            player.setVolume(data.volume);
+        });
+
         return () => {
             ipc?.removeAllListeners('mpris-request-toggle-repeat');
             ipc?.removeAllListeners('mpris-request-toggle-shuffle');
             ipc?.removeAllListeners('request-position');
             ipc?.removeAllListeners('request-seek');
+            ipc?.removeAllListeners('request-volume');
         };
     }, [player]);
 
