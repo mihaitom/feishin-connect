@@ -206,10 +206,10 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
 
 interface TagFilterItemProps {
     label: string;
-    onChange: (value: null | string) => void;
+    onChange: (value: null | string[]) => void;
     options: Array<{ id: string; name: string }>;
     tagValue: string;
-    value: string | undefined;
+    value: string | string[] | undefined;
 }
 
 const TagFilterItem = ({ label, onChange, options, tagValue, value }: TagFilterItemProps) => {
@@ -222,15 +222,20 @@ const TagFilterItem = ({ label, onChange, options, tagValue, value }: TagFilterI
         [options],
     );
 
+    const defaultValue = useMemo(() => {
+        if (!value) return [];
+        return Array.isArray(value) ? value : [value];
+    }, [value]);
+
     return (
-        <SelectWithInvalidData
+        <MultiSelectWithInvalidData
             clearable
             data={selectData}
-            defaultValue={value}
+            defaultValue={defaultValue}
             key={tagValue}
             label={label}
             limit={100}
-            onChange={onChange}
+            onChange={(e) => (e && e.length > 0 ? onChange(e) : onChange(null))}
             searchable
         />
     );
@@ -257,7 +262,7 @@ const TagFilters = () => {
     );
 
     const handleTagFilter = useMemo(
-        () => (tag: string, e: null | string) => {
+        () => (tag: string, e: null | string[]) => {
             setCustom({ [tag]: e });
         },
         [setCustom],
@@ -289,7 +294,7 @@ const TagFilters = () => {
                     onChange={(e) => handleTagFilter(tag.value, e)}
                     options={tag.options}
                     tagValue={tag.value}
-                    value={query._custom?.[tag.value] as string | undefined}
+                    value={query._custom?.[tag.value] as string | string[] | undefined}
                 />
             ))}
         </>
