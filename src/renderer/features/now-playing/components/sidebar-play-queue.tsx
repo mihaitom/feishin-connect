@@ -184,7 +184,6 @@ export const SidebarPlayQueue = () => {
                     direction="vertical"
                     dividerClassName={styles.resizeHandle}
                     onResize={onLayoutChange}
-                    style={{ flex: 1, height: '100%', minHeight: 0 }}
                 >
                     {orderedPanels.map((panel, index) =>
                         renderPanel(panel, index, orderedPanels.length),
