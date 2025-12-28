@@ -56,9 +56,7 @@
 }
 
 .image-container.is-round {
-    &::before {
-        border-radius: 50%;
-    }
+    border-radius: 50%;
 }
 
 .favorite-badge {

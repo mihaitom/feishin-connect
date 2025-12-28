@@ -11,6 +11,25 @@ import {
 import { BaseImage, ImageProps } from '/@/shared/components/image/image';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
+const getUnloaderIcon = (itemType: LibraryItem) => {
+    switch (itemType) {
+        case LibraryItem.ALBUM:
+            return 'emptyAlbumImage';
+        case LibraryItem.ALBUM_ARTIST:
+            return 'emptyArtistImage';
+        case LibraryItem.ARTIST:
+            return 'emptyArtistImage';
+        case LibraryItem.GENRE:
+            return 'emptyGenreImage';
+        case LibraryItem.PLAYLIST:
+            return 'emptyPlaylistImage';
+        case LibraryItem.SONG:
+            return 'emptySongImage';
+        default:
+            return 'emptyImage';
+    }
+};
+
 const BaseItemImage = (
     props: Omit<ImageProps, 'src'> & {
         id?: null | string;
@@ -27,7 +46,7 @@ const BaseItemImage = (
         size: 300,
     });
 
-    return <BaseImage src={imageUrl} {...rest} />;
+    return <BaseImage src={imageUrl} unloaderIcon={getUnloaderIcon(props.itemType)} {...rest} />;
 };
 
 export const ItemImage = memo(BaseItemImage);

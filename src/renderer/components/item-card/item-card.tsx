@@ -785,9 +785,9 @@ const PosterItemCard = ({
             <>
                 <ItemImage
                     className={clsx(styles.image, { [styles.isRound]: isRound })}
-                    id={data?.id}
+                    id={(data as { imageId: string })?.imageId}
                     itemType={itemType}
-                    src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
+                    src={(data as { imageUrl: string })?.imageUrl}
                 />
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
