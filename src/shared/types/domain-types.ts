@@ -1584,6 +1584,7 @@ export type SimilarSongsArgs = BaseEndpointArgs & {
 
 export type SimilarSongsQuery = {
     count?: number;
+    musicFolderId?: string | string[];
     songId: string;
 };
 

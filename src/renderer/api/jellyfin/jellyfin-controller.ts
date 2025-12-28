@@ -923,7 +923,12 @@ export const JellyfinController: InternalControllerEndpoint = {
             throw new Error('Failed to get server info');
         }
 
-        const features = getFeatures(VERSION_INFO, res.body.Version);
+        const defaultFeatures = {};
+
+        const features = {
+            ...defaultFeatures,
+            ...getFeatures(VERSION_INFO, res.body.Version),
+        };
 
         return {
             features,

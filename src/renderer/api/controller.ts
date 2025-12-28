@@ -567,7 +567,11 @@ export const controller: GeneralController = {
         return apiController(
             'getSimilarSongs',
             server.type,
-        )?.({ ...args, apiClientProps: { ...args.apiClientProps, server } });
+        )?.({
+            ...args,
+            apiClientProps: { ...args.apiClientProps, server },
+            query: mergeMusicFolderId(args.query, server),
+        });
     },
     getSongDetail(args) {
         const server = getServerById(args.apiClientProps.serverId);
