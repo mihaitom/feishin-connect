@@ -1,7 +1,7 @@
 import type { MouseEvent } from 'react';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './feature-carousel.module.css';
@@ -209,28 +209,70 @@ export const FeatureCarousel = ({ data, onNearEnd }: FeatureCarouselProps) => {
         }
     }, [data, startIndex, itemsPerRow, onNearEnd]);
 
-    const handleNext = (e?: MouseEvent<HTMLButtonElement>) => {
-        e?.preventDefault();
-        e?.stopPropagation();
-        if (!data) return;
-        directionRef.current = { isNext: true };
-        setStartIndex((prev) => (prev + itemsPerRow) % data.length);
-    };
+    const handleNext = useCallback(
+        (e?: MouseEvent<HTMLButtonElement>) => {
+            e?.preventDefault();
+            e?.stopPropagation();
+            if (!data) return;
+            directionRef.current = { isNext: true };
+            setStartIndex((prev) => (prev + itemsPerRow) % data.length);
+        },
+        [data, itemsPerRow],
+    );
 
-    const handlePrevious = (e?: MouseEvent<HTMLButtonElement>) => {
-        e?.preventDefault();
-        e?.stopPropagation();
-        if (!data) return;
-        directionRef.current = { isNext: false };
-        setStartIndex((prev) => (prev - itemsPerRow + data.length) % data.length);
-    };
+    const handlePrevious = useCallback(
+        (e?: MouseEvent<HTMLButtonElement>) => {
+            e?.preventDefault();
+            e?.stopPropagation();
+            if (!data) return;
+            directionRef.current = { isNext: false };
+            setStartIndex((prev) => (prev - itemsPerRow + data.length) % data.length);
+        },
+        [data, itemsPerRow],
+    );
+
+    const canNavigate = data && data.length > itemsPerRow;
+
+    const wheelCooldownRef = useRef(0);
+    const wheelThreshold = 10;
+    const wheelCooldownMs = 250;
+
+    const handleWheel = useCallback(
+        (event: React.WheelEvent<HTMLDivElement>) => {
+            if (!canNavigate || !data) {
+                return;
+            }
+
+            if (!event.shiftKey) {
+                return;
+            }
+
+            const now = Date.now();
+            const elapsed = now - wheelCooldownRef.current;
+
+            const horizontalDelta = Math.abs(event.deltaY);
+
+            if (horizontalDelta < wheelThreshold || elapsed < wheelCooldownMs) {
+                return;
+            }
+
+            if (event.deltaY > 0) {
+                wheelCooldownRef.current = now;
+                handleNext();
+            } else if (event.deltaY < 0) {
+                wheelCooldownRef.current = now;
+                handlePrevious();
+            }
+        },
+        [canNavigate, data, handleNext, handlePrevious, wheelCooldownMs, wheelThreshold],
+    );
 
     if (!data || data.length === 0) {
         return null;
     }
 
     return (
-        <div className={styles.carouselContainer} ref={containerRef}>
+        <div className={styles.carouselContainer} onWheel={handleWheel} ref={containerRef}>
             <AnimatePresence initial={false} mode="popLayout">
                 <motion.div
                     animate="animate"
