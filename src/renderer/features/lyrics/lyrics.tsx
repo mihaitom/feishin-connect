@@ -319,7 +319,7 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true, settingsKey = 'default' 
                     pos="absolute"
                     right={0}
                     top={0}
-                    variant="transparent"
+                    variant="subtle"
                 />
                 {isLoadingLyrics ? (
                     <Spinner container />
