@@ -29,6 +29,7 @@ const VisualizerInner = () => {
     const resizeObserverRef = useRef<ResizeObserver | undefined>(undefined);
     const cycleTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const cycleStartTimeRef = useRef<number | undefined>(undefined);
+    const pauseTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const butterchurnSettings = useSettingsStore((store) => store.visualizer.butterchurn);
     const opacity = useSettingsStore((store) => store.visualizer.butterchurn.opacity);
     const { setSettings } = useSettingsStoreActions();
@@ -114,6 +115,48 @@ const VisualizerInner = () => {
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [webAudio, canvasRef, containerRef, visualizer, isPlaying]);
+
+    // Kill visualizer after 5 seconds of pause
+    useEffect(() => {
+        if (isPlaying) {
+            // Clear pause timer if player resumes
+            if (pauseTimerRef.current) {
+                clearTimeout(pauseTimerRef.current);
+                pauseTimerRef.current = undefined;
+            }
+            return;
+        }
+
+        // Player is paused
+        if (!visualizer) return;
+
+        // Start 5-second timer
+        pauseTimerRef.current = setTimeout(() => {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = undefined;
+            }
+            if (cycleTimerRef.current) {
+                clearInterval(cycleTimerRef.current);
+                cycleTimerRef.current = undefined;
+            }
+            if (resizeObserverRef.current) {
+                resizeObserverRef.current.disconnect();
+                resizeObserverRef.current = undefined;
+            }
+
+            // Destroy visualizer
+            setVisualizer(undefined);
+            pauseTimerRef.current = undefined;
+        }, 5000);
+
+        return () => {
+            if (pauseTimerRef.current) {
+                clearTimeout(pauseTimerRef.current);
+                pauseTimerRef.current = undefined;
+            }
+        };
+    }, [isPlaying, visualizer]);
 
     // Handle resize
     useEffect(() => {
@@ -293,10 +336,22 @@ const VisualizerInner = () => {
         };
     }, [visualizer, butterchurnSettings.maxFPS]);
 
+    // Render container when playing (for initialization) or when visualizer exists
+    // Canvas must always be rendered when container is rendered so refs are available
+    const shouldRenderContainer = isPlaying || visualizer;
+
+    if (!shouldRenderContainer) {
+        return null;
+    }
+
     return (
-        <div className={styles.container} ref={containerRef} style={{ opacity }}>
+        <div
+            className={styles.container}
+            ref={containerRef}
+            style={{ opacity: visualizer ? opacity : 0 }}
+        >
             <canvas className={styles.canvas} ref={canvasRef} />
-            {butterchurnSettings.currentPreset && (
+            {visualizer && butterchurnSettings.currentPreset && (
                 <Text className={styles['preset-overlay']} isNoSelect size="sm">
                     {butterchurnSettings.currentPreset}
                 </Text>
