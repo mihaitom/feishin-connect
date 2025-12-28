@@ -131,7 +131,13 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
                     <div className={styles.metadataSection}>
                         <Stack gap="sm">
                             {album.albumArtists?.[0] && (
-                                <Text className={styles.artist} fw={500} size="md">
+                                <Text
+                                    className={styles.artist}
+                                    fw={500}
+                                    lineClamp={1}
+                                    size="md"
+                                    ta="center"
+                                >
                                     {album.albumArtists[0].name}
                                 </Text>
                             )}
