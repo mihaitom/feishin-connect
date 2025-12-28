@@ -322,13 +322,17 @@ export const NavidromeController: InternalControllerEndpoint = {
             ? query.genreIds
             : query.genreIds?.[0];
 
+        const artistIds = hasFeature(apiClientProps.server, ServerFeature.BFR)
+            ? query.artistIds
+            : query.artistIds?.[0];
+
         const res = await ndApiClient(apiClientProps).getAlbumList({
             query: {
                 _end: query.startIndex + (query.limit || 0),
                 _order: sortOrderMap.navidrome[query.sortOrder],
                 _sort: albumListSortMap.navidrome[query.sortBy],
                 _start: query.startIndex,
-                artist_id: query.artistIds?.[0],
+                artist_id: artistIds,
                 compilation: query.compilation,
                 genre_id: genres,
                 has_rating: query.hasRating,

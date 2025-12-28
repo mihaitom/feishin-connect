@@ -2,10 +2,7 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { ChangeEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-    MultiSelectWithInvalidData,
-    SelectWithInvalidData,
-} from '/@/renderer/components/select-with-invalid-data';
+import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
@@ -187,14 +184,14 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
                     searchable
                 />
             )}
-            <SelectWithInvalidData
+            <MultiSelectWithInvalidData
                 clearable
                 data={selectableAlbumArtists}
-                defaultValue={query.artistIds?.[0] || undefined}
+                defaultValue={query.artistIds || []}
                 disabled={disableArtistFilter}
-                label={t('entity.artist', { count: 1, postProcess: 'titleCase' })}
+                label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
                 limit={300}
-                onChange={(e) => setAlbumArtist(e ? [e] : null)}
+                onChange={(e) => (e && e.length > 0 ? setAlbumArtist(e) : setAlbumArtist(null))}
                 rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
                 searchable
             />
