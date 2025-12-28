@@ -186,10 +186,9 @@ export const useItemListInfiniteLoader = ({
                 lastFetchedPageRef.current = -1;
                 currentVisibleRangeRef.current = null;
 
-                // Invalidate and wait for count query to refetch (this will suspend via useSuspenseQuery)
-                await queryClient.refetchQueries({
+                // Invalidate and wait for count query to refetch
+                await queryClient.ensureQueryData({
                     queryKey: countQueryKey,
-                    type: 'active',
                 });
 
                 // Fetch the first page after count is refetched
