@@ -15,6 +15,7 @@ import {
     PlaylistSongListResponse,
     Song,
     SongDetailResponse,
+    TopSongListResponse,
 } from '/@/shared/types/domain-types';
 
 export interface PreviousQueryData {
@@ -592,6 +593,40 @@ export const applyFavoriteOptimisticUpdates = (
                         queryClient.setQueryData(
                             queryKey,
                             (prev: PlaylistSongListResponse | undefined) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        items: prev.items.map((item: Song) =>
+                                            itemIdSet.has(item.id)
+                                                ? { ...item, userFavorite: isFavorite }
+                                                : item,
+                                        ),
+                                    };
+                                }
+
+                                return prev;
+                            },
+                        );
+                    }
+                });
+            }
+
+            const topSongsQueryKey = queryKeys.albumArtists.topSongs(
+                variables.apiClientProps.serverId,
+            );
+
+            const topSongsQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: topSongsQueryKey,
+            });
+
+            if (topSongsQueries.length) {
+                topSongsQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: TopSongListResponse | undefined) => {
                                 if (prev) {
                                     return {
                                         ...prev,

@@ -15,6 +15,7 @@ import {
     SetRatingArgs,
     Song,
     SongDetailResponse,
+    TopSongListResponse,
 } from '/@/shared/types/domain-types';
 
 export const applyRatingOptimisticUpdates = (
@@ -487,6 +488,39 @@ export const applyRatingOptimisticUpdates = (
                             (prev: SongDetailResponse | undefined) => {
                                 if (prev && itemIdSet.has(prev.id)) {
                                     return { ...prev, userRating: rating };
+                                }
+                                return prev;
+                            },
+                        );
+                    }
+                });
+            }
+
+            const topSongsQueryKey = queryKeys.albumArtists.topSongs(
+                variables.apiClientProps.serverId,
+            );
+
+            const topSongsQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: topSongsQueryKey,
+            });
+
+            if (topSongsQueries.length) {
+                topSongsQueries.forEach(([queryKey, data]) => {
+                    if (data) {
+                        previousQueries.push({ data, queryKey });
+                        queryClient.setQueryData(
+                            queryKey,
+                            (prev: TopSongListResponse | undefined) => {
+                                if (prev) {
+                                    return {
+                                        ...prev,
+                                        items: prev.items.map((item: Song) =>
+                                            itemIdSet.has(item.id)
+                                                ? { ...item, userRating: rating }
+                                                : item,
+                                        ),
+                                    };
                                 }
                                 return prev;
                             },
