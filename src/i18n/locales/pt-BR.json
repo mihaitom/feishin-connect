@@ -356,8 +356,6 @@
         "playButtonBehavior_optionAddNext": "$t(player.addNext)",
         "playButtonBehavior_optionPlay": "$t(player.play)",
         "playButtonBehavior_optionPlayShuffled": "$t(player.shuffle)",
-        "playerAlbumArtResolution": "resolução da capa do álbum no reprodutor",
-        "playerAlbumArtResolution_description": "a resolução da pré-visualização da capa do álbum no reprodutor grande. Resoluções maiores deixam a imagem mais nítida, mas podem diminuir a velocidade de carregamento. O padrão é 0, ou seja, automático",
         "playerbarOpenDrawer": "alternar tela cheia na barra do reprodutor",
         "playerbarOpenDrawer_description": "permite clicar na barra do reprodutor para abrir o reprodutor em tela cheia",
         "remotePassword": "Senha do servidor de controle remoto",
