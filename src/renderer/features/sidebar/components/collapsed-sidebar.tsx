@@ -80,7 +80,7 @@ export const CollapsedSidebar = () => {
                 [styles.web]: windowBarStyle === Platform.WEB,
             })}
         >
-            <ScrollArea className={currentServer ? styles.scrollAreaWithServer : undefined}>
+            <ScrollArea>
                 {sidebarCollapsedNavigation && (
                     <Group gap={0} grow>
                         <CollapsedSidebarButton onClick={() => navigate(-1)}>
@@ -119,28 +119,37 @@ export const CollapsedSidebar = () => {
                         to={item.route}
                     />
                 ))}
-            </ScrollArea>
-            {currentServer && (
-                <DropdownMenu offset={0} position="right-end" width={240}>
-                    <DropdownMenu.Target>
-                        <div className={styles.serverSelectorContainer}>
-                            <img
-                                className={styles.serverIcon}
-                                src={
-                                    currentServer.type === ServerType.NAVIDROME
-                                        ? NavidromeLogo
-                                        : currentServer.type === ServerType.JELLYFIN
-                                          ? JellyfinLogo
-                                          : OpenSubsonicLogo
+                {currentServer && (
+                    <DropdownMenu offset={0} position="right-end" width={240}>
+                        <DropdownMenu.Target>
+                            <CollapsedSidebarItem
+                                activeIcon={null}
+                                component={Flex}
+                                icon={
+                                    <img
+                                        className={styles.serverIcon}
+                                        src={
+                                            currentServer.type === ServerType.NAVIDROME
+                                                ? NavidromeLogo
+                                                : currentServer.type === ServerType.JELLYFIN
+                                                  ? JellyfinLogo
+                                                  : OpenSubsonicLogo
+                                        }
+                                    />
                                 }
+                                label={''}
+                                py="md"
+                                style={{
+                                    cursor: 'pointer',
+                                }}
                             />
-                        </div>
-                    </DropdownMenu.Target>
-                    <DropdownMenu.Dropdown>
-                        <ServerSelectorItems />
-                    </DropdownMenu.Dropdown>
-                </DropdownMenu>
-            )}
+                        </DropdownMenu.Target>
+                        <DropdownMenu.Dropdown>
+                            <ServerSelectorItems />
+                        </DropdownMenu.Dropdown>
+                    </DropdownMenu>
+                )}
+            </ScrollArea>
         </motion.div>
     );
 };
