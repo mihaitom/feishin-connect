@@ -886,9 +886,9 @@ const initialState: SettingsState = {
             type: PlayerbarSliderType.SLIDER,
         },
         resume: true,
-        showLyricsInSidebar: false,
+        showLyricsInSidebar: true,
         showRatings: true,
-        showVisualizerInSidebar: false,
+        showVisualizerInSidebar: true,
         sidebarCollapsedNavigation: true,
         sidebarCollapseShared: false,
         sidebarItems,
@@ -996,7 +996,7 @@ const initialState: SettingsState = {
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
             table: {
-                autoFitColumns: false,
+                autoFitColumns: true,
                 columns: SONG_TABLE_COLUMNS.map((column) => ({
                     align: column.align,
                     autoSize: column.autoSize,
@@ -1209,7 +1209,7 @@ const initialState: SettingsState = {
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
             table: {
-                autoFitColumns: false,
+                autoFitColumns: true,
                 columns: pickTableColumns({
                     autoSizeColumns: [TableColumn.TITLE],
                     columns: PLAYLIST_TABLE_COLUMNS,
@@ -1239,7 +1239,7 @@ const initialState: SettingsState = {
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
             table: {
-                autoFitColumns: false,
+                autoFitColumns: true,
                 columns: PLAYLIST_SONG_TABLE_COLUMNS.map((column) => ({
                     align: column.align,
                     autoSize: column.autoSize,
@@ -1267,7 +1267,7 @@ const initialState: SettingsState = {
             itemsPerPage: 100,
             pagination: ListPaginationType.INFINITE,
             table: {
-                autoFitColumns: false,
+                autoFitColumns: true,
                 columns: SONG_TABLE_COLUMNS.map((column) => ({
                     align: column.align,
                     autoSize: column.autoSize,
@@ -1313,7 +1313,7 @@ const initialState: SettingsState = {
             itemsPerPage: 100,
             pagination: ListPaginationType.PAGINATED,
             table: {
-                autoFitColumns: false,
+                autoFitColumns: true,
                 columns: SONG_TABLE_COLUMNS.map((column) => ({
                     align: column.align,
                     autoSize: column.autoSize,
