@@ -275,10 +275,10 @@
         "explicitStatus": "$t(common.explicitStatus)"
     },
     "datetime": {
-        "minuteShort": "min",
-        "secondShort": "sec",
-        "hourShort": "hr",
-        "dayShort": "day"
+        "minuteShort": "m",
+        "secondShort": "s",
+        "hourShort": "h",
+        "dayShort": "d"
     },
     "filterOperator": {
         "after": "is after",

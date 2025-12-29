@@ -1,11 +1,11 @@
 import clsx from 'clsx';
-import formatDuration from 'format-duration';
 import { AnimatePresence } from 'motion/react';
 import { Fragment, memo, ReactNode, useState } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './item-card.module.css';
 
+import i18n from '/@/i18n/i18n';
 import { ItemCardControls } from '/@/renderer/components/item-card/item-card-controls';
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
 import { getDraggedItems } from '/@/renderer/components/item-list/helpers/get-dragged-items';
@@ -19,7 +19,15 @@ import { ItemControls } from '/@/renderer/components/item-list/types';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useGeneralSettings } from '/@/renderer/store';
-import { formatDateAbsolute, formatDateRelative, formatRating } from '/@/renderer/utils/format';
+import {
+    formatDateAbsolute,
+    formatDateAbsoluteUTC,
+    formatDateRelative,
+    formatDurationString,
+    formatRating,
+} from '/@/renderer/utils/format';
+import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
 import { Separator } from '/@/shared/components/separator/separator';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Text } from '/@/shared/components/text/text';
@@ -991,7 +999,7 @@ export const getDataRows = (): DataRow[] => {
         {
             format: (data) => {
                 if ('duration' in data && data.duration !== null) {
-                    return formatDuration(data.duration * 1000);
+                    return formatDurationString(data.duration);
                 }
                 return '';
             },
@@ -1009,7 +1017,7 @@ export const getDataRows = (): DataRow[] => {
         {
             format: (data) => {
                 if ('releaseDate' in data && data.releaseDate) {
-                    return data.releaseDate;
+                    return formatDateAbsoluteUTC(data.releaseDate);
                 }
                 return '';
             },
@@ -1027,7 +1035,12 @@ export const getDataRows = (): DataRow[] => {
         {
             format: (data) => {
                 if ('lastPlayedAt' in data && data.lastPlayedAt) {
-                    return formatDateRelative(data.lastPlayedAt);
+                    return (
+                        <Group align="center" gap="xs">
+                            <Icon icon="lastPlayed" size="sm" />
+                            {formatDateRelative(data.lastPlayedAt)}
+                        </Group>
+                    );
                 }
                 return '';
             },
@@ -1036,7 +1049,7 @@ export const getDataRows = (): DataRow[] => {
         {
             format: (data) => {
                 if ('playCount' in data && data.playCount !== null) {
-                    return String(data.playCount);
+                    return i18n.t('entity.play', { count: data.playCount });
                 }
                 return '';
             },
@@ -1085,7 +1098,7 @@ export const getDataRows = (): DataRow[] => {
         {
             format: (data) => {
                 if ('songCount' in data && data.songCount !== null) {
-                    return String(data.songCount);
+                    return i18n.t('entity.trackWithCount', { count: data.songCount });
                 }
                 return '';
             },

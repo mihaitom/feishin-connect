@@ -74,8 +74,8 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
     };
 
     const artists = useMemo(() => {
-        if (row && 'artists' in row && Array.isArray(row.artists)) {
-            return (row.artists as RelatedAlbumArtist[]).map((artist) => {
+        if (row && 'artists' in item && Array.isArray(item.artists)) {
+            return (item.artists as RelatedAlbumArtist[]).map((artist) => {
                 const path = generatePath(AppRoute.LIBRARY_ARTISTS_DETAIL, {
                     artistId: artist.id,
                 });
@@ -83,9 +83,9 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
             });
         }
         return [];
-    }, [row]);
+    }, [item, row]);
 
-    if (row && 'name' in row && 'imageUrl' in row && 'artists' in row) {
+    if (item && 'name' in item && 'imageUrl' in item && 'artists' in item) {
         const rowHeight = props.getRowHeight(props.rowIndex, props);
         const path = getTitlePath(props.itemType, (props.data[props.rowIndex] as any).id as string);
 
@@ -143,7 +143,7 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
                     })}
                 >
                     <Text className={styles.title} isNoSelect size="md" {...titleLinkProps}>
-                        {row.name as string}
+                        {item.name as string}
                     </Text>
                     <div className={styles.artists}>
                         {artists.map((artist, index) => (
