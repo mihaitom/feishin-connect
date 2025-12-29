@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './lyrics.module.css';
@@ -52,10 +52,44 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true, settingsKey = 'default' 
     const [index, setIndex] = useState(0);
     const [translatedLyrics, setTranslatedLyrics] = useState<null | string>(null);
     const [showTranslation, setShowTranslation] = useState(false);
+    const [pendingSongId, setPendingSongId] = useState<string | undefined>(currentSong?.id);
+    const lyricsFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const previousSongIdRef = useRef<string | undefined>(currentSong?.id);
+
+    // Use a timeout to prevent fetching lyrics when switching songs quickly
+    useEffect(() => {
+        const currentSongId = currentSong?.id;
+        const previousSongId = previousSongIdRef.current;
+
+        if (currentSongId === previousSongId) {
+            return;
+        }
+
+        previousSongIdRef.current = currentSongId;
+
+        setPendingSongId(undefined);
+
+        if (!currentSongId) {
+            return;
+        }
+
+        clearTimeout(lyricsFetchTimeoutRef.current);
+
+        lyricsFetchTimeoutRef.current = setTimeout(() => {
+            setPendingSongId(currentSongId);
+        }, 500);
+
+        return () => {
+            clearTimeout(lyricsFetchTimeoutRef.current);
+        };
+    }, [currentSong?.id]);
 
     const { data, isInitialLoading } = useQuery(
         lyricsQueries.songLyrics(
             {
+                options: {
+                    enabled: !!pendingSongId && pendingSongId === currentSong?.id,
+                },
                 query: { songId: currentSong?.id || '' },
                 serverId: currentSong?._serverId || '',
             },
