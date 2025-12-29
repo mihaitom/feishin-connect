@@ -1003,9 +1003,17 @@ const GeneralSettings = () => {
 };
 
 type CustomGradient = {
-    colorStops: (string | { color: string; level?: number; pos?: number })[];
+    colorStops: StoredColorStop[];
     dir?: string;
     name: string;
+};
+
+type StoredColorStop = {
+    color: string;
+    level?: number;
+    levelEnabled?: boolean;
+    pos?: number;
+    positionEnabled?: boolean;
 };
 
 const CustomGradientsManager = () => {
@@ -1014,14 +1022,10 @@ const CustomGradientsManager = () => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<null | number>(null);
     const [newGradient, setNewGradient] = useState<CustomGradient>({
-        colorStops: ['#ff0000'],
+        colorStops: [{ color: '#ff0000', levelEnabled: false, positionEnabled: false }],
         dir: 'v',
         name: '',
     });
-    // Track which checkboxes are enabled for each color stop
-    const [colorStopOptions, setColorStopOptions] = useState<
-        Array<{ enableLevel: boolean; enablePos: boolean }>
-    >([{ enableLevel: false, enablePos: false }]);
 
     const customGradients = visualizer.audiomotionanalyzer.customGradients || [];
 
@@ -1030,8 +1034,19 @@ const CustomGradientsManager = () => {
 
         const updatedGradients = [...customGradients, newGradient];
         updateProperty('customGradients', updatedGradients);
-        setNewGradient({ colorStops: ['#ff0000'], dir: 'v', name: '' });
-        setColorStopOptions([{ enableLevel: false, enablePos: false }]);
+        setNewGradient({
+            colorStops: [
+                {
+                    color: '#ff0000',
+                    level: 0,
+                    levelEnabled: false,
+                    pos: 0,
+                    positionEnabled: false,
+                },
+            ],
+            dir: 'v',
+            name: '',
+        });
         setIsAdding(false);
     };
 
@@ -1043,12 +1058,6 @@ const CustomGradientsManager = () => {
     const handleEditGradient = (index: number) => {
         const gradient = customGradients[index];
         setNewGradient(gradient);
-        // Initialize checkbox states based on existing color stops
-        const options = gradient.colorStops.map((stop) => ({
-            enableLevel: typeof stop !== 'string' && stop.level !== undefined,
-            enablePos: typeof stop !== 'string' && stop.pos !== undefined,
-        }));
-        setColorStopOptions(options);
         setEditingIndex(index);
         setIsAdding(true);
     };
@@ -1059,15 +1068,21 @@ const CustomGradientsManager = () => {
         const updatedGradients = [...customGradients];
         updatedGradients[editingIndex] = newGradient;
         updateProperty('customGradients', updatedGradients);
-        setNewGradient({ colorStops: ['#ff0000'], dir: 'v', name: '' });
-        setColorStopOptions([{ enableLevel: false, enablePos: false }]);
+        setNewGradient({
+            colorStops: [{ color: '#ff0000', levelEnabled: false, positionEnabled: false }],
+            dir: 'v',
+            name: '',
+        });
         setEditingIndex(null);
         setIsAdding(false);
     };
 
     const handleCancel = () => {
-        setNewGradient({ colorStops: ['#ff0000'], dir: 'v', name: '' });
-        setColorStopOptions([{ enableLevel: false, enablePos: false }]);
+        setNewGradient({
+            colorStops: [{ color: '#ff0000', levelEnabled: false, positionEnabled: false }],
+            dir: 'v',
+            name: '',
+        });
         setEditingIndex(null);
         setIsAdding(false);
     };
@@ -1075,9 +1090,11 @@ const CustomGradientsManager = () => {
     const handleAddColorStop = () => {
         setNewGradient({
             ...newGradient,
-            colorStops: [...newGradient.colorStops, '#00ff00'],
+            colorStops: [
+                ...newGradient.colorStops,
+                { color: '#00ff00', levelEnabled: false, positionEnabled: false },
+            ],
         });
-        setColorStopOptions([...colorStopOptions, { enableLevel: false, enablePos: false }]);
     };
 
     const handleRemoveColorStop = (index: number) => {
@@ -1086,33 +1103,16 @@ const CustomGradientsManager = () => {
             ...newGradient,
             colorStops: newGradient.colorStops.filter((_, i) => i !== index),
         });
-        setColorStopOptions(colorStopOptions.filter((_, i) => i !== index));
     };
 
     const handleColorStopChange = (index: number, color: string) => {
         const updatedColorStops = [...newGradient.colorStops];
         const currentStop = updatedColorStops[index];
-        const options = colorStopOptions[index];
 
-        // If neither checkbox is enabled, store as string
-        if (!options.enablePos && !options.enableLevel) {
-            updatedColorStops[index] = color;
-        } else {
-            // Otherwise, store as object with enabled properties
-            updatedColorStops[index] = {
-                color,
-                ...(options.enablePos &&
-                typeof currentStop !== 'string' &&
-                currentStop.pos !== undefined
-                    ? { pos: currentStop.pos }
-                    : {}),
-                ...(options.enableLevel &&
-                typeof currentStop !== 'string' &&
-                currentStop.level !== undefined
-                    ? { level: currentStop.level }
-                    : {}),
-            };
-        }
+        updatedColorStops[index] = {
+            ...currentStop,
+            color,
+        };
 
         setNewGradient({ ...newGradient, colorStops: updatedColorStops });
     };
@@ -1121,18 +1121,10 @@ const CustomGradientsManager = () => {
         const updatedColorStops = [...newGradient.colorStops];
         const currentStop = updatedColorStops[index];
         const posValue = typeof pos === 'number' ? pos : parseFloat(pos) || undefined;
-        const options = colorStopOptions[index];
-
-        const color = typeof currentStop === 'string' ? currentStop : currentStop.color;
 
         updatedColorStops[index] = {
-            color,
-            ...(options.enablePos && posValue !== undefined ? { pos: posValue } : {}),
-            ...(options.enableLevel &&
-            typeof currentStop !== 'string' &&
-            currentStop.level !== undefined
-                ? { level: currentStop.level }
-                : {}),
+            ...currentStop,
+            ...(currentStop.positionEnabled && posValue !== undefined ? { pos: posValue } : {}),
         };
 
         setNewGradient({ ...newGradient, colorStops: updatedColorStops });
@@ -1142,87 +1134,43 @@ const CustomGradientsManager = () => {
         const updatedColorStops = [...newGradient.colorStops];
         const currentStop = updatedColorStops[index];
         const levelValue = typeof level === 'number' ? level : parseFloat(level) || undefined;
-        const options = colorStopOptions[index];
-
-        const color = typeof currentStop === 'string' ? currentStop : currentStop.color;
 
         updatedColorStops[index] = {
-            color,
-            ...(options.enablePos &&
-            typeof currentStop !== 'string' &&
-            currentStop.pos !== undefined
-                ? { pos: currentStop.pos }
-                : {}),
-            ...(options.enableLevel && levelValue !== undefined ? { level: levelValue } : {}),
+            ...currentStop,
+            ...(currentStop.levelEnabled && levelValue !== undefined ? { level: levelValue } : {}),
         };
 
         setNewGradient({ ...newGradient, colorStops: updatedColorStops });
     };
 
     const handleTogglePos = (index: number, enabled: boolean) => {
-        const updatedOptions = [...colorStopOptions];
-        updatedOptions[index] = { ...updatedOptions[index], enablePos: enabled };
-        setColorStopOptions(updatedOptions);
+        const updatedColorStops = [...newGradient.colorStops];
+        const currentStop = updatedColorStops[index];
 
-        // If both are now disabled, convert to string
-        if (!enabled && !updatedOptions[index].enableLevel) {
-            const updatedColorStops = [...newGradient.colorStops];
-            const currentStop = updatedColorStops[index];
-            const color = typeof currentStop === 'string' ? currentStop : currentStop.color;
-            updatedColorStops[index] = color;
-            setNewGradient({ ...newGradient, colorStops: updatedColorStops });
-        } else {
-            // Otherwise, ensure it's an object
-            const updatedColorStops = [...newGradient.colorStops];
-            const currentStop = updatedColorStops[index];
-            const color = typeof currentStop === 'string' ? currentStop : currentStop.color;
+        updatedColorStops[index] = {
+            ...currentStop,
+            positionEnabled: enabled,
+            // Remove pos if disabling
+            ...(enabled && currentStop.pos !== undefined ? { pos: currentStop.pos } : {}),
+            ...(!enabled ? { pos: undefined } : {}),
+        };
 
-            updatedColorStops[index] = {
-                color,
-                ...(enabled && typeof currentStop !== 'string' && currentStop.pos !== undefined
-                    ? { pos: currentStop.pos }
-                    : {}),
-                ...(updatedOptions[index].enableLevel &&
-                typeof currentStop !== 'string' &&
-                currentStop.level !== undefined
-                    ? { level: currentStop.level }
-                    : {}),
-            };
-            setNewGradient({ ...newGradient, colorStops: updatedColorStops });
-        }
+        setNewGradient({ ...newGradient, colorStops: updatedColorStops });
     };
 
     const handleToggleLevel = (index: number, enabled: boolean) => {
-        const updatedOptions = [...colorStopOptions];
-        updatedOptions[index] = { ...updatedOptions[index], enableLevel: enabled };
-        setColorStopOptions(updatedOptions);
+        const updatedColorStops = [...newGradient.colorStops];
+        const currentStop = updatedColorStops[index];
 
-        // If both are now disabled, convert to string
-        if (!enabled && !updatedOptions[index].enablePos) {
-            const updatedColorStops = [...newGradient.colorStops];
-            const currentStop = updatedColorStops[index];
-            const color = typeof currentStop === 'string' ? currentStop : currentStop.color;
-            updatedColorStops[index] = color;
-            setNewGradient({ ...newGradient, colorStops: updatedColorStops });
-        } else {
-            // Otherwise, ensure it's an object
-            const updatedColorStops = [...newGradient.colorStops];
-            const currentStop = updatedColorStops[index];
-            const color = typeof currentStop === 'string' ? currentStop : currentStop.color;
+        updatedColorStops[index] = {
+            ...currentStop,
+            levelEnabled: enabled,
+            // Remove level if disabling
+            ...(enabled && currentStop.level !== undefined ? { level: currentStop.level } : {}),
+            ...(!enabled ? { level: undefined } : {}),
+        };
 
-            updatedColorStops[index] = {
-                color,
-                ...(updatedOptions[index].enablePos &&
-                typeof currentStop !== 'string' &&
-                currentStop.pos !== undefined
-                    ? { pos: currentStop.pos }
-                    : {}),
-                ...(enabled && typeof currentStop !== 'string' && currentStop.level !== undefined
-                    ? { level: currentStop.level }
-                    : {}),
-            };
-            setNewGradient({ ...newGradient, colorStops: updatedColorStops });
-        }
+        setNewGradient({ ...newGradient, colorStops: updatedColorStops });
     };
 
     return (
@@ -1311,10 +1259,6 @@ const CustomGradientsManager = () => {
                                     </Button>
                                 </Group>
                                 {newGradient.colorStops.map((stop, index) => {
-                                    const options = colorStopOptions[index] || {
-                                        enableLevel: false,
-                                        enablePos: false,
-                                    };
                                     return (
                                         <Group grow key={index}>
                                             <ColorInput
@@ -1323,20 +1267,18 @@ const CustomGradientsManager = () => {
                                                     handleColorStopChange(index, color)
                                                 }
                                                 size="sm"
-                                                value={typeof stop === 'string' ? stop : stop.color}
+                                                value={stop.color}
                                             />
                                             <VisualizerSlider
-                                                defaultValue={
-                                                    typeof stop === 'string' ? undefined : stop.pos
-                                                }
-                                                disabled={!options.enablePos}
+                                                defaultValue={stop.pos}
+                                                disabled={!stop.positionEnabled}
                                                 label={
                                                     <Group
                                                         gap="xs"
                                                         style={{ alignItems: 'center' }}
                                                     >
                                                         <Checkbox
-                                                            checked={options.enablePos}
+                                                            checked={stop.positionEnabled || false}
                                                             onChange={(e) =>
                                                                 handleTogglePos(
                                                                     index,
@@ -1358,19 +1300,15 @@ const CustomGradientsManager = () => {
                                                 step={0.1}
                                             />
                                             <VisualizerSlider
-                                                defaultValue={
-                                                    typeof stop === 'string'
-                                                        ? undefined
-                                                        : stop.level
-                                                }
-                                                disabled={!options.enableLevel}
+                                                defaultValue={stop.level}
+                                                disabled={!stop.levelEnabled}
                                                 label={
                                                     <Group
                                                         gap="xs"
                                                         style={{ alignItems: 'center' }}
                                                     >
                                                         <Checkbox
-                                                            checked={options.enableLevel}
+                                                            checked={stop.levelEnabled || false}
                                                             onChange={(e) =>
                                                                 handleToggleLevel(
                                                                     index,

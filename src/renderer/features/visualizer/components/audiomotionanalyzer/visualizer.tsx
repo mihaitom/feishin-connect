@@ -117,6 +117,50 @@ const VisualizerInner = () => {
         };
     }, [visualizer, gradientsRegistered, isCustomGradient]);
 
+    const transformGradientForVisualizer = useCallback(
+        (gradient: {
+            colorStops: Array<{
+                color: string;
+                level?: number;
+                levelEnabled?: boolean;
+                pos?: number;
+                positionEnabled?: boolean;
+            }>;
+            dir?: string;
+        }): {
+            colorStops: (string | { color: string; level?: number; pos?: number })[];
+            dir?: string;
+        } => {
+            const transformedColorStops = gradient.colorStops.map((stop) => {
+                // If neither position nor level is enabled, return just the color string
+                if (!stop.positionEnabled && !stop.levelEnabled) {
+                    return stop.color;
+                }
+
+                // Otherwise, return an object with only enabled properties
+                const transformedStop: { color: string; level?: number; pos?: number } = {
+                    color: stop.color,
+                };
+
+                if (stop.positionEnabled && stop.pos !== undefined) {
+                    transformedStop.pos = stop.pos;
+                }
+
+                if (stop.levelEnabled && stop.level !== undefined) {
+                    transformedStop.level = stop.level;
+                }
+
+                return transformedStop;
+            });
+
+            return {
+                colorStops: transformedColorStops,
+                ...(gradient.dir ? { dir: gradient.dir } : {}),
+            };
+        },
+        [],
+    );
+
     const registerCustomGradients = useCallback(
         (audioMotionInstance: AudioMotionAnalyzer) => {
             if (visualizer.type !== 'audiomotionanalyzer') {
@@ -127,18 +171,8 @@ const VisualizerInner = () => {
 
             customGradients.forEach((gradient) => {
                 try {
-                    const gradientConfig: {
-                        colorStops: (string | { color: string; level?: number; pos?: number })[];
-                        dir?: string;
-                    } = {
-                        colorStops: gradient.colorStops,
-                    };
+                    const gradientConfig = transformGradientForVisualizer(gradient);
 
-                    if (gradient.dir) {
-                        gradientConfig.dir = gradient.dir;
-                    }
-
-                    // Type assertion needed as TypeScript definitions may be incomplete
                     audioMotionInstance.registerGradient(gradient.name, gradientConfig as any);
                 } catch (error) {
                     console.error(`Failed to register gradient "${gradient.name}":`, error);
@@ -148,7 +182,7 @@ const VisualizerInner = () => {
             // Mark gradients as registered
             setGradientsRegistered(true);
         },
-        [visualizer],
+        [visualizer, transformGradientForVisualizer],
     );
 
     useEffect(() => {

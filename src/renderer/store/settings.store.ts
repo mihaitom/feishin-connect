@@ -243,13 +243,13 @@ const AudioMotionAnalyzerSettingsSchema = z.object({
     customGradients: z.array(
         z.object({
             colorStops: z.array(
-                z.string().or(
-                    z.object({
-                        color: z.string(),
-                        level: z.number().min(0).max(1).optional(),
-                        pos: z.number().min(0).max(1).optional(),
-                    }),
-                ),
+                z.object({
+                    color: z.string(),
+                    level: z.number().min(0).max(1).optional(),
+                    levelEnabled: z.boolean().optional(),
+                    pos: z.number().min(0).max(1).optional(),
+                    positionEnabled: z.boolean().optional(),
+                }),
             ),
             dir: z.string().optional(),
             name: z.string(),
