@@ -407,6 +407,7 @@ export const PlayerConfig = () => {
                         size: 'lg',
                     }}
                     size="sm"
+                    stopsPropagation
                     tooltip={{
                         label: t('common.setting_other', { postProcess: 'titleCase' }),
                         openDelay: 0,
