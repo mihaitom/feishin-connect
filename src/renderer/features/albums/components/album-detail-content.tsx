@@ -90,6 +90,12 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
 
         items.push(
             {
+                id: 'isCompilation',
+                value: album?.isCompilation
+                    ? t('filter.isCompilation', { postProcess: 'sentenceCase' })
+                    : undefined,
+            },
+            {
                 id: 'releaseDate',
                 value: album.releaseDate
                     ? `${releasePrefix} ${formatDateAbsoluteUTC(album.releaseDate)}`
@@ -97,7 +103,11 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
             },
             {
                 id: 'releaseYear',
-                value: album.releaseYear?.toString(),
+                value: album.releaseDate
+                    ? undefined
+                    : album.releaseYear
+                      ? album.releaseYear.toString()
+                      : undefined,
             },
             {
                 id: 'songCount',
@@ -137,19 +147,7 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
                           ? t('common.clean', { postProcess: 'sentenceCase' })
                           : undefined,
             },
-            {
-                id: 'isCompilation',
-                value: album?.isCompilation
-                    ? t('filter.isCompilation', { postProcess: 'sentenceCase' })
-                    : undefined,
-            },
-            {
-                id: 'recordLabels',
-                value:
-                    album.recordLabels && album.recordLabels.length > 0
-                        ? album.recordLabels.join(', ')
-                        : undefined,
-            },
+
             {
                 id: 'version',
                 value: album.version || undefined,
