@@ -132,7 +132,10 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                     },
                 },
                 isReorderingQueue: false,
-                pageSidebar: {},
+                pageSidebar: {
+                    album: true,
+                    song: true,
+                },
                 platform: Platform.WINDOWS,
                 privateMode: false,
                 showTimeRemaining: false,
