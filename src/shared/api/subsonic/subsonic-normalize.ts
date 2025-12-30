@@ -277,11 +277,7 @@ const normalizeAlbum = (
             typeof item.releaseDate.year === 'number' &&
             typeof item.releaseDate.month === 'number' &&
             typeof item.releaseDate.day === 'number'
-                ? new Date(
-                      item.releaseDate.year,
-                      item.releaseDate.month - 1,
-                      item.releaseDate.day,
-                  ).toISOString()
+                ? `${item.releaseDate.year}-${item.releaseDate.month}-${item.releaseDate.day}`
                 : null,
         releaseType: getReleaseType(item),
         releaseTypes: item.releaseTypes || [],
