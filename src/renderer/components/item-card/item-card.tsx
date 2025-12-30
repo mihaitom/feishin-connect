@@ -896,7 +896,7 @@ const PosterItemCard = ({
     );
 };
 
-export const getDataRows = (): DataRow[] => {
+export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] => {
     return [
         {
             format: (data) => {
@@ -959,7 +959,11 @@ export const getDataRows = (): DataRow[] => {
                             artistName={data.albumArtistName}
                             artists={data.albumArtists}
                             linkProps={{ fw: 400, isMuted: true }}
-                            rootTextProps={{ fw: 400, isMuted: true, size: 'sm' }}
+                            rootTextProps={{
+                                fw: 400,
+                                isMuted: type === 'compact' ? false : true,
+                                size: 'sm',
+                            }}
                         />
                     );
                 }
