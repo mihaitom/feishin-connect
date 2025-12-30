@@ -111,6 +111,7 @@ services:
             - SERVER_LOCK=true # When true AND name/type/url are set, only username/password can be toggled
             - SERVER_TYPE=jellyfin # the allowed types are: jellyfin, navidrome, subsonic. These values are case insensitive
             - SERVER_URL= # http://address:port or https://address:port
+            - ANALYTICS_DISABLED=true # Set to true to disable Umami analytics tracking
         ports:
             - 9180:9180
             # Alternatively, to restrict to only localhost, - 127.0.0.1:9180:8190
@@ -128,6 +129,8 @@ services:
 3. _Optional_ - If you want to host Feishin on a subpath (not `/`), then pass in the following environment variable: `PUBLIC_PATH=PATH`. For example, to host on `/feishin`, pass in `PUBLIC_PATH=/feishin`.
 
 4. _Optional_ - To hard code the server url, pass the following environment variables: `SERVER_NAME`, `SERVER_TYPE` (one of `jellyfin` or `navidrome` or `subsonic`), `SERVER_URL`. To prevent users from changing these settings, pass `SERVER_LOCK=true`. This can only be set if all three of the previous values are set.
+
+5. _Optional_ - To disable Umami analytics tracking in the Docker/web version, set the environment variable `ANALYTICS_DISABLED=true`. When enabled, the analytics script will not be loaded and all tracking will be disabled.
 
 ## FAQ
 
