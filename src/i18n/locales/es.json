@@ -353,7 +353,16 @@
         "artistRadioCount_description": "Establece el número de canciones a buscar para la radio de artista y de pista",
         "artistRadioCount": "Recuento de radio de artista/pista",
         "imageResolution": "Resolución de imagen",
-        "imageResolution_description": "La resolución de las imágenes usadas en la aplicación. Usar un valor de 0 lo dejará de forma predeterminada a la resolución nativa de la imagen"
+        "imageResolution_description": "La resolución de las imágenes usadas en la aplicación. Usar un valor de 0 lo dejará de forma predeterminada a la resolución nativa de la imagen",
+        "imageResolution_optionTable": "Tabla",
+        "imageResolution_optionItemCard": "Tarjeta de elemento",
+        "imageResolution_optionSidebar": "Barra lateral",
+        "imageResolution_optionHeader": "Cabecera",
+        "imageResolution_optionFullScreenPlayer": "Reproductor a pantalla completa",
+        "showRatings_description": "Controla si la característica de calificación de estrellas aparece en la interfaz",
+        "showRatings": "Mostrar calificación de estrellas",
+        "combinedLyricsAndVisualizer_description": "Combina letras y visualizador en el mismo panel",
+        "combinedLyricsAndVisualizer": "Combinar letras y visualizador en la barra lateral del reproductor"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist_one)",
@@ -754,7 +763,9 @@
             "recentReleases": "Lanzamientos recientes",
             "viewDiscography": "Ver discografía",
             "about": "Sobre {{artist}}",
-            "appearsOn": "Aparece en"
+            "appearsOn": "Aparece en",
+            "groupingTypeAll": "Todos los tipos de lanzamiento",
+            "groupingTypePrimary": "Tipos de lanzamiento principales"
         },
         "itemDetail": {
             "copiedPath": "Ruta copiada correctamente",
@@ -1105,9 +1116,110 @@
         "matchesRegex": "coincide con expresión regular"
     },
     "datetime": {
-        "minuteShort": "min",
-        "secondShort": "seg",
+        "minuteShort": "m",
+        "secondShort": "s",
         "hourShort": "h",
-        "dayShort": "día"
+        "dayShort": "d"
+    },
+    "visualizer": {
+        "visualizerType": "Tipo de visualizador",
+        "copyConfiguration": "Copiar configuración",
+        "pasteConfiguration": "Pegar configuración",
+        "pasteConfigurationPlaceholder": "Pegar configuración de JSON aquí...",
+        "pasteFromClipboard": "Pegar desde el portapapeles",
+        "applyConfiguration": "Aplicar configuración",
+        "configCopied": "Configuración copiada al portapapeles",
+        "configCopyFailed": "Error al copiar la configuración",
+        "configPasted": "Configuración aplicada con éxito",
+        "configPasteFailed": "Error al aplicar la configuración. Por favor revisa el formato.",
+        "configPasteReadFailed": "Error al leer del portapapeles",
+        "general": "General",
+        "mode": "Modo",
+        "mode1To8": "Modo 1 - 8",
+        "mode10": "Modo 10",
+        "barSpace": "Espacio de barra",
+        "lineWidth": "Ancho de línea",
+        "maxFPS": "FPS máximos",
+        "opacity": "Opacidad",
+        "channelLayout": "Diseño del canal",
+        "fillAlpha": "Rellenar alfa",
+        "customGradients": "Degradados personalizados",
+        "addCustomGradient": "Añadir degradado personalizado",
+        "gradientName": "Nombre del degradado",
+        "gradientNamePlaceholder": "Nombre del degradado",
+        "vertical": "Vertical",
+        "horizontal": "Horizontal",
+        "addColor": "Añadir color",
+        "colorStops": "Paradas de color",
+        "position": "Posición",
+        "level": "Nivel",
+        "remove": "Eliminar",
+        "custom": "Personalizado",
+        "builtIn": "Integrado",
+        "colors": "Colores",
+        "colorMode": "Modo de color",
+        "gradient": "Degradado",
+        "gradientLeft": "Izquierda del degradado",
+        "gradientRight": "Derecha del degradado",
+        "fft": "FFT",
+        "fftSize": "Tamaño del FFT",
+        "smoothing": "Suavizado",
+        "frequencyRangeAndScaling": "Rango de frecuencia y escala",
+        "minimumFrequency": "Frecuencia mínima",
+        "maximumFrequency": "Frecuencia máxima",
+        "frequencyScale": "Escala de frecuencia",
+        "sensitivity": "Sensibilidad",
+        "weightingFilter": "Filtro de ponderación",
+        "minimumDecibels": "Decibelios mínimos",
+        "maximumDecibels": "Decibelios máximos",
+        "linearAmplitude": "Amplitud lineal",
+        "linearBoost": "Aumento lineal",
+        "peakBehavior": "Comportamiento del pico",
+        "showPeaks": "Mostrar picos",
+        "fadePeaks": "Picos desvanecidos",
+        "peakLine": "Línea del pico",
+        "gravity": "Gravedad",
+        "peakFadeTime": "Tiempo de desvanecimiento del pico (ms)",
+        "peakHoldTime": "Tiempo de espera del pico (ms)",
+        "radialSpectrum": "Espectro radial",
+        "radial": "Radial",
+        "radialInvert": "Invertir radial",
+        "spinSpeed": "Velocidad de giro",
+        "radius": "Radio",
+        "reflexMirror": "Espejo del reflejo",
+        "reflexFit": "Ajuste del reflejo",
+        "reflexRatio": "Proporción del reflejo",
+        "reflexAlpha": "Alfa del reflejo",
+        "reflexBrightness": "Brillo del reflejo",
+        "mirror": "Espejo",
+        "miscellaneousSettings": "Miscelánea",
+        "alphaBars": "Barras alfa",
+        "ansiBands": "Bandas ANSI",
+        "ledBars": "Barras LED",
+        "trueLeds": "True LED",
+        "options": {
+            "colorMode": {
+                "gradient": "Degradado"
+            },
+            "gradient": {
+                "classic": "Clásico",
+                "prism": "Prisma",
+                "rainbow": "Arcoíris"
+            },
+            "channelLayout": {
+                "single": "Sencillo"
+            },
+            "frequencyScale": {
+                "linear": "Lineal"
+            },
+            "weightingFilter": {
+                "none": "Ninguno",
+                "a": "A",
+                "b": "B",
+                "c": "C",
+                "d": "D",
+                "z": "Z"
+            }
+        }
     }
 }
