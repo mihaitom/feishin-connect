@@ -225,15 +225,8 @@ export type AlbumArtist = {
     userRating: null | number;
 };
 
-export type Artist = {
+export type Artist = Omit<AlbumArtist, '_itemType'> & {
     _itemType: LibraryItem.ARTIST;
-    _serverId: string;
-    _serverType: ServerType;
-    biography: null | string;
-    createdAt: string;
-    id: string;
-    name: string;
-    updatedAt: string;
 };
 
 export type AuthenticationResponse = {

@@ -232,7 +232,7 @@ const normalizeAlbum = (
         _itemType: LibraryItem.ALBUM,
         _serverId: server?.id || '',
         _serverType: ServerType.JELLYFIN,
-        albumArtistName: item.AlbumArtist || '',
+        albumArtistName: item.AlbumArtist,
         albumArtists:
             item.AlbumArtists.map((entry) => ({
                 id: entry.Id,

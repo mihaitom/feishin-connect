@@ -92,7 +92,7 @@ export const MobilePlayerbar = () => {
                                                 styles.playerbarImage,
                                                 PlaybackSelectors.playerCoverArt,
                                             )}
-                                            id={currentSong.id}
+                                            id={currentSong.imageId}
                                             itemType={LibraryItem.SONG}
                                             loading="eager"
                                         />

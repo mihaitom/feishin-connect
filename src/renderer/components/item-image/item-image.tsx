@@ -31,7 +31,7 @@ const getUnloaderIcon = (itemType: LibraryItem) => {
 };
 
 const BaseItemImage = (
-    props: Omit<ImageProps, 'src'> & {
+    props: Omit<ImageProps, 'id' | 'src'> & {
         id?: null | string;
         itemType: LibraryItem;
         src?: null | string;
@@ -46,13 +46,20 @@ const BaseItemImage = (
         size: 300,
     });
 
-    return <BaseImage src={imageUrl} unloaderIcon={getUnloaderIcon(props.itemType)} {...rest} />;
+    return (
+        <BaseImage
+            src={imageUrl}
+            unloaderIcon={getUnloaderIcon(props.itemType)}
+            {...rest}
+            id={props.id || undefined}
+        />
+    );
 };
 
 export const ItemImage = memo(BaseItemImage);
 
 interface UseItemImageUrlProps {
-    id?: string;
+    id?: null | string;
     imageUrl?: null | string;
     itemType: LibraryItem;
     serverId?: string;
