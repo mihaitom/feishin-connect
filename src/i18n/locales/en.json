@@ -855,6 +855,8 @@
         "minimumScrobbleSeconds": "minimum scrobble (seconds)",
         "mpvExecutablePath_description": "sets the path to the mpv executable. if left empty, the default path will be used",
         "mpvExecutablePath": "mpv executable path",
+        "mpvExtraParameters": "mpv extra parameters",
+        "mpvExtraParameters_description": "extra arguments to pass to mpv",
         "mpvExtraParameters_help": "one per line",
         "musicbrainz_description": "show links to MusicBrainz on artist/album pages, where MusicBrainz ID exists",
         "musicbrainz": "show MusicBrainz links",
