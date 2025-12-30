@@ -1155,6 +1155,8 @@
         "position": "Position",
         "level": "Level",
         "remove": "Remove",
+        "pasteGradient": "Paste Gradient",
+        "pasteGradientPlaceholder": "Paste gradient JSON here...",
         "custom": "Custom",
         "builtIn": "Built-in",
         "colors": "Colors",

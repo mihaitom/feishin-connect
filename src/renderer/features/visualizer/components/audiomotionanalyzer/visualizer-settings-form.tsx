@@ -801,6 +801,7 @@ const PresetSettings = () => {
                             minRows={5}
                             onChange={(e) => setPasteValue(e.currentTarget.value)}
                             placeholder={t('visualizer.pasteConfigurationPlaceholder')}
+                            spellCheck={false}
                             value={pasteValue}
                         />
                         <Group>
@@ -1002,6 +1003,8 @@ const CustomGradientsManager = () => {
     const { updateProperty, visualizer } = useUpdateAudioMotionAnalyzer();
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<null | number>(null);
+    const [isPasting, setIsPasting] = useState(false);
+    const [pasteValue, setPasteValue] = useState('');
     const [newGradient, setNewGradient] = useState<CustomGradient>({
         colorStops: [{ color: '#ff0000', levelEnabled: false, positionEnabled: false }],
         dir: 'v',
@@ -1009,6 +1012,33 @@ const CustomGradientsManager = () => {
     });
 
     const customGradients = visualizer.audiomotionanalyzer.customGradients || [];
+
+    const generateDefaultName = () => {
+        const existingNames = customGradients.map((g) => g.name);
+        const pattern = /^Custom Gradient (\d+)$/i;
+        const numbers = existingNames
+            .map((name) => {
+                const match = name.match(pattern);
+                return match ? parseInt(match[1], 10) : null;
+            })
+            .filter((num): num is number => num !== null);
+
+        if (numbers.length === 0) {
+            return 'Custom Gradient 1';
+        }
+
+        const maxNumber = Math.max(...numbers);
+        return `Custom Gradient ${maxNumber + 1}`;
+    };
+
+    const handleStartAdding = () => {
+        setNewGradient({
+            colorStops: [{ color: '#ff0000', levelEnabled: false, positionEnabled: false }],
+            dir: 'v',
+            name: generateDefaultName(),
+        });
+        setIsAdding(true);
+    };
 
     const handleAddGradient = () => {
         if (!newGradient.name.trim()) return;
@@ -1154,6 +1184,76 @@ const CustomGradientsManager = () => {
         setNewGradient({ ...newGradient, colorStops: updatedColorStops });
     };
 
+    const handleCopyGradient = async (gradient: CustomGradient) => {
+        try {
+            const gradientJson = JSON.stringify(gradient, null, 2);
+            await navigator.clipboard.writeText(gradientJson);
+            toast.success({
+                message: t('visualizer.configCopied'),
+            });
+        } catch {
+            toast.error({
+                message: t('visualizer.configCopyFailed'),
+            });
+        }
+    };
+
+    const handlePasteGradient = () => {
+        if (!pasteValue.trim()) return;
+
+        try {
+            const parsed = JSON.parse(pasteValue.trim());
+
+            // Validate that it's a valid gradient object
+            if (
+                typeof parsed !== 'object' ||
+                parsed === null ||
+                Array.isArray(parsed) ||
+                !parsed.colorStops ||
+                !Array.isArray(parsed.colorStops) ||
+                parsed.colorStops.length === 0
+            ) {
+                throw new Error('Invalid gradient format');
+            }
+
+            // Generate a unique name if the pasted gradient has a name that already exists
+            let gradientName = parsed.name || generateDefaultName();
+            const existingNames = customGradients.map((g) => g.name);
+            if (existingNames.includes(gradientName)) {
+                const pattern = /^(.+?)(\s+\((\d+)\))?$/;
+                const match = gradientName.match(pattern);
+                const baseName = match ? match[1] : gradientName;
+                let counter = 1;
+                while (existingNames.includes(`${baseName} (${counter})`)) {
+                    counter++;
+                }
+                gradientName = `${baseName} (${counter})`;
+            }
+
+            const pastedGradient: CustomGradient = {
+                colorStops: parsed.colorStops.map((stop: any) => ({
+                    color: stop.color || '#ff0000',
+                    level: stop.level,
+                    levelEnabled: stop.levelEnabled || false,
+                    pos: stop.pos,
+                    positionEnabled: stop.positionEnabled || false,
+                })),
+                dir: parsed.dir || 'v',
+                name: gradientName,
+            };
+
+            setNewGradient(pastedGradient);
+            setPasteValue('');
+            setIsPasting(false);
+            setIsAdding(true);
+            setEditingIndex(null);
+        } catch {
+            toast.error({
+                message: t('visualizer.configPasteFailed'),
+            });
+        }
+    };
+
     return (
         <Fieldset
             legend={
@@ -1176,32 +1276,71 @@ const CustomGradientsManager = () => {
                     <Stack gap="sm">
                         {customGradients.map((gradient, index) => (
                             <Group grow key={index}>
-                                <Text size="sm" style={{ flex: 1 }}>
-                                    {gradient.name}
-                                </Text>
-                                <Button
-                                    onClick={() => handleEditGradient(index)}
-                                    size="xs"
-                                    variant="default"
-                                >
-                                    {t('common.edit', { postProcess: 'titleCase' })}
-                                </Button>
-                                <Button
-                                    onClick={() => handleDeleteGradient(index)}
-                                    size="xs"
-                                    variant="subtle"
-                                >
-                                    {t('common.delete', { postProcess: 'titleCase' })}
-                                </Button>
+                                <Group grow>
+                                    <Text size="sm">{gradient.name}</Text>
+                                </Group>
+                                <Group justify="flex-end">
+                                    <Button
+                                        onClick={() => handleCopyGradient(gradient)}
+                                        size="xs"
+                                        variant="subtle"
+                                    >
+                                        {t('visualizer.copyConfiguration')}
+                                    </Button>
+                                    <Button
+                                        onClick={() => handleEditGradient(index)}
+                                        size="xs"
+                                        variant="default"
+                                    >
+                                        {t('common.edit', { postProcess: 'titleCase' })}
+                                    </Button>
+                                    <Button
+                                        onClick={() => handleDeleteGradient(index)}
+                                        size="xs"
+                                        variant="state-error"
+                                    >
+                                        {t('common.delete', { postProcess: 'titleCase' })}
+                                    </Button>
+                                </Group>
                             </Group>
                         ))}
                     </Stack>
                 )}
 
-                {!isAdding ? (
-                    <Button onClick={() => setIsAdding(true)} size="sm" variant="outline">
-                        {t('visualizer.addCustomGradient')}
-                    </Button>
+                {!isAdding && !isPasting ? (
+                    <Group>
+                        <Button onClick={handleStartAdding} size="sm" variant="outline">
+                            {t('visualizer.addCustomGradient')}
+                        </Button>
+                        <Button onClick={() => setIsPasting(true)} size="sm" variant="outline">
+                            {t('visualizer.pasteGradient', { postProcess: 'titleCase' })}
+                        </Button>
+                    </Group>
+                ) : isPasting ? (
+                    <Stack>
+                        <Textarea
+                            autosize
+                            label={t('visualizer.pasteGradient', { postProcess: 'titleCase' })}
+                            maxRows={10}
+                            minRows={5}
+                            onChange={(e) => setPasteValue(e.currentTarget.value)}
+                            placeholder={t('visualizer.pasteGradientPlaceholder')}
+                            spellCheck={false}
+                            value={pasteValue}
+                        />
+                        <Group>
+                            <Button onClick={() => setIsPasting(false)} variant="subtle">
+                                {t('common.cancel', { postProcess: 'titleCase' })}
+                            </Button>
+                            <Button
+                                disabled={!pasteValue.trim()}
+                                onClick={handlePasteGradient}
+                                variant="filled"
+                            >
+                                {t('common.add', { postProcess: 'titleCase' })}
+                            </Button>
+                        </Group>
+                    </Stack>
                 ) : (
                     <>
                         <Divider />
