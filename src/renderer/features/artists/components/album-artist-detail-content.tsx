@@ -38,6 +38,7 @@ import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
     ArtistItem,
+    ArtistReleaseTypeItem,
     useAppStore,
     useCurrentServer,
     useCurrentServerId,
@@ -998,8 +999,30 @@ const groupAlbumsByReleaseType = (
     return grouped;
 };
 
+const releaseTypeToEnumMap: Record<string, ArtistReleaseTypeItem> = {
+    album: ArtistReleaseTypeItem.RELEASE_TYPE_ALBUM,
+    'appears-on': ArtistReleaseTypeItem.APPEARS_ON,
+    audiobook: ArtistReleaseTypeItem.RELEASE_TYPE_AUDIOBOOK,
+    'audio drama': ArtistReleaseTypeItem.RELEASE_TYPE_AUDIO_DRAMA,
+    broadcast: ArtistReleaseTypeItem.RELEASE_TYPE_BROADCAST,
+    compilation: ArtistReleaseTypeItem.RELEASE_TYPE_COMPILATION,
+    demo: ArtistReleaseTypeItem.RELEASE_TYPE_DEMO,
+    'dj-mix': ArtistReleaseTypeItem.RELEASE_TYPE_DJ_MIX,
+    ep: ArtistReleaseTypeItem.RELEASE_TYPE_EP,
+    'field recording': ArtistReleaseTypeItem.RELEASE_TYPE_FIELD_RECORDING,
+    interview: ArtistReleaseTypeItem.RELEASE_TYPE_INTERVIEW,
+    live: ArtistReleaseTypeItem.RELEASE_TYPE_LIVE,
+    'mixtape/street': ArtistReleaseTypeItem.RELEASE_TYPE_MIXTAPE_STREET,
+    other: ArtistReleaseTypeItem.RELEASE_TYPE_OTHER,
+    remix: ArtistReleaseTypeItem.RELEASE_TYPE_REMIX,
+    single: ArtistReleaseTypeItem.RELEASE_TYPE_SINGLE,
+    soundtrack: ArtistReleaseTypeItem.RELEASE_TYPE_SOUNDTRACK,
+    spokenword: ArtistReleaseTypeItem.RELEASE_TYPE_SPOKENWORD,
+};
+
 const ArtistAlbums = () => {
     const { t } = useTranslation();
+    const { artistReleaseTypeItems } = useGeneralSettings();
     const serverId = useCurrentServerId();
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
@@ -1042,21 +1065,33 @@ const ArtistAlbums = () => {
     }, [filteredAndSortedAlbums, routeId, groupingType]);
 
     const releaseTypeEntries = useMemo(() => {
-        const priorityOrder = [
-            'album',
-            'ep',
-            'single',
-            'broadcast',
-            'other',
-            'compilation',
-            'appears-on',
-        ];
+        const enabledReleaseTypeEnums = new Set(
+            artistReleaseTypeItems.filter((item) => !item.disabled).map((item) => item.id),
+        );
+
+        const priorityMap = new Map<string, number>();
+        artistReleaseTypeItems
+            .filter((item) => !item.disabled)
+            .forEach((item, index) => {
+                const releaseTypeKey = Object.keys(releaseTypeToEnumMap).find(
+                    (key) => releaseTypeToEnumMap[key] === item.id,
+                );
+                if (releaseTypeKey) {
+                    priorityMap.set(releaseTypeKey, index);
+                }
+            });
+
         const getPriority = (releaseType: string) => {
-            const index = priorityOrder.indexOf(releaseType);
-            return index === -1 ? 999 : index;
+            return priorityMap.get(releaseType) ?? 999;
+        };
+
+        const isReleaseTypeEnabled = (releaseType: string): boolean => {
+            const enumValue = releaseTypeToEnumMap[releaseType];
+            return enumValue ? enabledReleaseTypeEnums.has(enumValue) : false;
         };
 
         return Object.entries(albumsByReleaseType)
+            .filter(([releaseType]) => isReleaseTypeEnabled(releaseType))
             .map(([releaseType, albums]) => {
                 let displayName: React.ReactNode | string;
                 switch (releaseType) {
@@ -1156,7 +1191,7 @@ const ArtistAlbums = () => {
                 return { albums, displayName, releaseType };
             })
             .sort((a, b) => getPriority(a.releaseType) - getPriority(b.releaseType));
-    }, [albumsByReleaseType, t]);
+    }, [albumsByReleaseType, artistReleaseTypeItems, t]);
 
     const cq = useContainerQuery({
         '2xl': 1280,

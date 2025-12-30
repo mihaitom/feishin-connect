@@ -7,7 +7,10 @@ import { useTranslation } from 'react-i18next';
 
 import i18n, { languages } from '/@/i18n/i18n';
 import { ImageResolutionSettings } from '/@/renderer/features/settings/components/general/art-resolution-settings';
-import { ArtistSettings } from '/@/renderer/features/settings/components/general/artist-settings';
+import {
+    ArtistReleaseTypeSettings,
+    ArtistSettings,
+} from '/@/renderer/features/settings/components/general/artist-settings';
 import { HomeSettings } from '/@/renderer/features/settings/components/general/home-settings';
 import {
     SettingOption,
@@ -606,6 +609,7 @@ export const ApplicationSettings = () => {
                     <ImageResolutionSettings />
                     <HomeSettings />
                     <ArtistSettings />
+                    <ArtistReleaseTypeSettings />
                 </>
             }
             options={options}
