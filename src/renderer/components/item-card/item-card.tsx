@@ -16,6 +16,7 @@ import {
     useItemSelectionState,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { ItemControls } from '/@/renderer/components/item-list/types';
+import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useGeneralSettings } from '/@/renderer/store';
@@ -953,21 +954,14 @@ export const getDataRows = (): DataRow[] => {
         {
             format: (data) => {
                 if ('albumArtists' in data && Array.isArray(data.albumArtists)) {
-                    return (data as Album | Song).albumArtists.map((artist, index) => (
-                        <Fragment key={artist.id}>
-                            <Link
-                                state={{ item: artist }}
-                                to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
-                                    albumArtistId: artist.id,
-                                })}
-                            >
-                                {artist.name}
-                            </Link>
-                            {index < (data as Album | Song).albumArtists.length - 1 && (
-                                <Separator />
-                            )}
-                        </Fragment>
-                    ));
+                    return (
+                        <JoinedArtists
+                            artistName={data.albumArtistName}
+                            artists={data.albumArtists}
+                            linkProps={{ fw: 400, isMuted: true }}
+                            rootTextProps={{ fw: 400, isMuted: true, size: 'sm' }}
+                        />
+                    );
                 }
                 return '';
             },

@@ -2,33 +2,43 @@ import { Fragment } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import { AppRoute } from '/@/renderer/router/routes';
-import { Group } from '/@/shared/components/group/group';
-import { Separator } from '/@/shared/components/separator/separator';
-import { Text } from '/@/shared/components/text/text';
-import { AlbumArtist, RelatedArtist } from '/@/shared/types/domain-types';
+import { Text, TextProps } from '/@/shared/components/text/text';
+import { AlbumArtist, RelatedAlbumArtist, RelatedArtist } from '/@/shared/types/domain-types';
 
-interface JoinedAlbumArtistProps {
-    albumArtist: string;
-    albumArtists: AlbumArtist[] | RelatedArtist[];
+interface JoinedArtistsProps {
+    artistName: string;
+    artists: AlbumArtist[] | RelatedAlbumArtist[] | RelatedArtist[];
+    linkProps?: Partial<Omit<TextProps, 'children' | 'component' | 'to'>>;
+    rootTextProps?: Partial<Omit<TextProps, 'children' | 'component'>>;
 }
 
-export const JoinedAlbumArtist = ({ albumArtist, albumArtists }: JoinedAlbumArtistProps) => {
+export const JoinedArtists = ({
+    artistName,
+    artists,
+    linkProps,
+    rootTextProps,
+}: JoinedArtistsProps) => {
     const parts: (
         | string
-        | { artist: AlbumArtist | RelatedArtist; end: number; start: number; text: string }
+        | {
+              artist: AlbumArtist | RelatedAlbumArtist | RelatedArtist;
+              end: number;
+              start: number;
+              text: string;
+          }
     )[] = [];
     const matches: Array<{
-        artist: AlbumArtist | RelatedArtist;
+        artist: AlbumArtist | RelatedAlbumArtist | RelatedArtist;
         end: number;
         name: string;
         start: number;
     }> = [];
 
-    for (const artist of albumArtists) {
+    for (const artist of artists) {
         const name = artist.name;
         const regex = new RegExp(escapeRegex(name), 'gi');
         let match: null | RegExpExecArray = null;
-        while ((match = regex.exec(albumArtist)) !== null) {
+        while ((match = regex.exec(artistName)) !== null) {
             matches.push({
                 artist,
                 end: match.index + match[0].length,
@@ -63,7 +73,7 @@ export const JoinedAlbumArtist = ({ albumArtist, albumArtists }: JoinedAlbumArti
     let lastIndex = 0;
     for (const match of nonOverlappingMatches) {
         if (match.start > lastIndex) {
-            parts.push(albumArtist.substring(lastIndex, match.start));
+            parts.push(artistName.substring(lastIndex, match.start));
         }
 
         parts.push({
@@ -76,19 +86,19 @@ export const JoinedAlbumArtist = ({ albumArtist, albumArtists }: JoinedAlbumArti
         lastIndex = match.end;
     }
 
-    if (lastIndex < albumArtist.length) {
-        parts.push(albumArtist.substring(lastIndex));
+    if (lastIndex < artistName?.length) {
+        parts.push(artistName.substring(lastIndex));
     }
 
     const hasArtistMatches = parts.some((part) => typeof part !== 'string');
 
     // If no matches found and there are album artists, return the album artists
-    if (!hasArtistMatches && albumArtists.length > 0) {
+    if (!hasArtistMatches && artists.length > 0) {
         return (
-            <Group gap="xs">
-                {albumArtists.map((artist, index) => (
+            <Text component="span" {...rootTextProps}>
+                {artists.map((artist, index) => (
                     <Fragment key={artist.id}>
-                        {index > 0 && <Separator />}
+                        {index > 0 && ', '}
                         <Text
                             component={Link}
                             fw={600}
@@ -96,26 +106,27 @@ export const JoinedAlbumArtist = ({ albumArtist, albumArtists }: JoinedAlbumArti
                             to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
                                 albumArtistId: artist.id,
                             })}
+                            {...linkProps}
                         >
                             {artist.name}
                         </Text>
                     </Fragment>
                 ))}
-            </Group>
+            </Text>
         );
     }
 
     // If no matches found and no albumArtists, return the original string
     if (!hasArtistMatches) {
         return (
-            <Text fw={400} isNoSelect>
-                {albumArtist}
+            <Text fw={400} isNoSelect {...rootTextProps}>
+                {artistName}
             </Text>
         );
     }
 
     return (
-        <Text component="span" fw={400}>
+        <Text component="span" fw={400} {...rootTextProps}>
             {parts.map((part, index) => {
                 if (typeof part === 'string') {
                     return <Fragment key={index}>{part}</Fragment>;
@@ -131,6 +142,7 @@ export const JoinedAlbumArtist = ({ albumArtist, albumArtists }: JoinedAlbumArti
                         to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
                             albumArtistId: artist.id,
                         })}
+                        {...linkProps}
                     >
                         {text}
                     </Text>

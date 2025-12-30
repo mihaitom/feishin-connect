@@ -377,7 +377,7 @@ export const AlbumDetailContent = () => {
                         <AlbumMetadataGenres genres={detailQuery?.data?.genres} />
                         <AlbumMetadataTags album={detailQuery?.data} />
                         <AlbumMetadataExternalLinks
-                            albumArtist={detailQuery?.data?.albumArtist}
+                            albumArtist={detailQuery?.data?.albumArtistName}
                             albumName={detailQuery?.data?.name}
                             externalLinks={externalLinks}
                             lastFM={lastFM}

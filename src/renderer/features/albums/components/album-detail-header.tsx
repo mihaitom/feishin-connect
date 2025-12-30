@@ -7,7 +7,7 @@ import styles from './album-detail-header.module.css';
 
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
-import { JoinedAlbumArtist } from '/@/renderer/features/albums/components/joined-album-artist';
+import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import {
@@ -214,9 +214,9 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
                         ))}
                     </Group>
                     <Group className={styles.metadataGroup}>
-                        <JoinedAlbumArtist
-                            albumArtist={detailQuery?.data?.albumArtist || ''}
-                            albumArtists={detailQuery?.data?.albumArtists || []}
+                        <JoinedArtists
+                            artistName={detailQuery?.data?.albumArtistName || ''}
+                            artists={detailQuery?.data?.albumArtists || []}
                         />
                     </Group>
                     <LibraryHeaderMenu

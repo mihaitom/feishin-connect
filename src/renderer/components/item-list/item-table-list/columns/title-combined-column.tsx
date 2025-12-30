@@ -1,6 +1,6 @@
 import clsx from 'clsx';
-import { CSSProperties, useMemo, useState } from 'react';
-import { generatePath, Link } from 'react-router';
+import { CSSProperties, useState } from 'react';
+import { Link } from 'react-router';
 
 import styles from './title-combined-column.module.css';
 
@@ -12,16 +12,16 @@ import {
     ItemTableListInnerColumn,
     TableColumnContainer,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
+import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { PlayButton } from '/@/renderer/features/shared/components/play-button';
 import {
     LONG_PRESS_PLAY_BEHAVIOR,
     PlayTooltip,
 } from '/@/renderer/features/shared/components/play-button-group';
-import { AppRoute } from '/@/renderer/router/routes';
 import { usePlayButtonBehavior } from '/@/renderer/store';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Text } from '/@/shared/components/text/text';
-import { Folder, LibraryItem, QueueSong, RelatedAlbumArtist } from '/@/shared/types/domain-types';
+import { Folder, LibraryItem, QueueSong } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
 export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
@@ -72,18 +72,6 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
             playType,
         });
     };
-
-    const artists = useMemo(() => {
-        if (row && 'artists' in item && Array.isArray(item.artists)) {
-            return (item.artists as RelatedAlbumArtist[]).map((artist) => {
-                const path = generatePath(AppRoute.LIBRARY_ARTISTS_DETAIL, {
-                    artistId: artist.id,
-                });
-                return { ...artist, path };
-            });
-        }
-        return [];
-    }, [item, row]);
 
     if (item && 'name' in item && 'imageUrl' in item && 'artists' in item) {
         const rowHeight = props.getRowHeight(props.rowIndex, props);
@@ -146,22 +134,12 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
                         {item.name as string}
                     </Text>
                     <div className={styles.artists}>
-                        {artists.map((artist, index) => (
-                            <span key={artist.id}>
-                                <Text
-                                    component={Link}
-                                    isLink
-                                    isMuted
-                                    isNoSelect
-                                    size="sm"
-                                    state={{ item: artist }}
-                                    to={artist.path}
-                                >
-                                    {artist.name}
-                                </Text>
-                                {index < artists.length - 1 && ', '}
-                            </span>
-                        ))}
+                        <JoinedArtists
+                            artistName={item.albumArtist}
+                            artists={item.albumArtists}
+                            linkProps={{ fw: 400, isMuted: true }}
+                            rootTextProps={{ fw: 400, isMuted: true, size: 'sm' }}
+                        />
                     </div>
                 </div>
             </TableColumnContainer>
@@ -228,18 +206,6 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
             playType,
         });
     };
-
-    const artists = useMemo(() => {
-        if (row && 'artists' in row && Array.isArray(row.artists)) {
-            return (row.artists as RelatedAlbumArtist[]).map((artist) => {
-                const path = generatePath(AppRoute.LIBRARY_ARTISTS_DETAIL, {
-                    artistId: artist.id,
-                });
-                return { ...artist, path };
-            });
-        }
-        return [];
-    }, [row]);
 
     if (row && 'name' in row && 'imageUrl' in row && 'artists' in row) {
         const rowHeight = props.getRowHeight(props.rowIndex, props);
@@ -310,22 +276,12 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
                         {row.name as string}
                     </Text>
                     <div className={styles.artists}>
-                        {artists.map((artist, index) => (
-                            <span key={artist.id}>
-                                <Text
-                                    component={Link}
-                                    isLink
-                                    isMuted
-                                    isNoSelect
-                                    size="sm"
-                                    state={{ item: artist }}
-                                    to={artist.path}
-                                >
-                                    {artist.name}
-                                </Text>
-                                {index < artists.length - 1 && ', '}
-                            </span>
-                        ))}
+                        <JoinedArtists
+                            artistName={item.artistName}
+                            artists={item.artists}
+                            linkProps={{ fw: 400, isMuted: true }}
+                            rootTextProps={{ fw: 400, isMuted: true, size: 'sm' }}
+                        />
                     </div>
                 </div>
             </TableColumnContainer>

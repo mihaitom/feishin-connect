@@ -171,7 +171,7 @@ export type Album = {
     _itemType: LibraryItem.ALBUM;
     _serverId: string;
     _serverType: ServerType;
-    albumArtist: string;
+    albumArtistName: string;
     albumArtists: RelatedArtist[];
     artists: RelatedArtist[];
     comment: null | string;
@@ -366,6 +366,7 @@ export type Song = {
     _serverId: string;
     _serverType: ServerType;
     album: null | string;
+    albumArtistName: string;
     albumArtists: RelatedArtist[];
     albumId: string;
     artistName: string;
