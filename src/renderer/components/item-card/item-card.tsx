@@ -328,7 +328,7 @@ const CompactItemCard = ({
                             internalState={internalState}
                             item={data}
                             itemType={itemType}
-                            showRating={hasRating}
+                            showRating={showRating}
                             type="compact"
                         />
                     )}
