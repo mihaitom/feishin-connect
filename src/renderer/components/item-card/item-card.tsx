@@ -1105,7 +1105,7 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
         {
             format: (data) => {
                 if ('albumCount' in data && data.albumCount !== null) {
-                    return String(data.albumCount);
+                    return i18n.t('entity.albumWithCount', { count: data.albumCount });
                 }
                 return '';
             },
