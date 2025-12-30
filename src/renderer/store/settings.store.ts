@@ -17,6 +17,7 @@ import {
     PLAYLIST_TABLE_COLUMNS,
     SONG_TABLE_COLUMNS,
 } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import { audiomotionanalyzerPresets } from '/@/renderer/features/visualizer/components/audiomotionanalyzer/presets';
 import { AppRoute } from '/@/renderer/router/routes';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
 import { FontValueSchema } from '/@/renderer/types/fonts';
@@ -1521,7 +1522,7 @@ const initialState: SettingsState = {
             peakFadeTime: 900,
             peakHoldTime: 500,
             peakLine: true,
-            presets: [],
+            presets: audiomotionanalyzerPresets,
             radial: false,
             radialInvert: false,
             radius: 0.7,
