@@ -226,6 +226,19 @@ const normalizeAlbumArtist = (
     };
 };
 
+const PRIMARY_RELEASE_TYPES = ['album', 'ep', 'single', 'broadcast', 'other'];
+
+const getReleaseType = (
+    item: z.infer<typeof ssType._response.album> | z.infer<typeof ssType._response.albumListEntry>,
+) => {
+    if (!item.releaseTypes) {
+        return null;
+    }
+
+    // Return the first primary release type
+    return item.releaseTypes.find((type) => PRIMARY_RELEASE_TYPES.includes(type)) || null;
+};
+
 const normalizeAlbum = (
     item: z.infer<typeof ssType._response.album> | z.infer<typeof ssType._response.albumListEntry>,
     server?: null | ServerListItemWithCredential,
@@ -269,6 +282,7 @@ const normalizeAlbum = (
                       item.releaseDate.day,
                   ).toISOString()
                 : null,
+        releaseType: getReleaseType(item),
         releaseTypes: item.releaseTypes || [],
         releaseYear: item.year || null,
         size: null,

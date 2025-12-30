@@ -91,11 +91,13 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
         type: 'header',
     });
 
+    const releaseType = detailQuery?.data?.releaseType || undefined;
+
     return (
         <Stack ref={ref}>
             <LibraryHeader
                 imageUrl={imageUrl}
-                item={{ route: AppRoute.LIBRARY_ALBUMS, type: LibraryItem.ALBUM }}
+                item={{ releaseType, route: AppRoute.LIBRARY_ALBUMS, type: LibraryItem.ALBUM }}
                 title={detailQuery?.data?.name || ''}
             >
                 <Stack gap="md" w="100%">

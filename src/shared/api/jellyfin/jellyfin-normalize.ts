@@ -279,6 +279,7 @@ const normalizeAlbum = (
         playCount: item.UserData?.PlayCount || 0,
         recordLabels: item.Studios?.map((entry) => entry.Name) || [],
         releaseDate: item.PremiereDate || null,
+        releaseType: null,
         releaseTypes: [],
         releaseYear: item.ProductionYear || null,
         size: null,

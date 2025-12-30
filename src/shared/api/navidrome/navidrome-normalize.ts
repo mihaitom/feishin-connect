@@ -304,6 +304,7 @@ const normalizeAlbum = (
         originalDate: item.originalDate || null,
         playCount: item.playCount || 0,
         releaseDate: normalizeReleaseDate(item),
+        releaseType: item.mbzAlbumType || null,
         releaseYear: item.maxYear || null,
         size: item.size,
         songCount: item.songCount,

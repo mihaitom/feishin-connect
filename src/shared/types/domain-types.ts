@@ -191,6 +191,7 @@ export type Album = {
     playCount: null | number;
     recordLabels: string[];
     releaseDate: null | string;
+    releaseType: null | string;
     releaseTypes: string[];
     releaseYear: null | number;
     size: null | number;
