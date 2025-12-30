@@ -17,7 +17,6 @@ import { usePlayButtonClick } from '/@/renderer/features/shared/hooks/use-play-b
 import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { useIsMutatingRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
-import { titleCase } from '/@/renderer/utils';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
@@ -35,7 +34,7 @@ interface LibraryHeaderProps {
     containerClassName?: string;
     imagePlaceholderUrl?: null | string;
     imageUrl?: null | string;
-    item: { releaseType?: string; route: string; type?: LibraryItem };
+    item: { children?: ReactNode; route: string; type?: LibraryItem };
     loading?: boolean;
     title: string;
 }
@@ -53,85 +52,6 @@ export const LibraryHeader = forwardRef(
         };
 
         const itemTypeString = (): string => {
-            if (item.releaseType) {
-                switch (item.releaseType) {
-                    case 'album':
-                        return t('releaseType.primary.album', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'appears-on':
-                        return t('page.albumArtistDetail.appearsOn', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'audiobook':
-                        return t('releaseType.secondary.audiobook', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'audio drama':
-                        return t('releaseType.secondary.audioDrama', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'broadcast':
-                        return t('releaseType.primary.broadcast', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'compilation':
-                        return t('releaseType.secondary.compilation', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'demo':
-                        return t('releaseType.secondary.demo', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'dj-mix':
-                        return t('releaseType.secondary.djMix', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'ep':
-                        return t('releaseType.primary.ep', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'field recording':
-                        return t('releaseType.secondary.fieldRecording', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'interview':
-                        return t('releaseType.secondary.interview', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'live':
-                        return t('releaseType.secondary.live', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'mixtape/street':
-                        return t('releaseType.secondary.mixtape', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'other':
-                        return t('releaseType.primary.other', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'remix':
-                        return t('releaseType.secondary.remix', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'single':
-                        return t('releaseType.primary.single', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'soundtrack':
-                        return t('releaseType.secondary.soundtrack', {
-                            postProcess: 'sentenceCase',
-                        });
-                    case 'spokenword':
-                        return t('releaseType.secondary.spokenWord', {
-                            postProcess: 'sentenceCase',
-                        });
-                    default:
-                        return titleCase(item.releaseType);
-                }
-            }
-
             switch (item.type) {
                 case LibraryItem.ALBUM:
                     return t('entity.album', { count: 1 });
@@ -203,18 +123,22 @@ export const LibraryHeader = forwardRef(
                 </div>
                 {title && (
                     <div className={styles.metadataSection}>
-                        <Text
-                            className={styles.itemType}
-                            component={Link}
-                            fw={600}
-                            isLink
-                            size="md"
-                            style={{}}
-                            to={item.route}
-                            tt="uppercase"
-                        >
-                            {itemTypeString()}
-                        </Text>
+                        {item.children ? (
+                            <div className={styles.itemType}>{item.children}</div>
+                        ) : (
+                            <Text
+                                className={styles.itemType}
+                                component={Link}
+                                fw={600}
+                                isLink
+                                size="md"
+                                to={item.route}
+                                tt="uppercase"
+                            >
+                                {itemTypeString()}
+                            </Text>
+                        )}
+
                         <h1
                             className={styles.title}
                             style={{
