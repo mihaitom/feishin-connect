@@ -141,7 +141,12 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
     return (
         <LibraryHeader
             imageUrl={selectedImageUrl}
-            item={{ route: AppRoute.LIBRARY_ALBUM_ARTISTS, type: LibraryItem.ALBUM_ARTIST }}
+            item={{
+                imageId: detailQuery.data?.imageId,
+                imageUrl: detailQuery.data?.imageUrl,
+                route: AppRoute.LIBRARY_ALBUM_ARTISTS,
+                type: LibraryItem.ALBUM_ARTIST,
+            }}
             ref={ref}
             title={detailQuery.data?.name || ''}
         >

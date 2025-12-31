@@ -91,12 +91,6 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
     const releaseYear = detailQuery?.data?.releaseYear;
     const releaseDate = detailQuery?.data?.releaseDate;
 
-    const imageUrl = useItemImageUrl({
-        id: detailQuery?.data?.imageId || undefined,
-        itemType: LibraryItem.ALBUM,
-        type: 'header',
-    });
-
     const metadataItems = useMemo(() => {
         const items: Array<{ id: string; value: React.ReactNode | string | undefined }> = [];
 
@@ -192,9 +186,10 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
     return (
         <Stack ref={ref}>
             <LibraryHeader
-                imageUrl={imageUrl}
                 item={{
                     children: headerItem,
+                    imageId: detailQuery?.data?.imageId,
+                    imageUrl: detailQuery?.data?.imageUrl,
                     route: AppRoute.LIBRARY_ALBUMS,
                     type: LibraryItem.ALBUM,
                 }}

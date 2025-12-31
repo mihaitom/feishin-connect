@@ -6,6 +6,7 @@ import { Link } from 'react-router';
 
 import styles from './library-header.module.css';
 
+import { ItemImage } from '/@/renderer/components/item-image/item-image';
 import { useIsPlayerFetching } from '/@/renderer/features/player/context/player-context';
 import {
     PlayLastTextButton,
@@ -22,7 +23,6 @@ import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
-import { Image } from '/@/shared/components/image/image';
 import { Rating } from '/@/shared/components/rating/rating';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
@@ -34,7 +34,13 @@ interface LibraryHeaderProps {
     containerClassName?: string;
     imagePlaceholderUrl?: null | string;
     imageUrl?: null | string;
-    item: { children?: ReactNode; route: string; type?: LibraryItem };
+    item: {
+        children?: ReactNode;
+        imageId?: null | string;
+        imageUrl?: null | string;
+        route: string;
+        type?: LibraryItem;
+    };
     loading?: boolean;
     title: string;
 }
@@ -110,12 +116,9 @@ export const LibraryHeader = forwardRef(
                     tabIndex={0}
                 >
                     {!isImageError && (
-                        <Image
-                            alt="cover"
-                            className={styles.image}
-                            containerClassName={styles.image}
-                            key={imageUrl}
-                            loading="eager"
+                        <ItemImage
+                            id={item.imageId}
+                            itemType={item.type as LibraryItem}
                             onError={onImageError}
                             src={imageUrl || ''}
                         />
