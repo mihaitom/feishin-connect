@@ -390,6 +390,7 @@ const PresetSettings = () => {
     const { setSettings } = useSettingsStoreActions();
     const [selectedPreset, setSelectedPreset] = useState<null | string>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isRenaming, setIsRenaming] = useState(false);
     const [newPresetName, setNewPresetName] = useState('');
     const [isPasting, setIsPasting] = useState(false);
     const [pasteValue, setPasteValue] = useState('');
@@ -584,12 +585,33 @@ const PresetSettings = () => {
     };
 
     const handleUpdatePreset = () => {
-        if (!selectedPreset) return;
+        if (!selectedPreset || !newPresetName.trim()) return;
+
+        let trimmedName = newPresetName.trim();
+        const isRenaming = trimmedName !== selectedPreset;
+
+        if (isRenaming) {
+            const existingNames = visualizer.audiomotionanalyzer.presets
+                .filter((p) => p.name !== selectedPreset)
+                .map((p) => p.name);
+
+            if (existingNames.includes(trimmedName)) {
+                const pattern = /^(.+?)(\s+\((\d+)\))?$/;
+                const match = trimmedName.match(pattern);
+                const baseName = match ? match[1] : trimmedName;
+                let counter = 1;
+                while (existingNames.includes(`${baseName} (${counter})`)) {
+                    counter++;
+                }
+                trimmedName = `${baseName} (${counter})`;
+            }
+        }
 
         const updatedPresets = visualizer.audiomotionanalyzer.presets.map((p) =>
             p.name === selectedPreset
                 ? {
                       ...p,
+                      name: trimmedName,
                       value: getCurrentSettingsAsPresetValue(),
                   }
                 : p,
@@ -604,6 +626,10 @@ const PresetSettings = () => {
                 },
             },
         });
+
+        setNewPresetName('');
+        setIsRenaming(false);
+        setSelectedPreset(trimmedName);
     };
 
     const handleDeletePreset = () => {
@@ -792,6 +818,36 @@ const PresetSettings = () => {
                             </Button>
                         </Group>
                     </Group>
+                ) : isRenaming ? (
+                    <Group grow>
+                        <TextInput
+                            autoFocus
+                            label={t('visualizer.presetName')}
+                            onChange={(e) => setNewPresetName(e.currentTarget.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleUpdatePreset();
+                                } else if (e.key === 'Escape') {
+                                    setIsRenaming(false);
+                                    setNewPresetName('');
+                                }
+                            }}
+                            placeholder={t('visualizer.presetNamePlaceholder')}
+                            value={newPresetName}
+                        />
+                        <Group style={{ alignSelf: 'flex-end' }}>
+                            <Button onClick={() => setIsRenaming(false)} variant="subtle">
+                                {t('common.cancel', { postProcess: 'titleCase' })}
+                            </Button>
+                            <Button
+                                disabled={!newPresetName.trim()}
+                                onClick={handleUpdatePreset}
+                                variant="filled"
+                            >
+                                {t('common.save', { postProcess: 'titleCase' })}
+                            </Button>
+                        </Group>
+                    </Group>
                 ) : isPasting ? (
                     <Stack>
                         <Textarea
@@ -827,7 +883,13 @@ const PresetSettings = () => {
                         </Button>
                         {selectedPreset && (
                             <>
-                                <Button onClick={handleUpdatePreset} variant="default">
+                                <Button
+                                    onClick={() => {
+                                        setNewPresetName(selectedPreset);
+                                        setIsRenaming(true);
+                                    }}
+                                    variant="default"
+                                >
                                     {t('visualizer.updatePreset')}
                                 </Button>
                                 <Button onClick={handleDeletePreset} variant="subtle">
