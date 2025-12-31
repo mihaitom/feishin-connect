@@ -316,15 +316,13 @@ export const SubsonicController: InternalControllerEndpoint = {
             results = searchResults;
         }
 
-        if (query.sortBy) {
-            results = sortAlbumArtistList(results, query.sortBy, query.sortOrder);
-        }
-
-        return {
-            items: results,
+        return sortAndPaginate(results, {
+            limit: query.limit,
+            sortBy: query.sortBy,
+            sortFn: query.sortBy ? sortAlbumArtistList : undefined,
+            sortOrder: query.sortOrder,
             startIndex: query.startIndex,
-            totalRecordCount: artists.length,
-        };
+        });
     },
     getAlbumArtistListCount: (args) =>
         SubsonicController.getAlbumArtistList({
