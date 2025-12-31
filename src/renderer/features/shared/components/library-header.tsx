@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 
 import styles from './library-header.module.css';
 
-import { ItemImage } from '/@/renderer/components/item-image/item-image';
+import { getItemImageUrl, ItemImage } from '/@/renderer/components/item-image/item-image';
 import { useIsPlayerFetching } from '/@/renderer/features/player/context/player-context';
 import {
     PlayLastTextButton,
@@ -23,6 +23,7 @@ import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { BaseImage } from '/@/shared/components/image/image';
 import { Rating } from '/@/shared/components/rating/rating';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
@@ -75,39 +76,57 @@ export const LibraryHeader = forwardRef(
         };
 
         const openImage = useCallback(() => {
-            if (imageUrl && !isImageError) {
-                const fullSized = imageUrl.replace(/&?(size|width|height)=\d+/, '');
+            const imageId = item.imageId;
+            const itemType = item.type as LibraryItem;
 
-                openModal({
-                    children: (
-                        <Center
-                            onClick={() => closeAllModals()}
-                            style={{
-                                cursor: 'pointer',
-                                height: 'calc(100vh - 80px)',
-                                width: '100%',
-                            }}
-                        >
-                            <img
-                                alt="cover"
-                                src={fullSized}
-                                style={{
-                                    maxHeight: '100%',
-                                    maxWidth: '100%',
-                                }}
-                            />
-                        </Center>
-                    ),
-                    fullScreen: true,
-                });
+            if (!imageId || !itemType) {
+                return;
             }
-        }, [imageUrl, isImageError]);
+
+            const imageUrl = getItemImageUrl({
+                id: imageId,
+                itemType,
+            });
+
+            if (!imageUrl) {
+                console.error('No image URL found');
+                return;
+            }
+
+            openModal({
+                children: (
+                    <Center
+                        onClick={() => closeAllModals()}
+                        style={{
+                            cursor: 'pointer',
+                            height: 'calc(100vh - 80px)',
+                            width: '100%',
+                        }}
+                    >
+                        <BaseImage
+                            alt="cover"
+                            src={imageUrl}
+                            style={{
+                                maxHeight: '100%',
+                                maxWidth: '100%',
+                                objectFit: 'contain',
+                            }}
+                            unloaderIcon="emptyImage"
+                        />
+                    </Center>
+                ),
+                fullScreen: true,
+            });
+        }, [item.imageId, item.type]);
 
         return (
             <div className={clsx(styles.libraryHeader, containerClassName)} ref={ref}>
                 <div
                     className={styles.imageSection}
-                    onClick={() => openImage()}
+                    onClick={() => {
+                        console.log('openImage');
+                        openImage();
+                    }}
                     onKeyDown={(event) =>
                         [' ', 'Enter', 'Spacebar'].includes(event.key) && openImage()
                     }
