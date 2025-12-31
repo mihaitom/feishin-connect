@@ -103,7 +103,7 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true, settingsKey = 'default' 
     const clearedOverrideRef = useRef<string | undefined>(undefined);
 
     // Fetch remote lyrics automatically (but not if we've explicitly cleared the override)
-    const { data: remoteLyricsData } = useQuery(
+    const { data: remoteLyricsData, isInitialLoading: isRemoteLyricsLoading } = useQuery(
         lyricsQueries.remoteLyrics(
             {
                 options: {
@@ -397,7 +397,31 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true, settingsKey = 'default' 
         return [];
     }, [data]);
 
-    const isLoadingLyrics = isInitialLoading || isOverrideLoading;
+    const shouldShowRemoteLoading = useMemo(() => {
+        if (!isRemoteLyricsLoading) {
+            return false;
+        }
+
+        // If preferLocalLyrics is disabled, always show remote loading
+        if (!preferLocalLyrics) {
+            return true;
+        }
+
+        // If preferLocalLyrics is enabled, only show remote loading if:
+        // - Local lyrics have finished loading (!isInitialLoading)
+        // - No local lyrics are available
+        if (isInitialLoading) return false;
+
+        // Check if local lyrics are available
+        const hasLocalLyrics =
+            (Array.isArray(data) && data.length > 0) ||
+            (data && !Array.isArray(data) && data.lyrics);
+
+        // Show remote loading only if no local lyrics are available
+        return !hasLocalLyrics;
+    }, [isRemoteLyricsLoading, preferLocalLyrics, data, isInitialLoading]);
+
+    const isLoadingLyrics = isInitialLoading || isOverrideLoading || shouldShowRemoteLoading;
 
     const hasNoLyrics = !lyrics;
     const [shouldFadeOut, setShouldFadeOut] = useState(false);
