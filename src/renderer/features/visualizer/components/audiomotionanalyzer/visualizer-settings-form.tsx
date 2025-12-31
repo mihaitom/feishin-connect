@@ -431,6 +431,7 @@ const PresetSettings = () => {
             mirror: 0.0,
             mode: 0,
             noteLabels: false,
+            opacity: 1,
             outlineBars: false,
             peakFadeTime: 750,
             peakHoldTime: 500,
@@ -537,6 +538,7 @@ const PresetSettings = () => {
             barSpace: visualizer.audiomotionanalyzer.barSpace,
             channelLayout: visualizer.audiomotionanalyzer.channelLayout,
             colorMode: visualizer.audiomotionanalyzer.colorMode,
+            customGradients: visualizer.audiomotionanalyzer.customGradients,
             fadePeaks: visualizer.audiomotionanalyzer.fadePeaks,
             fftSize: visualizer.audiomotionanalyzer.fftSize,
             fillAlpha: visualizer.audiomotionanalyzer.fillAlpha,
@@ -559,6 +561,7 @@ const PresetSettings = () => {
             mirror: visualizer.audiomotionanalyzer.mirror,
             mode: visualizer.audiomotionanalyzer.mode,
             noteLabels: visualizer.audiomotionanalyzer.noteLabels,
+            opacity: visualizer.audiomotionanalyzer.opacity,
             outlineBars: visualizer.audiomotionanalyzer.outlineBars,
             peakFadeTime: visualizer.audiomotionanalyzer.peakFadeTime,
             peakHoldTime: visualizer.audiomotionanalyzer.peakHoldTime,
@@ -708,6 +711,7 @@ const PresetSettings = () => {
                 mirror: 0.0,
                 mode: 0,
                 noteLabels: false,
+                opacity: 1,
                 outlineBars: false,
                 peakFadeTime: 750,
                 peakHoldTime: 500,
@@ -732,9 +736,42 @@ const PresetSettings = () => {
                 weightingFilter: '' as const,
             };
 
+            const pastedCustomGradients = Array.isArray(parsed.customGradients)
+                ? parsed.customGradients
+                : [];
+
+            const parsedWithoutCustomGradients = { ...parsed };
+            delete parsedWithoutCustomGradients.customGradients;
+
+            // Determine the channel layout from the pasted config (or use default)
+            const pastedChannelLayout = parsed.channelLayout || initialDefaults.channelLayout;
+
+            // Get the gradient values that would be used based on channel layout
+            const gradientNamesToCheck: (string | undefined)[] = [];
+            if (pastedChannelLayout === 'single') {
+                gradientNamesToCheck.push(parsed.gradient);
+            } else {
+                gradientNamesToCheck.push(parsed.gradientLeft, parsed.gradientRight);
+            }
+
+            // Check if any of the gradient names match custom gradients in the pasted config
+            const pastedCustomGradientNames = pastedCustomGradients.map((g) => g.name);
+            const isUsingCustomGradient = gradientNamesToCheck.some(
+                (gradientName) => gradientName && pastedCustomGradientNames.includes(gradientName),
+            );
+
+            // Only append custom gradients if they're actually being used in the configuration
+            const customGradientsToUse = isUsingCustomGradient
+                ? [
+                      ...(visualizer.audiomotionanalyzer.customGradients || []),
+                      ...pastedCustomGradients,
+                  ]
+                : pastedCustomGradients;
+
             const configValue = {
                 ...initialDefaults,
-                ...parsed,
+                ...parsedWithoutCustomGradients,
+                customGradients: customGradientsToUse,
             };
 
             setSettings({
