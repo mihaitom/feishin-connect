@@ -218,24 +218,25 @@ export const JellyfinController: InternalControllerEndpoint = {
             throw new Error('No userId found');
         }
 
-        const res = await jfApiClient(apiClientProps).getAlbumArtistDetail({
-            params: {
-                id: query.id,
-                userId: apiClientProps.server?.userId,
-            },
-            query: {
-                Fields: 'Genres, Overview',
-            },
-        });
-
-        const similarArtistsRes = await jfApiClient(apiClientProps).getSimilarArtistList({
-            params: {
-                id: query.id,
-            },
-            query: {
-                Limit: 10,
-            },
-        });
+        const [res, similarArtistsRes] = await Promise.all([
+            jfApiClient(apiClientProps).getAlbumArtistDetail({
+                params: {
+                    id: query.id,
+                    userId: apiClientProps.server?.userId,
+                },
+                query: {
+                    Fields: 'Genres, Overview',
+                },
+            }),
+            jfApiClient(apiClientProps).getSimilarArtistList({
+                params: {
+                    id: query.id,
+                },
+                query: {
+                    Limit: 10,
+                },
+            }),
+        ]);
 
         if (res.status !== 200 || similarArtistsRes.status !== 200) {
             throw new Error('Failed to get album artist detail');

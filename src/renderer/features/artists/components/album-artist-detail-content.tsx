@@ -1,8 +1,14 @@
-import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import {
+    useQuery,
+    useQueryClient,
+    useSuspenseQuery,
+    UseSuspenseQueryResult,
+} from '@tanstack/react-query';
 import { LayoutGroup, motion } from 'motion/react';
+import { Suspense } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createSearchParams, generatePath, Link, useParams } from 'react-router';
+import { createSearchParams, generatePath, Link, useLocation, useParams } from 'react-router';
 
 import styles from './album-artist-detail-content.module.css';
 
@@ -16,7 +22,6 @@ import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-
 import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemControls } from '/@/renderer/components/item-list/types';
-import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistGridCarousel } from '/@/renderer/features/artists/components/album-artist-grid-carousel';
 import { useIsPlayerFetching, usePlayer } from '/@/renderer/features/player/context/player-context';
@@ -67,6 +72,7 @@ import {
     Album,
     AlbumArtist,
     AlbumArtistDetailResponse,
+    AlbumListResponse,
     AlbumListSort,
     LibraryItem,
     RelatedArtist,
@@ -214,7 +220,7 @@ interface AlbumArtistMetadataTopSongsProps {
     routeId: string;
 }
 
-const AlbumArtistMetadataTopSongs = ({
+const AlbumArtistMetadataTopSongsContent = ({
     detailQuery,
     routeId,
 }: AlbumArtistMetadataTopSongsProps) => {
@@ -226,15 +232,22 @@ const AlbumArtistMetadataTopSongs = ({
     const currentSong = usePlayerSong();
     const player = usePlayer();
     const serverId = useCurrentServerId();
+    const server = useCurrentServer();
 
-    const topSongsQuery = useSuspenseQuery(
-        artistsQueries.topSongs({
-            query: { artist: detailQuery.data?.name || '', artistId: routeId },
+    const canStartQuery = server?.type === ServerType.JELLYFIN || !!detailQuery.data?.name;
+
+    const topSongsQuery = useQuery({
+        ...artistsQueries.topSongs({
+            query: {
+                artist: detailQuery.data?.name || '',
+                artistId: routeId,
+            },
             serverId: serverId,
         }),
-    );
+        enabled: canStartQuery,
+    });
 
-    const songs = useMemo(() => topSongsQuery?.data?.items || [], [topSongsQuery?.data?.items]);
+    const songs = useMemo(() => topSongsQuery.data?.items || [], [topSongsQuery.data?.items]);
 
     const columns = useMemo(() => {
         return tableConfig?.columns || [];
@@ -273,6 +286,10 @@ const AlbumArtistMetadataTopSongs = ({
             },
         };
     }, [player]);
+
+    if (topSongsQuery.isLoading || !topSongsQuery.data) {
+        return null;
+    }
 
     if (!topSongsQuery?.data?.items?.length) return null;
 
@@ -401,6 +418,26 @@ const AlbumArtistMetadataTopSongs = ({
                 )}
             </Stack>
         </section>
+    );
+};
+
+const AlbumArtistMetadataTopSongs = ({
+    detailQuery,
+    routeId,
+}: AlbumArtistMetadataTopSongsProps) => {
+    const server = useCurrentServer();
+
+    const location = useLocation();
+    const artistName = location.state?.item?.name || detailQuery.data?.name;
+
+    const canStartQuery = server?.type === ServerType.JELLYFIN || !!artistName;
+
+    return (
+        <Suspense fallback={null}>
+            {canStartQuery ? (
+                <AlbumArtistMetadataTopSongsContent detailQuery={detailQuery} routeId={routeId} />
+            ) : null}
+        </Suspense>
     );
 };
 
@@ -543,7 +580,15 @@ const AlbumArtistMetadataSimilarArtists = ({
     );
 };
 
-export const AlbumArtistDetailContent = () => {
+interface AlbumArtistDetailContentProps {
+    albumsQuery: UseSuspenseQueryResult<AlbumListResponse, Error>;
+    detailQuery: UseSuspenseQueryResult<AlbumArtistDetailResponse, Error>;
+}
+
+export const AlbumArtistDetailContent = ({
+    albumsQuery,
+    detailQuery,
+}: AlbumArtistDetailContentProps) => {
     const { artistItems, artistRadioCount, externalLinks, lastFM, musicBrainz } =
         useGeneralSettings();
     const { albumArtistId, artistId } = useParams() as {
@@ -566,13 +611,6 @@ export const AlbumArtistDetailContent = () => {
 
         return [enabled, order];
     }, [artistItems]);
-
-    const detailQuery = useSuspenseQuery(
-        artistsQueries.albumArtistDetail({
-            query: { id: routeId },
-            serverId: server?.id,
-        }),
-    );
 
     const artistDiscographyLink = useMemo(
         () =>
@@ -662,7 +700,7 @@ export const AlbumArtistDetailContent = () => {
                         </Grid.Col>
                     )}
                     <Grid.Col order={itemOrder.recentAlbums} span={12}>
-                        <ArtistAlbums />
+                        <ArtistAlbums albumsQuery={albumsQuery} />
                     </Grid.Col>
                     {enabledItem.similarArtists && (
                         <Grid.Col order={itemOrder.similarArtists} span={12}>
@@ -1020,10 +1058,13 @@ const releaseTypeToEnumMap: Record<string, ArtistReleaseTypeItem> = {
     spokenword: ArtistReleaseTypeItem.RELEASE_TYPE_SPOKENWORD,
 };
 
-const ArtistAlbums = () => {
+interface ArtistAlbumsProps {
+    albumsQuery: UseSuspenseQueryResult<AlbumListResponse, Error>;
+}
+
+const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
     const { t } = useTranslation();
     const { artistReleaseTypeItems } = useGeneralSettings();
-    const serverId = useCurrentServerId();
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
     const albumArtistDetailSort = useAppStore((state) => state.albumArtistDetailSort);
@@ -1037,19 +1078,6 @@ const ArtistAlbums = () => {
         artistId?: string;
     };
     const routeId = (artistId || albumArtistId) as string;
-
-    const albumsQuery = useSuspenseQuery(
-        albumQueries.list({
-            query: {
-                artistIds: [routeId],
-                limit: -1,
-                sortBy: AlbumListSort.RELEASE_DATE,
-                sortOrder: SortOrder.DESC,
-                startIndex: 0,
-            },
-            serverId,
-        }),
-    );
 
     const rows = useGridRows(LibraryItem.ALBUM, ItemListKey.ALBUM);
     const controls = useDefaultItemListControls();

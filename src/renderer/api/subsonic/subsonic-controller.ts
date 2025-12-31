@@ -256,17 +256,18 @@ export const SubsonicController: InternalControllerEndpoint = {
     getAlbumArtistDetail: async (args) => {
         const { apiClientProps, query } = args;
 
-        const artistInfoRes = await ssApiClient(apiClientProps).getArtistInfo({
-            query: {
-                id: query.id,
-            },
-        });
-
-        const res = await ssApiClient(apiClientProps).getArtist({
-            query: {
-                id: query.id,
-            },
-        });
+        const [artistInfoRes, res] = await Promise.all([
+            ssApiClient(apiClientProps).getArtistInfo({
+                query: {
+                    id: query.id,
+                },
+            }),
+            ssApiClient(apiClientProps).getArtist({
+                query: {
+                    id: query.id,
+                },
+            }),
+        ]);
 
         if (res.status !== 200) {
             throw new Error('Failed to get album artist detail');

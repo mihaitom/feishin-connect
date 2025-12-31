@@ -184,18 +184,19 @@ export const NavidromeController: InternalControllerEndpoint = {
     getAlbumArtistDetail: async (args) => {
         const { apiClientProps, query } = args;
 
-        const res = await ndApiClient(apiClientProps).getAlbumArtistDetail({
-            params: {
-                id: query.id,
-            },
-        });
-
-        const artistInfoRes = await ssApiClient(apiClientProps).getArtistInfo({
-            query: {
-                count: 10,
-                id: query.id,
-            },
-        });
+        const [res, artistInfoRes] = await Promise.all([
+            ndApiClient(apiClientProps).getAlbumArtistDetail({
+                params: {
+                    id: query.id,
+                },
+            }),
+            ssApiClient(apiClientProps).getArtistInfo({
+                query: {
+                    count: 10,
+                    id: query.id,
+                },
+            }),
+        ]);
 
         if (res.status !== 200) {
             throw new Error('Failed to get album artist detail');
