@@ -9,6 +9,7 @@ import { AnimatedPage } from '/@/renderer/features/shared/components/animated-pa
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
+import { SongInfiniteCarousel } from '/@/renderer/features/songs/components/song-infinite-carousel';
 import {
     HomeItem,
     useCurrentServer,
@@ -17,7 +18,13 @@ import {
 } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
-import { AlbumListSort, LibraryItem, ServerType, SortOrder } from '/@/shared/types/domain-types';
+import {
+    AlbumListSort,
+    LibraryItem,
+    ServerType,
+    SongListSort,
+    SortOrder,
+} from '/@/shared/types/domain-types';
 import { Platform } from '/@/shared/types/types';
 
 const HomeRoute = () => {
@@ -29,11 +36,10 @@ const HomeRoute = () => {
 
     const isJellyfin = server?.type === ServerType.JELLYFIN;
 
-    // Carousel configuration - queries are now handled inside AlbumInfiniteCarousel
     const carousels = {
         [HomeItem.MOST_PLAYED]: {
             itemType: isJellyfin ? LibraryItem.SONG : LibraryItem.ALBUM,
-            sortBy: AlbumListSort.PLAY_COUNT,
+            sortBy: isJellyfin ? SongListSort.PLAY_COUNT : AlbumListSort.PLAY_COUNT,
             sortOrder: SortOrder.DESC,
             title: t('page.home.mostPlayed', { postProcess: 'sentenceCase' }),
         },
@@ -122,16 +128,24 @@ const HomeRoute = () => {
                                         enableRefresh={carousel.enableRefresh}
                                         key={`carousel-${carousel.uniqueId}`}
                                         rowCount={1}
-                                        sortBy={carousel.sortBy}
+                                        sortBy={carousel.sortBy as AlbumListSort}
                                         sortOrder={carousel.sortOrder}
                                         title={carousel.title}
                                     />
                                 );
                             }
 
-                            if ('data' in carousel && 'query' in carousel) {
-                                // TODO: Create SongInfiniteCarousel
-                                return null;
+                            if (carousel.itemType === LibraryItem.SONG) {
+                                return (
+                                    <SongInfiniteCarousel
+                                        enableRefresh={carousel.enableRefresh}
+                                        key={`carousel-${carousel.uniqueId}`}
+                                        rowCount={1}
+                                        sortBy={carousel.sortBy as SongListSort}
+                                        sortOrder={carousel.sortOrder}
+                                        title={carousel.title}
+                                    />
+                                );
                             }
 
                             return null;
