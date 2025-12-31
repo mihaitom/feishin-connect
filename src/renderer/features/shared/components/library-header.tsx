@@ -117,6 +117,8 @@ export const LibraryHeader = forwardRef(
                 >
                     {!isImageError && (
                         <ItemImage
+                            className={styles.image}
+                            containerClassName={styles.image}
                             id={item.imageId}
                             itemType={item.type as LibraryItem}
                             onError={onImageError}
