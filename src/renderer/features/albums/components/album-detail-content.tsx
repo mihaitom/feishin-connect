@@ -113,8 +113,6 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
                 value: label,
             })) || [];
 
-        console.log('album', album);
-
         const items: Array<{ id: string; value: ReactNode | string | undefined }> = [];
 
         items.push(

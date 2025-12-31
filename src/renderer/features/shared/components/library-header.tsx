@@ -155,8 +155,43 @@ export const LibraryHeader = forwardRef(
     },
 );
 
+const isAsianCharacter = (char: string): boolean => {
+    const codePoint = char.codePointAt(0);
+
+    if (!codePoint) return false;
+
+    // CJK Unified Ideographs: U+4E00–U+9FFF
+    if (codePoint >= 0x4e00 && codePoint <= 0x9fff) return true;
+
+    // Hiragana: U+3040–U+309F
+    if (codePoint >= 0x3040 && codePoint <= 0x309f) return true;
+
+    // Katakana: U+30A0–U+30FF
+    if (codePoint >= 0x30a0 && codePoint <= 0x30ff) return true;
+
+    // CJK Extension A: U+3400–U+4DBF
+    if (codePoint >= 0x3400 && codePoint <= 0x4dbf) return true;
+
+    // CJK Compatibility Ideographs: U+F900–U+FAFF
+    if (codePoint >= 0xf900 && codePoint <= 0xfaff) return true;
+
+    // Fullwidth forms (some Asian characters): U+FF00–U+FFEF
+    // Only count fullwidth letters/numbers as Asian
+    if (codePoint >= 0xff01 && codePoint <= 0xff5e) return true;
+
+    return false;
+};
+
+const calculateWeightedLength = (str: string): number => {
+    let length = 0;
+    for (const char of str) {
+        length += isAsianCharacter(char) ? 2.5 : 1;
+    }
+    return length;
+};
+
 const calculateTitleSize = (title: string) => {
-    const titleLength = title.length;
+    const titleLength = calculateWeightedLength(title);
     let baseSize = '3dvw';
 
     if (titleLength > 20) {
@@ -177,6 +212,18 @@ const calculateTitleSize = (title: string) => {
 
     if (titleLength > 60) {
         baseSize = '1.75dvw';
+    }
+
+    if (titleLength > 70) {
+        baseSize = '1.5dvw';
+    }
+
+    if (titleLength > 80) {
+        baseSize = '1.4dvw';
+    }
+
+    if (titleLength > 90) {
+        baseSize = '1.3dvw';
     }
 
     return `clamp(1.75rem, ${baseSize}, 2.75rem)`;
