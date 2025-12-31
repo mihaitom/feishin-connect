@@ -383,6 +383,14 @@ export const queryKeys: Record<
         lyricsByRemoteId: (searchQuery: { remoteSongId: string; remoteSource: LyricSource }) => {
             return ['song', 'lyrics', 'remote', searchQuery] as const;
         },
+        remoteLyrics: (serverId: string, query?: LyricsQuery) => {
+            if (query) return [serverId, 'song', 'lyrics', 'remote', query] as const;
+            return [serverId, 'song', 'lyrics', 'remote'] as const;
+        },
+        serverLyrics: (serverId: string, query?: LyricsQuery) => {
+            if (query) return [serverId, 'song', 'lyrics', 'server', query] as const;
+            return [serverId, 'song', 'lyrics', 'server'] as const;
+        },
         lyricsSearch: (query?: LyricSearchQuery) => {
             if (query) return ['lyrics', 'search', query] as const;
             return ['lyrics', 'search'] as const;

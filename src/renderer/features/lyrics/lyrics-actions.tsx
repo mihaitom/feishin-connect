@@ -62,7 +62,12 @@ export const LyricsActions = ({
                                 value={index.toString()}
                             />
                         )}
-                        <Button onClick={onExportLyrics} uppercase variant="subtle">
+                        <Button
+                            onClick={onExportLyrics}
+                            size="compact-sm"
+                            uppercase
+                            variant="subtle"
+                        >
                             {t('form.lyricsExport.export', { postProcess: 'sentenceCase ' })}
                         </Button>
                     </Center>
