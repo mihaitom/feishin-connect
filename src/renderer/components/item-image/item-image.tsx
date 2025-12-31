@@ -4,6 +4,7 @@ import z from 'zod';
 import { api } from '/@/renderer/api';
 import {
     GeneralSettingsSchema,
+    getServerById,
     useAuthStore,
     useCurrentServerId,
     useSettingsStore,
@@ -65,10 +66,11 @@ interface UseItemImageUrlProps {
     serverId?: string;
     size?: number;
     type?: keyof z.infer<typeof GeneralSettingsSchema>['imageRes'];
+    useRemoteUrl?: boolean;
 }
 
 export const useItemImageUrl = (args: UseItemImageUrlProps) => {
-    const { id, imageUrl, itemType, size, type } = args;
+    const { id, imageUrl, itemType, size, type, useRemoteUrl } = args;
     const serverId = useCurrentServerId();
 
     const imageRes = useSettingsStore((store) => store.general.imageRes);
@@ -83,17 +85,26 @@ export const useItemImageUrl = (args: UseItemImageUrlProps) => {
             return undefined;
         }
 
+        const targetServerId = args.serverId || serverId;
+        let baseUrl: string | undefined;
+
+        if (useRemoteUrl) {
+            const server = getServerById(targetServerId);
+            baseUrl = server?.remoteUrl || server?.url;
+        }
+
         return (
             api.controller.getImageUrl({
-                apiClientProps: { serverId: args.serverId || serverId },
+                apiClientProps: { serverId: targetServerId },
+                baseUrl,
                 query: { id, itemType, size: size ?? sizeByType },
             }) || undefined
         );
-    }, [args.serverId, id, imageUrl, itemType, serverId, size, sizeByType]);
+    }, [args.serverId, id, imageUrl, itemType, serverId, size, sizeByType, useRemoteUrl]);
 };
 
 export function getItemImageUrl(args: UseItemImageUrlProps) {
-    const { id, imageUrl, itemType, size, type } = args;
+    const { id, imageUrl, itemType, size, type, useRemoteUrl } = args;
     const authStore = useAuthStore.getState();
     const currentServerId = authStore.currentServer?.id;
     const serverId = (args.serverId || currentServerId) as string;
@@ -109,9 +120,17 @@ export function getItemImageUrl(args: UseItemImageUrlProps) {
         return undefined;
     }
 
+    let baseUrl: string | undefined;
+
+    if (useRemoteUrl) {
+        const server = getServerById(serverId);
+        baseUrl = server?.remoteUrl || server?.url;
+    }
+
     return (
         api.controller.getImageUrl({
             apiClientProps: { serverId },
+            baseUrl,
             query: { id, itemType, size: size ?? sizeByType },
         }) || undefined
     );

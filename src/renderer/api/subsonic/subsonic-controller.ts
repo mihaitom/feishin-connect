@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 import { contract, ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
 import { randomString } from '/@/renderer/utils';
+import { getServerUrl } from '/@/renderer/utils/normalize-server-url';
 import { ssNormalize } from '/@/shared/api/subsonic/subsonic-normalize';
 import {
     AlbumListSortType,
@@ -851,11 +852,12 @@ export const SubsonicController: InternalControllerEndpoint = {
             startIndex: query.startIndex,
         });
     },
-    getImageUrl: ({ apiClientProps: { server }, query }) => {
+    getImageUrl: ({ apiClientProps: { server }, baseUrl, query }) => {
         const { id, size } = query;
         const imageSize = size;
+        const url = baseUrl || getServerUrl(server);
 
-        if (!server?.url || !server?.credential) {
+        if (!url || !server?.credential) {
             return null;
         }
 
@@ -865,7 +867,7 @@ export const SubsonicController: InternalControllerEndpoint = {
         }
 
         return (
-            `${server.url}/rest/getCoverArt.view` +
+            `${url}/rest/getCoverArt.view` +
             `?id=${id}` +
             `&${server.credential}` +
             '&v=1.13.0' +

@@ -250,6 +250,8 @@ export type ServerListItem = {
     id: string;
     name: string;
     ndCredential?: string;
+    preferRemoteUrl?: boolean;
+    remoteUrl?: string;
     savePassword?: boolean;
     type: ServerType;
     url: string;

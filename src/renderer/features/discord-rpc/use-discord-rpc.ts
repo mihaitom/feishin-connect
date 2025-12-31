@@ -41,6 +41,7 @@ export const useDiscordRpc = () => {
         imageUrl: currentSong?.imageUrl,
         itemType: LibraryItem.SONG,
         type: 'table',
+        useRemoteUrl: true,
     });
 
     const imageUrlRef = useRef<null | string | undefined>(imageUrl);
@@ -194,14 +195,13 @@ export const useDiscordRpc = () => {
                 }
 
                 if (discordSettings.showServerImage && song) {
-                    // Use imageUrl from useItemImageUrl hook if available and song matches current song
                     if (song._uniqueId === currentSong?._uniqueId && imageUrlRef.current) {
-                        activity.largeImageKey = imageUrlRef.current;
-                    } else {
-                        // Fallback to old logic if song doesn't match (shouldn't happen in normal flow)
                         if (song._serverType === ServerType.JELLYFIN && song.imageUrl) {
-                            activity.largeImageKey = song.imageUrl;
-                        } else if (song._serverType === ServerType.NAVIDROME) {
+                            activity.largeImageKey = imageUrlRef.current;
+                        } else if (
+                            song._serverType === ServerType.NAVIDROME ||
+                            song._serverType === ServerType.SUBSONIC
+                        ) {
                             try {
                                 const info = await api.controller.getAlbumInfo({
                                     apiClientProps: { serverId: song._serverId },

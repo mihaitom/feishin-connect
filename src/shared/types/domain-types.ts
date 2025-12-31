@@ -91,6 +91,8 @@ export type ServerListItem = {
     musicFolderId?: string[];
     name: string;
     preferInstantMix?: boolean;
+    preferRemoteUrl?: boolean;
+    remoteUrl?: string;
     savePassword?: boolean;
     type: ServerType;
     url: string;
@@ -1418,6 +1420,7 @@ export type GetQueueResponse = {
 };
 
 export type ImageArgs = BaseEndpointArgs & {
+    baseUrl?: string;
     query: ImageQuery;
 };
 

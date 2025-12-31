@@ -101,6 +101,8 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                 (localSettings ? localSettings.env.SERVER_NAME : window.SERVER_NAME) || 'My Server',
             password: '',
             preferInstantMix: undefined,
+            preferRemoteUrl: false,
+            remoteUrl: '',
             savePassword: undefined,
             type:
                 (localSettings
@@ -164,6 +166,14 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
 
             if (values.savePassword !== undefined) {
                 serverItem.savePassword = values.savePassword;
+            }
+
+            if (values.remoteUrl?.trim()) {
+                serverItem.remoteUrl = values.remoteUrl.trim().replace(/\/$/, '');
+            }
+
+            if (values.preferRemoteUrl !== undefined) {
+                serverItem.preferRemoteUrl = values.preferRemoteUrl;
             }
 
             if (data.ndCredential !== undefined) {
@@ -247,6 +257,29 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                             {...form.getInputProps('url')}
                         />
                     </Group>
+                    <TextInput
+                        disabled={isServerLock}
+                        label={t('form.addServer.input', {
+                            context: 'remoteUrl',
+                            postProcess: 'titleCase',
+                        })}
+                        placeholder={t('form.addServer.input', {
+                            context: 'remoteUrlPlaceholder',
+                            postProcess: 'sentenceCase',
+                        })}
+                        {...form.getInputProps('remoteUrl')}
+                    />
+                    {form.values.remoteUrl && (
+                        <Checkbox
+                            label={t('form.addServer.input', {
+                                context: 'preferRemoteUrl',
+                                postProcess: 'titleCase',
+                            })}
+                            {...form.getInputProps('preferRemoteUrl', {
+                                type: 'checkbox',
+                            })}
+                        />
+                    )}
                     <TextInput
                         label={t('form.addServer.input', {
                             context: 'username',

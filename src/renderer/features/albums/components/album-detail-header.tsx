@@ -5,7 +5,6 @@ import { Link, useParams } from 'react-router';
 
 import styles from './album-detail-header.module.css';
 
-import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
