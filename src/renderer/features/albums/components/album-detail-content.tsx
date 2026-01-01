@@ -22,7 +22,7 @@ import { useContainerQuery } from '/@/renderer/hooks';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, usePlayerSong } from '/@/renderer/store';
 import { useGeneralSettings, useSettingsStore } from '/@/renderer/store/settings.store';
-import { titleCase } from '/@/renderer/utils';
+import { sentenceCase, titleCase } from '/@/renderer/utils';
 import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
 import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
 import { sortSongList } from '/@/shared/api/utils';
@@ -314,40 +314,57 @@ export const AlbumDetailContent = () => {
     const { ref, ...cq } = useContainerQuery();
     const { externalLinks, lastFM, musicBrainz } = useGeneralSettings();
 
-    const carousels = [
-        {
-            excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
-            isHidden: !detailQuery?.data?.albumArtists?.[0]?.id,
-            query: {
-                artistIds: detailQuery?.data?.albumArtists.length
-                    ? [detailQuery?.data?.albumArtists[0].id]
-                    : undefined,
+    const genreCarousels = useMemo(() => {
+        const genreLimit = 2;
+        const selectedGenres = detailQuery?.data?.genres?.slice(0, genreLimit);
+
+        if (!selectedGenres || selectedGenres.length === 0) return [];
+
+        return selectedGenres
+            .map((genre) => {
+                const uniqueId = `moreFromGenre-${genre.id}`;
+                return {
+                    enableRefresh: true,
+                    excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
+                    isHidden: !genre,
+                    query: {
+                        genreIds: [genre.id],
+                    },
+                    rowCount: 1,
+                    sortBy: AlbumListSort.RANDOM,
+                    sortOrder: SortOrder.ASC,
+                    title: sentenceCase(
+                        t('page.albumDetail.moreFromGeneric', {
+                            item: genre.name,
+                        }),
+                    ),
+                    uniqueId,
+                };
+            })
+            .filter((carousel) => !carousel.isHidden);
+    }, [detailQuery.data, t]);
+
+    const carousels = useMemo(() => {
+        const moreFromArtistUniqueId = 'moreFromArtist';
+        return [
+            {
+                enableRefresh: false,
+                excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
+                isHidden: !detailQuery?.data?.albumArtists?.[0]?.id,
+                query: {
+                    artistIds: detailQuery?.data?.albumArtists.length
+                        ? [detailQuery?.data?.albumArtists[0].id]
+                        : undefined,
+                },
+                rowCount: 1,
+                sortBy: AlbumListSort.YEAR,
+                sortOrder: SortOrder.DESC,
+                title: t('page.albumDetail.moreFromArtist', { postProcess: 'sentenceCase' }),
+                uniqueId: moreFromArtistUniqueId,
             },
-            rowCount: 1,
-            sortBy: AlbumListSort.YEAR,
-            sortOrder: SortOrder.DESC,
-            title: t('page.albumDetail.moreFromArtist', { postProcess: 'sentenceCase' }),
-            uniqueId: 'moreFromArtist',
-        },
-        {
-            enableRefresh: true,
-            excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
-            isHidden: !detailQuery?.data?.genres?.[0],
-            query: {
-                genreIds: detailQuery?.data?.genres.length
-                    ? [detailQuery?.data?.genres[0].id]
-                    : undefined,
-            },
-            rowCount: 1,
-            sortBy: AlbumListSort.RANDOM,
-            sortOrder: SortOrder.ASC,
-            title: `${t('page.albumDetail.moreFromGeneric', {
-                item: '',
-                postProcess: 'sentenceCase',
-            })} ${detailQuery?.data?.genres?.[0]?.name}`,
-            uniqueId: 'relatedGenres',
-        },
-    ];
+            ...genreCarousels,
+        ];
+    }, [detailQuery.data, genreCarousels, t]);
 
     const comment = detailQuery?.data?.comment;
 
