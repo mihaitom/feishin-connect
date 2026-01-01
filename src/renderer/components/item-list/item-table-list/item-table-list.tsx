@@ -32,6 +32,7 @@ import {
     useItemListStateSubscription,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { parseTableColumns } from '/@/renderer/components/item-list/helpers/parse-table-columns';
+import { useListHotkeys } from '/@/renderer/components/item-list/helpers/use-list-hotkeys';
 import { useStickyTableGroupRows } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-table-group-rows';
 import { useStickyTableHeader } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-table-header';
 import {
@@ -42,7 +43,6 @@ import {
 import { PlayerContext, usePlayer } from '/@/renderer/features/player/context/player-context';
 import { animationProps } from '/@/shared/components/animations/animation-props';
 import { useFocusWithin } from '/@/shared/hooks/use-focus-within';
-import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
 import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { TableColumn } from '/@/shared/types/types';
@@ -2262,20 +2262,12 @@ const BaseItemTableList = ({
         stickyGroupTop,
     ]);
 
-    useHotkeys([
-        [
-            'mod+a',
-            () => {
-                if (focused) {
-                    if (internalState.isAllSelected()) {
-                        internalState.deselectAll();
-                    } else {
-                        internalState.selectAll();
-                    }
-                }
-            },
-        ],
-    ]);
+    useListHotkeys({
+        controls,
+        focused,
+        internalState,
+        itemType,
+    });
 
     return (
         <motion.div

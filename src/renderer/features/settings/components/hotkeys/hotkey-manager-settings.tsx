@@ -15,8 +15,8 @@ import { useSettingSearchContext } from '/@/renderer/features/settings/context/s
 import { BindingActions, useHotkeySettings, useSettingsStoreActions } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
-import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { Table } from '/@/shared/components/table/table';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 
 const ipc = isElectron() ? window.api.ipc : null;
@@ -55,6 +55,23 @@ const BINDINGS_MAP: Record<BindingActions, string> = {
         context: 'globalSearch',
         postProcess: 'sentenceCase',
     }),
+    listNavigateToPage: i18n.t('setting.hotkey', {
+        context: 'listNavigateToPage',
+        postProcess: 'sentenceCase',
+    }),
+    listPlayDefault: i18n.t('setting.hotkey', {
+        context: 'listPlayDefault',
+        postProcess: 'sentenceCase',
+    }),
+    listPlayLast: i18n.t('setting.hotkey', {
+        context: 'listPlayLast',
+        postProcess: 'sentenceCase',
+    }),
+    listPlayNext: i18n.t('setting.hotkey', {
+        context: 'listPlayNext',
+        postProcess: 'sentenceCase',
+    }),
+    listPlayNow: i18n.t('setting.hotkey', { context: 'listPlayNow', postProcess: 'sentenceCase' }),
     localSearch: i18n.t('setting.hotkey', { context: 'localSearch', postProcess: 'sentenceCase' }),
     navigateHome: i18n.t('setting.hotkey', {
         context: 'navigateHome',
@@ -251,78 +268,99 @@ export const HotkeyManagerSettings = () => {
                         title={t('setting.applicationHotkeys', { postProcess: 'sentenceCase' })}
                     />
                     <div className={styles.container}>
-                        {filteredBindings.map((binding) => (
-                            <Group key={`hotkey-${binding}`} wrap="nowrap">
-                                <TextInput
-                                    readOnly
-                                    style={{ userSelect: 'none' }}
-                                    value={BINDINGS_MAP[binding as keyof typeof BINDINGS_MAP]}
-                                />
-                                <TextInput
-                                    id={`hotkey-${binding}`}
-                                    leftSection={<Icon icon="keyboard" />}
-                                    onBlur={() => setSelected(null)}
-                                    onChange={() => {}}
-                                    onKeyDownCapture={(e) => {
-                                        if (selected !== (binding as BindingActions)) return;
-                                        handleSetHotkey(binding as BindingActions, e);
-                                    }}
-                                    readOnly
-                                    rightSection={
-                                        <ActionIcon
-                                            icon="edit"
-                                            onClick={() => {
-                                                setSelected(binding as BindingActions);
-                                                document
-                                                    .getElementById(`hotkey-${binding}`)
-                                                    ?.focus();
+                        <Table withColumnBorders withRowBorders>
+                            {filteredBindings.map((binding) => (
+                                <Table.Tr key={`hotkey-${binding}`}>
+                                    <Table.Td style={{ userSelect: 'none' }}>
+                                        {BINDINGS_MAP[binding as keyof typeof BINDINGS_MAP]}
+                                    </Table.Td>
+                                    <Table.Td>
+                                        <TextInput
+                                            id={`hotkey-${binding}`}
+                                            leftSection={<Icon icon="keyboard" />}
+                                            onBlur={() => setSelected(null)}
+                                            onChange={() => {}}
+                                            onKeyDownCapture={(e) => {
+                                                if (selected !== (binding as BindingActions))
+                                                    return;
+                                                handleSetHotkey(binding as BindingActions, e);
                                             }}
-                                            variant="transparent"
+                                            readOnly
+                                            rightSection={
+                                                <ActionIcon
+                                                    icon="edit"
+                                                    onClick={() => {
+                                                        setSelected(binding as BindingActions);
+                                                        document
+                                                            .getElementById(`hotkey-${binding}`)
+                                                            ?.focus();
+                                                    }}
+                                                    variant="transparent"
+                                                />
+                                            }
+                                            style={{
+                                                opacity:
+                                                    selected === (binding as BindingActions)
+                                                        ? 0.8
+                                                        : 1,
+                                                outline: duplicateHotkeyMap.includes(
+                                                    bindings[binding as keyof typeof BINDINGS_MAP]
+                                                        .hotkey!,
+                                                )
+                                                    ? '1px dashed red'
+                                                    : undefined,
+                                            }}
+                                            value={
+                                                bindings[binding as keyof typeof BINDINGS_MAP]
+                                                    .hotkey
+                                            }
                                         />
-                                    }
-                                    style={{
-                                        opacity: selected === (binding as BindingActions) ? 0.8 : 1,
-                                        outline: duplicateHotkeyMap.includes(
-                                            bindings[binding as keyof typeof BINDINGS_MAP].hotkey!,
-                                        )
-                                            ? '1px dashed red'
-                                            : undefined,
-                                    }}
-                                    value={bindings[binding as keyof typeof BINDINGS_MAP].hotkey}
-                                />
-                                {isElectron() && (
-                                    <Checkbox
-                                        checked={
-                                            bindings[binding as keyof typeof BINDINGS_MAP].isGlobal
-                                        }
-                                        disabled={
-                                            bindings[binding as keyof typeof BINDINGS_MAP]
-                                                .hotkey === ''
-                                        }
-                                        onChange={(e) =>
-                                            handleSetGlobalHotkey(binding as BindingActions, e)
-                                        }
-                                        size="md"
-                                        style={{
-                                            opacity: bindings[binding as keyof typeof BINDINGS_MAP]
-                                                .allowGlobal
-                                                ? 1
-                                                : 0,
-                                        }}
-                                    />
-                                )}
-                                {bindings[binding as keyof typeof BINDINGS_MAP].hotkey && (
-                                    <ActionIcon
-                                        icon="x"
-                                        iconProps={{
-                                            color: 'error',
-                                        }}
-                                        onClick={() => handleClearHotkey(binding as BindingActions)}
-                                        variant="transparent"
-                                    />
-                                )}
-                            </Group>
-                        ))}
+                                    </Table.Td>
+                                    {isElectron() && (
+                                        <Table.Td>
+                                            <Checkbox
+                                                checked={
+                                                    bindings[binding as keyof typeof BINDINGS_MAP]
+                                                        .isGlobal
+                                                }
+                                                disabled={
+                                                    bindings[binding as keyof typeof BINDINGS_MAP]
+                                                        .hotkey === ''
+                                                }
+                                                onChange={(e) =>
+                                                    handleSetGlobalHotkey(
+                                                        binding as BindingActions,
+                                                        e,
+                                                    )
+                                                }
+                                                size="md"
+                                                style={{
+                                                    opacity: bindings[
+                                                        binding as keyof typeof BINDINGS_MAP
+                                                    ].allowGlobal
+                                                        ? 1
+                                                        : 0,
+                                                }}
+                                            />
+                                        </Table.Td>
+                                    )}
+                                    {bindings[binding as keyof typeof BINDINGS_MAP].hotkey && (
+                                        <Table.Td>
+                                            <ActionIcon
+                                                icon="x"
+                                                iconProps={{
+                                                    color: 'error',
+                                                }}
+                                                onClick={() =>
+                                                    handleClearHotkey(binding as BindingActions)
+                                                }
+                                                variant="transparent"
+                                            />
+                                        </Table.Td>
+                                    )}
+                                </Table.Tr>
+                            ))}
+                        </Table>
                     </div>
                 </>
             }
