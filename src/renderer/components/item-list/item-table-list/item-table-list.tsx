@@ -57,8 +57,8 @@ const hasRequiredItemProperties = (item: unknown): item is { id: string; serverI
         item !== null &&
         'id' in item &&
         typeof (item as any).id === 'string' &&
-        'serverId' in item &&
-        typeof (item as any).serverId === 'string'
+        '_serverId' in item &&
+        typeof (item as any)._serverId === 'string'
     );
 };
 
@@ -76,9 +76,7 @@ const hasRequiredStateItemProperties = (
         '_serverId' in item &&
         typeof (item as any)._serverId === 'string' &&
         '_itemType' in item &&
-        typeof (item as any)._itemType === 'string' &&
-        'rowId' in item &&
-        typeof (item as any).rowId === 'string'
+        typeof (item as any)._itemType === 'string'
     );
 };
 
@@ -1722,7 +1720,9 @@ const BaseItemTableList = ({
     // Helper function to get ItemListStateItemWithRequiredProperties (rowId is separate, not part of item)
     const getStateItem = useCallback(
         (item: any): ItemListStateItemWithRequiredProperties | null => {
-            if (!hasRequiredItemProperties(item)) return null;
+            if (!hasRequiredItemProperties(item)) {
+                return null;
+            }
             if (
                 typeof item === 'object' &&
                 item !== null &&
@@ -1750,7 +1750,7 @@ const BaseItemTableList = ({
             if (validSelected.length > 0) {
                 const lastSelected = validSelected[validSelected.length - 1];
                 currentIndex = data.findIndex(
-                    (d) => hasRequiredItemProperties(d) && d.id === lastSelected.id,
+                    (d) => extractRowId(d) === extractRowId(lastSelected),
                 );
             }
 
@@ -1765,93 +1765,111 @@ const BaseItemTableList = ({
             const newItem: any = data[newIndex];
             if (!newItem) return;
 
-            // Handle Shift + Arrow for incremental range selection (matches shift+click behavior)
-            if (e.shiftKey) {
-                const selectedItems = internalState.getSelected();
-                const validSelectedItems = selectedItems.filter(hasRequiredStateItemProperties);
-                const lastSelectedItem = validSelectedItems[validSelectedItems.length - 1];
-
-                if (lastSelectedItem) {
-                    // Find the indices of the last selected item and new item
-                    const lastRowId = lastSelectedItem.rowId;
-                    const lastIndex = data.findIndex((d) => {
-                        const rowId = extractRowId(d);
-                        return rowId === lastRowId;
-                    });
-
-                    if (lastIndex !== -1 && newIndex !== -1) {
-                        // Create range selection from last selected to new position
-                        const startIndex = Math.min(lastIndex, newIndex);
-                        const stopIndex = Math.max(lastIndex, newIndex);
-
-                        const rangeItems: ItemListStateItemWithRequiredProperties[] = [];
-                        for (let i = startIndex; i <= stopIndex; i++) {
-                            const rangeItem = data[i];
-                            const stateItem = getStateItem(rangeItem);
-                            if (stateItem && extractRowId(stateItem)) {
-                                rangeItems.push(stateItem);
-                            }
-                        }
-
-                        // Add range items to selection (matching shift+click behavior)
-                        const currentSelected = internalState.getSelected();
-                        const validSelected = currentSelected.filter(
-                            hasRequiredStateItemProperties,
-                        );
-                        const newSelected: ItemListStateItemWithRequiredProperties[] = [
-                            ...validSelected,
-                        ];
-                        rangeItems.forEach((rangeItem) => {
-                            const rangeRowId = extractRowId(rangeItem);
-                            if (
-                                rangeRowId &&
-                                !newSelected.some(
-                                    (selected) => extractRowId(selected) === rangeRowId,
-                                )
-                            ) {
-                                newSelected.push(rangeItem);
-                            }
-                        });
-
-                        // Ensure the last item in selection is the item at newIndex for incremental extension
-                        const newItemListItem = getStateItem(newItem);
-                        if (newItemListItem && extractRowId(newItemListItem)) {
-                            const newItemRowId = extractRowId(newItemListItem);
-                            // Remove the new item from its current position if it exists
-                            const filteredSelected = newSelected.filter(
-                                (item) => extractRowId(item) !== newItemRowId,
-                            );
-                            // Add it at the end so it becomes the last selected item
-                            filteredSelected.push(newItemListItem);
-                            internalState.setSelected(filteredSelected);
-                        }
-                    }
-                } else {
-                    // No previous selection, just select the new item
-                    const newItemListItem = getStateItem(newItem);
-                    if (newItemListItem && extractRowId(newItemListItem)) {
-                        internalState.setSelected([newItemListItem]);
-                    }
-                }
-            } else {
-                // Without Shift: select only the new item
-                const newItemListItem = getStateItem(newItem);
-                if (newItemListItem && extractRowId(newItemListItem)) {
-                    internalState.setSelected([newItemListItem]);
-                }
+            const newItemListItem = getStateItem(newItem);
+            if (newItemListItem && extractRowId(newItemListItem)) {
+                internalState.setSelected([newItemListItem]);
             }
 
-            const offset = calculateScrollTopForIndex(newIndex);
-            scrollToTableOffset(offset);
+            // Check if we need to scroll by determining if the item is at the edge of the viewport
+            const gridIndex = enableHeader ? newIndex + 1 : newIndex;
+
+            const mainContainer = rowRef.current?.childNodes[0] as HTMLDivElement | undefined;
+            const pinnedRightContainer = pinnedRightColumnRef.current?.childNodes[0] as
+                | HTMLDivElement
+                | undefined;
+
+            // Use right pinned column scroll position if right-pinned columns exist
+            const scrollContainer =
+                pinnedRightColumnCount > 0 && pinnedRightContainer
+                    ? pinnedRightContainer
+                    : mainContainer;
+
+            if (scrollContainer) {
+                const viewportTop = scrollContainer.scrollTop;
+                const viewportHeight = scrollContainer.clientHeight;
+                const viewportBottom = viewportTop + viewportHeight;
+
+                const rowTop = calculateScrollTopForIndex(gridIndex);
+                const adjustedIndex = enableHeader ? Math.max(0, newIndex - 1) : newIndex;
+                const mockCellProps: TableItemProps = {
+                    cellPadding,
+                    columns: parsedColumns,
+                    controls: {} as ItemControls,
+                    data: enableHeader ? [null, ...data] : data,
+                    enableAlternateRowColors,
+                    enableExpansion,
+                    enableHeader,
+                    enableHorizontalBorders,
+                    enableRowHoverHighlight,
+                    enableSelection,
+                    enableVerticalBorders,
+                    getRowHeight: () => DEFAULT_ROW_HEIGHT,
+                    internalState: {} as ItemListStateActions,
+                    itemType,
+                    playerContext,
+                    size,
+                    tableId,
+                };
+
+                let calculatedRowHeight: number;
+                if (typeof rowHeight === 'number') {
+                    calculatedRowHeight = rowHeight;
+                } else if (typeof rowHeight === 'function') {
+                    calculatedRowHeight = rowHeight(adjustedIndex, mockCellProps);
+                } else {
+                    calculatedRowHeight = DEFAULT_ROW_HEIGHT;
+                }
+
+                const rowBottom = rowTop + calculatedRowHeight;
+
+                // Check if row is fully visible within viewport
+                const isFullyVisible = rowTop >= viewportTop && rowBottom <= viewportBottom;
+
+                // Check if row is at the edge (top or bottom of viewport)
+                const isAtTopEdge = rowTop < viewportTop;
+                const isAtBottomEdge = rowBottom >= viewportBottom;
+
+                // Only scroll if the item is not fully visible or at the edge
+                if (!isFullyVisible || isAtTopEdge || isAtBottomEdge) {
+                    // Determine alignment based on direction
+                    const align: 'bottom' | 'top' =
+                        e.key === 'ArrowDown' && isAtBottomEdge
+                            ? 'bottom'
+                            : e.key === 'ArrowUp' && isAtTopEdge
+                              ? 'top'
+                              : isAtBottomEdge
+                                ? 'bottom'
+                                : isAtTopEdge
+                                  ? 'top'
+                                  : 'top';
+
+                    scrollToTableIndex(gridIndex, { align });
+                }
+            }
         },
         [
             data,
             enableSelection,
             internalState,
             calculateScrollTopForIndex,
-            scrollToTableOffset,
+            scrollToTableIndex,
             extractRowId,
             getStateItem,
+            pinnedRightColumnCount,
+            enableHeader,
+            cellPadding,
+            parsedColumns,
+            enableAlternateRowColors,
+            enableExpansion,
+            enableHorizontalBorders,
+            enableRowHoverHighlight,
+            enableVerticalBorders,
+            itemType,
+            playerContext,
+            size,
+            tableId,
+            DEFAULT_ROW_HEIGHT,
+            rowHeight,
         ],
     );
 
