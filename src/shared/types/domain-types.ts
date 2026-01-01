@@ -18,7 +18,7 @@ import {
     NDUserListSort,
 } from '/@/shared/api/navidrome/navidrome-types';
 import { ServerFeatures } from '/@/shared/types/features-types';
-import { PlayerRepeat, PlayerShuffle, PlayerStatus, PlayerStyle } from '/@/shared/types/types';
+import { PlayerStatus } from '/@/shared/types/types';
 
 export enum LibraryItem {
     ALBUM = 'album',
@@ -57,20 +57,13 @@ export type AnyLibraryItems =
 export interface PlayerData {
     currentSong: QueueSong | undefined;
     index: number;
-    muted: boolean;
     nextSong: QueueSong | undefined;
     num: 1 | 2;
     player1: QueueSong | undefined;
     player2: QueueSong | undefined;
     previousSong: QueueSong | undefined;
-    queue: QueueData;
     queueLength: number;
-    repeat: PlayerRepeat;
-    shuffle: PlayerShuffle;
-    speed: number;
     status: PlayerStatus;
-    transitionType: PlayerStyle;
-    volume: number;
 }
 
 export interface QueueData {

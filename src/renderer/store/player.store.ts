@@ -1234,20 +1234,13 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     return {
                         currentSong,
                         index: queueIndex, // Return the actual queue position for display
-                        muted: state.player.muted,
                         nextSong,
                         num: state.player.playerNum,
                         player1: state.player.playerNum === 1 ? currentSong : nextSong,
                         player2: state.player.playerNum === 2 ? currentSong : nextSong,
                         previousSong,
-                        queue: state.queue,
                         queueLength: state.queue.default.length + state.queue.priority.length,
-                        repeat: state.player.repeat,
-                        shuffle: state.player.shuffle,
-                        speed: state.player.speed,
                         status: state.player.status,
-                        transitionType: state.player.transitionType,
-                        volume: state.player.volume,
                     };
                 },
                 getQueue: (groupBy?: QueueGroupingProperty) => {
@@ -1379,20 +1372,13 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     return {
                         currentSong: queue.items[nextIndex],
                         index: nextIndex,
-                        muted: player.muted,
                         nextSong,
                         num: newPlayerNum,
                         player1: newPlayerNum === 1 ? queue.items[nextIndex] : nextSong,
                         player2: newPlayerNum === 2 ? queue.items[nextIndex] : nextSong,
                         previousSong: queue.items[nextIndex - 1],
-                        queue: get().queue,
                         queueLength: queue.items.length,
-                        repeat: player.repeat,
-                        shuffle: player.shuffle,
-                        speed: player.speed,
                         status: newStatus,
-                        transitionType: player.transitionType,
-                        volume: player.volume,
                     };
                 },
                 mediaNext: () => {
@@ -2607,20 +2593,13 @@ export const usePlayerData = (): PlayerData => {
             return {
                 currentSong,
                 index: queueIndex, // Return the actual queue position for display
-                muted: state.player.muted,
                 nextSong,
                 num: state.player.playerNum,
                 player1: state.player.playerNum === 1 ? currentSong : nextSong,
                 player2: state.player.playerNum === 2 ? currentSong : nextSong,
                 previousSong,
-                queue: state.queue,
                 queueLength: state.queue.default.length + state.queue.priority.length,
-                repeat: state.player.repeat,
-                shuffle: state.player.shuffle,
-                speed: state.player.speed,
                 status: state.player.status,
-                transitionType: state.player.transitionType,
-                volume: state.player.volume,
             };
         }),
     );
