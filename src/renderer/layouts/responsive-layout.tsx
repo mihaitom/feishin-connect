@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 
 import { useAppTracker } from '/@/renderer/features/analytics/hooks/use-app-tracker';
 import { CommandPalette } from '/@/renderer/features/search/components/command-palette';
+import { useGarbageCollection } from '/@/renderer/hooks/use-garbage-collection';
 import { useIsMobile } from '/@/renderer/hooks/use-is-mobile';
 import { DefaultLayout } from '/@/renderer/layouts/default-layout';
 import { MobileLayout } from '/@/renderer/layouts/mobile-layout/mobile-layout';
@@ -31,6 +32,7 @@ const ResponsiveLayoutBase = ({ shell }: ResponsiveLayoutProps) => {
 
 export const ResponsiveLayout = ({ shell }: ResponsiveLayoutProps) => {
     useAppTracker();
+    useGarbageCollection();
 
     return (
         <>
