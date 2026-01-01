@@ -207,7 +207,7 @@ const SidebarImage = () => {
                 {imageUrl ? (
                     <img className={styles.sidebarImage} loading="eager" src={imageUrl} />
                 ) : (
-                    <ImageUnloader />
+                    <ImageUnloader icon="emptySongImage" />
                 )}
             </Tooltip>
             <ActionIcon
