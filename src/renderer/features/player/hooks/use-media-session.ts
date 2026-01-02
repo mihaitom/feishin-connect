@@ -1,11 +1,16 @@
 import isElectron from 'is-electron';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { usePlaybackSettings, useSettingsStore, useTimestampStoreBase } from '/@/renderer/store';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import {
+    usePlaybackSettings,
+    usePlayerStore,
+    useSettingsStore,
+    useTimestampStoreBase,
+} from '/@/renderer/store';
+import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
 import { PlayerStatus, PlayerType } from '/@/shared/types/types';
 
 const mediaSession = navigator.mediaSession;
@@ -85,6 +90,29 @@ export const useMediaSession = () => {
         };
     }, [player, skip?.skipBackwardSeconds, skip?.skipForwardSeconds, isMediaSessionEnabled]);
 
+    const updateMediaSessionMetadata = useCallback(
+        (song: QueueSong | undefined) => {
+            if (!isMediaSessionEnabled || !song) {
+                return;
+            }
+
+            const imageUrl = getItemImageUrl({
+                id: song?.imageId || undefined,
+                imageUrl: song?.imageUrl,
+                itemType: LibraryItem.SONG,
+                type: 'itemCard',
+            });
+
+            mediaSession.metadata = new MediaMetadata({
+                album: song?.album ?? '',
+                artist: song?.artistName ?? '',
+                artwork: imageUrl ? [{ src: imageUrl, type: 'image/png' }] : [],
+                title: song?.name ?? '',
+            });
+        },
+        [isMediaSessionEnabled],
+    );
+
     usePlayerEvents(
         {
             onCurrentSongChange: (properties) => {
@@ -92,20 +120,15 @@ export const useMediaSession = () => {
                     return;
                 }
 
-                const song = properties.song;
-                const imageUrl = getItemImageUrl({
-                    id: song?.imageId || undefined,
-                    imageUrl: song?.imageUrl,
-                    itemType: LibraryItem.SONG,
-                    type: 'itemCard',
-                });
+                updateMediaSessionMetadata(properties.song);
+            },
+            onPlayerRepeated: () => {
+                if (!isMediaSessionEnabled) {
+                    return;
+                }
 
-                mediaSession.metadata = new MediaMetadata({
-                    album: song?.album ?? '',
-                    artist: song?.artistName ?? '',
-                    artwork: imageUrl ? [{ src: imageUrl, type: 'image/png' }] : [],
-                    title: song?.name ?? '',
-                });
+                const currentSong = usePlayerStore.getState().getCurrentSong();
+                updateMediaSessionMetadata(currentSong);
             },
             onPlayerStatus: (properties) => {
                 if (!isMediaSessionEnabled) {

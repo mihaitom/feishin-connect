@@ -1367,6 +1367,12 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         state.player.status = newStatus;
                     });
 
+                    if (repeat === PlayerRepeat.ONE && nextIndex === currentIndex) {
+                        eventEmitter.emit('PLAYER_REPEATED', {
+                            index: nextIndex,
+                        });
+                    }
+
                     const nextSong = calculateNextSong(nextIndex, queue.items, repeat);
 
                     return {

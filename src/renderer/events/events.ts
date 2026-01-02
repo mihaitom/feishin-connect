@@ -11,6 +11,7 @@ export type EventMap = {
     MEDIA_NEXT: MediaNextEventPayload;
     MEDIA_PREV: MediaPrevEventPayload;
     PLAYER_PLAY: PlayerPlayEventPayload;
+    PLAYER_REPEATED: PlayerRepeatedEventPayload;
     PLAYLIST_MOVE_DOWN: PlaylistMoveEventPayload;
     PLAYLIST_MOVE_TO_BOTTOM: PlaylistMoveEventPayload;
     PLAYLIST_MOVE_TO_TOP: PlaylistMoveEventPayload;
@@ -43,6 +44,10 @@ export type MediaPrevEventPayload = {
 
 export type PlayerPlayEventPayload = {
     id: string;
+    index: number;
+};
+
+export type PlayerRepeatedEventPayload = {
     index: number;
 };
 
