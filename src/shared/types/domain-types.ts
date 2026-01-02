@@ -403,6 +403,10 @@ type BaseEndpointArgs = {
         serverId: string;
         signal?: AbortSignal;
     };
+    context?: {
+        pathReplace?: string;
+        pathReplaceWith?: string;
+    };
 };
 
 type GenreListSortMap = {
@@ -1651,5 +1655,9 @@ type BaseEndpointArgsWithServer = {
         server: null | ServerListItemWithCredential;
         serverId: string;
         signal?: AbortSignal;
+    };
+    context?: {
+        pathReplace?: string;
+        pathReplaceWith?: string;
     };
 };

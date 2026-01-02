@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
+import { replacePathPrefix } from '/@/shared/api/utils';
 import {
     Album,
     AlbumArtist,
@@ -108,6 +109,8 @@ const getPlaylistImageId = (item: z.infer<typeof jfType._response.playlist>): nu
 const normalizeSong = (
     item: z.infer<typeof jfType._response.song>,
     server: null | ServerListItem,
+    pathReplace?: string,
+    pathReplaceWith?: string,
 ): Song => {
     let bitRate = 0;
     let channels: null | number = null;
@@ -208,7 +211,10 @@ const normalizeSong = (
         mbzTrackId: item.ProviderIds?.MusicBrainzTrack || null,
         name: item.Name,
         participants: getPeople(item),
-        path,
+        path:
+            path && (pathReplace || pathReplaceWith)
+                ? replacePathPrefix(path, pathReplace || '', pathReplaceWith || '')
+                : path,
         peak: null,
         playCount: (item.UserData && item.UserData.PlayCount) || 0,
         playlistItemId: item.PlaylistItemId,

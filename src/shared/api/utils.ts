@@ -471,3 +471,11 @@ export const sortRadioList = (
 
     return results;
 };
+
+export const replacePathPrefix = (path: string, replacePrefix?: string, addPrefix?: string) => {
+    if (replacePrefix && path.startsWith(replacePrefix)) {
+        return path.slice(replacePrefix.length);
+    }
+
+    return addPrefix ? addPrefix + path : path;
+};

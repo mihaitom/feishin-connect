@@ -2,6 +2,7 @@ import z from 'zod';
 
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
+import { replacePathPrefix } from '/@/shared/api/utils';
 import {
     Album,
     AlbumArtist,
@@ -139,6 +140,8 @@ const getArtists = (
 const normalizeSong = (
     item: z.infer<typeof ndType._response.playlistSong> | z.infer<typeof ndType._response.song>,
     server?: null | ServerListItem,
+    pathReplace?: string,
+    pathReplaceWith?: string,
 ): Song => {
     let id;
     let playlistItemId;
@@ -202,7 +205,7 @@ const normalizeSong = (
         name: item.title,
         // Thankfully, Windows is merciful and allows a mix of separators. So, we can use the
         // POSIX separator here instead
-        path: (item.libraryPath ? item.libraryPath + '/' : '') + item.path,
+        path: item.path ? replacePathPrefix(item.path, pathReplace, pathReplaceWith) : null,
         peak:
             item.rgAlbumPeak || item.rgTrackPeak
                 ? { album: item.rgAlbumPeak, track: item.rgTrackPeak }
@@ -267,6 +270,8 @@ const normalizeAlbum = (
         songs?: z.infer<typeof ndType._response.songList>;
     },
     server?: null | ServerListItem,
+    pathReplace?: string,
+    pathReplaceWith?: string,
 ): Album => {
     return {
         ...parseAlbumTags(item),
@@ -309,7 +314,9 @@ const normalizeAlbum = (
         releaseYear: item.maxYear || null,
         size: item.size,
         songCount: item.songCount,
-        songs: item.songs ? item.songs.map((song) => normalizeSong(song, server)) : undefined,
+        songs: item.songs
+            ? item.songs.map((song) => normalizeSong(song, server, pathReplace, pathReplaceWith))
+            : undefined,
         tags: item.tags || null,
         updatedAt: item.updatedAt,
         userFavorite: item.starred || false,

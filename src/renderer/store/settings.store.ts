@@ -400,6 +400,8 @@ export const GeneralSettingsSchema = z.object({
     musicBrainz: z.boolean(),
     nativeAspectRatio: z.boolean(),
     passwordStore: z.string().optional(),
+    pathReplace: z.string(),
+    pathReplaceWith: z.string(),
     playButtonBehavior: z.nativeEnum(Play),
     playerbarOpenDrawer: z.boolean(),
     playerbarSlider: PlayerbarSliderSchema,
@@ -953,6 +955,8 @@ const initialState: SettingsState = {
         musicBrainz: true,
         nativeAspectRatio: false,
         passwordStore: undefined,
+        pathReplace: '',
+        pathReplaceWith: '',
         playButtonBehavior: Play.NOW,
         playerbarOpenDrawer: false,
         playerbarSlider: {
