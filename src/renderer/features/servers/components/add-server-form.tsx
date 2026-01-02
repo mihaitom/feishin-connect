@@ -94,9 +94,12 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     const { addServer, setCurrentServer } = useAuthStoreActions();
     const { servers: discovered } = useAutodiscovery();
 
+    const isServerLock = Boolean(window.SERVER_LOCK) || false;
+    const legacyAuthDefault = isServerLock ? Boolean(window.LEGACY_AUTHENTICATION) || false : false;
+
     const form = useForm({
         initialValues: {
-            legacyAuth: false,
+            legacyAuth: legacyAuthDefault,
             name:
                 (localSettings ? localSettings.env.SERVER_NAME : window.SERVER_NAME) || 'My Server',
             password: '',
@@ -112,9 +115,6 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
             username: '',
         },
     });
-
-    // server lock for web is only true if lock is true *and* all other properties are set
-    const isServerLock = Boolean(window.SERVER_LOCK) || false;
 
     const isSubmitDisabled = !form.values.name || !form.values.url || !form.values.username;
 
@@ -308,6 +308,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                     )}
                     {form.values.type === ServerType.SUBSONIC && (
                         <Checkbox
+                            disabled={isServerLock}
                             label={t('form.addServer.input', {
                                 context: 'legacyAuthentication',
                                 postProcess: 'titleCase',

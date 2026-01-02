@@ -7,6 +7,7 @@ declare global {
         api: PreloadApi;
         electron: ElectronAPI;
         queryLocalFonts?: () => Promise<Font[]>;
+        LEGACY_AUTHENTICATION?: boolean;
         SERVER_LOCK?: boolean;
         SERVER_NAME?: string;
         SERVER_TYPE?: ServerType;
