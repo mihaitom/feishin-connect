@@ -72,16 +72,21 @@ export const App = () => {
         }
     }, [language]);
 
+    const notificationStyles = useMemo(
+        () => ({
+            root: {
+                marginBottom: 90,
+            },
+        }),
+        [],
+    );
+
     return (
         <MantineProvider forceColorScheme={mode} theme={theme}>
             <Notifications
                 containerWidth="300px"
                 position="bottom-center"
-                styles={{
-                    root: {
-                        marginBottom: 90,
-                    },
-                }}
+                styles={notificationStyles}
                 zIndex={50000}
             />
             <WebAudioContext.Provider value={webAudioProvider}>

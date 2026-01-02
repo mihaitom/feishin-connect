@@ -32,12 +32,12 @@ const ResponsiveLayoutBase = ({ shell }: ResponsiveLayoutProps) => {
 
 export const ResponsiveLayout = ({ shell }: ResponsiveLayoutProps) => {
     useAppTracker();
-    useGarbageCollection();
 
     return (
         <>
             <ResponsiveLayoutBase shell={shell} />
             <LayoutHotkeys />
+            <GarbageCollection />
         </>
     );
 };
@@ -76,4 +76,9 @@ const LayoutHotkeys = () => {
     ]);
 
     return <CommandPalette modalProps={{ handlers, opened }} />;
+};
+
+const GarbageCollection = () => {
+    useGarbageCollection();
+    return null;
 };

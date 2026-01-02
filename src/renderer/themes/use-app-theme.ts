@@ -249,9 +249,14 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
         }
     }, [colorVars, selectedTheme, themeVars]);
 
+    const mantineTheme = useMemo(
+        () => createMantineTheme(appTheme as AppThemeConfiguration),
+        [appTheme],
+    );
+
     return {
         mode: appTheme?.mode || 'dark',
-        theme: createMantineTheme(appTheme as AppThemeConfiguration),
+        theme: mantineTheme,
     };
 };
 
