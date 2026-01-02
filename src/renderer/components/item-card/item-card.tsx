@@ -19,7 +19,7 @@ import { ItemControls } from '/@/renderer/components/item-list/types';
 import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useGeneralSettings } from '/@/renderer/store';
+import { useShowRatings } from '/@/renderer/store';
 import {
     formatDateAbsolute,
     formatDateAbsoluteUTC,
@@ -77,7 +77,7 @@ export const ItemCard = ({
     type = 'poster',
     withControls,
 }: ItemCardProps) => {
-    const { showRatings } = useGeneralSettings();
+    const showRatings = useShowRatings();
     const imageUrl = getImageUrl(data);
     const rows = providedRows || [];
 

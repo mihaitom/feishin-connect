@@ -1,6 +1,6 @@
 import isElectron from 'is-electron';
 import debounce from 'lodash/debounce';
-import { ChangeEvent, KeyboardEvent, useCallback, useMemo, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './hotkeys-manager-settings.module.css';
@@ -120,9 +120,9 @@ const BINDINGS_MAP: Record<BindingActions, string> = {
     zoomOut: i18n.t('setting.hotkey', { context: 'zoomOut', postProcess: 'sentenceCase' }),
 };
 
-export const HotkeyManagerSettings = () => {
+export const HotkeyManagerSettings = memo(() => {
     const { t } = useTranslation();
-    const { bindings, globalMediaHotkeys } = useHotkeySettings();
+    const { bindings } = useHotkeySettings();
     const { setSettings } = useSettingsStoreActions();
     const [selected, setSelected] = useState<BindingActions | null>(null);
     const keyword = useSettingSearchContext();
@@ -162,7 +162,6 @@ export const HotkeyManagerSettings = () => {
             setSettings({
                 hotkeys: {
                     bindings: updatedBindings,
-                    globalMediaHotkeys,
                 },
             });
 
@@ -188,13 +187,12 @@ export const HotkeyManagerSettings = () => {
             setSettings({
                 hotkeys: {
                     bindings: updatedBindings,
-                    globalMediaHotkeys,
                 },
             });
 
             ipc?.send('set-global-shortcuts', updatedBindings);
         },
-        [bindings, globalMediaHotkeys, setSettings],
+        [bindings, setSettings],
     );
 
     const handleClearHotkey = useCallback(
@@ -207,13 +205,12 @@ export const HotkeyManagerSettings = () => {
             setSettings({
                 hotkeys: {
                     bindings: updatedBindings,
-                    globalMediaHotkeys,
                 },
             });
 
             ipc?.send('set-global-shortcuts', updatedBindings);
         },
-        [bindings, globalMediaHotkeys, setSettings],
+        [bindings, setSettings],
     );
 
     const duplicateHotkeyMap = useMemo(() => {
@@ -367,4 +364,4 @@ export const HotkeyManagerSettings = () => {
             options={options}
         />
     );
-};
+});

@@ -12,12 +12,15 @@ import { Lyrics } from '/@/renderer/features/lyrics/lyrics';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { PlayQueueListControls } from '/@/renderer/features/now-playing/components/play-queue-list-controls';
 import {
+    useCombinedLyricsAndVisualizer,
     useFullScreenPlayerStore,
-    useGeneralSettings,
     usePlaybackSettings,
     usePlayerSong,
     useSettingsStore,
     useSettingsStoreActions,
+    useShowLyricsInSidebar,
+    useShowVisualizerInSidebar,
+    useSidebarPanelOrder,
 } from '/@/renderer/store';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Flex } from '/@/shared/components/flex/flex';
@@ -43,12 +46,10 @@ export const SidebarPlayQueue = () => {
     const [search, setSearch] = useState<string | undefined>(undefined);
     const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
     const [shouldRender, setShouldRender] = useState(!isFullScreenPlayerExpanded);
-    const {
-        combinedLyricsAndVisualizer,
-        showLyricsInSidebar,
-        showVisualizerInSidebar,
-        sidebarPanelOrder,
-    } = useGeneralSettings();
+    const combinedLyricsAndVisualizer = useCombinedLyricsAndVisualizer();
+    const showLyricsInSidebar = useShowLyricsInSidebar();
+    const showVisualizerInSidebar = useShowVisualizerInSidebar();
+    const sidebarPanelOrder = useSidebarPanelOrder();
     const { type, webAudio } = usePlaybackSettings();
     const showVisualizer = showVisualizerInSidebar && type === PlayerType.WEB && webAudio;
     const showPanel = showLyricsInSidebar || showVisualizer;
@@ -217,9 +218,9 @@ export const SidebarPlayQueue = () => {
 
 const PanelReorderControls = ({ panelType }: { panelType: 'lyrics' | 'visualizer' }) => {
     const { t } = useTranslation();
-    const generalSettings = useGeneralSettings();
-    const { combinedLyricsAndVisualizer, sidebarPanelOrder } = generalSettings;
     const { setSettings } = useSettingsStoreActions();
+    const sidebarPanelOrder = useSidebarPanelOrder();
+    const combinedLyricsAndVisualizer = useCombinedLyricsAndVisualizer();
 
     const currentIndex = sidebarPanelOrder.indexOf(panelType);
     const canMoveUp = currentIndex > 0;
@@ -238,11 +239,10 @@ const PanelReorderControls = ({ panelType }: { panelType: 'lyrics' | 'visualizer
 
         setSettings({
             general: {
-                ...generalSettings,
                 sidebarPanelOrder: newOrder,
             },
         });
-    }, [canMoveUp, currentIndex, generalSettings, sidebarPanelOrder, setSettings]);
+    }, [canMoveUp, currentIndex, sidebarPanelOrder, setSettings]);
 
     const handleMoveDown = useCallback(() => {
         if (!canMoveDown) return;
@@ -255,17 +255,15 @@ const PanelReorderControls = ({ panelType }: { panelType: 'lyrics' | 'visualizer
 
         setSettings({
             general: {
-                ...generalSettings,
                 sidebarPanelOrder: newOrder,
             },
         });
-    }, [canMoveDown, currentIndex, generalSettings, sidebarPanelOrder, setSettings]);
+    }, [canMoveDown, currentIndex, sidebarPanelOrder, setSettings]);
 
     const handleClose = useCallback(() => {
         if (combinedLyricsAndVisualizer && panelType === 'lyrics') {
             setSettings({
                 general: {
-                    ...generalSettings,
                     showLyricsInSidebar: false,
                     showVisualizerInSidebar: false,
                 },
@@ -273,19 +271,17 @@ const PanelReorderControls = ({ panelType }: { panelType: 'lyrics' | 'visualizer
         } else if (panelType === 'lyrics') {
             setSettings({
                 general: {
-                    ...generalSettings,
                     showLyricsInSidebar: false,
                 },
             });
         } else if (panelType === 'visualizer') {
             setSettings({
                 general: {
-                    ...generalSettings,
                     showVisualizerInSidebar: false,
                 },
             });
         }
-    }, [combinedLyricsAndVisualizer, generalSettings, panelType, setSettings]);
+    }, [combinedLyricsAndVisualizer, panelType, setSettings]);
 
     return (
         <div className={styles.panelReorderControls}>

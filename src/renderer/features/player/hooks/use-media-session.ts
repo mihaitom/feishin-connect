@@ -8,6 +8,7 @@ import {
     usePlaybackSettings,
     usePlayerStore,
     useSettingsStore,
+    useSkipButtons,
     useTimestampStoreBase,
 } from '/@/renderer/store';
 import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
@@ -18,7 +19,7 @@ const mediaSession = navigator.mediaSession;
 export const useMediaSession = () => {
     const { mediaSession: mediaSessionEnabled } = usePlaybackSettings();
     const player = usePlayer();
-    const skip = useSettingsStore((state) => state.general.skipButtons);
+    const skip = useSkipButtons();
     const playbackType = useSettingsStore((state) => state.playback.type);
 
     const isMediaSessionEnabled = useMemo(() => {

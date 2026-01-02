@@ -277,12 +277,9 @@ const VisualizerInner = () => {
                 visualizer.loadPreset(nextPreset, currentSettings.blendTime || 0.0);
 
                 // Update currentPreset in settings
-                const currentVisualizer = useSettingsStore.getState().visualizer;
                 setSettings({
                     visualizer: {
-                        ...currentVisualizer,
                         butterchurn: {
-                            ...currentVisualizer.butterchurn,
                             currentPreset: nextPresetName,
                         },
                     },

@@ -49,7 +49,13 @@ import {
     useCurrentServerId,
     usePlayerSong,
 } from '/@/renderer/store';
-import { useGeneralSettings, useSettingsStore } from '/@/renderer/store/settings.store';
+import {
+    useArtistItems,
+    useArtistRadioCount,
+    useArtistReleaseTypeItems,
+    useExternalLinks,
+    useSettingsStore,
+} from '/@/renderer/store/settings.store';
 import { titleCase } from '/@/renderer/utils';
 import { sanitize } from '/@/renderer/utils/sanitize';
 import { sortAlbumList } from '/@/shared/api/utils';
@@ -589,8 +595,9 @@ export const AlbumArtistDetailContent = ({
     albumsQuery,
     detailQuery,
 }: AlbumArtistDetailContentProps) => {
-    const { artistItems, artistRadioCount, externalLinks, lastFM, musicBrainz } =
-        useGeneralSettings();
+    const artistItems = useArtistItems();
+    const artistRadioCount = useArtistRadioCount();
+    const { externalLinks, lastFM, musicBrainz } = useExternalLinks();
     const { albumArtistId, artistId } = useParams() as {
         albumArtistId?: string;
         artistId?: string;
@@ -1064,7 +1071,7 @@ interface ArtistAlbumsProps {
 
 const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
     const { t } = useTranslation();
-    const { artistReleaseTypeItems } = useGeneralSettings();
+    const artistReleaseTypeItems = useArtistReleaseTypeItems();
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
     const albumArtistDetailSort = useAppStore((state) => state.albumArtistDetailSort);

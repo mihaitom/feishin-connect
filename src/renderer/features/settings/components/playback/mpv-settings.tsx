@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -68,7 +68,7 @@ export const getMpvProperties = (settings: SettingsState['playback']['mpvPropert
     return properties;
 };
 
-export const MpvSettings = () => {
+export const MpvSettings = memo(() => {
     const { t } = useTranslation();
     const settings = usePlaybackSettings();
     const { setSettings } = useSettingsStoreActions();
@@ -114,9 +114,7 @@ export const MpvSettings = () => {
     ) => {
         setSettings({
             playback: {
-                ...settings,
                 mpvProperties: {
-                    ...settings.mpvProperties,
                     [setting]: value,
                 },
             },
@@ -146,7 +144,6 @@ export const MpvSettings = () => {
     const handleSetExtraParameters = (data: string[]) => {
         setSettings({
             playback: {
-                ...settings,
                 mpvExtraParameters: data,
             },
         });
@@ -421,4 +418,4 @@ export const MpvSettings = () => {
             <SettingsSection options={replayGainOptions} />
         </>
     );
-};
+});

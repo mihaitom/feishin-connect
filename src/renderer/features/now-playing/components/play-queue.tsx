@@ -20,12 +20,12 @@ import {
     mapShuffledToQueueIndex,
     subscribeCurrentTrack,
     subscribePlayerQueue,
+    useFollowCurrentSong,
     useListSettings,
     usePlayerActions,
     usePlayerQueueType,
     usePlayerSong,
     usePlayerStore,
-    useSettingsStore,
 } from '/@/renderer/store';
 import { Flex } from '/@/shared/components/flex/flex';
 import { LoadingOverlay } from '/@/shared/components/loading-overlay/loading-overlay';
@@ -51,7 +51,7 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(({ listKey, sear
     const mergedRef = useMergedRef(ref, tableRef);
     const { getQueue } = usePlayerActions();
     const queueType = usePlayerQueueType();
-    const followCurrentSong = useSettingsStore((state) => state.general.followCurrentSong);
+    const followCurrentSong = useFollowCurrentSong();
 
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 200);
 

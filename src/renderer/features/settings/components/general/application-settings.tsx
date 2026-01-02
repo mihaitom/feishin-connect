@@ -2,7 +2,7 @@ import type { IpcRendererEvent } from 'electron';
 
 import { t } from 'i18next';
 import isElectron from 'is-electron';
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import i18n, { languages } from '/@/i18n/i18n';
@@ -78,7 +78,7 @@ if (isElectron()) {
     });
 }
 
-export const ApplicationSettings = () => {
+export const ApplicationSettings = memo(() => {
     const { t } = useTranslation();
     const settings = useGeneralSettings();
     const fontSettings = useFontSettings();
@@ -618,4 +618,4 @@ export const ApplicationSettings = () => {
             title={t('page.setting.application', { postProcess: 'sentenceCase' })}
         />
     );
-};
+});

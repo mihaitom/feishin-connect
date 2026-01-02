@@ -14,7 +14,7 @@ import {
     LibraryHeaderMenu,
 } from '/@/renderer/features/shared/components/library-header';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer, useGeneralSettings } from '/@/renderer/store';
+import { useCurrentServer, useShowRatings } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
 import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
@@ -29,7 +29,7 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
     const { albumId } = useParams() as { albumId: string };
     const { t } = useTranslation();
     const server = useCurrentServer();
-    const { showRatings } = useGeneralSettings();
+    const showRatings = useShowRatings();
     const detailQuery = useQuery(
         albumQueries.detail({ query: { id: albumId }, serverId: server?.id }),
     );

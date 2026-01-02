@@ -10,9 +10,9 @@ import { MobileLayout } from '/@/renderer/layouts/mobile-layout/mobile-layout';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
     useCommandPalette,
-    useGeneralSettings,
     useHotkeySettings,
     useSettingsStoreActions,
+    useZoomFactor,
 } from '/@/renderer/store';
 import { HotkeyItem, useHotkeys } from '/@/shared/hooks/use-hotkeys';
 
@@ -45,23 +45,22 @@ export const ResponsiveLayout = ({ shell }: ResponsiveLayoutProps) => {
 const LayoutHotkeys = () => {
     const navigate = useNavigate();
     const localSettings = isElectron() ? window.api.localSettings : null;
-    const settings = useGeneralSettings();
+    const zoomFactor = useZoomFactor();
     const { setSettings } = useSettingsStoreActions();
     const { bindings } = useHotkeySettings();
     const { opened, ...handlers } = useCommandPalette();
 
     const updateZoom = (increase: number) => {
-        const newVal = settings.zoomFactor + increase;
+        const newVal = zoomFactor + increase;
         if (newVal > 300 || newVal < 50 || !isElectron()) return;
         setSettings({
             general: {
-                ...settings,
                 zoomFactor: newVal,
             },
         });
-        localSettings?.setZoomFactor(settings.zoomFactor);
+        localSettings?.setZoomFactor(zoomFactor);
     };
-    localSettings?.setZoomFactor(settings.zoomFactor);
+    localSettings?.setZoomFactor(zoomFactor);
 
     const zoomHotkeys: HotkeyItem[] = [
         [bindings.zoomIn.hotkey, () => updateZoom(5)],

@@ -6,13 +6,13 @@ import styles from './visualizer.module.css';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { openVisualizerSettingsModal } from '/@/renderer/features/player/utils/open-visualizer-settings-modal';
 import { ComponentErrorBoundary } from '/@/renderer/features/shared/components/component-error-boundary';
-import { useSettingsStore } from '/@/renderer/store';
+import { useAccent, useSettingsStore } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 
 const VisualizerInner = () => {
     const { webAudio } = useWebAudio();
     const canvasRef = createRef<HTMLDivElement>();
-    const accent = useSettingsStore((store) => store.general.accent);
+    const accent = useAccent();
     const visualizer = useSettingsStore((store) => store.visualizer);
     const opacity = useSettingsStore((store) => store.visualizer.audiomotionanalyzer.opacity);
     const [motion, setMotion] = useState<AudioMotionAnalyzer>();

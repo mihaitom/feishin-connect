@@ -127,9 +127,7 @@ const useUpdateAudioMotionAnalyzer = () => {
     ) => {
         setSettings({
             visualizer: {
-                ...visualizer,
                 audiomotionanalyzer: {
-                    ...visualizer.audiomotionanalyzer,
                     [property]: value,
                 },
             },
@@ -149,9 +147,7 @@ const useUpdateButterchurn = () => {
     ) => {
         setSettings({
             visualizer: {
-                ...visualizer,
                 butterchurn: {
-                    ...visualizer.butterchurn,
                     [property]: value,
                 },
             },
@@ -177,7 +173,6 @@ export const VisualizerSettingsForm = () => {
     const handleTypeChange = (value: string) => {
         setSettings({
             visualizer: {
-                ...visualizer,
                 type: value as 'audiomotionanalyzer' | 'butterchurn',
             },
         });
@@ -464,9 +459,7 @@ const PresetSettings = () => {
 
         setSettings({
             visualizer: {
-                ...visualizer,
                 audiomotionanalyzer: {
-                    ...visualizer.audiomotionanalyzer,
                     ...presetValue,
                 },
             },
@@ -501,9 +494,7 @@ const PresetSettings = () => {
 
             setSettings({
                 visualizer: {
-                    ...visualizer,
                     audiomotionanalyzer: {
-                        ...visualizer.audiomotionanalyzer,
                         presets: updatedPresets,
                     },
                 },
@@ -517,9 +508,7 @@ const PresetSettings = () => {
 
             setSettings({
                 visualizer: {
-                    ...visualizer,
                     audiomotionanalyzer: {
-                        ...visualizer.audiomotionanalyzer,
                         presets: [...visualizer.audiomotionanalyzer.presets, newPreset],
                     },
                 },
@@ -644,9 +633,7 @@ const PresetSettings = () => {
 
         setSettings({
             visualizer: {
-                ...visualizer,
                 audiomotionanalyzer: {
-                    ...visualizer.audiomotionanalyzer,
                     presets: updatedPresets,
                 },
             },
@@ -776,9 +763,7 @@ const PresetSettings = () => {
 
             setSettings({
                 visualizer: {
-                    ...visualizer,
                     audiomotionanalyzer: {
-                        ...visualizer.audiomotionanalyzer,
                         ...configValue,
                     },
                 },

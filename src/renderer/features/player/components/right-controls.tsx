@@ -14,16 +14,17 @@ import {
     useAutoDJSettings,
     useCurrentServer,
     useFullScreenPlayerStore,
-    useGeneralSettings,
     useHotkeySettings,
     usePlayerData,
     usePlayerMuted,
     usePlayerSong,
     usePlayerVolume,
     useSetFullScreenPlayerStore,
-    useSettingsStore,
     useSettingsStoreActions,
     useSidebarRightExpanded,
+    useSideQueueType,
+    useVolumeWheelStep,
+    useVolumeWidth,
 } from '/@/renderer/store';
 import { useFullScreenPlayerStoreActions } from '/@/renderer/store/full-screen-player.store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
@@ -114,7 +115,7 @@ const QueueButton = () => {
     const { t } = useTranslation();
     const isSidebarRightExpanded = useSidebarRightExpanded();
     const { setSideBar } = useAppStoreActions();
-    const { sideQueueType } = useGeneralSettings();
+    const sideQueueType = useSideQueueType();
 
     const { bindings } = useHotkeySettings();
 
@@ -355,8 +356,8 @@ const VolumeButton = () => {
     const { bindings } = useHotkeySettings();
     const volume = usePlayerVolume();
     const muted = usePlayerMuted();
-    const { volumeWheelStep } = useGeneralSettings();
-    const volumeWidth = useSettingsStore((state) => state.general.volumeWidth);
+    const volumeWheelStep = useVolumeWheelStep();
+    const volumeWidth = useVolumeWidth();
     const { mediaToggleMute, setVolume } = usePlayer();
     const isMinWidth = useMediaQuery('(max-width: 480px)');
 
