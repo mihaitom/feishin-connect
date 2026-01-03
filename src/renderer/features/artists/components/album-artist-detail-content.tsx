@@ -1290,10 +1290,6 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
         ],
     ]);
 
-    if (releaseTypeEntries.length === 0) {
-        return null;
-    }
-
     return (
         <Stack gap="md">
             <Group gap="sm" w="100%">
@@ -1336,23 +1332,25 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
                 />
                 <GroupingTypeSelector />
             </Group>
-            <div className={styles.albumSectionContainer} ref={cq.ref}>
-                {cq.isCalculated && (
-                    <LayoutGroup>
-                        {releaseTypeEntries.map(({ albums, displayName, releaseType }) => (
-                            <AlbumSection
-                                albums={albums}
-                                controls={controls}
-                                cq={cq}
-                                key={releaseType}
-                                releaseType={releaseType}
-                                rows={rows}
-                                title={displayName}
-                            />
-                        ))}
-                    </LayoutGroup>
-                )}
-            </div>
+            {releaseTypeEntries.length > 0 && (
+                <div className={styles.albumSectionContainer} ref={cq.ref}>
+                    {cq.isCalculated && (
+                        <LayoutGroup>
+                            {releaseTypeEntries.map(({ albums, displayName, releaseType }) => (
+                                <AlbumSection
+                                    albums={albums}
+                                    controls={controls}
+                                    cq={cq}
+                                    key={releaseType}
+                                    releaseType={releaseType}
+                                    rows={rows}
+                                    title={displayName}
+                                />
+                            ))}
+                        </LayoutGroup>
+                    )}
+                </div>
+            )}
         </Stack>
     );
 };
