@@ -2,6 +2,7 @@
 
 import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 import clsx from 'clsx';
+import throttle from 'lodash/throttle';
 import { AnimatePresence, motion } from 'motion/react';
 import { useOverlayScrollbars } from 'overlayscrollbars-react';
 import React, {
@@ -1654,28 +1655,20 @@ const BaseItemTableList = ({
             return () => clearTimeout(timeout);
         }
 
-        let debounceTimeout: NodeJS.Timeout | null = null;
-        const checkScrollPosition = () => {
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
-            debounceTimeout = setTimeout(() => {
-                const scrollLeft = row.scrollLeft;
-                const maxScrollLeft = row.scrollWidth - row.clientWidth;
+        const checkScrollPosition = throttle(() => {
+            const scrollLeft = row.scrollLeft;
+            const maxScrollLeft = row.scrollWidth - row.clientWidth;
 
-                setShowLeftShadow(pinnedLeftColumnCount > 0 && scrollLeft > 0);
-                setShowRightShadow(pinnedRightColumnCount > 0 && scrollLeft < maxScrollLeft);
-            }, 50); // 50ms debounce for shadow visibility
-        };
+            setShowLeftShadow(pinnedLeftColumnCount > 0 && scrollLeft > 0);
+            setShowRightShadow(pinnedRightColumnCount > 0 && scrollLeft < maxScrollLeft);
+        }, 50);
 
         checkScrollPosition();
 
         row.addEventListener('scroll', checkScrollPosition, { passive: true });
 
         return () => {
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
+            checkScrollPosition.cancel();
             row.removeEventListener('scroll', checkScrollPosition);
         };
     }, [pinnedLeftColumnCount, pinnedRightColumnCount]);
@@ -1696,25 +1689,17 @@ const BaseItemTableList = ({
         // When right-pinned columns exist, use right pinned column's scroll position
         const scrollElement = pinnedRightColumnCount > 0 && pinnedRight ? pinnedRight : row;
 
-        let debounceTimeout: NodeJS.Timeout | null = null;
-        const checkScrollPosition = () => {
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
-            debounceTimeout = setTimeout(() => {
-                const currentScrollTop = scrollElement.scrollTop;
-                setShowTopShadow(currentScrollTop > 0);
-            }, 50);
-        };
+        const checkScrollPosition = throttle(() => {
+            const currentScrollTop = scrollElement.scrollTop;
+            setShowTopShadow(currentScrollTop > 0);
+        }, 50);
 
         checkScrollPosition();
 
         scrollElement.addEventListener('scroll', checkScrollPosition, { passive: true });
 
         return () => {
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
+            checkScrollPosition.cancel();
             scrollElement.removeEventListener('scroll', checkScrollPosition);
         };
     }, [enableHeader, pinnedRightColumnCount]);
