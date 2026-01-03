@@ -12,6 +12,6 @@ const BaseGrid = ({ classNames, style, ...props }: GridProps) => {
 
 BaseGrid.displayName = 'Grid';
 
-export const Grid = memo(BaseGrid);
+export const Grid = memo(BaseGrid) as unknown as typeof BaseGrid & { Col: typeof MantineGrid.Col };
 
 (Grid as typeof Grid & { Col: typeof MantineGrid.Col }).Col = MantineGrid.Col;

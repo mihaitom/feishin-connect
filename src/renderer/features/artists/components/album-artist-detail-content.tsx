@@ -900,6 +900,8 @@ const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumS
 
 type GroupingType = 'all' | 'primary';
 
+const PRIMARY_RELEASE_TYPES = ['album', 'broadcast', 'ep', 'other', 'single'];
+
 const groupAlbumsByReleaseType = (
     albums: Album[],
     routeId: string,
@@ -933,13 +935,21 @@ const groupAlbumsByReleaseType = (
                 // Group by all release types
                 const releaseTypes = album.releaseTypes || [];
                 if (releaseTypes.length > 0) {
-                    releaseTypes.forEach((type) => {
-                        const normalizedType = type.toLowerCase();
-                        if (!acc[normalizedType]) {
-                            acc[normalizedType] = [];
-                        }
-                        acc[normalizedType].push(album);
-                    });
+                    // Sort release types: primaries first (alphabetically), then secondaries (alphabetically)
+                    const normalizedTypes = releaseTypes.map((type) => type.toLowerCase());
+                    const primaryTypes = normalizedTypes
+                        .filter((type) => PRIMARY_RELEASE_TYPES.includes(type))
+                        .sort();
+                    const secondaryTypes = normalizedTypes
+                        .filter((type) => !PRIMARY_RELEASE_TYPES.includes(type))
+                        .sort();
+                    const sortedTypes = [...primaryTypes, ...secondaryTypes];
+
+                    const combinedKey = sortedTypes.join('/');
+                    if (!acc[combinedKey]) {
+                        acc[combinedKey] = [];
+                    }
+                    acc[combinedKey].push(album);
                 } else {
                     // If no release types, use "album" as fallback
                     const albumKey = 'album';
@@ -1116,11 +1126,114 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
                 }
             });
 
+        const getDisplayNameForType = (releaseType: string): string => {
+            switch (releaseType) {
+                case 'album':
+                    return t('releaseType.primary.album', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'appears-on':
+                    return t('page.albumArtistDetail.appearsOn', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'audiobook':
+                    return t('releaseType.secondary.audiobook', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'audio drama':
+                    return t('releaseType.secondary.audioDrama', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'broadcast':
+                    return t('releaseType.primary.broadcast', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'compilation':
+                    return t('releaseType.secondary.compilation', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'demo':
+                    return t('releaseType.secondary.demo', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'dj-mix':
+                    return t('releaseType.secondary.djMix', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'ep':
+                    return t('releaseType.primary.ep', {
+                        postProcess: 'upperCase',
+                    });
+                case 'field recording':
+                    return t('releaseType.secondary.fieldRecording', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'interview':
+                    return t('releaseType.secondary.interview', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'live':
+                    return t('releaseType.secondary.live', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'mixtape/street':
+                    return t('releaseType.secondary.mixtape', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'other':
+                    return t('releaseType.primary.other', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'remix':
+                    return t('releaseType.secondary.remix', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'single':
+                    return t('releaseType.primary.single', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'soundtrack':
+                    return t('releaseType.secondary.soundtrack', {
+                        postProcess: 'sentenceCase',
+                    });
+                case 'spokenword':
+                    return t('releaseType.secondary.spokenWord', {
+                        postProcess: 'sentenceCase',
+                    });
+                default:
+                    return titleCase(releaseType);
+            }
+        };
+
         const getPriority = (releaseType: string) => {
+            if (releaseType.includes('/')) {
+                const types = releaseType.split('/');
+                // Check if there's a primary type in the joined types
+                const primaryTypes = types.filter((type) => PRIMARY_RELEASE_TYPES.includes(type));
+
+                if (primaryTypes.length > 0) {
+                    // Use the primary type's priority (first primary if multiple)
+                    const primaryPriority = priorityMap.get(primaryTypes[0]) ?? 999;
+                    return primaryPriority;
+                } else {
+                    // Only secondary types - use minimum priority from settings
+                    const priorities = types
+                        .map((type) => priorityMap.get(type) ?? 999)
+                        .filter((p) => p !== 999);
+                    return priorities.length > 0 ? Math.min(...priorities) : 999;
+                }
+            }
             return priorityMap.get(releaseType) ?? 999;
         };
 
         const isReleaseTypeEnabled = (releaseType: string): boolean => {
+            if (releaseType.includes('/')) {
+                const types = releaseType.split('/');
+                return types.some((type) => {
+                    const enumValue = releaseTypeToEnumMap[type];
+                    return enumValue ? enabledReleaseTypeEnums.has(enumValue) : false;
+                });
+            }
             const enumValue = releaseTypeToEnumMap[releaseType];
             return enumValue ? enabledReleaseTypeEnums.has(enumValue) : false;
         };
@@ -1129,103 +1242,30 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
             .filter(([releaseType]) => isReleaseTypeEnabled(releaseType))
             .map(([releaseType, albums]) => {
                 let displayName: React.ReactNode | string;
-                switch (releaseType) {
-                    case 'album':
-                        displayName = t('releaseType.primary.album', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'appears-on':
-                        displayName = t('page.albumArtistDetail.appearsOn', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'audiobook':
-                        displayName = t('releaseType.secondary.audiobook', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'audio drama':
-                        displayName = t('releaseType.secondary.audioDrama', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'broadcast':
-                        displayName = t('releaseType.primary.broadcast', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'compilation':
-                        displayName = t('releaseType.secondary.compilation', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'demo':
-                        displayName = t('releaseType.secondary.demo', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'dj-mix':
-                        displayName = t('releaseType.secondary.djMix', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'ep':
-                        displayName = t('releaseType.primary.ep', {
-                            postProcess: 'upperCase',
-                        });
-                        break;
-                    case 'field recording':
-                        displayName = t('releaseType.secondary.fieldRecording', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'interview':
-                        displayName = t('releaseType.secondary.interview', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'live':
-                        displayName = t('releaseType.secondary.live', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'mixtape/street':
-                        displayName = t('releaseType.secondary.mixtape', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'other':
-                        displayName = t('releaseType.primary.other', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'remix':
-                        displayName = t('releaseType.secondary.remix', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'single':
-                        displayName = t('releaseType.primary.single', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'soundtrack':
-                        displayName = t('releaseType.secondary.soundtrack', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    case 'spokenword':
-                        displayName = t('releaseType.secondary.spokenWord', {
-                            postProcess: 'sentenceCase',
-                        });
-                        break;
-                    default:
-                        displayName = titleCase(releaseType);
+
+                if (releaseType.includes('/')) {
+                    const types = releaseType.split('/');
+                    const displayNames = types.map((type) => getDisplayNameForType(type));
+                    displayName = displayNames.join('/');
+                } else {
+                    displayName = getDisplayNameForType(releaseType);
                 }
+
                 return { albums, displayName, releaseType };
             })
-            .sort((a, b) => getPriority(a.releaseType) - getPriority(b.releaseType));
+            .sort((a, b) => {
+                const priorityA = getPriority(a.releaseType);
+                const priorityB = getPriority(b.releaseType);
+
+                // First sort by priority
+                if (priorityA !== priorityB) {
+                    return priorityA - priorityB;
+                }
+
+                // If priorities are equal (e.g., both have the same primary type),
+                // sort alphabetically by the release type key
+                return a.releaseType.localeCompare(b.releaseType);
+            });
     }, [albumsByReleaseType, artistReleaseTypeItems, t]);
 
     const cq = useContainerQuery({
