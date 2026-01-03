@@ -21,26 +21,39 @@ const getArtistList = (
     artists?: typeof ssType._response.song._type.artists,
     artistId?: number | string,
     artistName?: string,
+    participants?: null | Record<string, RelatedArtist[]>,
 ) => {
-    return artists
-        ? artists.map((item) => ({
-              id: item.id.toString(),
-              imageId: null,
-              imageUrl: null,
-              name: item.name,
-              userFavorite: false,
-              userRating: null,
-          }))
-        : [
-              {
-                  id: artistId?.toString() || '',
-                  imageId: null,
-                  imageUrl: null,
-                  name: artistName || '',
-                  userFavorite: false,
-                  userRating: null,
-              },
-          ];
+    if (!artists && !participants) {
+        return [
+            {
+                id: artistId?.toString() || '',
+                imageId: null,
+                imageUrl: null,
+                name: artistName || '',
+                userFavorite: false,
+                userRating: null,
+            },
+        ];
+    }
+
+    const result: RelatedArtist[] = [];
+
+    artists?.forEach((item) => {
+        result.push({
+            id: item.id.toString(),
+            imageId: null,
+            imageUrl: null,
+            name: item.name,
+            userFavorite: false,
+            userRating: null,
+        });
+    });
+
+    if (participants?.['remixer']) {
+        result.push(...participants['remixer']);
+    }
+
+    return result;
 };
 
 const getParticipants = (
@@ -121,6 +134,8 @@ const normalizeSong = (
     pathReplace?: string,
     pathReplaceWith?: string,
 ): Song => {
+    const participants = getParticipants(item);
+
     return {
         _itemType: LibraryItem.SONG,
         _serverId: server?.id || 'unknown',
@@ -130,7 +145,7 @@ const normalizeSong = (
         albumArtists: getArtistList(item.albumArtists, item.artistId, item.artist),
         albumId: item.albumId?.toString() || '',
         artistName: item.artist || '',
-        artists: getArtistList(item.artists, item.artistId, item.artist),
+        artists: getArtistList(item.artists, item.artistId, item.artist, participants),
         bitDepth: item.bitDepth || null,
         bitRate: item.bitRate || 0,
         bpm: item.bpm || null,
@@ -164,7 +179,7 @@ const normalizeSong = (
         mbzRecordingId: item.musicBrainzId || null,
         mbzTrackId: null,
         name: item.title,
-        participants: getParticipants(item),
+        participants,
         path: replacePathPrefix(item.path || '', pathReplace, pathReplaceWith),
         peak:
             item.replayGain && (item.replayGain.albumPeak || item.replayGain.trackPeak)
