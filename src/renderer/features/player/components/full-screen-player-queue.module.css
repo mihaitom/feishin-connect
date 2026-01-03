@@ -1,5 +1,6 @@
 .queue-container {
     position: relative;
+    display: flex;
     width: 100%;
     min-width: 0;
     height: 100%;
