@@ -83,8 +83,9 @@ const VisualizerInner = () => {
                         width,
                     }) as ButterchurnVisualizer;
 
-                    // Connect to audio gains (use the first gain node)
-                    butterchurnInstance.connectAudio(gains[0]);
+                    for (const gain of gains) {
+                        butterchurnInstance.connectAudio(gain);
+                    }
 
                     // Load preset from settings or default
                     const presets = butterchurnPresets.getPresets();
