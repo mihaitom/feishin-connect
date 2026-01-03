@@ -165,10 +165,7 @@ const normalizeSong = (
         mbzTrackId: null,
         name: item.title,
         participants: getParticipants(item),
-        path:
-            pathReplace || pathReplaceWith
-                ? replacePathPrefix(item.path || '', pathReplace, pathReplaceWith)
-                : item.path,
+        path: replacePathPrefix(item.path || '', pathReplace, pathReplaceWith),
         peak:
             item.replayGain && (item.replayGain.albumPeak || item.replayGain.trackPeak)
                 ? {

@@ -211,10 +211,7 @@ const normalizeSong = (
         mbzTrackId: item.ProviderIds?.MusicBrainzTrack || null,
         name: item.Name,
         participants: getPeople(item),
-        path:
-            path && (pathReplace || pathReplaceWith)
-                ? replacePathPrefix(path, pathReplace || '', pathReplaceWith || '')
-                : path,
+        path: replacePathPrefix(path || '', pathReplace, pathReplaceWith),
         peak: null,
         playCount: (item.UserData && item.UserData.PlayCount) || 0,
         playlistItemId: item.PlaylistItemId,
