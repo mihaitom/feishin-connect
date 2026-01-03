@@ -1226,6 +1226,26 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
             return priorityMap.get(releaseType) ?? 999;
         };
 
+        const getSecondaryTypePriorityKey = (releaseType: string): string => {
+            if (releaseType.includes('/')) {
+                const types = releaseType.split('/');
+                const secondaryTypes = types.filter(
+                    (type) => !PRIMARY_RELEASE_TYPES.includes(type),
+                );
+
+                if (secondaryTypes.length > 0) {
+                    const priorities = secondaryTypes
+                        .map((type) => priorityMap.get(type) ?? 999)
+                        .filter((p) => p !== 999)
+                        .sort((a, b) => a - b);
+
+                    // Create a comparison key from sorted priorities
+                    return priorities.map((p) => String(p).padStart(3, '0')).join(',');
+                }
+            }
+            return '';
+        };
+
         const isReleaseTypeEnabled = (releaseType: string): boolean => {
             if (releaseType.includes('/')) {
                 const types = releaseType.split('/');
@@ -1262,8 +1282,20 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
                     return priorityA - priorityB;
                 }
 
-                // If priorities are equal (e.g., both have the same primary type),
-                // sort alphabetically by the release type key
+                // If priorities are equal, use weighted ordering for combined release types
+                const isCombinedA = a.releaseType.includes('/');
+                const isCombinedB = b.releaseType.includes('/');
+
+                if (isCombinedA && isCombinedB) {
+                    const secondaryKeyA = getSecondaryTypePriorityKey(a.releaseType);
+                    const secondaryKeyB = getSecondaryTypePriorityKey(b.releaseType);
+
+                    if (secondaryKeyA && secondaryKeyB) {
+                        return secondaryKeyA.localeCompare(secondaryKeyB);
+                    }
+                }
+
+                // Fallback to alphabetical for non-combined types or if weighted comparison isn't applicable
                 return a.releaseType.localeCompare(b.releaseType);
             });
     }, [albumsByReleaseType, artistReleaseTypeItems, t]);
