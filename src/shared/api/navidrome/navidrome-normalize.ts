@@ -54,6 +54,7 @@ const getArtists = (
         | z.infer<typeof ndType._response.album>
         | z.infer<typeof ndType._response.playlistSong>
         | z.infer<typeof ndType._response.song>,
+    includeRemixers = true,
 ) => {
     let albumArtists: RelatedArtist[] | undefined;
     let artists: RelatedArtist[] | undefined;
@@ -75,7 +76,7 @@ const getArtists = (
 
                 if (role === 'albumartist') {
                     albumArtists = roleList;
-                } else if (role === 'remixer') {
+                } else if (role === 'remixer' && includeRemixers) {
                     remixers = roleList;
                 } else {
                     artists = roleList;
@@ -124,7 +125,7 @@ const getArtists = (
         ];
     }
 
-    if (artists === undefined && remixers === undefined) {
+    if (artists === undefined && (includeRemixers ? remixers === undefined : true)) {
         artists = [
             {
                 id: item.artistId,
@@ -137,7 +138,11 @@ const getArtists = (
         ];
     }
 
-    return { albumArtists, artists: [...(artists || []), ...(remixers || [])], participants };
+    return {
+        albumArtists,
+        artists: [...(artists || []), ...(includeRemixers ? remixers || [] : [])],
+        participants,
+    };
 };
 
 const normalizeSong = (
@@ -160,7 +165,7 @@ const normalizeSong = (
     return {
         album: item.album,
         albumId: item.albumId,
-        ...getArtists(item),
+        ...getArtists(item, true),
         _itemType: LibraryItem.SONG,
         _serverId: server?.id || 'unknown',
         _serverType: ServerType.NAVIDROME,
@@ -278,7 +283,7 @@ const normalizeAlbum = (
 ): Album => {
     return {
         ...parseAlbumTags(item),
-        ...getArtists(item),
+        ...getArtists(item, false),
         _itemType: LibraryItem.ALBUM,
         _serverId: server?.id || 'unknown',
         _serverType: ServerType.NAVIDROME,
