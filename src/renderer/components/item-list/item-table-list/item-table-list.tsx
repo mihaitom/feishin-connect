@@ -93,6 +93,7 @@ interface VirtualizedTableGridProps {
     cellPadding: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
     controls: ItemControls;
     data: unknown[];
+    dataWithGroups: (null | unknown)[];
     enableAlternateRowColors: boolean;
     enableColumnReorder: boolean;
     enableColumnResize: boolean;
@@ -134,7 +135,8 @@ const VirtualizedTableGrid = ({
     CellComponent,
     cellPadding,
     controls,
-    data,
+    // data,
+    dataWithGroups,
     enableAlternateRowColors,
     enableColumnReorder,
     enableColumnResize,
@@ -185,53 +187,6 @@ const VirtualizedTableGrid = ({
         );
     }, [pinnedRightColumnCount, pinnedLeftColumnCount, totalColumnCount, columnWidth]);
 
-    // Create data array with group headers inserted as null values
-    // Groups are defined by itemCount, so we calculate indexes based on cumulative item counts
-    const dataWithGroups = useMemo(() => {
-        const result: (null | unknown)[] = enableHeader ? [null] : [];
-
-        if (!groups || groups.length === 0) {
-            // No groups, just add all data
-            result.push(...data);
-            return result;
-        }
-
-        // Calculate group header indexes based on itemCounts
-        const groupIndexes: number[] = [];
-        let cumulativeDataIndex = 0;
-        const headerOffset = enableHeader ? 1 : 0;
-
-        groups.forEach((group, groupIndex) => {
-            // Group header appears before its items
-            // Index = header offset + cumulative data index + number of previous group headers
-            const groupHeaderIndex = headerOffset + cumulativeDataIndex + groupIndex;
-            groupIndexes.push(groupHeaderIndex);
-            cumulativeDataIndex += group.itemCount;
-        });
-
-        let dataIndex = 0;
-        const startIndex = enableHeader ? 1 : 0;
-        let groupHeaderCount = 0;
-
-        // Iterate through the expanded row space (data + group headers)
-        for (
-            let rowIndex = startIndex;
-            rowIndex < startIndex + data.length + groupIndexes.length;
-            rowIndex++
-        ) {
-            // Check if this row should have a group header
-            const expectedGroupIndex = groupIndexes[groupHeaderCount];
-            if (expectedGroupIndex !== undefined && rowIndex === expectedGroupIndex) {
-                result.push(null); // Group header row
-                groupHeaderCount++;
-            } else if (dataIndex < data.length) {
-                result.push(data[dataIndex]);
-                dataIndex++;
-            }
-        }
-        return result;
-    }, [data, enableHeader, groups]);
-
     const adjustedRowIndexMap = useMemo(() => {
         const map = new Map<number, number>();
 
@@ -275,69 +230,92 @@ const VirtualizedTableGrid = ({
         return map;
     }, [dataWithGroups, enableHeader, groups]);
 
-    const itemProps: TableItemProps = useMemo(
+    const stableConfigProps = useMemo(
+        () => ({
+            cellPadding,
+            columns: parsedColumns,
+            controls,
+            enableHeader,
+            getRowHeight,
+            internalState,
+            itemType,
+            playerContext,
+            size,
+            tableId,
+        }),
+        [
+            cellPadding,
+            parsedColumns,
+            controls,
+            enableHeader,
+            getRowHeight,
+            internalState,
+            itemType,
+            playerContext,
+            size,
+            tableId,
+        ],
+    );
+
+    const dynamicDataProps = useMemo(
         () => ({
             activeRowId,
             adjustedRowIndexMap,
             calculatedColumnWidths,
-            cellPadding,
-            columns: parsedColumns,
-            controls,
             data: dataWithGroups,
-            enableAlternateRowColors,
-            enableColumnReorder,
-            enableColumnResize,
-            enableDrag,
-            enableExpansion,
-            enableHeader,
-            enableHorizontalBorders,
-            enableRowHoverHighlight,
-            enableSelection,
-            enableVerticalBorders,
-            getRowHeight,
-            groups,
-            internalState,
-            itemType,
             pinnedLeftColumnCount,
             pinnedLeftColumnWidths,
             pinnedRightColumnCount,
             pinnedRightColumnWidths,
-            playerContext,
-            size,
             startRowIndex,
-            tableId,
         }),
         [
             activeRowId,
             adjustedRowIndexMap,
             calculatedColumnWidths,
-            cellPadding,
-            parsedColumns,
-            controls,
             dataWithGroups,
+            pinnedLeftColumnCount,
+            pinnedLeftColumnWidths,
+            pinnedRightColumnCount,
+            pinnedRightColumnWidths,
+            startRowIndex,
+        ],
+    );
+
+    const featureFlags = useMemo(
+        () => ({
             enableAlternateRowColors,
             enableColumnReorder,
             enableColumnResize,
             enableDrag,
             enableExpansion,
-            enableHeader,
             enableHorizontalBorders,
             enableRowHoverHighlight,
             enableSelection,
             enableVerticalBorders,
-            getRowHeight,
             groups,
-            internalState,
-            itemType,
-            pinnedLeftColumnCount,
-            pinnedLeftColumnWidths,
-            pinnedRightColumnCount,
-            pinnedRightColumnWidths,
-            playerContext,
-            size,
-            startRowIndex,
-            tableId,
+        }),
+        [
+            enableAlternateRowColors,
+            enableColumnReorder,
+            enableColumnResize,
+            enableDrag,
+            enableExpansion,
+            enableHorizontalBorders,
+            enableRowHoverHighlight,
+            enableSelection,
+            enableVerticalBorders,
+            groups,
         ],
+    );
+
+    const itemProps: TableItemProps = useMemo(
+        () => ({
+            ...stableConfigProps,
+            ...dynamicDataProps,
+            ...featureFlags,
+        }),
+        [stableConfigProps, dynamicDataProps, featureFlags],
     );
 
     const PinnedRowCell = useCallback(
@@ -612,6 +590,53 @@ const VirtualizedTableGrid = ({
 
 VirtualizedTableGrid.displayName = 'VirtualizedTableGrid';
 
+const MemoizedVirtualizedTableGrid = memo(VirtualizedTableGrid, (prevProps, nextProps) => {
+    return (
+        prevProps.activeRowId === nextProps.activeRowId &&
+        prevProps.calculatedColumnWidths === nextProps.calculatedColumnWidths &&
+        prevProps.cellPadding === nextProps.cellPadding &&
+        prevProps.controls === nextProps.controls &&
+        prevProps.data === nextProps.data &&
+        prevProps.dataWithGroups === nextProps.dataWithGroups &&
+        prevProps.enableAlternateRowColors === nextProps.enableAlternateRowColors &&
+        prevProps.enableColumnReorder === nextProps.enableColumnReorder &&
+        prevProps.enableColumnResize === nextProps.enableColumnResize &&
+        prevProps.enableDrag === nextProps.enableDrag &&
+        prevProps.enableExpansion === nextProps.enableExpansion &&
+        prevProps.enableHeader === nextProps.enableHeader &&
+        prevProps.enableHorizontalBorders === nextProps.enableHorizontalBorders &&
+        prevProps.enableRowHoverHighlight === nextProps.enableRowHoverHighlight &&
+        prevProps.enableSelection === nextProps.enableSelection &&
+        prevProps.enableVerticalBorders === nextProps.enableVerticalBorders &&
+        prevProps.getRowHeight === nextProps.getRowHeight &&
+        prevProps.groups === nextProps.groups &&
+        prevProps.headerHeight === nextProps.headerHeight &&
+        prevProps.internalState === nextProps.internalState &&
+        prevProps.itemType === nextProps.itemType &&
+        prevProps.mergedRowRef === nextProps.mergedRowRef &&
+        prevProps.onRangeChanged === nextProps.onRangeChanged &&
+        prevProps.parsedColumns === nextProps.parsedColumns &&
+        prevProps.pinnedLeftColumnCount === nextProps.pinnedLeftColumnCount &&
+        prevProps.pinnedLeftColumnRef === nextProps.pinnedLeftColumnRef &&
+        prevProps.pinnedRightColumnCount === nextProps.pinnedRightColumnCount &&
+        prevProps.pinnedRightColumnRef === nextProps.pinnedRightColumnRef &&
+        prevProps.pinnedRowCount === nextProps.pinnedRowCount &&
+        prevProps.pinnedRowRef === nextProps.pinnedRowRef &&
+        prevProps.playerContext === nextProps.playerContext &&
+        prevProps.showLeftShadow === nextProps.showLeftShadow &&
+        prevProps.showRightShadow === nextProps.showRightShadow &&
+        prevProps.showTopShadow === nextProps.showTopShadow &&
+        prevProps.size === nextProps.size &&
+        prevProps.startRowIndex === nextProps.startRowIndex &&
+        prevProps.tableId === nextProps.tableId &&
+        prevProps.totalColumnCount === nextProps.totalColumnCount &&
+        prevProps.totalRowCount === nextProps.totalRowCount &&
+        prevProps.CellComponent === nextProps.CellComponent
+    );
+});
+
+MemoizedVirtualizedTableGrid.displayName = 'MemoizedVirtualizedTableGrid';
+
 export interface TableGroupHeader {
     itemCount: number;
     render: (props: {
@@ -737,6 +762,53 @@ const BaseItemTableList = ({
     const playerContext = usePlayer();
     const [centerContainerWidth, setCenterContainerWidth] = useState(0);
     const [totalContainerWidth, setTotalContainerWidth] = useState(0);
+
+    // Compute dataWithGroups once to avoid duplicate computation
+    // This is used by both VirtualizedTableGrid and getDataFn
+    const dataWithGroups = useMemo(() => {
+        const result: (null | unknown)[] = enableHeader ? [null] : [];
+
+        if (!groups || groups.length === 0) {
+            // No groups, just add all data
+            result.push(...data);
+            return result;
+        }
+
+        // Calculate group header indexes based on itemCounts
+        const groupIndexes: number[] = [];
+        let cumulativeDataIndex = 0;
+        const headerOffset = enableHeader ? 1 : 0;
+
+        groups.forEach((group, groupIndex) => {
+            // Group header appears before its items
+            // Index = header offset + cumulative data index + number of previous group headers
+            const groupHeaderIndex = headerOffset + cumulativeDataIndex + groupIndex;
+            groupIndexes.push(groupHeaderIndex);
+            cumulativeDataIndex += group.itemCount;
+        });
+
+        let dataIndex = 0;
+        const startIndex = enableHeader ? 1 : 0;
+        let groupHeaderCount = 0;
+
+        // Iterate through the expanded row space (data + group headers)
+        for (
+            let rowIndex = startIndex;
+            rowIndex < startIndex + data.length + groupIndexes.length;
+            rowIndex++
+        ) {
+            // Check if this row should have a group header
+            const expectedGroupIndex = groupIndexes[groupHeaderCount];
+            if (expectedGroupIndex !== undefined && rowIndex === expectedGroupIndex) {
+                result.push(null); // Group header row
+                groupHeaderCount++;
+            } else if (dataIndex < data.length) {
+                result.push(data[dataIndex]);
+                dataIndex++;
+            }
+        }
+        return result;
+    }, [data, enableHeader, groups]);
 
     // Compute distributed widths: unpinned columns with autoWidth will share any remaining space
     // When autoSizeColumns is true, all column widths are treated as proportions and scaled to fit the container
@@ -867,11 +939,20 @@ const BaseItemTableList = ({
 
         const stickyHeader = stickyHeaderRef.current;
         const container = containerRef.current;
+        let isMounted = true;
 
         const updatePosition = () => {
-            const containerRect = container.getBoundingClientRect();
-            stickyHeader.style.left = `${containerRect.left}px`;
-            stickyHeader.style.width = `${containerRect.width}px`;
+            // Guard against updates after unmount
+            if (!isMounted || !stickyHeader || !container) {
+                return;
+            }
+            try {
+                const containerRect = container.getBoundingClientRect();
+                stickyHeader.style.left = `${containerRect.left}px`;
+                stickyHeader.style.width = `${containerRect.width}px`;
+            } catch {
+                // Silently handle errors if elements are no longer in DOM
+            }
         };
 
         updatePosition();
@@ -880,6 +961,7 @@ const BaseItemTableList = ({
         window.addEventListener('scroll', updatePosition, true);
 
         return () => {
+            isMounted = false;
             window.removeEventListener('resize', updatePosition);
             window.removeEventListener('scroll', updatePosition, true);
         };
@@ -895,13 +977,22 @@ const BaseItemTableList = ({
 
         updateWidth();
 
+        let debounceTimeout: NodeJS.Timeout | null = null;
         const resizeObserver = new ResizeObserver(() => {
-            updateWidth();
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
+            debounceTimeout = setTimeout(() => {
+                updateWidth();
+            }, 100);
         });
 
         resizeObserver.observe(el);
 
         return () => {
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
             resizeObserver.disconnect();
         };
     }, []);
@@ -917,13 +1008,22 @@ const BaseItemTableList = ({
 
         updateWidth();
 
+        let debounceTimeout: NodeJS.Timeout | null = null;
         const resizeObserver = new ResizeObserver(() => {
-            updateWidth();
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
+            debounceTimeout = setTimeout(() => {
+                updateWidth();
+            }, 100);
         });
 
         resizeObserver.observe(el);
 
         return () => {
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
             resizeObserver.disconnect();
         };
     }, [autoFitColumns]);
@@ -1366,7 +1466,6 @@ const BaseItemTableList = ({
                 const scrollTop = (e.currentTarget as HTMLDivElement).scrollTop;
                 const scrollLeft = (e.currentTarget as HTMLDivElement).scrollLeft;
 
-                // Prevent recursive scroll events
                 const isScrolling = {
                     header: false,
                     pinnedLeft: false,
@@ -1490,8 +1589,14 @@ const BaseItemTableList = ({
             }
 
             // Add resize observer to maintain height sync
+            let heightSyncDebounceTimeout: NodeJS.Timeout | null = null;
             const resizeObserver = new ResizeObserver(() => {
-                syncHeights();
+                if (heightSyncDebounceTimeout) {
+                    clearTimeout(heightSyncDebounceTimeout);
+                }
+                heightSyncDebounceTimeout = setTimeout(() => {
+                    syncHeights();
+                }, 100);
             });
 
             resizeObserver.observe(row);
@@ -1526,6 +1631,9 @@ const BaseItemTableList = ({
                     pinnedRight.removeEventListener('wheel', setActiveElementFromWheel);
                     pinnedRight.removeEventListener('scroll', syncScroll);
                 }
+                if (heightSyncDebounceTimeout) {
+                    clearTimeout(heightSyncDebounceTimeout);
+                }
                 resizeObserver.disconnect();
             };
         }
@@ -1546,19 +1654,28 @@ const BaseItemTableList = ({
             return () => clearTimeout(timeout);
         }
 
+        let debounceTimeout: NodeJS.Timeout | null = null;
         const checkScrollPosition = () => {
-            const scrollLeft = row.scrollLeft;
-            const maxScrollLeft = row.scrollWidth - row.clientWidth;
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
+            debounceTimeout = setTimeout(() => {
+                const scrollLeft = row.scrollLeft;
+                const maxScrollLeft = row.scrollWidth - row.clientWidth;
 
-            setShowLeftShadow(pinnedLeftColumnCount > 0 && scrollLeft > 0);
-            setShowRightShadow(pinnedRightColumnCount > 0 && scrollLeft < maxScrollLeft);
+                setShowLeftShadow(pinnedLeftColumnCount > 0 && scrollLeft > 0);
+                setShowRightShadow(pinnedRightColumnCount > 0 && scrollLeft < maxScrollLeft);
+            }, 50); // 50ms debounce for shadow visibility
         };
 
         checkScrollPosition();
 
-        row.addEventListener('scroll', checkScrollPosition);
+        row.addEventListener('scroll', checkScrollPosition, { passive: true });
 
         return () => {
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
             row.removeEventListener('scroll', checkScrollPosition);
         };
     }, [pinnedLeftColumnCount, pinnedRightColumnCount]);
@@ -1579,16 +1696,25 @@ const BaseItemTableList = ({
         // When right-pinned columns exist, use right pinned column's scroll position
         const scrollElement = pinnedRightColumnCount > 0 && pinnedRight ? pinnedRight : row;
 
+        let debounceTimeout: NodeJS.Timeout | null = null;
         const checkScrollPosition = () => {
-            const currentScrollTop = scrollElement.scrollTop;
-            setShowTopShadow(currentScrollTop > 0);
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
+            debounceTimeout = setTimeout(() => {
+                const currentScrollTop = scrollElement.scrollTop;
+                setShowTopShadow(currentScrollTop > 0);
+            }, 50);
         };
 
         checkScrollPosition();
 
-        scrollElement.addEventListener('scroll', checkScrollPosition);
+        scrollElement.addEventListener('scroll', checkScrollPosition, { passive: true });
 
         return () => {
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+            }
             scrollElement.removeEventListener('scroll', checkScrollPosition);
         };
     }, [enableHeader, pinnedRightColumnCount]);
@@ -1653,11 +1779,20 @@ const BaseItemTableList = ({
 
         const stickyGroupRow = stickyGroupRowRef.current;
         const container = containerRef.current;
+        let isMounted = true;
 
         const updatePosition = () => {
-            const containerRect = container.getBoundingClientRect();
-            stickyGroupRow.style.left = `${containerRect.left}px`;
-            stickyGroupRow.style.width = `${containerRect.width}px`;
+            // Guard against updates after unmount
+            if (!isMounted || !stickyGroupRow || !container) {
+                return;
+            }
+            try {
+                const containerRect = container.getBoundingClientRect();
+                stickyGroupRow.style.left = `${containerRect.left}px`;
+                stickyGroupRow.style.width = `${containerRect.width}px`;
+            } catch {
+                // Silently handle errors if elements are no longer in DOM
+            }
         };
 
         updatePosition();
@@ -1666,52 +1801,15 @@ const BaseItemTableList = ({
         window.addEventListener('scroll', updatePosition, true);
 
         return () => {
+            isMounted = false;
             window.removeEventListener('resize', updatePosition);
             window.removeEventListener('scroll', updatePosition, true);
         };
     }, [shouldRenderStickyGroupRow]);
 
     const getDataFn = useCallback(() => {
-        const result: (null | unknown)[] = enableHeader ? [null] : [];
-
-        if (!groups || groups.length === 0) {
-            // No groups, just add all data
-            result.push(...data);
-            return result;
-        }
-
-        // Calculate group header indexes based on itemCounts
-        const groupIndexes: number[] = [];
-        let cumulativeDataIndex = 0;
-        const headerOffset = enableHeader ? 1 : 0;
-
-        groups.forEach((group, groupIndex) => {
-            // Index = header offset + cumulative data index + number of previous group headers
-            const groupHeaderIndex = headerOffset + cumulativeDataIndex + groupIndex;
-            groupIndexes.push(groupHeaderIndex);
-            cumulativeDataIndex += group.itemCount;
-        });
-
-        let dataIndex = 0;
-        const startIndex = enableHeader ? 1 : 0;
-        let groupHeaderCount = 0;
-
-        for (
-            let rowIndex = startIndex;
-            rowIndex < startIndex + data.length + groupIndexes.length;
-            rowIndex++
-        ) {
-            const expectedGroupIndex = groupIndexes[groupHeaderCount];
-            if (expectedGroupIndex !== undefined && rowIndex === expectedGroupIndex) {
-                result.push(null);
-                groupHeaderCount++;
-            } else if (dataIndex < data.length) {
-                result.push(data[dataIndex]);
-                dataIndex++;
-            }
-        }
-        return result;
-    }, [data, enableHeader, groups]);
+        return dataWithGroups;
+    }, [dataWithGroups]);
 
     const extractRowId = useMemo(() => createExtractRowId(getRowId), [getRowId]);
 
@@ -2287,13 +2385,14 @@ const BaseItemTableList = ({
         >
             {StickyHeader}
             {StickyGroupRow}
-            <VirtualizedTableGrid
+            <MemoizedVirtualizedTableGrid
                 activeRowId={activeRowId}
                 calculatedColumnWidths={calculatedColumnWidths}
                 CellComponent={CellComponent}
                 cellPadding={cellPadding}
                 controls={controls}
                 data={data}
+                dataWithGroups={dataWithGroups}
                 enableAlternateRowColors={enableAlternateRowColors}
                 enableColumnReorder={!!onColumnReordered}
                 enableColumnResize={!!onColumnResized}
