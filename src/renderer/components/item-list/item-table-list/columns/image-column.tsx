@@ -125,6 +125,8 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
             <div
                 className={clsx(styles.imageContainer, {
                     [styles.compactImageContainer]: props.size === 'compact',
+                    [styles.skeletonWithAspectRatio]:
+                        props.size === 'default' || props.size === 'large',
                 })}
             >
                 <Skeleton containerClassName={styles.skeleton} />
