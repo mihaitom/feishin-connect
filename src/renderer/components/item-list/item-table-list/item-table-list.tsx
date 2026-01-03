@@ -103,6 +103,7 @@ interface VirtualizedTableGridProps {
     enableHeader: boolean;
     enableHorizontalBorders: boolean;
     enableRowHoverHighlight: boolean;
+    enableScrollShadow: boolean;
     enableSelection: boolean;
     enableVerticalBorders: boolean;
     getRowHeight: (index: number, cellProps: TableItemProps) => number;
@@ -146,6 +147,7 @@ const VirtualizedTableGrid = ({
     enableHeader,
     enableHorizontalBorders,
     enableRowHoverHighlight,
+    enableScrollShadow,
     enableSelection,
     enableVerticalBorders,
     getRowHeight,
@@ -429,7 +431,7 @@ const VirtualizedTableGrid = ({
                         />
                     </div>
                 )}
-                {enableHeader && showTopShadow && (
+                {enableHeader && enableScrollShadow && showTopShadow && (
                     <div className={styles.itemTableTopScrollShadow} />
                 )}
                 {!!pinnedLeftColumnCount && (
@@ -489,7 +491,7 @@ const VirtualizedTableGrid = ({
                         />
                     </div>
                 )}
-                {enableHeader && showTopShadow && (
+                {enableHeader && enableScrollShadow && showTopShadow && (
                     <div className={styles.itemTableTopScrollShadow} />
                 )}
                 <div className={styles.itemTableGridContainer} ref={mergedRowRef}>
@@ -507,10 +509,10 @@ const VirtualizedTableGrid = ({
                             return getRowHeight(index + pinnedRowCount, cellProps);
                         }}
                     />
-                    {pinnedLeftColumnCount > 0 && showLeftShadow && (
+                    {pinnedLeftColumnCount > 0 && enableScrollShadow && showLeftShadow && (
                         <div className={styles.itemTableLeftScrollShadow} />
                     )}
-                    {pinnedRightColumnCount > 0 && showRightShadow && (
+                    {pinnedRightColumnCount > 0 && enableScrollShadow && showRightShadow && (
                         <div className={styles.itemTableRightScrollShadow} />
                     )}
                 </div>
@@ -560,7 +562,7 @@ const VirtualizedTableGrid = ({
                             />
                         </div>
                     )}
-                    {enableHeader && showTopShadow && (
+                    {enableHeader && enableScrollShadow && showTopShadow && (
                         <div className={styles.itemTableTopScrollShadow} />
                     )}
                     <div
@@ -607,6 +609,7 @@ const MemoizedVirtualizedTableGrid = memo(VirtualizedTableGrid, (prevProps, next
         prevProps.enableHeader === nextProps.enableHeader &&
         prevProps.enableHorizontalBorders === nextProps.enableHorizontalBorders &&
         prevProps.enableRowHoverHighlight === nextProps.enableRowHoverHighlight &&
+        prevProps.enableScrollShadow === nextProps.enableScrollShadow &&
         prevProps.enableSelection === nextProps.enableSelection &&
         prevProps.enableVerticalBorders === nextProps.enableVerticalBorders &&
         prevProps.getRowHeight === nextProps.getRowHeight &&
@@ -695,6 +698,7 @@ interface ItemTableListProps {
     enableHeader?: boolean;
     enableHorizontalBorders?: boolean;
     enableRowHoverHighlight?: boolean;
+    enableScrollShadow?: boolean;
     enableSelection?: boolean;
     enableSelectionDialog?: boolean;
     enableStickyGroupRows?: boolean;
@@ -737,6 +741,7 @@ const BaseItemTableList = ({
     enableHeader = true,
     enableHorizontalBorders = false,
     enableRowHoverHighlight = true,
+    enableScrollShadow = true,
     enableSelection = true,
     enableStickyGroupRows = false,
     enableStickyHeader = false,
@@ -2386,6 +2391,7 @@ const BaseItemTableList = ({
                 enableHeader={enableHeader}
                 enableHorizontalBorders={enableHorizontalBorders}
                 enableRowHoverHighlight={enableRowHoverHighlight}
+                enableScrollShadow={enableScrollShadow}
                 enableSelection={enableSelection}
                 enableVerticalBorders={enableVerticalBorders}
                 getRowHeight={getRowHeight}
