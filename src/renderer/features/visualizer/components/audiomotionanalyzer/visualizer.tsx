@@ -187,6 +187,7 @@ const VisualizerInner = () => {
 
     useEffect(() => {
         const { context, gains } = webAudio || {};
+        let audioMotion: AudioMotionAnalyzer | undefined;
         if (gains && context && canvasRef.current && !motion) {
             // Reset gradients registered flag on new instance
             setGradientsRegistered(false);
@@ -208,7 +209,7 @@ const VisualizerInner = () => {
                 }
             }
 
-            const audioMotion = new AudioMotionAnalyzer(canvasRef.current, {
+            audioMotion = new AudioMotionAnalyzer(canvasRef.current, {
                 ...initOptions,
                 audioCtx: context,
             });
@@ -220,16 +221,21 @@ const VisualizerInner = () => {
             for (const gain of gains) audioMotion.connectInput(gain);
         }
 
-        return () => {};
+        return () => {
+            if (motion) {
+                motion.destroy();
+                setMotion(undefined);
+            }
+        };
     }, [
         accent,
         canvasRef,
-        motion,
         registerCustomGradients,
         webAudio,
         visualizer,
         options,
         isCustomGradient,
+        motion,
     ]);
 
     // Re-register custom gradients when they change

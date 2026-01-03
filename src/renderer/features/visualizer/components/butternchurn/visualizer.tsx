@@ -112,7 +112,31 @@ const VisualizerInner = () => {
             }
         }
 
-        return () => {};
+        return () => {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = undefined;
+            }
+
+            if (cycleTimerRef.current) {
+                clearInterval(cycleTimerRef.current);
+                cycleTimerRef.current = undefined;
+            }
+
+            if (pauseTimerRef.current) {
+                clearTimeout(pauseTimerRef.current);
+                pauseTimerRef.current = undefined;
+            }
+
+            if (resizeObserverRef.current) {
+                resizeObserverRef.current.disconnect();
+                resizeObserverRef.current = undefined;
+            }
+
+            if (visualizer) {
+                setVisualizer(undefined);
+            }
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [webAudio, canvasRef, containerRef, visualizer, isPlaying]);
 
