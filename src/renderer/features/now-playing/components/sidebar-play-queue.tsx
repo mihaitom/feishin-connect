@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import isElectron from 'is-electron';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels';
@@ -21,11 +22,12 @@ import {
     useShowLyricsInSidebar,
     useShowVisualizerInSidebar,
     useSidebarPanelOrder,
+    useWindowSettings,
 } from '/@/renderer/store';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Stack } from '/@/shared/components/stack/stack';
-import { ItemListKey, PlayerType } from '/@/shared/types/types';
+import { ItemListKey, Platform, PlayerType } from '/@/shared/types/types';
 
 type SidebarPanelType = 'lyrics' | 'queue' | 'visualizer';
 
@@ -51,8 +53,11 @@ export const SidebarPlayQueue = () => {
     const showVisualizerInSidebar = useShowVisualizerInSidebar();
     const sidebarPanelOrder = useSidebarPanelOrder();
     const { type, webAudio } = usePlaybackSettings();
+    const { windowBarStyle } = useWindowSettings();
     const showVisualizer = showVisualizerInSidebar && type === PlayerType.WEB && webAudio;
     const showPanel = showLyricsInSidebar || showVisualizer;
+
+    const shouldAddTopMargin = isElectron() && windowBarStyle === Platform.WEB;
 
     useEffect(() => {
         if (isFullScreenPlayerExpanded) {
@@ -102,13 +107,20 @@ export const SidebarPlayQueue = () => {
     const renderPanel = (panelType: SidebarPanelType) => {
         if (panelType === 'queue') {
             return (
-                <div className={styles.playQueueSection}>
-                    <PlayQueue
-                        listKey={ItemListKey.SIDE_QUEUE}
-                        ref={tableRef}
+                <Stack gap={0} h="100%" w="100%">
+                    <PlayQueueListControls
+                        handleSearch={setSearch}
                         searchTerm={search}
+                        type={ItemListKey.SIDE_QUEUE}
                     />
-                </div>
+                    <div className={styles.playQueueSection}>
+                        <PlayQueue
+                            listKey={ItemListKey.SIDE_QUEUE}
+                            ref={tableRef}
+                            searchTerm={search}
+                        />
+                    </div>
+                </Stack>
             );
         }
 
@@ -177,11 +189,7 @@ export const SidebarPlayQueue = () => {
 
     return (
         <Stack gap={0} h="100%" id="sidebar-play-queue-container" pos="relative" w="100%">
-            <PlayQueueListControls
-                handleSearch={setSearch}
-                searchTerm={search}
-                type={ItemListKey.SIDE_QUEUE}
-            />
+            {shouldAddTopMargin && <div className={styles.draggableRegion} />}
             {showPanel ? (
                 <SplitPane
                     direction="vertical"
@@ -202,15 +210,22 @@ export const SidebarPlayQueue = () => {
                     ))}
                 </SplitPane>
             ) : (
-                <Flex direction="column" style={{ flex: 1, minHeight: 0 }}>
-                    <div className={styles.playQueueSection}>
-                        <PlayQueue
-                            listKey={ItemListKey.SIDE_QUEUE}
-                            ref={tableRef}
-                            searchTerm={search}
-                        />
-                    </div>
-                </Flex>
+                <Stack gap={0} h="100%" w="100%">
+                    <PlayQueueListControls
+                        handleSearch={setSearch}
+                        searchTerm={search}
+                        type={ItemListKey.SIDE_QUEUE}
+                    />
+                    <Flex direction="column" style={{ flex: 1, minHeight: 0 }}>
+                        <div className={styles.playQueueSection}>
+                            <PlayQueue
+                                listKey={ItemListKey.SIDE_QUEUE}
+                                ref={tableRef}
+                                searchTerm={search}
+                            />
+                        </div>
+                    </Flex>
+                </Stack>
             )}
         </Stack>
     );
