@@ -103,7 +103,6 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
     if (isError || !releaseData) {
         return (
             <Stack gap="md">
-                <Text>{t('common.newVersion', { postProcess: 'sentenceCase', version })}</Text>
                 <Text size="sm">{t('error.genericError', { postProcess: 'sentenceCase' })}</Text>
                 <Group justify="flex-end">
                     <Button
