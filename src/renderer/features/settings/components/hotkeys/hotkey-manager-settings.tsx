@@ -266,97 +266,102 @@ export const HotkeyManagerSettings = memo(() => {
                     />
                     <div className={styles.container}>
                         <Table withColumnBorders withRowBorders>
-                            {filteredBindings.map((binding) => (
-                                <Table.Tr key={`hotkey-${binding}`}>
-                                    <Table.Td style={{ userSelect: 'none' }}>
-                                        {BINDINGS_MAP[binding as keyof typeof BINDINGS_MAP]}
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <TextInput
-                                            id={`hotkey-${binding}`}
-                                            leftSection={<Icon icon="keyboard" />}
-                                            onBlur={() => setSelected(null)}
-                                            onChange={() => {}}
-                                            onKeyDownCapture={(e) => {
-                                                if (selected !== (binding as BindingActions))
-                                                    return;
-                                                handleSetHotkey(binding as BindingActions, e);
-                                            }}
-                                            readOnly
-                                            rightSection={
-                                                <ActionIcon
-                                                    icon="edit"
-                                                    onClick={() => {
-                                                        setSelected(binding as BindingActions);
-                                                        document
-                                                            .getElementById(`hotkey-${binding}`)
-                                                            ?.focus();
+                            <Table.Tbody>
+                                {filteredBindings.map((binding) => (
+                                    <Table.Tr key={`hotkey-${binding}`}>
+                                        <Table.Td style={{ userSelect: 'none' }}>
+                                            {BINDINGS_MAP[binding as keyof typeof BINDINGS_MAP]}
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <TextInput
+                                                id={`hotkey-${binding}`}
+                                                leftSection={<Icon icon="keyboard" />}
+                                                onBlur={() => setSelected(null)}
+                                                onChange={() => {}}
+                                                onKeyDownCapture={(e) => {
+                                                    if (selected !== (binding as BindingActions))
+                                                        return;
+                                                    handleSetHotkey(binding as BindingActions, e);
+                                                }}
+                                                readOnly
+                                                rightSection={
+                                                    <ActionIcon
+                                                        icon="edit"
+                                                        onClick={() => {
+                                                            setSelected(binding as BindingActions);
+                                                            document
+                                                                .getElementById(`hotkey-${binding}`)
+                                                                ?.focus();
+                                                        }}
+                                                        variant="transparent"
+                                                    />
+                                                }
+                                                style={{
+                                                    opacity:
+                                                        selected === (binding as BindingActions)
+                                                            ? 0.8
+                                                            : 1,
+                                                    outline: duplicateHotkeyMap.includes(
+                                                        bindings[
+                                                            binding as keyof typeof BINDINGS_MAP
+                                                        ].hotkey!,
+                                                    )
+                                                        ? '1px dashed red'
+                                                        : undefined,
+                                                }}
+                                                value={
+                                                    bindings[binding as keyof typeof BINDINGS_MAP]
+                                                        .hotkey
+                                                }
+                                            />
+                                        </Table.Td>
+                                        {isElectron() && (
+                                            <Table.Td>
+                                                <Checkbox
+                                                    checked={
+                                                        bindings[
+                                                            binding as keyof typeof BINDINGS_MAP
+                                                        ].isGlobal
+                                                    }
+                                                    disabled={
+                                                        bindings[
+                                                            binding as keyof typeof BINDINGS_MAP
+                                                        ].hotkey === ''
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleSetGlobalHotkey(
+                                                            binding as BindingActions,
+                                                            e,
+                                                        )
+                                                    }
+                                                    size="md"
+                                                    style={{
+                                                        opacity: bindings[
+                                                            binding as keyof typeof BINDINGS_MAP
+                                                        ].allowGlobal
+                                                            ? 1
+                                                            : 0,
                                                     }}
+                                                />
+                                            </Table.Td>
+                                        )}
+                                        {bindings[binding as keyof typeof BINDINGS_MAP].hotkey && (
+                                            <Table.Td>
+                                                <ActionIcon
+                                                    icon="x"
+                                                    iconProps={{
+                                                        color: 'error',
+                                                    }}
+                                                    onClick={() =>
+                                                        handleClearHotkey(binding as BindingActions)
+                                                    }
                                                     variant="transparent"
                                                 />
-                                            }
-                                            style={{
-                                                opacity:
-                                                    selected === (binding as BindingActions)
-                                                        ? 0.8
-                                                        : 1,
-                                                outline: duplicateHotkeyMap.includes(
-                                                    bindings[binding as keyof typeof BINDINGS_MAP]
-                                                        .hotkey!,
-                                                )
-                                                    ? '1px dashed red'
-                                                    : undefined,
-                                            }}
-                                            value={
-                                                bindings[binding as keyof typeof BINDINGS_MAP]
-                                                    .hotkey
-                                            }
-                                        />
-                                    </Table.Td>
-                                    {isElectron() && (
-                                        <Table.Td>
-                                            <Checkbox
-                                                checked={
-                                                    bindings[binding as keyof typeof BINDINGS_MAP]
-                                                        .isGlobal
-                                                }
-                                                disabled={
-                                                    bindings[binding as keyof typeof BINDINGS_MAP]
-                                                        .hotkey === ''
-                                                }
-                                                onChange={(e) =>
-                                                    handleSetGlobalHotkey(
-                                                        binding as BindingActions,
-                                                        e,
-                                                    )
-                                                }
-                                                size="md"
-                                                style={{
-                                                    opacity: bindings[
-                                                        binding as keyof typeof BINDINGS_MAP
-                                                    ].allowGlobal
-                                                        ? 1
-                                                        : 0,
-                                                }}
-                                            />
-                                        </Table.Td>
-                                    )}
-                                    {bindings[binding as keyof typeof BINDINGS_MAP].hotkey && (
-                                        <Table.Td>
-                                            <ActionIcon
-                                                icon="x"
-                                                iconProps={{
-                                                    color: 'error',
-                                                }}
-                                                onClick={() =>
-                                                    handleClearHotkey(binding as BindingActions)
-                                                }
-                                                variant="transparent"
-                                            />
-                                        </Table.Td>
-                                    )}
-                                </Table.Tr>
-                            ))}
+                                            </Table.Td>
+                                        )}
+                                    </Table.Tr>
+                                ))}
+                            </Table.Tbody>
                         </Table>
                     </div>
                 </>
