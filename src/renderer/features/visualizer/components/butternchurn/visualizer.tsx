@@ -87,8 +87,7 @@ const VisualizerInner = () => {
                         butterchurnInstance.connectAudio(gain);
                     }
 
-                    // Load preset from settings or default
-                    const presets = butterchurnPresets.getPresets();
+                    const presets = butterchurnPresets;
                     const presetNames = Object.keys(presets);
 
                     if (presetNames.length > 0) {
@@ -223,7 +222,7 @@ const VisualizerInner = () => {
             return;
         }
 
-        const presets = butterchurnPresets.getPresets();
+        const presets = butterchurnPresets;
         const preset = presets[butterchurnSettings.currentPreset];
 
         if (preset) {
@@ -244,7 +243,7 @@ const VisualizerInner = () => {
             return;
         }
 
-        const presets = butterchurnPresets.getPresets();
+        const presets = butterchurnPresets;
         const allPresetNames = Object.keys(presets);
 
         // Get the list of presets to cycle through
