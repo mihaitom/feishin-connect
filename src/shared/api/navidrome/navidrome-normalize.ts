@@ -49,6 +49,26 @@ const normalizeReleaseDate = (item: { date?: string; releaseDate?: string }) => 
     return null;
 };
 
+const normalizeOriginalDate = (item: {
+    date?: string;
+    originalDate?: string;
+    releaseDate?: string;
+}) => {
+    if (item.originalDate && matchesFullDate(item.originalDate)) {
+        return item.originalDate;
+    }
+
+    if (item.releaseDate && matchesFullDate(item.releaseDate)) {
+        return item.releaseDate;
+    }
+
+    if (item.date && matchesFullDate(item.date)) {
+        return item.date;
+    }
+
+    return null;
+};
+
 const getArtists = (
     item:
         | z.infer<typeof ndType._response.album>
@@ -282,6 +302,11 @@ const normalizeAlbum = (
     pathReplace?: string,
     pathReplaceWith?: string,
 ): Album => {
+    const releaseDate = normalizeReleaseDate(item);
+    const releaseYear = releaseDate ? parseInt(releaseDate.split('-')[0]) : null;
+    const originalDate = normalizeOriginalDate(item);
+    const originalYear = originalDate ? parseInt(originalDate.split('-')[0]) : null;
+
     return {
         ...parseAlbumTags(item),
         ...getArtists(item, false),
@@ -316,11 +341,12 @@ const normalizeAlbum = (
         lastPlayedAt: normalizePlayDate(item),
         mbzId: item.mbzAlbumId || null,
         name: item.name,
-        originalDate: item.originalDate || null,
+        originalDate,
+        originalYear,
         playCount: item.playCount || 0,
-        releaseDate: normalizeReleaseDate(item),
+        releaseDate,
         releaseType: item.mbzAlbumType || null,
-        releaseYear: item.maxYear || null,
+        releaseYear,
         size: item.size,
         songCount: item.songCount,
         songs: item.songs

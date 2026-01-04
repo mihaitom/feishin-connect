@@ -265,6 +265,14 @@ const normalizeAlbum = (
     pathReplace?: string,
     pathReplaceWith?: string,
 ): Album => {
+    const releaseDate =
+        item.releaseDate &&
+        typeof item.releaseDate.year === 'number' &&
+        typeof item.releaseDate.month === 'number' &&
+        typeof item.releaseDate.day === 'number'
+            ? `${item.releaseDate.year}-${item.releaseDate.month}-${item.releaseDate.day}`
+            : null;
+
     return {
         _itemType: LibraryItem.ALBUM,
         _serverId: server?.id || 'unknown',
@@ -289,17 +297,12 @@ const normalizeAlbum = (
         lastPlayedAt: null,
         mbzId: null,
         name: item.name,
-        originalDate: null,
+        originalDate: releaseDate,
+        originalYear: item.year || null,
         participants: getParticipants(item),
         playCount: null,
         recordLabels: item.recordLabels?.map((item) => item.name) || [],
-        releaseDate:
-            item.releaseDate &&
-            typeof item.releaseDate.year === 'number' &&
-            typeof item.releaseDate.month === 'number' &&
-            typeof item.releaseDate.day === 'number'
-                ? `${item.releaseDate.year}-${item.releaseDate.month}-${item.releaseDate.day}`
-                : null,
+        releaseDate,
         releaseType: getReleaseType(item),
         releaseTypes: item.releaseTypes || [],
         releaseYear: item.year || null,

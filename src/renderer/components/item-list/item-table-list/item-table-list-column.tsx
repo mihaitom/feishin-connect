@@ -47,6 +47,7 @@ import { SizeColumn } from '/@/renderer/components/item-list/item-table-list/col
 import { TextColumn } from '/@/renderer/components/item-list/item-table-list/columns/text-column';
 import { TitleColumn } from '/@/renderer/components/item-list/item-table-list/columns/title-column';
 import { TitleCombinedColumn } from '/@/renderer/components/item-list/item-table-list/columns/title-combined-column';
+import { YearColumn } from '/@/renderer/components/item-list/item-table-list/columns/year-column';
 import { TableItemProps } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemControls, ItemListItem } from '/@/renderer/components/item-list/types';
 import { eventEmitter } from '/@/renderer/events/event-emitter';
@@ -487,8 +488,10 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
             case TableColumn.DISC_NUMBER:
             case TableColumn.SAMPLE_RATE:
             case TableColumn.TRACK_NUMBER:
-            case TableColumn.YEAR:
                 return <NumericColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.YEAR:
+                return <YearColumn {...props} {...dragProps} controls={controls} type={type} />;
 
             case TableColumn.DATE_ADDED:
                 return <DateColumn {...props} {...dragProps} controls={controls} type={type} />;

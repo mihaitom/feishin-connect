@@ -27,6 +27,7 @@ import {
     formatDurationString,
     formatRating,
 } from '/@/renderer/utils/format';
+import { SEPARATOR_STRING } from '/@/shared/api/utils';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Separator } from '/@/shared/components/separator/separator';
@@ -1054,7 +1055,17 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
         {
             format: (data) => {
                 if ('releaseYear' in data && data.releaseYear !== null) {
-                    return String(data.releaseYear);
+                    const releaseYear = data.releaseYear;
+                    const originalYear =
+                        'originalYear' in data && data.originalYear !== null
+                            ? data.originalYear
+                            : null;
+
+                    if (originalYear !== null && originalYear !== releaseYear) {
+                        return `♫ ${originalYear}${SEPARATOR_STRING}${releaseYear}`;
+                    }
+
+                    return String(releaseYear);
                 }
                 return '';
             },
@@ -1063,7 +1074,15 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
         {
             format: (data) => {
                 if ('releaseDate' in data && data.releaseDate) {
-                    return formatDateAbsoluteUTC(data.releaseDate);
+                    if (
+                        'originalDate' in data &&
+                        data.originalDate &&
+                        data.originalDate !== data.releaseDate
+                    ) {
+                        return `♫ ${formatDateAbsoluteUTC(data.originalDate)}${SEPARATOR_STRING}${formatDateAbsoluteUTC(data.releaseDate)}`;
+                    }
+
+                    return `${formatDateAbsoluteUTC(data.releaseDate)}`;
                 }
                 return '';
             },

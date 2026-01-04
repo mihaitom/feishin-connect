@@ -182,6 +182,7 @@ export type Album = {
     mbzId: null | string;
     name: string;
     originalDate: null | string;
+    originalYear: null | number;
     participants: null | Record<string, RelatedArtist[]>;
     playCount: null | number;
     recordLabels: string[];
