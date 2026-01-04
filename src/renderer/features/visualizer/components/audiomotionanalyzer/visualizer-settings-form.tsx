@@ -2110,8 +2110,6 @@ const ButterChurnCycleSettings = () => {
     const { t } = useTranslation();
     const { updateProperty, visualizer } = useUpdateButterchurn();
 
-    console.log(butterchurnPresets, 'number of presets');
-
     const presetOptions = useMemo(() => {
         const presets = butterchurnPresets;
         return Object.keys(presets).map((presetName) => ({
