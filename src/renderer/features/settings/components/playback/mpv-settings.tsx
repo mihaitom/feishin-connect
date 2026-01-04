@@ -2,6 +2,8 @@ import isElectron from 'is-electron';
 import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { eventEmitter } from '/@/renderer/events/event-emitter';
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import {
     SettingOption,
     SettingsSection,
@@ -125,21 +127,12 @@ export const MpvSettings = memo(() => {
         mpvPlayer?.setProperties(mpvSetting);
     };
 
-    // const handleReloadMpv = () => {
-    //     pause();
-    //     clearQueue();
+    const player = usePlayer();
 
-    //     const extraParameters = useSettingsStore.getState().playback.mpvExtraParameters;
-    //     const properties: Record<string, any> = {
-    //         speed: usePlayerStore.getState().speed,
-    //         ...getMpvProperties(useSettingsStore.getState().playback.mpvProperties),
-    //     };
-    //     mpvPlayer?.restart({
-    //         binaryPath: mpvPath || undefined,
-    //         extraParameters,
-    //         properties,
-    //     });
-    // };
+    const handleReloadMpv = () => {
+        player.mediaStop();
+        eventEmitter.emit('MPV_RELOAD', {});
+    };
 
     const handleSetExtraParameters = (data: string[]) => {
         setSettings({
@@ -155,7 +148,7 @@ export const MpvSettings = memo(() => {
                 <Group gap="sm">
                     <ActionIcon
                         icon="refresh"
-                        // onClick={handleReloadMpv}
+                        onClick={handleReloadMpv}
                         tooltip={{
                             label: t('common.reload', { postProcess: 'titleCase' }),
                             openDelay: 0,
