@@ -490,9 +490,6 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
             case TableColumn.TRACK_NUMBER:
                 return <NumericColumn {...props} {...dragProps} controls={controls} type={type} />;
 
-            case TableColumn.YEAR:
-                return <YearColumn {...props} {...dragProps} controls={controls} type={type} />;
-
             case TableColumn.DATE_ADDED:
                 return <DateColumn {...props} {...dragProps} controls={controls} type={type} />;
 
@@ -550,6 +547,9 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
 
             case TableColumn.USER_RATING:
                 return <RatingColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.YEAR:
+                return <YearColumn {...props} {...dragProps} controls={controls} type={type} />;
 
             default:
                 return <DefaultColumn {...props} {...dragProps} controls={controls} type={type} />;
