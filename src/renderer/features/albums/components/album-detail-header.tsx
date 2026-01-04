@@ -100,27 +100,55 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
         const originalDifferentFromRelease =
             album?.originalDate && album?.originalDate !== album?.releaseDate;
 
+        const originalYearDifferentFromRelease = album?.originalYear !== album?.releaseYear;
+
         const playCount = album?.playCount;
 
         const releasePrefix = originalDifferentFromRelease
             ? t('page.albumDetail.released', { postProcess: 'sentenceCase' })
             : '♫';
 
-        if (originalDifferentFromRelease && album.originalDate) {
-            items.push({
-                id: 'originalDate',
-                value: `♫ ${formatDateAbsoluteUTC(album.originalDate)}`,
-            });
+        const releaseYearPrefix = originalYearDifferentFromRelease
+            ? t('page.albumDetail.released', { postProcess: 'sentenceCase' })
+            : '♫';
+
+        if (album.originalDate) {
+            if (originalDifferentFromRelease) {
+                items.push({
+                    id: 'originalDate',
+                    value: `♫ ${formatDateAbsoluteUTC(album.originalDate)}`,
+                });
+            }
+
+            if (releaseDate) {
+                items.push({
+                    id: 'releaseDate',
+                    value: `${releasePrefix} ${formatDateAbsoluteUTC(releaseDate)}`,
+                });
+            }
+        } else if (album.originalYear) {
+            if (originalYearDifferentFromRelease) {
+                items.push({
+                    id: 'originalYear',
+                    value: `♫ ${album.originalYear}`,
+                });
+            }
+
+            if (releaseDate) {
+                items.push({
+                    id: 'releaseDate',
+                    value: `${releaseYearPrefix} ${formatDateAbsoluteUTC(releaseDate)}`,
+                });
+            } else if (releaseYear) {
+                items.push({
+                    id: 'releaseYear',
+                    value: `${releaseYearPrefix} ${releaseYear}`,
+                });
+            }
         }
 
         items.push(
             ...[
-                {
-                    id: 'releaseDate',
-                    value: releaseDate
-                        ? `${releasePrefix} ${formatDateAbsoluteUTC(releaseDate)}`
-                        : releaseYear,
-                },
                 {
                     id: 'songCount',
                     value: t('entity.trackWithCount', { count: detailQuery?.data?.songCount || 0 }),

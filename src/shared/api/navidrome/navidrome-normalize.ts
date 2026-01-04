@@ -37,36 +37,89 @@ const matchesFullDate = (date: string) => {
     return Boolean(date.match(/^\d{4}-\d{2}-\d{2}$/));
 };
 
-const normalizeReleaseDate = (item: { date?: string; releaseDate?: string }) => {
+const matchesYearOnly = (date: string) => {
+    return Boolean(date.match(/^\d{4}$/));
+};
+
+const normalizeReleaseDate = (item: {
+    date?: string;
+    releaseDate?: string;
+}): { date: null | string; year: null | number } => {
     if (item.releaseDate && matchesFullDate(item.releaseDate)) {
-        return item.releaseDate;
+        return {
+            date: item.releaseDate,
+            year: parseInt(item.releaseDate.split('-')[0]),
+        };
+    } else if (item.releaseDate && matchesYearOnly(item.releaseDate)) {
+        return {
+            date: null,
+            year: parseInt(item.releaseDate),
+        };
     }
 
     if (item.date && matchesFullDate(item.date)) {
-        return item.date;
+        return {
+            date: item.date,
+            year: parseInt(item.date.split('-')[0]),
+        };
+    } else if (item.date && matchesYearOnly(item.date)) {
+        return {
+            date: null,
+            year: parseInt(item.date),
+        };
     }
 
-    return null;
+    return {
+        date: null,
+        year: null,
+    };
 };
 
 const normalizeOriginalDate = (item: {
     date?: string;
     originalDate?: string;
     releaseDate?: string;
-}) => {
+}): { date: null | string; year: null | number } => {
     if (item.originalDate && matchesFullDate(item.originalDate)) {
-        return item.originalDate;
+        return {
+            date: item.originalDate,
+            year: parseInt(item.originalDate.split('-')[0]),
+        };
+    } else if (item.originalDate && matchesYearOnly(item.originalDate)) {
+        return {
+            date: null,
+            year: parseInt(item.originalDate),
+        };
     }
 
     if (item.releaseDate && matchesFullDate(item.releaseDate)) {
-        return item.releaseDate;
+        return {
+            date: item.releaseDate,
+            year: parseInt(item.releaseDate.split('-')[0]),
+        };
+    } else if (item.releaseDate && matchesYearOnly(item.releaseDate)) {
+        return {
+            date: null,
+            year: parseInt(item.releaseDate),
+        };
     }
 
     if (item.date && matchesFullDate(item.date)) {
-        return item.date;
+        return {
+            date: item.date,
+            year: parseInt(item.date.split('-')[0]),
+        };
+    } else if (item.date && matchesYearOnly(item.date)) {
+        return {
+            date: null,
+            year: parseInt(item.date),
+        };
     }
 
-    return null;
+    return {
+        date: null,
+        year: null,
+    };
 };
 
 const getArtists = (
@@ -240,7 +293,7 @@ const normalizeSong = (
                 : null,
         playCount: item.playCount || 0,
         playlistItemId,
-        releaseDate: normalizeReleaseDate(item),
+        releaseDate: normalizeReleaseDate(item).date,
         releaseYear: item.year || null,
         sampleRate: item.sampleRate || null,
         size: item.size,
@@ -303,9 +356,7 @@ const normalizeAlbum = (
     pathReplaceWith?: string,
 ): Album => {
     const releaseDate = normalizeReleaseDate(item);
-    const releaseYear = releaseDate ? parseInt(releaseDate.split('-')[0]) : null;
     const originalDate = normalizeOriginalDate(item);
-    const originalYear = originalDate ? parseInt(originalDate.split('-')[0]) : null;
 
     return {
         ...parseAlbumTags(item),
@@ -341,12 +392,12 @@ const normalizeAlbum = (
         lastPlayedAt: normalizePlayDate(item),
         mbzId: item.mbzAlbumId || null,
         name: item.name,
-        originalDate,
-        originalYear,
+        originalDate: originalDate.date,
+        originalYear: originalDate.year,
         playCount: item.playCount || 0,
-        releaseDate,
+        releaseDate: releaseDate.date,
         releaseType: item.mbzAlbumType || null,
-        releaseYear,
+        releaseYear: releaseDate.year,
         size: item.size,
         songCount: item.songCount,
         songs: item.songs
