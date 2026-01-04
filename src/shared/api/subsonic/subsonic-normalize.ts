@@ -195,6 +195,7 @@ const normalizeSong = (
         size: item.size,
         tags: null,
         trackNumber: item.track || 1,
+        trackSubtitle: null,
         updatedAt: '',
         userFavorite: Boolean(item.starred) || false,
         userRating: item.userRating || null,

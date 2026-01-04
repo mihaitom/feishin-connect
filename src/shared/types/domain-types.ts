@@ -392,6 +392,7 @@ export type Song = {
     size: number;
     tags: null | Record<string, string[]>;
     trackNumber: number;
+    trackSubtitle: null | string;
     updatedAt: string;
     userFavorite: boolean;
     userRating: null | number;

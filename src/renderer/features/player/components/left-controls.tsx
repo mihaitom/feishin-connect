@@ -173,6 +173,13 @@ export const LeftControls = () => {
                                         to={AppRoute.NOW_PLAYING}
                                     >
                                         {title || '—'}
+                                        {currentSong?.trackSubtitle && (
+                                            <Text component="span" isMuted size="sm">
+                                                {' ('}
+                                                {currentSong.trackSubtitle}
+                                                {')'}
+                                            </Text>
+                                        )}
                                     </Text>
                                     {isSongDefined && (
                                         <ActionIcon

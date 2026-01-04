@@ -244,6 +244,7 @@ const normalizeSong = (
         size,
         tags: getTags(item),
         trackNumber: item.IndexNumber,
+        trackSubtitle: null,
         updatedAt: item.DateCreated,
         userFavorite: (item.UserData && item.UserData.IsFavorite) || false,
         userRating: null,
