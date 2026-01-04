@@ -1,5 +1,6 @@
 import isElectron from 'is-electron';
-import merge from 'lodash/merge';
+import mergeWith from 'lodash/mergeWith';
+import { nanoid } from 'nanoid';
 import { generatePath } from 'react-router';
 import { z } from 'zod';
 import { devtools, persist } from 'zustand/middleware';
@@ -51,7 +52,16 @@ const deepMergeIntoState = <T extends Record<string, any>>(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { actions, ...updatesWithoutActions } = updates as any;
 
-    merge(state, updatesWithoutActions);
+    // Use mergeWith to replace arrays instead of merging them by index
+    mergeWith(state, updatesWithoutActions, (_objValue, srcValue) => {
+        // If source value is an array, replace the entire array instead of merging
+        if (Array.isArray(srcValue)) {
+            return srcValue;
+        }
+
+        // Default merge behavior
+        return undefined;
+    });
 };
 
 const HomeItemSchema = z.enum([
@@ -331,6 +341,7 @@ const AudioMotionAnalyzerSettingsSchema = z.object({
     peakLine: z.boolean(),
     presets: z.array(
         z.object({
+            id: z.string(),
             name: z.string(),
             value: z.any(),
         }),
@@ -1928,10 +1939,29 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     }
                 }
 
+                if (version <= 19) {
+                    // Add IDs to presets that don't have them
+                    if (
+                        state.visualizer?.audiomotionanalyzer?.presets &&
+                        Array.isArray(state.visualizer.audiomotionanalyzer.presets)
+                    ) {
+                        state.visualizer.audiomotionanalyzer.presets =
+                            state.visualizer.audiomotionanalyzer.presets.map((preset) => {
+                                if (!preset.id) {
+                                    return {
+                                        ...preset,
+                                        id: nanoid(),
+                                    };
+                                }
+                                return preset;
+                            });
+                    }
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 19,
+            version: 20,
         },
     ),
 );
