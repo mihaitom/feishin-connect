@@ -58,7 +58,7 @@ import {
 } from '/@/renderer/store/settings.store';
 import { titleCase } from '/@/renderer/utils';
 import { sanitize } from '/@/renderer/utils/sanitize';
-import { sortAlbumList } from '/@/shared/api/utils';
+import { SEPARATOR_STRING, sortAlbumList } from '/@/shared/api/utils';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Button } from '/@/shared/components/button/button';
@@ -1266,7 +1266,7 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
                 if (releaseType.includes('/')) {
                     const types = releaseType.split('/');
                     const displayNames = types.map((type) => getDisplayNameForType(type));
-                    displayName = displayNames.join('/');
+                    displayName = displayNames.join(SEPARATOR_STRING);
                 } else {
                     displayName = getDisplayNameForType(releaseType);
                 }
