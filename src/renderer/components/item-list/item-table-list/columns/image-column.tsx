@@ -86,6 +86,7 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
                         id={item?.imageId}
                         itemType={item?._itemType}
                         src={item?.imageUrl}
+                        type="table"
                     />
                     {isHovered && (
                         <div

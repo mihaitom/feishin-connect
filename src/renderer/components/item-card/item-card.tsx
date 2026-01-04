@@ -335,6 +335,7 @@ const CompactItemCard = ({
                     id={data?.imageId}
                     itemType={itemType}
                     src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
+                    type="itemCard"
                 />
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
@@ -553,6 +554,7 @@ const DefaultItemCard = ({
                     id={data?.imageId}
                     itemType={itemType}
                     src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
+                    type="itemCard"
                 />
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
@@ -833,6 +835,7 @@ const PosterItemCard = ({
                     id={(data as { imageId: string })?.imageId}
                     itemType={itemType}
                     src={(data as { imageUrl: string })?.imageUrl}
+                    type="itemCard"
                 />
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}

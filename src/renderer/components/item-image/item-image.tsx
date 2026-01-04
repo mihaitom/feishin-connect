@@ -37,6 +37,7 @@ const BaseItemImage = (
         id?: null | string;
         itemType: LibraryItem;
         src?: null | string;
+        type?: keyof z.infer<typeof GeneralSettingsSchema>['imageRes'];
     },
 ) => {
     const { src, ...rest } = props;
@@ -45,7 +46,7 @@ const BaseItemImage = (
         id: props.id,
         imageUrl: src,
         itemType: props.itemType,
-        size: 300,
+        type: props.type,
     });
 
     return (

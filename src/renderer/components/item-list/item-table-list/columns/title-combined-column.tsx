@@ -103,6 +103,7 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
                         id={item?.imageId}
                         itemType={item?._itemType}
                         src={item?.imageUrl}
+                        type="table"
                     />
                     {isHovered && (
                         <div
@@ -239,6 +240,7 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
                         id={item?.imageId}
                         itemType={item?._itemType}
                         src={item?.imageUrl}
+                        type="table"
                     />
                     {isHovered && (
                         <div
