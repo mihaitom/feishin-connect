@@ -16,6 +16,7 @@ import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Stack } from '/@/shared/components/stack/stack';
 
 const ActionRequiredRoute = () => {
@@ -59,31 +60,33 @@ const ActionRequiredRoute = () => {
             <PageHeader />
             <Center style={{ height: '100%', width: '100vw' }}>
                 <Stack gap="xl" style={{ maxWidth: '50%' }}>
-                    <Group wrap="nowrap">
-                        {displayedCheck && (
-                            <ActionRequiredContainer title={displayedCheck.title}>
-                                {displayedCheck?.component}
-                            </ActionRequiredContainer>
-                        )}
-                    </Group>
-                    <Stack mt="2rem">
-                        {canReturnHome && <Navigate to={AppRoute.HOME} />}
-                        {/* This should be displayed if a credential is required */}
-                        {isCredentialRequired && !isServerLock && (
-                            <Group justify="center" wrap="nowrap">
-                                <Button
-                                    fullWidth
-                                    leftSection={<Icon icon="edit" />}
-                                    onClick={handleManageServersModal}
-                                    variant="filled"
-                                >
-                                    {t('page.appMenu.manageServers', {
-                                        postProcess: 'sentenceCase',
-                                    })}
-                                </Button>
-                            </Group>
-                        )}
-                    </Stack>
+                    <ScrollArea style={{ maxHeight: 'calc(100vh - 50px)' }}>
+                        <Group wrap="nowrap">
+                            {displayedCheck && (
+                                <ActionRequiredContainer title={displayedCheck.title}>
+                                    {displayedCheck?.component}
+                                </ActionRequiredContainer>
+                            )}
+                        </Group>
+                        <Stack mt="2rem">
+                            {canReturnHome && <Navigate to={AppRoute.HOME} />}
+                            {/* This should be displayed if a credential is required */}
+                            {isCredentialRequired && !isServerLock && (
+                                <Group justify="center" wrap="nowrap">
+                                    <Button
+                                        fullWidth
+                                        leftSection={<Icon icon="edit" />}
+                                        onClick={handleManageServersModal}
+                                        variant="filled"
+                                    >
+                                        {t('page.appMenu.manageServers', {
+                                            postProcess: 'sentenceCase',
+                                        })}
+                                    </Button>
+                                </Group>
+                            )}
+                        </Stack>
+                    </ScrollArea>
                 </Stack>
             </Center>
         </AnimatedPage>
