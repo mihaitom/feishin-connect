@@ -99,11 +99,10 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     const { servers: discovered } = useAutodiscovery();
 
     const serverLock = isServerLock();
-    const legacyAuthDefault = serverLock && isLegacyAuth();
 
     const form = useForm({
         initialValues: {
-            legacyAuth: legacyAuthDefault,
+            legacyAuth: isLegacyAuth(),
             name:
                 (localSettings ? localSettings.env.SERVER_NAME : window.SERVER_NAME) || 'My Server',
             password: '',
