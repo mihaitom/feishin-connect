@@ -358,7 +358,7 @@ const VolumeButton = () => {
     const muted = usePlayerMuted();
     const volumeWheelStep = useVolumeWheelStep();
     const volumeWidth = useVolumeWidth();
-    const { mediaToggleMute, setVolume } = usePlayer();
+    const { decreaseVolume, increaseVolume, mediaToggleMute, setVolume } = usePlayer();
     const isMinWidth = useMediaQuery('(max-width: 480px)');
 
     const [sliderValue, setSliderValue] = useState(volume);
@@ -376,12 +376,12 @@ const VolumeButton = () => {
     }, [volume]);
 
     const handleVolumeDown = useCallback(() => {
-        setVolume(Math.max(0, volume - 1));
-    }, [setVolume, volume]);
+        decreaseVolume(volumeWheelStep);
+    }, [decreaseVolume, volumeWheelStep]);
 
     const handleVolumeUp = useCallback(() => {
-        setVolume(Math.min(100, volume + 1));
-    }, [setVolume, volume]);
+        increaseVolume(volumeWheelStep);
+    }, [increaseVolume, volumeWheelStep]);
 
     const handleVolumeSlider = useCallback((e: number) => {
         setSliderValue(e);
