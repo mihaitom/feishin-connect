@@ -147,7 +147,9 @@ export const CollapsedSidebar = () => {
                             />
                         </DropdownMenu.Target>
                         <DropdownMenu.Dropdown>
-                            <ServerSelectorItems />
+                            <ScrollArea style={{ maxHeight: '95vh' }}>
+                                <ServerSelectorItems />
+                            </ScrollArea>
                         </DropdownMenu.Dropdown>
                     </DropdownMenu>
                 )}
