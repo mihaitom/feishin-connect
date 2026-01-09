@@ -124,6 +124,7 @@ export const LeftControls = () => {
                                         id={currentSong?.imageId}
                                         itemType={LibraryItem.SONG}
                                         loading="eager"
+                                        serverId={currentSong?._serverId}
                                         type="table"
                                     />
                                 </Tooltip>

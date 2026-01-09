@@ -85,12 +85,14 @@ export const FullScreenPlayerImage = () => {
     const currentImageUrl = useItemImageUrl({
         id: currentSong?.imageId || undefined,
         itemType: LibraryItem.SONG,
+        serverId: currentSong?._serverId,
         type: 'fullScreenPlayer',
     });
 
     const nextImageUrl = useItemImageUrl({
         id: nextSong?.imageId || undefined,
         itemType: LibraryItem.SONG,
+        serverId: nextSong?._serverId,
         type: 'fullScreenPlayer',
     });
 

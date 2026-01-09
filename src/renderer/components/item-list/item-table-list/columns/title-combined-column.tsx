@@ -238,6 +238,7 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
                         containerClassName={styles.image}
                         id={item?.imageId}
                         itemType={item?._itemType}
+                        serverId={item?._serverId}
                         src={item?.imageUrl}
                         type="table"
                     />

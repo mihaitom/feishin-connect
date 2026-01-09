@@ -36,6 +36,7 @@ const BaseItemImage = (
     props: Omit<ImageProps, 'id' | 'src'> & {
         id?: null | string;
         itemType: LibraryItem;
+        serverId?: null | string;
         src?: null | string;
         type?: keyof z.infer<typeof GeneralSettingsSchema>['imageRes'];
     },
@@ -46,6 +47,7 @@ const BaseItemImage = (
         id: props.id,
         imageUrl: src,
         itemType: props.itemType,
+        serverId: props.serverId || undefined,
         type: props.type,
     });
 
