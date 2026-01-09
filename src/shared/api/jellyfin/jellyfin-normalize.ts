@@ -174,7 +174,6 @@ const normalizeSong = (
 
     const artists = getArtists(item, participants);
 
-    console.log('artists', artists);
     return {
         _itemType: LibraryItem.SONG,
         _serverId: server?.id || '',

@@ -1119,19 +1119,19 @@ export const JellyfinController: InternalControllerEndpoint = {
                 ? formatCommaDelimitedString(query.albumIds)
                 : undefined;
 
-            const parentIdFilter = [albumIdsFilter, artistIdsFilter].filter(Boolean).join(',');
-
             const res = await jfApiClient(apiClientProps).getSongList({
                 params: {
                     userId: apiClientProps.server?.userId,
                 },
                 query: {
+                    AlbumIds: albumIdsFilter,
+                    ArtistIds: artistIdsFilter,
                     Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags',
                     GenreIds: query.genreIds?.join(','),
                     IncludeItemTypes: 'Audio',
                     IsFavorite: query.favorite,
                     Limit: query.limit,
-                    ParentId: parentIdFilter,
+                    ParentId: getLibraryId(query.musicFolderId),
                     Recursive: true,
                     SearchTerm: query.searchTerm,
                     SortBy: songListSortMap.jellyfin[query.sortBy] || 'Album,SortName',
