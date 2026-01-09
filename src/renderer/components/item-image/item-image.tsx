@@ -41,13 +41,13 @@ const BaseItemImage = (
         type?: keyof z.infer<typeof GeneralSettingsSchema>['imageRes'];
     },
 ) => {
-    const { src, ...rest } = props;
+    const { serverId, src, ...rest } = props;
 
     const imageUrl = useItemImageUrl({
         id: props.id,
         imageUrl: src,
         itemType: props.itemType,
-        serverId: props.serverId || undefined,
+        serverId: serverId || undefined,
         type: props.type,
     });
 

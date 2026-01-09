@@ -366,7 +366,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 GenreIds: query.genreIds ? query.genreIds.join(',') : undefined,
                 IncludeItemTypes: 'MusicAlbum',
                 IsFavorite: query.favorite,
-                Limit: query.limit,
+                Limit: query.limit === -1 ? undefined : query.limit,
                 ParentId: getLibraryId(query.musicFolderId),
                 Recursive: true,
                 SearchTerm: query.searchTerm,
