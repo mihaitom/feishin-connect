@@ -6,6 +6,8 @@ import {
     type ImgHTMLAttributes,
     memo,
     ReactNode,
+    useEffect,
+    useState,
 } from 'react';
 import { Img } from 'react-image';
 
@@ -43,6 +45,25 @@ interface ImageUnloaderProps {
 export const FALLBACK_SVG =
     'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iLjA1IiBkPSJNMCAwaDMwMHYzMDBIMHoiLz48L3N2Zz4=';
 
+interface ImageViewportWrapperProps {
+    children: (shouldRenderImage: boolean, ref: ForwardedRef<HTMLDivElement>) => ReactNode;
+}
+
+const ImageViewportWrapper = ({ children }: ImageViewportWrapperProps) => {
+    const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
+    const { inViewport, ref } = useInViewport();
+
+    useEffect(() => {
+        if (inViewport && !hasEnteredViewport) {
+            setHasEnteredViewport(true);
+        }
+    }, [inViewport, hasEnteredViewport]);
+
+    const shouldRenderImage = hasEnteredViewport || inViewport;
+
+    return <>{children(shouldRenderImage, ref)}</>;
+};
+
 export function BaseImage({
     className,
     containerClassName,
@@ -54,38 +75,44 @@ export function BaseImage({
     unloaderIcon = 'emptyImage',
     ...props
 }: ImageProps) {
-    const { inViewport, ref } = useInViewport();
-
     return (
-        <ImageContainer
-            className={containerClassName}
-            enableAnimation={enableAnimation}
-            ref={ref}
-            {...imageContainerProps}
-        >
-            {inViewport && src ? (
-                <Img
-                    className={clsx(styles.image, className, {
-                        [styles.animated]: enableAnimation,
-                    })}
-                    decoding="async"
-                    fetchPriority="high"
-                    loader={includeLoader ? <ImageLoader className={className} /> : null}
-                    loading="eager"
-                    src={src}
-                    unloader={
-                        includeUnloader ? (
+        <ImageViewportWrapper>
+            {(shouldRenderImage, viewportRef) => {
+                return (
+                    <ImageContainer
+                        className={containerClassName}
+                        enableAnimation={enableAnimation}
+                        ref={viewportRef}
+                        {...imageContainerProps}
+                    >
+                        {shouldRenderImage && src ? (
+                            <Img
+                                className={clsx(styles.image, className, {
+                                    [styles.animated]: enableAnimation,
+                                })}
+                                decoding="async"
+                                fetchPriority="high"
+                                loader={
+                                    includeLoader ? <ImageLoader className={className} /> : null
+                                }
+                                loading="eager"
+                                src={src}
+                                unloader={
+                                    includeUnloader ? (
+                                        <ImageUnloader className={className} icon={unloaderIcon} />
+                                    ) : null
+                                }
+                                {...props}
+                            />
+                        ) : !src ? (
                             <ImageUnloader className={className} icon={unloaderIcon} />
-                        ) : null
-                    }
-                    {...props}
-                />
-            ) : !src ? (
-                <ImageUnloader className={className} icon={unloaderIcon} />
-            ) : (
-                <ImageLoader className={className} />
-            )}
-        </ImageContainer>
+                        ) : (
+                            <ImageLoader className={className} />
+                        )}
+                    </ImageContainer>
+                );
+            }}
+        </ImageViewportWrapper>
     );
 }
 
