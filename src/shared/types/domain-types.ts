@@ -159,7 +159,7 @@ export enum ImageType {
 }
 
 export enum TagListSort {
-    TAG_VALUE = 'tagValue',
+    NAME = 'name',
 }
 
 export type Album = {
@@ -437,13 +437,13 @@ type TagListSortMap = {
 
 export const tagListSortMap: TagListSortMap = {
     jellyfin: {
-        tagValue: undefined,
+        name: undefined,
     },
     navidrome: {
-        tagValue: NDTagListSort.TAG_VALUE,
+        name: NDTagListSort.TAG_VALUE,
     },
     subsonic: {
-        tagValue: undefined,
+        name: undefined,
     },
 };
 
