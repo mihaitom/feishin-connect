@@ -276,12 +276,13 @@
     transform: translateY(-50%) scale(0.95);
 }
 
-/* Single carousel: hide arrows by default, show on hover */
 .single-carousel-container .nav-arrow-left,
 .single-carousel-container .nav-arrow-right {
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
 }
 
 .single-carousel-container:hover .nav-arrow-left,

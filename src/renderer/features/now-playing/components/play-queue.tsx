@@ -136,6 +136,24 @@ export const PlayQueue = forwardRef<ItemListHandle, QueueProps>(
 
             setQueue();
 
+            if (followCurrentSong) {
+                const state = usePlayerStore.getState();
+                let index = state.player.index;
+
+                if (isShuffleEnabled(state)) {
+                    index = mapShuffledToQueueIndex(index, state.queue.shuffled);
+                }
+
+                if (index !== -1) {
+                    setTimeout(() => {
+                        tableRef.current?.scrollToIndex(index, {
+                            align: 'center',
+                            behavior: 'auto',
+                        });
+                    }, 0);
+                }
+            }
+
             return () => {
                 unsub();
                 unsubCurrentTrack();
