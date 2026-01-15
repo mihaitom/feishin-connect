@@ -740,7 +740,7 @@ interface AlbumSectionProps {
     title: React.ReactNode | string;
 }
 
-const MAX_SECTION_CARDS = 20;
+const MAX_SECTION_CARDS = 100;
 
 const getItemsPerRow = (cq: ReturnType<typeof useContainerQuery>) => {
     // Match grid carousel breakpoints: is3xl: 8, is2xl: 7, isXl: 6, isLg: 5, isMd: 4, isSm: 3, default: 2
