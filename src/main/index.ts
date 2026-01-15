@@ -185,13 +185,11 @@ const createWinThumbarButtons = () => {
 };
 
 const createTray = () => {
-    if (isMacOS()) {
-        return;
-    }
+    tray =
+        isLinux() || isMacOS()
+            ? new Tray(getAssetPath('icons/icon.png'))
+            : new Tray(getAssetPath('icons/icon.ico'));
 
-    tray = isLinux()
-        ? new Tray(getAssetPath('icons/icon.png'))
-        : new Tray(getAssetPath('icons/icon.ico'));
     const contextMenu = Menu.buildFromTemplate([
         {
             click: () => {
