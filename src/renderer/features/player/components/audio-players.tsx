@@ -15,6 +15,7 @@ import { usePowerSaveBlocker } from '/@/renderer/features/player/hooks/use-power
 import { useQueueRestoreTimestamp } from '/@/renderer/features/player/hooks/use-queue-restore';
 import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
+import { RadioWebPlayer } from '/@/renderer/features/radio/components/radio-web-player';
 import {
     useIsRadioActive,
     useRadioAudioInstance,
@@ -147,7 +148,7 @@ export const AudioPlayers = () => {
     }
 
     if (isRadioActive && playbackType === PlayerType.WEB) {
-        return null;
+        return <RadioWebPlayer />;
     }
 
     return (
