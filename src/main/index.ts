@@ -273,7 +273,7 @@ async function createWindow(first = true): Promise<void> {
         autoHideMenuBar: true,
         frame: false,
         height: 900,
-        icon: getAssetPath('icons/icon.png'),
+        icon: isWindows() ? getAssetPath('icons/icon.ico') : getAssetPath('icons/icon.png'),
         minHeight: 640,
         minWidth: 480,
         show: false,
