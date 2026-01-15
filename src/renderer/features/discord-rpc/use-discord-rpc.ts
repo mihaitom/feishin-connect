@@ -196,7 +196,7 @@ export const useDiscordRpc = () => {
 
                 if (discordSettings.showServerImage && song) {
                     if (song._uniqueId === currentSong?._uniqueId && imageUrlRef.current) {
-                        if (song._serverType === ServerType.JELLYFIN && song.imageUrl) {
+                        if (song._serverType === ServerType.JELLYFIN) {
                             activity.largeImageKey = imageUrlRef.current;
                         } else if (
                             song._serverType === ServerType.NAVIDROME ||
