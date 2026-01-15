@@ -59,8 +59,8 @@ const HomeRoute = () => {
             title: t('page.home.newlyAdded', { postProcess: 'sentenceCase' }),
         },
         [HomeItem.RECENTLY_PLAYED]: {
-            itemType: LibraryItem.ALBUM,
-            sortBy: AlbumListSort.RECENTLY_PLAYED,
+            itemType: isJellyfin ? LibraryItem.SONG : LibraryItem.ALBUM,
+            sortBy: isJellyfin ? SongListSort.RECENTLY_PLAYED : AlbumListSort.RECENTLY_PLAYED,
             sortOrder: SortOrder.DESC,
             title: t('page.home.recentlyPlayed', { postProcess: 'sentenceCase' }),
         },
