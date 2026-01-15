@@ -27,6 +27,20 @@
     isolation: isolate;
 }
 
+.blurred-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+
 .carousel-item :global(.overlay) {
     border-radius: var(--theme-radius-md);
 }
@@ -53,6 +67,13 @@
     padding: var(--theme-spacing-md);
 }
 
+.single-carousel-container .carousel-item .content {
+    flex-direction: row;
+    gap: var(--theme-spacing-lg);
+    align-items: flex-end;
+    padding: var(--theme-spacing-xl);
+}
+
 .title-section {
     display: flex;
     flex-shrink: 0;
@@ -75,6 +96,15 @@
     height: 160px;
     min-height: 160px;
     max-height: 160px;
+}
+
+.single-carousel-container .carousel-item .content .image-section {
+    flex-shrink: 0;
+    justify-content: flex-start;
+    width: auto;
+    height: auto;
+    min-height: auto;
+    max-height: none;
 }
 
 .play-button-overlay {
@@ -106,6 +136,23 @@
     text-align: center;
 }
 
+.single-carousel-container .carousel-item .content .metadata-section {
+    flex: 1;
+    align-items: flex-start;
+    justify-content: center;
+    height: auto;
+    min-height: auto;
+    max-height: none;
+    text-align: left;
+}
+
+/* Hide metadata on screens smaller than xs */
+@media (width < 36em) {
+    .single-carousel-container .carousel-item .content .metadata-section {
+        display: none;
+    }
+}
+
 .image-link {
     display: block;
     transition: transform 0.3s ease;
@@ -129,6 +176,11 @@
     transition: filter 0.3s ease;
 }
 
+.single-carousel-container .album-image-container {
+    width: 200px;
+    max-width: 200px;
+}
+
 .album-image-container::before {
     position: absolute;
     top: 0;
@@ -149,7 +201,7 @@
 
 .album-image {
     width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: cover;
     border-radius: var(--theme-radius-md);
 }
@@ -157,6 +209,12 @@
 .carousel-item:hover .album-image-container,
 .carousel-link:hover .album-image-container {
     filter: drop-shadow(0 16px 40px rgb(0 0 0 / 60%)) drop-shadow(0 6px 16px rgb(0 0 0 / 50%));
+}
+
+/* Single carousel: remove hover shadow effect */
+.single-carousel-container .carousel-item:hover .album-image-container,
+.single-carousel-container .carousel-link:hover .album-image-container {
+    filter: drop-shadow(0 6px 20px rgb(0 0 0 / 50%)) drop-shadow(0 2px 8px rgb(0 0 0 / 40%));
 }
 
 .artist-link {
@@ -216,6 +274,20 @@
 .nav-arrow-left:active,
 .nav-arrow-right:active {
     transform: translateY(-50%) scale(0.95);
+}
+
+/* Single carousel: hide arrows by default, show on hover */
+.single-carousel-container .nav-arrow-left,
+.single-carousel-container .nav-arrow-right {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.single-carousel-container:hover .nav-arrow-left,
+.single-carousel-container:hover .nav-arrow-right {
+    pointer-events: auto;
+    opacity: 1;
 }
 
 @container (min-width: $mantine-breakpoint-xs) {

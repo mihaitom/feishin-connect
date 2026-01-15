@@ -180,7 +180,7 @@ export const LibraryHeader = forwardRef(
     },
 );
 
-const isAsianCharacter = (char: string): boolean => {
+export const isAsianCharacter = (char: string): boolean => {
     const codePoint = char.codePointAt(0);
 
     if (!codePoint) return false;
@@ -207,7 +207,7 @@ const isAsianCharacter = (char: string): boolean => {
     return false;
 };
 
-const calculateWeightedLength = (str: string): number => {
+export const calculateWeightedLength = (str: string): number => {
     let length = 0;
     for (const char of str) {
         length += isAsianCharacter(char) ? 2.5 : 1;
@@ -215,7 +215,7 @@ const calculateWeightedLength = (str: string): number => {
     return length;
 };
 
-const calculateTitleSize = (title: string) => {
+export const calculateTitleSize = (title: string) => {
     const titleLength = calculateWeightedLength(title);
     let baseSize = '3dvw';
 
