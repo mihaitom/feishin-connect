@@ -525,6 +525,63 @@ ipcMain.handle(
     },
 );
 
+ipcMain.handle(
+    'player-get-audio-devices',
+    async (): Promise<{ label: string; value: string }[]> => {
+        try {
+            const instance = getMpvInstance();
+            let tempInstance: MpvAPI | null = null;
+            let mpvToUse: MpvAPI | null = null;
+
+            if (instance && instance.isRunning()) {
+                mpvToUse = instance;
+            } else {
+                try {
+                    tempInstance = await createMpv({});
+                    mpvToUse = tempInstance;
+                } catch (err: any | NodeMpvError) {
+                    mpvLog(
+                        { action: 'Failed to create temporary MPV instance for audio device list' },
+                        err,
+                    );
+                    return [];
+                }
+            }
+
+            try {
+                const deviceList = await mpvToUse.getProperty('audio-device-list');
+
+                if (!deviceList || !Array.isArray(deviceList)) {
+                    return [];
+                }
+
+                const devices = deviceList.map((device: any) => {
+                    const name = device.name || device.description || 'Unknown Device';
+                    const description = device.description || '';
+                    const label = description ? `${name} (${description})` : name;
+                    return {
+                        label,
+                        value: name,
+                    };
+                });
+
+                return devices;
+            } finally {
+                if (tempInstance && tempInstance !== instance) {
+                    try {
+                        await quit(tempInstance);
+                    } catch {
+                        // Ignore
+                    }
+                }
+            }
+        } catch (err: any | NodeMpvError) {
+            mpvLog({ action: 'Failed to get audio devices' }, err);
+            return [];
+        }
+    },
+);
+
 enum MpvState {
     STARTED,
     IN_PROGRESS,

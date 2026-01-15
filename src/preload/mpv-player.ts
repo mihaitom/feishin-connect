@@ -98,6 +98,10 @@ const getStreamMetadata = async () => {
     return ipcRenderer.invoke('player-stream-metadata');
 };
 
+const getAudioDevices = async () => {
+    return ipcRenderer.invoke('player-get-audio-devices');
+};
+
 const rendererAutoNext = (cb: (event: IpcRendererEvent, data: PlayerData) => void) => {
     ipcRenderer.on('renderer-player-auto-next', cb);
 };
@@ -174,6 +178,7 @@ export const mpvPlayer = {
     autoNext,
     cleanup,
     currentTime,
+    getAudioDevices,
     getCurrentTime,
     getMetadata,
     getStreamMetadata,

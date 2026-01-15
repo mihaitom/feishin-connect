@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ListConfigTable } from '/@/renderer/features/shared/components/list-config-menu';
 import {
+    usePlaybackType,
     usePlayerActions,
     usePlayerData,
     usePlayerProperties,
@@ -35,10 +36,24 @@ import {
 } from '/@/shared/types/types';
 
 const ipc = isElectron() ? window.api.ipc : null;
+const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 
 const getAudioDevice = async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
     return (devices || []).filter((dev: MediaDeviceInfo) => dev.kind === 'audiooutput');
+};
+
+const getMpvAudioDevices = async () => {
+    if (!mpvPlayer) {
+        return [];
+    }
+
+    try {
+        return await mpvPlayer.getAudioDevices();
+    } catch (error) {
+        console.error('Failed to get MPV audio devices:', error);
+        return [];
+    }
 };
 
 export const PlayerConfig = () => {
@@ -47,6 +62,7 @@ export const PlayerConfig = () => {
     const speed = usePlayerSpeed();
     const queueType = usePlayerQueueType();
     const status = usePlayerStatus();
+    const playbackType = usePlaybackType();
     const { crossfadeDuration, crossfadeStyle, transitionType } = usePlayerProperties();
     const { setCrossfadeDuration, setCrossfadeStyle, setQueueType, setSpeed, setTransitionType } =
         usePlayerActions();
@@ -70,22 +86,39 @@ export const PlayerConfig = () => {
     const [audioDevices, setAudioDevices] = useState<{ label: string; value: string }[]>([]);
 
     useEffect(() => {
-        const fetchAudioDevices = () => {
-            getAudioDevice()
-                .then((dev) =>
-                    setAudioDevices(dev.map((d) => ({ label: d.label, value: d.deviceId }))),
-                )
-                .catch(() =>
+        const fetchAudioDevices = async () => {
+            if (!isElectron()) {
+                return;
+            }
+
+            if (playbackType === PlayerType.WEB) {
+                getAudioDevice()
+                    .then((dev) =>
+                        setAudioDevices(dev.map((d) => ({ label: d.label, value: d.deviceId }))),
+                    )
+                    .catch(() =>
+                        toast.error({
+                            message: t('error.audioDeviceFetchError', {
+                                postProcess: 'sentenceCase',
+                            }),
+                        }),
+                    );
+            } else if (playbackType === PlayerType.LOCAL && mpvPlayer) {
+                try {
+                    const devices = await getMpvAudioDevices();
+                    setAudioDevices(devices);
+                } catch {
                     toast.error({
-                        message: t('error.audioDeviceFetchError', { postProcess: 'sentenceCase' }),
-                    }),
-                );
+                        message: t('error.audioDeviceFetchError', {
+                            postProcess: 'sentenceCase',
+                        }),
+                    });
+                }
+            }
         };
 
-        if (playbackSettings.type === PlayerType.WEB) {
-            fetchAudioDevices();
-        }
-    }, [playbackSettings.type, t]);
+        fetchAudioDevices();
+    }, [playbackType, t]);
 
     const options = useMemo(() => {
         const formatPlaybackSpeedSliderLabel = (value: number) => {
@@ -161,15 +194,15 @@ export const PlayerConfig = () => {
                         comboboxProps={{ withinPortal: false }}
                         data={audioDevices}
                         defaultValue={playbackSettings.audioDeviceId}
-                        disabled={playbackSettings.type !== PlayerType.WEB}
-                        onChange={(e) =>
+                        disabled={status === PlayerStatus.PLAYING}
+                        onChange={(e) => {
                             setSettings({
                                 playback: {
                                     ...playbackSettings,
                                     audioDeviceId: e,
                                 },
-                            })
-                        }
+                            });
+                        }}
                         width="100%"
                     />
                 ),

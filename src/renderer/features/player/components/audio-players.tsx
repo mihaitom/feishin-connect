@@ -89,8 +89,16 @@ export const AudioPlayers = () => {
     useEffect(() => {
         // Not standard, just used in chromium-based browsers. See
         // https://developer.chrome.com/blog/audiocontext-setsinkid/.
-        // If the isElectron() check is every removed, fix this.
-        if (isElectron() && audioContext && 'setSinkId' in audioContext.context && audioDeviceId) {
+
+        if (!isElectron()) {
+            return;
+        }
+
+        if (playbackType !== PlayerType.WEB) {
+            return;
+        }
+
+        if (audioContext && 'setSinkId' in audioContext.context && audioDeviceId) {
             const setSink = async () => {
                 try {
                     if (audioContext.context.state !== 'closed') {
@@ -103,7 +111,7 @@ export const AudioPlayers = () => {
 
             setSink();
         }
-    }, [audioContext, audioDeviceId]);
+    }, [audioContext, audioDeviceId, playbackType]);
 
     // Listen to favorite and rating events to update queue songs
     useEffect(() => {
