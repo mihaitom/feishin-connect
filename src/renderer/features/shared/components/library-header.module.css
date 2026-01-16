@@ -102,7 +102,7 @@
     font-weight: 800;
     line-height: 1.2;
     word-break: keep-all;
-    text-wrap: balance;
+    text-wrap: pretty;
 }
 
 .library-header-menu {
