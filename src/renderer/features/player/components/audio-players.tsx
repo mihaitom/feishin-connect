@@ -14,6 +14,7 @@ import { usePlaybackHotkeys } from '/@/renderer/features/player/hooks/use-playba
 import { usePowerSaveBlocker } from '/@/renderer/features/player/hooks/use-power-save-blocker';
 import { useQueueRestoreTimestamp } from '/@/renderer/features/player/hooks/use-queue-restore';
 import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
+import { useUpdateCurrentSong } from '/@/renderer/features/player/hooks/use-update-current-song';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { RadioWebPlayer } from '/@/renderer/features/radio/components/radio-web-player';
 import {
@@ -54,6 +55,7 @@ export const AudioPlayers = () => {
     usePlaybackHotkeys();
     useAutoDJ();
     useQueueRestoreTimestamp();
+    useUpdateCurrentSong();
 
     useRadioAudioInstance();
     useRadioMetadata();

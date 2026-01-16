@@ -2641,6 +2641,20 @@ export const incrementQueuePlayCount = (ids: string[]) => {
     });
 };
 
+export const updateQueueSong = (songId: string, updatedSong: Song) => {
+    usePlayerStoreBase.setState((state) => {
+        Object.values(state.queue.songs).forEach((song) => {
+            if (song.id === songId) {
+                const uniqueId = song._uniqueId;
+                state.queue.songs[song._uniqueId] = {
+                    ...updatedSong,
+                    _uniqueId: uniqueId,
+                };
+            }
+        });
+    });
+};
+
 export const usePlayerMuted = () => {
     return usePlayerStoreBase((state) => state.player.muted);
 };
