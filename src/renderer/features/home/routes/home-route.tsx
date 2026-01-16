@@ -133,6 +133,7 @@ const HomeRoute = () => {
                                         containerQuery={containerQuery}
                                         enableRefresh={carousel.enableRefresh}
                                         key={`carousel-${carousel.uniqueId}`}
+                                        queryKey={['home', carousel.uniqueId] as const}
                                         rowCount={1}
                                         sortBy={carousel.sortBy as AlbumListSort}
                                         sortOrder={carousel.sortOrder}
@@ -147,6 +148,7 @@ const HomeRoute = () => {
                                         containerQuery={containerQuery}
                                         enableRefresh={carousel.enableRefresh}
                                         key={`carousel-${carousel.uniqueId}`}
+                                        queryKey={['home', carousel.uniqueId] as const}
                                         rowCount={1}
                                         sortBy={carousel.sortBy as SongListSort}
                                         sortOrder={carousel.sortOrder}
