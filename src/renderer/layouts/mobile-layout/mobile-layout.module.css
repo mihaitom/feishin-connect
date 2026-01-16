@@ -29,6 +29,12 @@
     backdrop-filter: blur(10px);
 }
 
+@media (height < 192px) {
+    .drawer-button {
+        display: none;
+    }
+}
+
 .main-content {
     position: relative;
     grid-area: main-content;

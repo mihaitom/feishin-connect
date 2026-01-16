@@ -274,7 +274,7 @@ async function createWindow(first = true): Promise<void> {
         frame: false,
         height: 900,
         icon: isWindows() ? getAssetPath('icons/icon.ico') : getAssetPath('icons/icon.png'),
-        minHeight: 640,
+        minHeight: 120,
         minWidth: 480,
         show: false,
         webPreferences: {
