@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { ReactNode, Suspense, useMemo, useRef, useState } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { ReactNode, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useParams } from 'react-router';
 
 import styles from './album-detail-content.module.css';
 
+import { useGridCarouselContainerQuery } from '/@/renderer/components/grid-carousel/grid-carousel-v2';
 import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
 import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
@@ -18,7 +19,6 @@ import { ListConfigMenu } from '/@/renderer/features/shared/components/list-conf
 import { ListSortByDropdownControlled } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButtonControlled } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
-import { useContainerQuery } from '/@/renderer/hooks';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, usePlayerSong } from '/@/renderer/store';
 import { useExternalLinks, useSettingsStore } from '/@/renderer/store/settings.store';
@@ -31,7 +31,6 @@ import { Checkbox } from '/@/shared/components/checkbox/checkbox';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Pill, PillLink } from '/@/shared/components/pill/pill';
-import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
@@ -304,67 +303,13 @@ const AlbumMetadataExternalLinks = ({
 };
 
 export const AlbumDetailContent = () => {
-    const { t } = useTranslation();
     const { albumId } = useParams() as { albumId: string };
     const server = useCurrentServer();
-    const detailQuery = useQuery(
+    const detailQuery = useSuspenseQuery(
         albumQueries.detail({ query: { id: albumId }, serverId: server.id }),
     );
 
-    const { ref, ...cq } = useContainerQuery();
     const { externalLinks, lastFM, musicBrainz } = useExternalLinks();
-
-    const genreCarousels = useMemo(() => {
-        const genreLimit = 2;
-        const selectedGenres = detailQuery?.data?.genres?.slice(0, genreLimit);
-
-        if (!selectedGenres || selectedGenres.length === 0) return [];
-
-        return selectedGenres
-            .map((genre) => {
-                const uniqueId = `moreFromGenre-${genre.id}`;
-                return {
-                    enableRefresh: true,
-                    excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
-                    isHidden: !genre,
-                    query: {
-                        genreIds: [genre.id],
-                    },
-                    rowCount: 1,
-                    sortBy: AlbumListSort.RANDOM,
-                    sortOrder: SortOrder.ASC,
-                    title: sentenceCase(
-                        t('page.albumDetail.moreFromGeneric', {
-                            item: genre.name,
-                        }),
-                    ),
-                    uniqueId,
-                };
-            })
-            .filter((carousel) => !carousel.isHidden);
-    }, [detailQuery.data, t]);
-
-    const carousels = useMemo(() => {
-        const moreFromArtistUniqueId = 'moreFromArtist';
-        return [
-            {
-                enableRefresh: false,
-                excludeIds: detailQuery?.data?.id ? [detailQuery.data.id] : undefined,
-                isHidden: !detailQuery?.data?.albumArtists?.[0]?.id,
-                query: {
-                    artistIds: detailQuery?.data?.albumArtists.length
-                        ? [detailQuery?.data?.albumArtists[0].id]
-                        : undefined,
-                },
-                rowCount: 1,
-                sortBy: AlbumListSort.YEAR,
-                sortOrder: SortOrder.DESC,
-                title: t('page.albumDetail.moreFromArtist', { postProcess: 'sentenceCase' }),
-                uniqueId: moreFromArtistUniqueId,
-            },
-            ...genreCarousels,
-        ];
-    }, [detailQuery.data, genreCarousels, t]);
 
     const comment = detailQuery?.data?.comment;
 
@@ -374,7 +319,7 @@ export const AlbumDetailContent = () => {
     const mbzId = detailQuery?.data?.mbzId;
 
     return (
-        <div className={styles.contentContainer} ref={ref}>
+        <div className={styles.contentContainer}>
             <div className={styles.detailContainer}>
                 {comment && (
                     <Spoiler maxHeight={75}>
@@ -388,7 +333,6 @@ export const AlbumDetailContent = () => {
                         )}
                     </div>
                     <div className={styles.metadataColumn}>
-                        {/* <AlbumMetadataArtists artists={detailQuery?.data?.albumArtists} /> */}
                         <AlbumMetadataGenres genres={detailQuery?.data?.genres} />
                         <AlbumMetadataTags album={detailQuery?.data} />
                         <AlbumMetadataExternalLinks
@@ -410,26 +354,7 @@ export const AlbumDetailContent = () => {
                         ))}
                     </Stack>
                 )}
-                <Stack gap="lg" mt="3rem">
-                    {cq.height || cq.width ? (
-                        <Suspense fallback={<Spinner container />}>
-                            {carousels
-                                .filter((c) => !c.isHidden)
-                                .map((carousel) => (
-                                    <AlbumInfiniteCarousel
-                                        enableRefresh={carousel.enableRefresh}
-                                        excludeIds={carousel.excludeIds}
-                                        key={`carousel-${carousel.uniqueId}`}
-                                        query={carousel.query}
-                                        rowCount={carousel.rowCount}
-                                        sortBy={carousel.sortBy}
-                                        sortOrder={carousel.sortOrder}
-                                        title={carousel.title}
-                                    />
-                                ))}
-                        </Suspense>
-                    ) : null}
-                </Stack>
+                <AlbumDetailCarousels data={detailQuery?.data} />
             </div>
         </div>
     );
@@ -437,6 +362,82 @@ export const AlbumDetailContent = () => {
 
 interface AlbumDetailSongsTableProps {
     songs: Song[];
+}
+
+function AlbumDetailCarousels({ data }: { data: Album }) {
+    const { t } = useTranslation();
+
+    const genreCarousels = useMemo(() => {
+        const genreLimit = 2;
+        const selectedGenres = data?.genres?.slice(0, genreLimit);
+
+        if (!selectedGenres || selectedGenres.length === 0) return [];
+
+        return selectedGenres
+            .map((genre) => {
+                const uniqueId = `moreFromGenre-${genre.id}`;
+                return {
+                    enableRefresh: true,
+                    excludeIds: data?.id ? [data.id] : undefined,
+                    isHidden: !genre,
+                    query: {
+                        genreIds: [genre.id],
+                    },
+                    rowCount: 1,
+                    sortBy: AlbumListSort.RANDOM,
+                    sortOrder: SortOrder.ASC,
+                    title: sentenceCase(
+                        t('page.albumDetail.moreFromGeneric', {
+                            item: genre.name,
+                        }),
+                    ),
+                    uniqueId,
+                };
+            })
+            .filter((carousel) => !carousel.isHidden);
+    }, [data, t]);
+
+    const carousels = useMemo(() => {
+        const moreFromArtistUniqueId = 'moreFromArtist';
+        return [
+            {
+                enableRefresh: false,
+                excludeIds: data?.id ? [data.id] : undefined,
+                isHidden: !data?.albumArtists?.[0]?.id,
+                query: {
+                    artistIds: data?.albumArtists.length ? [data?.albumArtists[0].id] : undefined,
+                },
+                rowCount: 1,
+                sortBy: AlbumListSort.YEAR,
+                sortOrder: SortOrder.DESC,
+                title: t('page.albumDetail.moreFromArtist', { postProcess: 'sentenceCase' }),
+                uniqueId: moreFromArtistUniqueId,
+            },
+            ...genreCarousels,
+        ];
+    }, [data.albumArtists, data.id, genreCarousels, t]);
+
+    const cq = useGridCarouselContainerQuery();
+
+    return (
+        <Stack gap="lg" mt="3rem" ref={cq.ref}>
+            {carousels
+                .filter((c) => !c.isHidden)
+                .map((carousel) => (
+                    <AlbumInfiniteCarousel
+                        containerQuery={cq}
+                        enableRefresh={carousel.enableRefresh}
+                        excludeIds={carousel.excludeIds}
+                        key={`carousel-${carousel.uniqueId}`}
+                        query={carousel.query}
+                        rowCount={carousel.rowCount}
+                        sortBy={carousel.sortBy}
+                        sortOrder={carousel.sortOrder}
+                        title={carousel.title}
+                    />
+                ))}
+        </Stack>
+    );
 }
 
 const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {

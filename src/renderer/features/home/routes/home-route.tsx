@@ -1,6 +1,7 @@
 import { Suspense, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useGridCarouselContainerQuery } from '/@/renderer/components/grid-carousel/grid-carousel-v2';
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
 import { AlbumInfiniteCarousel } from '/@/renderer/features/albums/components/album-infinite-carousel';
 import { AlbumInfiniteSingleFeatureCarousel } from '/@/renderer/features/home/components/album-infinite-single-feature-carousel';
@@ -35,6 +36,7 @@ const HomeRoute = () => {
     const { windowBarStyle } = useWindowSettings();
     const homeFeature = useHomeFeature();
     const homeItems = useHomeItems();
+    const containerQuery = useGridCarouselContainerQuery();
 
     const isJellyfin = server?.type === ServerType.JELLYFIN;
 
@@ -112,6 +114,7 @@ const HomeRoute = () => {
                         mb="5rem"
                         pt={windowBarStyle === Platform.WEB ? '5rem' : '3rem'}
                         px="2rem"
+                        ref={containerQuery.ref}
                     >
                         {homeFeature && <AlbumInfiniteSingleFeatureCarousel />}
                         {sortedItems.map((item) => {
@@ -127,6 +130,7 @@ const HomeRoute = () => {
                             if (carousel.itemType === LibraryItem.ALBUM) {
                                 return (
                                     <AlbumInfiniteCarousel
+                                        containerQuery={containerQuery}
                                         enableRefresh={carousel.enableRefresh}
                                         key={`carousel-${carousel.uniqueId}`}
                                         rowCount={1}
@@ -140,6 +144,7 @@ const HomeRoute = () => {
                             if (carousel.itemType === LibraryItem.SONG) {
                                 return (
                                     <SongInfiniteCarousel
+                                        containerQuery={containerQuery}
                                         enableRefresh={carousel.enableRefresh}
                                         key={`carousel-${carousel.uniqueId}`}
                                         rowCount={1}

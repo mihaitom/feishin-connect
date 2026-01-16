@@ -1,10 +1,14 @@
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
+import { Suspense, useCallback, useMemo } from 'react';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { GridCarousel } from '/@/renderer/components/grid-carousel/grid-carousel-v2';
-import { MemoizedItemCard } from '/@/renderer/components/item-card/item-card';
+import {
+    GridCarousel,
+    GridCarouselSkeletonFallback,
+    useGridCarouselContainerQuery,
+} from '/@/renderer/components/grid-carousel/grid-carousel-v2';
+import { DataRow, MemoizedItemCard } from '/@/renderer/components/item-card/item-card';
 import { useDefaultItemListControls } from '/@/renderer/components/item-list/helpers/item-list-controls';
 import { useGridRows } from '/@/renderer/components/item-list/helpers/use-grid-rows';
 import { useCurrentServerId } from '/@/renderer/store';
@@ -19,6 +23,7 @@ import {
 import { ItemListKey } from '/@/shared/types/types';
 
 interface AlbumCarouselProps {
+    containerQuery?: ReturnType<typeof useGridCarouselContainerQuery>;
     enableRefresh?: boolean;
     excludeIds?: string[];
     query?: Partial<Omit<AlbumListQuery, 'startIndex'>>;
@@ -28,21 +33,23 @@ interface AlbumCarouselProps {
     title: React.ReactNode | string;
 }
 
-const BaseAlbumInfiniteCarousel = (props: AlbumCarouselProps) => {
+const BaseAlbumInfiniteCarousel = (props: AlbumCarouselProps & { rows: DataRow[] }) => {
     const {
+        containerQuery,
         enableRefresh,
         excludeIds,
         query: additionalQuery,
         rowCount = 1,
+        rows,
         sortBy,
         sortOrder,
         title,
     } = props;
-    const rows = useGridRows(LibraryItem.ALBUM, ItemListKey.ALBUM);
     const {
         data: albums,
         fetchNextPage,
         hasNextPage,
+        isFetchingNextPage,
         refetch,
     } = useAlbumListInfinite(sortBy, sortOrder, 20, additionalQuery);
 
@@ -50,7 +57,7 @@ const BaseAlbumInfiniteCarousel = (props: AlbumCarouselProps) => {
 
     const cards = useMemo(() => {
         // Flatten all pages and filter excluded IDs
-        const allItems = albums.pages.flatMap((page: AlbumListResponse) => page.items);
+        const allItems = albums?.pages.flatMap((page: AlbumListResponse) => page.items) || [];
         const filteredItems = excludeIds
             ? allItems.filter((album) => !excludeIds.includes(album.id))
             : allItems;
@@ -69,7 +76,7 @@ const BaseAlbumInfiniteCarousel = (props: AlbumCarouselProps) => {
             ),
             id: album.id,
         }));
-    }, [albums.pages, controls, excludeIds, rows]);
+    }, [albums, controls, excludeIds, rows]);
 
     const handleNextPage = useCallback(() => {}, []);
 
@@ -80,8 +87,8 @@ const BaseAlbumInfiniteCarousel = (props: AlbumCarouselProps) => {
     }, [refetch]);
 
     const firstPageItems = excludeIds
-        ? albums.pages[0]?.items.filter((album) => !excludeIds.includes(album.id)) || []
-        : albums.pages[0]?.items || [];
+        ? albums?.pages[0]?.items.filter((album) => !excludeIds.includes(album.id)) || []
+        : albums?.pages[0]?.items || [];
 
     if (firstPageItems.length === 0) {
         return null;
@@ -90,12 +97,16 @@ const BaseAlbumInfiniteCarousel = (props: AlbumCarouselProps) => {
     return (
         <GridCarousel
             cards={cards}
+            containerQuery={containerQuery}
             enableRefresh={enableRefresh}
             hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
             loadNextPage={fetchNextPage}
             onNextPage={handleNextPage}
             onPrevPage={handlePrevPage}
             onRefresh={handleRefresh}
+            placeholderItemType={LibraryItem.ALBUM}
+            placeholderRows={rows}
             rowCount={rowCount}
             title={title}
         />
@@ -103,7 +114,22 @@ const BaseAlbumInfiniteCarousel = (props: AlbumCarouselProps) => {
 };
 
 export const AlbumInfiniteCarousel = (props: AlbumCarouselProps) => {
-    return <BaseAlbumInfiniteCarousel {...props} />;
+    const rows = useGridRows(LibraryItem.ALBUM, ItemListKey.ALBUM);
+
+    return (
+        <Suspense
+            fallback={
+                <GridCarouselSkeletonFallback
+                    containerQuery={props.containerQuery}
+                    placeholderItemType={LibraryItem.ALBUM}
+                    placeholderRows={rows}
+                    title={props.title}
+                />
+            }
+        >
+            <BaseAlbumInfiniteCarousel {...props} rows={rows} />
+        </Suspense>
+    );
 };
 
 function useAlbumListInfinite(

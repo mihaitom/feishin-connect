@@ -6,10 +6,24 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import styles from './grid-carousel.module.css';
 
+import { DataRow, MemoizedItemCard } from '/@/renderer/components/item-card/item-card';
 import { useContainerQuery } from '/@/renderer/hooks';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
 import { TextTitle } from '/@/shared/components/text-title/text-title';
+import { LibraryItem } from '/@/shared/types/domain-types';
+
+export const useGridCarouselContainerQuery = () => {
+    return useContainerQuery({
+        '2xl': 1280,
+        '3xl': 1440,
+        lg: 960,
+        md: 720,
+        sm: 520,
+        xl: 1152,
+        xs: 360,
+    });
+};
 
 interface Card {
     content: ReactNode;
@@ -18,12 +32,16 @@ interface Card {
 
 interface GridCarouselProps {
     cards: Card[];
+    containerQuery?: ReturnType<typeof useGridCarouselContainerQuery>;
     enableRefresh?: boolean;
     hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
     loadNextPage?: () => void;
     onNextPage: (page: number) => void;
     onPrevPage: (page: number) => void;
     onRefresh?: () => void;
+    placeholderItemType?: LibraryItem;
+    placeholderRows?: DataRow[];
     rowCount?: number;
     title?: ReactNode | string;
 }
@@ -47,24 +65,22 @@ const pageVariants: Variants = {
 function BaseGridCarousel(props: GridCarouselProps) {
     const {
         cards,
+        containerQuery: providedContainerQuery,
         enableRefresh = false,
         hasNextPage,
+        isFetchingNextPage,
         loadNextPage,
         onNextPage,
         onPrevPage,
         onRefresh,
+        placeholderItemType,
+        placeholderRows,
         rowCount = 1,
         title,
     } = props;
-    const { ref, ...cq } = useContainerQuery({
-        '2xl': 1280,
-        '3xl': 1440,
-        lg: 960,
-        md: 720,
-        sm: 520,
-        xl: 1152,
-        xs: 360,
-    });
+    const defaultContainerQuery = useGridCarouselContainerQuery();
+    const containerQuery = providedContainerQuery || defaultContainerQuery;
+    const { ref, ...cq } = containerQuery;
 
     const [currentPage, setCurrentPage] = useState({
         isNext: false,
@@ -97,11 +113,48 @@ function BaseGridCarousel(props: GridCarouselProps) {
     });
 
     const visibleCards = useMemo(() => {
-        return cards.slice(
-            currentPage.page * cardsToShow * rowCount,
-            (currentPage.page + 1) * cardsToShow * rowCount,
-        );
-    }, [cards, currentPage, cardsToShow, rowCount]);
+        const startIndex = currentPage.page * cardsToShow * rowCount;
+        const endIndex = (currentPage.page + 1) * cardsToShow * rowCount;
+        const slicedCards = cards.slice(startIndex, endIndex);
+        const expectedCardCount = cardsToShow * rowCount;
+        const missingCardCount = expectedCardCount - slicedCards.length;
+
+        // Add placeholder cards during loading state
+        if (
+            missingCardCount > 0 &&
+            hasNextPage &&
+            isFetchingNextPage &&
+            placeholderItemType &&
+            placeholderRows
+        ) {
+            const placeholderCards: Card[] = Array.from(
+                { length: missingCardCount },
+                (_, index) => ({
+                    content: (
+                        <MemoizedItemCard
+                            data={undefined}
+                            itemType={placeholderItemType}
+                            rows={placeholderRows}
+                            type="poster"
+                        />
+                    ),
+                    id: `placeholder-${startIndex + slicedCards.length + index}`,
+                }),
+            );
+            return [...slicedCards, ...placeholderCards];
+        }
+
+        return slicedCards;
+    }, [
+        currentPage.page,
+        cardsToShow,
+        rowCount,
+        cards,
+        hasNextPage,
+        isFetchingNextPage,
+        placeholderItemType,
+        placeholderRows,
+    ]);
 
     const shouldLoadNextPage = visibleCards.length < cardsToShow * rowCount;
 
@@ -248,6 +301,74 @@ function BaseGridCarousel(props: GridCarouselProps) {
 export const GridCarousel = memo(BaseGridCarousel);
 
 GridCarousel.displayName = 'GridCarousel';
+
+interface GridCarouselSkeletonProps {
+    containerQuery?: ReturnType<typeof useGridCarouselContainerQuery>;
+    enableRefresh?: boolean;
+    placeholderItemType: LibraryItem;
+    placeholderRows: DataRow[];
+    rowCount?: number;
+    title?: ReactNode | string;
+}
+
+const GridCarouselSkeleton = (props: GridCarouselSkeletonProps) => {
+    const {
+        containerQuery: providedContainerQuery,
+        enableRefresh = false,
+        placeholderItemType,
+        placeholderRows,
+        rowCount = 1,
+        title,
+    } = props;
+
+    const { ...cq } = providedContainerQuery;
+
+    const cardsToShow = cq.isCalculated
+        ? getCardsToShow({
+              isLargerThan2xl: cq.is2xl,
+              isLargerThan3xl: cq.is3xl,
+              isLargerThanLg: cq.isLg,
+              isLargerThanMd: cq.isMd,
+              isLargerThanSm: cq.isSm,
+              isLargerThanXl: cq.isXl,
+          })
+        : 6;
+
+    const placeholderCards = useMemo(() => {
+        const cardCount = cardsToShow * rowCount;
+        return Array.from({ length: cardCount }, (_, index) => ({
+            content: (
+                <MemoizedItemCard
+                    data={undefined}
+                    itemType={placeholderItemType}
+                    rows={placeholderRows}
+                    type="poster"
+                />
+            ),
+            id: `skeleton-${index}`,
+        }));
+    }, [cardsToShow, rowCount, placeholderItemType, placeholderRows]);
+
+    return (
+        <GridCarousel
+            cards={placeholderCards}
+            containerQuery={providedContainerQuery}
+            enableRefresh={enableRefresh}
+            hasNextPage={false}
+            isFetchingNextPage={false}
+            onNextPage={() => {}}
+            onPrevPage={() => {}}
+            placeholderItemType={placeholderItemType}
+            placeholderRows={placeholderRows}
+            rowCount={rowCount}
+            title={title}
+        />
+    );
+};
+
+export const GridCarouselSkeletonFallback = memo(GridCarouselSkeleton);
+
+GridCarouselSkeletonFallback.displayName = 'GridCarouselSkeletonFallback';
 
 function getCardsToShow(breakpoints: {
     isLargerThan2xl: boolean;
