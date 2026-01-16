@@ -31,8 +31,7 @@ const AlbumDetailRoute = () => {
 
     const detailQuery = useQuery({
         ...albumQueries.detail({ query: { id: albumId }, serverId: server?.id }),
-        initialData: location.state?.item,
-        staleTime: 0,
+        placeholderData: location.state?.item,
     });
 
     const imageUrl =

@@ -242,8 +242,7 @@ const PlaylistDetailSongListRoute = () => {
 
     const detailQuery = useQuery({
         ...playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
-        initialData: location.state?.item,
-        staleTime: 0,
+        placeholderData: location.state?.item,
     });
     const createPlaylistMutation = useCreatePlaylist({});
     const deletePlaylistMutation = useDeletePlaylist({});
