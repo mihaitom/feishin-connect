@@ -1,10 +1,7 @@
 // Component adapted from https://github.com/bvaughn/react-window/issues/826
 
-import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 import clsx from 'clsx';
-import throttle from 'lodash/throttle';
 import { AnimatePresence, motion } from 'motion/react';
-import { useOverlayScrollbars } from 'overlayscrollbars-react';
 import React, {
     type JSXElementConstructor,
     memo,
@@ -13,7 +10,6 @@ import React, {
     useCallback,
     useEffect,
     useId,
-    useImperativeHandle,
     useMemo,
     useRef,
     useState,
@@ -34,8 +30,19 @@ import {
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { parseTableColumns } from '/@/renderer/components/item-list/helpers/parse-table-columns';
 import { useListHotkeys } from '/@/renderer/components/item-list/helpers/use-list-hotkeys';
+import { useContainerWidthTracking } from '/@/renderer/components/item-list/item-table-list/hooks/use-container-width-tracking';
+import { useRowInteractionDelegate } from '/@/renderer/components/item-list/item-table-list/hooks/use-row-interaction-delegate';
+import { useStickyGroupRowPositioning } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-group-row-positioning';
+import { useStickyHeaderPositioning } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-header-positioning';
 import { useStickyTableGroupRows } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-table-group-rows';
 import { useStickyTableHeader } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-table-header';
+import { useTableColumnModel } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-column-model';
+import { useTableImperativeHandle } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-imperative-handle';
+import { useTableInitialScroll } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-initial-scroll';
+import { useTableKeyboardNavigation } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-keyboard-navigation';
+import { useTablePaneSync } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-pane-sync';
+import { useTableRowModel } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-row-model';
+import { useTableScrollToIndex } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-scroll-to-index';
 import {
     ItemTableListConfigProvider,
     ItemTableListStoreProvider,
@@ -178,6 +185,11 @@ const VirtualizedTableGrid = ({
 }: VirtualizedTableGridProps) => {
     const hoverDelegateRef = useRef<HTMLDivElement | null>(null);
 
+    useRowInteractionDelegate({
+        containerRef: hoverDelegateRef,
+        enableRowHoverHighlight,
+    });
+
     const columnWidth = useCallback(
         (index: number) => calculatedColumnWidths[index],
         [calculatedColumnWidths],
@@ -200,149 +212,6 @@ const VirtualizedTableGrid = ({
     }, [groups, enableHeader]);
 
     const getGroupRenderData = useCallback(() => data, [data]);
-
-    // Row hover highlight: do one delegated listener per table rather than per cell
-    // This is intentionally imperative to avoid React re-rendering the entire visible grid on hover
-    useEffect(() => {
-        if (!enableRowHoverHighlight) return;
-        const root = hoverDelegateRef.current;
-        if (!root) return;
-
-        let hoveredKey: null | string = null;
-        let rafId: null | number = null;
-
-        const getRowKey = (target: EventTarget | null): null | string => {
-            const el = target instanceof Element ? target : null;
-            const rowEl = el?.closest?.('[data-row-index]') as HTMLElement | null;
-            return rowEl?.getAttribute('data-row-index') ?? null;
-        };
-
-        const apply = (prev: null | string, next: null | string) => {
-            if (rafId !== null) cancelAnimationFrame(rafId);
-            rafId = requestAnimationFrame(() => {
-                if (prev) {
-                    root.querySelectorAll(`[data-row-index="${prev}"]`).forEach((node) => {
-                        (node as HTMLElement).removeAttribute('data-row-hovered');
-                    });
-                }
-                if (next) {
-                    root.querySelectorAll(`[data-row-index="${next}"]`).forEach((node) => {
-                        (node as HTMLElement).setAttribute('data-row-hovered', 'true');
-                    });
-                }
-            });
-        };
-
-        const setHovered = (next: null | string) => {
-            if (next === hoveredKey) return;
-            const prev = hoveredKey;
-            hoveredKey = next;
-            apply(prev, next);
-        };
-
-        const onPointerOver = (e: PointerEvent) => {
-            setHovered(getRowKey(e.target));
-        };
-
-        const onPointerOut = (e: PointerEvent) => {
-            // If moving within the same row, keep it hovered
-            const relatedKey = getRowKey((e as any).relatedTarget);
-            if (relatedKey === hoveredKey) return;
-            setHovered(relatedKey);
-        };
-
-        root.addEventListener('pointerover', onPointerOver);
-        root.addEventListener('pointerout', onPointerOut);
-
-        return () => {
-            root.removeEventListener('pointerover', onPointerOver);
-            root.removeEventListener('pointerout', onPointerOut);
-            if (rafId !== null) cancelAnimationFrame(rafId);
-            // Ensure we don't leave stale attributes behind
-            if (hoveredKey) apply(hoveredKey, null);
-        };
-    }, [enableRowHoverHighlight]);
-
-    useEffect(() => {
-        const root = hoverDelegateRef.current;
-        if (!root) return;
-
-        let current: null | { edge: 'bottom' | 'top'; rowKey: string } = null;
-        let pending: null | { edge: 'bottom' | 'top' | null; rowKey: string } = null;
-        let rafId: null | number = null;
-
-        const clearRow = (rowKey: string) => {
-            root.querySelectorAll(`[data-row-index="${rowKey}"]`).forEach((node) => {
-                const el = node as HTMLElement;
-                el.removeAttribute('data-row-dragged-over');
-                el.removeAttribute('data-row-dragged-over-first');
-            });
-        };
-
-        const applyRow = (rowKey: string, edge: 'bottom' | 'top') => {
-            const nodes = root.querySelectorAll(`[data-row-index="${rowKey}"]`);
-            nodes.forEach((node, idx) => {
-                const el = node as HTMLElement;
-                el.setAttribute('data-row-dragged-over', edge);
-                if (idx === 0) {
-                    el.setAttribute('data-row-dragged-over-first', 'true');
-                } else {
-                    el.removeAttribute('data-row-dragged-over-first');
-                }
-            });
-        };
-
-        const flush = () => {
-            rafId = null;
-            const next = pending;
-            pending = null;
-            if (!next) return;
-
-            // Clear previous row if we’re moving rows or clearing.
-            if (current && current.rowKey !== next.rowKey) {
-                clearRow(current.rowKey);
-                current = null;
-            }
-
-            if (!next.edge) {
-                if (current) {
-                    clearRow(current.rowKey);
-                    current = null;
-                }
-                return;
-            }
-
-            // If same row + edge, no-op.
-            if (current && current.rowKey === next.rowKey && current.edge === next.edge) return;
-
-            if (current) clearRow(current.rowKey);
-            applyRow(next.rowKey, next.edge);
-            current = { edge: next.edge, rowKey: next.rowKey };
-        };
-
-        const scheduleFlush = () => {
-            if (rafId !== null) return;
-            rafId = requestAnimationFrame(flush);
-        };
-
-        const onRowDragOver = (e: Event) => {
-            const ev = e as CustomEvent<{ edge?: 'bottom' | 'top' | null; rowKey?: string }>;
-            const rowKey = ev.detail?.rowKey;
-            const edge = ev.detail?.edge ?? null;
-            if (!rowKey) return;
-
-            pending = { edge, rowKey };
-            scheduleFlush();
-        };
-
-        root.addEventListener('itl:row-drag-over', onRowDragOver as any);
-
-        return () => {
-            root.removeEventListener('itl:row-drag-over', onRowDragOver as any);
-            if (rafId !== null) cancelAnimationFrame(rafId);
-            if (current) clearRow(current.rowKey);
-        };
-    }, []);
 
     // Calculate pinned column widths for group header positioning
     const pinnedLeftColumnWidths = useMemo(() => {
@@ -950,135 +819,33 @@ const BaseItemTableList = ({
 }: ItemTableListProps) => {
     const tableId = useId();
     const totalItemCount = enableHeader ? data.length + 1 : data.length;
-    const parsedColumns = useMemo(() => parseTableColumns(columns), [columns]);
-    const columnCount = parsedColumns.length;
-    const playerContext = usePlayer();
     const [centerContainerWidth, setCenterContainerWidth] = useState(0);
     const [totalContainerWidth, setTotalContainerWidth] = useState(0);
 
-    // Compute dataWithGroups once to avoid duplicate computation
-    // This is used by both VirtualizedTableGrid and getDataFn
-    const dataWithGroups = useMemo(() => {
-        const result: (null | unknown)[] = enableHeader ? [null] : [];
+    const {
+        calculatedColumnWidths,
+        parsedColumns,
+        pinnedLeftColumnCount,
+        pinnedRightColumnCount,
+        totalColumnCount,
+    } = useTableColumnModel({
+        autoFitColumns,
+        centerContainerWidth,
+        columns,
+        totalContainerWidth,
+    });
+    const playerContext = usePlayer();
 
-        if (!groups || groups.length === 0) {
-            // No groups, just add all data
-            result.push(...data);
-            return result;
-        }
-
-        // Build the expanded row model: [header?] + (groupHeader + groupItems)* + any remaining items.
-        let dataIndex = 0;
-        for (const group of groups) {
-            // Group header row
-            result.push(null);
-
-            // Group items
-            const end = Math.min(data.length, dataIndex + group.itemCount);
-            for (; dataIndex < end; dataIndex++) {
-                result.push(data[dataIndex]);
-            }
-        }
-
-        // If groups don't account for all items, append the remainder.
-        for (; dataIndex < data.length; dataIndex++) {
-            result.push(data[dataIndex]);
-        }
-
-        return result;
-    }, [data, enableHeader, groups]);
-
-    // Compute distributed widths: unpinned columns with autoWidth will share any remaining space
-    // When autoSizeColumns is true, all column widths are treated as proportions and scaled to fit the container
-    const calculatedColumnWidths = useMemo(() => {
-        const baseWidths = parsedColumns.map((c) => c.width);
-
-        // When autoSizeColumns is enabled, treat all widths as proportions and scale to fit container
-        if (autoFitColumns) {
-            // Calculate total reference width (sum of all base widths)
-            const totalReferenceWidth = baseWidths.reduce((sum, width) => sum + width, 0);
-
-            if (totalReferenceWidth === 0 || totalContainerWidth === 0) {
-                return baseWidths.map((width) => Math.round(width));
-            }
-
-            // Scale factor to fit all columns proportionally within the total container width
-            const scaleFactor = totalContainerWidth / totalReferenceWidth;
-
-            // Apply scale factor to all columns proportionally and round to integers
-            const scaledWidths = baseWidths.map((width) => Math.round(width * scaleFactor));
-
-            // Adjust for rounding errors: ensure total equals totalContainerWidth
-            const totalScaled = scaledWidths.reduce((sum, width) => sum + width, 0);
-            const difference = totalContainerWidth - totalScaled;
-
-            if (difference !== 0 && scaledWidths.length > 0) {
-                // Distribute the difference to the largest columns
-                const sortedIndices = scaledWidths
-                    .map((width, idx) => ({ idx, width }))
-                    .sort((a, b) => b.width - a.width);
-
-                const adjustmentPerColumn = Math.sign(difference);
-                const adjustmentCount = Math.abs(difference);
-
-                for (let i = 0; i < adjustmentCount && i < sortedIndices.length; i++) {
-                    scaledWidths[sortedIndices[i].idx] += adjustmentPerColumn;
-                }
-            }
-
-            return scaledWidths;
-        }
-
-        // Original behavior: distribute extra space to auto-size columns
-        const distributed = baseWidths.slice();
-
-        const unpinnedIndices: number[] = [];
-        const autoUnpinnedIndices: number[] = [];
-
-        parsedColumns.forEach((col, idx) => {
-            if (col.pinned === null) {
-                unpinnedIndices.push(idx);
-                if (col.autoSize) {
-                    autoUnpinnedIndices.push(idx);
-                }
-            }
-        });
-
-        if (unpinnedIndices.length === 0 || autoUnpinnedIndices.length === 0) {
-            return distributed.map((width) => Math.round(width));
-        }
-
-        const unpinnedBaseTotal = unpinnedIndices.reduce((sum, idx) => sum + baseWidths[idx], 0);
-
-        // Distribute only when there is extra space within the center container
-        const extra = Math.max(0, centerContainerWidth - unpinnedBaseTotal);
-        if (extra <= 0) {
-            return distributed.map((width) => Math.round(width));
-        }
-
-        const extraPer = extra / autoUnpinnedIndices.length;
-        autoUnpinnedIndices.forEach((idx) => {
-            distributed[idx] = Math.round(baseWidths[idx] + extraPer);
-        });
-
-        // Round all widths to integers
-        return distributed.map((width) => Math.round(width));
-    }, [parsedColumns, centerContainerWidth, autoFitColumns, totalContainerWidth]);
-
-    const pinnedLeftColumnCount = parsedColumns.filter((col) => col.pinned === 'left').length;
-    const pinnedRightColumnCount = parsedColumns.filter((col) => col.pinned === 'right').length;
+    const { dataWithGroups, groupHeaderRowCount } = useTableRowModel({
+        data,
+        enableHeader,
+        groups,
+    });
 
     const pinnedRowCount = enableHeader ? 1 : 0;
 
-    // Calculate group header row count - each group has one header row
-    const groupHeaderRowCount = useMemo(() => {
-        if (!groups || groups.length === 0) return 0;
-        return groups.length;
-    }, [groups]);
-
     // Group headers are inserted at specific indexes, so they add to the total row count
     const totalRowCount = totalItemCount - pinnedRowCount + groupHeaderRowCount;
-    const totalColumnCount = columnCount - pinnedLeftColumnCount - pinnedRightColumnCount;
     const pinnedRowRef = useRef<HTMLDivElement>(null);
     const rowRef = useRef<HTMLDivElement>(null);
     const pinnedLeftColumnRef = useRef<HTMLDivElement>(null);
@@ -1109,781 +876,76 @@ const BaseItemTableList = ({
         stickyHeaderMainRef,
     });
 
-    // Update position and width of sticky header (scroll sync is handled in the hook)
-    useEffect(() => {
-        if (!shouldShowStickyHeader || !stickyHeaderRef.current || !containerRef.current) {
-            return;
-        }
+    useStickyHeaderPositioning({
+        containerRef,
+        shouldShowStickyHeader,
+        stickyHeaderRef,
+    });
 
-        const stickyHeader = stickyHeaderRef.current;
-        const container = containerRef.current;
-        let isMounted = true;
-
-        const updatePosition = () => {
-            // Guard against updates after unmount
-            if (!isMounted || !stickyHeader || !container) {
-                return;
-            }
-            try {
-                const containerRect = container.getBoundingClientRect();
-                stickyHeader.style.left = `${containerRect.left}px`;
-                stickyHeader.style.width = `${containerRect.width}px`;
-            } catch {
-                // Silently handle errors if elements are no longer in DOM
-            }
-        };
-
-        updatePosition();
-
-        window.addEventListener('resize', updatePosition);
-        window.addEventListener('scroll', updatePosition, true);
-
-        return () => {
-            isMounted = false;
-            window.removeEventListener('resize', updatePosition);
-            window.removeEventListener('scroll', updatePosition, true);
-        };
-    }, [shouldShowStickyHeader]);
-
-    useEffect(() => {
-        const el = rowRef.current;
-        if (!el) return;
-
-        const updateWidth = () => {
-            setCenterContainerWidth(el.clientWidth || 0);
-        };
-
-        updateWidth();
-
-        let debounceTimeout: NodeJS.Timeout | null = null;
-        const resizeObserver = new ResizeObserver(() => {
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
-            debounceTimeout = setTimeout(() => {
-                updateWidth();
-            }, 100);
-        });
-
-        resizeObserver.observe(el);
-
-        return () => {
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
-            resizeObserver.disconnect();
-        };
-    }, []);
-
-    // Track total container width for autoSizeColumns
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el || !autoFitColumns) return;
-
-        const updateWidth = () => {
-            setTotalContainerWidth(el.clientWidth || 0);
-        };
-
-        updateWidth();
-
-        let debounceTimeout: NodeJS.Timeout | null = null;
-        const resizeObserver = new ResizeObserver(() => {
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
-            debounceTimeout = setTimeout(() => {
-                updateWidth();
-            }, 100);
-        });
-
-        resizeObserver.observe(el);
-
-        return () => {
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
-            resizeObserver.disconnect();
-        };
-    }, [autoFitColumns]);
+    useContainerWidthTracking({
+        autoFitColumns,
+        containerRef,
+        rowRef,
+        setCenterContainerWidth,
+        setTotalContainerWidth,
+    });
 
     const onScrollEndRef = useRef<ItemTableListProps['onScrollEnd']>(onScrollEnd);
     useEffect(() => {
         onScrollEndRef.current = onScrollEnd;
     }, [onScrollEnd]);
 
-    const scrollToTableOffset = useCallback((offset: number) => {
-        const mainContainer = rowRef.current?.childNodes[0] as HTMLDivElement | undefined;
-        const pinnedLeftContainer = pinnedLeftColumnRef.current?.childNodes[0] as
-            | HTMLDivElement
-            | undefined;
-        const pinnedRightContainer = pinnedRightColumnRef.current?.childNodes[0] as
-            | HTMLDivElement
-            | undefined;
-
-        const behavior = 'instant';
-
-        if (mainContainer) {
-            mainContainer.scrollTo({ behavior, top: offset });
-        }
-        if (pinnedLeftContainer) {
-            pinnedLeftContainer.scrollTo({ behavior, top: offset });
-        }
-        if (pinnedRightContainer) {
-            pinnedRightContainer.scrollTo({ behavior, top: offset });
-        }
-    }, []);
-
-    const DEFAULT_ROW_HEIGHT =
-        size === 'compact'
-            ? TableItemSize.COMPACT
-            : size === 'large'
-              ? TableItemSize.LARGE
-              : TableItemSize.DEFAULT;
-
-    const calculateScrollTopForIndex = useCallback(
-        (index: number) => {
-            const adjustedIndex = enableHeader ? Math.max(0, index - 1) : index;
-            let scrollTop = 0;
-
-            // Create a minimal mock cellProps for rowHeight function calls if needed
-            const mockCellProps: TableItemProps = {
-                cellPadding,
-                columns: parsedColumns,
-                controls: {} as ItemControls,
-                data: enableHeader ? [null, ...data] : data,
-                enableAlternateRowColors,
-                enableExpansion,
-                enableHeader,
-                enableHorizontalBorders,
-                enableRowHoverHighlight,
-                enableSelection,
-                enableVerticalBorders,
-                getRowHeight: () => DEFAULT_ROW_HEIGHT,
-                internalState: {} as ItemListStateActions,
-                itemType,
-                playerContext,
-                size,
-                tableId,
-            };
-
-            for (let i = 0; i < adjustedIndex; i++) {
-                let height: number;
-                if (typeof rowHeight === 'number') {
-                    height = rowHeight;
-                } else if (typeof rowHeight === 'function') {
-                    height = rowHeight(i, mockCellProps);
-                } else {
-                    height = DEFAULT_ROW_HEIGHT;
-                }
-                scrollTop += height;
-            }
-            return scrollTop;
-        },
-        [
-            enableHeader,
-            cellPadding,
-            parsedColumns,
-            data,
-            enableAlternateRowColors,
-            enableExpansion,
-            enableHorizontalBorders,
-            enableRowHoverHighlight,
-            enableSelection,
-            enableVerticalBorders,
-            itemType,
-            playerContext,
-            size,
-            tableId,
-            DEFAULT_ROW_HEIGHT,
-            rowHeight,
-        ],
-    );
-
-    const scrollToTableIndex = useCallback(
-        (index: number, options?: { align?: 'bottom' | 'center' | 'top' }) => {
-            const mainContainer = rowRef.current?.childNodes[0] as HTMLDivElement | undefined;
-            if (!mainContainer) return;
-
-            const viewportHeight = mainContainer.clientHeight;
-            const align = options?.align || 'top';
-
-            // Calculate the base scroll offset (top of the row)
-            let offset = calculateScrollTopForIndex(index);
-
-            // Calculate row height for the target index
-            const adjustedIndex = enableHeader ? Math.max(0, index - 1) : index;
-            const mockCellProps: TableItemProps = {
-                cellPadding,
-                columns: parsedColumns,
-                controls: {} as ItemControls,
-                data: enableHeader ? [null, ...data] : data,
-                enableAlternateRowColors,
-                enableExpansion,
-                enableHeader,
-                enableHorizontalBorders,
-                enableRowHoverHighlight,
-                enableSelection,
-                enableVerticalBorders,
-                getRowHeight: () => DEFAULT_ROW_HEIGHT,
-                internalState: {} as ItemListStateActions,
-                itemType,
-                playerContext,
-                size,
-                tableId,
-            };
-
-            let targetRowHeight: number;
-            if (typeof rowHeight === 'number') {
-                targetRowHeight = rowHeight;
-            } else if (typeof rowHeight === 'function') {
-                targetRowHeight = rowHeight(adjustedIndex, mockCellProps);
-            } else {
-                targetRowHeight = DEFAULT_ROW_HEIGHT;
-            }
-
-            // Adjust offset based on alignment
-            if (align === 'center') {
-                offset = offset - viewportHeight / 2 + targetRowHeight / 2;
-            } else if (align === 'bottom') {
-                offset = offset - viewportHeight + targetRowHeight;
-            }
-            // 'top' uses the base offset
-
-            // Ensure offset is not negative
-            offset = Math.max(0, offset);
-
-            scrollToTableOffset(offset);
-        },
-        [
-            calculateScrollTopForIndex,
-            scrollToTableOffset,
-            enableHeader,
-            cellPadding,
-            parsedColumns,
-            data,
-            enableAlternateRowColors,
-            enableExpansion,
-            enableHorizontalBorders,
-            enableRowHoverHighlight,
-            enableSelection,
-            enableVerticalBorders,
-            itemType,
-            playerContext,
-            size,
-            tableId,
-            DEFAULT_ROW_HEIGHT,
-            rowHeight,
-        ],
-    );
-
-    // Main grid overlayscrollbars - only handle X-axis if right-pinned columns exist
-    const [initialize, osInstance] = useOverlayScrollbars({
-        defer: false,
-        events: {
-            initialized(osInstance) {
-                const { viewport } = osInstance.elements();
-                viewport.style.overflowX = `var(--os-viewport-overflow-x)`;
-
-                if (pinnedRightColumnCount > 0) {
-                    viewport.style.overflowY = 'auto';
-                } else {
-                    viewport.style.overflowY = `var(--os-viewport-overflow-y)`;
-                }
-            },
-        },
-        options: {
-            overflow: {
-                x: 'scroll',
-                y: pinnedRightColumnCount > 0 ? 'hidden' : 'scroll',
-            },
-            paddingAbsolute: true,
-            scrollbars: {
-                autoHide: 'leave',
-                autoHideDelay: 500,
-                pointers: ['mouse', 'pen', 'touch'],
-                theme: 'feishin-os-scrollbar',
-            },
-        },
+    const {
+        calculateScrollTopForIndex,
+        DEFAULT_ROW_HEIGHT,
+        scrollToTableIndex,
+        scrollToTableOffset,
+    } = useTableScrollToIndex({
+        cellPadding,
+        columns: parsedColumns,
+        data,
+        enableAlternateRowColors,
+        enableExpansion,
+        enableHeader,
+        enableHorizontalBorders,
+        enableRowHoverHighlight,
+        enableSelection,
+        enableVerticalBorders,
+        itemType,
+        pinnedLeftColumnRef,
+        pinnedRightColumnRef,
+        playerContext,
+        rowHeight,
+        rowRef,
+        size,
+        tableId,
     });
 
-    // Right pinned columns overlayscrollbars - enable Y-axis scroll when right-pinned columns exist
-    const [initializeRightPinned, osInstanceRightPinned] = useOverlayScrollbars({
-        defer: false,
-        events: {
-            initialized(osInstance) {
-                const { viewport } = osInstance.elements();
-                viewport.style.overflowX = `var(--os-viewport-overflow-x)`;
-                viewport.style.overflowY = `var(--os-viewport-overflow-y)`;
-            },
-        },
-        options: {
-            overflow: { x: 'hidden', y: 'scroll' },
-            paddingAbsolute: true,
-            scrollbars: {
-                autoHide: 'leave',
-                autoHideDelay: 500,
-                pointers: ['mouse', 'pen', 'touch'],
-                theme: 'feishin-os-scrollbar',
-            },
-        },
+    useTablePaneSync({
+        enableDrag,
+        enableHeader,
+        handleRef,
+        onScrollEndRef,
+        pinnedLeftColumnCount,
+        pinnedLeftColumnRef,
+        pinnedRightColumnCount,
+        pinnedRightColumnRef,
+        pinnedRowRef,
+        rowRef,
+        scrollContainerRef,
+        setShowLeftShadow,
+        setShowRightShadow,
+        setShowTopShadow,
     });
-
-    useEffect(() => {
-        const { current: root } = scrollContainerRef;
-
-        if (!root || !root.firstElementChild) {
-            return;
-        }
-
-        const viewport = root.firstElementChild as HTMLElement;
-
-        initialize({
-            elements: { viewport },
-            target: root,
-        });
-
-        if (enableDrag) {
-            autoScrollForElements({
-                canScroll: () => true,
-                element: viewport,
-                getAllowedAxis: () => 'vertical',
-                getConfiguration: () => ({ maxScrollSpeed: 'fast' }),
-            });
-        }
-
-        return () => {
-            try {
-                const instance = osInstance();
-                const { current: root } = scrollContainerRef;
-
-                // Check if instance exists and elements are still connected to the DOM
-                if (instance && root) {
-                    const viewport = root.firstElementChild as HTMLElement;
-
-                    // Check if elements are still in the document
-                    const rootInDocument = document.contains(root);
-                    const viewportInDocument = viewport && document.contains(viewport);
-
-                    // Only destroy if elements are still in the document
-                    if (rootInDocument && viewportInDocument) {
-                        instance.destroy();
-                    }
-                }
-            } catch {
-                // Ignore error
-            }
-        };
-    }, [enableDrag, initialize, osInstance, pinnedRightColumnCount]);
-
-    useEffect(() => {
-        if (pinnedLeftColumnCount === 0) {
-            return;
-        }
-
-        const { current: root } = pinnedLeftColumnRef;
-
-        if (!root || !root.firstElementChild) {
-            return;
-        }
-
-        const viewport = root.firstElementChild as HTMLElement;
-
-        if (enableDrag) {
-            autoScrollForElements({
-                canScroll: () => true,
-                element: viewport,
-                getAllowedAxis: () => 'vertical',
-                getConfiguration: () => ({ maxScrollSpeed: 'fast' }),
-            });
-        }
-    }, [enableDrag, pinnedLeftColumnCount]);
-
-    // Initialize overlayscrollbars for right pinned columns
-    useEffect(() => {
-        if (pinnedRightColumnCount === 0) {
-            return;
-        }
-
-        const { current: root } = pinnedRightColumnRef;
-
-        if (!root || !root.firstElementChild) {
-            return;
-        }
-
-        const viewport = root.firstElementChild as HTMLElement;
-
-        initializeRightPinned({
-            elements: { viewport },
-            target: root,
-        });
-
-        if (enableDrag) {
-            autoScrollForElements({
-                canScroll: () => true,
-                element: viewport,
-                getAllowedAxis: () => 'vertical',
-                getConfiguration: () => ({ maxScrollSpeed: 'fast' }),
-            });
-        }
-
-        return () => {
-            try {
-                const instance = osInstanceRightPinned();
-                const { current: root } = pinnedRightColumnRef;
-
-                if (instance && root) {
-                    const viewport = root.firstElementChild as HTMLElement;
-
-                    const rootInDocument = document.contains(root);
-                    const viewportInDocument = viewport && document.contains(viewport);
-
-                    if (rootInDocument && viewportInDocument) {
-                        instance.destroy();
-                    }
-                }
-            } catch {
-                // Ignore error
-            }
-        };
-    }, [enableDrag, initializeRightPinned, osInstanceRightPinned, pinnedRightColumnCount]);
-
-    useEffect(() => {
-        const header = pinnedRowRef.current?.childNodes[0] as HTMLDivElement;
-        const row = rowRef.current?.childNodes[0] as HTMLDivElement;
-        const pinnedLeft = pinnedLeftColumnRef.current?.childNodes[0] as HTMLDivElement;
-        const pinnedRight = pinnedRightColumnRef.current?.childNodes[0] as HTMLDivElement;
-
-        if (row) {
-            // Ensure all containers have the same height
-            const syncHeights = () => {
-                const rowHeight = row.scrollHeight;
-                let targetHeight = rowHeight;
-
-                if (pinnedLeft) {
-                    const pinnedLeftHeight = pinnedLeft.scrollHeight;
-                    targetHeight = Math.max(targetHeight, pinnedLeftHeight);
-                }
-
-                if (pinnedRight) {
-                    const pinnedRightHeight = pinnedRight.scrollHeight;
-                    targetHeight = Math.max(targetHeight, pinnedRightHeight);
-                }
-
-                // Set consistent heights for all elements
-                if (pinnedLeft && pinnedLeft.style.height !== `${targetHeight}px`) {
-                    pinnedLeft.style.height = `${targetHeight}px`;
-                }
-                if (pinnedRight && pinnedRight.style.height !== `${targetHeight}px`) {
-                    pinnedRight.style.height = `${targetHeight}px`;
-                }
-                if (row.style.height !== `${targetHeight}px`) {
-                    row.style.height = `${targetHeight}px`;
-                }
-            };
-
-            const timeoutId = setTimeout(syncHeights, 0);
-
-            const activeElement = { element: null } as { element: HTMLDivElement | null };
-            const scrollingElements = new Set<HTMLDivElement>();
-            const scrollTimeouts = new Map<HTMLDivElement, NodeJS.Timeout>();
-
-            const setActiveElement = (e: HTMLElementEventMap['pointermove']) => {
-                activeElement.element = e.currentTarget as HTMLDivElement;
-            };
-            const setActiveElementFromWheel = (e: HTMLElementEventMap['wheel']) => {
-                activeElement.element = e.currentTarget as HTMLDivElement;
-            };
-
-            // Track which elements are actively scrolling
-            const markElementAsScrolling = (element: HTMLDivElement) => {
-                scrollingElements.add(element);
-
-                // Clear existing timeout for this element
-                const existingTimeout = scrollTimeouts.get(element);
-                if (existingTimeout) {
-                    clearTimeout(existingTimeout);
-                }
-
-                // Set a timeout to remove the element from scrolling set
-                const timeout = setTimeout(() => {
-                    scrollingElements.delete(element);
-
-                    // Use right pinned column scroll position if right-pinned columns exist
-                    const hasRightPinnedColumns = pinnedRightColumnCount > 0;
-                    const scrollElement = hasRightPinnedColumns && pinnedRight ? pinnedRight : row;
-
-                    if (scrollElement && onScrollEndRef.current) {
-                        onScrollEndRef.current(
-                            scrollElement.scrollTop,
-                            handleRef.current ?? (undefined as any),
-                        );
-                    }
-
-                    scrollTimeouts.delete(element);
-                }, 150);
-
-                scrollTimeouts.set(element, timeout);
-            };
-
-            const syncScroll = (e: HTMLElementEventMap['scroll']) => {
-                const currentElement = e.currentTarget as HTMLDivElement;
-
-                markElementAsScrolling(currentElement);
-
-                // Allow sync if:
-                // 1. Current element is the active element (normal case)
-                // 2. Current element is actively scrolling (handles autoscroll and other continuous scrolling)
-                const shouldSync =
-                    currentElement === activeElement.element ||
-                    scrollingElements.has(currentElement);
-
-                if (!shouldSync) {
-                    return;
-                }
-
-                const scrollTop = (e.currentTarget as HTMLDivElement).scrollTop;
-                const scrollLeft = (e.currentTarget as HTMLDivElement).scrollLeft;
-
-                const isScrolling = {
-                    header: false,
-                    pinnedLeft: false,
-                    pinnedRight: false,
-                    row: false,
-                };
-
-                const hasRightPinnedColumns = pinnedRightColumnCount > 0;
-
-                // Sync horizontal scroll between header and main content (only if header exists)
-                if (header && e.currentTarget === header && !isScrolling.row) {
-                    isScrolling.row = true;
-                    row.scrollTo({
-                        behavior: 'instant',
-                        left: scrollLeft,
-                    });
-                    isScrolling.row = false;
-                }
-
-                // Sync from main content to header and sticky columns
-                if (
-                    e.currentTarget === row &&
-                    !isScrolling.header &&
-                    !isScrolling.pinnedLeft &&
-                    !isScrolling.pinnedRight
-                ) {
-                    if (header) {
-                        isScrolling.header = true;
-                        header.scrollTo({
-                            behavior: 'instant',
-                            left: scrollLeft,
-                        });
-                    }
-                    // When right-pinned columns exist, sync Y-scroll to right pinned column instead of from main grid
-                    if (hasRightPinnedColumns && pinnedRight) {
-                        isScrolling.pinnedRight = true;
-                        pinnedRight.scrollTo({
-                            behavior: 'instant',
-                            top: scrollTop,
-                        });
-                        isScrolling.pinnedRight = false;
-                    } else {
-                        // When no right-pinned columns, sync Y-scroll normally
-                        if (pinnedLeft) {
-                            isScrolling.pinnedLeft = true;
-                            pinnedLeft.scrollTo({
-                                behavior: 'instant',
-                                top: scrollTop,
-                            });
-                        }
-                        if (pinnedRight) {
-                            isScrolling.pinnedRight = true;
-                            pinnedRight.scrollTo({
-                                behavior: 'instant',
-                                top: scrollTop,
-                            });
-                        }
-                    }
-                    isScrolling.header = false;
-                    isScrolling.pinnedLeft = false;
-                }
-
-                // Sync vertical scroll between left pinned column and main content (only if pinnedLeft exists)
-                if (pinnedLeft && e.currentTarget === pinnedLeft && !isScrolling.row) {
-                    // When right-pinned columns exist, sync Y-scroll to right pinned column instead of main grid
-                    if (hasRightPinnedColumns && pinnedRight) {
-                        isScrolling.pinnedRight = true;
-                        pinnedRight.scrollTo({
-                            behavior: 'instant',
-                            top: scrollTop,
-                        });
-                        isScrolling.pinnedRight = false;
-                    } else {
-                        isScrolling.row = true;
-                        row.scrollTo({
-                            behavior: 'instant',
-                            top: scrollTop,
-                        });
-                        isScrolling.row = false;
-                    }
-                }
-
-                // Sync vertical scroll from right pinned column to main content and left pinned column
-                // When right-pinned columns exist, this is the source of truth for Y-scroll
-                if (pinnedRight && e.currentTarget === pinnedRight && !isScrolling.row) {
-                    isScrolling.row = true;
-                    row.scrollTo({
-                        behavior: 'instant',
-                        top: scrollTop,
-                    });
-                    isScrolling.row = false;
-                    if (pinnedLeft) {
-                        isScrolling.pinnedLeft = true;
-                        pinnedLeft.scrollTo({
-                            behavior: 'instant',
-                            top: scrollTop,
-                        });
-                        isScrolling.pinnedLeft = false;
-                    }
-                }
-            };
-
-            // Add event listeners for elements that exist
-            if (header) {
-                header.addEventListener('pointermove', setActiveElement);
-                header.addEventListener('wheel', setActiveElementFromWheel);
-                header.addEventListener('scroll', syncScroll);
-            }
-            row.addEventListener('pointermove', setActiveElement);
-            row.addEventListener('wheel', setActiveElementFromWheel);
-            row.addEventListener('scroll', syncScroll);
-            if (pinnedLeft) {
-                pinnedLeft.addEventListener('pointermove', setActiveElement);
-                pinnedLeft.addEventListener('wheel', setActiveElementFromWheel);
-                pinnedLeft.addEventListener('scroll', syncScroll);
-            }
-            if (pinnedRight) {
-                pinnedRight.addEventListener('pointermove', setActiveElement);
-                pinnedRight.addEventListener('wheel', setActiveElementFromWheel);
-                pinnedRight.addEventListener('scroll', syncScroll);
-            }
-
-            // Add resize observer to maintain height sync
-            let heightSyncDebounceTimeout: NodeJS.Timeout | null = null;
-            const resizeObserver = new ResizeObserver(() => {
-                if (heightSyncDebounceTimeout) {
-                    clearTimeout(heightSyncDebounceTimeout);
-                }
-                heightSyncDebounceTimeout = setTimeout(() => {
-                    syncHeights();
-                }, 100);
-            });
-
-            resizeObserver.observe(row);
-            if (pinnedLeft) {
-                resizeObserver.observe(pinnedLeft);
-            }
-            if (pinnedRight) {
-                resizeObserver.observe(pinnedRight);
-            }
-
-            return () => {
-                clearTimeout(timeoutId);
-                scrollTimeouts.forEach((timeout) => clearTimeout(timeout));
-                scrollTimeouts.clear();
-                scrollingElements.clear();
-
-                if (header) {
-                    header.removeEventListener('pointermove', setActiveElement);
-                    header.removeEventListener('wheel', setActiveElementFromWheel);
-                    header.removeEventListener('scroll', syncScroll);
-                }
-                row.removeEventListener('pointermove', setActiveElement);
-                row.removeEventListener('wheel', setActiveElementFromWheel);
-                row.removeEventListener('scroll', syncScroll);
-                if (pinnedLeft) {
-                    pinnedLeft.removeEventListener('pointermove', setActiveElement);
-                    pinnedLeft.removeEventListener('wheel', setActiveElementFromWheel);
-                    pinnedLeft.removeEventListener('scroll', syncScroll);
-                }
-                if (pinnedRight) {
-                    pinnedRight.removeEventListener('pointermove', setActiveElement);
-                    pinnedRight.removeEventListener('wheel', setActiveElementFromWheel);
-                    pinnedRight.removeEventListener('scroll', syncScroll);
-                }
-                if (heightSyncDebounceTimeout) {
-                    clearTimeout(heightSyncDebounceTimeout);
-                }
-                resizeObserver.disconnect();
-            };
-        }
-
-        return undefined;
-    }, [pinnedLeftColumnCount, pinnedRightColumnCount]);
-
-    // Handle left and right shadow visibility based on horizontal scroll
-    useEffect(() => {
-        const row = rowRef.current?.childNodes[0] as HTMLDivElement;
-
-        if (!row) {
-            const timeout = setTimeout(() => {
-                setShowLeftShadow(false);
-                setShowRightShadow(false);
-            }, 0);
-
-            return () => clearTimeout(timeout);
-        }
-
-        const checkScrollPosition = throttle(() => {
-            const scrollLeft = row.scrollLeft;
-            const maxScrollLeft = row.scrollWidth - row.clientWidth;
-
-            setShowLeftShadow(pinnedLeftColumnCount > 0 && scrollLeft > 0);
-            setShowRightShadow(pinnedRightColumnCount > 0 && scrollLeft < maxScrollLeft);
-        }, 50);
-
-        checkScrollPosition();
-
-        row.addEventListener('scroll', checkScrollPosition, { passive: true });
-
-        return () => {
-            checkScrollPosition.cancel();
-            row.removeEventListener('scroll', checkScrollPosition);
-        };
-    }, [pinnedLeftColumnCount, pinnedRightColumnCount]);
-
-    // Handle top shadow visibility based on vertical scroll
-    useEffect(() => {
-        const row = rowRef.current?.childNodes[0] as HTMLDivElement;
-        const pinnedRight = pinnedRightColumnRef.current?.childNodes[0] as HTMLDivElement;
-
-        if (!row || !enableHeader) {
-            const timeout = setTimeout(() => {
-                setShowTopShadow(false);
-            }, 0);
-
-            return () => clearTimeout(timeout);
-        }
-
-        // When right-pinned columns exist, use right pinned column's scroll position
-        const scrollElement = pinnedRightColumnCount > 0 && pinnedRight ? pinnedRight : row;
-
-        const checkScrollPosition = throttle(() => {
-            const currentScrollTop = scrollElement.scrollTop;
-            setShowTopShadow(currentScrollTop > 0);
-        }, 50);
-
-        checkScrollPosition();
-
-        scrollElement.addEventListener('scroll', checkScrollPosition, { passive: true });
-
-        return () => {
-            checkScrollPosition.cancel();
-            scrollElement.removeEventListener('scroll', checkScrollPosition);
-        };
-    }, [enableHeader, pinnedRightColumnCount]);
 
     const getRowHeight = useCallback(
         (index: number, cellProps: TableItemProps) => {
-            const height = size === 'compact' ? 40 : size === 'large' ? 88 : 64;
+            const height =
+                size === 'compact'
+                    ? TableItemSize.COMPACT
+                    : size === 'large'
+                      ? TableItemSize.LARGE
+                      : TableItemSize.DEFAULT;
 
             const baseHeight =
                 typeof rowHeight === 'number' ? rowHeight : rowHeight?.(index, cellProps) || height;
@@ -1901,7 +963,12 @@ const BaseItemTableList = ({
     // Create a wrapper for getRowHeight that doesn't require cellProps (for sticky group rows hook)
     const getRowHeightWrapper = useCallback(
         (index: number) => {
-            const height = size === 'compact' ? 40 : size === 'large' ? 88 : 64;
+            const height =
+                size === 'compact'
+                    ? TableItemSize.COMPACT
+                    : size === 'large'
+                      ? TableItemSize.LARGE
+                      : TableItemSize.DEFAULT;
 
             const baseHeight = typeof rowHeight === 'number' ? rowHeight : height;
 
@@ -1933,41 +1000,11 @@ const BaseItemTableList = ({
     // Show sticky group row whenever it should be shown
     const shouldRenderStickyGroupRow = shouldShowStickyGroupRow;
 
-    // Update position and width of sticky group row
-    useEffect(() => {
-        if (!shouldRenderStickyGroupRow || !stickyGroupRowRef.current || !containerRef.current) {
-            return;
-        }
-
-        const stickyGroupRow = stickyGroupRowRef.current;
-        const container = containerRef.current;
-        let isMounted = true;
-
-        const updatePosition = () => {
-            // Guard against updates after unmount
-            if (!isMounted || !stickyGroupRow || !container) {
-                return;
-            }
-            try {
-                const containerRect = container.getBoundingClientRect();
-                stickyGroupRow.style.left = `${containerRect.left}px`;
-                stickyGroupRow.style.width = `${containerRect.width}px`;
-            } catch {
-                // Silently handle errors if elements are no longer in DOM
-            }
-        };
-
-        updatePosition();
-
-        window.addEventListener('resize', updatePosition);
-        window.addEventListener('scroll', updatePosition, true);
-
-        return () => {
-            isMounted = false;
-            window.removeEventListener('resize', updatePosition);
-            window.removeEventListener('scroll', updatePosition, true);
-        };
-    }, [shouldRenderStickyGroupRow]);
+    useStickyGroupRowPositioning({
+        containerRef,
+        shouldRenderStickyGroupRow,
+        stickyGroupRowRef,
+    });
 
     const getDataFn = useCallback(() => {
         return dataWithGroups;
@@ -1996,180 +1033,44 @@ const BaseItemTableList = ({
         [],
     );
 
-    const handleKeyDown = useCallback(
-        (e: React.KeyboardEvent<HTMLDivElement>) => {
-            if (!enableSelection) return;
-            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-            e.preventDefault();
-            e.stopPropagation();
+    const { handleKeyDown } = useTableKeyboardNavigation({
+        calculateScrollTopForIndex,
+        cellPadding,
+        data,
+        DEFAULT_ROW_HEIGHT,
+        enableHeader,
+        enableSelection,
+        extractRowId,
+        getStateItem,
+        hasRequiredStateItemProperties,
+        internalState,
+        itemType,
+        parsedColumns,
+        pinnedRightColumnCount,
+        pinnedRightColumnRef,
+        playerContext,
+        rowHeight,
+        rowRef,
+        scrollToTableIndex,
+        size,
+        tableId,
+    });
 
-            const selected = internalState.getSelected();
-            const validSelected = selected.filter(hasRequiredStateItemProperties);
-            let currentIndex = -1;
+    useTableInitialScroll({
+        initialTop,
+        scrollToTableIndex,
+        scrollToTableOffset,
+        startRowIndex,
+    });
 
-            if (validSelected.length > 0) {
-                const lastSelected = validSelected[validSelected.length - 1];
-                currentIndex = data.findIndex(
-                    (d) => extractRowId(d) === extractRowId(lastSelected),
-                );
-            }
-
-            let newIndex = 0;
-            if (currentIndex !== -1) {
-                newIndex =
-                    e.key === 'ArrowDown'
-                        ? Math.min(currentIndex + 1, data.length - 1)
-                        : Math.max(currentIndex - 1, 0);
-            }
-
-            const newItem: any = data[newIndex];
-            if (!newItem) return;
-
-            const newItemListItem = getStateItem(newItem);
-            if (newItemListItem && extractRowId(newItemListItem)) {
-                internalState.setSelected([newItemListItem]);
-            }
-
-            // Check if we need to scroll by determining if the item is at the edge of the viewport
-            const gridIndex = enableHeader ? newIndex + 1 : newIndex;
-
-            const mainContainer = rowRef.current?.childNodes[0] as HTMLDivElement | undefined;
-            const pinnedRightContainer = pinnedRightColumnRef.current?.childNodes[0] as
-                | HTMLDivElement
-                | undefined;
-
-            // Use right pinned column scroll position if right-pinned columns exist
-            const scrollContainer =
-                pinnedRightColumnCount > 0 && pinnedRightContainer
-                    ? pinnedRightContainer
-                    : mainContainer;
-
-            if (scrollContainer) {
-                const viewportTop = scrollContainer.scrollTop;
-                const viewportHeight = scrollContainer.clientHeight;
-                const viewportBottom = viewportTop + viewportHeight;
-
-                const rowTop = calculateScrollTopForIndex(gridIndex);
-                const adjustedIndex = enableHeader ? Math.max(0, newIndex - 1) : newIndex;
-                const mockCellProps: TableItemProps = {
-                    cellPadding,
-                    columns: parsedColumns,
-                    controls: {} as ItemControls,
-                    data: enableHeader ? [null, ...data] : data,
-                    enableAlternateRowColors,
-                    enableExpansion,
-                    enableHeader,
-                    enableHorizontalBorders,
-                    enableRowHoverHighlight,
-                    enableSelection,
-                    enableVerticalBorders,
-                    getRowHeight: () => DEFAULT_ROW_HEIGHT,
-                    internalState: {} as ItemListStateActions,
-                    itemType,
-                    playerContext,
-                    size,
-                    tableId,
-                };
-
-                let calculatedRowHeight: number;
-                if (typeof rowHeight === 'number') {
-                    calculatedRowHeight = rowHeight;
-                } else if (typeof rowHeight === 'function') {
-                    calculatedRowHeight = rowHeight(adjustedIndex, mockCellProps);
-                } else {
-                    calculatedRowHeight = DEFAULT_ROW_HEIGHT;
-                }
-
-                const rowBottom = rowTop + calculatedRowHeight;
-
-                // Check if row is fully visible within viewport
-                const isFullyVisible = rowTop >= viewportTop && rowBottom <= viewportBottom;
-
-                // Check if row is at the edge (top or bottom of viewport)
-                const isAtTopEdge = rowTop < viewportTop;
-                const isAtBottomEdge = rowBottom >= viewportBottom;
-
-                // Only scroll if the item is not fully visible or at the edge
-                if (!isFullyVisible || isAtTopEdge || isAtBottomEdge) {
-                    // Determine alignment based on direction
-                    const align: 'bottom' | 'top' =
-                        e.key === 'ArrowDown' && isAtBottomEdge
-                            ? 'bottom'
-                            : e.key === 'ArrowUp' && isAtTopEdge
-                              ? 'top'
-                              : isAtBottomEdge
-                                ? 'bottom'
-                                : isAtTopEdge
-                                  ? 'top'
-                                  : 'top';
-
-                    scrollToTableIndex(gridIndex, { align });
-                }
-            }
-        },
-        [
-            data,
-            enableSelection,
-            internalState,
-            calculateScrollTopForIndex,
-            scrollToTableIndex,
-            extractRowId,
-            getStateItem,
-            pinnedRightColumnCount,
-            enableHeader,
-            cellPadding,
-            parsedColumns,
-            enableAlternateRowColors,
-            enableExpansion,
-            enableHorizontalBorders,
-            enableRowHoverHighlight,
-            enableVerticalBorders,
-            itemType,
-            playerContext,
-            size,
-            tableId,
-            DEFAULT_ROW_HEIGHT,
-            rowHeight,
-        ],
-    );
-
-    const isInitialScrollPositionSet = useRef<boolean>(false);
-
-    useEffect(() => {
-        if (!initialTop || isInitialScrollPositionSet.current) return;
-        isInitialScrollPositionSet.current = true;
-
-        if (initialTop.type === 'offset') {
-            scrollToTableOffset(initialTop.to);
-        } else {
-            scrollToTableIndex(initialTop.to);
-        }
-    }, [initialTop, scrollToTableIndex, scrollToTableOffset]);
-
-    // Scroll to top when startRowIndex changes
-    useEffect(() => {
-        if (startRowIndex !== undefined) {
-            scrollToTableOffset(0);
-        }
-    }, [startRowIndex, scrollToTableOffset]);
-
-    const imperativeHandle: ItemListHandle = useMemo(() => {
-        return {
-            internalState,
-            scrollToIndex: (index: number, options?: { align?: 'bottom' | 'center' | 'top' }) => {
-                scrollToTableIndex(enableHeader ? index + 1 : index, options);
-            },
-            scrollToOffset: (offset: number) => {
-                scrollToTableOffset(offset);
-            },
-        };
-    }, [enableHeader, internalState, scrollToTableIndex, scrollToTableOffset]);
-
-    useImperativeHandle(ref, () => imperativeHandle);
-
-    useEffect(() => {
-        handleRef.current = imperativeHandle;
-    }, [imperativeHandle]);
+    useTableImperativeHandle({
+        enableHeader,
+        handleRef,
+        internalState,
+        ref,
+        scrollToTableIndex,
+        scrollToTableOffset,
+    });
 
     const controls = useDefaultItemListControls({
         onColumnReordered,
