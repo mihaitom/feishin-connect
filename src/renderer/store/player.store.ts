@@ -2631,6 +2631,16 @@ export const updateQueueRatings = (ids: string[], rating: null | number) => {
     });
 };
 
+export const incrementQueuePlayCount = (ids: string[]) => {
+    usePlayerStoreBase.setState((state) => {
+        Object.values(state.queue.songs).forEach((song) => {
+            if (ids.includes(song.id)) {
+                song.playCount = (song.playCount || 0) + 1;
+            }
+        });
+    });
+};
+
 export const usePlayerMuted = () => {
     return usePlayerStoreBase((state) => state.player.muted);
 };
