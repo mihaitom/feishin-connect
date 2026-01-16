@@ -694,6 +694,7 @@ interface ItemTableListProps {
     data: unknown[];
     enableAlternateRowColors?: boolean;
     enableDrag?: boolean;
+    enableEntranceAnimation?: boolean;
     enableExpansion?: boolean;
     enableHeader?: boolean;
     enableHorizontalBorders?: boolean;
@@ -737,6 +738,7 @@ const BaseItemTableList = ({
     data,
     enableAlternateRowColors = false,
     enableDrag = true,
+    enableEntranceAnimation = true,
     enableExpansion = true,
     enableHeader = true,
     enableHorizontalBorders = false,
@@ -2371,7 +2373,7 @@ const BaseItemTableList = ({
             ref={mergedContainerRef}
             tabIndex={0}
             {...animationProps.fadeIn}
-            transition={{ duration: 1, ease: 'anticipate' }}
+            transition={{ duration: enableEntranceAnimation ? 1 : 0, ease: 'anticipate' }}
         >
             {StickyHeader}
             {StickyGroupRow}

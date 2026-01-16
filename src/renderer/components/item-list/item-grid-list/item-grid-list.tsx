@@ -305,6 +305,7 @@ export interface ItemGridListProps {
     currentPage?: number;
     data: unknown[];
     enableDrag?: boolean;
+    enableEntranceAnimation?: boolean;
     enableExpansion?: boolean;
     enableSelection?: boolean;
     enableSelectionDialog?: boolean;
@@ -329,6 +330,7 @@ const BaseItemGridList = ({
     currentPage,
     data,
     enableDrag = true,
+    enableEntranceAnimation = true,
     enableExpansion = false,
     enableSelection = true,
     gap = 'sm',
@@ -730,7 +732,7 @@ const BaseItemGridList = ({
             ref={mergedContainerRef}
             tabIndex={0}
             {...animationProps.fadeIn}
-            transition={{ duration: 1, ease: 'anticipate' }}
+            transition={{ duration: enableEntranceAnimation ? 1 : 0, ease: 'anticipate' }}
         >
             <AutoSizer>
                 {({ height, width }) => (
