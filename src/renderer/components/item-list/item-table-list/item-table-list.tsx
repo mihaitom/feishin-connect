@@ -137,7 +137,7 @@ const VirtualizedTableGrid = ({
     CellComponent,
     cellPadding,
     controls,
-    // data,
+    data,
     dataWithGroups,
     enableAlternateRowColors,
     enableColumnReorder,
@@ -174,10 +174,173 @@ const VirtualizedTableGrid = ({
     totalColumnCount,
     totalRowCount,
 }: VirtualizedTableGridProps) => {
+    const hoverDelegateRef = useRef<HTMLDivElement | null>(null);
+
     const columnWidth = useCallback(
         (index: number) => calculatedColumnWidths[index],
         [calculatedColumnWidths],
     );
+
+    const groupHeaderInfoByRowIndex = useMemo(() => {
+        if (!groups || groups.length === 0) return undefined;
+
+        const map = new Map<number, { groupIndex: number; startDataIndex: number }>();
+        const headerOffset = enableHeader ? 1 : 0;
+        let cumulativeDataIndex = 0;
+
+        for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+            const groupHeaderIndex = headerOffset + cumulativeDataIndex + groupIndex;
+            map.set(groupHeaderIndex, { groupIndex, startDataIndex: cumulativeDataIndex });
+            cumulativeDataIndex += groups[groupIndex].itemCount;
+        }
+
+        return map;
+    }, [groups, enableHeader]);
+
+    const getGroupRenderData = useCallback(() => data, [data]);
+
+    // Row hover highlight: do one delegated listener per table rather than per cell
+    // This is intentionally imperative to avoid React re-rendering the entire visible grid on hover
+    useEffect(() => {
+        if (!enableRowHoverHighlight) return;
+        const root = hoverDelegateRef.current;
+        if (!root) return;
+
+        let hoveredKey: null | string = null;
+        let rafId: null | number = null;
+
+        const getRowKey = (target: EventTarget | null): null | string => {
+            const el = target instanceof Element ? target : null;
+            const rowEl = el?.closest?.('[data-row-index]') as HTMLElement | null;
+            return rowEl?.getAttribute('data-row-index') ?? null;
+        };
+
+        const apply = (prev: null | string, next: null | string) => {
+            if (rafId !== null) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                if (prev) {
+                    root.querySelectorAll(`[data-row-index="${prev}"]`).forEach((node) => {
+                        (node as HTMLElement).removeAttribute('data-row-hovered');
+                    });
+                }
+                if (next) {
+                    root.querySelectorAll(`[data-row-index="${next}"]`).forEach((node) => {
+                        (node as HTMLElement).setAttribute('data-row-hovered', 'true');
+                    });
+                }
+            });
+        };
+
+        const setHovered = (next: null | string) => {
+            if (next === hoveredKey) return;
+            const prev = hoveredKey;
+            hoveredKey = next;
+            apply(prev, next);
+        };
+
+        const onPointerOver = (e: PointerEvent) => {
+            setHovered(getRowKey(e.target));
+        };
+
+        const onPointerOut = (e: PointerEvent) => {
+            // If moving within the same row, keep it hovered
+            const relatedKey = getRowKey((e as any).relatedTarget);
+            if (relatedKey === hoveredKey) return;
+            setHovered(relatedKey);
+        };
+
+        root.addEventListener('pointerover', onPointerOver);
+        root.addEventListener('pointerout', onPointerOut);
+
+        return () => {
+            root.removeEventListener('pointerover', onPointerOver);
+            root.removeEventListener('pointerout', onPointerOut);
+            if (rafId !== null) cancelAnimationFrame(rafId);
+            // Ensure we don't leave stale attributes behind
+            if (hoveredKey) apply(hoveredKey, null);
+        };
+    }, [enableRowHoverHighlight]);
+
+    useEffect(() => {
+        const root = hoverDelegateRef.current;
+        if (!root) return;
+
+        let current: null | { edge: 'bottom' | 'top'; rowKey: string } = null;
+        let pending: null | { edge: 'bottom' | 'top' | null; rowKey: string } = null;
+        let rafId: null | number = null;
+
+        const clearRow = (rowKey: string) => {
+            root.querySelectorAll(`[data-row-index="${rowKey}"]`).forEach((node) => {
+                const el = node as HTMLElement;
+                el.removeAttribute('data-row-dragged-over');
+                el.removeAttribute('data-row-dragged-over-first');
+            });
+        };
+
+        const applyRow = (rowKey: string, edge: 'bottom' | 'top') => {
+            const nodes = root.querySelectorAll(`[data-row-index="${rowKey}"]`);
+            nodes.forEach((node, idx) => {
+                const el = node as HTMLElement;
+                el.setAttribute('data-row-dragged-over', edge);
+                if (idx === 0) {
+                    el.setAttribute('data-row-dragged-over-first', 'true');
+                } else {
+                    el.removeAttribute('data-row-dragged-over-first');
+                }
+            });
+        };
+
+        const flush = () => {
+            rafId = null;
+            const next = pending;
+            pending = null;
+            if (!next) return;
+
+            // Clear previous row if we’re moving rows or clearing.
+            if (current && current.rowKey !== next.rowKey) {
+                clearRow(current.rowKey);
+                current = null;
+            }
+
+            if (!next.edge) {
+                if (current) {
+                    clearRow(current.rowKey);
+                    current = null;
+                }
+                return;
+            }
+
+            // If same row + edge, no-op.
+            if (current && current.rowKey === next.rowKey && current.edge === next.edge) return;
+
+            if (current) clearRow(current.rowKey);
+            applyRow(next.rowKey, next.edge);
+            current = { edge: next.edge, rowKey: next.rowKey };
+        };
+
+        const scheduleFlush = () => {
+            if (rafId !== null) return;
+            rafId = requestAnimationFrame(flush);
+        };
+
+        const onRowDragOver = (e: Event) => {
+            const ev = e as CustomEvent<{ edge?: 'bottom' | 'top' | null; rowKey?: string }>;
+            const rowKey = ev.detail?.rowKey;
+            const edge = ev.detail?.edge ?? null;
+            if (!rowKey) return;
+
+            pending = { edge, rowKey };
+            scheduleFlush();
+        };
+
+        root.addEventListener('itl:row-drag-over', onRowDragOver as any);
+
+        return () => {
+            root.removeEventListener('itl:row-drag-over', onRowDragOver as any);
+            if (rafId !== null) cancelAnimationFrame(rafId);
+            if (current) clearRow(current.rowKey);
+        };
+    }, []);
 
     // Calculate pinned column widths for group header positioning
     const pinnedLeftColumnWidths = useMemo(() => {
@@ -190,48 +353,65 @@ const VirtualizedTableGrid = ({
         );
     }, [pinnedRightColumnCount, pinnedLeftColumnCount, totalColumnCount, columnWidth]);
 
-    const adjustedRowIndexMap = useMemo(() => {
-        const map = new Map<number, number>();
+    const groupHeaderRowIndexes = useMemo(() => {
+        if (!groupHeaderInfoByRowIndex || groupHeaderInfoByRowIndex.size === 0) return [];
+        return Array.from(groupHeaderInfoByRowIndex.keys()).sort((a, b) => a - b);
+    }, [groupHeaderInfoByRowIndex]);
 
-        if (!groups || groups.length === 0) {
-            const startIndex = enableHeader ? 1 : 0;
-            const endIndex = enableHeader ? dataWithGroups.length : dataWithGroups.length;
-            for (let rowIndex = startIndex; rowIndex < endIndex; rowIndex++) {
-                map.set(rowIndex, enableHeader ? rowIndex : rowIndex + 1);
+    const adjustedRowIndexCacheRef = useRef<{ lastRowIndex: number; pos: number }>({
+        lastRowIndex: -1,
+        pos: 0,
+    });
+
+    useEffect(() => {
+        adjustedRowIndexCacheRef.current = { lastRowIndex: -1, pos: 0 };
+    }, [enableHeader, groupHeaderRowIndexes, groups]);
+
+    const getAdjustedRowIndex = useCallback(
+        (rowIndex: number) => {
+            if (!groups || groups.length === 0) {
+                if (enableHeader && rowIndex === 0) return 0;
+                return enableHeader ? rowIndex : rowIndex + 1;
             }
-            return map;
-        }
 
-        const groupIndexes: number[] = [];
-        let cumulativeDataIndex = 0;
-        const headerOffset = enableHeader ? 1 : 0;
+            if (enableHeader && rowIndex === 0) return 0;
+            if (groupHeaderInfoByRowIndex?.has(rowIndex)) return 0;
 
-        groups.forEach((group, groupIndex) => {
-            const groupHeaderIndex = headerOffset + cumulativeDataIndex + groupIndex;
-            groupIndexes.push(groupHeaderIndex);
-            cumulativeDataIndex += group.itemCount;
-        });
+            const headerOffset = enableHeader ? 1 : 0;
+            const cache = adjustedRowIndexCacheRef.current;
 
-        let adjustedIndex = 1;
-        const startIndex = enableHeader ? 0 : 0;
-        const endIndex = dataWithGroups.length;
-
-        for (let rowIndex = startIndex; rowIndex < endIndex; rowIndex++) {
-            if (enableHeader && rowIndex === 0) {
-                // Header row
-                map.set(rowIndex, 0);
-            } else if (groupIndexes.includes(rowIndex)) {
-                // Group header row - don't increment adjustedIndex
-                map.set(rowIndex, 0);
+            // Count group header rows strictly before this rowIndex.
+            let pos: number;
+            if (cache.lastRowIndex !== -1 && rowIndex >= cache.lastRowIndex) {
+                pos = cache.pos;
+                while (
+                    pos < groupHeaderRowIndexes.length &&
+                    groupHeaderRowIndexes[pos] < rowIndex
+                ) {
+                    pos++;
+                }
             } else {
-                // Data row
-                map.set(rowIndex, adjustedIndex);
-                adjustedIndex++;
+                // upperBound(groupHeaderRowIndexes, rowIndex - 1)
+                let lo = 0;
+                let hi = groupHeaderRowIndexes.length;
+                const target = rowIndex - 1;
+                while (lo < hi) {
+                    const mid = (lo + hi) >>> 1;
+                    if (groupHeaderRowIndexes[mid] <= target) lo = mid + 1;
+                    else hi = mid;
+                }
+                pos = lo;
             }
-        }
 
-        return map;
-    }, [dataWithGroups, enableHeader, groups]);
+            cache.lastRowIndex = rowIndex;
+            cache.pos = pos;
+
+            const groupHeadersBefore = pos;
+            const dataIndexZeroBased = rowIndex - headerOffset - groupHeadersBefore;
+            return dataIndexZeroBased + 1;
+        },
+        [enableHeader, groupHeaderInfoByRowIndex, groupHeaderRowIndexes, groups],
+    );
 
     const stableConfigProps = useMemo(
         () => ({
@@ -263,9 +443,11 @@ const VirtualizedTableGrid = ({
     const dynamicDataProps = useMemo(
         () => ({
             activeRowId,
-            adjustedRowIndexMap,
             calculatedColumnWidths,
             data: dataWithGroups,
+            getAdjustedRowIndex,
+            getGroupRenderData,
+            groupHeaderInfoByRowIndex,
             pinnedLeftColumnCount,
             pinnedLeftColumnWidths,
             pinnedRightColumnCount,
@@ -274,9 +456,11 @@ const VirtualizedTableGrid = ({
         }),
         [
             activeRowId,
-            adjustedRowIndexMap,
             calculatedColumnWidths,
             dataWithGroups,
+            getAdjustedRowIndex,
+            getGroupRenderData,
+            groupHeaderInfoByRowIndex,
             pinnedLeftColumnCount,
             pinnedLeftColumnWidths,
             pinnedRightColumnCount,
@@ -394,7 +578,7 @@ const VirtualizedTableGrid = ({
     );
 
     return (
-        <div className={styles.itemTableContainer}>
+        <div className={styles.itemTableContainer} ref={hoverDelegateRef}>
             <div
                 className={styles.itemTablePinnedColumnsGridContainer}
                 style={
@@ -670,7 +854,10 @@ export interface TableItemProps {
     enableRowHoverHighlight?: ItemTableListProps['enableRowHoverHighlight'];
     enableSelection?: ItemTableListProps['enableSelection'];
     enableVerticalBorders?: ItemTableListProps['enableVerticalBorders'];
+    getAdjustedRowIndex?: (rowIndex: number) => number;
+    getGroupRenderData?: () => unknown[];
     getRowHeight: (index: number, cellProps: TableItemProps) => number;
+    groupHeaderInfoByRowIndex?: Map<number, { groupIndex: number; startDataIndex: number }>;
     groups?: TableGroupHeader[];
     internalState: ItemListStateActions;
     itemType: ItemTableListProps['itemType'];
@@ -782,39 +969,24 @@ const BaseItemTableList = ({
             return result;
         }
 
-        // Calculate group header indexes based on itemCounts
-        const groupIndexes: number[] = [];
-        let cumulativeDataIndex = 0;
-        const headerOffset = enableHeader ? 1 : 0;
-
-        groups.forEach((group, groupIndex) => {
-            // Group header appears before its items
-            // Index = header offset + cumulative data index + number of previous group headers
-            const groupHeaderIndex = headerOffset + cumulativeDataIndex + groupIndex;
-            groupIndexes.push(groupHeaderIndex);
-            cumulativeDataIndex += group.itemCount;
-        });
-
+        // Build the expanded row model: [header?] + (groupHeader + groupItems)* + any remaining items.
         let dataIndex = 0;
-        const startIndex = enableHeader ? 1 : 0;
-        let groupHeaderCount = 0;
+        for (const group of groups) {
+            // Group header row
+            result.push(null);
 
-        // Iterate through the expanded row space (data + group headers)
-        for (
-            let rowIndex = startIndex;
-            rowIndex < startIndex + data.length + groupIndexes.length;
-            rowIndex++
-        ) {
-            // Check if this row should have a group header
-            const expectedGroupIndex = groupIndexes[groupHeaderCount];
-            if (expectedGroupIndex !== undefined && rowIndex === expectedGroupIndex) {
-                result.push(null); // Group header row
-                groupHeaderCount++;
-            } else if (dataIndex < data.length) {
+            // Group items
+            const end = Math.min(data.length, dataIndex + group.itemCount);
+            for (; dataIndex < end; dataIndex++) {
                 result.push(data[dataIndex]);
-                dataIndex++;
             }
         }
+
+        // If groups don't account for all items, append the remainder.
+        for (; dataIndex < data.length; dataIndex++) {
+            result.push(data[dataIndex]);
+        }
+
         return result;
     }, [data, enableHeader, groups]);
 

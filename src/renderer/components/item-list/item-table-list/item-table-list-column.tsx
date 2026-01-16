@@ -93,44 +93,33 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
     // to maintain proper styling and row heights
     let groupHeader: 'GROUP_HEADER' | null | ReactElement = null;
     if (props.groups && isDataRow && props.groups.length > 0) {
-        // Calculate which group this row index belongs to
-        let cumulativeDataIndex = 0;
-        const headerOffset = props.enableHeader ? 1 : 0;
+        const groupInfo = props.groupHeaderInfoByRowIndex?.get(props.rowIndex);
+        const group = groupInfo ? props.groups[groupInfo.groupIndex] : undefined;
 
-        const originalData = props.data.filter((item) => item !== null);
+        if (groupInfo && group) {
+            // Determine where to render the group header content:
+            // - If pinned left columns exist, render in the first pinned left column
+            // - Otherwise, render in the first column of the main grid
+            const hasPinnedLeftColumns = (props.pinnedLeftColumnCount || 0) > 0;
+            const isFirstPinnedLeftColumn = props.columnIndex === 0 && hasPinnedLeftColumns;
+            const isMainGridFirstColumn =
+                !hasPinnedLeftColumns &&
+                (props.columnIndex === (props.pinnedLeftColumnCount || 0) ||
+                    (props.columnIndex === 0 && (props.pinnedLeftColumnCount || 0) === 0));
 
-        for (let groupIndex = 0; groupIndex < props.groups.length; groupIndex++) {
-            const group = props.groups[groupIndex];
-            const groupHeaderIndex = headerOffset + cumulativeDataIndex + groupIndex;
-
-            if (props.rowIndex === groupHeaderIndex) {
-                // Determine where to render the group header content:
-                // - If pinned left columns exist, render in the first pinned left column
-                // - Otherwise, render in the first column of the main grid
-                const hasPinnedLeftColumns = (props.pinnedLeftColumnCount || 0) > 0;
-                const isFirstPinnedLeftColumn = props.columnIndex === 0 && hasPinnedLeftColumns;
-                const isMainGridFirstColumn =
-                    !hasPinnedLeftColumns &&
-                    (props.columnIndex === (props.pinnedLeftColumnCount || 0) ||
-                        (props.columnIndex === 0 && (props.pinnedLeftColumnCount || 0) === 0));
-
-                // Render group header content in the first pinned left column (if exists) or first main grid column
-                if (isFirstPinnedLeftColumn || isMainGridFirstColumn) {
-                    groupHeader = group.render({
-                        data: originalData,
-                        groupIndex,
-                        index: props.rowIndex,
-                        internalState: props.internalState,
-                        startDataIndex: cumulativeDataIndex,
-                    });
-                } else {
-                    // For other columns, mark as group header row for styled rendering
-                    groupHeader = 'GROUP_HEADER';
-                }
-                break;
+            // Render group header content in the first pinned left column (if exists) or first main grid column
+            if (isFirstPinnedLeftColumn || isMainGridFirstColumn) {
+                groupHeader = group.render({
+                    data: props.getGroupRenderData?.() ?? [],
+                    groupIndex: groupInfo.groupIndex,
+                    index: props.rowIndex,
+                    internalState: props.internalState,
+                    startDataIndex: groupInfo.startDataIndex,
+                });
+            } else {
+                // For other columns, mark as group header row for styled rendering
+                groupHeader = 'GROUP_HEADER';
             }
-
-            cumulativeDataIndex += group.itemCount;
         }
     }
 
@@ -613,121 +602,22 @@ export const TableColumnTextContainer = (
             ? props.rowIndex === props.data.length
             : props.rowIndex === props.data.length - 1);
 
-    useEffect(() => {
-        if (!isDataRow || !containerRef.current || !props.enableRowHoverHighlight) return;
-
-        const container = containerRef.current;
-        const rowIndex = props.rowIndex;
-        const rowSelector = `[data-row-index="${props.tableId}-${rowIndex}"]`;
-        let rafId: null | number = null;
-        let cachedCells: NodeListOf<Element> | null = null;
-
-        const getCells = () => {
-            if (!cachedCells) {
-                cachedCells = document.querySelectorAll(rowSelector);
-            }
-            return cachedCells;
-        };
-
-        const handleMouseEnter = () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-            rafId = requestAnimationFrame(() => {
-                const cells = getCells();
-                cells.forEach((cell) => cell.classList.add(styles.rowHovered));
-            });
-        };
-
-        const handleMouseLeave = () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-            rafId = requestAnimationFrame(() => {
-                const cells = getCells();
-                cells.forEach((cell) => cell.classList.remove(styles.rowHovered));
-                cachedCells = null;
-            });
-        };
-
-        container.addEventListener('mouseenter', handleMouseEnter);
-        container.addEventListener('mouseleave', handleMouseLeave);
-
-        return () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-            container.removeEventListener('mouseenter', handleMouseEnter);
-            container.removeEventListener('mouseleave', handleMouseLeave);
-            cachedCells = null;
-        };
-    }, [isDataRow, props.rowIndex, props.enableRowHoverHighlight, props.tableId]);
-
     // Apply dragged over state to all cells in the row so border can span entire row
     useEffect(() => {
         if (!isDataRow || !containerRef.current) return;
+        const rowKey = `${props.tableId}-${props.rowIndex}`;
+        const edge =
+            props.isDraggedOver === 'top' || props.isDraggedOver === 'bottom'
+                ? props.isDraggedOver
+                : null;
 
-        const rowIndex = props.rowIndex;
-        const draggedOverState = props.isDraggedOver;
-        const rowSelector = `[data-row-index="${props.tableId}-${rowIndex}"]`;
-        let rafId: null | number = null;
-        let cachedCells: NodeListOf<Element> | null = null;
-
-        const getCells = () => {
-            if (!cachedCells) {
-                cachedCells = document.querySelectorAll(rowSelector);
-            }
-            return cachedCells;
-        };
-
-        if (rafId !== null) {
-            cancelAnimationFrame(rafId);
-        }
-
-        rafId = requestAnimationFrame(() => {
-            const cells = getCells();
-
-            if (draggedOverState) {
-                cells.forEach((cell, index) => {
-                    if (draggedOverState === 'top') {
-                        cell.classList.add(styles.draggedOverTop);
-                        cell.classList.remove(styles.draggedOverBottom);
-                        // Mark first cell so border can span full width
-                        if (index === 0) {
-                            cell.classList.add(styles.draggedOverFirstCell);
-                        } else {
-                            cell.classList.remove(styles.draggedOverFirstCell);
-                        }
-                    } else if (draggedOverState === 'bottom') {
-                        cell.classList.add(styles.draggedOverBottom);
-                        cell.classList.remove(styles.draggedOverTop);
-                        // Mark first cell so border can span full width
-                        if (index === 0) {
-                            cell.classList.add(styles.draggedOverFirstCell);
-                        } else {
-                            cell.classList.remove(styles.draggedOverFirstCell);
-                        }
-                    }
-                });
-            } else {
-                // Remove dragged over classes from all cells in the same row
-                cells.forEach((cell) => {
-                    cell.classList.remove(styles.draggedOverTop);
-                    cell.classList.remove(styles.draggedOverBottom);
-                    cell.classList.remove(styles.draggedOverFirstCell);
-                });
-                // Clear cache when state is cleared
-                cachedCells = null;
-            }
-        });
-
-        return () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-            cachedCells = null;
-        };
-    }, [isDataRow, props.rowIndex, props.isDraggedOver, props.tableId]);
+        containerRef.current.dispatchEvent(
+            new CustomEvent('itl:row-drag-over', {
+                bubbles: true,
+                detail: { edge, rowKey },
+            }),
+        );
+    }, [isDataRow, props.isDraggedOver, props.rowIndex, props.tableId]);
 
     const handleClick = useDoubleClick({
         onDoubleClick: (event: React.MouseEvent<HTMLDivElement>) => {
@@ -793,8 +683,6 @@ export const TableColumnTextContainer = (
                 [styles.center]: props.columns[props.columnIndex].align === 'center',
                 [styles.compact]: props.size === 'compact',
                 [styles.dataRow]: isDataRow,
-                [styles.draggedOverBottom]: isDataRow && props.isDraggedOver === 'bottom',
-                [styles.draggedOverTop]: isDataRow && props.isDraggedOver === 'top',
                 [styles.dragging]: isDataRow && isDragging,
                 [styles.large]: props.size === 'large',
                 [styles.left]: props.columns[props.columnIndex].align === 'start',
@@ -865,121 +753,22 @@ export const TableColumnContainer = (
             ? props.rowIndex === props.data.length
             : props.rowIndex === props.data.length - 1);
 
-    useEffect(() => {
-        if (!isDataRow || !containerRef.current || !props.enableRowHoverHighlight) return;
-
-        const container = containerRef.current;
-        const rowIndex = props.rowIndex;
-        const rowSelector = `[data-row-index="${props.tableId}-${rowIndex}"]`;
-        let rafId: null | number = null;
-        let cachedCells: NodeListOf<Element> | null = null;
-
-        const getCells = () => {
-            if (!cachedCells) {
-                cachedCells = document.querySelectorAll(rowSelector);
-            }
-            return cachedCells;
-        };
-
-        const handleMouseEnter = () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-            rafId = requestAnimationFrame(() => {
-                const cells = getCells();
-                cells.forEach((cell) => cell.classList.add(styles.rowHovered));
-            });
-        };
-
-        const handleMouseLeave = () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-            rafId = requestAnimationFrame(() => {
-                const cells = getCells();
-                cells.forEach((cell) => cell.classList.remove(styles.rowHovered));
-                cachedCells = null;
-            });
-        };
-
-        container.addEventListener('mouseenter', handleMouseEnter);
-        container.addEventListener('mouseleave', handleMouseLeave);
-
-        return () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-            container.removeEventListener('mouseenter', handleMouseEnter);
-            container.removeEventListener('mouseleave', handleMouseLeave);
-            cachedCells = null;
-        };
-    }, [isDataRow, props.rowIndex, props.enableRowHoverHighlight, props.tableId]);
-
     // Apply dragged over state to all cells in the row so border can span entire row
     useEffect(() => {
         if (!isDataRow || !containerRef.current) return;
+        const rowKey = `${props.tableId}-${props.rowIndex}`;
+        const edge =
+            props.isDraggedOver === 'top' || props.isDraggedOver === 'bottom'
+                ? props.isDraggedOver
+                : null;
 
-        const rowIndex = props.rowIndex;
-        const draggedOverState = props.isDraggedOver;
-        const rowSelector = `[data-row-index="${props.tableId}-${rowIndex}"]`;
-        let rafId: null | number = null;
-        let cachedCells: NodeListOf<Element> | null = null;
-
-        const getCells = () => {
-            if (!cachedCells) {
-                cachedCells = document.querySelectorAll(rowSelector);
-            }
-            return cachedCells;
-        };
-
-        if (rafId !== null) {
-            cancelAnimationFrame(rafId);
-        }
-
-        rafId = requestAnimationFrame(() => {
-            const cells = getCells();
-
-            if (draggedOverState) {
-                cells.forEach((cell, index) => {
-                    if (draggedOverState === 'top') {
-                        cell.classList.add(styles.draggedOverTop);
-                        cell.classList.remove(styles.draggedOverBottom);
-                        // Mark first cell so border can span full width
-                        if (index === 0) {
-                            cell.classList.add(styles.draggedOverFirstCell);
-                        } else {
-                            cell.classList.remove(styles.draggedOverFirstCell);
-                        }
-                    } else if (draggedOverState === 'bottom') {
-                        cell.classList.add(styles.draggedOverBottom);
-                        cell.classList.remove(styles.draggedOverTop);
-                        // Mark first cell so border can span full width
-                        if (index === 0) {
-                            cell.classList.add(styles.draggedOverFirstCell);
-                        } else {
-                            cell.classList.remove(styles.draggedOverFirstCell);
-                        }
-                    }
-                });
-            } else {
-                // Remove dragged over classes from all cells in the same row
-                cells.forEach((cell) => {
-                    cell.classList.remove(styles.draggedOverTop);
-                    cell.classList.remove(styles.draggedOverBottom);
-                    cell.classList.remove(styles.draggedOverFirstCell);
-                });
-                // Clear cache when state is cleared
-                cachedCells = null;
-            }
-        });
-
-        return () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-            }
-            cachedCells = null;
-        };
-    }, [isDataRow, props.rowIndex, props.isDraggedOver, props.tableId]);
+        containerRef.current.dispatchEvent(
+            new CustomEvent('itl:row-drag-over', {
+                bubbles: true,
+                detail: { edge, rowKey },
+            }),
+        );
+    }, [isDataRow, props.isDraggedOver, props.rowIndex, props.tableId]);
 
     const handleClick = useDoubleClick({
         onDoubleClick: (event: React.MouseEvent<HTMLDivElement>) => {
@@ -1045,8 +834,6 @@ export const TableColumnContainer = (
                 [styles.center]: props.columns[props.columnIndex].align === 'center',
                 [styles.compact]: props.size === 'compact',
                 [styles.dataRow]: isDataRow,
-                [styles.draggedOverBottom]: isDataRow && props.isDraggedOver === 'bottom',
-                [styles.draggedOverTop]: isDataRow && props.isDraggedOver === 'top',
                 [styles.dragging]: isDataRow && isDragging,
                 [styles.large]: props.size === 'large',
                 [styles.left]: props.columns[props.columnIndex].align === 'start',

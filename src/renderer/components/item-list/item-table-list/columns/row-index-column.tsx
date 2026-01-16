@@ -33,7 +33,6 @@ export const RowIndexColumn = (props: ItemTableListInnerColumn) => {
 
 const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
     const {
-        adjustedRowIndexMap,
         controls,
         data,
         enableExpansion,
@@ -45,7 +44,9 @@ const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
     } = props;
 
     let adjustedRowIndex =
-        adjustedRowIndexMap?.get(rowIndex) ?? (enableHeader ? rowIndex : rowIndex + 1);
+        props.getAdjustedRowIndex?.(rowIndex) ??
+        props.adjustedRowIndexMap?.get(rowIndex) ??
+        (enableHeader ? rowIndex : rowIndex + 1);
 
     if (startRowIndex !== undefined && adjustedRowIndex > 0) {
         adjustedRowIndex = startRowIndex + adjustedRowIndex;
@@ -93,6 +94,7 @@ const QueueSongRowIndexColumn = (props: ItemTableListInnerColumn) => {
     const isActiveAndPlaying = isActive && status === PlayerStatus.PLAYING;
 
     let adjustedRowIndex =
+        props.getAdjustedRowIndex?.(props.rowIndex) ??
         props.adjustedRowIndexMap?.get(props.rowIndex) ??
         (props.enableHeader ? props.rowIndex : props.rowIndex + 1);
 
