@@ -121,6 +121,7 @@ export const useScrobble = () => {
                         {
                             apiClientProps: { serverId: currentSong._serverId || '' },
                             query: {
+                                albumId: currentSong.albumId,
                                 event: 'timeupdate',
                                 id: currentSong.id,
                                 position,
@@ -163,6 +164,7 @@ export const useScrobble = () => {
                         {
                             apiClientProps: { serverId: currentSong._serverId || '' },
                             query: {
+                                albumId: currentSong.albumId,
                                 id: currentSong.id,
                                 position,
                                 submission: true,
@@ -245,6 +247,7 @@ export const useScrobble = () => {
                         {
                             apiClientProps: { serverId: currentSong._serverId || '' },
                             query: {
+                                albumId: currentSong.albumId,
                                 event: 'start',
                                 id: currentSong.id,
                                 position: 0,
@@ -306,6 +309,7 @@ export const useScrobble = () => {
                 {
                     apiClientProps: { serverId: currentSong._serverId || '' },
                     query: {
+                        albumId: currentSong.albumId,
                         event: 'timeupdate',
                         id: currentSong.id,
                         position,
@@ -353,6 +357,7 @@ export const useScrobble = () => {
                     {
                         apiClientProps: { serverId: currentSong._serverId || '' },
                         query: {
+                            albumId: currentSong.albumId,
                             event: 'pause',
                             id: currentSong.id,
                             position,
@@ -378,6 +383,7 @@ export const useScrobble = () => {
                     {
                         apiClientProps: { serverId: currentSong._serverId || '' },
                         query: {
+                            albumId: currentSong.albumId,
                             event: 'unpause',
                             id: currentSong.id,
                             position,

@@ -1237,6 +1237,7 @@ export type ScrobbleArgs = BaseEndpointArgs & {
 };
 
 export type ScrobbleQuery = {
+    albumId?: string;
     event?: 'pause' | 'start' | 'timeupdate' | 'unpause';
     id: string;
     position?: number;
