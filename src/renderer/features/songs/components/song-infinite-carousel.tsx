@@ -1,4 +1,4 @@
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { QueryFunctionContext, useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { Suspense, useCallback, useMemo } from 'react';
 
 import { api } from '/@/renderer/api';
@@ -29,6 +29,7 @@ interface SongCarouselProps {
     enableRefresh?: boolean;
     excludeIds?: string[];
     query?: Partial<Omit<SongListQuery, 'startIndex'>>;
+    queryKey?: QueryFunctionContext['queryKey'];
     rowCount?: number;
     sortBy: SongListSort;
     sortOrder: SortOrder;
@@ -41,6 +42,7 @@ const BaseSongInfiniteCarousel = (props: SongCarouselProps & { rows: DataRow[] }
         enableRefresh,
         excludeIds,
         query: additionalQuery,
+        queryKey,
         rowCount = 1,
         rows,
         sortBy,
@@ -53,7 +55,7 @@ const BaseSongInfiniteCarousel = (props: SongCarouselProps & { rows: DataRow[] }
         hasNextPage,
         isFetchingNextPage,
         refetch,
-    } = useSongListInfinite(sortBy, sortOrder, 20, additionalQuery);
+    } = useSongListInfinite(sortBy, sortOrder, 20, additionalQuery, queryKey);
 
     const player = usePlayer();
     const baseControls = useDefaultItemListControls();
@@ -153,8 +155,15 @@ function useSongListInfinite(
     sortOrder: SortOrder,
     itemLimit: number,
     additionalQuery?: Partial<Omit<SongListQuery, 'startIndex'>>,
+    overrideQueryKey?: QueryFunctionContext['queryKey'],
 ) {
     const serverId = useCurrentServerId();
+
+    const defaultQueryKey = queryKeys.songs.infiniteList(serverId, {
+        sortBy,
+        sortOrder,
+        ...additionalQuery,
+    });
 
     const query = useSuspenseInfiniteQuery<SongListResponse>({
         getNextPageParam: (lastPage, _allPages, lastPageParam) => {
@@ -179,11 +188,7 @@ function useSongListInfinite(
                 },
             });
         },
-        queryKey: queryKeys.songs.infiniteList(serverId, {
-            sortBy,
-            sortOrder,
-            ...additionalQuery,
-        }),
+        queryKey: overrideQueryKey || defaultQueryKey,
     });
 
     return query;

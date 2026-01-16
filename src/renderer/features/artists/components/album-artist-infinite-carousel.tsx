@@ -1,4 +1,4 @@
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { QueryFunctionContext, useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { Suspense, useCallback, useMemo } from 'react';
 
 import { api } from '/@/renderer/api';
@@ -26,6 +26,7 @@ interface AlbumArtistCarouselProps {
     containerQuery?: ReturnType<typeof useGridCarouselContainerQuery>;
     excludeIds?: string[];
     query?: Partial<Omit<AlbumArtistListQuery, 'startIndex'>>;
+    queryKey?: QueryFunctionContext['queryKey'];
     rowCount?: number;
     sortBy: AlbumArtistListSort;
     sortOrder: SortOrder;
@@ -37,6 +38,7 @@ const BaseAlbumArtistInfiniteCarousel = (props: AlbumArtistCarouselProps & { row
         containerQuery,
         excludeIds,
         query: additionalQuery,
+        queryKey,
         rowCount = 1,
         rows,
         sortBy,
@@ -49,7 +51,7 @@ const BaseAlbumArtistInfiniteCarousel = (props: AlbumArtistCarouselProps & { row
         hasNextPage,
         isFetchingNextPage,
         refetch,
-    } = useAlbumArtistListInfinite(sortBy, sortOrder, 20, additionalQuery);
+    } = useAlbumArtistListInfinite(sortBy, sortOrder, 20, additionalQuery, queryKey);
 
     const controls = useDefaultItemListControls();
 
@@ -137,8 +139,15 @@ function useAlbumArtistListInfinite(
     sortOrder: SortOrder,
     itemLimit: number,
     additionalQuery?: Partial<Omit<AlbumArtistListQuery, 'startIndex'>>,
+    overrideQueryKey?: QueryFunctionContext['queryKey'],
 ) {
     const serverId = useCurrentServerId();
+
+    const defaultQueryKey = queryKeys.albumArtists.infiniteList(serverId, {
+        sortBy,
+        sortOrder,
+        ...additionalQuery,
+    });
 
     const query = useSuspenseInfiniteQuery<AlbumArtistListResponse>({
         getNextPageParam: (lastPage, _allPages, lastPageParam) => {
@@ -163,11 +172,7 @@ function useAlbumArtistListInfinite(
                 },
             });
         },
-        queryKey: queryKeys.albumArtists.infiniteList(serverId, {
-            sortBy,
-            sortOrder,
-            ...additionalQuery,
-        }),
+        queryKey: overrideQueryKey || defaultQueryKey,
     });
 
     return query;

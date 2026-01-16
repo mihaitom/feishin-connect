@@ -1,4 +1,4 @@
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
+import { QueryFunctionContext, useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 
 import { api } from '/@/renderer/api';
@@ -9,13 +9,20 @@ import { Album, AlbumListResponse, AlbumListSort, SortOrder } from '/@/shared/ty
 
 interface InfiniteAlbumSingleFeatureCarouselProps {
     itemLimit?: number;
+    queryKey?: QueryFunctionContext['queryKey'];
 }
 
 export const AlbumInfiniteSingleFeatureCarousel = ({
     itemLimit = 20,
+    queryKey,
 }: InfiniteAlbumSingleFeatureCarouselProps) => {
     const serverId = useCurrentServerId();
     const loadMoreTriggeredRef = useRef(false);
+
+    const defaultQueryKey = queryKeys.albums.infiniteList(serverId, {
+        sortBy: AlbumListSort.RANDOM,
+        sortOrder: SortOrder.DESC,
+    });
 
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
         useSuspenseInfiniteQuery<AlbumListResponse>({
@@ -40,10 +47,7 @@ export const AlbumInfiniteSingleFeatureCarousel = ({
                     },
                 });
             },
-            queryKey: queryKeys.albums.infiniteList(serverId, {
-                sortBy: AlbumListSort.RANDOM,
-                sortOrder: SortOrder.DESC,
-            }),
+            queryKey: queryKey || defaultQueryKey,
         });
 
     // Flatten all pages and filter for albums with images
