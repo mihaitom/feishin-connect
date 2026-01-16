@@ -8,6 +8,7 @@ import {
     TableColumnContainer,
     TableColumnTextContainer,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
+import { useIsActiveRow } from '/@/renderer/components/item-list/item-table-list/item-table-list-context';
 import { ItemListItem } from '/@/renderer/components/item-list/types';
 import { usePlayerStatus } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
@@ -87,9 +88,7 @@ const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
 const QueueSongRowIndexColumn = (props: ItemTableListInnerColumn) => {
     const status = usePlayerStatus();
     const song = props.data[props.rowIndex] as QueueSong;
-    const isActive =
-        !!props.activeRowId &&
-        (props.activeRowId === song?.id || props.activeRowId === song?._uniqueId);
+    const isActive = useIsActiveRow(song?.id, song?._uniqueId);
 
     const isActiveAndPlaying = isActive && status === PlayerStatus.PLAYING;
 

@@ -37,6 +37,10 @@ import { useListHotkeys } from '/@/renderer/components/item-list/helpers/use-lis
 import { useStickyTableGroupRows } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-table-group-rows';
 import { useStickyTableHeader } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-table-header';
 import {
+    ItemTableListConfigProvider,
+    ItemTableListStoreProvider,
+} from '/@/renderer/components/item-list/item-table-list/item-table-list-context';
+import {
     ItemControls,
     ItemListHandle,
     ItemTableListColumnConfig,
@@ -88,7 +92,6 @@ enum TableItemSize {
 }
 
 interface VirtualizedTableGridProps {
-    activeRowId?: string;
     calculatedColumnWidths: number[];
     CellComponent: JSXElementConstructor<CellComponentProps<TableItemProps>>;
     cellPadding: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
@@ -132,7 +135,6 @@ interface VirtualizedTableGridProps {
 }
 
 const VirtualizedTableGrid = ({
-    activeRowId,
     calculatedColumnWidths,
     CellComponent,
     cellPadding,
@@ -442,7 +444,6 @@ const VirtualizedTableGrid = ({
 
     const dynamicDataProps = useMemo(
         () => ({
-            activeRowId,
             calculatedColumnWidths,
             data: dataWithGroups,
             getAdjustedRowIndex,
@@ -455,7 +456,6 @@ const VirtualizedTableGrid = ({
             startRowIndex,
         }),
         [
-            activeRowId,
             calculatedColumnWidths,
             dataWithGroups,
             getAdjustedRowIndex,
@@ -779,7 +779,6 @@ VirtualizedTableGrid.displayName = 'VirtualizedTableGrid';
 
 const MemoizedVirtualizedTableGrid = memo(VirtualizedTableGrid, (prevProps, nextProps) => {
     return (
-        prevProps.activeRowId === nextProps.activeRowId &&
         prevProps.calculatedColumnWidths === nextProps.calculatedColumnWidths &&
         prevProps.cellPadding === nextProps.cellPadding &&
         prevProps.controls === nextProps.controls &&
@@ -837,7 +836,6 @@ export interface TableGroupHeader {
 }
 
 export interface TableItemProps {
-    activeRowId?: string;
     adjustedRowIndexMap?: Map<number, number>;
     calculatedColumnWidths?: number[];
     cellPadding?: ItemTableListProps['cellPadding'];
@@ -2531,70 +2529,104 @@ const BaseItemTableList = ({
         itemType,
     });
 
+    const tableConfigValue = useMemo(
+        () => ({
+            cellPadding,
+            columns: parsedColumns,
+            controls,
+            enableHeader,
+            enableRowHoverHighlight,
+            enableSelection,
+            internalState,
+            itemType,
+            playerContext,
+            size,
+            startRowIndex,
+            tableId,
+        }),
+        [
+            cellPadding,
+            parsedColumns,
+            controls,
+            enableHeader,
+            enableRowHoverHighlight,
+            enableSelection,
+            internalState,
+            itemType,
+            playerContext,
+            size,
+            startRowIndex,
+            tableId,
+        ],
+    );
+
     return (
-        <motion.div
-            className={styles.itemTableListContainer}
-            onKeyDown={handleKeyDown}
-            onMouseDown={(e) => {
-                const element = e.currentTarget as HTMLDivElement;
-                // Focus without scrolling into view
-                if (element.focus) {
-                    element.focus({ preventScroll: true });
-                }
-            }}
-            ref={mergedContainerRef}
-            tabIndex={0}
-            {...animationProps.fadeIn}
-            transition={{ duration: enableEntranceAnimation ? 1 : 0, ease: 'anticipate' }}
-        >
-            {StickyHeader}
-            {StickyGroupRow}
-            <MemoizedVirtualizedTableGrid
-                activeRowId={activeRowId}
-                calculatedColumnWidths={calculatedColumnWidths}
-                CellComponent={CellComponent}
-                cellPadding={cellPadding}
-                controls={controls}
-                data={data}
-                dataWithGroups={dataWithGroups}
-                enableAlternateRowColors={enableAlternateRowColors}
-                enableColumnReorder={!!onColumnReordered}
-                enableColumnResize={!!onColumnResized}
-                enableDrag={enableDrag}
-                enableExpansion={enableExpansion}
-                enableHeader={enableHeader}
-                enableHorizontalBorders={enableHorizontalBorders}
-                enableRowHoverHighlight={enableRowHoverHighlight}
-                enableScrollShadow={enableScrollShadow}
-                enableSelection={enableSelection}
-                enableVerticalBorders={enableVerticalBorders}
-                getRowHeight={getRowHeight}
-                groups={groups}
-                headerHeight={headerHeight}
-                internalState={internalState}
-                itemType={itemType}
-                mergedRowRef={mergedRowRef}
-                onRangeChanged={onRangeChanged}
-                parsedColumns={parsedColumns}
-                pinnedLeftColumnCount={pinnedLeftColumnCount}
-                pinnedLeftColumnRef={pinnedLeftColumnRef}
-                pinnedRightColumnCount={pinnedRightColumnCount}
-                pinnedRightColumnRef={pinnedRightColumnRef}
-                pinnedRowCount={pinnedRowCount}
-                pinnedRowRef={pinnedRowRef}
-                playerContext={playerContext}
-                showLeftShadow={showLeftShadow}
-                showRightShadow={showRightShadow}
-                showTopShadow={showTopShadow}
-                size={size}
-                startRowIndex={startRowIndex}
-                tableId={tableId}
-                totalColumnCount={totalColumnCount}
-                totalRowCount={totalRowCount}
-            />
-            <ExpandedContainer internalState={internalState} itemType={itemType} />
-            {/* {enableSelectionDialog && <SelectionDialog internalState={internalState} />} */}
-        </motion.div>
+        <ItemTableListStoreProvider activeRowId={activeRowId}>
+            <ItemTableListConfigProvider value={tableConfigValue}>
+                <motion.div
+                    className={styles.itemTableListContainer}
+                    onKeyDown={handleKeyDown}
+                    onMouseDown={(e) => {
+                        const element = e.currentTarget as HTMLDivElement;
+                        // Focus without scrolling into view
+                        if (element.focus) {
+                            element.focus({ preventScroll: true });
+                        }
+                    }}
+                    ref={mergedContainerRef}
+                    tabIndex={0}
+                    {...animationProps.fadeIn}
+                    transition={{ duration: enableEntranceAnimation ? 1 : 0, ease: 'anticipate' }}
+                >
+                    {StickyHeader}
+                    {StickyGroupRow}
+                    <MemoizedVirtualizedTableGrid
+                        calculatedColumnWidths={calculatedColumnWidths}
+                        CellComponent={CellComponent}
+                        cellPadding={cellPadding}
+                        controls={controls}
+                        data={data}
+                        dataWithGroups={dataWithGroups}
+                        enableAlternateRowColors={enableAlternateRowColors}
+                        enableColumnReorder={!!onColumnReordered}
+                        enableColumnResize={!!onColumnResized}
+                        enableDrag={enableDrag}
+                        enableExpansion={enableExpansion}
+                        enableHeader={enableHeader}
+                        enableHorizontalBorders={enableHorizontalBorders}
+                        enableRowHoverHighlight={enableRowHoverHighlight}
+                        enableScrollShadow={enableScrollShadow}
+                        enableSelection={enableSelection}
+                        enableVerticalBorders={enableVerticalBorders}
+                        getRowHeight={getRowHeight}
+                        groups={groups}
+                        headerHeight={headerHeight}
+                        internalState={internalState}
+                        itemType={itemType}
+                        mergedRowRef={mergedRowRef}
+                        onRangeChanged={onRangeChanged}
+                        parsedColumns={parsedColumns}
+                        pinnedLeftColumnCount={pinnedLeftColumnCount}
+                        pinnedLeftColumnRef={pinnedLeftColumnRef}
+                        pinnedRightColumnCount={pinnedRightColumnCount}
+                        pinnedRightColumnRef={pinnedRightColumnRef}
+                        pinnedRowCount={pinnedRowCount}
+                        pinnedRowRef={pinnedRowRef}
+                        playerContext={playerContext}
+                        showLeftShadow={showLeftShadow}
+                        showRightShadow={showRightShadow}
+                        showTopShadow={showTopShadow}
+                        size={size}
+                        startRowIndex={startRowIndex}
+                        tableId={tableId}
+                        totalColumnCount={totalColumnCount}
+                        totalRowCount={totalRowCount}
+                    />
+                    <ExpandedContainer internalState={internalState} itemType={itemType} />
+                    {/* {enableSelectionDialog && <SelectionDialog internalState={internalState} />} */}
+                </motion.div>
+            </ItemTableListConfigProvider>
+        </ItemTableListStoreProvider>
     );
 };
 

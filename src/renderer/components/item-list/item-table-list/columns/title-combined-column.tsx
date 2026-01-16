@@ -12,6 +12,7 @@ import {
     ItemTableListInnerColumn,
     TableColumnContainer,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
+import { useIsActiveRow } from '/@/renderer/components/item-list/item-table-list/item-table-list-context';
 import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { PlayButton } from '/@/renderer/features/shared/components/play-button';
 import {
@@ -162,9 +163,7 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
     const internalState = (props as any).internalState;
     const playButtonBehavior = usePlayButtonBehavior();
     const [isHovered, setIsHovered] = useState(false);
-    const isActive =
-        !!props.activeRowId &&
-        (props.activeRowId === song?.id || props.activeRowId === song?._uniqueId);
+    const isActive = useIsActiveRow(song?.id, song?._uniqueId);
 
     const handlePlay = (playType: Play, event: React.MouseEvent<HTMLButtonElement>) => {
         if (!item) {
