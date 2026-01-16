@@ -367,12 +367,16 @@ const VisualizerPanel = () => {
 const CombinedLyricsAndVisualizerPanel = () => {
     const currentSong = usePlayerSong();
     const visualizerType = useSettingsStore((store) => store.visualizer.type);
+    const showLyricsInSidebar = useShowLyricsInSidebar();
+    const showVisualizerInSidebar = useShowVisualizerInSidebar();
+    const { type, webAudio } = usePlaybackSettings();
+    const showVisualizer = showVisualizerInSidebar && type === PlayerType.WEB && webAudio;
 
     const { data: lyricsData } = useQuery(
         lyricsQueries.songLyrics(
             {
                 options: {
-                    enabled: !!currentSong?.id,
+                    enabled: !!currentSong?.id && showLyricsInSidebar,
                 },
                 query: { songId: currentSong?.id || '' },
                 serverId: currentSong?._serverId || '',
@@ -402,21 +406,23 @@ const CombinedLyricsAndVisualizerPanel = () => {
     return (
         <div className={styles.lyricsSection}>
             <PanelReorderControls panelType="lyrics" />
-            <Lyrics fadeOutNoLyricsMessage={true} settingsKey="sidebar" />
-            <div
-                className={styles.visualizerOverlay}
-                style={{
-                    opacity: hasLyrics ? 0.2 : 1,
-                }}
-            >
-                <Suspense fallback={<></>}>
-                    {visualizerType === 'butterchurn' ? (
-                        <ButterchurnVisualizer />
-                    ) : (
-                        <AudioMotionAnalyzerVisualizer />
-                    )}
-                </Suspense>
-            </div>
+            {showLyricsInSidebar && <Lyrics fadeOutNoLyricsMessage={true} settingsKey="sidebar" />}
+            {showVisualizer && (
+                <div
+                    className={styles.visualizerOverlay}
+                    style={{
+                        opacity: hasLyrics && showLyricsInSidebar ? 0.2 : 1,
+                    }}
+                >
+                    <Suspense fallback={<></>}>
+                        {visualizerType === 'butterchurn' ? (
+                            <ButterchurnVisualizer />
+                        ) : (
+                            <AudioMotionAnalyzerVisualizer />
+                        )}
+                    </Suspense>
+                </div>
+            )}
         </div>
     );
 };
