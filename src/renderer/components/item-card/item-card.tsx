@@ -420,14 +420,15 @@ const CompactItemCard = ({
                                 row !== null && row !== undefined,
                         )
                         .map((row, index) => (
-                            <div
+                            <Text
                                 className={clsx(styles.row, {
                                     [styles.muted]: index > 0,
                                 })}
                                 key={row.id}
+                                size={index > 0 ? 'sm' : 'md'}
                             >
                                 &nbsp;
-                            </div>
+                            </Text>
                         ))}
                 </div>
             </div>
@@ -636,14 +637,15 @@ const DefaultItemCard = ({
                         (row): row is NonNullable<typeof row> => row !== null && row !== undefined,
                     )
                     .map((row, index) => (
-                        <div
+                        <Text
                             className={clsx(styles.row, {
                                 [styles.muted]: index > 0,
                             })}
                             key={row.id}
+                            size={index > 0 ? 'sm' : 'md'}
                         >
                             &nbsp;
-                        </div>
+                        </Text>
                     ))}
             </div>
         </div>
@@ -922,14 +924,15 @@ const PosterItemCard = ({
                         (row): row is NonNullable<typeof row> => row !== null && row !== undefined,
                     )
                     .map((row, index) => (
-                        <div
+                        <Text
                             className={clsx(styles.row, {
                                 [styles.muted]: index > 0,
                             })}
                             key={row.id}
+                            size={index > 0 ? 'sm' : 'md'}
                         >
                             &nbsp;
-                        </div>
+                        </Text>
                     ))}
             </div>
         </div>
