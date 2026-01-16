@@ -42,7 +42,7 @@ export async function getLyricsBySongId(songId: string): Promise<null | string> 
     try {
         result = await axios.get<LrcLibTrackResponse>(`${FETCH_URL}/${songId}`);
     } catch (e) {
-        console.error('LrcLib lyrics request got an error!', e);
+        console.error('LrcLib lyrics request got an error!', (e as Error)?.message);
         return null;
     }
 
@@ -65,7 +65,7 @@ export async function getSearchResults(
             },
         });
     } catch (e) {
-        console.error('LrcLib search request got an error!', e);
+        console.error('LrcLib search request got an error!', (e as Error)?.message);
         return null;
     }
 
@@ -102,14 +102,13 @@ export async function query(
             timeout: TIMEOUT_MS,
         });
     } catch (e) {
-        console.error('LrcLib search request got an error!', e);
+        console.error('LrcLib search request got an error!', (e as Error).message);
         return null;
     }
 
     const lyrics = result.data.syncedLyrics || result.data.plainLyrics || null;
 
     if (!lyrics) {
-        console.error(`Could not get lyrics on LrcLib!`);
         return null;
     }
 

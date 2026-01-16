@@ -124,7 +124,6 @@ export const LibraryHeader = forwardRef(
                 <div
                     className={styles.imageSection}
                     onClick={() => {
-                        console.log('openImage');
                         openImage();
                     }}
                     onKeyDown={(event) =>

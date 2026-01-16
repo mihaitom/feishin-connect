@@ -126,7 +126,9 @@ const installExtensions = async () => {
                     type: 'info',
                 });
             })
-            .catch(console.error);
+            .catch(() => {
+                // Ignore
+            });
     });
 };
 
