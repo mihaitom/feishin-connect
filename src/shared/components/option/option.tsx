@@ -1,4 +1,4 @@
-import { memo, ReactNode, useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 
 import styles from './option.module.css';
 
@@ -12,7 +12,7 @@ interface OptionProps extends GroupProps {
 
 const defaultClassNames = { root: styles.root };
 
-export const Option = memo(({ children, classNames, ...props }: OptionProps) => {
+export const Option = ({ children, classNames, ...props }: OptionProps) => {
     const mergedClassNames = useMemo(
         () => (classNames ? { ...defaultClassNames, ...classNames } : defaultClassNames),
         [classNames],
@@ -23,7 +23,7 @@ export const Option = memo(({ children, classNames, ...props }: OptionProps) => 
             {children}
         </Group>
     );
-});
+};
 
 Option.displayName = 'Option';
 
@@ -43,5 +43,5 @@ const Control = ({ children }: ControlProps) => {
     return <Flex justify="flex-end">{children}</Flex>;
 };
 
-(Option as typeof Option & { Label: typeof Label }).Label = Label;
-(Option as typeof Option & { Control: typeof Control }).Control = Control;
+Option.Label = Label;
+Option.Control = Control;

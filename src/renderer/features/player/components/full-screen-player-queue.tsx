@@ -91,7 +91,7 @@ export const FullScreenPlayerQueue = () => {
                             pos="relative"
                             size="lg"
                             uppercase
-                            variant="subtle"
+                            variant="transparent"
                         >
                             {item.label}
                         </Button>

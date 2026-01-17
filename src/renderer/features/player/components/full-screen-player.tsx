@@ -220,11 +220,7 @@ const BackgroundImageOverlay = memo(
 
 BackgroundImageOverlay.displayName = 'BackgroundImageOverlay';
 
-interface ControlsProps {
-    isPageHovered: boolean;
-}
-
-const Controls = ({ isPageHovered }: ControlsProps) => {
+const Controls = () => {
     const { t } = useTranslation();
     const {
         dynamicBackground,
@@ -271,6 +267,7 @@ const Controls = ({ isPageHovered }: ControlsProps) => {
 
     return (
         <Group
+            className={styles.controlsContainer}
             gap="sm"
             p="1rem"
             pos="absolute"
@@ -285,7 +282,7 @@ const Controls = ({ isPageHovered }: ControlsProps) => {
                 iconProps={{ size: 'lg' }}
                 onClick={handleToggleFullScreenPlayer}
                 tooltip={{ label: t('common.minimize', { postProcess: 'titleCase' }) }}
-                variant={isPageHovered ? 'default' : 'subtle'}
+                variant="subtle"
             />
             <Popover position="bottom-start">
                 <Popover.Target>
@@ -293,7 +290,7 @@ const Controls = ({ isPageHovered }: ControlsProps) => {
                         icon="settings2"
                         iconProps={{ size: 'lg' }}
                         tooltip={{ label: t('common.configure', { postProcess: 'titleCase' }) }}
-                        variant={isPageHovered ? 'default' : 'subtle'}
+                        variant="subtle"
                     />
                 </Popover.Target>
                 <Popover.Dropdown>
@@ -556,7 +553,7 @@ const Controls = ({ isPageHovered }: ControlsProps) => {
             </Popover>
             <ListConfigMenu
                 buttonProps={{
-                    variant: isPageHovered ? 'default' : 'subtle',
+                    variant: 'subtle',
                 }}
                 displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
                 listKey={ItemListKey.FULL_SCREEN}
@@ -616,20 +613,11 @@ interface PlayerContainerProps {
     children: ReactNode;
     dynamicBackground: boolean | undefined;
     dynamicIsImage: boolean | undefined;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
     windowBarStyle: Platform;
 }
 
 const PlayerContainer = memo(
-    ({
-        children,
-        dynamicBackground,
-        dynamicIsImage,
-        onMouseEnter,
-        onMouseLeave,
-        windowBarStyle,
-    }: PlayerContainerProps) => {
+    ({ children, dynamicBackground, dynamicIsImage, windowBarStyle }: PlayerContainerProps) => {
         const currentSong = usePlayerSong();
         const imageUrl = useItemImageUrl({
             id: currentSong?.imageId || undefined,
@@ -650,8 +638,6 @@ const PlayerContainer = memo(
                 custom={{ background, dynamicBackground, windowBarStyle }}
                 exit="closed"
                 initial="closed"
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
                 transition={{ duration: 2 }}
                 variants={containerVariants}
             >
@@ -672,8 +658,6 @@ export const FullScreenPlayer = () => {
     const { setStore } = useFullScreenPlayerStoreActions();
     const { windowBarStyle } = useWindowSettings();
 
-    const [isPageHovered, setIsPageHovered] = useState(false);
-
     const location = useLocation();
     const isOpenedRef = useRef<boolean | null>(null);
 
@@ -689,11 +673,9 @@ export const FullScreenPlayer = () => {
         <PlayerContainer
             dynamicBackground={dynamicBackground}
             dynamicIsImage={dynamicIsImage}
-            onMouseEnter={() => setIsPageHovered(true)}
-            onMouseLeave={() => setIsPageHovered(false)}
             windowBarStyle={windowBarStyle}
         >
-            <Controls isPageHovered={isPageHovered} />
+            <Controls />
             <BackgroundImageOverlay
                 dynamicBackground={dynamicBackground}
                 dynamicImageBlur={dynamicImageBlur}
