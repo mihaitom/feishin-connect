@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import isEqual from 'lodash/isEqual';
 import { useCallback } from 'react';
 
 import { api } from '/@/renderer/api';
@@ -36,15 +37,20 @@ export const useUpdateCurrentSong = () => {
                 });
 
                 if (updatedSong) {
-                    updateQueueSong(currentSong.id, updatedSong);
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { _uniqueId, ...currentSongData } = currentSong;
 
-                    logFn.debug('Song updated in queue', {
-                        category: LogCategory.PLAYER,
-                        meta: {
-                            id: currentSong.id,
-                            name: updatedSong.name,
-                        },
-                    });
+                    if (!isEqual(currentSongData, updatedSong)) {
+                        updateQueueSong(currentSong.id, updatedSong);
+
+                        logFn.debug('Song updated in queue', {
+                            category: LogCategory.PLAYER,
+                            meta: {
+                                id: currentSong.id,
+                                name: updatedSong.name,
+                            },
+                        });
+                    }
                 }
             } catch (error) {
                 logFn.error('Failed to update song in queue', {
