@@ -36,6 +36,9 @@ const config: UserConfig = {
         },
     },
     preload: {
+        build: {
+            sourcemap: true,
+        },
         plugins: [externalizeDepsPlugin()],
         resolve: {
             alias: {

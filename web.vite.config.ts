@@ -25,6 +25,7 @@ export default defineConfig({
             },
             output: {
                 assetFileNames: 'assets/[name].[ext]',
+                sourcemapExcludeSources: false,
             },
         },
         sourcemap: true,
