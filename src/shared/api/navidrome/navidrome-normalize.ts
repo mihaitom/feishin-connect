@@ -43,6 +43,7 @@ const matchesYearOnly = (date: string) => {
 
 const normalizeReleaseDate = (item: {
     date?: string;
+    minYear?: number;
     releaseDate?: string;
 }): { date: null | string; year: null | number } => {
     if (item.releaseDate && matchesFullDate(item.releaseDate)) {
@@ -71,12 +72,13 @@ const normalizeReleaseDate = (item: {
 
     return {
         date: null,
-        year: null,
+        year: item.minYear ?? null,
     };
 };
 
 const normalizeOriginalDate = (item: {
     date?: string;
+    minYear?: number;
     originalDate?: string;
     releaseDate?: string;
 }): { date: null | string; year: null | number } => {
@@ -118,7 +120,7 @@ const normalizeOriginalDate = (item: {
 
     return {
         date: null,
-        year: null,
+        year: item.minYear ?? null,
     };
 };
 
