@@ -187,6 +187,7 @@ export enum TableColumn {
     SKIP = 'skip',
     SONG_COUNT = 'songCount',
     TITLE = 'name',
+    TITLE_ARTIST = 'titleArtist',
     TITLE_COMBINED = 'titleCombined',
     TRACK_NUMBER = 'trackNumber',
     USER_FAVORITE = 'userFavorite',

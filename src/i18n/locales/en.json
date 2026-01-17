@@ -1105,6 +1105,7 @@
                 "size": "$t(common.size)",
                 "songCount": "$t(entity.track_other)",
                 "title": "$t(common.title)",
+                "titleArtist": "$t(common.title) (artist)",
                 "titleCombined": "$t(common.title) (combined)",
                 "trackNumber": "track number",
                 "year": "$t(common.year)"

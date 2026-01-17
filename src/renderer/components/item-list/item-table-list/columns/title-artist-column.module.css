@@ -1,0 +1,59 @@
+.title-artist {
+    display: flex;
+    gap: var(--theme-spacing-sm);
+    width: 100%;
+    height: 100%;
+}
+
+
+
+.text-container {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: var(--theme-spacing-xs);
+    min-width: 0;
+}
+
+.text-container.align-left {
+    text-align: left;
+}
+
+.text-container.align-center {
+    text-align: center;
+}
+
+.text-container.align-right {
+    text-align: right;
+}
+
+.text-container.compact {
+    gap: 0;
+}
+
+.title {
+    display: inline-block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artists {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--theme-font-size-xs) !important;
+    color: var(--theme-colors-foreground-muted);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.folder-icon {
+    color: black;
+    fill: rgb(255 215 100);
+}
+
+.active {
+    color: var(--theme-colors-primary);
+}

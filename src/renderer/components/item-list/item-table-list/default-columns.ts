@@ -50,6 +50,15 @@ export const SONG_TABLE_COLUMNS: DefaultTableColumn[] = [
         width: 300,
     },
     {
+        align: 'start',
+        autoSize: false,
+        isEnabled: false,
+        label: i18n.t('table.config.label.titleArtist', { postProcess: 'titleCase' }),
+        pinned: null,
+        value: TableColumn.TITLE_ARTIST,
+        width: 300,
+    },
+    {
         align: 'center',
         autoSize: false,
         isEnabled: true,
@@ -313,6 +322,15 @@ export const ALBUM_TABLE_COLUMNS: DefaultTableColumn[] = [
         label: i18n.t('table.config.label.titleCombined', { postProcess: 'titleCase' }),
         pinned: null,
         value: TableColumn.TITLE_COMBINED,
+        width: 300,
+    },
+    {
+        align: 'start',
+        autoSize: false,
+        isEnabled: false,
+        label: i18n.t('table.config.label.titleArtist', { postProcess: 'titleCase' }),
+        pinned: null,
+        value: TableColumn.TITLE_ARTIST,
         width: 300,
     },
     {

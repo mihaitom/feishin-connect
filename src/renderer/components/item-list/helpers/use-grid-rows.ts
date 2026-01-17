@@ -39,9 +39,7 @@ const getDefaultRowsForItemType = (
     }
 };
 
-// Map TableColumn enum values to row IDs used in getDataRows
 const getRowIdFromTableColumn = (tableColumn: TableColumn): null | string => {
-    // Map TableColumn enum values to the row IDs used in getDataRows
     const columnToRowIdMap: Record<TableColumn, null | string> = {
         [TableColumn.ACTIONS]: null,
         [TableColumn.ALBUM]: 'album',
@@ -74,6 +72,7 @@ const getRowIdFromTableColumn = (tableColumn: TableColumn): null | string => {
         [TableColumn.SKIP]: null,
         [TableColumn.SONG_COUNT]: 'songCount',
         [TableColumn.TITLE]: 'name',
+        [TableColumn.TITLE_ARTIST]: null,
         [TableColumn.TITLE_COMBINED]: null,
         [TableColumn.TRACK_NUMBER]: null,
         [TableColumn.USER_FAVORITE]: 'userFavorite',

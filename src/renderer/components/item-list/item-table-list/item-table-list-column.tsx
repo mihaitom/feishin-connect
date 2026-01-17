@@ -45,6 +45,7 @@ import { RatingColumn } from '/@/renderer/components/item-list/item-table-list/c
 import { RowIndexColumn } from '/@/renderer/components/item-list/item-table-list/columns/row-index-column';
 import { SizeColumn } from '/@/renderer/components/item-list/item-table-list/columns/size-column';
 import { TextColumn } from '/@/renderer/components/item-list/item-table-list/columns/text-column';
+import { TitleArtistColumn } from '/@/renderer/components/item-list/item-table-list/columns/title-artist-column';
 import { TitleColumn } from '/@/renderer/components/item-list/item-table-list/columns/title-column';
 import { TitleCombinedColumn } from '/@/renderer/components/item-list/item-table-list/columns/title-combined-column';
 import { YearColumn } from '/@/renderer/components/item-list/item-table-list/columns/year-column';
@@ -523,6 +524,11 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
             case TableColumn.TITLE:
                 return <TitleColumn {...props} {...dragProps} controls={controls} type={type} />;
 
+            case TableColumn.TITLE_ARTIST:
+                return (
+                    <TitleArtistColumn {...props} {...dragProps} controls={controls} type={type} />
+                );
+
             case TableColumn.TITLE_COMBINED:
                 return (
                     <TitleCombinedColumn
@@ -560,6 +566,9 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
         case TableColumn.TITLE:
             return <TitleColumn {...props} {...dragProps} controls={controls} type={type} />;
 
+        case TableColumn.TITLE_ARTIST:
+            return <TitleArtistColumn {...props} {...dragProps} controls={controls} type={type} />;
+
         case TableColumn.TITLE_COMBINED:
             return (
                 <TitleCombinedColumn {...props} {...dragProps} controls={controls} type={type} />
@@ -570,7 +579,7 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
     }
 };
 
-const NonMutedColumns = [TableColumn.TITLE, TableColumn.TITLE_COMBINED];
+const NonMutedColumns = [TableColumn.TITLE, TableColumn.TITLE_ARTIST, TableColumn.TITLE_COMBINED];
 
 export const TableColumnTextContainer = (
     props: ItemTableListColumn & {
@@ -1166,6 +1175,9 @@ const columnLabelMap: Record<TableColumn, ReactNode | string> = {
         postProcess: 'upperCase',
     }) as string,
     [TableColumn.TITLE]: i18n.t('table.column.title', { postProcess: 'upperCase' }) as string,
+    [TableColumn.TITLE_ARTIST]: i18n.t('table.column.title', {
+        postProcess: 'upperCase',
+    }) as string,
     [TableColumn.TITLE_COMBINED]: i18n.t('table.column.title', {
         postProcess: 'upperCase',
     }) as string,
