@@ -1941,10 +1941,52 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
+                if (version <= 21) {
+                    // Add COMPOSER column to SONG and ALBUM table configs
+                    const composerColumn: ItemTableListColumnConfig = {
+                        align: 'start',
+                        autoSize: false,
+                        id: TableColumn.COMPOSER,
+                        isEnabled: false,
+                        pinned: null,
+                        width: 300,
+                    };
+
+                    const listKeysToUpdate: (LibraryItem | string)[] = [
+                        LibraryItem.SONG,
+                        LibraryItem.ALBUM,
+                        LibraryItem.PLAYLIST_SONG,
+                        LibraryItem.QUEUE_SONG,
+                        ItemListKey.ALBUM_DETAIL,
+                        ItemListKey.FULL_SCREEN,
+                        ItemListKey.SIDE_QUEUE,
+                    ];
+
+                    listKeysToUpdate.forEach((listKey) => {
+                        const listConfig = state.lists[listKey];
+                        if (listConfig?.table?.columns) {
+                            const columns = listConfig.table.columns;
+                            const hasComposer = columns.some(
+                                (col) => col.id === TableColumn.COMPOSER,
+                            );
+                            if (!hasComposer) {
+                                const artistIndex = columns.findIndex(
+                                    (col) => col.id === TableColumn.ARTIST,
+                                );
+                                if (artistIndex >= 0) {
+                                    columns.splice(artistIndex + 1, 0, composerColumn);
+                                } else {
+                                    columns.push(composerColumn);
+                                }
+                            }
+                        }
+                    });
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 21,
+            version: 22,
         },
     ),
 );

@@ -1086,6 +1086,7 @@
                 "bpm": "$t(common.bpm)",
                 "channels": "$t(common.channel_other)",
                 "codec": "$t(common.codec)",
+                "composer": "composer",
                 "dateAdded": "date added",
                 "discNumber": "disc number",
                 "duration": "$t(common.duration)",

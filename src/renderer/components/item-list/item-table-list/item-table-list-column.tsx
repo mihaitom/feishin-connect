@@ -26,6 +26,7 @@ import { ActionsColumn } from '/@/renderer/components/item-list/item-table-list/
 import { AlbumArtistsColumn } from '/@/renderer/components/item-list/item-table-list/columns/album-artists-column';
 import { AlbumColumn } from '/@/renderer/components/item-list/item-table-list/columns/album-column';
 import { ArtistsColumn } from '/@/renderer/components/item-list/item-table-list/columns/artists-column';
+import { ComposerColumn } from '/@/renderer/components/item-list/item-table-list/columns/composer-column';
 import { CountColumn } from '/@/renderer/components/item-list/item-table-list/columns/count-column';
 import {
     AbsoluteDateColumn,
@@ -481,6 +482,9 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
             case TableColumn.SAMPLE_RATE:
             case TableColumn.TRACK_NUMBER:
                 return <NumericColumn {...props} {...dragProps} controls={controls} type={type} />;
+
+            case TableColumn.COMPOSER:
+                return <ComposerColumn {...props} {...dragProps} controls={controls} type={type} />;
 
             case TableColumn.DATE_ADDED:
                 return <DateColumn {...props} {...dragProps} controls={controls} type={type} />;
@@ -1126,6 +1130,9 @@ const columnLabelMap: Record<TableColumn, ReactNode | string> = {
     [TableColumn.CHANNELS]: i18n.t('table.column.channels', { postProcess: 'upperCase' }) as string,
     [TableColumn.CODEC]: i18n.t('table.column.codec', { postProcess: 'upperCase' }) as string,
     [TableColumn.COMMENT]: i18n.t('table.column.comment', { postProcess: 'upperCase' }) as string,
+    [TableColumn.COMPOSER]: i18n.t('table.config.label.composer', {
+        postProcess: 'upperCase',
+    }) as string,
     [TableColumn.DATE_ADDED]: i18n.t('table.column.dateAdded', {
         postProcess: 'upperCase',
     }) as string,

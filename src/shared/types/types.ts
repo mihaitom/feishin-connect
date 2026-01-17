@@ -168,6 +168,7 @@ export enum TableColumn {
     CHANNELS = 'channels',
     CODEC = 'container',
     COMMENT = 'comment',
+    COMPOSER = 'composer',
     DATE_ADDED = 'createdAt',
     DISC_NUMBER = 'discNumber',
     DURATION = 'duration',
