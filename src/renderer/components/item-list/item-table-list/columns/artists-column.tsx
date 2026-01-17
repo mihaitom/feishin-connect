@@ -17,7 +17,9 @@ import { LibraryItem, RelatedAlbumArtist, Song } from '/@/shared/types/domain-ty
 
 const AlbumArtistsColumn = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
-    const row: RelatedAlbumArtist[] | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
+    const row: RelatedAlbumArtist[] | undefined = (rowItem as any)?.[
+        props.columns[props.columnIndex].id
+    ];
 
     const artists = useMemo(() => {
         if (!row) return [];
@@ -66,8 +68,8 @@ const AlbumArtistsColumn = (props: ItemTableListInnerColumn) => {
 };
 
 const SongArtistsColumn = (props: ItemTableListInnerColumn) => {
-    const row: Song | undefined =
-        (props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex]) as Song | undefined;
+    const row: Song | undefined = (props.getRowItem?.(props.rowIndex) ??
+        (props.data as any[])[props.rowIndex]) as Song | undefined;
 
     if (row) {
         return (

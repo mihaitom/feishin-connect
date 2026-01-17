@@ -61,7 +61,8 @@ const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
                     icon="arrowDownS"
                     iconProps={{ color: 'muted', size: 'md' }}
                     onClick={(e) => {
-                        const item = (props.getRowItem?.(rowIndex) ?? data[rowIndex]) as ItemListItem;
+                        const item = (props.getRowItem?.(rowIndex) ??
+                            data[rowIndex]) as ItemListItem;
                         const rowId = internalState.extractRowId(item);
                         const index = rowId ? internalState.findItemIndex(rowId) : -1;
                         controls.onExpand?.({
