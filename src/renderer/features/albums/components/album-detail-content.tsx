@@ -1,3 +1,8 @@
+import type {
+    ItemListStateActions,
+    ItemListStateItemWithRequiredProperties,
+} from '/@/renderer/components/item-list/helpers/item-list-state';
+
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { ReactNode, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +11,7 @@ import { generatePath, useParams } from 'react-router';
 import styles from './album-detail-content.module.css';
 
 import { useGridCarouselContainerQuery } from '/@/renderer/components/grid-carousel/grid-carousel-v2';
+import { useItemListStateSubscription } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
 import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
@@ -400,6 +406,80 @@ interface AlbumDetailSongsTableProps {
     songs: Song[];
 }
 
+interface DiscGroupRowProps {
+    discGroup: {
+        discNumber: number;
+        discSubtitle: null | string;
+    };
+    groupItems: unknown[];
+    internalState: ItemListStateActions;
+    t: (key: string, options?: any) => string;
+}
+
+const DiscGroupRow = ({ discGroup, groupItems, internalState, t }: DiscGroupRowProps) => {
+    const selectionVersion = useItemListStateSubscription(internalState, (state) =>
+        state ? state.version : 0,
+    );
+
+    const selectedCount = groupItems.filter((item) => {
+        if (!item || typeof item !== 'object' || !('id' in item)) return false;
+        const rowId = internalState.extractRowId(item);
+        return rowId ? internalState.isSelected(rowId) : false;
+    }).length;
+
+    const isAllSelected = selectedCount === groupItems.length;
+
+    void selectionVersion;
+
+    const handleCheckboxChange = () => {
+        const selectableItems = groupItems.filter(
+            (item): item is ItemListStateItemWithRequiredProperties =>
+                item !== null && typeof item === 'object',
+        );
+
+        if (isAllSelected) {
+            // Deselect all items in the group
+            const currentlySelected =
+                internalState.getSelected() as ItemListStateItemWithRequiredProperties[];
+            const groupItemIds = new Set(
+                selectableItems.map((item) => internalState.extractRowId(item)).filter(Boolean),
+            );
+            const itemsToKeep = currentlySelected.filter(
+                (item) => !groupItemIds.has(internalState.extractRowId(item) || ''),
+            );
+            internalState.setSelected(itemsToKeep);
+        } else {
+            // Select all items in the group (add to existing selection)
+            const currentlySelected =
+                internalState.getSelected() as ItemListStateItemWithRequiredProperties[];
+            const selectedIds = new Set(
+                currentlySelected.map((item) => internalState.extractRowId(item)).filter(Boolean),
+            );
+            const itemsToAdd = selectableItems.filter(
+                (item) => !selectedIds.has(internalState.extractRowId(item) || ''),
+            );
+            internalState.setSelected([...currentlySelected, ...itemsToAdd]);
+        }
+    };
+
+    return (
+        <Group align="center" h="100%" px="md" w="100%">
+            <Checkbox
+                checked={isAllSelected}
+                id={`disc-${discGroup.discNumber}`}
+                label={
+                    <Text component="label" size="sm" truncate>
+                        {t('common.disc', { postProcess: 'sentenceCase' })} {discGroup.discNumber}
+                        {discGroup.discSubtitle && ` - ${discGroup.discSubtitle}`}
+                    </Text>
+                }
+                onChange={handleCheckboxChange}
+                size="xs"
+            />
+        </Group>
+    );
+};
+
 function AlbumDetailCarousels({ data }: { data: Album }) {
     const { t } = useTranslation();
 
@@ -568,65 +648,18 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
                 data: unknown[];
                 groupIndex: number;
                 index: number;
-                internalState: any;
+                internalState: ItemListStateActions;
                 startDataIndex: number;
             }) => {
                 const groupItems = data.slice(startDataIndex, startDataIndex + discGroup.itemCount);
 
-                const selectedCount = groupItems.filter((item) => {
-                    if (!item || typeof item !== 'object' || !('id' in item)) return false;
-                    const rowId = internalState.extractRowId(item);
-                    return rowId ? internalState.isSelected(rowId) : false;
-                }).length;
-
-                const isAllSelected = selectedCount === groupItems.length;
-
-                const handleCheckboxChange = () => {
-                    const selectableItems = groupItems;
-
-                    if (isAllSelected) {
-                        // Deselect all items in the group
-                        const currentlySelected = internalState.getSelected();
-                        const groupItemIds = new Set(
-                            selectableItems
-                                .map((item) => internalState.extractRowId(item))
-                                .filter(Boolean),
-                        );
-                        const itemsToKeep = currentlySelected.filter(
-                            (item) => !groupItemIds.has(internalState.extractRowId(item) || ''),
-                        );
-                        internalState.setSelected(itemsToKeep);
-                    } else {
-                        // Select all items in the group (add to existing selection)
-                        const currentlySelected = internalState.getSelected();
-                        const selectedIds = new Set(
-                            currentlySelected
-                                .map((item) => internalState.extractRowId(item))
-                                .filter(Boolean),
-                        );
-                        const itemsToAdd = selectableItems.filter(
-                            (item) => !selectedIds.has(internalState.extractRowId(item) || ''),
-                        );
-                        internalState.setSelected([...currentlySelected, ...itemsToAdd]);
-                    }
-                };
-
                 return (
-                    <Group align="center" h="100%" px="md" w="100%">
-                        <Checkbox
-                            checked={isAllSelected}
-                            id={`disc-${discGroup.discNumber}`}
-                            label={
-                                <Text component="label" size="sm" truncate>
-                                    {t('common.disc', { postProcess: 'sentenceCase' })}{' '}
-                                    {discGroup.discNumber}
-                                    {discGroup.discSubtitle && ` - ${discGroup.discSubtitle}`}
-                                </Text>
-                            }
-                            onChange={handleCheckboxChange}
-                            size="xs"
-                        />
-                    </Group>
+                    <DiscGroupRow
+                        discGroup={discGroup}
+                        groupItems={groupItems}
+                        internalState={internalState}
+                        t={t}
+                    />
                 );
             },
             rowHeight: 40,
