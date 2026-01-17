@@ -1,14 +1,40 @@
 import isElectron from 'is-electron';
+import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AdvancedTab } from '/@/renderer/features/settings/components/advanced/advanced-tab';
-import { GeneralTab } from '/@/renderer/features/settings/components/general/general-tab';
-import { HotkeysTab } from '/@/renderer/features/settings/components/hotkeys/hotkeys-tab';
-import { PlaybackTab } from '/@/renderer/features/settings/components/playback/playback-tab';
-import { WindowTab } from '/@/renderer/features/settings/components/window/window-tab';
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import { Tabs } from '/@/shared/components/tabs/tabs';
+
+const GeneralTab = lazy(() =>
+    import('/@/renderer/features/settings/components/general/general-tab').then((module) => ({
+        default: module.GeneralTab,
+    })),
+);
+
+const PlaybackTab = lazy(() =>
+    import('/@/renderer/features/settings/components/playback/playback-tab').then((module) => ({
+        default: module.PlaybackTab,
+    })),
+);
+
+const HotkeysTab = lazy(() =>
+    import('/@/renderer/features/settings/components/hotkeys/hotkeys-tab').then((module) => ({
+        default: module.HotkeysTab,
+    })),
+);
+
+const WindowTab = lazy(() =>
+    import('/@/renderer/features/settings/components/window/window-tab').then((module) => ({
+        default: module.WindowTab,
+    })),
+);
+
+const AdvancedTab = lazy(() =>
+    import('/@/renderer/features/settings/components/advanced/advanced-tab').then((module) => ({
+        default: module.AdvancedTab,
+    })),
+);
 
 export const SettingsContent = () => {
     const { t } = useTranslation();
@@ -45,21 +71,31 @@ export const SettingsContent = () => {
                         </Tabs.Tab>
                     </Tabs.List>
                     <Tabs.Panel value="general">
-                        <GeneralTab />
+                        <Suspense fallback={null}>
+                            <GeneralTab />
+                        </Suspense>
                     </Tabs.Panel>
                     <Tabs.Panel value="playback">
-                        <PlaybackTab />
+                        <Suspense fallback={null}>
+                            <PlaybackTab />
+                        </Suspense>
                     </Tabs.Panel>
                     <Tabs.Panel value="hotkeys">
-                        <HotkeysTab />
+                        <Suspense fallback={null}>
+                            <HotkeysTab />
+                        </Suspense>
                     </Tabs.Panel>
                     {isElectron() && (
                         <Tabs.Panel value="window">
-                            <WindowTab />
+                            <Suspense fallback={null}>
+                                <WindowTab />
+                            </Suspense>
                         </Tabs.Panel>
                     )}
                     <Tabs.Panel value="advanced">
-                        <AdvancedTab />
+                        <Suspense fallback={null}>
+                            <AdvancedTab />
+                        </Suspense>
                     </Tabs.Panel>
                 </Tabs>
             </div>

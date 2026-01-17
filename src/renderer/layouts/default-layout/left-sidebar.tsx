@@ -1,11 +1,21 @@
-import { useRef } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 
 import styles from './left-sidebar.module.css';
 
 import { ResizeHandle } from '/@/renderer/features/shared/components/resize-handle';
-import { CollapsedSidebar } from '/@/renderer/features/sidebar/components/collapsed-sidebar';
-import { Sidebar } from '/@/renderer/features/sidebar/components/sidebar';
 import { useAppStore } from '/@/renderer/store';
+
+const CollapsedSidebar = lazy(() =>
+    import('/@/renderer/features/sidebar/components/collapsed-sidebar').then((module) => ({
+        default: module.CollapsedSidebar,
+    })),
+);
+
+const Sidebar = lazy(() =>
+    import('/@/renderer/features/sidebar/components/sidebar').then((module) => ({
+        default: module.Sidebar,
+    })),
+);
 
 interface LeftSidebarProps {
     isResizing: boolean;
@@ -27,7 +37,7 @@ export const LeftSidebar = ({ isResizing, startResizing }: LeftSidebarProps) => 
                 placement="right"
                 ref={sidebarRef}
             />
-            {collapsed ? <CollapsedSidebar /> : <Sidebar />}
+            <Suspense fallback={<></>}>{collapsed ? <CollapsedSidebar /> : <Sidebar />}</Suspense>
         </aside>
     );
 };

@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
+import type ReactPlayer from 'react-player';
 
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import ReactPlayer from 'react-player';
 
 import { AudioPlayer, PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
 import { convertToLogVolume } from '/@/renderer/features/player/audio-player/utils/player-utils';
@@ -69,6 +69,31 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
 
     const player1Ref = useRef<null | ReactPlayer>(null);
     const player2Ref = useRef<null | ReactPlayer>(null);
+    const [ReactPlayerComponent, setReactPlayerComponent] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadReactPlayer = async () => {
+            try {
+                const module = await import('react-player');
+                if (isMounted) {
+                    setReactPlayerComponent(() => module.default);
+                    setIsLoading(false);
+                }
+            } catch (error) {
+                console.error('Failed to load react-player:', error);
+                setIsLoading(false);
+            }
+        };
+
+        loadReactPlayer();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const [internalVolume1, setInternalVolume1] = useState(volume / 100 || 0);
     const [internalVolume2, setInternalVolume2] = useState(volume / 100 || 0);
@@ -184,9 +209,13 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
         [onStartedPlayer2, preservesPitch],
     );
 
+    if (isLoading || !ReactPlayerComponent) {
+        return <div id="web-player-engine" style={{ display: 'none' }} />;
+    }
+
     return (
         <div id="web-player-engine" style={{ display: 'none' }}>
-            <ReactPlayer
+            <ReactPlayerComponent
                 config={{
                     file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
                 }}
@@ -206,7 +235,7 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
                 volume={volume1}
                 width={0}
             />
-            <ReactPlayer
+            <ReactPlayerComponent
                 config={{
                     file: { attributes: { crossOrigin: 'anonymous' }, forceAudio: true },
                 }}

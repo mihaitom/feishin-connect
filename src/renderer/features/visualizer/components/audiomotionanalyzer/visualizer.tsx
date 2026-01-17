@@ -1,5 +1,4 @@
-import AudioMotionAnalyzer from 'audiomotion-analyzer';
-import { createRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import styles from './visualizer.module.css';
 
@@ -15,7 +14,31 @@ const VisualizerInner = () => {
     const accent = useAccent();
     const visualizer = useSettingsStore((store) => store.visualizer);
     const opacity = useSettingsStore((store) => store.visualizer.audiomotionanalyzer.opacity);
-    const [motion, setMotion] = useState<AudioMotionAnalyzer>();
+    const [motion, setMotion] = useState<any>();
+    const [libraryLoaded, setLibraryLoaded] = useState(false);
+    const AudioMotionAnalyzerRef = useRef<any>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadLibrary = async () => {
+            try {
+                const module = await import('audiomotion-analyzer');
+                if (isMounted) {
+                    AudioMotionAnalyzerRef.current = module.default;
+                    setLibraryLoaded(true);
+                }
+            } catch (error) {
+                console.error('Failed to load AudioMotionAnalyzer library:', error);
+            }
+        };
+
+        loadLibrary();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     // Check if a gradient name is a custom gradient
     const isCustomGradient = useCallback(
@@ -162,7 +185,7 @@ const VisualizerInner = () => {
     );
 
     const registerCustomGradients = useCallback(
-        (audioMotionInstance: AudioMotionAnalyzer) => {
+        (audioMotionInstance: any) => {
             if (visualizer.type !== 'audiomotionanalyzer') {
                 return;
             }
@@ -187,8 +210,11 @@ const VisualizerInner = () => {
 
     useEffect(() => {
         const { context, gains } = webAudio || {};
-        let audioMotion: AudioMotionAnalyzer | undefined;
-        if (gains && context && canvasRef.current && !motion) {
+        let audioMotion: any | undefined;
+        if (gains && context && canvasRef.current && !motion && libraryLoaded) {
+            const AudioMotionAnalyzer = AudioMotionAnalyzerRef.current;
+            if (!AudioMotionAnalyzer) return;
+
             // Reset gradients registered flag on new instance
             setGradientsRegistered(false);
 
@@ -236,6 +262,7 @@ const VisualizerInner = () => {
         options,
         isCustomGradient,
         motion,
+        libraryLoaded,
     ]);
 
     // Re-register custom gradients when they change

@@ -1,4 +1,3 @@
-import butterchurnPresets from 'butterchurn-presets';
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +23,38 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { Textarea } from '/@/shared/components/textarea/textarea';
 import { toast } from '/@/shared/components/toast/toast';
+
+type ButterchurnPresetOption = { label: string; value: string };
+
+let butterchurnPresetOptionsCache: ButterchurnPresetOption[] | null = null;
+
+const loadButterchurnPresetOptions = async (): Promise<ButterchurnPresetOption[]> => {
+    if (butterchurnPresetOptionsCache) return butterchurnPresetOptionsCache;
+
+    const mod = await import('butterchurn-presets');
+    const presets = (mod as any).default ?? mod;
+    const presetNames = Object.keys(presets);
+
+    butterchurnPresetOptionsCache = presetNames.map((presetName) => ({
+        label: presetName,
+        value: presetName,
+    }));
+
+    return butterchurnPresetOptionsCache;
+};
+
+const useButterchurnPresetOptions = () => {
+    const [options, setOptions] = useState<ButterchurnPresetOption[]>(
+        butterchurnPresetOptionsCache ?? [],
+    );
+
+    useEffect(() => {
+        if (butterchurnPresetOptionsCache) return;
+        void loadButterchurnPresetOptions().then(setOptions);
+    }, []);
+
+    return options;
+};
 
 const modeOptions: { label: string; value: string }[] = [
     { label: i18n.t('visualizer.options.mode.0') as string, value: '0' },
@@ -2068,13 +2099,7 @@ const ButterchurnGeneralSettings = () => {
     const { t } = useTranslation();
     const { updateProperty, visualizer } = useUpdateButterchurn();
 
-    const presetOptions = useMemo(() => {
-        const presets = butterchurnPresets;
-        return Object.keys(presets).map((presetName) => ({
-            label: presetName,
-            value: presetName,
-        }));
-    }, []);
+    const presetOptions = useButterchurnPresetOptions();
 
     return (
         <Fieldset legend={t('visualizer.general')}>
@@ -2124,13 +2149,7 @@ const ButterChurnCycleSettings = () => {
     const { t } = useTranslation();
     const { updateProperty, visualizer } = useUpdateButterchurn();
 
-    const presetOptions = useMemo(() => {
-        const presets = butterchurnPresets;
-        return Object.keys(presets).map((presetName) => ({
-            label: presetName,
-            value: presetName,
-        }));
-    }, []);
+    const presetOptions = useButterchurnPresetOptions();
 
     return (
         <Fieldset legend={t('visualizer.cyclePresets')}>

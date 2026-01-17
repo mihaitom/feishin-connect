@@ -1,8 +1,8 @@
 import formatDuration from 'format-duration';
+import { lazy, Suspense } from 'react';
 
 import { PlayerbarSeekSlider } from './playerbar-seek-slider';
 import styles from './playerbar-slider.module.css';
-import { PlayerbarWaveform } from './playerbar-waveform';
 
 import { useRemote } from '/@/renderer/features/remote/hooks/use-remote';
 import {
@@ -13,8 +13,15 @@ import {
 } from '/@/renderer/store';
 import { PlayerbarSliderType, usePlayerbarSlider } from '/@/renderer/store/settings.store';
 import { Slider, SliderProps } from '/@/shared/components/slider/slider';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
 import { PlaybackSelectors } from '/@/shared/constants/playback-selectors';
+
+const PlayerbarWaveform = lazy(() =>
+    import('./playerbar-waveform').then((module) => ({
+        default: module.PlayerbarWaveform,
+    })),
+);
 
 export const PlayerbarSlider = () => {
     const currentSong = usePlayerSong();
@@ -51,7 +58,9 @@ export const PlayerbarSlider = () => {
                 </div>
                 <div className={styles.sliderWrapper}>
                     {isWaveform ? (
-                        <PlayerbarWaveform />
+                        <Suspense fallback={<Spinner />}>
+                            <PlayerbarWaveform />
+                        </Suspense>
                     ) : (
                         <PlayerbarSeekSlider max={songDuration} min={0} />
                     )}

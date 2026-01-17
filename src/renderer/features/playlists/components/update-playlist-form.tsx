@@ -1,9 +1,8 @@
-import { closeModal, ContextModalProps, openContextModal } from '@mantine/modals';
+import { closeModal, ContextModalProps } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
-import i18n from '/@/i18n/i18n';
 import { useUpdatePlaylist } from '/@/renderer/features/playlists/mutations/update-playlist-mutation';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { useCurrentServer, useCurrentServerId, usePermissions } from '/@/renderer/store';
@@ -17,7 +16,6 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { toast } from '/@/shared/components/toast/toast';
 import { useForm } from '/@/shared/hooks/use-form';
 import {
-    Playlist,
     ServerType,
     SortOrder,
     UpdatePlaylistBody,
@@ -166,25 +164,4 @@ const OwnerSelect = ({ form }: { form: ReturnType<typeof useForm<UpdatePlaylistB
             })}
         />
     );
-};
-
-export const openUpdatePlaylistModal = async (args: { playlist: Playlist }) => {
-    const { playlist } = args;
-
-    openContextModal({
-        innerProps: {
-            body: {
-                comment: playlist?.description || undefined,
-                genres: playlist?.genres,
-                name: playlist?.name,
-                ownerId: playlist?.ownerId || undefined,
-                public: playlist?.public || false,
-                queryBuilderRules: playlist?.rules || undefined,
-                sync: playlist?.sync || undefined,
-            },
-            query: { id: playlist?.id },
-        },
-        modalKey: 'updatePlaylist',
-        title: i18n.t('form.editPlaylist.title', { postProcess: 'titleCase' }) as string,
-    });
 };

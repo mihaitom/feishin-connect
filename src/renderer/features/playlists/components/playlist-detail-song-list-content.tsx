@@ -2,8 +2,6 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { PlaylistDetailSongListEditTable } from './playlist-detail-song-list-table';
-
 import { ItemListHandle } from '/@/renderer/components/item-list/types';
 import { useListContext } from '/@/renderer/context/list-context';
 import { eventEmitter } from '/@/renderer/events/event-emitter';
@@ -17,6 +15,14 @@ const PlaylistDetailSongListTable = lazy(() =>
     import('/@/renderer/features/playlists/components/playlist-detail-song-list-table').then(
         (module) => ({
             default: module.PlaylistDetailSongListTable,
+        }),
+    ),
+);
+
+const PlaylistDetailSongListEditTable = lazy(() =>
+    import('/@/renderer/features/playlists/components/playlist-detail-song-list-table').then(
+        (module) => ({
+            default: module.PlaylistDetailSongListEditTable,
         }),
     ),
 );

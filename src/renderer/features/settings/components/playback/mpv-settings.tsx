@@ -2,6 +2,8 @@ import isElectron from 'is-electron';
 import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getMpvSetting } from './mpv-properties';
+
 import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import {
@@ -26,49 +28,6 @@ import { PlayerType } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
-
-export const getMpvSetting = (
-    key: keyof SettingsState['playback']['mpvProperties'],
-    value: any,
-) => {
-    switch (key) {
-        case 'audioExclusiveMode':
-            return { 'audio-exclusive': value || 'no' };
-        case 'audioSampleRateHz':
-            return { 'audio-samplerate': value };
-        case 'gaplessAudio':
-            return { 'gapless-audio': value || 'weak' };
-        case 'replayGainClip':
-            return { 'replaygain-clip': value || 'no' };
-        case 'replayGainFallbackDB':
-            return { 'replaygain-fallback': value };
-        case 'replayGainMode':
-            return { replaygain: value || 'no' };
-        case 'replayGainPreampDB':
-            return { 'replaygain-preamp': value || 0 };
-        default:
-            return { 'audio-format': value };
-    }
-};
-
-export const getMpvProperties = (settings: SettingsState['playback']['mpvProperties']) => {
-    const properties: Record<string, any> = {
-        'audio-exclusive': settings.audioExclusiveMode || 'no',
-        'audio-samplerate':
-            settings.audioSampleRateHz === 0 ? undefined : settings.audioSampleRateHz,
-        'gapless-audio': settings.gaplessAudio || 'weak',
-        replaygain: settings.replayGainMode || 'no',
-        'replaygain-clip': settings.replayGainClip || 'no',
-        'replaygain-fallback': settings.replayGainFallbackDB,
-        'replaygain-preamp': settings.replayGainPreampDB || 0,
-    };
-
-    Object.keys(properties).forEach((key) =>
-        properties[key] === undefined ? delete properties[key] : {},
-    );
-
-    return properties;
-};
 
 export const MpvSettings = memo(() => {
     const { t } = useTranslation();

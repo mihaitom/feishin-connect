@@ -1,15 +1,21 @@
 import formatDuration from 'format-duration';
-import { memo } from 'react';
+import { lazy, memo, Suspense } from 'react';
 
 import styles from './mobile-fullscreen-player.module.css';
 
 import { PlayerbarSeekSlider } from '/@/renderer/features/player/components/playerbar-seek-slider';
-import { PlayerbarWaveform } from '/@/renderer/features/player/components/playerbar-waveform';
 import { usePlayerTimestamp } from '/@/renderer/store';
 import { PlayerbarSliderType, usePlayerbarSlider } from '/@/renderer/store/settings.store';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
 import { PlaybackSelectors } from '/@/shared/constants/playback-selectors';
 import { QueueSong } from '/@/shared/types/domain-types';
+
+const PlayerbarWaveform = lazy(() =>
+    import('/@/renderer/features/player/components/playerbar-waveform').then((module) => ({
+        default: module.PlayerbarWaveform,
+    })),
+);
 
 interface MobileFullscreenPlayerProgressProps {
     currentSong?: QueueSong;
@@ -38,7 +44,9 @@ export const MobileFullscreenPlayerProgress = memo(
                 </div>
                 <div className={styles.sliderWrapper}>
                     {isWaveform ? (
-                        <PlayerbarWaveform />
+                        <Suspense fallback={<Spinner />}>
+                            <PlayerbarWaveform />
+                        </Suspense>
                     ) : (
                         <PlayerbarSeekSlider max={songDuration} min={0} />
                     )}
