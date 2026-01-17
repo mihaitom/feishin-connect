@@ -1198,9 +1198,11 @@ const columnLabelMap: Record<TableColumn, ReactNode | string> = {
             <Icon icon="favorite" />
         </Flex>
     ),
-    [TableColumn.USER_RATING]: i18n.t('table.column.rating', {
-        postProcess: 'upperCase',
-    }) as string,
+    [TableColumn.USER_RATING]: (
+        <Flex className={styles.headerIconWrapper}>
+            <Icon icon="star" />
+        </Flex>
+    ),
     [TableColumn.YEAR]: i18n.t('table.column.releaseYear', { postProcess: 'upperCase' }) as string,
 };
 
