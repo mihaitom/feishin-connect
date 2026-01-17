@@ -18,13 +18,14 @@ import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { ListSortByDropdownControlled } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButtonControlled } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
-import { searchLibraryItems } from '/@/renderer/features/shared/utils';
+import { FILTER_KEYS, searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, usePlayerSong } from '/@/renderer/store';
 import { useExternalLinks, useSettingsStore } from '/@/renderer/store/settings.store';
 import { sentenceCase, titleCase } from '/@/renderer/utils';
 import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
 import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
+import { setJsonSearchParam } from '/@/renderer/utils/query-params';
 import { sortSongList } from '/@/shared/api/utils';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
@@ -106,12 +107,6 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
                 value: status,
             })) || [];
 
-        const recordLabels =
-            album.recordLabels?.map((label) => ({
-                id: label,
-                value: label,
-            })) || [];
-
         const items: Array<{ id: string; value: ReactNode | string | undefined }> = [];
 
         items.push(
@@ -124,7 +119,6 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
             },
             ...releaseCountries,
             ...releaseStatuses,
-            ...recordLabels,
             {
                 id: 'explicitStatus',
                 value:
@@ -148,12 +142,54 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
         }));
     }, [album]);
 
+    const recordLabels = useMemo(() => {
+        if (!album?.recordLabels || album.recordLabels.length === 0) return [];
+
+        return album.recordLabels.map((label) => {
+            const searchParams = new URLSearchParams();
+            const customFilters = { recordlabel: [label] };
+            const paramsWithCustom = setJsonSearchParam(
+                searchParams,
+                FILTER_KEYS.ALBUM._CUSTOM,
+                customFilters,
+            );
+            const url = `${AppRoute.LIBRARY_ALBUMS}?${paramsWithCustom.toString()}`;
+
+            return {
+                id: label,
+                label,
+                url,
+            };
+        });
+    }, [album]);
+
     return (
         <>
             <MetadataPillGroup
                 items={defaultTagItems}
                 title={t('common.tags', { postProcess: 'sentenceCase' })}
             />
+
+            {recordLabels.length > 0 && (
+                <Stack align="center" className={styles.metadataPillGroup} gap="xs">
+                    <Text fw={600} isNoSelect size="sm" tt="uppercase">
+                        {t('common.recordLabel', { postProcess: 'sentenceCase' })}
+                    </Text>
+                    <div className={styles['pill-group-wrapper']}>
+                        <Pill.Group>
+                            {recordLabels.map((recordLabel) => (
+                                <PillLink
+                                    key={`recordlabel-${recordLabel.id}`}
+                                    size="md"
+                                    to={recordLabel.url}
+                                >
+                                    {recordLabel.label}
+                                </PillLink>
+                            ))}
+                        </Pill.Group>
+                    </div>
+                </Stack>
+            )}
 
             <MetadataPillGroup
                 items={moodTagItems}
