@@ -6,6 +6,7 @@ import dynamicImportPlugin from 'vite-plugin-dynamic-import';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 
 const currentOSEnv = process.platform;
+const electronRendererTarget = 'chrome87';
 
 const config: UserConfig = {
     main: {
@@ -51,7 +52,11 @@ const config: UserConfig = {
         build: {
             cssMinify: 'esbuild',
             minify: 'esbuild',
+            modulePreload: {
+                polyfill: false,
+            },
             sourcemap: true,
+            target: electronRendererTarget,
         },
         css: {
             modules: {
