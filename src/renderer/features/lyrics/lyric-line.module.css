@@ -4,7 +4,7 @@
     line-height: 1.2;
     color: var(--theme-colors-foreground);
     word-break: normal;
-    opacity: 0.5;
+    opacity: 0.35;
     transition:
         opacity 0.3s ease-in-out,
         transform 0.3s ease-in-out;
