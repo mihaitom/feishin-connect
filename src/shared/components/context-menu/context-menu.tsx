@@ -3,7 +3,16 @@ import type { Dispatch, SetStateAction } from 'react';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'motion/react';
-import { createContext, Fragment, type ReactNode, useContext, useMemo, useState } from 'react';
+import {
+    createContext,
+    Fragment,
+    type ReactNode,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
 import styles from './context-menu.module.css';
 
@@ -49,9 +58,11 @@ interface LabelProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 interface SubmenuContext {
+    cancelCloseTimeout: () => void;
     disabled?: boolean;
     isCloseDisabled?: boolean;
     open: boolean;
+    setCloseTimeout: (timeout: NodeJS.Timeout) => void;
     setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -164,8 +175,36 @@ interface SubmenuTargetProps {
 function Submenu(props: SubmenuProps) {
     const { children, disabled, isCloseDisabled, open: isManuallyOpen } = props;
     const [open, setOpen] = useState(isManuallyOpen ?? false);
+    const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (closeTimeoutRef.current) {
+                clearTimeout(closeTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const cancelCloseTimeout = () => {
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current);
+            closeTimeoutRef.current = null;
+        }
+    };
+
+    const setCloseTimeout = (timeout: NodeJS.Timeout) => {
+        closeTimeoutRef.current = timeout;
+    };
+
     const context = useMemo(
-        () => ({ disabled, isCloseDisabled, open, setOpen }),
+        () => ({
+            cancelCloseTimeout,
+            disabled,
+            isCloseDisabled,
+            open,
+            setCloseTimeout,
+            setOpen,
+        }),
         [disabled, isCloseDisabled, open],
     );
 
@@ -178,7 +217,25 @@ function Submenu(props: SubmenuProps) {
 
 function SubmenuContent(props: SubmenuContentProps) {
     const { children, stickyContent } = props;
-    const { isCloseDisabled, open, setOpen } = useContext(SubmenuContext) as SubmenuContext;
+    const { cancelCloseTimeout, isCloseDisabled, open, setCloseTimeout, setOpen } = useContext(
+        SubmenuContext,
+    ) as SubmenuContext;
+
+    const handleMouseEnter = () => {
+        cancelCloseTimeout();
+        setOpen(true);
+    };
+
+    const handleMouseLeave = () => {
+        if (isCloseDisabled) {
+            const timeout = setTimeout(() => {
+                setOpen(false);
+            }, 150);
+            setCloseTimeout(timeout);
+        } else {
+            setOpen(false);
+        }
+    };
 
     return (
         <Fragment>
@@ -186,12 +243,8 @@ function SubmenuContent(props: SubmenuContentProps) {
                 <RadixContextMenu.Portal forceMount>
                     <RadixContextMenu.SubContent
                         className={styles.content}
-                        onMouseEnter={() => setOpen(true)}
-                        onMouseLeave={() => {
-                            if (!isCloseDisabled) {
-                                setOpen(false);
-                            }
-                        }}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
                     >
                         <motion.div
                             animate="show"
@@ -211,14 +264,52 @@ function SubmenuContent(props: SubmenuContentProps) {
 
 function SubmenuTarget(props: SubmenuTargetProps) {
     const { children } = props;
-    const { disabled, setOpen } = useContext(SubmenuContext) as SubmenuContext;
+    const { cancelCloseTimeout, disabled, setCloseTimeout, setOpen } = useContext(
+        SubmenuContext,
+    ) as SubmenuContext;
+    const openTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (openTimeoutRef.current) {
+                clearTimeout(openTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleMouseEnter = () => {
+        if (disabled) return;
+
+        cancelCloseTimeout();
+
+        if (openTimeoutRef.current) {
+            clearTimeout(openTimeoutRef.current);
+        }
+
+        openTimeoutRef.current = setTimeout(() => {
+            setOpen(true);
+            openTimeoutRef.current = null;
+        }, 150);
+    };
+
+    const handleMouseLeave = () => {
+        if (openTimeoutRef.current) {
+            clearTimeout(openTimeoutRef.current);
+            openTimeoutRef.current = null;
+        }
+
+        const timeout = setTimeout(() => {
+            setOpen(false);
+        }, 150);
+        setCloseTimeout(timeout);
+    };
 
     return (
         <RadixContextMenu.SubTrigger
             className={clsx({ [styles.disabled]: disabled })}
             disabled={disabled}
-            onMouseEnter={() => setOpen(true)}
-            onMouseLeave={() => setOpen(false)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             {children}
         </RadixContextMenu.SubTrigger>
