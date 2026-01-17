@@ -119,8 +119,18 @@ const QueueButton = () => {
 
     const { bindings } = useHotkeySettings();
 
+    const [popoverOpened, setPopoverOpened] = useState(false);
+
     const handleToggleQueue = () => {
-        setSideBar({ rightExpanded: !isSidebarRightExpanded });
+        if (sideQueueType === 'sideQueue') {
+            setSideBar({ rightExpanded: !isSidebarRightExpanded });
+        } else {
+            setPopoverOpened((prev) => !prev);
+        }
+    };
+
+    const handlePopoverClose = () => {
+        setPopoverOpened(false);
     };
 
     useHotkeys([
@@ -153,7 +163,13 @@ const QueueButton = () => {
         );
     }
 
-    return <PopoverPlayQueue />;
+    return (
+        <PopoverPlayQueue
+            onClose={handlePopoverClose}
+            onToggle={handleToggleQueue}
+            opened={popoverOpened}
+        />
+    );
 };
 
 const LyricsButton = () => {

@@ -10,19 +10,36 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { ItemListKey } from '/@/shared/types/types';
 
-export const PopoverPlayQueue = () => {
+interface PopoverPlayQueueProps {
+    onClose?: () => void;
+    onToggle?: () => void;
+    opened?: boolean;
+}
+
+export const PopoverPlayQueue = ({
+    onClose,
+    onToggle,
+    opened: controlledOpened,
+}: PopoverPlayQueueProps = {}) => {
     const queueRef = useRef<ItemListHandle | null>(null);
     const [search, setSearch] = useState<string | undefined>(undefined);
 
-    const [opened, handlers] = useDisclosure(false);
+    const [internalOpened, internalHandlers] = useDisclosure(false);
+
+    const opened = controlledOpened !== undefined ? controlledOpened : internalOpened;
+    const handleClose = onClose ? onClose : internalHandlers.close;
+    const handleToggle = onToggle ? onToggle : internalHandlers.toggle;
 
     return (
         <Popover
             arrowSize={24}
             offset={12}
-            onClose={() => handlers.close()}
+            onClose={handleClose}
             opened={opened}
             position="top"
+            transitionProps={{
+                transition: 'fade',
+            }}
             withArrow
         >
             <Popover.Target>
@@ -31,7 +48,7 @@ export const PopoverPlayQueue = () => {
                     iconProps={{
                         size: 'lg',
                     }}
-                    onClick={() => handlers.toggle()}
+                    onClick={handleToggle}
                     size="sm"
                     tooltip={{
                         label: t('player.viewQueue', { postProcess: 'titleCase' }),
