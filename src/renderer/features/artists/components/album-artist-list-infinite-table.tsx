@@ -44,15 +44,16 @@ export const AlbumArtistListInfiniteTable = ({
 
     const listQueryFn = api.controller.getAlbumArtistList;
 
-    const { data, onRangeChanged } = useItemListInfiniteLoader({
-        eventKey: ItemListKey.ALBUM_ARTIST,
-        itemsPerPage,
-        itemType: LibraryItem.ALBUM_ARTIST,
-        listCountQuery,
-        listQueryFn,
-        query,
-        serverId,
-    });
+    const { getItem, getItemIndex, itemCount, loadedItems, onRangeChanged } =
+        useItemListInfiniteLoader({
+            eventKey: ItemListKey.ALBUM_ARTIST,
+            itemsPerPage,
+            itemType: LibraryItem.ALBUM_ARTIST,
+            listCountQuery,
+            listQueryFn,
+            query,
+            serverId,
+        });
 
     const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
         enabled: saveScrollOffset,
@@ -71,17 +72,20 @@ export const AlbumArtistListInfiniteTable = ({
             autoFitColumns={autoFitColumns}
             CellComponent={ItemTableListColumn}
             columns={columns}
-            data={data}
+            data={loadedItems}
             enableAlternateRowColors={enableAlternateRowColors}
             enableExpansion={false}
             enableHorizontalBorders={enableHorizontalBorders}
             enableRowHoverHighlight={enableRowHoverHighlight}
             enableSelection={enableSelection}
             enableVerticalBorders={enableVerticalBorders}
+            getItem={getItem}
+            getItemIndex={getItemIndex}
             initialTop={{
                 to: scrollOffset ?? 0,
                 type: 'offset',
             }}
+            itemCount={itemCount}
             itemType={LibraryItem.ALBUM_ARTIST}
             onColumnReordered={handleColumnReordered}
             onColumnResized={handleColumnResized}

@@ -61,7 +61,7 @@ const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
                     icon="arrowDownS"
                     iconProps={{ color: 'muted', size: 'md' }}
                     onClick={(e) => {
-                        const item = data[rowIndex] as ItemListItem;
+                        const item = (props.getRowItem?.(rowIndex) ?? data[rowIndex]) as ItemListItem;
                         const rowId = internalState.extractRowId(item);
                         const index = rowId ? internalState.findItemIndex(rowId) : -1;
                         controls.onExpand?.({
@@ -87,7 +87,7 @@ const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
 
 const QueueSongRowIndexColumn = (props: ItemTableListInnerColumn) => {
     const status = usePlayerStatus();
-    const song = props.data[props.rowIndex] as QueueSong;
+    const song = (props.getRowItem?.(props.rowIndex) ?? props.data[props.rowIndex]) as QueueSong;
     const isActive = useIsActiveRow(song?.id, song?._uniqueId);
 
     const isActiveAndPlaying = isActive && status === PlayerStatus.PLAYING;

@@ -43,15 +43,16 @@ export const PlaylistListInfiniteTable = ({
 
     const listQueryFn = api.controller.getPlaylistList;
 
-    const { data, onRangeChanged } = useItemListInfiniteLoader({
-        eventKey: ItemListKey.PLAYLIST,
-        itemsPerPage,
-        itemType: LibraryItem.PLAYLIST,
-        listCountQuery,
-        listQueryFn,
-        query,
-        serverId,
-    });
+    const { getItem, getItemIndex, itemCount, loadedItems, onRangeChanged } =
+        useItemListInfiniteLoader({
+            eventKey: ItemListKey.PLAYLIST,
+            itemsPerPage,
+            itemType: LibraryItem.PLAYLIST,
+            listCountQuery,
+            listQueryFn,
+            query,
+            serverId,
+        });
 
     const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
         enabled: saveScrollOffset,
@@ -70,16 +71,19 @@ export const PlaylistListInfiniteTable = ({
             autoFitColumns={autoFitColumns}
             CellComponent={ItemTableListColumn}
             columns={columns}
-            data={data}
+            data={loadedItems}
             enableAlternateRowColors={enableAlternateRowColors}
             enableHorizontalBorders={enableHorizontalBorders}
             enableRowHoverHighlight={enableRowHoverHighlight}
             enableSelection={enableSelection}
             enableVerticalBorders={enableVerticalBorders}
+            getItem={getItem}
+            getItemIndex={getItemIndex}
             initialTop={{
                 to: scrollOffset ?? 0,
                 type: 'offset',
             }}
+            itemCount={itemCount}
             itemType={LibraryItem.PLAYLIST}
             onColumnReordered={handleColumnReordered}
             onColumnResized={handleColumnResized}

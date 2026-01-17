@@ -8,9 +8,8 @@ import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutatio
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 
 export const FavoriteColumn = (props: ItemTableListInnerColumn) => {
-    const row: boolean | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: boolean | undefined = rowItem?.[props.columns[props.columnIndex].id];
 
     const isMutatingCreateFavorite = useIsMutatingCreateFavorite();
     const isMutatingDeleteFavorite = useIsMutatingDeleteFavorite();
@@ -31,7 +30,7 @@ export const FavoriteColumn = (props: ItemTableListInnerColumn) => {
                     onClick={(event) => {
                         event.stopPropagation();
                         event.preventDefault();
-                        const item = props.data[props.rowIndex] as ItemListItem;
+                        const item = rowItem as ItemListItem;
                         const rowId = props.internalState.extractRowId(item);
                         const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                         props.controls.onFavorite?.({

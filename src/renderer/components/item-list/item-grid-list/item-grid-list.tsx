@@ -53,14 +53,16 @@ interface VirtualizedGridListProps {
     _tableMetaVersion: number; // Used to trigger rerenders via React.memo comparison
     controls: ItemControls;
     currentPage?: number;
-    data: unknown[];
+    dataVersion?: number;
     enableDrag?: boolean;
     enableExpansion: boolean;
     enableSelection: boolean;
     gap: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
+    getItem?: (index: number) => ItemCardProps['data'];
     height: number;
     initialTop?: ItemGridListProps['initialTop'];
     internalState: ItemListStateActions;
+    itemCount: number;
     itemType: LibraryItem;
     onRangeChanged?: ItemGridListProps['onRangeChanged'];
     onScroll?: ItemGridListProps['onScroll'];
@@ -81,14 +83,16 @@ const VirtualizedGridList = React.memo(
     ({
         controls,
         currentPage,
-        data,
+        dataVersion,
         enableDrag,
         enableExpansion,
         enableSelection,
         gap,
+        getItem,
         height,
         initialTop,
         internalState,
+        itemCount,
         itemType,
         onRangeChanged,
         onScroll,
@@ -107,12 +111,14 @@ const VirtualizedGridList = React.memo(
             return {
                 columns: tableMeta?.columnCount || 0,
                 controls,
-                data,
+                dataVersion,
                 enableDrag,
                 enableExpansion,
                 enableSelection,
                 gap,
+                getItem,
                 internalState,
+                itemCount,
                 itemType,
                 rows,
                 size,
@@ -122,7 +128,9 @@ const VirtualizedGridList = React.memo(
             tableMeta,
             controls,
             rows,
-            data,
+            getItem,
+            itemCount,
+            dataVersion,
             enableDrag,
             enableExpansion,
             enableSelection,
@@ -285,12 +293,14 @@ const createThrottledSetTableMeta = (
 export interface GridItemProps {
     columns: number;
     controls: ItemCardProps['controls'];
-    data: any[];
+    dataVersion?: number;
     enableDrag?: boolean;
     enableExpansion?: boolean;
     enableSelection?: boolean;
     gap: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
+    getItem?: (index: number) => ItemCardProps['data'];
     internalState: ItemListStateActions;
+    itemCount: number;
     itemType: LibraryItem;
     rows?: ItemCardProps['rows'];
     size?: 'compact' | 'default' | 'large';
@@ -304,17 +314,21 @@ export interface GridItemProps {
 export interface ItemGridListProps {
     currentPage?: number;
     data: unknown[];
+    dataVersion?: number;
     enableDrag?: boolean;
     enableEntranceAnimation?: boolean;
     enableExpansion?: boolean;
     enableSelection?: boolean;
     enableSelectionDialog?: boolean;
     gap?: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
+    getItem?: (index: number) => ItemCardProps['data'];
+    getItemIndex?: (rowId: string) => number | undefined;
     getRowId?: ((item: unknown) => string) | string;
     initialTop?: {
         to: number;
         type: 'index' | 'offset';
     };
+    itemCount?: number;
     itemsPerRow?: number;
     itemType: LibraryItem;
     onRangeChanged?: (range: { startIndex: number; stopIndex: number }) => void;
@@ -329,13 +343,17 @@ export interface ItemGridListProps {
 const BaseItemGridList = ({
     currentPage,
     data,
+    dataVersion,
     enableDrag = true,
     enableEntranceAnimation = true,
     enableExpansion = false,
     enableSelection = true,
     gap = 'sm',
+    getItem,
+    getItemIndex,
     getRowId,
     initialTop,
+    itemCount,
     itemsPerRow,
     itemType,
     onRangeChanged,
@@ -353,6 +371,14 @@ const BaseItemGridList = ({
     const { focused, ref: containerFocusRef } = useFocusWithin();
     const handleRef = useRef<ItemListHandle | null>(null);
     const mergedContainerRef = useMergedRef(containerRef, rootRef, containerFocusRef);
+
+    const resolvedItemCount = itemCount ?? data.length;
+    const resolvedGetItem = useCallback<(index: number) => ItemCardProps['data']>(
+        (index: number) => {
+            return (getItem ? getItem(index) : (data as any[])[index]) as ItemCardProps['data'];
+        },
+        [data, getItem],
+    );
 
     const getDataFn = useCallback(() => {
         return data;
@@ -442,7 +468,7 @@ const BaseItemGridList = ({
         const { current: container } = containerRef;
         if (!container) return;
 
-        throttledSetTableMeta(containerWidth, data.length, (meta) => {
+        throttledSetTableMeta(containerWidth, resolvedItemCount, (meta) => {
             if (!meta) return;
 
             const current = tableMetaRef.current;
@@ -459,7 +485,7 @@ const BaseItemGridList = ({
                 setTableMetaVersion((v) => v + 1);
             }
         });
-    }, [containerWidth, data.length, throttledSetTableMeta, containerRef]);
+    }, [containerWidth, resolvedItemCount, throttledSetTableMeta, containerRef]);
 
     const controls = useDefaultItemListControls({ overrides: overrideControls });
 
@@ -512,10 +538,12 @@ const BaseItemGridList = ({
                 const lastSelected = selected[selected.length - 1];
                 const lastRowId = internalState.extractRowId(lastSelected);
                 if (lastRowId) {
-                    currentIndex = data.findIndex((d: any) => {
-                        const rowId = internalState.extractRowId(d);
-                        return rowId === lastRowId;
-                    });
+                    currentIndex =
+                        getItemIndex?.(lastRowId) ??
+                        data.findIndex((d: any) => {
+                            const rowId = internalState.extractRowId(d);
+                            return rowId === lastRowId;
+                        });
                 }
             }
 
@@ -526,7 +554,7 @@ const BaseItemGridList = ({
                     : 0;
             const currentCol =
                 currentIndex !== -1 ? currentIndex % tableMetaRef.current.columnCount : 0;
-            const totalRows = Math.ceil(data.length / tableMetaRef.current.columnCount);
+            const totalRows = Math.ceil(resolvedItemCount / tableMetaRef.current.columnCount);
 
             let newIndex = 0;
             if (currentIndex !== -1) {
@@ -538,7 +566,7 @@ const BaseItemGridList = ({
                             const nextRowStart = nextRow * tableMetaRef.current.columnCount;
                             const nextRowEnd = Math.min(
                                 nextRowStart + tableMetaRef.current.columnCount - 1,
-                                data.length - 1,
+                                resolvedItemCount - 1,
                             );
                             // Keep same column position, or use last item in row if column doesn't exist
                             newIndex = Math.min(nextRowStart + currentCol, nextRowEnd);
@@ -559,7 +587,7 @@ const BaseItemGridList = ({
                                     1,
                                 0,
                             );
-                            newIndex = Math.min(newIndex, data.length - 1);
+                            newIndex = Math.min(newIndex, resolvedItemCount - 1);
                         } else {
                             newIndex = currentIndex;
                         }
@@ -569,14 +597,14 @@ const BaseItemGridList = ({
                         // Move right, wrap to next row if at end of row
                         if (
                             currentCol < tableMetaRef.current.columnCount - 1 &&
-                            currentIndex < data.length - 1
+                            currentIndex < resolvedItemCount - 1
                         ) {
                             newIndex = currentIndex + 1;
                         } else if (currentRow < totalRows - 1) {
                             // Wrap to start of next row
                             newIndex = Math.min(
                                 (currentRow + 1) * tableMetaRef.current.columnCount,
-                                data.length - 1,
+                                resolvedItemCount - 1,
                             );
                         } else {
                             newIndex = currentIndex;
@@ -590,7 +618,7 @@ const BaseItemGridList = ({
                             const prevRowStart = prevRow * tableMetaRef.current.columnCount;
                             const prevRowEnd = Math.min(
                                 prevRowStart + tableMetaRef.current.columnCount - 1,
-                                data.length - 1,
+                                resolvedItemCount - 1,
                             );
                             // Keep same column position, or use last item in row if column doesn't exist
                             newIndex = Math.min(prevRowStart + currentCol, prevRowEnd);
@@ -605,7 +633,7 @@ const BaseItemGridList = ({
                 newIndex = 0;
             }
 
-            const newItem: any = data[newIndex];
+            const newItem: any = resolvedGetItem(newIndex);
             if (!newItem) return;
 
             // Handle Shift + Arrow for incremental range selection (matches shift+click behavior)
@@ -618,10 +646,12 @@ const BaseItemGridList = ({
                     const lastRowId = internalState.extractRowId(lastSelectedItem);
                     if (!lastRowId) return;
 
-                    const lastIndex = data.findIndex((d: any) => {
-                        const rowId = internalState.extractRowId(d);
-                        return rowId === lastRowId;
-                    });
+                    const lastIndex =
+                        getItemIndex?.(lastRowId) ??
+                        data.findIndex((d: any) => {
+                            const rowId = internalState.extractRowId(d);
+                            return rowId === lastRowId;
+                        });
 
                     if (lastIndex !== -1 && newIndex !== -1) {
                         // Create range selection from last selected to new position
@@ -630,7 +660,7 @@ const BaseItemGridList = ({
 
                         const rangeItems: ItemListStateItemWithRequiredProperties[] = [];
                         for (let i = startIndex; i <= stopIndex; i++) {
-                            const rangeItem = data[i];
+                            const rangeItem = resolvedGetItem(i);
                             if (
                                 rangeItem &&
                                 typeof rangeItem === 'object' &&
@@ -695,7 +725,15 @@ const BaseItemGridList = ({
 
             scrollToIndex(newIndex);
         },
-        [data, enableSelection, internalState, scrollToIndex],
+        [
+            data,
+            enableSelection,
+            getItemIndex,
+            internalState,
+            resolvedGetItem,
+            resolvedItemCount,
+            scrollToIndex,
+        ],
     );
 
     const imperativeHandle: ItemListHandle = useMemo(() => {
@@ -740,14 +778,16 @@ const BaseItemGridList = ({
                         _tableMetaVersion={tableMetaVersion}
                         controls={controls}
                         currentPage={currentPage}
-                        data={data}
+                        dataVersion={dataVersion}
                         enableDrag={enableDrag}
                         enableExpansion={enableExpansion}
                         enableSelection={enableSelection}
                         gap={gap}
+                        getItem={resolvedGetItem}
                         height={height}
                         initialTop={initialTop}
                         internalState={internalState}
+                        itemCount={resolvedItemCount}
                         itemType={itemType}
                         onRangeChanged={onRangeChanged}
                         onScroll={onScroll ?? (() => {})}
@@ -771,10 +811,10 @@ const BaseItemGridList = ({
 
 const ListComponent = memo((props: ListChildComponentProps<GridItemProps>) => {
     const { index, style } = props;
-    const { columns, controls, data, enableDrag, gap, itemType, rows, size } = props.data;
+    const { columns, controls, enableDrag, gap, getItem, itemCount, itemType, rows, size } =
+        props.data;
 
     const items: ReactNode[] = [];
-    const itemCount = data.length;
     const startIndex = index * columns;
     const stopIndex = Math.min(itemCount - 1, startIndex + columns - 1);
 
@@ -787,7 +827,8 @@ const ListComponent = memo((props: ListChildComponentProps<GridItemProps>) => {
     }
 
     for (let i = startIndex; i <= stopIndex + columnCountToAdd; i += 1) {
-        if (i < data.length) {
+        if (i < itemCount) {
+            const item = getItem ? getItem(i) : undefined;
             items.push(
                 <div
                     className={clsx(styles.itemRow, styles[`gap-${gap}`])}
@@ -796,7 +837,7 @@ const ListComponent = memo((props: ListChildComponentProps<GridItemProps>) => {
                 >
                     <ItemCard
                         controls={controls}
-                        data={data[i]}
+                        data={item}
                         enableDrag={enableDrag}
                         enableExpansion={props.data.enableExpansion}
                         internalState={props.data.internalState}

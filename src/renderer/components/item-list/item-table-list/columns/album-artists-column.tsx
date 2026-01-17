@@ -13,11 +13,10 @@ import { JoinedArtists } from '/@/renderer/features/albums/components/joined-art
 import { Album, RelatedAlbumArtist, Song } from '/@/shared/types/domain-types';
 
 const AlbumArtistsColumn = (props: ItemTableListInnerColumn) => {
-    const row: RelatedAlbumArtist[] | undefined = (
-        props.data as (RelatedAlbumArtist[] | undefined)[]
-    )[props.rowIndex]?.[props.columns[props.columnIndex].id];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: RelatedAlbumArtist[] | undefined = rowItem?.[props.columns[props.columnIndex].id];
 
-    const item = props.data[props.rowIndex] as Album | Song | undefined;
+    const item = rowItem as Album | Song | undefined;
     const albumArtistString = item && 'albumArtistName' in item ? item.albumArtistName : '';
 
     if (Array.isArray(row)) {

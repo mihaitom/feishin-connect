@@ -20,8 +20,9 @@ import { Folder, LibraryItem } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
 export const ImageColumn = (props: ItemTableListInnerColumn) => {
-    const row: string | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.id;
-    const item = props.data[props.rowIndex] as any;
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: string | undefined = rowItem?.id;
+    const item = rowItem as any;
     const playButtonBehavior = usePlayButtonBehavior();
     const internalState = (props as any).internalState;
     const [isHovered, setIsHovered] = useState(false);
@@ -113,7 +114,7 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
         );
     }
 
-    if ((props.data[props.rowIndex] as unknown as Folder)?._itemType === LibraryItem.FOLDER) {
+    if ((rowItem as unknown as Folder)?._itemType === LibraryItem.FOLDER) {
         return (
             <TableColumnContainer {...props}>
                 <Icon className={styles.folderIcon} icon="folder" size="2xl" />

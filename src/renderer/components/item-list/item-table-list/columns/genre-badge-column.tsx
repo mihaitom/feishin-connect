@@ -18,9 +18,8 @@ import { stringToColor } from '/@/shared/utils/string-to-color';
 const MAX_GENRES = 4;
 
 const GenreBadgeColumn = (props: ItemTableListInnerColumn) => {
-    const row: Genre[] | undefined = (props.data as (Genre[] | undefined)[])[props.rowIndex]?.[
-        'genres'
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: Genre[] | undefined = (rowItem as any)?.genres;
 
     const genres = useMemo(() => {
         if (!row) return [];

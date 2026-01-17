@@ -116,6 +116,7 @@ interface VirtualizedTableGridProps {
     enableScrollShadow: boolean;
     enableSelection: boolean;
     enableVerticalBorders: boolean;
+    getItem?: (index: number) => undefined | unknown;
     getRowHeight: (index: number, cellProps: TableItemProps) => number;
     groups?: TableGroupHeader[];
     headerHeight: number;
@@ -159,6 +160,7 @@ const VirtualizedTableGrid = ({
     enableScrollShadow,
     enableSelection,
     enableVerticalBorders,
+    getItem,
     getRowHeight,
     groups,
     headerHeight,
@@ -284,6 +286,44 @@ const VirtualizedTableGrid = ({
         [enableHeader, groupHeaderInfoByRowIndex, groupHeaderRowIndexes, groups],
     );
 
+    const getRowItem = useCallback(
+        (rowIndex: number): null | undefined | unknown => {
+            // Header row
+            if (enableHeader && rowIndex === 0) return null;
+            // Group header rows are represented as null in the row model
+            if (groupHeaderInfoByRowIndex?.has(rowIndex)) return null;
+
+            if (!groups || groups.length === 0) {
+                const dataIndex = enableHeader ? rowIndex - 1 : rowIndex;
+                return getItem ? getItem(dataIndex) : dataWithGroups[rowIndex];
+            }
+
+            const headerOffset = enableHeader ? 1 : 0;
+
+            // Count group header rows strictly before this rowIndex (upperBound on groupHeaderRowIndexes)
+            let lo = 0;
+            let hi = groupHeaderRowIndexes.length;
+            const target = rowIndex - 1;
+            while (lo < hi) {
+                const mid = (lo + hi) >>> 1;
+                if (groupHeaderRowIndexes[mid] <= target) lo = mid + 1;
+                else hi = mid;
+            }
+            const groupHeadersBefore = lo;
+
+            const dataIndex = rowIndex - headerOffset - groupHeadersBefore;
+            return getItem ? getItem(dataIndex) : undefined;
+        },
+        [
+            dataWithGroups,
+            enableHeader,
+            getItem,
+            groupHeaderInfoByRowIndex,
+            groupHeaderRowIndexes,
+            groups,
+        ],
+    );
+
     const stableConfigProps = useMemo(
         () => ({
             cellPadding,
@@ -317,6 +357,7 @@ const VirtualizedTableGrid = ({
             data: dataWithGroups,
             getAdjustedRowIndex,
             getGroupRenderData,
+            getRowItem,
             groupHeaderInfoByRowIndex,
             pinnedLeftColumnCount,
             pinnedLeftColumnWidths,
@@ -327,6 +368,7 @@ const VirtualizedTableGrid = ({
         [
             calculatedColumnWidths,
             dataWithGroups,
+            getRowItem,
             getAdjustedRowIndex,
             getGroupRenderData,
             groupHeaderInfoByRowIndex,
@@ -724,6 +766,7 @@ export interface TableItemProps {
     getAdjustedRowIndex?: (rowIndex: number) => number;
     getGroupRenderData?: () => unknown[];
     getRowHeight: (index: number, cellProps: TableItemProps) => number;
+    getRowItem?: (rowIndex: number) => null | undefined | unknown;
     groupHeaderInfoByRowIndex?: Map<number, { groupIndex: number; startDataIndex: number }>;
     groups?: TableGroupHeader[];
     internalState: ItemListStateActions;
@@ -759,6 +802,8 @@ interface ItemTableListProps {
     enableStickyGroupRows?: boolean;
     enableStickyHeader?: boolean;
     enableVerticalBorders?: boolean;
+    getItem?: (index: number) => undefined | unknown;
+    getItemIndex?: (rowId: string) => number | undefined;
     getRowId?: ((item: unknown) => string) | string;
     groups?: TableGroupHeader[];
     headerHeight?: number;
@@ -767,6 +812,7 @@ interface ItemTableListProps {
         to: number;
         type: 'index' | 'offset';
     };
+    itemCount?: number;
     itemType: LibraryItem;
     onColumnReordered?: (
         columnIdFrom: TableColumn,
@@ -802,10 +848,13 @@ const BaseItemTableList = ({
     enableStickyGroupRows = false,
     enableStickyHeader = false,
     enableVerticalBorders = false,
+    getItem,
+    getItemIndex,
     getRowId,
     groups,
     headerHeight = 40,
     initialTop,
+    itemCount,
     itemType,
     onColumnReordered,
     onColumnResized,
@@ -818,7 +867,8 @@ const BaseItemTableList = ({
     startRowIndex,
 }: ItemTableListProps) => {
     const tableId = useId();
-    const totalItemCount = enableHeader ? data.length + 1 : data.length;
+    const baseItemCount = itemCount ?? data.length;
+    const totalItemCount = enableHeader ? baseItemCount + 1 : baseItemCount;
     const [centerContainerWidth, setCenterContainerWidth] = useState(0);
     const [totalContainerWidth, setTotalContainerWidth] = useState(0);
 
@@ -836,11 +886,28 @@ const BaseItemTableList = ({
     });
     const playerContext = usePlayer();
 
-    const { dataWithGroups, groupHeaderRowCount } = useTableRowModel({
+    const {
+        dataWithGroups: dataWithGroupsFromModel,
+        groupHeaderRowCount: groupHeaderRowCountFromModel,
+    } = useTableRowModel({
         data,
         enableHeader,
         groups,
     });
+
+    const shouldUseAccessor = typeof getItem === 'function' && typeof itemCount === 'number';
+
+    // Avoid constructing a massive row-model array for infinite lists.
+    // Cell renderers use `getRowItem` accessor when provided.
+    const dataWithGroups = useMemo<(null | unknown)[]>(() => {
+        if (!shouldUseAccessor) return dataWithGroupsFromModel;
+        return enableHeader ? [null] : [];
+    }, [dataWithGroupsFromModel, enableHeader, shouldUseAccessor]);
+
+    const groupHeaderRowCount = useMemo(() => {
+        if (!shouldUseAccessor) return groupHeaderRowCountFromModel;
+        return groups?.length ? groups.length : 0;
+    }, [groupHeaderRowCountFromModel, groups, shouldUseAccessor]);
 
     const pinnedRowCount = enableHeader ? 1 : 0;
 
@@ -1007,8 +1074,9 @@ const BaseItemTableList = ({
     });
 
     const getDataFn = useCallback(() => {
-        return dataWithGroups;
-    }, [dataWithGroups]);
+        // For infinite lists, callers should pass `data` as the currently loaded items only.
+        return data;
+    }, [data]);
 
     const extractRowId = useMemo(() => createExtractRowId(getRowId), [getRowId]);
 
@@ -1041,9 +1109,12 @@ const BaseItemTableList = ({
         enableHeader,
         enableSelection,
         extractRowId,
+        getItem,
+        getItemIndex,
         getStateItem,
         hasRequiredStateItemProperties,
         internalState,
+        itemCount: baseItemCount,
         itemType,
         parsedColumns,
         pinnedRightColumnCount,
@@ -1499,6 +1570,7 @@ const BaseItemTableList = ({
                         enableScrollShadow={enableScrollShadow}
                         enableSelection={enableSelection}
                         enableVerticalBorders={enableVerticalBorders}
+                        getItem={getItem}
                         getRowHeight={getRowHeight}
                         groups={groups}
                         headerHeight={headerHeight}

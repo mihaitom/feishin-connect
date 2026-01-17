@@ -24,7 +24,9 @@ export const PlaylistReorderColumn = (props: ItemTableListInnerColumn) => {
     const { playlistId } = useParams() as { playlistId?: string };
     const isHeaderEnabled = !!props.enableHeader;
     const isDataRow = isHeaderEnabled ? props.rowIndex > 0 : true;
-    const item = isDataRow ? props.data[props.rowIndex] : null;
+    const item = isDataRow
+        ? (props.getRowItem?.(props.rowIndex) ?? props.data[props.rowIndex])
+        : null;
 
     const isPlaylistSong = props.itemType === LibraryItem.PLAYLIST_SONG;
 
@@ -153,8 +155,8 @@ export const PlaylistReorderColumn = (props: ItemTableListInnerColumn) => {
     const isDragging = props.internalState ? isDraggingState : isDraggingLocal;
 
     const getValidDataItems = useCallback(() => {
-        return props.data.filter((d) => d !== null && (d as any).id);
-    }, [props.data]);
+        return props.internalState.getData().filter((d) => d !== null && (d as any).id);
+    }, [props.internalState]);
 
     const handleMoveUp = useCallback(() => {
         if (!item || !isDataRow || !isPlaylistSong || !playlistId) {

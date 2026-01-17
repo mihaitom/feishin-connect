@@ -17,11 +17,14 @@ interface UseTableKeyboardNavigationProps {
     enableHeader: boolean;
     enableSelection: boolean;
     extractRowId: (item: unknown) => string | undefined;
+    getItem?: (index: number) => undefined | unknown;
+    getItemIndex?: (rowId: string) => number | undefined;
     getStateItem: (item: any) => ItemListStateItemWithRequiredProperties | null;
     hasRequiredStateItemProperties: (
         item: unknown,
     ) => item is ItemListStateItemWithRequiredProperties;
     internalState: ItemListStateActions;
+    itemCount?: number;
     itemType: LibraryItem;
     parsedColumns: TableItemProps['columns'];
     pinnedRightColumnCount: number;
@@ -45,9 +48,12 @@ export const useTableKeyboardNavigation = ({
     enableHeader,
     enableSelection,
     extractRowId,
+    getItem,
+    getItemIndex,
     getStateItem,
     hasRequiredStateItemProperties,
     internalState,
+    itemCount,
     itemType,
     parsedColumns,
     pinnedRightColumnCount,
@@ -69,23 +75,26 @@ export const useTableKeyboardNavigation = ({
             const selected = internalState.getSelected();
             const validSelected = selected.filter(hasRequiredStateItemProperties);
             let currentIndex = -1;
+            const totalCount = itemCount ?? data.length;
 
             if (validSelected.length > 0) {
                 const lastSelected = validSelected[validSelected.length - 1];
-                currentIndex = data.findIndex(
-                    (d) => extractRowId(d) === extractRowId(lastSelected),
-                );
+                const rowId = extractRowId(lastSelected);
+                if (rowId) {
+                    currentIndex =
+                        getItemIndex?.(rowId) ?? data.findIndex((d) => extractRowId(d) === rowId);
+                }
             }
 
             let newIndex = 0;
             if (currentIndex !== -1) {
                 newIndex =
                     e.key === 'ArrowDown'
-                        ? Math.min(currentIndex + 1, data.length - 1)
+                        ? Math.min(currentIndex + 1, totalCount - 1)
                         : Math.max(currentIndex - 1, 0);
             }
 
-            const newItem: any = data[newIndex];
+            const newItem: any = getItem ? getItem(newIndex) : data[newIndex];
             if (!newItem) return;
 
             const newItemListItem = getStateItem(newItem);
@@ -118,7 +127,7 @@ export const useTableKeyboardNavigation = ({
                     cellPadding,
                     columns: parsedColumns,
                     controls: {} as ItemControls,
-                    data: enableHeader ? [null, ...data] : data,
+                    data: enableHeader ? [null] : [],
                     enableAlternateRowColors: false,
                     enableExpansion: false,
                     enableHeader,
@@ -127,6 +136,12 @@ export const useTableKeyboardNavigation = ({
                     enableSelection,
                     enableVerticalBorders: false,
                     getRowHeight: () => DEFAULT_ROW_HEIGHT,
+                    getRowItem: (rowIndex: number) => {
+                        if (!getItem) return undefined;
+                        if (enableHeader && rowIndex === 0) return null;
+                        const dataIndex = enableHeader ? rowIndex - 1 : rowIndex;
+                        return getItem(dataIndex);
+                    },
                     internalState: {} as ItemListStateActions,
                     itemType,
                     playerContext,
@@ -174,6 +189,8 @@ export const useTableKeyboardNavigation = ({
             calculateScrollTopForIndex,
             cellPadding,
             data,
+            getItem,
+            getItemIndex,
             DEFAULT_ROW_HEIGHT,
             enableHeader,
             enableSelection,
@@ -181,6 +198,7 @@ export const useTableKeyboardNavigation = ({
             getStateItem,
             hasRequiredStateItemProperties,
             internalState,
+            itemCount,
             itemType,
             parsedColumns,
             pinnedRightColumnCount,

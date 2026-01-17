@@ -7,9 +7,8 @@ import { useIsMutatingRating } from '/@/renderer/features/shared/mutations/set-r
 import { Rating } from '/@/shared/components/rating/rating';
 
 export const RatingColumn = (props: ItemTableListInnerColumn) => {
-    const row: null | number | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: null | number | undefined = rowItem?.[props.columns[props.columnIndex].id];
 
     const isMutatingRating = useIsMutatingRating();
 
@@ -19,7 +18,7 @@ export const RatingColumn = (props: ItemTableListInnerColumn) => {
                 <Rating
                     className={row ? undefined : 'hover-only-flex'}
                     onChange={(rating) => {
-                        const item = props.data[props.rowIndex] as ItemListItem;
+                        const item = rowItem as ItemListItem;
                         const rowId = props.internalState.extractRowId(item);
                         const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                         props.controls.onRating?.({

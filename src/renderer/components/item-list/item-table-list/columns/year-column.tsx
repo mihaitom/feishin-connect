@@ -7,7 +7,8 @@ import {
 import { SEPARATOR_STRING } from '/@/shared/api/utils';
 
 export const YearColumn = (props: ItemTableListInnerColumn) => {
-    const item = (props.data as (any | undefined)[])[props.rowIndex];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const item = rowItem as any;
 
     if (item && 'releaseYear' in item && item.releaseYear !== null) {
         const releaseYear = item.releaseYear;
@@ -29,9 +30,7 @@ export const YearColumn = (props: ItemTableListInnerColumn) => {
         }
     }
 
-    const row: number | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const row: number | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
 
     if (row === null) {
         return <ColumnNullFallback {...props} />;

@@ -30,9 +30,8 @@ const getDateTooltipLabel = (utcString: string) => {
 };
 
 export const DateColumn = (props: ItemTableListInnerColumn) => {
-    const row: string | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: string | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
 
     if (typeof row === 'string' && row) {
         return (
@@ -52,12 +51,11 @@ export const DateColumn = (props: ItemTableListInnerColumn) => {
 };
 
 export const AbsoluteDateColumn = (props: ItemTableListInnerColumn) => {
-    const row: string | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: string | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
 
     if (props.type === TableColumn.RELEASE_DATE) {
-        const item = (props.data as (any | undefined)[])[props.rowIndex];
+        const item = rowItem as any;
         if (item && 'releaseDate' in item && item.releaseDate) {
             const releaseDate = item.releaseDate;
             const originalDate =
@@ -115,9 +113,8 @@ export const AbsoluteDateColumn = (props: ItemTableListInnerColumn) => {
 };
 
 export const RelativeDateColumn = (props: ItemTableListInnerColumn) => {
-    const row: string | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: string | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
 
     if (typeof row === 'string') {
         return (

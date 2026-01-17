@@ -84,7 +84,9 @@ export const ItemTableListColumn = (props: ItemTableListColumn) => {
 
     const isHeaderEnabled = !!props.enableHeader;
     const isDataRow = isHeaderEnabled ? props.rowIndex > 0 : true;
-    const item = isDataRow ? props.data[props.rowIndex] : null;
+    const item = isDataRow
+        ? (props.getRowItem?.(props.rowIndex) ?? props.data[props.rowIndex])
+        : null;
     const shouldEnableDrag = !!props.enableDrag && isDataRow && !!item;
     const itemType = (item as unknown as { _itemType?: LibraryItem })?._itemType || props.itemType;
 
@@ -585,7 +587,9 @@ export const TableColumnTextContainer = (
     const containerRef = useRef<HTMLDivElement>(null);
     const isDataRow = props.enableHeader ? props.rowIndex > 0 : true;
     const dataIndex = props.enableHeader ? props.rowIndex - 1 : props.rowIndex;
-    const item = isDataRow ? props.data[props.rowIndex] : null;
+    const item = isDataRow
+        ? (props.getRowItem?.(props.rowIndex) ?? props.data[props.rowIndex])
+        : null;
     const itemRowId =
         item && typeof item === 'object' && 'id' in item
             ? props.internalState.extractRowId(item)
@@ -736,7 +740,9 @@ export const TableColumnContainer = (
     const containerRef = useRef<HTMLDivElement>(null);
     const isDataRow = props.enableHeader ? props.rowIndex > 0 : true;
     const dataIndex = props.enableHeader ? props.rowIndex - 1 : props.rowIndex;
-    const item = isDataRow ? props.data[props.rowIndex] : null;
+    const item = isDataRow
+        ? (props.getRowItem?.(props.rowIndex) ?? props.data[props.rowIndex])
+        : null;
     const itemRowId =
         item && typeof item === 'object' && 'id' in item
             ? props.internalState.extractRowId(item)

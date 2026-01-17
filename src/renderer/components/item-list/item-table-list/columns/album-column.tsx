@@ -15,11 +15,10 @@ import { Text } from '/@/shared/components/text/text';
 import { Song } from '/@/shared/types/domain-types';
 
 const AlbumColumn = (props: ItemTableListInnerColumn) => {
-    const row: null | string | undefined = (props.data as (null | string | undefined)[])[
-        props.rowIndex
-    ]?.[props.columns[props.columnIndex].id];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: null | string | undefined = rowItem?.[props.columns[props.columnIndex].id];
 
-    const song = props.data[props.rowIndex] as Song | undefined;
+    const song = rowItem as Song | undefined;
     const albumId = song?.albumId;
 
     const albumPath = useMemo(() => {

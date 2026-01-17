@@ -16,9 +16,8 @@ import { Text } from '/@/shared/components/text/text';
 import { LibraryItem, RelatedAlbumArtist, Song } from '/@/shared/types/domain-types';
 
 const AlbumArtistsColumn = (props: ItemTableListInnerColumn) => {
-    const row: RelatedAlbumArtist[] | undefined = (
-        props.data as (RelatedAlbumArtist[] | undefined)[]
-    )[props.rowIndex]?.[props.columns[props.columnIndex].id];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: RelatedAlbumArtist[] | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
 
     const artists = useMemo(() => {
         if (!row) return [];
@@ -67,7 +66,8 @@ const AlbumArtistsColumn = (props: ItemTableListInnerColumn) => {
 };
 
 const SongArtistsColumn = (props: ItemTableListInnerColumn) => {
-    const row: Song | undefined = (props.data as (Song | undefined)[])[props.rowIndex];
+    const row: Song | undefined =
+        (props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex]) as Song | undefined;
 
     if (row) {
         return (

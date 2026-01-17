@@ -29,13 +29,12 @@ export const TitleColumn = (props: ItemTableListInnerColumn) => {
 };
 
 function DefaultTitleColumn(props: ItemTableListInnerColumn) {
-    const row: string | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: string | undefined = rowItem?.[props.columns[props.columnIndex].id];
 
     if (typeof row === 'string') {
-        const path = getTitlePath(props.itemType, (props.data[props.rowIndex] as any).id as string);
-        const item = props.data[props.rowIndex] as any;
+        const path = getTitlePath(props.itemType, (rowItem as any).id as string);
+        const item = rowItem as any;
 
         const titleLinkProps = path
             ? {
@@ -71,16 +70,15 @@ function DefaultTitleColumn(props: ItemTableListInnerColumn) {
 }
 
 function QueueSongTitleColumn(props: ItemTableListInnerColumn) {
-    const row: string | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: string | undefined = rowItem?.[props.columns[props.columnIndex].id];
 
-    const song = props.data[props.rowIndex] as QueueSong;
+    const song = rowItem as QueueSong;
     const isActive = useIsActiveRow(song?.id, song?._uniqueId);
 
     if (typeof row === 'string') {
-        const path = getTitlePath(props.itemType, (props.data[props.rowIndex] as any).id as string);
-        const item = props.data[props.rowIndex] as any;
+        const path = getTitlePath(props.itemType, (rowItem as any).id as string);
+        const item = rowItem as any;
 
         const titleLinkProps = path
             ? {

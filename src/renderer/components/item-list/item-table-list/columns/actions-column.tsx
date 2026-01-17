@@ -6,7 +6,7 @@ import { ItemListItem } from '/@/renderer/components/item-list/types';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 
 export const ActionsColumn = (props: ItemTableListInnerColumn) => {
-    const row: any = (props.data as (any | undefined)[])[props.rowIndex];
+    const row: any = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
 
     const handleActionClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.stopPropagation();

@@ -10,9 +10,8 @@ import {
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 
 export const TextColumn = (props: ItemTableListInnerColumn) => {
-    const row: string | undefined = (props.data as (any | undefined)[])[props.rowIndex]?.[
-        props.columns[props.columnIndex].id
-    ];
+    const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
+    const row: string | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
 
     if (typeof row === 'string' && row) {
         return (

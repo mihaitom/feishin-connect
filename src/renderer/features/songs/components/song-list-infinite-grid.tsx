@@ -31,15 +31,16 @@ export const SongListInfiniteGrid = ({
 
     const listQueryFn = api.controller.getSongList;
 
-    const { data, onRangeChanged } = useItemListInfiniteLoader({
-        eventKey: ItemListKey.SONG,
-        itemsPerPage,
-        itemType: LibraryItem.SONG,
-        listCountQuery,
-        listQueryFn,
-        query,
-        serverId,
-    });
+    const { dataVersion, getItem, getItemIndex, itemCount, loadedItems, onRangeChanged } =
+        useItemListInfiniteLoader({
+            eventKey: ItemListKey.SONG,
+            itemsPerPage,
+            itemType: LibraryItem.SONG,
+            listCountQuery,
+            listQueryFn,
+            query,
+            serverId,
+        });
 
     const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
         enabled: saveScrollOffset,
@@ -49,12 +50,16 @@ export const SongListInfiniteGrid = ({
 
     return (
         <ItemGridList
-            data={data}
+            data={loadedItems}
+            dataVersion={dataVersion}
             gap={gap}
+            getItem={getItem}
+            getItemIndex={getItemIndex}
             initialTop={{
                 to: scrollOffset ?? 0,
                 type: 'offset',
             }}
+            itemCount={itemCount}
             itemsPerRow={itemsPerRow}
             itemType={LibraryItem.SONG}
             onRangeChanged={onRangeChanged}
