@@ -1,0 +1,29 @@
+.row {
+    padding: var(--theme-spacing-xs) var(--theme-spacing-sm);
+    border: 1px solid transparent;
+    border-radius: var(--theme-radius-md);
+}
+
+.row:hover {
+    cursor: pointer;
+    background-color: alpha(var(--theme-colors-background), 0.5);
+}
+
+.row-image {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+}
+
+.row-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.row.selected {
+    background-color: var(--theme-colors-surface);
+}
+
+.row[data-focused='true'] {
+    border: 1px solid var(--theme-colors-primary);
+}

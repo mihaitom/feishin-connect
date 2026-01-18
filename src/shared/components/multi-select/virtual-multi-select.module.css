@@ -1,0 +1,25 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.list-container {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    background-color: var(--theme-colors-surface);
+}
+
+.search-input {
+    border-bottom: 1px solid var(--theme-colors-border);
+}
+
+.selected-option {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.selected-option:hover {
+    background-color: alpha(var(--theme-colors-surface), 0.6);
+}
