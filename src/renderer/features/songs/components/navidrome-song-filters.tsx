@@ -3,7 +3,6 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { useListContext } from '/@/renderer/context/list-context';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import {
@@ -24,16 +23,20 @@ import { Text } from '/@/shared/components/text/text';
 import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
 import { AlbumArtistListSort, LibraryItem, SortOrder } from '/@/shared/types/domain-types';
 
-export const NavidromeSongFilters = () => {
+interface NavidromeSongFiltersProps {
+    disableArtistFilter?: boolean;
+    disableGenreFilter?: boolean;
+}
+
+export const NavidromeSongFilters = ({
+    disableArtistFilter,
+    disableGenreFilter,
+}: NavidromeSongFiltersProps) => {
     const { t } = useTranslation();
     const server = useCurrentServer();
     const serverId = server.id;
     const { query, setArtistIds, setCustom, setFavorite, setGenreId, setMaxYear, setMinYear } =
         useSongListFilters();
-
-    const { customFilters } = useListContext();
-
-    const isGenrePage = customFilters?.genreIds !== undefined;
 
     const genreListQuery = useGenreList();
 
@@ -257,18 +260,22 @@ export const NavidromeSongFilters = () => {
                     w="100%"
                 />
             </Stack>
-            <Divider my="md" />
-            <VirtualMultiSelect
-                displayCountType="song"
-                height={300}
-                label={artistFilterLabel}
-                onChange={handleArtistChange}
-                options={selectableAlbumArtists}
-                RowComponent={ArtistMultiSelectRow}
-                singleSelect={artistSelectMode === 'single'}
-                value={selectedArtistIds}
-            />
-            {!isGenrePage && (
+            {!disableArtistFilter && (
+                <>
+                    <Divider my="md" />
+                    <VirtualMultiSelect
+                        displayCountType="song"
+                        height={300}
+                        label={artistFilterLabel}
+                        onChange={handleArtistChange}
+                        options={selectableAlbumArtists}
+                        RowComponent={ArtistMultiSelectRow}
+                        singleSelect={artistSelectMode === 'single'}
+                        value={selectedArtistIds}
+                    />
+                </>
+            )}
+            {!disableGenreFilter && (
                 <VirtualMultiSelect
                     displayCountType="song"
                     height={220}

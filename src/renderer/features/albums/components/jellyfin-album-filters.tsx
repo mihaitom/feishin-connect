@@ -3,7 +3,6 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
@@ -32,15 +31,15 @@ import {
 
 interface JellyfinAlbumFiltersProps {
     disableArtistFilter?: boolean;
+    disableGenreFilter?: boolean;
 }
 
-export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFiltersProps) => {
+export const JellyfinAlbumFilters = ({
+    disableArtistFilter,
+    disableGenreFilter,
+}: JellyfinAlbumFiltersProps) => {
     const { t } = useTranslation();
     const serverId = useCurrentServerId();
-
-    const { customFilters } = useListContext();
-
-    const isGenrePage = customFilters?.genreIds !== undefined;
 
     const {
         query,
@@ -298,7 +297,7 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
                     />
                 </>
             )}
-            {!isGenrePage && (
+            {!disableGenreFilter && (
                 <>
                     <Divider my="md" />
                     <VirtualMultiSelect

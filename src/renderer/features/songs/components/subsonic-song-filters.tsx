@@ -3,7 +3,6 @@ import { ChangeEvent, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { useListContext } from '/@/renderer/context/list-context';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import {
@@ -20,14 +19,18 @@ import { Switch } from '/@/shared/components/switch/switch';
 import { Text } from '/@/shared/components/text/text';
 import { AlbumArtistListSort, LibraryItem, SortOrder } from '/@/shared/types/domain-types';
 
-export const SubsonicSongFilters = () => {
+interface SubsonicSongFiltersProps {
+    disableArtistFilter?: boolean;
+    disableGenreFilter?: boolean;
+}
+
+export const SubsonicSongFilters = ({
+    disableArtistFilter,
+    disableGenreFilter,
+}: SubsonicSongFiltersProps) => {
     const { t } = useTranslation();
     const serverId = useCurrentServerId();
     const { query, setArtistIds, setFavorite, setGenreId } = useSongListFilters();
-
-    const { customFilters } = useListContext();
-
-    const isGenrePage = customFilters?.genreIds !== undefined;
 
     const genreListQuery = useGenreList();
 
@@ -149,19 +152,23 @@ export const SubsonicSongFilters = () => {
                     />
                 </Group>
             ))}
-            <Divider my="md" />
-            <VirtualMultiSelect
-                disabled={isArtistDisabled}
-                displayCountType="song"
-                height={300}
-                label={artistFilterLabel}
-                onChange={handleArtistFilter}
-                options={selectableAlbumArtists}
-                RowComponent={ArtistMultiSelectRow}
-                singleSelect={true}
-                value={selectedArtistIds}
-            />
-            {!isGenrePage && (
+            {!disableArtistFilter && (
+                <>
+                    <Divider my="md" />
+                    <VirtualMultiSelect
+                        disabled={isArtistDisabled}
+                        displayCountType="song"
+                        height={300}
+                        label={artistFilterLabel}
+                        onChange={handleArtistFilter}
+                        options={selectableAlbumArtists}
+                        RowComponent={ArtistMultiSelectRow}
+                        singleSelect={true}
+                        value={selectedArtistIds}
+                    />
+                </>
+            )}
+            {!disableGenreFilter && (
                 <>
                     <Divider my="md" />
                     <VirtualMultiSelect

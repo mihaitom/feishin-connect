@@ -3,7 +3,6 @@ import { ChangeEvent, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
@@ -26,16 +25,16 @@ import { AlbumArtistListSort, LibraryItem, SortOrder } from '/@/shared/types/dom
 
 interface SubsonicAlbumFiltersProps {
     disableArtistFilter?: boolean;
+    disableGenreFilter?: boolean;
 }
 
-export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFiltersProps) => {
+export const SubsonicAlbumFilters = ({
+    disableArtistFilter,
+    disableGenreFilter,
+}: SubsonicAlbumFiltersProps) => {
     const { t } = useTranslation();
 
     const serverId = useCurrentServerId();
-
-    const { customFilters } = useListContext();
-
-    const isGenrePage = customFilters?.genreIds !== undefined;
 
     const { query, setAlbumArtist, setFavorite, setGenreId, setMaxYear, setMinYear } =
         useAlbumListFilters();
@@ -262,7 +261,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                     />
                 </>
             )}
-            {!isGenrePage && (
+            {!disableGenreFilter && (
                 <>
                     <Divider my="md" />
                     <VirtualMultiSelect

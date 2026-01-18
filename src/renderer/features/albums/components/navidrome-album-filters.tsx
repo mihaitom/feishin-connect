@@ -3,7 +3,6 @@ import { ChangeEvent, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
@@ -27,19 +26,20 @@ import { AlbumArtistListSort, LibraryItem, SortOrder } from '/@/shared/types/dom
 
 interface NavidromeAlbumFiltersProps {
     disableArtistFilter?: boolean;
+    disableGenreFilter?: boolean;
 }
 
-export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFiltersProps) => {
+export const NavidromeAlbumFilters = ({
+    disableArtistFilter,
+    disableGenreFilter,
+}: NavidromeAlbumFiltersProps) => {
     const { t } = useTranslation();
     const server = useCurrentServer();
     const serverId = server.id;
 
-    const { customFilters } = useListContext();
     const artistSelectMode = useAppStore((state) => state.artistSelectMode);
     const genreSelectMode = useAppStore((state) => state.genreSelectMode);
     const { setArtistSelectMode, setGenreSelectMode } = useAppStoreActions();
-
-    const isGenrePage = customFilters?.genreIds !== undefined;
 
     const {
         query,
@@ -327,7 +327,7 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
                     />
                 </>
             )}
-            {!isGenrePage && (
+            {!disableGenreFilter && (
                 <>
                     <Divider my="md" />
                     <VirtualMultiSelect

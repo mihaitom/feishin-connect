@@ -3,7 +3,6 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { useListContext } from '/@/renderer/context/list-context';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import {
@@ -27,18 +26,18 @@ import { AlbumArtistListSort, LibraryItem, SortOrder } from '/@/shared/types/dom
 
 interface JellyfinSongFiltersProps {
     disableArtistFilter?: boolean;
+    disableGenreFilter?: boolean;
 }
 
-export const JellyfinSongFilters = ({ disableArtistFilter }: JellyfinSongFiltersProps) => {
+export const JellyfinSongFilters = ({
+    disableArtistFilter,
+    disableGenreFilter,
+}: JellyfinSongFiltersProps) => {
     const server = useCurrentServer();
     const serverId = server.id;
     const { t } = useTranslation();
     const { query, setArtistIds, setCustom, setFavorite, setMaxYear, setMinYear } =
         useSongListFilters();
-
-    const { customFilters } = useListContext();
-
-    const isGenrePage = customFilters?.genreIds !== undefined;
 
     // Despite the fact that getTags returns genres, it only returns genre names.
     // We prefer using IDs, hence the double query
@@ -280,7 +279,7 @@ export const JellyfinSongFilters = ({ disableArtistFilter }: JellyfinSongFilters
                     />
                 </>
             )}
-            {!isGenrePage && (
+            {!disableGenreFilter && (
                 <>
                     <Divider my="md" />
                     <VirtualMultiSelect

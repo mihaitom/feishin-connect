@@ -39,7 +39,7 @@ export const isFilterValueSet = (value: unknown): boolean => {
 export const ListFiltersModal = ({ isActive, itemType }: ListFiltersProps) => {
     const { t } = useTranslation();
     const server = useCurrentServer();
-    const { isSidebarOpen, setIsSidebarOpen } = useListContext();
+    const { isSidebarOpen, pageKey, setIsSidebarOpen } = useListContext();
 
     const serverType = server.type;
 
@@ -52,6 +52,9 @@ export const ListFiltersModal = ({ isActive, itemType }: ListFiltersProps) => {
     };
 
     const canPin = Boolean(setIsSidebarOpen);
+
+    const disableArtistFilter = pageKey === ItemListKey.ALBUM_ARTIST_ALBUM;
+    const disableGenreFilter = pageKey === ItemListKey.GENRE_ALBUM;
 
     return (
         <>
@@ -81,7 +84,10 @@ export const ListFiltersModal = ({ isActive, itemType }: ListFiltersProps) => {
                     </Group>
                 }
             >
-                <FilterComponent />
+                <FilterComponent
+                    disableArtistFilter={disableArtistFilter}
+                    disableGenreFilter={disableGenreFilter}
+                />
             </Modal>
         </>
     );
@@ -91,11 +97,18 @@ export const ListFilters = ({ itemType }: ListFiltersProps) => {
     const server = useCurrentServer();
     const serverType = server.type;
     const FilterComponent = FILTERS[serverType][itemType];
+    const { pageKey } = useListContext();
+
+    const disableArtistFilter = pageKey === ItemListKey.ALBUM_ARTIST_ALBUM;
+    const disableGenreFilter = pageKey === ItemListKey.GENRE_ALBUM;
 
     return (
         <ComponentErrorBoundary>
             <Suspense fallback={<Spinner container />}>
-                <FilterComponent />
+                <FilterComponent
+                    disableArtistFilter={disableArtistFilter}
+                    disableGenreFilter={disableGenreFilter}
+                />
             </Suspense>
         </ComponentErrorBoundary>
     );
