@@ -6,17 +6,19 @@
     max-height: 100%;
     margin: auto;
     overflow: hidden;
-
-    &:hover {
-        .settings-icon {
-            opacity: 1;
-        }
-    }
+    background: #000;
 }
 
-.container .settings-icon {
+.icon-group {
     z-index: 100;
+}
+
+.icon-group > * {
     opacity: 0;
+}
+
+.container:hover .icon-group > * {
+    opacity: 1;
 }
 
 .canvas {
@@ -34,7 +36,7 @@
     z-index: 10;
     padding: var(--theme-spacing-xs) var(--theme-spacing-sm);
     font-weight: 500;
-    color: var(--theme-colors-foreground);
+    color: #ddd;
     pointer-events: none;
     background-color: rgb(0 0 0 / 50%);
     border-radius: 0 var(--theme-radius-md) 0 0;

@@ -6,7 +6,12 @@ import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { openVisualizerSettingsModal } from '/@/renderer/features/player/utils/open-visualizer-settings-modal';
 import { ComponentErrorBoundary } from '/@/renderer/features/shared/components/component-error-boundary';
 import { useAccent, useSettingsStore } from '/@/renderer/store';
+import {
+    useFullScreenPlayerStore,
+    useFullScreenPlayerStoreActions,
+} from '/@/renderer/store/full-screen-player.store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { Group } from '/@/shared/components/group/group';
 
 const VisualizerInner = () => {
     const { webAudio } = useWebAudio();
@@ -289,18 +294,35 @@ const VisualizerInner = () => {
 };
 
 export const Visualizer = () => {
+    const { visualizerExpanded } = useFullScreenPlayerStore();
+    const { setStore } = useFullScreenPlayerStoreActions();
+
+    const handleToggleFullscreen = () => {
+        setStore({ expanded: false, visualizerExpanded: !visualizerExpanded });
+    };
+
     return (
         <div className={styles.container}>
-            <ActionIcon
-                className={styles.settingsIcon}
-                icon="settings2"
-                iconProps={{ size: 'lg' }}
-                onClick={openVisualizerSettingsModal}
+            <Group
+                className={styles.iconGroup}
+                gap="xs"
                 pos="absolute"
                 right="var(--theme-spacing-sm)"
                 top="var(--theme-spacing-sm)"
-                variant="subtle"
-            />
+            >
+                <ActionIcon
+                    icon="expand"
+                    iconProps={{ size: 'lg' }}
+                    onClick={handleToggleFullscreen}
+                    variant="subtle"
+                />
+                <ActionIcon
+                    icon="settings2"
+                    iconProps={{ size: 'lg' }}
+                    onClick={openVisualizerSettingsModal}
+                    variant="subtle"
+                />
+            </Group>
             <ComponentErrorBoundary>
                 <VisualizerInner />
             </ComponentErrorBoundary>

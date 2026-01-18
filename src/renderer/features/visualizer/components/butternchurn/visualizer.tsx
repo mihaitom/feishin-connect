@@ -1,4 +1,4 @@
-import { createRef, useEffect, useRef, useState } from 'react';
+import { createRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './visualizer.module.css';
 
@@ -6,8 +6,13 @@ import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { openVisualizerSettingsModal } from '/@/renderer/features/player/utils/open-visualizer-settings-modal';
 import { ComponentErrorBoundary } from '/@/renderer/features/shared/components/component-error-boundary';
 import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store';
+import {
+    useFullScreenPlayerStore,
+    useFullScreenPlayerStoreActions,
+} from '/@/renderer/store/full-screen-player.store';
 import { usePlayerStatus } from '/@/renderer/store/player.store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { Group } from '/@/shared/components/group/group';
 import { Text } from '/@/shared/components/text/text';
 import { PlayerStatus } from '/@/shared/types/types';
 
@@ -473,18 +478,147 @@ const VisualizerInner = () => {
 };
 
 export const Visualizer = () => {
+    const { visualizerExpanded } = useFullScreenPlayerStore();
+    const { setStore } = useFullScreenPlayerStoreActions();
+    const { setSettings } = useSettingsStoreActions();
+    const butterchurnSettings = useSettingsStore((store) => store.visualizer.butterchurn);
+    const [presetsLoaded, setPresetsLoaded] = useState(false);
+    const butterchurnPresetsRef = useRef<any>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadPresets = async () => {
+            try {
+                const presetsModule = await import('butterchurn-presets');
+                if (isMounted) {
+                    butterchurnPresetsRef.current = presetsModule.default;
+                    setPresetsLoaded(true);
+                }
+            } catch (error) {
+                console.error('Failed to load butterchurn presets:', error);
+            }
+        };
+
+        loadPresets();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const getPresetList = useCallback(() => {
+        const presets = butterchurnPresetsRef.current;
+        if (!presets) return [];
+
+        const allPresetNames = Object.keys(presets);
+
+        let presetList = butterchurnSettings.includeAllPresets
+            ? allPresetNames
+            : butterchurnSettings.selectedPresets.length > 0
+              ? butterchurnSettings.selectedPresets.filter((name) => presets[name])
+              : allPresetNames;
+
+        if (butterchurnSettings.ignoredPresets && butterchurnSettings.ignoredPresets.length > 0) {
+            presetList = presetList.filter(
+                (name) => !butterchurnSettings.ignoredPresets.includes(name),
+            );
+        }
+
+        return presetList;
+    }, [
+        butterchurnSettings.includeAllPresets,
+        butterchurnSettings.selectedPresets,
+        butterchurnSettings.ignoredPresets,
+    ]);
+
+    const handleToggleFullscreen = () => {
+        setStore({ expanded: false, visualizerExpanded: !visualizerExpanded });
+    };
+
+    const handleNextPreset = () => {
+        if (!presetsLoaded) return;
+
+        const presetList = getPresetList();
+        if (presetList.length === 0) return;
+
+        const currentPresetName = butterchurnSettings.currentPreset;
+        const currentIndex = currentPresetName ? presetList.indexOf(currentPresetName) : -1;
+        const nextIndex =
+            currentIndex >= 0 && currentIndex < presetList.length - 1 ? currentIndex + 1 : 0;
+        const nextPresetName = presetList[nextIndex];
+
+        setSettings({
+            visualizer: {
+                butterchurn: {
+                    currentPreset: nextPresetName,
+                },
+            },
+        });
+    };
+
+    const handlePreviousPreset = () => {
+        if (!presetsLoaded) return;
+
+        const presetList = getPresetList();
+        if (presetList.length === 0) return;
+
+        const currentPresetName = butterchurnSettings.currentPreset;
+        const currentIndex = currentPresetName ? presetList.indexOf(currentPresetName) : -1;
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : presetList.length - 1;
+        const prevPresetName = presetList[prevIndex];
+
+        setSettings({
+            visualizer: {
+                butterchurn: {
+                    currentPreset: prevPresetName,
+                },
+            },
+        });
+    };
+
     return (
         <div className={styles.container}>
-            <ActionIcon
-                className={styles.settingsIcon}
-                icon="settings2"
-                iconProps={{ size: 'lg' }}
-                onClick={openVisualizerSettingsModal}
+            <Group
+                className={styles.iconGroup}
+                gap="xs"
                 pos="absolute"
                 right="var(--theme-spacing-sm)"
                 top="var(--theme-spacing-sm)"
-                variant="subtle"
-            />
+            >
+                <ActionIcon
+                    icon="expand"
+                    iconProps={{ size: 'lg' }}
+                    onClick={handleToggleFullscreen}
+                    variant="subtle"
+                />
+                <ActionIcon
+                    icon="settings2"
+                    iconProps={{ size: 'lg' }}
+                    onClick={openVisualizerSettingsModal}
+                    variant="subtle"
+                />
+            </Group>
+            <Group
+                className={styles.iconGroup}
+                gap="xs"
+                pos="absolute"
+                right="var(--theme-spacing-sm)"
+                style={{ bottom: 'var(--theme-spacing-sm)' }}
+            >
+                <ActionIcon
+                    icon="arrowLeftS"
+                    iconProps={{ size: 'lg' }}
+                    onClick={handlePreviousPreset}
+                    variant="subtle"
+                />
+                <ActionIcon
+                    icon="arrowRightS"
+                    iconProps={{ size: 'lg' }}
+                    onClick={handleNextPreset}
+                    variant="subtle"
+                />
+            </Group>
             <ComponentErrorBoundary>
                 <VisualizerInner />
             </ComponentErrorBoundary>

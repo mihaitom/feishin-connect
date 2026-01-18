@@ -14,17 +14,19 @@
         margin: auto;
     }
 
-    &:hover {
-        .settings-icon {
-            opacity: 1;
-        }
-    }
 }
 
-.container .settings-icon {
+.icon-group {
     z-index: 100;
+}
+
+.icon-group > * {
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
+}
+
+.container:hover .icon-group > * {
+    opacity: 1;
 }
 
 .visualizer {

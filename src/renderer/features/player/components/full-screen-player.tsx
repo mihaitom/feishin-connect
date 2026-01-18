@@ -237,7 +237,7 @@ const Controls = () => {
     const lyricConfig = { ...lyricsSettings, ...displaySettings };
 
     const handleToggleFullScreenPlayer = () => {
-        setStore({ expanded: !expanded });
+        setStore({ expanded: !expanded, visualizerExpanded: false });
     };
 
     const handleLyricsSettings = (property: string, value: any) => {

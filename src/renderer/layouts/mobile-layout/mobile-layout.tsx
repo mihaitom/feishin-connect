@@ -6,6 +6,7 @@ import { Outlet } from 'react-router';
 import styles from './mobile-layout.module.css';
 
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
+import { FullScreenVisualizer } from '/@/renderer/features/player/components/full-screen-visualizer';
 import { MobileFullscreenPlayer } from '/@/renderer/features/player/components/mobile-fullscreen-player';
 import { CommandPalette } from '/@/renderer/features/search/components/command-palette';
 import { MobileSidebar } from '/@/renderer/features/sidebar/components/mobile-sidebar';
@@ -30,7 +31,10 @@ interface MobileLayoutProps {
 export const MobileLayout = ({ shell }: MobileLayoutProps) => {
     const { opened, ...handlers } = useCommandPalette();
     const [sidebarOpened, { close: closeSidebar, open: openSidebar }] = useDisclosure(false);
-    const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
+    const {
+        expanded: isFullScreenPlayerExpanded,
+        visualizerExpanded: isFullScreenVisualizerExpanded,
+    } = useFullScreenPlayerStore();
     const { windowBarStyle } = useWindowSettings();
 
     return (
@@ -79,6 +83,13 @@ export const MobileLayout = ({ shell }: MobileLayoutProps) => {
                 {isFullScreenPlayerExpanded && (
                     <div className={styles.fullScreenPlayerOverlay}>
                         <MobileFullscreenPlayer />
+                    </div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence initial={false}>
+                {isFullScreenVisualizerExpanded && (
+                    <div className={styles.fullScreenPlayerOverlay}>
+                        <FullScreenVisualizer />
                     </div>
                 )}
             </AnimatePresence>

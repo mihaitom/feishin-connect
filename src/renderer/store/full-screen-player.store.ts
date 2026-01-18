@@ -17,6 +17,7 @@ interface FullScreenPlayerState {
     expanded: boolean;
     opacity: number;
     useImageAspectRatio: boolean;
+    visualizerExpanded: boolean;
 }
 
 export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSlice>()(
@@ -35,6 +36,7 @@ export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSli
                 expanded: false,
                 opacity: 60,
                 useImageAspectRatio: false,
+                visualizerExpanded: false,
             })),
             { name: 'store_full_screen_player' },
         ),

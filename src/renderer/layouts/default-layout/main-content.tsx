@@ -7,6 +7,7 @@ import { shallow } from 'zustand/shallow';
 import styles from './main-content.module.css';
 
 import { FullScreenOverlay } from '/@/renderer/layouts/default-layout/full-screen-overlay';
+import { FullScreenVisualizerOverlay } from '/@/renderer/layouts/default-layout/full-screen-visualizer-overlay';
 import { LeftSidebar } from '/@/renderer/layouts/default-layout/left-sidebar';
 import { RightSidebar } from '/@/renderer/layouts/default-layout/right-sidebar';
 import { useAppStore, useAppStoreActions, useSideQueueType } from '/@/renderer/store';
@@ -143,6 +144,7 @@ export const MainContent = ({ shell }: { shell?: boolean }) => {
         >
             {!shell && (
                 <>
+                    <FullScreenVisualizerOverlay />
                     <FullScreenOverlay />
                     <LeftSidebar isResizing={isResizing} startResizing={startResizing} />
                     <RightSidebar

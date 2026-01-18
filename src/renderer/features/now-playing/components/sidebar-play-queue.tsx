@@ -46,7 +46,10 @@ const ButterchurnVisualizer = lazy(() =>
 export const SidebarPlayQueue = () => {
     const tableRef = useRef<ItemListHandle | null>(null);
     const [search, setSearch] = useState<string | undefined>(undefined);
-    const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
+    const {
+        expanded: isFullScreenPlayerExpanded,
+        visualizerExpanded: isFullScreenVisualizerExpanded,
+    } = useFullScreenPlayerStore();
     const [shouldRender, setShouldRender] = useState(!isFullScreenPlayerExpanded);
     const combinedLyricsAndVisualizer = useCombinedLyricsAndVisualizer();
     const showLyricsInSidebar = useShowLyricsInSidebar();
@@ -60,7 +63,7 @@ export const SidebarPlayQueue = () => {
     const shouldAddTopMargin = isElectron() && windowBarStyle === Platform.WEB;
 
     useEffect(() => {
-        if (isFullScreenPlayerExpanded) {
+        if (isFullScreenPlayerExpanded || isFullScreenVisualizerExpanded) {
             // Immediately hide when fullscreen player opens
             setShouldRender(false);
             return undefined;
@@ -74,7 +77,7 @@ export const SidebarPlayQueue = () => {
                 clearTimeout(timeoutId);
             };
         }
-    }, [isFullScreenPlayerExpanded]);
+    }, [isFullScreenPlayerExpanded, isFullScreenVisualizerExpanded]);
 
     const [defaultLayout, onLayoutChange] = usePersistence({
         debounce: 300,
