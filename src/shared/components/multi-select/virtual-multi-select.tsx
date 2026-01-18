@@ -258,11 +258,11 @@ export function VirtualMultiSelect<T>({
                 tabIndex={disabled ? -1 : 0}
             >
                 {isLoading ? (
-                    <Center h="100%">
-                        <Spinner />
+                    <Center h="100%" w="100%">
+                        <Spinner container />
                     </Center>
                 ) : stableOptions.length === 0 ? (
-                    <Center h="100%">
+                    <Center h="100%" w="100%">
                         <Text isMuted isNoSelect size="sm">
                             {t('common.noResultsFromQuery', { postProcess: 'sentenceCase' })}
                         </Text>
