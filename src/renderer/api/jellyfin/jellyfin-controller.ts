@@ -25,6 +25,7 @@ import {
     songListSortMap,
     SortOrder,
     sortOrderMap,
+    Tag,
 } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
@@ -1233,12 +1234,38 @@ export const JellyfinController: InternalControllerEndpoint = {
             throw new Error('failed to get tags');
         }
 
-        return {
-            boolTags: res.body.Tags?.sort((a, b) =>
-                a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()),
-            ),
-            excluded: { album: [], song: [] },
-        };
+        const studioRes = await jfApiClient(apiClientProps).getStudioList({
+            query: {
+                EnableTotalRecordCount: true,
+                IncludeItemTypes: query.type === LibraryItem.SONG ? 'Audio' : 'MusicAlbum',
+                ParentId: query.folder,
+            },
+        });
+
+        if (studioRes.status !== 200) {
+            throw new Error('failed to get studios');
+        }
+
+        const tags: Tag[] = [];
+        if (res.body.Tags?.length) {
+            tags.push({
+                name: 'Tags',
+                options: res.body.Tags.sort((a, b) =>
+                    a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()),
+                ).map((tag) => ({ id: tag, name: tag })),
+            });
+        }
+
+        if (studioRes.body.Items.length) {
+            tags.push({
+                name: 'Studios',
+                options: studioRes.body.Items.sort((a, b) =>
+                    a.Name.toLocaleLowerCase().localeCompare(b.Name.toLocaleLowerCase()),
+                ).map((option) => ({ id: option.Name, name: option.Name })),
+            });
+        }
+
+        return { excluded: { album: [], song: [] }, tags };
     },
     getTopSongs: async (args) => {
         const { apiClientProps, query } = args;

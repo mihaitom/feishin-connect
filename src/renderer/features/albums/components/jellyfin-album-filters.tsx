@@ -3,16 +3,15 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
-import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import {
     ArtistMultiSelectRow,
     GenreMultiSelectRow,
 } from '/@/renderer/features/shared/components/multi-select-rows';
+import { TagFilters } from '/@/renderer/features/shared/components/tag-filter';
 import { useCurrentServerId } from '/@/renderer/store';
 import { useAppStore, useAppStoreActions } from '/@/renderer/store/app.store';
 import { Button } from '/@/shared/components/button/button';
@@ -77,19 +76,6 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
             value: genre.id,
         }));
     }, [genreListQuery.data]);
-
-    const tagsQuery = useQuery(
-        sharedQueries.tagList({
-            options: {
-                gcTime: 1000 * 60 * 2,
-                staleTime: 1000 * 60 * 1,
-            },
-            query: {
-                type: LibraryItem.ALBUM,
-            },
-            serverId,
-        }),
-    );
 
     const yesNoFilter = useMemo(() => {
         const filters = [
@@ -202,13 +188,6 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
             setAlbumArtist(e ?? null);
         },
         [setAlbumArtist],
-    );
-
-    const handleTagFilter = useCallback(
-        (e: null | string[]) => {
-            setCustom({ Tags: e && e.length > 0 ? e.join('|') : null });
-        },
-        [setCustom],
     );
 
     const debouncedHandleMinYearFilter = useDebouncedCallback(handleMinYearFilter, 300);
@@ -358,17 +337,7 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
                     value={query.maxYear ?? undefined}
                 />
             </Group>
-            {tagsQuery.data?.boolTags && tagsQuery.data.boolTags.length > 0 && (
-                <MultiSelectWithInvalidData
-                    clearable
-                    data={tagsQuery.data.boolTags}
-                    label={t('common.tags', { postProcess: 'sentenceCase' })}
-                    onChange={handleTagFilter}
-                    searchable
-                    value={query._custom?.[tagsQuery.data.boolTags.join('|')] || []}
-                    width={250}
-                />
-            )}
+            <TagFilters query={query} setCustom={setCustom} type={LibraryItem.ALBUM} />
             <Divider my="md" />
             <Button fullWidth onClick={clear} variant="subtle">
                 {t('common.reset', { postProcess: 'sentenceCase' })}
