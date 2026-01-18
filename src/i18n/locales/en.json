@@ -90,6 +90,8 @@
         "filter_one": "filter",
         "filter_other": "filters",
         "filters": "filters",
+        "filter_single": "single",
+        "filter_multiple": "multi",
         "forceRestartRequired": "restart to apply changes… close the notification to restart",
         "forward": "forward",
         "gap": "gap",

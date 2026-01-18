@@ -11,6 +11,8 @@ export interface AppSlice extends AppState {
         setAlbumArtistDetailGroupingType: (groupingType: 'all' | 'primary') => void;
         setAlbumArtistDetailSort: (sortBy: AlbumListSort, sortOrder: SortOrder) => void;
         setAppStore: (data: Partial<AppSlice>) => void;
+        setArtistSelectMode: (mode: 'multi' | 'single') => void;
+        setGenreSelectMode: (mode: 'multi' | 'single') => void;
         setPageSidebar: (key: string, value: boolean) => void;
         setPrivateMode: (enabled: boolean) => void;
         setShowTimeRemaining: (enabled: boolean) => void;
@@ -25,7 +27,9 @@ export interface AppState {
         sortBy: AlbumListSort;
         sortOrder: SortOrder;
     };
+    artistSelectMode: 'multi' | 'single';
     commandPalette: CommandPaletteProps;
+    genreSelectMode: 'multi' | 'single';
     isReorderingQueue: boolean;
     pageSidebar: Record<string, boolean>;
     platform: Platform;
@@ -78,6 +82,16 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                     setAppStore: (data) => {
                         set({ ...get(), ...data });
                     },
+                    setArtistSelectMode: (mode) => {
+                        set((state) => {
+                            state.artistSelectMode = mode;
+                        });
+                    },
+                    setGenreSelectMode: (mode) => {
+                        set((state) => {
+                            state.genreSelectMode = mode;
+                        });
+                    },
                     setPageSidebar: (key, value) => {
                         set((state) => {
                             state.pageSidebar[key] = value;
@@ -109,6 +123,7 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                     sortBy: AlbumListSort.RELEASE_DATE,
                     sortOrder: SortOrder.DESC,
                 },
+                artistSelectMode: 'multi',
                 commandPalette: {
                     close: () => {
                         set((state) => {
@@ -127,6 +142,7 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                         });
                     },
                 },
+                genreSelectMode: 'multi',
                 isReorderingQueue: false,
                 pageSidebar: {
                     album: true,

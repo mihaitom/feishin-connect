@@ -2,18 +2,26 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { MultiSelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
+import {
+    ArtistMultiSelectRow,
+    GenreMultiSelectRow,
+} from '/@/renderer/features/shared/components/multi-select-rows';
 import { useCurrentServerId } from '/@/renderer/store';
+import { useAppStore, useAppStoreActions } from '/@/renderer/store/app.store';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
+import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
-import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
+import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
 import { Stack } from '/@/shared/components/stack/stack';
+import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
 import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
 import {
@@ -61,7 +69,9 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
     const genreList = useMemo(() => {
         if (!genreListQuery?.data) return [];
         return genreListQuery.data.items.map((genre) => ({
+            albumCount: genre.albumCount,
             label: genre.name,
+            songCount: genre.songCount,
             value: genre.id,
         }));
     }, [genreListQuery.data]);
@@ -173,7 +183,14 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
         if (!albumArtistListQuery?.data?.items) return [];
 
         return albumArtistListQuery?.data?.items?.map((artist) => ({
+            albumCount: artist.albumCount,
+            imageUrl: getItemImageUrl({
+                id: artist.id,
+                itemType: LibraryItem.ARTIST,
+                type: 'table',
+            }),
             label: artist.name,
+            songCount: artist.songCount,
             value: artist.id,
         }));
     }, [albumArtistListQuery.data?.items]);
@@ -195,6 +212,87 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
     const debouncedHandleMinYearFilter = useDebouncedCallback(handleMinYearFilter, 300);
     const debouncedHandleMaxYearFilter = useDebouncedCallback(handleMaxYearFilter, 300);
 
+    const artistSelectMode = useAppStore((state) => state.artistSelectMode);
+    const genreSelectMode = useAppStore((state) => state.genreSelectMode);
+    const { setArtistSelectMode, setGenreSelectMode } = useAppStoreActions();
+
+    const selectedArtistIds = useMemo(() => query.artistIds || [], [query.artistIds]);
+    const selectedGenreIds = useMemo(() => query.genreIds || [], [query.genreIds]);
+
+    const handleArtistSelectModeChange = useCallback(
+        (value: string) => {
+            const newMode = value as 'multi' | 'single';
+            setArtistSelectMode(newMode);
+
+            if (newMode === 'single' && selectedArtistIds.length > 1) {
+                setAlbumArtist([selectedArtistIds[0]]);
+            }
+        },
+        [selectedArtistIds, setAlbumArtist, setArtistSelectMode],
+    );
+
+    const handleGenreSelectModeChange = useCallback(
+        (value: string) => {
+            const newMode = value as 'multi' | 'single';
+            setGenreSelectMode(newMode);
+
+            if (newMode === 'single' && selectedGenreIds.length > 1) {
+                setGenreId([selectedGenreIds[0]]);
+            }
+        },
+        [selectedGenreIds, setGenreId, setGenreSelectMode],
+    );
+
+    const artistFilterLabel = useMemo(() => {
+        return (
+            <Group gap="xs" justify="space-between" w="100%">
+                <Text fw={500} size="sm">
+                    {t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
+                </Text>
+                <SegmentedControl
+                    data={[
+                        {
+                            label: t('common.filter_single', { postProcess: 'titleCase' }),
+                            value: 'single',
+                        },
+                        {
+                            label: t('common.filter_multiple', { postProcess: 'titleCase' }),
+                            value: 'multi',
+                        },
+                    ]}
+                    onChange={handleArtistSelectModeChange}
+                    size="xs"
+                    value={artistSelectMode}
+                />
+            </Group>
+        );
+    }, [artistSelectMode, handleArtistSelectModeChange, t]);
+
+    const genreFilterLabel = useMemo(() => {
+        return (
+            <Group gap="xs" justify="space-between" w="100%">
+                <Text fw={500} size="sm">
+                    {t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
+                </Text>
+                <SegmentedControl
+                    data={[
+                        {
+                            label: t('common.filter_single', { postProcess: 'titleCase' }),
+                            value: 'single',
+                        },
+                        {
+                            label: t('common.filter_multiple', { postProcess: 'titleCase' }),
+                            value: 'multi',
+                        },
+                    ]}
+                    onChange={handleGenreSelectModeChange}
+                    size="xs"
+                    value={genreSelectMode}
+                />
+            </Group>
+        );
+    }, [genreSelectMode, handleGenreSelectModeChange, t]);
+
     return (
         <Stack px="md" py="md">
             {yesNoFilter.map((filter) => (
@@ -205,6 +303,38 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
                     onChange={(e) => filter.onChange(e ? e === 'true' : undefined)}
                 />
             ))}
+            {!disableArtistFilter && (
+                <>
+                    <Divider my="md" />
+                    <VirtualMultiSelect
+                        displayCountType="album"
+                        height={300}
+                        isLoading={albumArtistListQuery.isFetching}
+                        label={artistFilterLabel}
+                        onChange={handleAlbumArtistFilter}
+                        options={selectableAlbumArtists}
+                        RowComponent={ArtistMultiSelectRow}
+                        singleSelect={artistSelectMode === 'single'}
+                        value={selectedArtistIds}
+                    />
+                </>
+            )}
+            {!isGenrePage && (
+                <>
+                    <Divider my="md" />
+                    <VirtualMultiSelect
+                        displayCountType="album"
+                        height={220}
+                        isLoading={genreListQuery.isFetching}
+                        label={genreFilterLabel}
+                        onChange={handleGenresFilter}
+                        options={genreList}
+                        RowComponent={GenreMultiSelectRow}
+                        singleSelect={genreSelectMode === 'single'}
+                        value={selectedGenreIds}
+                    />
+                </>
+            )}
             <Divider my="md" />
             <Group grow>
                 <NumberInput
@@ -226,27 +356,6 @@ export const JellyfinAlbumFilters = ({ disableArtistFilter }: JellyfinAlbumFilte
                     required={!!query.minYear}
                 />
             </Group>
-            {!isGenrePage && (
-                <MultiSelectWithInvalidData
-                    clearable
-                    data={genreList}
-                    defaultValue={query.genreIds || []}
-                    label={t('entity.genre', { count: 2, postProcess: 'sentenceCase' })}
-                    onChange={handleGenresFilter}
-                    searchable
-                />
-            )}
-            <MultiSelectWithInvalidData
-                clearable
-                data={selectableAlbumArtists}
-                defaultValue={query.artistIds || []}
-                disabled={disableArtistFilter}
-                label={t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
-                limit={300}
-                onChange={handleAlbumArtistFilter}
-                rightSection={albumArtistListQuery.isFetching ? <SpinnerIcon /> : undefined}
-                searchable
-            />
             {tagsQuery.data?.boolTags && tagsQuery.data.boolTags.length > 0 && (
                 <MultiSelectWithInvalidData
                     clearable

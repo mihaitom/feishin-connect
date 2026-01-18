@@ -11,17 +11,20 @@ import { Text } from '/@/shared/components/text/text';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
 export function ArtistMultiSelectRow({
+    displayCountType = 'album',
     focusedIndex,
     index,
     onToggle,
     options,
     style,
 }: RowComponentProps<{
+    displayCountType?: 'album' | 'song';
     focusedIndex: null | number;
     onToggle: (value: string) => void;
     options: VirtualMultiSelectOption<{
         albumCount: null | number;
         imageUrl: string | undefined;
+        songCount: null | number;
     }>[];
     value: string[];
 }>) {
@@ -32,6 +35,9 @@ export function ArtistMultiSelectRow({
     }, [onToggle, options, index]);
 
     const isFocused = focusedIndex === index;
+    const count =
+        displayCountType === 'song' ? options[index].songCount : options[index].albumCount;
+    const countEntity = displayCountType === 'song' ? 'song' : 'album';
 
     return (
         <Group
@@ -52,14 +58,11 @@ export function ArtistMultiSelectRow({
                     {options[index].label}
                 </Text>
                 <Text isMuted overflow="hidden" size="xs">
-                    {options[index].albumCount ? (
+                    {count ? (
                         <>
-                            {options[index].albumCount}{' '}
-                            {t('entity.album', { count: options[index].albumCount })}
+                            {count} {t(`entity.${countEntity}`, { count })}
                         </>
-                    ) : (
-                        <>&nbsp;</>
-                    )}
+                    ) : null}
                 </Text>
             </div>
         </Group>
@@ -67,15 +70,20 @@ export function ArtistMultiSelectRow({
 }
 
 export function GenreMultiSelectRow({
+    displayCountType = 'album',
     focusedIndex,
     index,
     onToggle,
     options,
     style,
 }: RowComponentProps<{
+    displayCountType?: 'album' | 'song';
     focusedIndex: null | number;
     onToggle: (value: string) => void;
-    options: VirtualMultiSelectOption<{ albumCount: null | number }>[];
+    options: VirtualMultiSelectOption<{
+        albumCount: null | number;
+        songCount: null | number;
+    }>[];
     value: string[];
 }>) {
     const { t } = useTranslation();
@@ -85,6 +93,9 @@ export function GenreMultiSelectRow({
     }, [onToggle, options, index]);
 
     const isFocused = focusedIndex === index;
+    const count =
+        displayCountType === 'song' ? options[index].songCount : options[index].albumCount;
+    const countEntity = displayCountType === 'song' ? 'song' : 'album';
 
     return (
         <Group
@@ -99,14 +110,11 @@ export function GenreMultiSelectRow({
                     {options[index].label}
                 </Text>
                 <Text isMuted overflow="hidden" size="xs">
-                    {options[index].albumCount ? (
+                    {count ? (
                         <>
-                            {options[index].albumCount}{' '}
-                            {t('entity.album', { count: options[index].albumCount })}
+                            {count} {t(`entity.${countEntity}`, { count })}
                         </>
-                    ) : (
-                        <>&nbsp;</>
-                    )}
+                    ) : null}
                 </Text>
             </div>
         </Group>

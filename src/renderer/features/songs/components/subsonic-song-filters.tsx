@@ -1,12 +1,13 @@
 import { ChangeEvent, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SelectWithInvalidData } from '/@/renderer/components/select-with-invalid-data';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
+import { GenreMultiSelectRow } from '/@/renderer/features/shared/components/multi-select-rows';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
+import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { Text } from '/@/shared/components/text/text';
@@ -24,17 +25,33 @@ export const SubsonicSongFilters = () => {
     const genreList = useMemo(() => {
         if (!genreListQuery.data) return [];
         return genreListQuery.data.items.map((genre) => ({
+            albumCount: genre.albumCount,
             label: genre.name,
+            songCount: genre.songCount,
             value: genre.id,
         }));
     }, [genreListQuery.data]);
 
+    const selectedGenreIds = useMemo(() => query.genreIds || [], [query.genreIds]);
+
     const handleGenresFilter = useCallback(
-        (e: null | string) => {
-            setGenreId(e ? [e] : null);
+        (e: null | string[]) => {
+            if (e && e.length > 0) {
+                setGenreId([e[0]]);
+            } else {
+                setGenreId(null);
+            }
         },
         [setGenreId],
     );
+
+    const genreFilterLabel = useMemo(() => {
+        return (
+            <Text fw={500} size="sm">
+                {t('entity.genre', { count: 1, postProcess: 'sentenceCase' })}
+            </Text>
+        );
+    }, [t]);
 
     const toggleFilters = useMemo(
         () => [
@@ -61,13 +78,15 @@ export const SubsonicSongFilters = () => {
             {!isGenrePage && (
                 <>
                     <Divider my="md" />
-                    <SelectWithInvalidData
-                        clearable
-                        data={genreList}
-                        defaultValue={query.genreIds ? query.genreIds[0] : undefined}
-                        label={t('entity.genre', { count: 1, postProcess: 'titleCase' })}
+                    <VirtualMultiSelect
+                        displayCountType="song"
+                        height={220}
+                        label={genreFilterLabel}
                         onChange={handleGenresFilter}
-                        searchable
+                        options={genreList}
+                        RowComponent={GenreMultiSelectRow}
+                        singleSelect={true}
+                        value={selectedGenreIds}
                     />
                 </>
             )}

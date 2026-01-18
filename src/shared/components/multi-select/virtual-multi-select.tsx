@@ -9,6 +9,7 @@ import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
@@ -16,12 +17,15 @@ import { Text } from '/@/shared/components/text/text';
 export type VirtualMultiSelectOption<T> = T & { label: string; value: string };
 
 interface VirtualMultiSelectProps<T> {
+    displayCountType?: 'album' | 'song';
     height: number;
+    isLoading?: boolean;
     label?: React.ReactNode | string;
     onChange: (value: null | string[]) => void;
     options: VirtualMultiSelectOption<T>[];
     RowComponent: (
         props: RowComponentProps<{
+            displayCountType?: 'album' | 'song';
             focusedIndex: null | number;
             onToggle: (value: string) => void;
             options: VirtualMultiSelectOption<T>[];
@@ -33,7 +37,9 @@ interface VirtualMultiSelectProps<T> {
 }
 
 export function VirtualMultiSelect<T>({
+    displayCountType = 'album',
     height,
+    isLoading = false,
     label,
     onChange,
     options,
@@ -235,7 +241,11 @@ export function VirtualMultiSelect<T>({
                 style={{ height: `${height}px` }}
                 tabIndex={0}
             >
-                {stableOptions.length === 0 ? (
+                {isLoading ? (
+                    <Center h="100%">
+                        <Spinner />
+                    </Center>
+                ) : stableOptions.length === 0 ? (
                     <Center h="100%">
                         <Text isMuted isNoSelect size="sm">
                             {t('common.noResultsFromQuery', { postProcess: 'sentenceCase' })}
@@ -248,6 +258,7 @@ export function VirtualMultiSelect<T>({
                         rowCount={stableOptions.length}
                         rowHeight={rowHeight}
                         rowProps={{
+                            displayCountType,
                             focusedIndex,
                             onToggle: handleToggle,
                             options: stableOptions,
