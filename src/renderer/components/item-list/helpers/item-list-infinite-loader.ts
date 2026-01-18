@@ -94,7 +94,7 @@ export const useItemListInfiniteLoader = ({
     const { setItemCount } = useListContext();
 
     useEffect(() => {
-        if (!totalItemCount || !setItemCount) {
+        if (totalItemCount == null || !setItemCount) {
             return;
         }
 
