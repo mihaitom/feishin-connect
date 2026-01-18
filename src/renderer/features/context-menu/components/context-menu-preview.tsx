@@ -48,6 +48,7 @@ export const ContextMenuPreview = ({ items, itemType }: ContextMenuPreviewProps)
     const imageUrl = useItemImageUrl({
         id: (firstItem as { imageId?: string })?.imageId,
         itemType: itemType || LibraryItem.SONG,
+        serverId: (firstItem as { _serverId?: string })?._serverId,
         type: 'table',
     });
 
