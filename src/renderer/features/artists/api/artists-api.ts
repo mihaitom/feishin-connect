@@ -1,7 +1,9 @@
 import { queryOptions } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
+import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { getOptimizedListCount } from '/@/renderer/api/utils-list-count';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import {
     AlbumArtistDetailQuery,
@@ -38,8 +40,25 @@ export const artistsQueries = {
     },
     albumArtistListCount: (args: QueryHookArgs<ListCountQuery<AlbumArtistListQuery>>) => {
         return queryOptions({
-            gcTime: 1000 * 60 * 60 * 12,
-            queryFn: ({ signal }) => {
+            gcTime: 1000 * 60 * 60,
+            queryFn: async ({ client, signal }) => {
+                const optimizedCount = await getOptimizedListCount<
+                    ListCountQuery<AlbumArtistListQuery>,
+                    AlbumArtistListQuery,
+                    { totalRecordCount: null | number }
+                >({
+                    client,
+                    listQueryFn: controller.getAlbumArtistList,
+                    listQueryKeyFn: queryKeys.albumArtists.list,
+                    query: args.query,
+                    serverId: args.serverId,
+                    signal,
+                });
+
+                if (optimizedCount !== null) {
+                    return optimizedCount;
+                }
+
                 return api.controller.getAlbumArtistListCount({
                     apiClientProps: { serverId: args.serverId, signal },
                     query: args.query,
@@ -49,7 +68,7 @@ export const artistsQueries = {
                 args.serverId,
                 Object.keys(args.query).length === 0 ? undefined : args.query,
             ),
-            staleTime: 1000 * 60 * 60 * 12,
+            staleTime: 1000 * 60 * 60,
             ...args.options,
         });
     },
@@ -67,8 +86,25 @@ export const artistsQueries = {
     },
     artistListCount: (args: QueryHookArgs<ListCountQuery<ArtistListQuery>>) => {
         return queryOptions({
-            gcTime: 1000 * 60 * 60 * 12,
-            queryFn: ({ signal }) => {
+            gcTime: 1000 * 60 * 60,
+            queryFn: async ({ client, signal }) => {
+                const optimizedCount = await getOptimizedListCount<
+                    ListCountQuery<ArtistListQuery>,
+                    ArtistListQuery,
+                    { totalRecordCount: null | number }
+                >({
+                    client,
+                    listQueryFn: controller.getArtistList,
+                    listQueryKeyFn: queryKeys.artists.list,
+                    query: args.query,
+                    serverId: args.serverId,
+                    signal,
+                });
+
+                if (optimizedCount !== null) {
+                    return optimizedCount;
+                }
+
                 return api.controller
                     .getArtistList({
                         apiClientProps: { serverId: args.serverId, signal },
@@ -80,7 +116,7 @@ export const artistsQueries = {
                 args.serverId,
                 Object.keys(args.query).length === 0 ? undefined : args.query,
             ),
-            staleTime: 1000 * 60 * 60 * 12,
+            staleTime: 1000 * 60 * 60,
             ...args.options,
         });
     },

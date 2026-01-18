@@ -38,14 +38,14 @@ export const ArtistListPaginatedTable = ({
     serverId,
     size = 'default',
 }: ArtistListPaginatedTableProps) => {
+    const { currentPage, onChange } = useItemListPagination();
+
     const listCountQuery = artistsQueries.artistListCount({
-        query: { ...query },
+        query: { ...query, limit: itemsPerPage },
         serverId: serverId,
     }) as UseSuspenseQueryOptions<number, Error, number, readonly unknown[]>;
 
     const listQueryFn = api.controller.getArtistList;
-
-    const { currentPage, onChange } = useItemListPagination();
 
     const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
         currentPage,

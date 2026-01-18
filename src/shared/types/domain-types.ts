@@ -487,7 +487,7 @@ export interface AlbumListQuery extends AlbumListNavidromeQuery, BaseQuery<Album
 // Album List
 export type AlbumListResponse = BasePaginatedResponse<Album[]>;
 
-export type ListCountQuery<TQuery> = Omit<TQuery, 'limit' | 'startIndex'>;
+export type ListCountQuery<TQuery> = Omit<TQuery, 'startIndex'>;
 
 interface AlbumListNavidromeQuery {
     hasRating?: boolean;

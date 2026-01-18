@@ -37,7 +37,7 @@ export const ArtistListInfiniteTable = ({
     size = 'default',
 }: ArtistListInfiniteTableProps) => {
     const listCountQuery = artistsQueries.artistListCount({
-        query: { ...query },
+        query: { ...query, limit: itemsPerPage },
         serverId: serverId,
     }) as UseSuspenseQueryOptions<number, Error, number, readonly unknown[]>;
 

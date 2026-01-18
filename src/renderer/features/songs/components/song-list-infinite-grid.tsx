@@ -25,7 +25,7 @@ export const SongListInfiniteGrid = ({
     size,
 }: SongListInfiniteGridProps) => {
     const listCountQuery = songsQueries.listCount({
-        query: { ...query },
+        query: { ...query, limit: itemsPerPage },
         serverId: serverId,
     }) as UseSuspenseQueryOptions<number, Error, number, readonly unknown[]>;
 

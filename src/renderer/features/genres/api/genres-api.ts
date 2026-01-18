@@ -28,7 +28,7 @@ export const genresQueries = {
     },
     listCount: (args: QueryHookArgs<ListCountQuery<GenreListQuery>>) => {
         return queryOptions({
-            gcTime: 1000 * 60 * 60 * 12,
+            gcTime: 1000 * 60 * 60,
             queryFn: ({ signal }) => {
                 return api.controller
                     .getGenreList({
@@ -41,7 +41,7 @@ export const genresQueries = {
                 args.serverId,
                 Object.keys(args.query).length === 0 ? undefined : args.query,
             ),
-            staleTime: 1000 * 60 * 60 * 12,
+            staleTime: 1000 * 60 * 60,
             ...args.options,
         });
     },

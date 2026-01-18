@@ -37,7 +37,7 @@ export const AlbumListInfiniteTable = ({
     size = 'default',
 }: AlbumListInfiniteTableProps) => {
     const listCountQuery = albumQueries.listCount({
-        query: { ...query },
+        query: { ...query, limit: itemsPerPage },
         serverId: serverId,
     }) as UseSuspenseQueryOptions<number, Error, number, readonly unknown[]>;
 
