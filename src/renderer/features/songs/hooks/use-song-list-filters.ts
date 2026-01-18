@@ -11,6 +11,7 @@ import {
     parseCustomFiltersParam,
     parseIntParam,
     setJsonSearchParam,
+    setMultipleSearchParams,
     setSearchParam,
 } from '/@/renderer/utils/query-params';
 import { SongListSort, SortOrder } from '/@/shared/types/domain-types';
@@ -19,9 +20,9 @@ import { ItemListKey } from '/@/shared/types/types';
 export const useSongListFilters = (listKey?: ItemListKey) => {
     const resolvedListKey = listKey ?? ItemListKey.SONG;
 
-    const { setSortBy, sortBy } = useSortByFilter<SongListSort>(SongListSort.NAME, resolvedListKey);
+    const { sortBy } = useSortByFilter<SongListSort>(SongListSort.NAME, resolvedListKey);
 
-    const { setSortOrder, sortOrder } = useSortOrderFilter(SortOrder.ASC, resolvedListKey);
+    const { sortOrder } = useSortOrderFilter(SortOrder.ASC, resolvedListKey);
 
     const { searchTerm, setSearchTerm } = useSearchTermFilter('');
 
@@ -145,28 +146,25 @@ export const useSongListFilters = (listKey?: ItemListKey) => {
     );
 
     const clear = useCallback(() => {
-        setAlbumIds(null);
-        setArtistIds(null);
-        setCustom(null);
-        setFavorite(null);
-        setGenreId(null);
-        setMaxYear(null);
-        setMinYear(null);
-        setSearchTerm(null);
-        setSortBy(SongListSort.NAME);
-        setSortOrder(SortOrder.ASC);
-    }, [
-        setAlbumIds,
-        setArtistIds,
-        setCustom,
-        setFavorite,
-        setGenreId,
-        setMaxYear,
-        setMinYear,
-        setSearchTerm,
-        setSortBy,
-        setSortOrder,
-    ]);
+        setSearchParams(
+            (prev) =>
+                setMultipleSearchParams(
+                    prev,
+                    {
+                        [FILTER_KEYS.SHARED.SEARCH_TERM]: null,
+                        [FILTER_KEYS.SONG._CUSTOM]: null,
+                        [FILTER_KEYS.SONG.ALBUM_IDS]: null,
+                        [FILTER_KEYS.SONG.ARTIST_IDS]: null,
+                        [FILTER_KEYS.SONG.FAVORITE]: null,
+                        [FILTER_KEYS.SONG.GENRE_ID]: null,
+                        [FILTER_KEYS.SONG.MAX_YEAR]: null,
+                        [FILTER_KEYS.SONG.MIN_YEAR]: null,
+                    },
+                    new Set([FILTER_KEYS.SONG._CUSTOM]),
+                ),
+            { replace: true },
+        );
+    }, [setSearchParams]);
 
     const query = useMemo(
         () => ({

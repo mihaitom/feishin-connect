@@ -15,6 +15,7 @@ import {
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { useCurrentServer } from '/@/renderer/store';
 import { useAppStore, useAppStoreActions } from '/@/renderer/store/app.store';
+import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
@@ -34,7 +35,7 @@ export const JellyfinSongFilters = ({ disableArtistFilter }: JellyfinSongFilters
     const server = useCurrentServer();
     const serverId = server.id;
     const { t } = useTranslation();
-    const { query, setArtistIds, setCustom, setFavorite, setMaxYear, setMinYear } =
+    const { clear, query, setArtistIds, setCustom, setFavorite, setMaxYear, setMinYear } =
         useSongListFilters();
 
     const { customFilters } = useListContext();
@@ -280,10 +281,10 @@ export const JellyfinSongFilters = ({ disableArtistFilter }: JellyfinSongFilters
         <Stack px="md" py="md">
             {yesNoFilters.map((filter) => (
                 <YesNoSelect
-                    defaultValue={filter.value ? filter.value.toString() : undefined}
                     key={`jf-filter-${filter.label}`}
                     label={filter.label}
                     onChange={(e) => filter.onChange(e ? e === 'true' : undefined)}
+                    value={filter.value ? filter.value.toString() : undefined}
                 />
             ))}
             {!disableArtistFilter && (
@@ -320,34 +321,38 @@ export const JellyfinSongFilters = ({ disableArtistFilter }: JellyfinSongFilters
             <Divider my="md" />
             <Group grow>
                 <NumberInput
-                    defaultValue={query.minYear ?? undefined}
                     hideControls={false}
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
                     onChange={(e) => debouncedHandleMinYearFilter(e)}
                     required={!!query.minYear}
+                    value={query.minYear ?? undefined}
                 />
                 <NumberInput
-                    defaultValue={query.maxYear ?? undefined}
                     hideControls={false}
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={2300}
                     min={1700}
                     onChange={(e) => debouncedHandleMaxYearFilter(e)}
                     required={!!query.minYear}
+                    value={query.maxYear ?? undefined}
                 />
             </Group>
             {tagsQuery.data?.boolTags && tagsQuery.data.boolTags.length > 0 && (
                 <MultiSelectWithInvalidData
                     clearable
                     data={tagsQuery.data.boolTags}
-                    defaultValue={selectedTags}
                     label={t('common.tags', { postProcess: 'sentenceCase' })}
                     onChange={handleTagFilter}
                     searchable
+                    value={selectedTags}
                 />
             )}
+            <Divider my="md" />
+            <Button fullWidth onClick={clear} variant="subtle">
+                {t('common.reset', { postProcess: 'sentenceCase' })}
+            </Button>
         </Stack>
     );
 };

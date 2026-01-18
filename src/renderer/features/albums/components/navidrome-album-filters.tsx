@@ -17,6 +17,7 @@ import { useCurrentServer, useCurrentServerId } from '/@/renderer/store';
 import { useAppStore, useAppStoreActions } from '/@/renderer/store/app.store';
 import { titleCase } from '/@/renderer/utils';
 import { NDSongQueryFieldsLabelMap } from '/@/shared/api/navidrome/navidrome-types';
+import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
@@ -45,6 +46,7 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
     const isGenrePage = customFilters?.genreIds !== undefined;
 
     const {
+        clear,
         query,
         setAlbumArtist,
         setCompilation,
@@ -285,11 +287,11 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
                 </Text>
                 <SegmentedControl
                     data={segmentedControlData}
-                    defaultValue={booleanToSegmentValue(query.favorite)}
                     onChange={(value) => {
                         setFavorite(segmentValueToBoolean(value));
                     }}
                     size="sm"
+                    value={booleanToSegmentValue(query.favorite)}
                     w="100%"
                 />
             </Stack>
@@ -299,18 +301,18 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
                 </Text>
                 <SegmentedControl
                     data={segmentedControlData}
-                    defaultValue={booleanToSegmentValue(query.compilation)}
                     onChange={(value) => {
                         setCompilation(segmentValueToBoolean(value));
                     }}
                     size="sm"
+                    value={booleanToSegmentValue(query.compilation)}
                     w="100%"
                 />
             </Stack>
             {toggleFilters.map((filter) => (
                 <Group justify="space-between" key={`nd-filter-${filter.label}`}>
                     <Text>{filter.label}</Text>
-                    <Switch defaultChecked={filter?.value ?? false} onChange={filter.onChange} />
+                    <Switch checked={filter?.value ?? false} onChange={filter.onChange} />
                 </Group>
             ))}
             {!disableArtistFilter && (
@@ -346,15 +348,19 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
             )}
             <Divider my="md" />
             <NumberInput
-                defaultValue={query.minYear ?? undefined}
                 hideControls={false}
                 label={t('common.year', { postProcess: 'titleCase' })}
                 max={5000}
                 min={0}
                 onChange={(e) => debouncedHandleYearFilter(e)}
+                value={query.minYear ?? undefined}
             />
             <Divider my="md" />
             <TagFilters />
+            <Divider my="md" />
+            <Button fullWidth onClick={clear} variant="subtle">
+                {t('common.reset', { postProcess: 'sentenceCase' })}
+            </Button>
         </Stack>
     );
 };
@@ -377,7 +383,7 @@ const TagFilterItem = ({ label, onChange, options, tagValue, value }: TagFilterI
         [options],
     );
 
-    const defaultValue = useMemo(() => {
+    const currentValue = useMemo(() => {
         if (!value) return [];
         return Array.isArray(value) ? value : [value];
     }, [value]);
@@ -397,12 +403,12 @@ const TagFilterItem = ({ label, onChange, options, tagValue, value }: TagFilterI
         <MultiSelectWithInvalidData
             clearable
             data={selectData}
-            defaultValue={defaultValue}
             key={tagValue}
             label={label}
             limit={100}
             onChange={handleChange}
             searchable
+            value={currentValue}
         />
     );
 };

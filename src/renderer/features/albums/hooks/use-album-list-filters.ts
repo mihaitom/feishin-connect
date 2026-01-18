@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
@@ -10,6 +10,7 @@ import {
     parseBooleanParam,
     parseCustomFiltersParam,
     parseIntParam,
+    setMultipleSearchParams,
     setSearchParam,
 } from '/@/renderer/utils/query-params';
 import { AlbumListSort, SortOrder } from '/@/shared/types/domain-types';
@@ -18,12 +19,9 @@ import { ItemListKey } from '/@/shared/types/types';
 export const useAlbumListFilters = (listKey?: ItemListKey) => {
     const resolvedListKey = listKey ?? ItemListKey.ALBUM;
 
-    const { setSortBy, sortBy } = useSortByFilter<AlbumListSort>(
-        AlbumListSort.NAME,
-        resolvedListKey,
-    );
+    const { sortBy } = useSortByFilter<AlbumListSort>(AlbumListSort.NAME, resolvedListKey);
 
-    const { setSortOrder, sortOrder } = useSortOrderFilter(SortOrder.ASC, resolvedListKey);
+    const { sortOrder } = useSortOrderFilter(SortOrder.ASC, resolvedListKey);
 
     const { searchTerm, setSearchTerm } = useSearchTermFilter('');
 
@@ -73,12 +71,6 @@ export const useAlbumListFilters = (listKey?: ItemListKey) => {
         () => parseCustomFiltersParam(searchParams, FILTER_KEYS.ALBUM._CUSTOM),
         [searchParams],
     );
-
-    // Use a ref to track the latest custom filters to avoid stale state during batched updates
-    const customRef = useRef<null | Record<string, any> | undefined>(custom);
-    useEffect(() => {
-        customRef.current = custom;
-    }, [custom]);
 
     const setGenreId = useCallback(
         (value: null | string[]) => {
@@ -184,32 +176,27 @@ export const useAlbumListFilters = (listKey?: ItemListKey) => {
     );
 
     const clear = useCallback(() => {
-        setAlbumArtist(null);
-        setCompilation(null);
-        setCustom(null);
-        setFavorite(null);
-        setGenreId(null);
-        setHasRating(null);
-        setMaxYear(null);
-        setMinYear(null);
-        setRecentlyPlayed(null);
-        setSearchTerm(null);
-        setSortBy(AlbumListSort.NAME);
-        setSortOrder(SortOrder.ASC);
-    }, [
-        setAlbumArtist,
-        setCompilation,
-        setCustom,
-        setFavorite,
-        setGenreId,
-        setHasRating,
-        setMaxYear,
-        setMinYear,
-        setRecentlyPlayed,
-        setSearchTerm,
-        setSortBy,
-        setSortOrder,
-    ]);
+        setSearchParams(
+            (prev) =>
+                setMultipleSearchParams(
+                    prev,
+                    {
+                        [FILTER_KEYS.ALBUM._CUSTOM]: null,
+                        [FILTER_KEYS.ALBUM.ARTIST_IDS]: null,
+                        [FILTER_KEYS.ALBUM.COMPILATION]: null,
+                        [FILTER_KEYS.ALBUM.FAVORITE]: null,
+                        [FILTER_KEYS.ALBUM.GENRE_ID]: null,
+                        [FILTER_KEYS.ALBUM.HAS_RATING]: null,
+                        [FILTER_KEYS.ALBUM.MAX_YEAR]: null,
+                        [FILTER_KEYS.ALBUM.MIN_YEAR]: null,
+                        [FILTER_KEYS.ALBUM.RECENTLY_PLAYED]: null,
+                        [FILTER_KEYS.SHARED.SEARCH_TERM]: null,
+                    },
+                    new Set([FILTER_KEYS.ALBUM._CUSTOM]),
+                ),
+            { replace: true },
+        );
+    }, [setSearchParams]);
 
     const query = useMemo(
         () => ({

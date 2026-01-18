@@ -13,6 +13,7 @@ import {
 } from '/@/renderer/features/shared/components/multi-select-rows';
 import { useCurrentServerId } from '/@/renderer/store';
 import { useAppStore, useAppStoreActions } from '/@/renderer/store/app.store';
+import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
@@ -37,7 +38,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
 
     const isGenrePage = customFilters?.genreIds !== undefined;
 
-    const { query, setAlbumArtist, setFavorite, setGenreId, setMaxYear, setMinYear } =
+    const { clear, query, setAlbumArtist, setFavorite, setGenreId, setMaxYear, setMinYear } =
         useAlbumListFilters();
 
     const albumArtistListQuery = useSuspenseQuery(
@@ -215,7 +216,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
             {toggleFilters.map((filter) => (
                 <Group justify="space-between" key={`ss-filter-${filter.label}`}>
                     <Text>{filter.label}</Text>
-                    <Switch defaultChecked={filter.value ?? false} onChange={filter.onChange} />
+                    <Switch checked={filter.value ?? false} onChange={filter.onChange} />
                 </Group>
             ))}
             {!disableArtistFilter && (
@@ -251,24 +252,28 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
             <Divider my="md" />
             <Group grow>
                 <NumberInput
-                    defaultValue={query.minYear ?? undefined}
                     disabled={Boolean(query.genreIds && query.genreIds.length > 0)}
                     hideControls={false}
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={5000}
                     min={0}
                     onChange={(e) => debouncedHandleMinYearFilter(e)}
+                    value={query.minYear ?? undefined}
                 />
                 <NumberInput
-                    defaultValue={query.maxYear ?? undefined}
                     disabled={Boolean(query.genreIds && query.genreIds.length > 0)}
                     hideControls={false}
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={5000}
                     min={0}
                     onChange={(e) => debouncedHandleMaxYearFilter(e)}
+                    value={query.maxYear ?? undefined}
                 />
             </Group>
+            <Divider my="md" />
+            <Button fullWidth onClick={clear} variant="subtle">
+                {t('common.reset', { postProcess: 'sentenceCase' })}
+            </Button>
         </Stack>
     );
 };

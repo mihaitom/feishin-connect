@@ -5,6 +5,7 @@ import { useListContext } from '/@/renderer/context/list-context';
 import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { GenreMultiSelectRow } from '/@/renderer/features/shared/components/multi-select-rows';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
+import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
@@ -14,7 +15,7 @@ import { Text } from '/@/shared/components/text/text';
 
 export const SubsonicSongFilters = () => {
     const { t } = useTranslation();
-    const { query, setFavorite, setGenreId } = useSongListFilters();
+    const { clear, query, setFavorite, setGenreId } = useSongListFilters();
 
     const { customFilters } = useListContext();
 
@@ -72,7 +73,7 @@ export const SubsonicSongFilters = () => {
             {toggleFilters.map((filter) => (
                 <Group justify="space-between" key={`ss-filter-${filter.label}`}>
                     <Text>{filter.label}</Text>
-                    <Switch defaultChecked={filter.value ?? false} onChange={filter.onChange} />
+                    <Switch checked={filter.value ?? false} onChange={filter.onChange} />
                 </Group>
             ))}
             {!isGenrePage && (
@@ -90,6 +91,10 @@ export const SubsonicSongFilters = () => {
                     />
                 </>
             )}
+            <Divider my="md" />
+            <Button fullWidth onClick={clear} variant="subtle">
+                {t('common.reset', { postProcess: 'sentenceCase' })}
+            </Button>
         </Stack>
     );
 };

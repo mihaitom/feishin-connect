@@ -123,6 +123,45 @@ export const setJsonSearchParam = (
     return newParams;
 };
 
+export const setMultipleSearchParams = (
+    searchParams: URLSearchParams,
+    params: Record<
+        string,
+        boolean | null | number | Record<string, any> | string | string[] | undefined
+    >,
+    jsonKeys?: Set<string>,
+): URLSearchParams => {
+    const newParams = new URLSearchParams(searchParams);
+
+    for (const [key, value] of Object.entries(params)) {
+        if (value === null || value === undefined) {
+            newParams.delete(key);
+            continue;
+        }
+
+        if (jsonKeys?.has(key)) {
+            if (typeof value === 'object' && !Array.isArray(value)) {
+                newParams.set(key, JSON.stringify(value));
+            } else {
+                newParams.delete(key);
+            }
+        } else {
+            if (Array.isArray(value)) {
+                newParams.delete(key);
+                value.forEach((v) => newParams.append(key, String(v)));
+            } else if (typeof value === 'boolean') {
+                newParams.set(key, String(value));
+            } else if (typeof value === 'number') {
+                newParams.set(key, String(value));
+            } else {
+                newParams.set(key, value as string);
+            }
+        }
+    }
+
+    return newParams;
+};
+
 /**
  * Parse custom filters from URLSearchParams with validation
  */

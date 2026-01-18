@@ -38,10 +38,16 @@ export const SelectWithInvalidData = ({ data, defaultValue, ...props }: SelectPr
     );
 };
 
-export const MultiSelectWithInvalidData = ({ data, defaultValue, ...props }: MultiSelectProps) => {
+export const MultiSelectWithInvalidData = ({
+    data,
+    defaultValue,
+    value,
+    ...props
+}: MultiSelectProps) => {
     const { t } = useTranslation();
+    const currentValue = value ?? defaultValue;
     const [fullData, missing] = useMemo(() => {
-        if (defaultValue?.length) {
+        if (currentValue?.length) {
             const validValues = new Set<string>();
             for (const item of data || []) {
                 if (typeof item === 'string') {
@@ -53,9 +59,9 @@ export const MultiSelectWithInvalidData = ({ data, defaultValue, ...props }: Mul
 
             const missingFields: string[] = [];
 
-            for (const value of defaultValue) {
-                if (!validValues.has(value)) {
-                    missingFields.push(value);
+            for (const val of currentValue) {
+                if (!validValues.has(val)) {
+                    missingFields.push(val);
                 }
             }
 
@@ -65,7 +71,7 @@ export const MultiSelectWithInvalidData = ({ data, defaultValue, ...props }: Mul
         }
 
         return [data, []];
-    }, [data, defaultValue]);
+    }, [data, currentValue]);
 
     const error = useMemo(
         () =>
@@ -75,5 +81,13 @@ export const MultiSelectWithInvalidData = ({ data, defaultValue, ...props }: Mul
         [missing, t],
     );
 
-    return <MultiSelect data={fullData} defaultValue={defaultValue} error={error} {...props} />;
+    return (
+        <MultiSelect
+            data={fullData}
+            defaultValue={defaultValue}
+            error={error}
+            value={value}
+            {...props}
+        />
+    );
 };
