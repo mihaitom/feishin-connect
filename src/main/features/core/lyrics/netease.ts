@@ -128,6 +128,7 @@ export async function getSearchResults(
         return {
             artist,
             id: String(song.id),
+            isSync: null,
             name: song.name,
             source: LyricSource.NETEASE,
         };

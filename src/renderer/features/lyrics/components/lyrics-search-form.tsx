@@ -19,6 +19,7 @@ import {
     UnsynchronizedLyricsProps,
 } from '/@/renderer/features/lyrics/unsynchronized-lyrics';
 import { usePlayerSong } from '/@/renderer/store';
+import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
 import { Divider } from '/@/shared/components/divider/divider';
@@ -43,7 +44,8 @@ interface SearchResultProps {
     onClick?: () => void;
 }
 const SearchResult = ({ data, isSelected, onClick }: SearchResultProps) => {
-    const { artist, id, name, score, source } = data;
+    const { t } = useTranslation();
+    const { artist, id, isSync, name, score, source } = data;
 
     const percentageScore = useMemo(() => {
         if (!score) return 0;
@@ -52,6 +54,21 @@ const SearchResult = ({ data, isSelected, onClick }: SearchResultProps) => {
 
     const cleanId =
         source === LyricSource.GENIUS ? id.replace(/^((http[s]?|ftp):\/)?\/?([^:/\s]+)/g, '') : id;
+
+    const syncStatus = useMemo(() => {
+        if (isSync === true) {
+            return t('page.fullscreenPlayer.config.synchronized', {
+                postProcess: 'sentenceCase',
+            });
+        }
+        if (isSync === false) {
+            return t('page.fullscreenPlayer.config.unsynchronized', {
+                postProcess: 'sentenceCase',
+            });
+        }
+
+        return t('common.unknown', { postProcess: 'titleCase' });
+    }, [isSync, t]);
 
     return (
         <button
@@ -68,7 +85,7 @@ const SearchResult = ({ data, isSelected, onClick }: SearchResultProps) => {
                     <Text isMuted>{artist}</Text>
                     <Group gap="sm" wrap="nowrap">
                         <Text isMuted size="sm">
-                            {[source, cleanId].join(' — ')}
+                            {[source, cleanId, syncStatus].join(' — ')}
                         </Text>
                     </Group>
                 </Stack>
@@ -171,6 +188,16 @@ export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearch
                             context: 'name',
                             postProcess: 'titleCase',
                         })}
+                        rightSection={
+                            form.values.name ? (
+                                <ActionIcon
+                                    icon="x"
+                                    onClick={() => form.setFieldValue('name', '')}
+                                    size="sm"
+                                    variant="transparent"
+                                />
+                            ) : null
+                        }
                         {...form.getInputProps('name')}
                     />
                     <TextInput
@@ -178,13 +205,23 @@ export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearch
                             context: 'artist',
                             postProcess: 'titleCase',
                         })}
+                        rightSection={
+                            form.values.artist ? (
+                                <ActionIcon
+                                    icon="x"
+                                    onClick={() => form.setFieldValue('artist', '')}
+                                    size="sm"
+                                    variant="transparent"
+                                />
+                            ) : null
+                        }
                         {...form.getInputProps('artist')}
                     />
                 </Group>
             </form>
             <Divider />
-            <Group align="flex-start" grow style={{ flex: 1, minHeight: 0 }}>
-                <Stack style={{ flex: 1, height: '100%', minHeight: 0 }}>
+            <Group align="flex-start" grow style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <Stack style={{ flex: 1, height: '100%', minHeight: 0, overflow: 'hidden' }}>
                     <ScrollArea
                         style={{
                             height: '100%',
@@ -211,41 +248,54 @@ export const LyricsSearchForm = ({ artist, name, onSearchOverride }: LyricSearch
                     </ScrollArea>
                 </Stack>
                 {selectedResult && (
-                    <Stack style={{ flex: 1, height: '100%', minHeight: 0 }}>
-                        {isPreviewLoading ? (
-                            <Spinner container />
-                        ) : previewData ? (
-                            Array.isArray(previewData) ? (
-                                <SynchronizedLyrics
-                                    style={{ padding: 0 }}
-                                    {...({
-                                        artist: selectedResult.artist,
-                                        lyrics: previewData,
-                                        name: selectedResult.name,
-                                        remote: true,
-                                        source: selectedResult.source,
-                                    } as SynchronizedLyricsProps)}
-                                />
+                    <Stack style={{ flex: 1, height: '100%', minHeight: 0, overflow: 'hidden' }}>
+                        <ScrollArea
+                            className={styles['lyrics-preview']}
+                            style={{
+                                height: '100%',
+                                paddingRight: '1rem',
+                            }}
+                        >
+                            {isPreviewLoading ? (
+                                <Spinner container />
+                            ) : previewData ? (
+                                <div
+                                    className={styles['lyrics-content-wrapper']}
+                                    style={{ width: '100%' }}
+                                >
+                                    {Array.isArray(previewData) ? (
+                                        <SynchronizedLyrics
+                                            style={{ padding: 0 }}
+                                            {...({
+                                                artist: selectedResult.artist,
+                                                lyrics: previewData,
+                                                name: selectedResult.name,
+                                                remote: true,
+                                                source: selectedResult.source,
+                                            } as SynchronizedLyricsProps)}
+                                        />
+                                    ) : (
+                                        <UnsynchronizedLyrics
+                                            {...({
+                                                artist: selectedResult.artist,
+                                                lyrics: previewData,
+                                                name: selectedResult.name,
+                                                remote: true,
+                                                source: selectedResult.source,
+                                            } as UnsynchronizedLyricsProps)}
+                                        />
+                                    )}
+                                </div>
                             ) : (
-                                <UnsynchronizedLyrics
-                                    {...({
-                                        artist: selectedResult.artist,
-                                        lyrics: previewData,
-                                        name: selectedResult.name,
-                                        remote: true,
-                                        source: selectedResult.source,
-                                    } as UnsynchronizedLyricsProps)}
-                                />
-                            )
-                        ) : (
-                            <Center>
-                                <Text isMuted>
-                                    {t('page.fullscreenPlayer.noLyrics', {
-                                        postProcess: 'sentenceCase',
-                                    })}
-                                </Text>
-                            </Center>
-                        )}
+                                <Center>
+                                    <Text isMuted>
+                                        {t('page.fullscreenPlayer.noLyrics', {
+                                            postProcess: 'sentenceCase',
+                                        })}
+                                    </Text>
+                                </Center>
+                            )}
+                        </ScrollArea>
                     </Stack>
                 )}
             </Group>

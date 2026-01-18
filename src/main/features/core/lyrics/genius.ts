@@ -150,6 +150,7 @@ export async function getSearchResults(
         return {
             artist: song.artist_names,
             id: song.url,
+            isSync: null,
             name: song.full_title,
             source: LyricSource.GENIUS,
         };

@@ -17,8 +17,12 @@ const TIMEOUT_MS = 5000;
 export interface LrcLibSearchResponse {
     albumName: string;
     artistName: string;
+    duration?: number;
     id: number;
+    instrumental?: boolean;
     name: string;
+    plainLyrics: null | string;
+    syncedLyrics: null | string;
 }
 
 export interface LrcLibTrackResponse {
@@ -75,6 +79,7 @@ export async function getSearchResults(
         return {
             artist: song.artistName,
             id: String(song.id),
+            isSync: song.syncedLyrics ? true : false,
             name: song.name,
             source: LyricSource.LRCLIB,
         };
