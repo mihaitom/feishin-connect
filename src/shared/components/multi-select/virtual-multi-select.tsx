@@ -17,6 +17,7 @@ import { Text } from '/@/shared/components/text/text';
 export type VirtualMultiSelectOption<T> = T & { label: string; value: string };
 
 interface VirtualMultiSelectProps<T> {
+    disabled?: boolean;
     displayCountType?: 'album' | 'song';
     height: number;
     isLoading?: boolean;
@@ -25,6 +26,7 @@ interface VirtualMultiSelectProps<T> {
     options: VirtualMultiSelectOption<T>[];
     RowComponent: (
         props: RowComponentProps<{
+            disabled?: boolean;
             displayCountType?: 'album' | 'song';
             focusedIndex: null | number;
             onToggle: (value: string) => void;
@@ -37,6 +39,7 @@ interface VirtualMultiSelectProps<T> {
 }
 
 export function VirtualMultiSelect<T>({
+    disabled = false,
     displayCountType = 'album',
     height,
     isLoading = false,
@@ -105,6 +108,7 @@ export function VirtualMultiSelect<T>({
 
     const handleToggle = useCallback(
         (optionValue: string) => {
+            if (disabled) return;
             if (value.includes(optionValue)) {
                 const newValue = value.filter((v) => v !== optionValue);
                 onChange(newValue.length > 0 ? newValue : null);
@@ -112,15 +116,16 @@ export function VirtualMultiSelect<T>({
                 onChange(singleSelect ? [optionValue] : [...value, optionValue]);
             }
         },
-        [onChange, singleSelect, value],
+        [disabled, onChange, singleSelect, value],
     );
 
     const handleDeselect = useCallback(
         (optionValue: string) => {
+            if (disabled) return;
             const newValue = value.filter((v) => v !== optionValue);
             onChange(newValue.length > 0 ? newValue : null);
         },
-        [onChange, value],
+        [disabled, onChange, value],
     );
 
     const placeholder = useMemo(
@@ -147,7 +152,7 @@ export function VirtualMultiSelect<T>({
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLDivElement>) => {
-            if (stableOptions.length === 0) return;
+            if (disabled || stableOptions.length === 0) return;
 
             switch (e.key) {
                 case ' ':
@@ -186,16 +191,17 @@ export function VirtualMultiSelect<T>({
                     break;
             }
         },
-        [focusedIndex, handleToggle, scrollToIndex, stableOptions],
+        [disabled, focusedIndex, handleToggle, scrollToIndex, stableOptions],
     );
 
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${disabled ? styles.disabled : ''}`}>
             <TextInput
                 className={styles['search-input']}
+                disabled={disabled}
                 label={labelWithClear}
                 leftSection={
-                    value.length > 0 ? (
+                    value.length > 0 && !disabled ? (
                         <ActionIcon
                             icon="x"
                             iconProps={{ size: 'md' }}
@@ -208,11 +214,15 @@ export function VirtualMultiSelect<T>({
                         />
                     ) : undefined
                 }
-                onChange={(e) => setSearch(e.currentTarget.value)}
+                onChange={(e) => {
+                    if (!disabled) {
+                        setSearch(e.currentTarget.value);
+                    }
+                }}
                 placeholder={placeholder}
                 rightSection={
                     <Group gap="xs" wrap="nowrap">
-                        {search ? (
+                        {search && !disabled ? (
                             <ActionIcon
                                 icon="x"
                                 iconProps={{ size: 'md' }}
@@ -225,13 +235,19 @@ export function VirtualMultiSelect<T>({
                         )}
                     </Group>
                 }
-                styles={{ label: { width: '100%' } }}
+                styles={{
+                    input: disabled ? { opacity: 0.6 } : undefined,
+                    label: { width: '100%' },
+                    section: disabled ? { opacity: 0.6 } : undefined,
+                    wrapper: disabled ? { opacity: 0.6 } : undefined,
+                }}
                 value={search}
             />
             <div
                 className={styles['list-container']}
                 onKeyDown={handleKeyDown}
                 onMouseDown={(e) => {
+                    if (disabled) return;
                     const element = e.currentTarget as HTMLDivElement;
                     if (element.focus) {
                         element.focus({ preventScroll: true });
@@ -239,7 +255,7 @@ export function VirtualMultiSelect<T>({
                 }}
                 ref={listContainerRef}
                 style={{ height: `${height}px` }}
-                tabIndex={0}
+                tabIndex={disabled ? -1 : 0}
             >
                 {isLoading ? (
                     <Center h="100%">
@@ -258,6 +274,7 @@ export function VirtualMultiSelect<T>({
                         rowCount={stableOptions.length}
                         rowHeight={rowHeight}
                         rowProps={{
+                            disabled,
                             displayCountType,
                             focusedIndex,
                             onToggle: handleToggle,
@@ -271,19 +288,21 @@ export function VirtualMultiSelect<T>({
                 <Stack gap="xs" mt="sm">
                     {selectedOptions.map((option) => (
                         <Group
-                            className={styles['selected-option']}
+                            className={`${styles['selected-option']} ${disabled ? styles.disabled : ''}`}
                             gap="sm"
                             key={option.value}
                             onClick={() => handleDeselect(option.value)}
                             wrap="nowrap"
                         >
-                            <ActionIcon
-                                icon="minus"
-                                iconProps={{ size: 'sm' }}
-                                size="xs"
-                                stopsPropagation
-                                variant="transparent"
-                            />
+                            {!disabled && (
+                                <ActionIcon
+                                    icon="minus"
+                                    iconProps={{ size: 'sm' }}
+                                    size="xs"
+                                    stopsPropagation
+                                    variant="transparent"
+                                />
+                            )}
                             <Text isNoSelect overflow="hidden" size="sm">
                                 {option.label}
                             </Text>

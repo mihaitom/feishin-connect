@@ -11,6 +11,7 @@ import { Text } from '/@/shared/components/text/text';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
 export function ArtistMultiSelectRow({
+    disabled = false,
     displayCountType = 'album',
     focusedIndex,
     index,
@@ -18,6 +19,7 @@ export function ArtistMultiSelectRow({
     options,
     style,
 }: RowComponentProps<{
+    disabled?: boolean;
     displayCountType?: 'album' | 'song';
     focusedIndex: null | number;
     onToggle: (value: string) => void;
@@ -41,11 +43,11 @@ export function ArtistMultiSelectRow({
 
     return (
         <Group
-            className={styles.row}
+            className={`${styles.row} ${disabled ? styles.disabled : ''}`}
             gap="sm"
-            onClick={handleClick}
+            onClick={disabled ? undefined : handleClick}
             style={{ ...style }}
-            {...(isFocused && { 'data-focused': true })}
+            {...(isFocused && !disabled && { 'data-focused': true })}
         >
             <ItemImage
                 containerClassName={styles.rowImage}
@@ -70,6 +72,7 @@ export function ArtistMultiSelectRow({
 }
 
 export function GenreMultiSelectRow({
+    disabled = false,
     displayCountType = 'album',
     focusedIndex,
     index,
@@ -77,6 +80,7 @@ export function GenreMultiSelectRow({
     options,
     style,
 }: RowComponentProps<{
+    disabled?: boolean;
     displayCountType?: 'album' | 'song';
     focusedIndex: null | number;
     onToggle: (value: string) => void;
@@ -99,11 +103,11 @@ export function GenreMultiSelectRow({
 
     return (
         <Group
-            className={styles.row}
+            className={`${styles.row} ${disabled ? styles.disabled : ''}`}
             gap="sm"
-            onClick={handleClick}
+            onClick={disabled ? undefined : handleClick}
             style={{ ...style }}
-            {...(isFocused && { 'data-focused': true })}
+            {...(isFocused && !disabled && { 'data-focused': true })}
         >
             <div className={styles.rowContent}>
                 <Text isNoSelect overflow="hidden" size="sm">

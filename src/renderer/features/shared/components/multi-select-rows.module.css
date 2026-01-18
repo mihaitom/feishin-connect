@@ -27,3 +27,13 @@
 .row[data-focused='true'] {
     border: 1px solid var(--theme-colors-primary);
 }
+
+.row.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.row.disabled:hover {
+    cursor: not-allowed;
+    background-color: transparent;
+}

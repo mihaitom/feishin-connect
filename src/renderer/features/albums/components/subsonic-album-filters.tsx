@@ -74,11 +74,22 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
         }));
     }, [items]);
 
+    const hasFavorite = query.favorite === true;
+    const hasArtist = query.artistIds && query.artistIds.length > 0;
+    const hasGenre = query.genreIds && query.genreIds.length > 0;
+    const hasYear = query.minYear !== undefined || query.maxYear !== undefined;
+
+    const isFavoriteDisabled = hasArtist || hasGenre || hasYear;
+    const isArtistDisabled = hasFavorite || hasGenre || hasYear;
+    const isGenreDisabled = hasFavorite || hasArtist || hasYear;
+    const isYearDisabled = hasFavorite || hasArtist || hasGenre;
+
     const handleAlbumArtistFilter = useCallback(
         (e: null | string[]) => {
+            if (isArtistDisabled && e !== null) return;
             setAlbumArtist(e ?? null);
         },
-        [setAlbumArtist],
+        [isArtistDisabled, setAlbumArtist],
     );
 
     const genreListQuery = useGenreList();
@@ -97,13 +108,14 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
 
     const handleGenresFilter = useCallback(
         (e: null | string[]) => {
+            if (isGenreDisabled && e !== null && e.length > 0) return; // Prevent setting if disabled
             if (e && e.length > 0) {
                 setGenreId([e[0]]);
             } else {
                 setGenreId(null);
             }
         },
-        [setGenreId],
+        [isGenreDisabled, setGenreId],
     );
 
     const genreFilterLabel = useMemo(() => {
@@ -119,17 +131,23 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
             {
                 label: t('filter.isFavorited', { postProcess: 'sentenceCase' }),
                 onChange: (e: ChangeEvent<HTMLInputElement>) => {
+                    if (isFavoriteDisabled && e.target.checked) return; // Prevent setting if disabled
                     const favoriteValue = e.target.checked ? true : undefined;
                     setFavorite(favoriteValue ?? null);
                 },
                 value: query.favorite,
             },
         ],
-        [t, query.favorite, setFavorite],
+        [isFavoriteDisabled, query.favorite, setFavorite, t],
     );
 
     const handleMinYearFilter = useMemo(
         () => (e: number | string) => {
+            if (isYearDisabled) {
+                const isEmpty = e === '' || e === null || e === undefined || isNaN(Number(e));
+                if (!isEmpty) return;
+            }
+
             // Handle empty string, null, undefined, or invalid numbers as clearing
             if (e === '' || e === null || e === undefined || isNaN(Number(e))) {
                 setMinYear(null);
@@ -144,11 +162,16 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                 setMinYear(null);
             }
         },
-        [setMinYear],
+        [isYearDisabled, setMinYear],
     );
 
     const handleMaxYearFilter = useMemo(
         () => (e: number | string) => {
+            if (isYearDisabled) {
+                const isEmpty = e === '' || e === null || e === undefined || isNaN(Number(e));
+                if (!isEmpty) return;
+            }
+
             // Handle empty string, null, undefined, or invalid numbers as clearing
             if (e === '' || e === null || e === undefined || isNaN(Number(e))) {
                 setMaxYear(null);
@@ -163,7 +186,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                 setMaxYear(null);
             }
         },
-        [setMaxYear],
+        [isYearDisabled, setMaxYear],
     );
 
     const debouncedHandleMinYearFilter = useDebouncedCallback(handleMinYearFilter, 300);
@@ -203,26 +226,32 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                             value: 'multi',
                         },
                     ]}
+                    disabled={isArtistDisabled}
                     onChange={handleArtistSelectModeChange}
                     size="xs"
                     value={artistSelectMode}
                 />
             </Group>
         );
-    }, [artistSelectMode, handleArtistSelectModeChange, t]);
+    }, [artistSelectMode, handleArtistSelectModeChange, isArtistDisabled, t]);
 
     return (
         <Stack px="md" py="md">
             {toggleFilters.map((filter) => (
                 <Group justify="space-between" key={`ss-filter-${filter.label}`}>
                     <Text>{filter.label}</Text>
-                    <Switch checked={filter.value ?? false} onChange={filter.onChange} />
+                    <Switch
+                        checked={filter.value ?? false}
+                        disabled={isFavoriteDisabled}
+                        onChange={filter.onChange}
+                    />
                 </Group>
             ))}
             {!disableArtistFilter && (
                 <>
                     <Divider my="md" />
                     <VirtualMultiSelect
+                        disabled={isArtistDisabled}
                         displayCountType="album"
                         height={300}
                         label={artistFilterLabel}
@@ -238,6 +267,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                 <>
                     <Divider my="md" />
                     <VirtualMultiSelect
+                        disabled={isGenreDisabled}
                         displayCountType="album"
                         height={220}
                         label={genreFilterLabel}
@@ -252,7 +282,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
             <Divider my="md" />
             <Group grow>
                 <NumberInput
-                    disabled={Boolean(query.genreIds && query.genreIds.length > 0)}
+                    disabled={isYearDisabled}
                     hideControls={false}
                     label={t('filter.fromYear', { postProcess: 'sentenceCase' })}
                     max={5000}
@@ -261,7 +291,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                     value={query.minYear ?? undefined}
                 />
                 <NumberInput
-                    disabled={Boolean(query.genreIds && query.genreIds.length > 0)}
+                    disabled={isYearDisabled}
                     hideControls={false}
                     label={t('filter.toYear', { postProcess: 'sentenceCase' })}
                     max={5000}

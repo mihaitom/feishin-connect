@@ -4,11 +4,20 @@
     min-height: 0;
 }
 
+.container.disabled {
+    cursor: not-allowed;
+    user-select: none;
+}
+
 .list-container {
     position: relative;
     flex-shrink: 0;
     overflow: hidden;
     background-color: var(--theme-colors-surface);
+}
+
+.container.disabled .list-container {
+    opacity: 0.6;
 }
 
 .search-input {
@@ -22,4 +31,12 @@
 
 .selected-option:hover {
     background-color: alpha(var(--theme-colors-surface), 0.6);
+}
+
+.selected-option.disabled {
+    cursor: not-allowed;
+}
+
+.selected-option.disabled:hover {
+    background-color: transparent;
 }
