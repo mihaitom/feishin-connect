@@ -1056,12 +1056,13 @@ export const SubsonicController: InternalControllerEndpoint = {
         }
 
         const items =
-            res.body.playlist.entry?.map((song) =>
+            res.body.playlist.entry?.map((song, index) =>
                 ssNormalize.song(
                     song,
                     apiClientProps.server,
                     context?.pathReplace,
                     context?.pathReplaceWith,
+                    index,
                 ),
             ) || [];
 

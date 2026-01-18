@@ -133,6 +133,7 @@ const normalizeSong = (
     server?: null | ServerListItemWithCredential,
     pathReplace?: string,
     pathReplaceWith?: string,
+    playlistIndex?: number,
 ): Song => {
     const participants = getParticipants(item);
 
@@ -189,6 +190,7 @@ const normalizeSong = (
                   }
                 : null,
         playCount: item?.playCount || 0,
+        playlistItemId: playlistIndex !== undefined ? playlistIndex.toString() : undefined,
         releaseDate: null,
         releaseYear: item.year || null,
         sampleRate: item.samplingRate || null,
