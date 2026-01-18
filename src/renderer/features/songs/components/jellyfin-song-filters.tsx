@@ -14,7 +14,6 @@ import { TagFilters } from '/@/renderer/features/shared/components/tag-filter';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { useCurrentServer } from '/@/renderer/store';
 import { useAppStore, useAppStoreActions } from '/@/renderer/store/app.store';
-import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
@@ -34,7 +33,7 @@ export const JellyfinSongFilters = ({ disableArtistFilter }: JellyfinSongFilters
     const server = useCurrentServer();
     const serverId = server.id;
     const { t } = useTranslation();
-    const { clear, query, setArtistIds, setCustom, setFavorite, setMaxYear, setMinYear } =
+    const { query, setArtistIds, setCustom, setFavorite, setMaxYear, setMinYear } =
         useSongListFilters();
 
     const { customFilters } = useListContext();
@@ -319,10 +318,6 @@ export const JellyfinSongFilters = ({ disableArtistFilter }: JellyfinSongFilters
                 />
             </Group>
             <TagFilters query={query} setCustom={setCustom} type={LibraryItem.SONG} />
-            <Divider my="md" />
-            <Button fullWidth onClick={clear} variant="subtle">
-                {t('common.reset', { postProcess: 'sentenceCase' })}
-            </Button>
         </Stack>
     );
 };

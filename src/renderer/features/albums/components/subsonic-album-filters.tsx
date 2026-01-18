@@ -13,7 +13,6 @@ import {
 } from '/@/renderer/features/shared/components/multi-select-rows';
 import { useCurrentServerId } from '/@/renderer/store';
 import { useAppStore, useAppStoreActions } from '/@/renderer/store/app.store';
-import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
@@ -38,7 +37,7 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
 
     const isGenrePage = customFilters?.genreIds !== undefined;
 
-    const { clear, query, setAlbumArtist, setFavorite, setGenreId, setMaxYear, setMinYear } =
+    const { query, setAlbumArtist, setFavorite, setGenreId, setMaxYear, setMinYear } =
         useAlbumListFilters();
 
     const albumArtistListQuery = useSuspenseQuery(
@@ -300,10 +299,6 @@ export const SubsonicAlbumFilters = ({ disableArtistFilter }: SubsonicAlbumFilte
                     value={query.maxYear ?? undefined}
                 />
             </Group>
-            <Divider my="md" />
-            <Button fullWidth onClick={clear} variant="subtle">
-                {t('common.reset', { postProcess: 'sentenceCase' })}
-            </Button>
         </Stack>
     );
 };

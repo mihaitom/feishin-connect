@@ -39,7 +39,7 @@ const AlbumListFilters = () => {
     return (
         <ListWithSidebarContainer.SidebarPortal>
             <Stack h="100%">
-                <ListFiltersTitle />
+                <ListFiltersTitle itemType={LibraryItem.ALBUM} />
                 <ScrollArea>
                     <ListFilters itemType={LibraryItem.ALBUM} />
                 </ScrollArea>

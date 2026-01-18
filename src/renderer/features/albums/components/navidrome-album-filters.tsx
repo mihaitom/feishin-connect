@@ -14,7 +14,6 @@ import {
 import { TagFilters } from '/@/renderer/features/shared/components/tag-filter';
 import { useCurrentServer } from '/@/renderer/store';
 import { useAppStore, useAppStoreActions } from '/@/renderer/store/app.store';
-import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
@@ -43,7 +42,6 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
     const isGenrePage = customFilters?.genreIds !== undefined;
 
     const {
-        clear,
         query,
         setAlbumArtist,
         setCompilation,
@@ -354,10 +352,6 @@ export const NavidromeAlbumFilters = ({ disableArtistFilter }: NavidromeAlbumFil
                 value={query.minYear ?? undefined}
             />
             <TagFilters query={query} setCustom={setCustom} type={LibraryItem.ALBUM} />
-            <Divider my="md" />
-            <Button fullWidth onClick={clear} variant="subtle">
-                {t('common.reset', { postProcess: 'sentenceCase' })}
-            </Button>
         </Stack>
     );
 };

@@ -12,7 +12,6 @@ import {
 } from '/@/renderer/features/shared/components/multi-select-rows';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
 import { useCurrentServerId } from '/@/renderer/store';
-import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { VirtualMultiSelect } from '/@/shared/components/multi-select/virtual-multi-select';
@@ -24,7 +23,7 @@ import { AlbumArtistListSort, LibraryItem, SortOrder } from '/@/shared/types/dom
 export const SubsonicSongFilters = () => {
     const { t } = useTranslation();
     const serverId = useCurrentServerId();
-    const { clear, query, setArtistIds, setFavorite, setGenreId } = useSongListFilters();
+    const { query, setArtistIds, setFavorite, setGenreId } = useSongListFilters();
 
     const { customFilters } = useListContext();
 
@@ -178,10 +177,6 @@ export const SubsonicSongFilters = () => {
                     />
                 </>
             )}
-            <Divider my="md" />
-            <Button fullWidth onClick={clear} variant="subtle">
-                {t('common.reset', { postProcess: 'sentenceCase' })}
-            </Button>
         </Stack>
     );
 };
