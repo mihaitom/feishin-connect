@@ -2,6 +2,7 @@ import { t } from 'i18next';
 import isElectron from 'is-electron';
 import { useCallback, useEffect } from 'react';
 
+import { useIsRadioActive } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { usePlayerActions } from '/@/renderer/store';
 import { toast } from '/@/shared/components/toast/toast';
 
@@ -10,6 +11,7 @@ const mpvPlayerListener = isElectron() ? window.api.mpvPlayerListener : null;
 const ipc = isElectron() ? window.api.ipc : null;
 
 export const useMainPlayerListener = () => {
+    const isRadioActive = useIsRadioActive();
     const {
         decreaseVolume,
         increaseVolume,
@@ -46,27 +48,39 @@ export const useMainPlayerListener = () => {
         }
 
         mpvPlayerListener.rendererPlayPause(() => {
-            mediaTogglePlayPause();
+            if (!isRadioActive) {
+                mediaTogglePlayPause();
+            }
         });
 
         mpvPlayerListener.rendererNext(() => {
-            mediaNext();
+            if (!isRadioActive) {
+                mediaNext();
+            }
         });
 
         mpvPlayerListener.rendererPrevious(() => {
-            mediaPrevious();
+            if (!isRadioActive) {
+                mediaPrevious();
+            }
         });
 
         mpvPlayerListener.rendererPlay(() => {
-            mediaPlay();
+            if (!isRadioActive) {
+                mediaPlay();
+            }
         });
 
         mpvPlayerListener.rendererPause(() => {
-            mediaPause();
+            if (!isRadioActive) {
+                mediaPause();
+            }
         });
 
         mpvPlayerListener.rendererStop(() => {
-            mediaStop();
+            if (!isRadioActive) {
+                mediaStop();
+            }
         });
 
         mpvPlayerListener.rendererSkipForward(() => {
@@ -121,6 +135,7 @@ export const useMainPlayerListener = () => {
         decreaseVolume,
         handleMpvError,
         increaseVolume,
+        isRadioActive,
         mediaAutoNext,
         mediaNext,
         mediaPause,

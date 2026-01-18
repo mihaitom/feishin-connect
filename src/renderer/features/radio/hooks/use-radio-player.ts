@@ -122,6 +122,7 @@ export const useRadioAudioInstance = () => {
     const { setCurrentStreamUrl, setIsPlaying, setStationName } = actions;
     const currentStreamUrl = useRadioStore((state) => state.currentStreamUrl);
     const isPlaying = useRadioStore((state) => state.isPlaying);
+    const isRadioActive = useIsRadioActive();
     const playbackType = usePlaybackType();
     const isUsingMpv = playbackType === PlayerType.LOCAL && mpvPlayer;
 
@@ -146,7 +147,7 @@ export const useRadioAudioInstance = () => {
     ]);
 
     useEffect(() => {
-        if (!isUsingMpv || !mpvPlayerListener || !ipc) {
+        if (!isUsingMpv || !mpvPlayerListener || !ipc || !isRadioActive) {
             return;
         }
 
@@ -173,7 +174,7 @@ export const useRadioAudioInstance = () => {
             ipc.removeAllListeners('renderer-player-pause');
             ipc.removeAllListeners('renderer-player-stop');
         };
-    }, [isUsingMpv, setIsPlaying, setCurrentStreamUrl, setStationName]);
+    }, [isUsingMpv, isRadioActive, setIsPlaying, setCurrentStreamUrl, setStationName]);
 
     usePlayerEvents(
         {
