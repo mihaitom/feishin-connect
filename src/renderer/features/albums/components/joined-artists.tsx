@@ -114,7 +114,7 @@ export const JoinedArtists = ({
                         {artist.id ? (
                             <Text
                                 component={Link}
-                                fw={600}
+                                fw={500}
                                 isLink
                                 to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
                                     albumArtistId: artist.id,
@@ -124,7 +124,7 @@ export const JoinedArtists = ({
                                 {artist.name}
                             </Text>
                         ) : (
-                            <Text fw={600} {...linkProps}>
+                            <Text fw={500} {...linkProps}>
                                 {artist.name}
                             </Text>
                         )}
@@ -156,7 +156,7 @@ export const JoinedArtists = ({
                     return (
                         <Text
                             component={Link}
-                            fw={600}
+                            fw={500}
                             isLink
                             key={`${artist.id}-${index}`}
                             to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
@@ -169,7 +169,7 @@ export const JoinedArtists = ({
                     );
                 }
                 return (
-                    <Text fw={600} key={`${artist.name}-${index}`} {...linkProps}>
+                    <Text fw={500} key={`${artist.name}-${index}`} {...linkProps}>
                         {text}
                     </Text>
                 );
@@ -183,7 +183,7 @@ export const JoinedArtists = ({
                             {artist.id ? (
                                 <Text
                                     component={Link}
-                                    fw={600}
+                                    fw={500}
                                     isLink
                                     to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL, {
                                         albumArtistId: artist.id,
