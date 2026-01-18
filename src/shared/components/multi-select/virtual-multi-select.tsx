@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { useOverlayScrollbars } from 'overlayscrollbars-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -195,9 +196,12 @@ export function VirtualMultiSelect<T>({
     );
 
     return (
-        <div className={`${styles.container} ${disabled ? styles.disabled : ''}`}>
+        <div
+            className={clsx(styles.container, {
+                [styles.disabled]: disabled,
+            })}
+        >
             <TextInput
-                className={styles['search-input']}
                 disabled={disabled}
                 label={labelWithClear}
                 leftSection={
@@ -244,7 +248,7 @@ export function VirtualMultiSelect<T>({
                 value={search}
             />
             <div
-                className={styles['list-container']}
+                className={styles.listContainer}
                 onKeyDown={handleKeyDown}
                 onMouseDown={(e) => {
                     if (disabled) return;
@@ -288,7 +292,9 @@ export function VirtualMultiSelect<T>({
                 <Stack gap="xs" mt="sm">
                     {selectedOptions.map((option) => (
                         <Group
-                            className={`${styles['selected-option']} ${disabled ? styles.disabled : ''}`}
+                            className={clsx(styles.selectedOption, {
+                                [styles.disabled]: disabled,
+                            })}
                             gap="sm"
                             key={option.value}
                             onClick={() => handleDeselect(option.value)}

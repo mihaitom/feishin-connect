@@ -1,6 +1,7 @@
 .container {
     display: flex;
     flex-direction: column;
+    gap: var(--theme-spacing-sm);
     min-height: 0;
 }
 
@@ -20,9 +21,6 @@
     opacity: 0.6;
 }
 
-.search-input {
-    border-bottom: 1px solid var(--theme-colors-border);
-}
 
 .selected-option {
     cursor: pointer;
