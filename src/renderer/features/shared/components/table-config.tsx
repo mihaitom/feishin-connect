@@ -11,7 +11,7 @@ import {
 import { disableNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/disable-native-drag-preview';
 import clsx from 'clsx';
 import Fuse, { type FuseResultMatch } from 'fuse.js';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './table-config.module.css';
@@ -252,10 +252,7 @@ export const TableConfig = ({
             <Divider />
             <TableColumnConfig
                 data={tableColumnsData}
-                listKey={listKey}
-                onChange={(columns) =>
-                    setList(listKey, { ...list, table: { ...list.table, columns } })
-                }
+                onChange={(columns) => setList(listKey, { table: { columns } })}
                 value={list.table.columns}
             />
         </>
@@ -264,16 +261,22 @@ export const TableConfig = ({
 
 const TableColumnConfig = ({
     data,
-    listKey,
     onChange,
     value,
 }: {
     data: { label: string; value: string }[];
-    listKey: ItemListKey;
     onChange: (value: ItemTableListColumnConfig[]) => void;
     value: ItemTableListColumnConfig[];
 }) => {
     const { t } = useTranslation();
+
+    const valueRef = useRef(value);
+    const onChangeRef = useRef(onChange);
+
+    useLayoutEffect(() => {
+        valueRef.current = value;
+        onChangeRef.current = onChange;
+    });
 
     const labelMap = useMemo(() => {
         return data.reduce(
@@ -285,133 +288,97 @@ const TableColumnConfig = ({
         );
     }, [data]);
 
-    const handleChangeEnabled = useCallback(
-        (item: ItemTableListColumnConfig, checked: boolean) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            const newValues = [...value];
-            newValues[index] = { ...newValues[index], isEnabled: checked };
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+    const handleChangeEnabled = useCallback((item: ItemTableListColumnConfig, checked: boolean) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        const newValues = [...currentValue];
+        newValues[index] = { ...newValues[index], isEnabled: checked };
+        onChangeRef.current(newValues);
+    }, []);
 
-    const handleMoveUp = useCallback(
-        (item: ItemTableListColumnConfig) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            if (index === 0) return;
-            const newValues = [...value];
-            [newValues[index], newValues[index - 1]] = [newValues[index - 1], newValues[index]];
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+    const handleMoveUp = useCallback((item: ItemTableListColumnConfig) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        if (index === 0) return;
+        const newValues = [...currentValue];
+        [newValues[index], newValues[index - 1]] = [newValues[index - 1], newValues[index]];
+        onChangeRef.current(newValues);
+    }, []);
 
-    const handleMoveDown = useCallback(
-        (item: ItemTableListColumnConfig) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            if (index === value.length - 1) return;
-            const newValues = [...value];
-            [newValues[index], newValues[index + 1]] = [newValues[index + 1], newValues[index]];
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+    const handleMoveDown = useCallback((item: ItemTableListColumnConfig) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        if (index === currentValue.length - 1) return;
+        const newValues = [...currentValue];
+        [newValues[index], newValues[index + 1]] = [newValues[index + 1], newValues[index]];
+        onChangeRef.current(newValues);
+    }, []);
 
-    const handlePinToLeft = useCallback(
-        (item: ItemTableListColumnConfig) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            const newValues = [...value];
+    const handlePinToLeft = useCallback((item: ItemTableListColumnConfig) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        const newValues = [...currentValue];
 
-            const isPinned = newValues[index].pinned;
-            const isPinnedLeft = isPinned === 'left';
+        const isPinned = newValues[index].pinned;
+        const isPinnedLeft = isPinned === 'left';
 
-            if (isPinnedLeft) {
-                newValues[index] = { ...newValues[index], pinned: null };
-            } else {
-                newValues[index] = { ...newValues[index], pinned: 'left' };
-            }
+        if (isPinnedLeft) {
+            newValues[index] = { ...newValues[index], pinned: null };
+        } else {
+            newValues[index] = { ...newValues[index], pinned: 'left' };
+        }
 
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+        onChangeRef.current(newValues);
+    }, []);
 
-    const handlePinToRight = useCallback(
-        (item: ItemTableListColumnConfig) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            const newValues = [...value];
+    const handlePinToRight = useCallback((item: ItemTableListColumnConfig) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        const newValues = [...currentValue];
 
-            const isPinned = newValues[index].pinned;
-            const isPinnedRight = isPinned === 'right';
+        const isPinned = newValues[index].pinned;
+        const isPinnedRight = isPinned === 'right';
 
-            if (isPinnedRight) {
-                newValues[index] = { ...newValues[index], pinned: null };
-            } else {
-                newValues[index] = { ...newValues[index], pinned: 'right' };
-            }
+        if (isPinnedRight) {
+            newValues[index] = { ...newValues[index], pinned: null };
+        } else {
+            newValues[index] = { ...newValues[index], pinned: 'right' };
+        }
 
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+        onChangeRef.current(newValues);
+    }, []);
 
-    const handleAlignLeft = useCallback(
-        (item: ItemTableListColumnConfig) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            const newValues = [...value];
-            newValues[index] = { ...newValues[index], align: 'start' };
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+    const handleAlignLeft = useCallback((item: ItemTableListColumnConfig) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        const newValues = [...currentValue];
+        newValues[index] = { ...newValues[index], align: 'start' };
+        onChangeRef.current(newValues);
+    }, []);
 
-    const handleAlignCenter = useCallback(
-        (item: ItemTableListColumnConfig) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            const newValues = [...value];
-            newValues[index] = { ...newValues[index], align: 'center' };
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+    const handleAlignCenter = useCallback((item: ItemTableListColumnConfig) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        const newValues = [...currentValue];
+        newValues[index] = { ...newValues[index], align: 'center' };
+        onChangeRef.current(newValues);
+    }, []);
 
-    const handleAlignRight = useCallback(
-        (item: ItemTableListColumnConfig) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            const newValues = [...value];
-            newValues[index] = { ...newValues[index], align: 'end' };
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+    const handleAlignRight = useCallback((item: ItemTableListColumnConfig) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        const newValues = [...currentValue];
+        newValues[index] = { ...newValues[index], align: 'end' };
+        onChangeRef.current(newValues);
+    }, []);
 
-    const handleAutoSize = useCallback(
-        (item: ItemTableListColumnConfig, checked: boolean) => {
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            const newValues = [...value];
-            newValues[index] = { ...newValues[index], autoSize: checked };
-            onChange(newValues);
-        },
-        [listKey, onChange],
-    );
+    const handleAutoSize = useCallback((item: ItemTableListColumnConfig, checked: boolean) => {
+        const currentValue = valueRef.current;
+        const index = currentValue.findIndex((v) => v.id === item.id);
+        const newValues = [...currentValue];
+        newValues[index] = { ...newValues[index], autoSize: checked };
+        onChangeRef.current(newValues);
+    }, []);
 
     const handleRowWidth = useCallback(
         (item: ItemTableListColumnConfig, number: number | string) => {
@@ -427,14 +394,13 @@ const TableColumnConfig = ({
                 number = 2000;
             }
 
-            const value = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!value) return;
-            const index = value.findIndex((v) => v.id === item.id);
-            const newValues = [...value];
+            const currentValue = valueRef.current;
+            const index = currentValue.findIndex((v) => v.id === item.id);
+            const newValues = [...currentValue];
             newValues[index] = { ...newValues[index], width: number };
-            onChange(newValues);
+            onChangeRef.current(newValues);
         },
-        [listKey, onChange],
+        [],
     );
 
     const [searchColumns, setSearchColumns] = useDebouncedState('', 300);
@@ -465,25 +431,20 @@ const TableColumnConfig = ({
         }));
     }, [value, searchColumns, fuse]);
 
-    const handleReorder = useCallback(
-        (idFrom: string, idTo: string, edge: Edge | null) => {
-            const currentValue = useSettingsStore.getState().lists[listKey]?.table.columns;
-            if (!currentValue) return;
+    const handleReorder = useCallback((idFrom: string, idTo: string, edge: Edge | null) => {
+        const currentValue = valueRef.current;
+        const idList = currentValue.map((item) => item.id);
+        const newIdOrder = dndUtils.reorderById({
+            edge,
+            idFrom,
+            idTo,
+            list: idList,
+        });
 
-            const idList = currentValue.map((item) => item.id);
-            const newIdOrder = dndUtils.reorderById({
-                edge,
-                idFrom,
-                idTo,
-                list: idList,
-            });
-
-            // Map the new ID order back to full items
-            const newOrder = newIdOrder.map((id) => currentValue.find((item) => item.id === id)!);
-            onChange(newOrder);
-        },
-        [listKey, onChange],
-    );
+        // Map the new ID order back to full items
+        const newOrder = newIdOrder.map((id) => currentValue.find((item) => item.id === id)!);
+        onChangeRef.current(newOrder);
+    }, []);
 
     return (
         <Stack gap="xs">
