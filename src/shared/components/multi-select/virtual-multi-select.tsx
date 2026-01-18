@@ -304,6 +304,10 @@ export function VirtualMultiSelect<T>({
                                 <ActionIcon
                                     icon="minus"
                                     iconProps={{ size: 'sm' }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeselect(option.value);
+                                    }}
                                     size="xs"
                                     stopsPropagation
                                     variant="transparent"
