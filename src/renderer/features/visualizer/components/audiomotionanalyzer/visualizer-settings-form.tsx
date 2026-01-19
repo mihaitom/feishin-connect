@@ -247,7 +247,13 @@ export const VisualizerSettingsForm = () => {
 };
 
 const VisualizerSelect = (props: SelectProps) => {
-    return <Select styles={{ label: { display: 'flex', justifyContent: 'center' } }} {...props} />;
+    return (
+        <Select
+            searchable
+            styles={{ label: { display: 'flex', justifyContent: 'center' } }}
+            {...props}
+        />
+    );
 };
 
 const VisualizerSlider = (props: SliderProps & { label?: React.ReactNode }) => {
