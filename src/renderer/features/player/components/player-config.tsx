@@ -8,7 +8,6 @@ import {
     usePlayerActions,
     usePlayerData,
     usePlayerProperties,
-    usePlayerQueueType,
     usePlayerSpeed,
     usePlayerStatus,
 } from '/@/renderer/store';
@@ -27,13 +26,7 @@ import { Select } from '/@/shared/components/select/select';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
 import { toast } from '/@/shared/components/toast/toast';
-import {
-    CrossfadeStyle,
-    PlayerQueueType,
-    PlayerStatus,
-    PlayerStyle,
-    PlayerType,
-} from '/@/shared/types/types';
+import { CrossfadeStyle, PlayerStatus, PlayerStyle, PlayerType } from '/@/shared/types/types';
 
 const ipc = isElectron() ? window.api.ipc : null;
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
@@ -60,11 +53,10 @@ export const PlayerConfig = () => {
     const { t } = useTranslation();
     const { currentSong } = usePlayerData();
     const speed = usePlayerSpeed();
-    const queueType = usePlayerQueueType();
     const status = usePlayerStatus();
     const playbackType = usePlaybackType();
     const { crossfadeDuration, crossfadeStyle, transitionType } = usePlayerProperties();
-    const { setCrossfadeDuration, setCrossfadeStyle, setQueueType, setSpeed, setTransitionType } =
+    const { setCrossfadeDuration, setCrossfadeStyle, setSpeed, setTransitionType } =
         usePlayerActions();
     const preservePitch = useSettingsStore((state) => state.playback.preservePitch);
     const showLyricsInSidebar = useShowLyricsInSidebar();
@@ -130,34 +122,6 @@ export const PlayerConfig = () => {
         };
 
         const allOptions = [
-            {
-                component: (
-                    <SegmentedControl
-                        data={[
-                            {
-                                label: t('player.queueType_default', { postProcess: 'titleCase' }),
-                                value: PlayerQueueType.DEFAULT,
-                            },
-                            {
-                                label: t('player.queueType_priority', { postProcess: 'titleCase' }),
-                                value: PlayerQueueType.PRIORITY,
-                            },
-                        ]}
-                        onChange={(value) => setQueueType(value as PlayerQueueType)}
-                        size="sm"
-                        value={queueType}
-                        w="100%"
-                    />
-                ),
-                id: 'queueType',
-                label: t('player.queueType', { postProcess: 'titleCase' }),
-            },
-            {
-                component: null,
-                id: 'divider-0',
-                isDivider: true,
-                label: '',
-            },
             {
                 component: (
                     <Select
@@ -412,7 +376,6 @@ export const PlayerConfig = () => {
         return allOptions;
     }, [
         t,
-        queueType,
         playbackSettings,
         status,
         audioDevices,
@@ -424,7 +387,6 @@ export const PlayerConfig = () => {
         setSpeed,
         preservePitch,
         currentSong?.bpm,
-        setQueueType,
         setSettings,
         setTransitionType,
         setCrossfadeStyle,

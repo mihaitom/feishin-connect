@@ -68,7 +68,6 @@ export interface PlayerData {
 
 export interface QueueData {
     default: string[];
-    priority: string[];
     shuffled: number[];
     songs: Record<string, QueueSong>;
 }

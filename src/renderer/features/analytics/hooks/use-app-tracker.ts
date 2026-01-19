@@ -19,13 +19,7 @@ import {
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { logMsg } from '/@/renderer/utils/logger-message';
 import { LyricSource, ServerType } from '/@/shared/types/domain-types';
-import {
-    FontType,
-    Platform,
-    PlayerQueueType,
-    PlayerStyle,
-    PlayerType,
-} from '/@/shared/types/types';
+import { FontType, Platform, PlayerStyle, PlayerType } from '/@/shared/types/types';
 
 const utils = isElectron() ? window.api.utils : null;
 let appTrackerInFlight = false;
@@ -64,7 +58,6 @@ type AppTrackerProperties = PlayerProperties &
 
 type PlayerProperties = {
     'player.mediaSession': boolean;
-    'player.queueType': PlayerQueueType;
     'player.style': PlayerStyle;
     'player.transcoding': boolean;
     'player.type': PlayerType;
@@ -117,7 +110,6 @@ type SettingsProperties = {
 const getPlayerProperties = (): Pick<
     AppTrackerProperties,
     | 'player.mediaSession'
-    | 'player.queueType'
     | 'player.style'
     | 'player.transcoding'
     | 'player.type'
@@ -128,7 +120,6 @@ const getPlayerProperties = (): Pick<
 
     return {
         'player.mediaSession': ignoreWeb(playbackSettings.mediaSession),
-        'player.queueType': player.player.queueType,
         'player.style': player.player.transitionType,
         'player.transcoding': playbackSettings.transcode.enabled,
         'player.type': ignoreWeb(playbackSettings.type),
