@@ -4,6 +4,9 @@
     --ai-size-md: calc(2.625rem * var(--mantine-scale));
     --ai-size-lg: calc(3.125rem * var(--mantine-scale));
     --ai-size-xl: calc(3.75rem * var(--mantine-scale));
+    --ai-size-compact-xs: calc(1.5rem * var(--mantine-scale));
+    --ai-size-compact-sm: calc(1.75rem * var(--mantine-scale));
+    --ai-size-compact-md: calc(2rem * var(--mantine-scale));
 
     font-weight: 500;
     transition:
@@ -109,5 +112,26 @@
         &:focus-visible {
             border: 1px solid lighten(var(--theme-colors-border), 10%);
         }
+    }
+
+    &[data-size='compact-xs'] {
+        width: var(--ai-size-compact-xs);
+        min-width: var(--ai-size-compact-xs);
+        height: var(--ai-size-compact-xs);
+        min-height: var(--ai-size-compact-xs);
+    }
+
+    &[data-size='compact-sm'] {
+        width: var(--ai-size-compact-sm);
+        min-width: var(--ai-size-compact-sm);
+        height: var(--ai-size-compact-sm);
+        min-height: var(--ai-size-compact-sm);
+    }
+
+    &[data-size='compact-md'] {
+        width: var(--ai-size-compact-md);
+        min-width: var(--ai-size-compact-md);
+        height: var(--ai-size-compact-md);
+        min-height: var(--ai-size-compact-md);
     }
 }
