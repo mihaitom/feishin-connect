@@ -1251,7 +1251,9 @@ export const JellyfinController: InternalControllerEndpoint = {
             tags.push({
                 name: 'Tags',
                 options: res.body.Tags.sort((a, b) =>
-                    a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()),
+                    a
+                        .toLocaleLowerCase()
+                        .localeCompare(b.toLocaleLowerCase(), undefined, { numeric: true }),
                 ).map((tag) => ({ id: tag, name: tag })),
             });
         }
