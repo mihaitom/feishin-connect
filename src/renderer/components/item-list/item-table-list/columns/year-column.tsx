@@ -18,7 +18,7 @@ export const YearColumn = (props: ItemTableListInnerColumn) => {
         if (originalYear !== null && originalYear !== releaseYear) {
             return (
                 <TableColumnTextContainer {...props}>
-                    ♫ {originalYear}
+                    {originalYear}
                     {SEPARATOR_STRING}
                     {releaseYear}
                 </TableColumnTextContainer>

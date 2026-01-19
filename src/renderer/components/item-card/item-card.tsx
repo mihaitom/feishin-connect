@@ -1065,7 +1065,7 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
                             : null;
 
                     if (originalYear !== null && originalYear !== releaseYear) {
-                        return `♫ ${originalYear}${SEPARATOR_STRING}${releaseYear}`;
+                        return `${originalYear}${SEPARATOR_STRING}${releaseYear}`;
                     }
 
                     return String(releaseYear);
@@ -1082,7 +1082,7 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
                         data.originalDate &&
                         data.originalDate !== data.releaseDate
                     ) {
-                        return `♫ ${formatDateAbsoluteUTC(data.originalDate)}${SEPARATOR_STRING}${formatDateAbsoluteUTC(data.releaseDate)}`;
+                        return `${formatDateAbsoluteUTC(data.originalDate)}${SEPARATOR_STRING}${formatDateAbsoluteUTC(data.releaseDate)}`;
                     }
 
                     return `${formatDateAbsoluteUTC(data.releaseDate)}`;

@@ -66,7 +66,7 @@ export const AbsoluteDateColumn = (props: ItemTableListInnerColumn) => {
             if (originalDate) {
                 const formattedOriginalDate = formatDateAbsoluteUTC(originalDate);
                 const formattedReleaseDate = formatDateAbsoluteUTC(releaseDate);
-                const displayText = `♫ ${formattedOriginalDate}${SEPARATOR_STRING}${formattedReleaseDate}`;
+                const displayText = `${formattedOriginalDate}${SEPARATOR_STRING}${formattedReleaseDate}`;
 
                 return (
                     <TableColumnTextContainer {...props}>
