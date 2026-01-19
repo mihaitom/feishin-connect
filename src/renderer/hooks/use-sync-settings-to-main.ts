@@ -42,7 +42,6 @@ export const useSyncSettingsToMain = () => {
             hasRunRef.current = true;
 
             const localSettings = window.api.localSettings;
-            let hasDifferences = false;
 
             const settingsMappings: Array<{
                 mainStoreKey: string;
@@ -105,34 +104,40 @@ export const useSyncSettingsToMain = () => {
             ];
 
             // Compare and sync each setting
-            for (const mapping of settingsMappings) {
-                const mainValue = localSettings.get(mapping.mainStoreKey);
-                const rendererValue = mapping.rendererValue;
+            (async () => {
+                let hasDifferences = false;
 
-                const mainValueNormalized = mainValue === undefined ? null : mainValue;
-                const rendererValueNormalized = rendererValue === undefined ? null : rendererValue;
+                for (const mapping of settingsMappings) {
+                    const mainValue = await localSettings.get(mapping.mainStoreKey);
+                    const rendererValue = mapping.rendererValue;
 
-                if (
-                    JSON.stringify(mainValueNormalized) !== JSON.stringify(rendererValueNormalized)
-                ) {
-                    hasDifferences = true;
-                    logFn.warn(logMsg.system.settingsSynchronized, {
-                        meta: {
-                            mainStoreKey: mapping.mainStoreKey,
-                            mainValue: mainValueNormalized,
-                            rendererValue: rendererValueNormalized,
-                        },
-                    });
-                    localSettings.set(mapping.mainStoreKey, rendererValue);
+                    const mainValueNormalized = mainValue === undefined ? null : mainValue;
+                    const rendererValueNormalized =
+                        rendererValue === undefined ? null : rendererValue;
+
+                    if (
+                        JSON.stringify(mainValueNormalized) !==
+                        JSON.stringify(rendererValueNormalized)
+                    ) {
+                        hasDifferences = true;
+                        logFn.warn(logMsg.system.settingsSynchronized, {
+                            meta: {
+                                mainStoreKey: mapping.mainStoreKey,
+                                mainValue: mainValueNormalized,
+                                rendererValue: rendererValueNormalized,
+                            },
+                        });
+                        localSettings.set(mapping.mainStoreKey, rendererValue);
+                    }
                 }
-            }
 
-            // Show restart toast if there were differences
-            if (hasDifferences) {
-                openRestartRequiredToast(
-                    i18n.t('error.settingsSyncError', { postProcess: 'sentenceCase' }),
-                );
-            }
+                // Show restart toast if there were differences
+                if (hasDifferences) {
+                    openRestartRequiredToast(
+                        i18n.t('error.settingsSyncError', { postProcess: 'sentenceCase' }),
+                    );
+                }
+            })();
         }, 5000);
 
         return () => {
