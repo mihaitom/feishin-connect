@@ -848,7 +848,7 @@
         "lastfmApiKey": "{{lastfm}} API key",
         "lyricFetch_description": "fetch lyrics from various internet sources",
         "lyricFetch": "fetch lyrics from the internet",
-        "lyricFetchProvider_description": "select the providers to fetch lyrics from. the order of the providers is the order in which they will be queried",
+        "lyricFetchProvider_description": "select the providers to fetch lyrics from",
         "lyricFetchProvider": "providers to fetch lyrics from",
         "lyricOffset_description": "offset the lyric by the specified amount of milliseconds",
         "lyricOffset": "lyric offset (ms)",

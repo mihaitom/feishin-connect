@@ -1,21 +1,10 @@
 import { ipcMain } from 'electron';
 
 import { store } from '../settings';
-import {
-    getLyricsBySongId as getGenius,
-    query as queryGenius,
-    getSearchResults as searchGenius,
-} from './genius';
-import {
-    getLyricsBySongId as getLrcLib,
-    query as queryLrclib,
-    getSearchResults as searchLrcLib,
-} from './lrclib';
-import {
-    getLyricsBySongId as getNetease,
-    query as queryNetease,
-    getSearchResults as searchNetease,
-} from './netease';
+import { getLyricsBySongId as getGenius, getSearchResults as searchGenius } from './genius';
+import { getLyricsBySongId as getLrcLib, getSearchResults as searchLrcLib } from './lrclib';
+import { getLyricsBySongId as getNetease, getSearchResults as searchNetease } from './netease';
+import { orderSearchResults } from './shared';
 
 import { Song } from '/@/shared/types/domain-types';
 
@@ -42,6 +31,7 @@ export type InternetProviderLyricResponse = {
 export type InternetProviderLyricSearchResponse = {
     artist: string;
     id: string;
+    isSync: boolean | null;
     name: string;
     score?: number;
     source: LyricSource;
@@ -72,14 +62,6 @@ type SearchFetcher = (
     params: LyricSearchQuery,
 ) => Promise<InternetProviderLyricSearchResponse[] | null>;
 
-type SongFetcher = (params: LyricSearchQuery) => Promise<InternetProviderLyricResponse | null>;
-
-const FETCHERS: Record<LyricSource, SongFetcher> = {
-    [LyricSource.GENIUS]: queryGenius,
-    [LyricSource.LRCLIB]: queryLrclib,
-    [LyricSource.NETEASE]: queryNetease,
-};
-
 const SEARCH_FETCHERS: Record<LyricSource, SearchFetcher> = {
     [LyricSource.GENIUS]: searchGenius,
     [LyricSource.LRCLIB]: searchLrcLib,
@@ -108,37 +90,82 @@ const getRemoteLyrics = async (song: Song) => {
         }
     }
 
-    let lyricsFromSource: InternetProviderLyricResponse | null = null;
+    const params: LyricSearchQuery = {
+        album: song.album || song.name,
+        artist: song.artists[0].name,
+        duration: song.duration / 1000.0,
+        name: song.name,
+    };
+
+    const allSearchResults: InternetProviderLyricSearchResponse[] = [];
 
     for (const source of sources) {
-        const params = {
-            album: song.album || song.name,
-            artist: song.artists[0].name,
-            duration: song.duration / 1000.0,
-            name: song.name,
-        };
-        const response = await FETCHERS[source](params as unknown as LyricSearchQuery);
-
-        if (response) {
-            const newResult = cached
-                ? {
-                      ...cached,
-                      [source]: response,
-                  }
-                : ({ [source]: response } as CachedLyrics);
-
-            if (lyricCache.size === MAX_CACHED_ITEMS && cached === undefined) {
-                const toRemove = lyricCache.keys().next().value;
-                if (toRemove) {
-                    lyricCache.delete(toRemove);
-                }
+        try {
+            const searchResults = await SEARCH_FETCHERS[source](params);
+            if (searchResults) {
+                allSearchResults.push(...searchResults);
             }
-
-            lyricCache.set(song.id.toString(), newResult);
-
-            lyricsFromSource = response;
-            break;
+        } catch (error) {
+            console.error(`Error searching ${source} for lyrics:`, error);
         }
+    }
+
+    if (allSearchResults.length === 0) {
+        return null;
+    }
+
+    const rankedResults = orderSearchResults({
+        params,
+        results: allSearchResults,
+    });
+
+    const bestMatch = rankedResults[0];
+
+    if (!bestMatch) {
+        return null;
+    }
+
+    // Score is 0-1 where 0 = perfect match, 1 = worst match
+    const matchThreshold = 0.55;
+    const matchScore = bestMatch.score ?? 1;
+
+    if (matchScore > matchThreshold) {
+        return null;
+    }
+
+    let lyricsFromSource: InternetProviderLyricResponse | null = null;
+
+    try {
+        const lyrics = await GET_FETCHERS[bestMatch.source](bestMatch.id);
+        if (lyrics) {
+            lyricsFromSource = {
+                artist: bestMatch.artist,
+                id: bestMatch.id,
+                lyrics,
+                name: bestMatch.name,
+                source: bestMatch.source,
+            };
+        }
+    } catch (error) {
+        console.error(`Error fetching lyrics from ${bestMatch.source}:`, error);
+    }
+
+    if (lyricsFromSource) {
+        const newResult = cached
+            ? {
+                  ...cached,
+                  [lyricsFromSource.source]: lyricsFromSource,
+              }
+            : ({ [lyricsFromSource.source]: lyricsFromSource } as CachedLyrics);
+
+        if (lyricCache.size === MAX_CACHED_ITEMS && cached === undefined) {
+            const toRemove = lyricCache.keys().next().value;
+            if (toRemove) {
+                lyricCache.delete(toRemove);
+            }
+        }
+
+        lyricCache.set(song.id.toString(), newResult);
     }
 
     return lyricsFromSource;
