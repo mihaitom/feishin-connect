@@ -138,10 +138,17 @@ export const ListFiltersTitle = ({ itemType }: ListFiltersTitleProps) => {
                 {t('common.filters', { postProcess: 'sentenceCase' })}
             </Text>
             <Group gap="xs">
-                <Button onClick={clear} size="xs" variant="subtle">
+                <Button onClick={clear} size="compact-sm" variant="subtle">
                     {t('common.reset', { postProcess: 'sentenceCase' })}
                 </Button>
-                {canUnpin && <ActionIcon icon="unpin" onClick={handleUnpin} variant="subtle" />}
+                {canUnpin && (
+                    <ActionIcon
+                        icon="unpin"
+                        onClick={handleUnpin}
+                        size="compact-sm"
+                        variant="subtle"
+                    />
+                )}
             </Group>
         </Group>
     );
