@@ -78,6 +78,7 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
     if (item && 'name' in item && 'imageUrl' in item && 'artists' in item) {
         const rowHeight = props.getRowHeight(props.rowIndex, props);
         const path = getTitlePath(props.itemType, (rowItem as any).id as string);
+        const align = props.columns[props.columnIndex]?.align || 'start';
 
         const item = rowItem as any;
         const titleLinkProps = path
@@ -130,6 +131,9 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
                 </div>
                 <div
                     className={clsx(styles.textContainer, {
+                        [styles.alignCenter]: align === 'center',
+                        [styles.alignLeft]: align === 'start',
+                        [styles.alignRight]: align === 'end',
                         [styles.compact]: props.size === 'compact',
                     })}
                 >
@@ -212,6 +216,7 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
     if (row && 'name' in row && 'imageUrl' in row && 'artists' in row) {
         const rowHeight = props.getRowHeight(props.rowIndex, props);
         const path = getTitlePath(props.itemType, (rowItem as any).id as string);
+        const align = props.columns[props.columnIndex]?.align || 'start';
 
         const item = rowItem as any;
 
@@ -267,6 +272,9 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
                 <div
                     className={clsx(styles.textContainer, {
                         [styles.active]: isActive,
+                        [styles.alignCenter]: align === 'center',
+                        [styles.alignLeft]: align === 'start',
+                        [styles.alignRight]: align === 'end',
                         [styles.compact]: props.size === 'compact',
                     })}
                 >
