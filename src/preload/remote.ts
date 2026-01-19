@@ -73,8 +73,8 @@ const updateShuffle = (shuffle: boolean) => {
     ipcRenderer.send('update-shuffle', shuffle);
 };
 
-const updateSong = (args: QueueSong | undefined) => {
-    ipcRenderer.send('update-song', args);
+const updateSong = (song: QueueSong | undefined, imageUrl?: null | string) => {
+    ipcRenderer.send('update-song', song, imageUrl);
 };
 
 const updateUsername = (username: string) => {

@@ -173,7 +173,8 @@ export const useRemote = () => {
                     type: 'itemCard',
                     useRemoteUrl: true,
                 }) || null;
-            remote.updateSong({ ...currentSong, imageUrl });
+
+            remote.updateSong(currentSong, imageUrl);
         }
     }, [isRemoteEnabled, player]);
 
@@ -204,7 +205,8 @@ export const useRemote = () => {
                             type: 'itemCard',
                             useRemoteUrl: true,
                         }) || null;
-                    remote.updateSong({ ...song, imageUrl });
+
+                    remote.updateSong(song, imageUrl);
                 } else {
                     remote.updateSong(undefined);
                 }

@@ -31,5 +31,5 @@ export const updateSong = (song: QueueSong | undefined, imageUrl?: null | string
         mediaSession.metadata = metadata;
     }
 
-    remote?.updateSong(song);
+    remote?.updateSong(song, imageUrl);
 };
