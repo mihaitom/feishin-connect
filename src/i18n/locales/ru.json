@@ -21,7 +21,22 @@
             "lastfm": "открыть на Last.fm",
             "musicbrainz": "открыть на MusicBrainz"
         },
-        "moveToNext": "следующий"
+        "moveToNext": "следующий",
+        "addOrRemoveFromSelection": "добавить или удалить из выделения",
+        "createRadioStation": "создать $t(entity.radioStation_one)",
+        "deleteRadioStation": "удалить $t(entity.radioStation_one)",
+        "selectAll": "выделить все",
+        "downloadStarted": "Начата загрузка {{count}} предметов",
+        "moveUp": "перейти наверх",
+        "moveDown": "Перейти вниз",
+        "holdToMoveToTop": "Удержать для перехода на верх",
+        "holdToMoveToBottom": "удержать для перехода вниз",
+        "moveItems": "переместить предметы",
+        "shuffle": "Перемешать",
+        "shuffleAll": "перемешать все",
+        "shuffleSelected": "Смешать выбранное",
+        "viewMore": "Посмотреть больше",
+        "openApplicationDirectory": "открыть папку приложения"
     },
     "common": {
         "backward": "назад",
@@ -124,7 +139,23 @@
         "viewReleaseNotes": "Список изменений",
         "bitDepth": "Разрядность",
         "sampleRate": "частота дискретизации",
-        "tags": "теги"
+        "tags": "теги",
+        "countSelected": "{{count}} выбрано",
+        "faster": "быстрее",
+        "filter_single": "один",
+        "filter_multiple": "несколько",
+        "mood": "настроение",
+        "noFilters": "фильтры не настроены",
+        "private": "приватный",
+        "public": "открытый",
+        "retry": "повторить",
+        "recordLabel": "лейбл звукозаписи",
+        "releaseType": "тип выпуска",
+        "slower": "медленее",
+        "sort": "сортировать",
+        "clean": "очистить",
+        "gridRows": "Строки в сетке",
+        "tableColumns": "Столбцы таблицы"
     },
     "entity": {
         "album_one": "альбом",
@@ -179,7 +210,13 @@
         "genreWithCount_many": "{{count}} жанров",
         "trackWithCount_one": "{{count}} трек",
         "trackWithCount_few": "{{count}} трека",
-        "trackWithCount_many": "{{count}} треков"
+        "trackWithCount_many": "{{count}} треков",
+        "radioStation_one": "радиостанция",
+        "radioStation_few": "радиостанции",
+        "radioStation_many": "радиостанции",
+        "radioStationWithCount_one": "Радиостанция",
+        "radioStationWithCount_few": "Радиостанций",
+        "radioStationWithCount_many": "Радиостанции"
     },
     "table": {
         "config": {
@@ -278,7 +315,12 @@
         "badAlbum": "вы видите эту страницу из-за того, что эта песня не входит в альбом. скорее всего, вы видите эту ошибку, так как песня находится в корневой директории папки с музыкой. Jellyfin группирует треки только по папкам",
         "networkError": "возникла ошибка сети",
         "badValue": "Недопустимый параметр «{{value}}». Это значение больше не существует",
-        "notificationDenied": "Доступ к уведомлениям запрещен. Настройка не работает"
+        "notificationDenied": "Доступ к уведомлениям запрещен. Настройка не работает",
+        "multipleServerSaveQueueError": "в очереди воспроизведения присутствует одна или несколько песен, которые не загружены с текущего сервера. это не поддерживается",
+        "noNetwork": "сервер недоступен",
+        "noNetworkDescription": "Не удалось подключиться к серверу",
+        "saveQueueFailed": "Не удалось сохранить очередь",
+        "settingsSyncError": "обнаружены несоответствия между настройками рендерера и основным процессом. перезапустите приложение, чтобы изменения вступили в силу"
     },
     "filter": {
         "isCompilation": "сборник",
@@ -352,7 +394,7 @@
         "queue_moveToTop": "переместить выделенное вниз",
         "queue_moveToBottom": "переместить выделенное вверх",
         "shuffle_off": "перемешивание выключено",
-        "addLast": "воспроизвести после всех",
+        "addLast": "последний",
         "mute": "отключить звук",
         "skip_forward": "вперёд",
         "viewQueue": "показать очередь"
@@ -408,7 +450,10 @@
             "goBack": "назад",
             "goForward": "вперёд",
             "privateModeOff": "Выключить приватный режим",
-            "privateModeOn": "Включить приватный режим"
+            "privateModeOn": "Включить приватный режим",
+            "selectMusicFolder": "выбрать папку с музыкой",
+            "noMusicFolder": "папка с музыкой не выбрана",
+            "multipleMusicFolders": "{{count}} выбрано музыкальных папок"
         },
         "manageServers": {
             "title": "сервера",
@@ -439,7 +484,8 @@
             "showDetails": "получить информацию",
             "shareItem": "поделиться",
             "goToAlbum": "Перейти к $t(entity.album_one)",
-            "goToAlbumArtist": "Перейти к $t(entity.albumArtist_one)"
+            "goToAlbumArtist": "Перейти к $t(entity.albumArtist_one)",
+            "goTo": "перейти в"
         },
         "home": {
             "mostPlayed": "слушают чаще всего",
@@ -459,7 +505,20 @@
             "generalTab": "общее",
             "hotkeysTab": "горячие клавиши",
             "windowTab": "окно",
-            "advanced": "расширенные"
+            "advanced": "расширенные",
+            "analytics": "аналитика",
+            "updates": "обновить",
+            "cache": "кэш",
+            "application": "приложение",
+            "theme": "тема",
+            "controls": "элементы управления",
+            "sidebar": "боковая панель",
+            "remote": "удаленный",
+            "exportImport": "импорт/экспорт",
+            "audio": "аудио",
+            "lyrics": "тексты песен",
+            "lyricsDisplay": "отображение текстов песен",
+            "transcoding": "транскодирование"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist_other)"
@@ -502,12 +561,17 @@
             "viewAllTracks": "посмотреть все $t(entity.track_other)",
             "recentReleases": "недавние релизы",
             "about": "О {{artist}}",
-            "topSongsFrom": "популярные треки из {{title}}"
+            "topSongsFrom": "популярные треки из {{title}}",
+            "groupingTypeAll": "все типы выпусков",
+            "groupingTypePrimary": "основные типы выпусков"
         },
         "itemDetail": {
             "copyPath": "скопировать путь в буфер обмена",
             "openFile": "открыть трек в менеджере файлов",
             "copiedPath": "путь успешно скопирован"
+        },
+        "radioList": {
+            "title": "радиостанции"
         }
     },
     "form": {
@@ -537,13 +601,18 @@
             "ignoreCors": "игнорировать CORS ($t(common.restartRequired))",
             "error_savePassword": "произошла ошибка при сохранении пароля",
             "input_preferInstantMix": "Предпочитать автоподборку",
-            "input_preferInstantMixDescription": "Использовать быстрый микс только для поиска похожих композиций. Полезно, если у вас есть плагины, которые изменяют это поведение"
+            "input_preferInstantMixDescription": "Использовать быстрый микс только для поиска похожих композиций. Полезно, если у вас есть плагины, которые изменяют это поведение",
+            "input_preferRemoteUrl": "предпочитать публичный url",
+            "input_remoteUrl": "публичный url",
+            "input_remoteUrlPlaceholder": "необязательно: публичный гкд-адрес для доступа к внешним функциям"
         },
         "addToPlaylist": {
             "success": "добавлено: $t(entity.trackWithCount, {\"count\": {{message}} }) в $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
             "title": "добавить в $t(entity.playlist_one)",
             "input_skipDuplicates": "не добавлять дубликаты",
-            "input_playlists": "$t(entity.playlist_other)"
+            "input_playlists": "$t(entity.playlist_other)",
+            "create": "создать $t(entity.playlist_one) {{playlist}}",
+            "searchOrCreate": "для создания нового списка выполните поиск по $t(entity.playlist_other) или введите соответствующий текст"
         },
         "updateServer": {
             "title": "обновление сервера",
@@ -552,7 +621,11 @@
         "queryEditor": {
             "input_optionMatchAll": "сопоставить все",
             "input_optionMatchAny": "сопоставить любой",
-            "title": "Редактор запросов"
+            "title": "Редактор запросов",
+            "addRuleGroup": "добавить группу правил",
+            "removeRuleGroup": "удалить группу правил",
+            "resetToDefault": "сбросить на настройки по умолчанию",
+            "clearFilters": "очистить фильтры"
         },
         "lyricSearch": {
             "input_name": "$t(common.name)",
@@ -562,7 +635,8 @@
         "editPlaylist": {
             "title": "редактировать $t(entity.playlist_one)",
             "success": "$t(entity.playlist_one) обновлён успешно",
-            "publicJellyfinNote": "Jellyfin по какой-то причине не предоставляет информацию о том, публичный плейлист или нет. Если вы хотите, чтобы он остался публичным, выберите следующую опцию"
+            "publicJellyfinNote": "Jellyfin по какой-то причине не предоставляет информацию о том, публичный плейлист или нет. Если вы хотите, чтобы он остался публичным, выберите следующую опцию",
+            "editNote": "редактирование больших плейлистов вручную не рекомендуется. Вы уверены, что готовы принять риск потери данных, который может возникнуть в результате перезаписи существующего плейлиста?"
         },
         "shareItem": {
             "success": "ссылка скопирована в буфер обмена (нажмите здесь, чтобы открыть)",
@@ -576,6 +650,35 @@
             "enabled": "Приватный режим включен. Статус воспроизведения скрыт от внешних интеграций",
             "disabled": "Приватный режим отключен. Статус воспроизведения теперь виден внешним интеграциям",
             "title": "Приватный режим"
+        },
+        "largeFetchConfirmation": {
+            "title": "добавить элементы в очередь",
+            "description": "Это действие добавит все элементы в текущий отфильтрованный вид"
+        },
+        "createRadioStation": {
+            "success": "радиостанция успешно создана",
+            "title": "создать радиостанцию",
+            "input_homepageUrl": "домашняя страница",
+            "input_name": "имя",
+            "input_streamUrl": "ссылка потока"
+        },
+        "lyricsExport": {
+            "export": "экспортировать тексты песен",
+            "input_synced": "экспорт синхронизированных текстов песен",
+            "input_offset": "$t(setting.lyricOffset)"
+        },
+        "saveQueue": {
+            "success": "сохранена очередь воспроизведения на сервере"
+        },
+        "shuffleAll": {
+            "title": "Случайное воспроизведение",
+            "input_limit": "сколько песен?",
+            "input_minYear": "от года",
+            "input_maxYear": "до года",
+            "input_played": "воспроизвести фильтр",
+            "input_played_optionAll": "все треки",
+            "input_played_optionUnplayed": "только не игранные треки",
+            "input_played_optionPlayed": "только игранные треки"
         }
     },
     "setting": {
@@ -789,5 +892,32 @@
         "primary": {
             "other": "другие"
         }
+    },
+    "datetime": {
+        "minuteShort": "м",
+        "secondShort": "с",
+        "hourShort": "ч",
+        "dayShort": "д"
+    },
+    "filterOperator": {
+        "after": "после",
+        "afterDate": "после (дата)",
+        "before": "это раньше",
+        "beforeDate": "это раньше (дата)",
+        "contains": "содержит",
+        "endsWith": "заканчивается",
+        "inPlaylist": "находится в",
+        "inTheLast": "находится в последнем",
+        "inTheRange": "находится в диапазоне",
+        "inTheRangeDate": "находится в диапазоне (дата)",
+        "is": "является",
+        "isNot": "не",
+        "isGreaterThan": "больше чем",
+        "isLessThan": "меньше чем",
+        "matchesRegex": "соответствует выражению",
+        "notContains": "не содержит",
+        "notInPlaylist": "не в",
+        "notInTheLast": "не в последнем",
+        "startsWith": "начинается с"
     }
 }

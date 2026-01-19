@@ -7,7 +7,7 @@
         "moveToBottom": "mugitu behera",
         "moveToTop": "mugitu gora",
         "refresh": "$t(common.refresh)",
-        "removeFromFavorites": "kendu $t(entity.favorite_other)-(e)tik",
+        "removeFromFavorites": "kendu gogokoetatik",
         "removeFromPlaylist": "kendu $t(entity.playlist_one)-(e)tik",
         "removeFromQueue": "kendu ilaratik",
         "setRating": "ezarri balorazioa",
@@ -20,12 +20,18 @@
         "clearQueue": "garbitu ilara",
         "createPlaylist": "sortu $t(entity.playlist_one)",
         "deletePlaylist": "ezabatu $t(entity.playlist_one)",
-        "addToFavorites": "gehitu $t(entity.favorite_other)-(e)ra",
-        "addToPlaylist": "gehitu $t(entity.playlist_one)-(e)ra",
+        "addToFavorites": "gehitu gogokoetara",
+        "addToPlaylist": "gehitu $t(entity.playlist_one)ra",
         "createRadioStation": "sortu $t(entity.radioStation_one)",
         "deleteRadioStation": "ezabatu $t(entity.radioStation_one)",
         "viewMore": "ikusi gehiago",
-        "shuffle": "nahastu"
+        "shuffle": "nahastu",
+        "selectAll": "aukeratu guztiak",
+        "downloadStarted": "{{count}} elementuren deskarga hasi da",
+        "addOrRemoveFromSelection": "gehitu edo kendu hautapenetik",
+        "selectRangeOfItems": "aukeratu elementu sorta bat",
+        "shuffleAll": "nahastu dena",
+        "shuffleSelected": "nahastu aukeratutak"
     },
     "common": {
         "add": "gehitu",
@@ -59,7 +65,7 @@
         "filter_other": "iragazkiak",
         "filters": "iragazkiak",
         "forceRestartRequired": "berreabiarazi aldaketak aplikatzeko... itxi notifikazioa berreabiarazteko",
-        "setting": "ezarpena",
+        "setting": "ezarpenak",
         "share": "partekatu",
         "action_one": "ekintza",
         "action_other": "ekintzak",
@@ -137,7 +143,10 @@
         "retry": "saiatu berriro",
         "slower": "motelago",
         "itemsMore": "{{count}} gehiago",
-        "sort": "ordenatu"
+        "sort": "ordenatu",
+        "recordLabel": "diskoetxea",
+        "example": "adibidea",
+        "tableColumns": "taulako zutabeak"
     },
     "player": {
         "repeat": "errepikatu",
@@ -172,11 +181,10 @@
         "viewQueue": "ikusi ilara",
         "playbackFetchCancel": "honek denbora pixka bat behar du... itxi jakinarazpena bertan behera uzteko",
         "lyrics": "letrak",
-        "queueType": "ilara mota",
-        "queueType_default": "lehenetsia",
-        "queueType_priority": "lehentasuna",
         "restoreQueueFromServer": "berrezarri ilara zerbitzaritik",
-        "saveQueueToServer": "gorde ilara zerbitzarira"
+        "saveQueueToServer": "gorde ilara zerbitzarira",
+        "addLastShuffled": "azkena (ausaz)",
+        "addNextShuffled": "hurrengoa (ausaz)"
     },
     "table": {
         "config": {
@@ -191,7 +199,19 @@
                 "tableColumns": "taula zutabeak",
                 "itemSize": "elementuaren tamaina (px)",
                 "followCurrentSong": "jarraitu uneko abestia",
-                "size_default": "lehenetsia"
+                "size_default": "lehenetsia",
+                "advancedSettings": "ezarpen aurreratuak",
+                "autoFitColumns": "zutabeak automatikoki doitu",
+                "pinToLeft": "ezkerrera finkatu",
+                "pinToRight": "eskuinera finkatu",
+                "alignLeft": "ezkerrean lerrokatu",
+                "alignCenter": "lerrokatu erdian",
+                "alignRight": "eskuinean lerrokatu",
+                "itemGap": "elementuen arteko tartea (px)",
+                "itemsPerRow": "elementuak errenkada bakoitzeko",
+                "size_large": "handia",
+                "pagination_itemsPerPage": "elementuak orrialde bakoitzeko",
+                "pagination_infinite": "infinitua"
             },
             "label": {
                 "actions": "$t(common.action_other)",
@@ -291,7 +311,11 @@
         "song_one": "abestia",
         "song_other": "abestiak",
         "trackWithCount_one": "pista {{count}}",
-        "trackWithCount_other": "{{count}} pista"
+        "trackWithCount_other": "{{count}} pista",
+        "radioStation_one": "irrati-katea",
+        "radioStation_other": "irrati-kateak",
+        "radioStationWithCount_one": "irrati-kate {{count}}",
+        "radioStationWithCount_other": "{{count}} irrati-kate"
     },
     "error": {
         "apiRouteError": "ezin izan da eskaera bideratu",
@@ -576,7 +600,42 @@
         "imageResolution_optionSidebar": "alboko barra",
         "replayGainClipping": "{{ReplayGain}} mozketa",
         "replayGainFallback": "{{ReplayGain}} ordezko aukera",
-        "trayEnabled": "erakutsi erretilua"
+        "trayEnabled": "erakutsi erretilua",
+        "artistReleaseTypeConfiguration": "artistaren argitalpen motaren konfigurazioa",
+        "artistReleaseTypeConfiguration_description": "konfiguratu zein argitalpen mota erakusten diren, eta zein ordenatan, albumaren artistaren orrian",
+        "useThemeAccentColor": "erabili gaiaren azentu-kolorea",
+        "useThemeAccentColor_description": "erabili hautatutako gaian definitutako kolore nagusia azentu-kolore pertsonalizatuaren ordez",
+        "showRatings": "erakutsi izarren balorazioak",
+        "showRatings_description": "izarren balorazioen funtzioa interfazean agertzen den ala ez kontrolatzen du",
+        "imageResolution": "irudiaren erresoluzioa",
+        "imageResolution_description": "aplikazioan erabilitako irudien erresoluzioa. 0 balioa erabiliz gero, jatorrizko irudiaren erresoluzioa erabiliko da lehenespenez",
+        "followCurrentSong_description": "automatikoki korritu erreprodukzio-ilara uneko abestira",
+        "followCurrentSong": "jarraitu uneko abestia",
+        "lyricOffset_description": "letra zehaztutako milisegundo kopuruarekin desplazatu",
+        "lyricOffset": "letraren desplazamendua (ms)",
+        "mpvExtraParameters": "mpv parametro gehigarriak",
+        "mpvExtraParameters_description": "mpv-ri pasatzeko argumentu gehigarriak",
+        "notify": "abestien jakinarazpenak gaitu",
+        "notify_description": "erakutsi jakinarazpenak uneko abestia aldatzean",
+        "pathReplace": "fitxategiaren bidearen ordezkapena",
+        "pathReplace_description": "ordezkatu zure zerbitzariaren fitxategi-bide lehenetsia",
+        "pathReplace_optionRemovePrefix": "kendu aurrizkia",
+        "pathReplace_optionAddPrefix": "gehitu aurrizkia",
+        "passwordStore_description": "zein pasahitz/sekretu biltegi erabili. aldatu hau pasahitzak gordetzeko arazoak badituzu",
+        "playerFilters": "Iragazi ilarako abestiak",
+        "sidePlayQueueStyle_description": "alboko erreprodukzio-ilararen estiloa ezartzen du",
+        "mediaSession_description": "Windows Media Session integrazioa gaitzen du, multimedia kontrolak eta metadatuak sistemaren bolumenaren gainjartzean eta blokeo pantailan bistaratuz (Windows bakarrik)",
+        "sidePlayQueueStyle": "alboko erreprodukzio-ilarako estiloa",
+        "skipPlaylistPage": "saltatu erreprodukzio-zerrenda orria",
+        "startMinimized_description": "abiarazi aplikazioa sistemaren erretiluan",
+        "startMinimized": "hasi minimizatuta",
+        "transcode": "gaitu transkodetzea",
+        "transcode_description": "formatu ezberdinetara transkodetzea ahalbidetzen du",
+        "transcodeBitrate_description": "transkodetzeko bit-emaria hautatzen du. 0k zerbitzariari aukeratzen uzten diola esan nahi du",
+        "transcodeBitrate": "transkodetzeko bit-emaria",
+        "transcodeFormat_description": "transkodetzeko formatua hautatzen du. utzi hutsik zerbitzariak erabaki dezan",
+        "transcodeFormat": "transkodetzeko formatua",
+        "queryBuilderCustomFields_inputLabel": "etiketa"
     },
     "form": {
         "addServer": {
@@ -592,7 +651,8 @@
             "input_legacyAuthentication": "gaitu zaharkitutako autentifikazioa",
             "success": "zerbitzaria behar bezala gehitu da",
             "input_preferInstantMix": "nahiago izan berehalako nahasketa",
-            "input_preferInstantMixDescription": "erabili berehalako nahasketa soilik antzeko abestiak lortzeko. erabilgarria portaera hau aldatzen duten pluginak badituzu"
+            "input_preferInstantMixDescription": "erabili berehalako nahasketa soilik antzeko abestiak lortzeko. erabilgarria portaera hau aldatzen duten pluginak badituzu",
+            "input_remoteUrl": "URL publikoa"
         },
         "addToPlaylist": {
             "input_playlists": "$t(entity.playlist_other)",
@@ -637,7 +697,9 @@
         "queryEditor": {
             "title": "kontsulta editorea",
             "input_optionMatchAll": "guztiak bat etorri",
-            "input_optionMatchAny": "edozeinekin bat etorri"
+            "input_optionMatchAny": "edozeinekin bat etorri",
+            "resetToDefault": "lehenetsitako egoerara berrezarri",
+            "clearFilters": "garbitu iragazkiak"
         },
         "updateServer": {
             "success": "zerbitzaria behar bezala eguneratu da",
@@ -653,7 +715,9 @@
         },
         "createRadioStation": {
             "input_homepageUrl": "hasierako orriaren URLa",
-            "input_name": "izena"
+            "input_name": "izena",
+            "title": "irrati-katea sortu",
+            "success": "irrati-katea behar bezala sortu da"
         },
         "lyricsExport": {
             "export": "esportatu letrak",
@@ -661,7 +725,15 @@
             "input_offset": "$t(setting.lyricOffset)"
         },
         "shuffleAll": {
-            "input_genre": "$t(entity.genre_one)"
+            "input_genre": "$t(entity.genre_one)",
+            "title": "ausaz erreproduzitu",
+            "input_limit": "zenbat abesti?",
+            "input_played_optionAll": "pista guztiak",
+            "input_played_optionUnplayed": "erreproduzitu gabeko pistak bakarrik",
+            "input_played_optionPlayed": "erreproduzitutako pistak bakarrik"
+        },
+        "saveQueue": {
+            "success": "erreprodukzio-ilara zerbitzarian gordeta"
         }
     },
     "page": {
@@ -690,7 +762,11 @@
             "privateModeOn": "aktibatu modu pribatua",
             "selectServer": "aukeratu zerbitzaria",
             "version": "bertsioa {{version}}",
-            "openBrowserDevtools": "ireki nabigatzailearen garapen tresnak"
+            "openBrowserDevtools": "ireki nabigatzailearen garapen tresnak",
+            "commandPalette": "ireki komando-paleta",
+            "noMusicFolder": "ez da musika karpetarik hautatu",
+            "selectMusicFolder": "aukeratu musika karpeta",
+            "multipleMusicFolders": "{{count}} musika karpeta aukeratuta"
         },
         "manageServers": {
             "url": "URLa",
@@ -791,7 +867,11 @@
             "lyrics": "letrak",
             "discord": "discord",
             "playerFilters": "erreproduzitzailearen iragazkiak",
-            "updates": "eguneraketa"
+            "updates": "eguneraketa",
+            "queryBuilder": "kontsulta-sortzailea",
+            "controls": "kontrolak",
+            "remote": "urrunekoa",
+            "lyricsDisplay": "erakutsi letrak"
         },
         "sidebar": {
             "albumArtists": "$t(entity.albumArtist_other)",
@@ -824,7 +904,9 @@
             "viewAllTracks": "ikusi $t(entity.track_other) guztiak",
             "appearsOn": "agertzen da hemen",
             "recentReleases": "azken argitalpenak",
-            "viewDiscography": "ikusi diskografia"
+            "viewDiscography": "ikusi diskografia",
+            "groupingTypeAll": "argitalpen mota guztiak",
+            "groupingTypePrimary": "argitalpen mota nagusiak"
         },
         "itemDetail": {
             "copyPath": "kopiatu bidea arbelean",
@@ -839,6 +921,9 @@
         },
         "favorites": {
             "title": "$t(entity.favorite_other)"
+        },
+        "radioList": {
+            "title": "irrati-kateak"
         }
     },
     "releaseType": {
@@ -864,7 +949,12 @@
         "customTags": "etiketa pertsonalizatutak"
     },
     "filterOperator": {
-        "is": "da"
+        "is": "da",
+        "contains": "dauka",
+        "notContains": "ez dauka",
+        "startsWith": "honekin hasten da",
+        "endsWith": "honekin amaitzen da",
+        "isNot": "ez da"
     },
     "visualizer": {
         "general": "Orokorra",
@@ -905,6 +995,20 @@
                 "z": "Z"
             }
         },
-        "opacity": "Opakotasuna"
+        "opacity": "Opakotasuna",
+        "minimumFrequency": "Gutxieneko Maiztasuna",
+        "maximumFrequency": "Gehienezko Maiztasuna",
+        "frequencyScale": "Maiztasun Eskala",
+        "weightingFilter": "Ponderazio-iragazkia",
+        "minimumDecibels": "Gutxieneko Dezibelioak",
+        "maximumDecibels": "Gehienezko Dezibelioak",
+        "linearAmplitude": "Anplitude Lineala",
+        "linearBoost": "Bultzada Lineala",
+        "showPeaks": "Erakutsi Gailurrak",
+        "configCopied": "Konfigurazioa arbelean kopiatu da",
+        "configCopyFailed": "Konfigurazioa kopiatzeak huts egin du",
+        "configPasted": "Konfigurazioa behar bezala aplikatu da",
+        "configPasteFailed": "Konfigurazioa aplikatzeak huts egin du. Mesedez, egiaztatu formatua.",
+        "configPasteReadFailed": "Arbelatik irakurtzeak huts egin du"
     }
 }

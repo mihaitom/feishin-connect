@@ -310,7 +310,11 @@
         "tableColumns": "columnes de la taula",
         "itemsMore": "{{count}} més",
         "countSelected": "{{count}} seleccionats",
-        "retry": "reintenta"
+        "retry": "reintenta",
+        "example": "exemple",
+        "mood": "estat d'ànim",
+        "filter_single": "senzill",
+        "filter_multiple": "multi"
     },
     "entity": {
         "album_one": "àlbum",
@@ -418,7 +422,10 @@
             "success": "servidor afegit correctament",
             "title": "afegeix un servidor",
             "input_preferInstantMix": "prefereix el mix instantani",
-            "input_preferInstantMixDescription": "utilitza només el mix instantani per obtenir cançons similars. útil si teniu complements que modifiquin aquest comportament"
+            "input_preferInstantMixDescription": "utilitza només el mix instantani per obtenir cançons similars. útil si teniu complements que modifiquin aquest comportament",
+            "input_preferRemoteUrl": "prefereix l'url públic",
+            "input_remoteUrl": "url públic",
+            "input_remoteUrlPlaceholder": "opcional: url públic per característiques externes"
         },
         "shareItem": {
             "description": "descripció",
@@ -763,7 +770,7 @@
         "releaseChannel": "canal de versions",
         "releaseChannel_description": "tria entre versions estables i versions beta per les actualitzacions automàtiques",
         "mediaSession": "activa Media Session",
-        "mediaSession_description": "activa la integració amb Windows Media Session per mostrar els controls multimèdia i les metadades a l'indicador de volum del sistema i la pantalla de bloqueig (només per Windows)",
+        "mediaSession_description": "activa la integració amb Media Session per mostrar els controls multimèdia i les metadades a l'indicador de volum del sistema i la pantalla de bloqueig",
         "crossfadeStyle": "estil de fosa encadenada",
         "discordRichPresence": "estat d'activitat de {{discord}}",
         "enableAutoTranslation_description": "activa la traducció automàtica en carregar la lletra",
@@ -836,7 +843,20 @@
         "showRatings_description": "controla si es mostren les estrelles de valoració a la interfície",
         "showRatings": "mostra la valoració d'estrelles",
         "combinedLyricsAndVisualizer_description": "combina la lletra i el visualitzador en un sol tauler",
-        "combinedLyricsAndVisualizer": "combina la lletra i el visualitzador al tauler lateral del reproductor"
+        "combinedLyricsAndVisualizer": "combina la lletra i el visualitzador al tauler lateral del reproductor",
+        "artistReleaseTypeConfiguration": "configuració de tipus de llançament d'artista",
+        "artistReleaseTypeConfiguration_description": "configura quins llançaments es mostren, i en quin ordre, a la pàgina d'artista de l'àlbum",
+        "hotkey_listNavigateToPage": "navega per la llista fins a la pàgina de l'element",
+        "hotkey_listPlayDefault": "reprodueix llista",
+        "hotkey_listPlayLast": "reprodueix la llista al final",
+        "hotkey_listPlayNext": "reprodueix la llista a continuació",
+        "hotkey_listPlayNow": "reprodueix la llista ara",
+        "mpvExtraParameters": "paràmetres addicionals d'mpv",
+        "mpvExtraParameters_description": "arguments addicionals per l'mpv",
+        "pathReplace": "substitució de la ruta de l'arxiu",
+        "pathReplace_description": "substitueix la ruta d'arxiu predeterminada del servidor",
+        "pathReplace_optionRemovePrefix": "elimina el prefix",
+        "pathReplace_optionAddPrefix": "afegeix prefix"
     },
     "table": {
         "column": {
@@ -933,7 +953,9 @@
                 "bitDepth": "$t(common.bitDepth)",
                 "genreBadge": "$t(entity.genre_one) (insígnies)",
                 "image": "imatge",
-                "sampleRate": "$t(common.sampleRate)"
+                "sampleRate": "$t(common.sampleRate)",
+                "composer": "compositor",
+                "titleArtist": "$t(common.title) (artista)"
             },
             "view": {
                 "table": "taula",
@@ -1022,9 +1044,6 @@
         "addLastShuffled": "al final (mesclat)",
         "addNextShuffled": "a continuació (mesclat)",
         "holdToShuffle": "mantén premut per mesclar",
-        "queueType": "tipus de cua",
-        "queueType_default": "predeterminat",
-        "queueType_priority": "prioritat",
         "lyrics": "lletra",
         "restoreQueueFromServer": "restaura la cua del servidor",
         "saveQueueToServer": "desa la cua al servidor",
@@ -1240,10 +1259,11 @@
                 "dualVertical": "Dual-Vertical"
             },
             "frequencyScale": {
-                "bark": "Bark",
-                "linear": "Lineal",
-                "log": "Registre",
-                "mel": "Mel"
+                "bark": "Escala Bark",
+                "linear": "Escala Lineal",
+                "log": "Escala logarítmica",
+                "mel": "Escala Mel",
+                "none": "Cap"
             },
             "weightingFilter": {
                 "none": "Cap",
@@ -1252,7 +1272,21 @@
                 "c": "C",
                 "d": "D",
                 "z": "Z"
+            },
+            "mode": {
+                "0": "[0] Freqüències discretes",
+                "1": "[1] 1/24a octava / 240 bandes",
+                "2": "[2] 1/12a octava / 120 bandes",
+                "3": "[3] 1/8a octava / 80 bandes",
+                "4": "[4] 1/6a octava / 60 bandes",
+                "5": "[5] 1/4a octava / 40 bandes",
+                "6": "[6] 1/3a octava / 30 bandes",
+                "7": "[7] Mitja octava / 20 bandes",
+                "8": "[8] Octava completa / 10 bandes",
+                "10": "[10] Línia / Gràfic d'àrea"
             }
-        }
+        },
+        "pasteGradient": "enganxa degradat",
+        "pasteGradientPlaceholder": "enganxa el degradat JSON aquí..."
     }
 }

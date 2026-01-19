@@ -1,1 +1,5 @@
-{}
+{
+    "action": {
+        "addToFavorites": "додати до $t(entity.favorite_other)"
+    }
+}

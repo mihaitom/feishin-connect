@@ -32,9 +32,6 @@
         "playSimilarSongs": "似たような曲を再生する",
         "viewQueue": "キューを表示する",
         "lyrics": "歌詞",
-        "queueType": "キュータイプ",
-        "queueType_default": "デフォルト",
-        "queueType_priority": "優先度",
         "restoreQueueFromServer": "サーバーからキューを復元",
         "saveQueueToServer": "サーバーにキューを保存"
     },
@@ -328,7 +325,25 @@
         "artistRadioCount": "アーティスト / トラックのラジオカウント",
         "artistRadioCount_description": "アーティストラジオとトラックラジオで取得する曲数を設定します",
         "imageResolution": "画像の解像度",
-        "imageResolution_description": "アプリ内で使用される画像の解像度。値を 0 に設定すると、デフォルトでネイティブ画像解像度が適用されます"
+        "imageResolution_description": "アプリ内で使用される画像の解像度。値を 0 に設定すると、デフォルトでネイティブ画像解像度が適用されます",
+        "showLyricsInSidebar_description": "添付の再生キューに歌詞を表示するパネルが追加されます",
+        "showLyricsInSidebar": "プレーヤーのサイドバーに歌詞を表示する",
+        "showRatings": "星評価を表示する",
+        "imageResolution_optionSidebar": "サイドバー",
+        "imageResolution_optionHeader": "ヘッダー",
+        "imageResolution_optionFullScreenPlayer": "全画面プレーヤー",
+        "playerbarSlider": "プレーヤーバースライダー",
+        "playerbarSlider_description": "低速または従量制のインターネット接続の場合は、波形は推奨されません",
+        "playerbarSliderType_optionSlider": "スライダー",
+        "playerbarSliderType_optionWaveform": "波形",
+        "playerbarWaveformAlign": "波形アライメント",
+        "showRatings_description": "インターフェースに星評価機能を表示するかどうかを制御します",
+        "showVisualizerInSidebar": "プレーヤーのサイドバーにビジュアライザーを表示する",
+        "combinedLyricsAndVisualizer": "プレイヤーのサイドバーに歌詞とビジュアライザーを統合する",
+        "audioFadeOnStatusChange_description": "再生 / 一時停止の状態が変わったときにフェードアウトとフェードインを有効にします",
+        "audioFadeOnStatusChange": "ステータス変更時の音声フェード",
+        "combinedLyricsAndVisualizer_description": "歌詞とビジュアライザーを同じパネルに統合します",
+        "showVisualizerInSidebar_description": "プレーヤーのサイドバーにビジュアライザーを表示するパネルが追加されます"
     },
     "action": {
         "editPlaylist": "$t(entity.playlist_one) を編集",
@@ -366,7 +381,9 @@
         "moveDown": "下に移動",
         "holdToMoveToTop": "押し続けると一番上に移動します",
         "holdToMoveToBottom": "押し続けると一番下に移動します",
-        "openApplicationDirectory": "アプリケーションディレクトリを開く"
+        "openApplicationDirectory": "アプリケーションディレクトリを開く",
+        "selectRangeOfItems": "項目の範囲を選択",
+        "addOrRemoveFromSelection": "選択に追加または削除"
     },
     "common": {
         "backward": "戻る",
@@ -476,7 +493,12 @@
         "retry": "再試行",
         "itemsMore": "{{count}} 個以上",
         "faster": "より速く",
-        "slower": "より遅く"
+        "slower": "より遅く",
+        "example": "例",
+        "mood": "気分",
+        "recordLabel": "レコードレーベル",
+        "tableColumns": "テーブル列",
+        "clean": "クリーン"
     },
     "table": {
         "config": {
@@ -856,7 +878,10 @@
             "ignoreCors": "CORSを無視 ($t(common.restartRequired))",
             "error_savePassword": "パスワードを保存する際にエラーが発生しました",
             "input_preferInstantMixDescription": "類似曲を取得するにはインスタントミックスのみを使用してください。この動作を変更するプラグインがある場合に役立ちます",
-            "input_preferInstantMix": "インスタントミックスを優先する"
+            "input_preferInstantMix": "インスタントミックスを優先する",
+            "input_preferRemoteUrl": "公開 URL を優先する",
+            "input_remoteUrl": "公開 URL",
+            "input_remoteUrlPlaceholder": "オプション: 外部機能用の公開 URL"
         },
         "addToPlaylist": {
             "success": "$t(entity.trackWithCount, {\"count\": {{message}} }) を $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} }) に追加しました",
@@ -946,7 +971,8 @@
         "trackWithCount_other": "{{count}} 個のトラック",
         "play_other": "{{count}} 回再生",
         "song_other": "曲",
-        "radioStation_other": "ラジオ局"
+        "radioStation_other": "ラジオ局",
+        "radioStationWithCount_other": "{{count}} 局のラジオ局"
     },
     "dragDropZone": {
         "error_oneFileOnly": "1 つのファイルのみ選択してください",
@@ -979,5 +1005,9 @@
     "queryBuilder": {
         "standardTags": "標準タグ",
         "customTags": "カスタムタグ"
+    },
+    "filterOperator": {
+        "matchesRegex": "正規表現に一致",
+        "notContains": "含まれていない"
     }
 }

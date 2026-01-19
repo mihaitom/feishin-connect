@@ -21,7 +21,8 @@
         "openIn": {
             "lastfm": "Otvoriť v Last.fm",
             "musicbrainz": "Otvoriť v MusicBrainz"
-        }
+        },
+        "addOrRemoveFromSelection": "pridať či odstrániť z vybranie"
     },
     "common": {
         "action_one": "akcia",

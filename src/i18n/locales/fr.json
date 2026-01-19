@@ -33,13 +33,12 @@
         "viewQueue": "voir la file d'attente",
         "addLastShuffled": "dernier (mélangé)",
         "addNextShuffled": "prochain (mélangé)",
-        "queueType": "type de file d'attente",
-        "queueType_default": "défaut",
-        "queueType_priority": "priorité",
         "holdToShuffle": "maintenir pour mélanger",
         "lyrics": "paroles",
         "restoreQueueFromServer": "restaurer la file d'attente depuis le serveur",
-        "saveQueueToServer": "enregistrer la file d'attente sur le serveur"
+        "saveQueueToServer": "enregistrer la file d'attente sur le serveur",
+        "artistRadio": "radio de l'artiste",
+        "trackRadio": "radio du titre"
     },
     "action": {
         "editPlaylist": "éditer $t(entity.playlist_one)",
@@ -75,7 +74,11 @@
         "holdToMoveToTop": "Maintenir pour déplacer en haut",
         "holdToMoveToBottom": "Maintenir pour déplacer en bas",
         "createRadioStation": "créer $t(entity.radioStation_one)",
-        "deleteRadioStation": "supprimer $t(entity.radioStation_one)"
+        "deleteRadioStation": "supprimer $t(entity.radioStation_one)",
+        "addOrRemoveFromSelection": "ajouter ou supprimer de la sélection",
+        "selectRangeOfItems": "sélectionner une plage d'entrées",
+        "selectAll": "tout sélectionner",
+        "openApplicationDirectory": "ouvrir le répertoire de l'application"
     },
     "common": {
         "backward": "en arrière",
@@ -195,7 +198,11 @@
         "tableColumns": "colonnes du tableau",
         "itemsMore": "plus {{count}}",
         "view": "vue",
-        "noFilters": "aucun filtre configuré"
+        "noFilters": "aucun filtre configuré",
+        "countSelected": "{{count}} sélectionnée",
+        "example": "exemple",
+        "mood": "humeur",
+        "retry": "réessayer"
     },
     "error": {
         "remotePortWarning": "redémarrer le serveur pour appliquer le nouveau port",
@@ -224,7 +231,9 @@
         "notificationDenied": "les autorisations pour les notifications ont été refusées. ce paramètre n'a aucun effet",
         "multipleServerSaveQueueError": "la file d'attente de lecture contient un ou plusieurs morceaux qui ne proviennent pas du serveur actuel. Ceci n'est pas prise en charge",
         "saveQueueFailed": "échec de l'enregistrement de la file d'attente",
-        "settingsSyncError": "des incohérences ont été détectées entre les paramètres du moteur de rendu et ceux du processus principal. redémarrez l'application pour appliquer les modifications"
+        "settingsSyncError": "des incohérences ont été détectées entre les paramètres du moteur de rendu et ceux du processus principal. redémarrez l'application pour appliquer les modifications",
+        "noNetwork": "serveur indisponible",
+        "noNetworkDescription": "impossible de se connecter à ce serveur"
     },
     "filter": {
         "mostPlayed": "plus joués",
@@ -366,7 +375,8 @@
             "transcoding": "transcodage",
             "discord": "discord",
             "logger": "logger",
-            "playerFilters": "filtres du lecteur"
+            "playerFilters": "filtres du lecteur",
+            "lyricsDisplay": "affichage des paroles"
         },
         "globalSearch": {
             "commands": {
@@ -434,7 +444,8 @@
             "recentReleases": "sorties récentes",
             "viewDiscography": "voir la discographie",
             "relatedArtists": "$t(entity.artist_other) similaires",
-            "topSongs": "meilleurs titres"
+            "topSongs": "meilleurs titres",
+            "groupingTypeAll": "toutes les types de sortie"
         },
         "itemDetail": {
             "copyPath": "copier le chemin dans le presse-papiers",
@@ -708,7 +719,7 @@
         "releaseChannel": "canal de diffusion",
         "releaseChannel_description": "choisissez entre les versions stables ou les versions bêta pour les mises à jour automatiques",
         "mediaSession": "activer media session",
-        "mediaSession_description": "active l'intégration de la session Windows Media, affichant les commandes multimédias et les métadonnées dans la superposition du volume du système et l'écran de verrouillage (Windows uniquement)",
+        "mediaSession_description": "active l'intégration Media Session, affichant les commandes multimédias et les métadonnées dans la superposition du volume du système et l'écran de verrouillage",
         "enableAutoTranslation_description": "activer la traduction automatiquement lorsque les paroles sont chargées",
         "enableAutoTranslation": "activer la traduction automatique",
         "exportImportSettings_control_description": "exporter et importer les paramètres en JSON",
@@ -729,8 +740,8 @@
         "notify": "activer les notifications de chansons",
         "analyticsDisable": "Désactiver l'analytique basée sur l'utilisation",
         "analyticsDisable_description": "les données d'utilisation anonymisées sont envoyées au développeur afin de contribuer à l'amélioration de l'application",
-        "playerbarSlider": "curseur de la barre de lecture",
-        "playerbarSliderType_optionSlider": "curseur",
+        "playerbarSlider": "barre de lecture",
+        "playerbarSliderType_optionSlider": "pleine",
         "playerbarSliderType_optionWaveform": "forme d'onde",
         "playerbarWaveformAlign": "forme d'onde alignée",
         "playerbarWaveformAlign_optionTop": "haut",
@@ -764,11 +775,32 @@
         "logLevel_optionError": "erreur",
         "logLevel_optionInfo": "info",
         "logLevel_optionWarn": "avertissement",
-        "playerFilters": "filtrer les tires de la file d'attente",
+        "playerFilters": "filtrer les titres de la file d'attente",
         "playerFilters_description": "exclure les titres de la file d'attente selon les critères suivants",
         "playerbarSlider_description": "la forme d'onde n'est pas recommandée sur une connexion lente ou limitée",
         "useThemeAccentColor": "utiliser la couleur d'accent du thème",
-        "useThemeAccentColor_description": "utiliser la couleur principale définie dans le thème sélectionné au lieu de la couleur d'accent personnalisée"
+        "useThemeAccentColor_description": "utiliser la couleur principale définie dans le thème sélectionné au lieu de la couleur d'accent personnalisée",
+        "artistReleaseTypeConfiguration": "configuration du type de sortie de l'artiste",
+        "artistReleaseTypeConfiguration_description": "configure quel type de sortie est affiché, et dans quel ordre, sur la page artiste de l'album",
+        "mpvExtraParameters": "paramètres supplémentaires de mpv",
+        "mpvExtraParameters_description": "arguments supplémentaires à transmettre à mpv",
+        "pathReplace": "remplacement du chemin de fichier",
+        "pathReplace_description": "remplacez le chemin de fichier par défaut de votre serveur",
+        "pathReplace_optionRemovePrefix": "supprimer un prefix",
+        "pathReplace_optionAddPrefix": "ajouter un prefix",
+        "artistRadioCount_description": "définit le nombre de titres à récupérer pour la radio d'artiste et la radio de titre",
+        "artistRadioCount": "nombre de radio d'artiste/titre",
+        "imageResolution": "résolution d'image",
+        "imageResolution_description": "la résolution d'image utilisée dans l'application. définir une valeur à 0 utilisera la résolution native de l'image",
+        "imageResolution_optionTable": "tableau",
+        "imageResolution_optionItemCard": "entrée de carte",
+        "imageResolution_optionSidebar": "barre latérale",
+        "imageResolution_optionHeader": "en-tête",
+        "imageResolution_optionFullScreenPlayer": "lecteur en plein écran",
+        "showRatings_description": "contrôle si la notation à étoiles s'affiche dans l'interface",
+        "showRatings": "affiche la notation à étoiles",
+        "combinedLyricsAndVisualizer_description": "combine les paroles et le visualisateur dans le même panneau",
+        "combinedLyricsAndVisualizer": "combine les paroles et le visualisateur dans la barre latérale"
     },
     "form": {
         "deletePlaylist": {
@@ -789,7 +821,10 @@
             "ignoreCors": "ignorer cors $t(common.restartRequired)",
             "error_savePassword": "une erreur s’est produite lors de la tentative de sauvegarde du mot de passe",
             "input_preferInstantMix": "Préférer le mix instantané",
-            "input_preferInstantMixDescription": "Utiliser uniquement le mix instantané pour jouer des pistes similaires. Activez cette option si vous avez des plugins qui modifient ce comportement"
+            "input_preferInstantMixDescription": "Utiliser uniquement le mix instantané pour jouer des pistes similaires. Activez cette option si vous avez des plugins qui modifient ce comportement",
+            "input_preferRemoteUrl": "préférer une URL publique",
+            "input_remoteUrl": "URL publique",
+            "input_remoteUrlPlaceholder": "optionnel : URL publique pour les fonctionnalités externes"
         },
         "addToPlaylist": {
             "success": "$t(entity.trackWithCount, {\"count\" : {{message}} }) ajouté à $t(entity.playlistWithCount, {\"count\" : {{numOfPlaylists}} })",
@@ -868,6 +903,11 @@
         },
         "saveQueue": {
             "success": "file d'attente de lecture enregistrée sur le serveur"
+        },
+        "lyricsExport": {
+            "export": "exporter les paroles",
+            "input_synced": "exporter les paroles synchronisées",
+            "input_offset": "$t(setting.lyricOffset)"
         }
     },
     "entity": {
@@ -1086,5 +1126,81 @@
         "notInPlaylist": "n'est pas dans",
         "notInTheLast": "n'est pas dans le dernier",
         "startsWith": "commence par"
+    },
+    "datetime": {
+        "minuteShort": "m",
+        "secondShort": "s",
+        "hourShort": "h",
+        "dayShort": "j"
+    },
+    "visualizer": {
+        "visualizerType": "type de visualisateur",
+        "cyclePresets": "cycle les préréglages",
+        "cycleTime": "temps de cycle (secondes)",
+        "includeAllPresets": "inclure tous les préréglages",
+        "ignoredPresets": "préréglages ignorés",
+        "selectedPresets": "préréglages sélectionné",
+        "randomizeNextPreset": "randomiser le préréglage suivant",
+        "blendTime": "temps de mélange",
+        "presets": "préréglages",
+        "selectPreset": "sélectionner un préréglage",
+        "applyPreset": "appliquer le préréglage",
+        "saveAsPreset": "enregistrer en tant que préréglage",
+        "updatePreset": "mettre à jour le préréglage",
+        "copyConfiguration": "copier la configuration",
+        "pasteConfiguration": "coller la configuration",
+        "pasteConfigurationPlaceholder": "coller ici la configuration JSON...",
+        "pasteFromClipboard": "coller depuis le presse-papier",
+        "applyConfiguration": "appliquer la configuration",
+        "configCopied": "configuration copiée dans le presse-papiers",
+        "configCopyFailed": "échec de la copie de la configuration",
+        "configPasted": "configuration appliquée avec succès",
+        "configPasteFailed": "échec de l'application de la configuration. Merci de vérifier le format.",
+        "configPasteReadFailed": "échec de la lecture du presse-papiers",
+        "presetName": "nom du préréglage",
+        "presetNamePlaceholder": "saisissez le nom du préréglage",
+        "general": "générale",
+        "mode": "mode",
+        "mode1To8": "Mode 1 - 8",
+        "mode10": "Mode 10",
+        "barSpace": "espacement des barres",
+        "lineWidth": "Largeur des traits",
+        "fillAlpha": "remplissage alpha",
+        "channelLayout": "disposition des canaux",
+        "maxFPS": "FPS Maximum",
+        "opacity": "opacité",
+        "customGradients": "dégradés personnalisés",
+        "addCustomGradient": "ajouter un dégradés personnalisés",
+        "gradientName": "nom du dégradé",
+        "gradientNamePlaceholder": "nom du dégradé",
+        "vertical": "verticale",
+        "horizontal": "horizontale",
+        "colorStops": "couleur d'arrêts",
+        "addColor": "ajouter un couleur",
+        "position": "position",
+        "level": "niveau",
+        "remove": "supprimer",
+        "pasteGradient": "coller le dégradé",
+        "pasteGradientPlaceholder": "coller ici le dégradé JSON...",
+        "custom": "personnalisé",
+        "builtIn": "intégré",
+        "colors": "couleurs",
+        "colorMode": "mode de couleur",
+        "gradient": "dégradé",
+        "gradientLeft": "dégradé gauche",
+        "gradientRight": "dégradé droite",
+        "smoothing": "lissage",
+        "frequencyRangeAndScaling": "plage de fréquence et mise à l'échelle",
+        "minimumFrequency": "fréquence minimum",
+        "maximumFrequency": "fréquence maximum",
+        "frequencyScale": "mise à l'échelle de fréquence",
+        "sensitivity": "sensibilité",
+        "weightingFilter": "filter de pondérage",
+        "minimumDecibels": "décibels minimum",
+        "maximumDecibels": "décibels maximum",
+        "linearAmplitude": "amplitude linéaire",
+        "linearBoost": "boost linéaire",
+        "peakBehavior": "comportement des piques",
+        "showPeaks": "afficher les piques"
     }
 }

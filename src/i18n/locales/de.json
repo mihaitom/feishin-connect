@@ -691,10 +691,7 @@
         "viewQueue": "Wiedergabeliste anzeigen",
         "addLastShuffled": "als Letztes (zufällige Wiedergabe)",
         "addNextShuffled": "als Nächstes (zufällige Wiedergabe)",
-        "queueType_default": "Standard",
-        "queueType_priority": "Priorität",
         "holdToShuffle": "Halten für Zufallswiedergabe",
-        "queueType": "Wiedergabelistentyp",
         "restoreQueueFromServer": "Wiedergabeliste von Server wiederherstellen",
         "saveQueueToServer": "Wiedergabeliste auf Server speichern"
     },

@@ -108,7 +108,9 @@
         "gridRows": "網格行",
         "noFilters": "未設定任何過濾器",
         "countSelected": "{{count}}個已選取",
-        "retry": "重試"
+        "retry": "重試",
+        "example": "範例",
+        "mood": "情緒"
     },
     "error": {
         "endpointNotImplementedError": "{{serverType}} 尚未實現端點 {{endpoint}}",
@@ -369,9 +371,6 @@
         "viewQueue": "檢視佇列",
         "addLastShuffled": "新增至尾端 (隨機)",
         "addNextShuffled": "新增至下一首 (隨機)",
-        "queueType": "佇列類型",
-        "queueType_default": "預設",
-        "queueType_priority": "優先",
         "holdToShuffle": "按住以隨機",
         "lyrics": "歌詞",
         "restoreQueueFromServer": "從伺服器還原播放佇列",
@@ -624,7 +623,7 @@
         "preventSleepOnPlayback": "防止播放時進入睡眠狀態",
         "preventSleepOnPlayback_description": "在音樂播放時防止螢幕進入睡眠狀態",
         "mediaSession": "啟用Media Session",
-        "mediaSession_description": "啟用 Windows Media Session 整合功能，於系統音量Overlay和鎖定畫面中顯示媒體資料與控制面板（僅限 Windows）",
+        "mediaSession_description": "啟用 Media Session 整合功能，於系統音量Overlay和鎖定畫面中顯示媒體資料與控制面板",
         "releaseChannel": "發佈通道",
         "analyticsDisable": "選擇退出使用情況分析",
         "analyticsDisable_description": "經過匿名處理的使用情況資料將傳送給開發者，以協助改進應用程式",
@@ -698,7 +697,16 @@
         "combinedLyricsAndVisualizer": "在播放器側邊欄整合歌詞與視覺化效果",
         "artistRadioCount": "藝人/歌曲電台數量",
         "showRatings_description": "控制星級評分功能是否顯示於介面中",
-        "showRatings": "顯示星級評分"
+        "showRatings": "顯示星級評分",
+        "artistReleaseTypeConfiguration": "藝人發行類型設定",
+        "artistReleaseTypeConfiguration_description": "設定專輯藝人頁面中顯示的發行類型及排序",
+        "hotkey_listNavigateToPage": "從清單導覽至項目頁面",
+        "mpvExtraParameters": "MPV額外參數",
+        "mpvExtraParameters_description": "傳遞給MPV的額外參數",
+        "pathReplace": "檔案路徑替換",
+        "pathReplace_description": "替換您伺服器的預設檔案路徑",
+        "pathReplace_optionRemovePrefix": "移除前綴",
+        "pathReplace_optionAddPrefix": "增加前綴"
     },
     "table": {
         "config": {
@@ -844,44 +852,25 @@
         "selectAll": "全選"
     },
     "entity": {
-        "album_one": "專輯",
         "album_other": "專輯",
-        "albumArtist_one": "專輯藝人",
         "albumArtist_other": "專輯藝人",
-        "albumArtistCount_one": "{{count}} 位專輯藝人",
         "albumArtistCount_other": "{{count}} 位專輯藝人",
-        "artist_one": "藝人",
         "artist_other": "藝人",
-        "artistWithCount_one": "{{count}} 位藝人",
         "artistWithCount_other": "{{count}} 位藝人",
-        "favorite_one": "收藏",
         "favorite_other": "收藏",
-        "folder_one": "資料夾",
         "folder_other": "資料夾",
-        "folderWithCount_one": "{{count}} 個資料夾",
         "folderWithCount_other": "{{count}} 個資料夾",
-        "genre_one": "曲風",
         "genre_other": "曲風",
-        "genreWithCount_one": "{{count}} 種曲風",
         "genreWithCount_other": "{{count}} 種曲風",
-        "playlist_one": "播放清單",
         "playlist_other": "播放清單",
-        "playlistWithCount_one": "{{count}} 個播放清單",
         "playlistWithCount_other": "{{count}} 個播放清單",
         "smartPlaylist": "智慧$t(entity.playlist_one)",
-        "track_one": "曲目",
         "track_other": "曲目",
-        "trackWithCount_one": "{{count}} 首曲目",
         "trackWithCount_other": "{{count}} 首曲目",
-        "albumWithCount_one": "{{count}} 張專輯",
         "albumWithCount_other": "{{count}} 張專輯",
-        "play_one": "{{count}}次播放",
         "play_other": "{{count}}次播放",
-        "song_one": "歌曲",
         "song_other": "歌曲",
-        "radioStation_one": "電台",
         "radioStation_other": "電台",
-        "radioStationWithCount_one": "{{count}} 個電台",
         "radioStationWithCount_other": "{{count}} 個電台"
     },
     "filter": {
@@ -943,7 +932,10 @@
             "ignoreCors": "忽略 cors $t(common.restartRequired)",
             "ignoreSsl": "忽略 ssl $t(common.restartRequired)",
             "input_preferInstantMix": "偏好即時混音",
-            "input_preferInstantMixDescription": "僅使用即時混音功能來獲取相似歌曲。若您擁有能修改此行為的外掛，此功能將相當實用"
+            "input_preferInstantMixDescription": "僅使用即時混音功能來獲取相似歌曲。若您擁有能修改此行為的外掛，此功能將相當實用",
+            "input_preferRemoteUrl": "優先使用公開網址",
+            "input_remoteUrl": "公開網址",
+            "input_remoteUrlPlaceholder": "選用：對外功能的公開網址"
         },
         "addToPlaylist": {
             "input_playlists": "$t(entity.playlist_other)",
@@ -1082,7 +1074,9 @@
         "matchesRegex": "符合正規表達式",
         "notContains": "不包含",
         "notInPlaylist": "不在…之中",
-        "startsWith": "以…開頭"
+        "startsWith": "以…開頭",
+        "inTheLast": "在最後",
+        "notInTheLast": "不在最後"
     },
     "datetime": {
         "minuteShort": "分",

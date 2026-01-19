@@ -33,9 +33,6 @@
         "viewQueue": "zobrazit frontu",
         "addLastShuffled": "poslední (náhodně)",
         "addNextShuffled": "další (náhodně)",
-        "queueType": "typ fronty",
-        "queueType_default": "výchozí",
-        "queueType_priority": "priorita",
         "holdToShuffle": "podržte pro zamíchání",
         "lyrics": "texty",
         "restoreQueueFromServer": "obnovit frontu ze serveru",
@@ -289,7 +286,7 @@
         "releaseChannel": "kanál vydání",
         "releaseChannel_description": "vyberte si mezi stabilními vydáními nebo beta vydáními pro automatické aktualizace",
         "mediaSession": "povolit relaci médií",
-        "mediaSession_description": "povolí integraci do služby Windows Media Session, což zobrazí ovládání a metadata médií v překrytí systémové hlasitosti a na zamykací obrazovce (pouze Windows)",
+        "mediaSession_description": "povolí integraci do služby Media Session, což zobrazí ovládání a metadata médií v překrytí systémové hlasitosti a na zamykací obrazovce",
         "exportImportSettings_control_description": "exportovat a importovat nastavení pomocí souboru JSON",
         "exportImportSettings_control_exportText": "exportovat nastavení",
         "exportImportSettings_control_importText": "importovat nastavení",
@@ -536,7 +533,9 @@
         "countSelected": "vybráno {{count}}",
         "retry": "zkusit znovu",
         "mood": "nálada",
-        "example": "příklad"
+        "example": "příklad",
+        "filter_single": "jeden",
+        "filter_multiple": "několik"
     },
     "table": {
         "config": {
@@ -609,7 +608,9 @@
                 "genreBadge": "$t(entity.genre_one) (značky)",
                 "image": "obrázek",
                 "bitDepth": "$t(common.bitDepth)",
-                "sampleRate": "$t(common.sampleRate)"
+                "sampleRate": "$t(common.sampleRate)",
+                "composer": "skladatel",
+                "titleArtist": "$t(common.title) (umělec)"
             }
         },
         "column": {
