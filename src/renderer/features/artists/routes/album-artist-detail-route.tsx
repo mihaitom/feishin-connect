@@ -16,7 +16,7 @@ import {
 import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
-import { useFastAverageColor, useWaitForColorCalculation } from '/@/renderer/hooks';
+import { useFastAverageColor } from '/@/renderer/hooks';
 import { useArtistBackground, useCurrentServer, useCurrentServerId } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { AlbumListSort, LibraryItem, SortOrder } from '/@/shared/types/domain-types';
@@ -76,14 +76,7 @@ const AlbumArtistDetailRouteContent = () => {
 
     const showBlurredImage = artistBackground;
 
-    const { isReady } = useWaitForColorCalculation({
-        hasImage: !!selectedImageUrl,
-        isLoading: isColorLoading,
-        routeId,
-        showBlurredImage,
-    });
-
-    if (!isReady) {
+    if (isColorLoading) {
         return <Spinner container />;
     }
 
