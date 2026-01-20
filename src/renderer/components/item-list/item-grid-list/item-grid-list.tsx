@@ -106,6 +106,8 @@ const VirtualizedGridList = React.memo(
     }: VirtualizedGridListProps) => {
         const tableMeta = tableMetaRef.current;
         const scrollEndTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+        const isInitialScrollRef = useRef(true);
+        const initialScrollOffsetRef = useRef<null | number>(null);
 
         const itemData: GridItemProps = useMemo(() => {
             return {
@@ -144,6 +146,16 @@ const VirtualizedGridList = React.memo(
             ({ scrollDirection, scrollOffset }: ListOnScrollProps) => {
                 onScroll?.(scrollOffset, scrollDirection === 'forward' ? 'down' : 'up');
 
+                if (isInitialScrollRef.current) {
+                    if (initialScrollOffsetRef.current === null) {
+                        initialScrollOffsetRef.current = scrollOffset;
+                        return;
+                    } else if (Math.abs(initialScrollOffsetRef.current - scrollOffset) < 1) {
+                        return;
+                    }
+                    isInitialScrollRef.current = false;
+                }
+
                 if (scrollEndTimeoutRef.current) {
                     clearTimeout(scrollEndTimeoutRef.current);
                 }
@@ -174,6 +186,11 @@ const VirtualizedGridList = React.memo(
             },
             [onRangeChanged, tableMetaRef],
         );
+
+        useEffect(() => {
+            isInitialScrollRef.current = true;
+            initialScrollOffsetRef.current = null;
+        }, [initialTop]);
 
         if (!tableMeta) {
             return null;
