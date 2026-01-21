@@ -5,7 +5,12 @@ import styles from './visualizer.module.css';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { openVisualizerSettingsModal } from '/@/renderer/features/player/utils/open-visualizer-settings-modal';
 import { ComponentErrorBoundary } from '/@/renderer/features/shared/components/component-error-boundary';
-import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store';
+import {
+    subscribeButterchurnPreset,
+    useButterchurnSettings,
+    useSettingsStore,
+    useSettingsStoreActions,
+} from '/@/renderer/store';
 import {
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
@@ -39,7 +44,7 @@ const VisualizerInner = () => {
     const cycleStartTimeRef = useRef<number | undefined>(undefined);
     const pauseTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const initialPresetLoadedRef = useRef(false);
-    const butterchurnSettings = useSettingsStore((store) => store.visualizer.butterchurn);
+    const butterchurnSettings = useButterchurnSettings();
     const opacity = useSettingsStore((store) => store.visualizer.butterchurn.opacity);
     const { setSettings } = useSettingsStoreActions();
     const playerStatus = usePlayerStatus();
@@ -249,10 +254,9 @@ const VisualizerInner = () => {
         const presetNames = Object.keys(presets);
 
         if (presetNames.length > 0) {
+            const currentPreset = useSettingsStore.getState().visualizer.butterchurn.currentPreset;
             const presetName =
-                butterchurnSettings.currentPreset && presets[butterchurnSettings.currentPreset]
-                    ? butterchurnSettings.currentPreset
-                    : presetNames[0];
+                currentPreset && presets[currentPreset] ? currentPreset : presetNames[0];
             const preset = presets[presetName];
 
             if (preset) {
@@ -261,53 +265,14 @@ const VisualizerInner = () => {
                 initialPresetLoadedRef.current = true;
             }
         }
-    }, [
-        isVisualizerReady,
-        butterchurnSettings.currentPreset,
-        butterchurnSettings.blendTime,
-        librariesLoaded,
-    ]);
+    }, [isVisualizerReady, butterchurnSettings.blendTime, librariesLoaded]);
 
-    // Update preset when currentPreset or blendTime changes (but not when cycling)
     const isCyclingRef = useRef(false);
-
-    useEffect(() => {
-        const visualizer = visualizerRef.current;
-        if (
-            !visualizer ||
-            !butterchurnSettings.currentPreset ||
-            !initialPresetLoadedRef.current ||
-            !librariesLoaded
-        )
-            return;
-
-        // Skip if we're currently cycling (to avoid reloading preset)
-        if (isCyclingRef.current) {
-            isCyclingRef.current = false;
-            return;
-        }
-
-        const presets = butterchurnPresetsRef.current;
-        if (!presets) return;
-        const preset = presets[butterchurnSettings.currentPreset];
-
-        if (preset) {
-            visualizer.loadPreset(preset, butterchurnSettings.blendTime || 0.0);
-            // Reset cycle timer when preset changes manually
-            cycleStartTimeRef.current = Date.now();
-        }
-    }, [butterchurnSettings.currentPreset, butterchurnSettings.blendTime, librariesLoaded]);
 
     // Handle preset cycling
     useEffect(() => {
         const visualizer = visualizerRef.current;
-        if (
-            !visualizer ||
-            !butterchurnSettings.cyclePresets ||
-            !initialPresetLoadedRef.current ||
-            !librariesLoaded
-        ) {
-            // Clear cycle timer if cycling is disabled or visualizer not ready
+        if (!visualizer || !butterchurnSettings.cyclePresets || !librariesLoaded) {
             if (cycleTimerRef.current) {
                 clearInterval(cycleTimerRef.current);
                 cycleTimerRef.current = undefined;
@@ -316,6 +281,7 @@ const VisualizerInner = () => {
         }
 
         const presets = butterchurnPresetsRef.current;
+
         if (!presets) return;
         const allPresetNames = Object.keys(presets);
 
@@ -342,7 +308,8 @@ const VisualizerInner = () => {
             const currentVisualizer = visualizerRef.current;
             if (!currentVisualizer) return;
 
-            const currentPresetName = butterchurnSettings.currentPreset;
+            const currentPresetName =
+                useSettingsStore.getState().visualizer.butterchurn.currentPreset;
             let nextPresetName: string;
 
             if (butterchurnSettings.randomizeNextPreset) {
@@ -365,16 +332,12 @@ const VisualizerInner = () => {
 
             const nextPreset = presets[nextPresetName];
             if (nextPreset) {
-                // Get current settings to ensure we use the latest blendTime
                 const currentSettings = useSettingsStore.getState().visualizer.butterchurn;
 
-                // Mark that we're cycling to prevent the preset change effect from running
                 isCyclingRef.current = true;
 
-                // Load the preset with blending
                 currentVisualizer.loadPreset(nextPreset, currentSettings.blendTime || 0.0);
 
-                // Update currentPreset in settings
                 setSettings({
                     visualizer: {
                         butterchurn: {
@@ -387,7 +350,6 @@ const VisualizerInner = () => {
             }
         };
 
-        // Check every second if it's time to cycle
         cycleTimerRef.current = setInterval(() => {
             if (cycleStartTimeRef.current === undefined) {
                 cycleStartTimeRef.current = Date.now();
@@ -413,7 +375,6 @@ const VisualizerInner = () => {
         butterchurnSettings.selectedPresets,
         butterchurnSettings.ignoredPresets,
         butterchurnSettings.randomizeNextPreset,
-        butterchurnSettings.currentPreset,
         setSettings,
         librariesLoaded,
     ]);
@@ -453,8 +414,40 @@ const VisualizerInner = () => {
         };
     }, [isVisualizerReady, butterchurnSettings.maxFPS]);
 
-    // Render container when playing (for initialization) or when visualizer exists
-    // Canvas must always be rendered when container is rendered so refs are available
+    // Handle preset changes via subscriber
+    useEffect(() => {
+        const unsubscribe = subscribeButterchurnPreset((presetName) => {
+            const visualizer = visualizerRef.current;
+            if (
+                !visualizer ||
+                !isVisualizerReady ||
+                !librariesLoaded ||
+                !presetName ||
+                !initialPresetLoadedRef.current
+            ) {
+                return;
+            }
+
+            if (isCyclingRef.current) {
+                isCyclingRef.current = false;
+                return;
+            }
+
+            const presets = butterchurnPresetsRef.current;
+            if (!presets) return;
+
+            const preset = presets[presetName];
+            if (preset && typeof preset === 'object') {
+                visualizer.loadPreset(preset, butterchurnSettings.blendTime || 0.0);
+                cycleStartTimeRef.current = Date.now();
+            }
+        });
+
+        return () => {
+            unsubscribe();
+        };
+    }, [isVisualizerReady, librariesLoaded, butterchurnSettings.blendTime]);
+
     const shouldRenderContainer = isPlaying || isVisualizerReady;
 
     if (!shouldRenderContainer) {
@@ -468,12 +461,17 @@ const VisualizerInner = () => {
             style={{ opacity: isVisualizerReady ? opacity : 0 }}
         >
             <canvas className={styles.canvas} ref={canvasRef} />
-            {isVisualizerReady && butterchurnSettings.currentPreset && (
-                <Text className={styles['preset-overlay']} isNoSelect size="sm">
-                    {butterchurnSettings.currentPreset}
-                </Text>
-            )}
+            {isVisualizerReady && <CurrentPresetDisplay />}
         </div>
+    );
+};
+
+const CurrentPresetDisplay = () => {
+    const currentPreset = useSettingsStore.getState().visualizer.butterchurn.currentPreset;
+    return (
+        <Text className={styles['preset-overlay']} isNoSelect size="sm">
+            {currentPreset}
+        </Text>
     );
 };
 
@@ -481,7 +479,7 @@ export const Visualizer = () => {
     const { visualizerExpanded } = useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { setSettings } = useSettingsStoreActions();
-    const butterchurnSettings = useSettingsStore((store) => store.visualizer.butterchurn);
+    const butterchurnSettings = useButterchurnSettings();
     const [presetsLoaded, setPresetsLoaded] = useState(false);
     const butterchurnPresetsRef = useRef<any>(null);
 
@@ -542,7 +540,7 @@ export const Visualizer = () => {
         const presetList = getPresetList();
         if (presetList.length === 0) return;
 
-        const currentPresetName = butterchurnSettings.currentPreset;
+        const currentPresetName = useSettingsStore.getState().visualizer.butterchurn.currentPreset;
         const currentIndex = currentPresetName ? presetList.indexOf(currentPresetName) : -1;
         const nextIndex =
             currentIndex >= 0 && currentIndex < presetList.length - 1 ? currentIndex + 1 : 0;
@@ -563,7 +561,7 @@ export const Visualizer = () => {
         const presetList = getPresetList();
         if (presetList.length === 0) return;
 
-        const currentPresetName = butterchurnSettings.currentPreset;
+        const currentPresetName = useSettingsStore.getState().visualizer.butterchurn.currentPreset;
         const currentIndex = currentPresetName ? presetList.indexOf(currentPresetName) : -1;
         const prevIndex = currentIndex > 0 ? currentIndex - 1 : presetList.length - 1;
         const prevPresetName = presetList[prevIndex];
