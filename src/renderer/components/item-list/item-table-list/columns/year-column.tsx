@@ -1,3 +1,5 @@
+import { memo, useMemo } from 'react';
+
 import {
     ColumnNullFallback,
     ColumnSkeletonFixed,
@@ -6,28 +8,29 @@ import {
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { SEPARATOR_STRING } from '/@/shared/api/utils';
 
-export const YearColumn = (props: ItemTableListInnerColumn) => {
+const YearColumnBase = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
     const item = rowItem as any;
 
-    if (item && 'releaseYear' in item && item.releaseYear !== null) {
-        const releaseYear = item.releaseYear;
-        const originalYear =
-            'originalYear' in item && item.originalYear !== null ? item.originalYear : null;
+    const yearDisplay = useMemo(() => {
+        if (item && 'releaseYear' in item && item.releaseYear !== null) {
+            const releaseYear = item.releaseYear;
+            const originalYear =
+                'originalYear' in item && item.originalYear !== null ? item.originalYear : null;
 
-        if (originalYear !== null && originalYear !== releaseYear) {
-            return (
-                <TableColumnTextContainer {...props}>
-                    {originalYear}
-                    {SEPARATOR_STRING}
-                    {releaseYear}
-                </TableColumnTextContainer>
-            );
-        }
+            if (originalYear !== null && originalYear !== releaseYear) {
+                return `${originalYear}${SEPARATOR_STRING}${releaseYear}`;
+            }
 
-        if (typeof releaseYear === 'number') {
-            return <TableColumnTextContainer {...props}>{releaseYear}</TableColumnTextContainer>;
+            if (typeof releaseYear === 'number') {
+                return releaseYear;
+            }
         }
+        return null;
+    }, [item]);
+
+    if (yearDisplay !== null) {
+        return <TableColumnTextContainer {...props}>{yearDisplay}</TableColumnTextContainer>;
     }
 
     const row: number | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
@@ -38,3 +41,16 @@ export const YearColumn = (props: ItemTableListInnerColumn) => {
 
     return <ColumnSkeletonFixed {...props} />;
 };
+
+export const YearColumn = memo(YearColumnBase, (prevProps, nextProps) => {
+    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
+    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
+
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevItem === nextItem
+    );
+});

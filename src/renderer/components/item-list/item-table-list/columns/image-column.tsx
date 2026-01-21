@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 
 import styles from './image-column.module.css';
 
@@ -19,7 +19,7 @@ import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Folder, LibraryItem } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
-export const ImageColumn = (props: ItemTableListInnerColumn) => {
+const ImageColumnBase = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
     const row: string | undefined = rowItem?.id;
     const item = rowItem as any;
@@ -136,3 +136,18 @@ export const ImageColumn = (props: ItemTableListInnerColumn) => {
         </TableColumnContainer>
     );
 };
+
+export const ImageColumn = memo(ImageColumnBase, (prevProps, nextProps) => {
+    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
+    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
+
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.itemType === nextProps.itemType &&
+        prevProps.size === nextProps.size &&
+        prevItem === nextItem
+    );
+});

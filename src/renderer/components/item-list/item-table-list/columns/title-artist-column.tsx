@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { CSSProperties } from 'react';
+import { CSSProperties, memo } from 'react';
 import { Link } from 'react-router';
 
 import styles from './title-artist-column.module.css';
@@ -194,7 +194,7 @@ export const QueueSongTitleArtistColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonVariable {...props} />;
 };
 
-export const TitleArtistColumn = (props: ItemTableListInnerColumn) => {
+const TitleArtistColumnBase = (props: ItemTableListInnerColumn) => {
     const { itemType } = props;
 
     switch (itemType) {
@@ -207,3 +207,18 @@ export const TitleArtistColumn = (props: ItemTableListInnerColumn) => {
             return <DefaultTitleArtistColumn {...props} />;
     }
 };
+
+export const TitleArtistColumn = memo(TitleArtistColumnBase, (prevProps, nextProps) => {
+    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
+    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
+
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.itemType === nextProps.itemType &&
+        prevProps.size === nextProps.size &&
+        prevItem === nextItem
+    );
+});

@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import {
     ItemTableListInnerColumn,
     TableColumnContainer,
@@ -7,7 +9,7 @@ import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutatio
 import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 
-export const FavoriteColumn = (props: ItemTableListInnerColumn) => {
+const FavoriteColumnBase = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
     const row: boolean | undefined = rowItem?.[props.columns[props.columnIndex].id];
 
@@ -55,3 +57,19 @@ export const FavoriteColumn = (props: ItemTableListInnerColumn) => {
 
     return <TableColumnContainer {...props}>&nbsp;</TableColumnContainer>;
 };
+
+export const FavoriteColumn = memo(FavoriteColumnBase, (prevProps, nextProps) => {
+    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
+    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
+    const prevFavorite = prevItem?.[prevProps.columns[prevProps.columnIndex].id];
+    const nextFavorite = nextItem?.[nextProps.columns[nextProps.columnIndex].id];
+
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevItem === nextItem &&
+        prevFavorite === nextFavorite
+    );
+});

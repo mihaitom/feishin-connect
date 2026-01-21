@@ -361,7 +361,9 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
     return <ColumnSkeletonVariable {...props} />;
 };
 
-export const TitleCombinedColumn = (props: ItemTableListInnerColumn) => {
+import { memo } from 'react';
+
+const TitleCombinedColumnBase = (props: ItemTableListInnerColumn) => {
     const { itemType } = props;
 
     switch (itemType) {
@@ -374,3 +376,18 @@ export const TitleCombinedColumn = (props: ItemTableListInnerColumn) => {
             return <DefaultTitleCombinedColumn {...props} />;
     }
 };
+
+export const TitleCombinedColumn = memo(TitleCombinedColumnBase, (prevProps, nextProps) => {
+    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
+    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
+
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.itemType === nextProps.itemType &&
+        prevProps.size === nextProps.size &&
+        prevItem === nextItem
+    );
+});

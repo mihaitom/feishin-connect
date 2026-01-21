@@ -43,10 +43,15 @@ import { useTableKeyboardNavigation } from '/@/renderer/components/item-list/ite
 import { useTablePaneSync } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-pane-sync';
 import { useTableRowModel } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-row-model';
 import { useTableScrollToIndex } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-scroll-to-index';
+import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import {
     ItemTableListConfigProvider,
     ItemTableListStoreProvider,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-context';
+import {
+    MemoizedCellRouter,
+    useColumnCellComponents,
+} from '/@/renderer/components/item-list/item-table-list/memoized-cell-router';
 import {
     ItemControls,
     ItemListHandle,
@@ -195,6 +200,22 @@ const VirtualizedTableGrid = ({
     const columnWidth = useCallback(
         (index: number) => calculatedColumnWidths[index],
         [calculatedColumnWidths],
+    );
+
+    const columnWidthMemoized = useCallback(
+        (index: number) => columnWidth(index + pinnedLeftColumnCount),
+        [columnWidth, pinnedLeftColumnCount],
+    );
+
+    const rowHeightMemoized = useCallback(
+        (index: number, cellProps: TableItemProps) =>
+            getRowHeight(index + pinnedRowCount, cellProps),
+        [getRowHeight, pinnedRowCount],
+    );
+
+    const pinnedRightColumnWidthMemoized = useCallback(
+        (index: number) => columnWidth(index + pinnedLeftColumnCount + totalColumnCount),
+        [columnWidth, pinnedLeftColumnCount, totalColumnCount],
     );
 
     const groupHeaderInfoByRowIndex = useMemo(() => {
@@ -595,14 +616,10 @@ const VirtualizedTableGrid = ({
                         cellProps={itemProps}
                         className={styles.height100}
                         columnCount={totalColumnCount}
-                        columnWidth={(index) => {
-                            return columnWidth(index + pinnedLeftColumnCount);
-                        }}
+                        columnWidth={columnWidthMemoized}
                         onCellsRendered={handleOnCellsRendered}
                         rowCount={totalRowCount}
-                        rowHeight={(index, cellProps) => {
-                            return getRowHeight(index + pinnedRowCount, cellProps);
-                        }}
+                        rowHeight={rowHeightMemoized}
                     />
                     {pinnedLeftColumnCount > 0 && enableScrollShadow && showLeftShadow && (
                         <div className={styles.itemTableLeftScrollShadow} />
@@ -669,15 +686,9 @@ const VirtualizedTableGrid = ({
                             cellProps={itemProps}
                             className={clsx(styles.noScrollbar, styles.height100)}
                             columnCount={pinnedRightColumnCount}
-                            columnWidth={(index) => {
-                                return columnWidth(
-                                    index + pinnedLeftColumnCount + totalColumnCount,
-                                );
-                            }}
+                            columnWidth={pinnedRightColumnWidthMemoized}
                             rowCount={totalRowCount}
-                            rowHeight={(index, cellProps) => {
-                                return getRowHeight(index + pinnedRowCount, cellProps);
-                            }}
+                            rowHeight={rowHeightMemoized}
                         />
                     </div>
                 </div>
@@ -785,7 +796,7 @@ export interface TableItemProps {
 interface ItemTableListProps {
     activeRowId?: string;
     autoFitColumns?: boolean;
-    CellComponent: JSXElementConstructor<CellComponentProps<TableItemProps>>;
+    CellComponent?: JSXElementConstructor<CellComponentProps<TableItemProps>>;
     cellPadding?: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
     columns: ItemTableListColumnConfig[];
     data: unknown[];
@@ -832,7 +843,7 @@ interface ItemTableListProps {
 const BaseItemTableList = ({
     activeRowId,
     autoFitColumns = false,
-    CellComponent,
+    CellComponent = ItemTableListColumn,
     cellPadding = 'sm',
     columns,
     data,
@@ -1074,7 +1085,6 @@ const BaseItemTableList = ({
     });
 
     const getDataFn = useCallback(() => {
-        // For infinite lists, callers should pass `data` as the currently loaded items only.
         return data;
     }, [data]);
 
@@ -1082,7 +1092,6 @@ const BaseItemTableList = ({
 
     const internalState = useItemListState(getDataFn, extractRowId);
 
-    // Helper function to get ItemListStateItemWithRequiredProperties (rowId is separate, not part of item)
     const getStateItem = useCallback(
         (item: any): ItemListStateItemWithRequiredProperties | null => {
             if (!hasRequiredItemProperties(item)) {
@@ -1532,6 +1541,25 @@ const BaseItemTableList = ({
         ],
     );
 
+    const columnCellComponents = useColumnCellComponents(
+        parsedColumns.map((c) => c.id as TableColumn),
+        itemType,
+    );
+
+    const optimizedCellComponent = useMemo<
+        JSXElementConstructor<CellComponentProps<TableItemProps>>
+    >(() => {
+        if (CellComponent && CellComponent !== ItemTableListColumn) {
+            return CellComponent;
+        }
+
+        return (cellProps: CellComponentProps<TableItemProps>) => {
+            return (
+                <MemoizedCellRouter {...cellProps} columnCellComponents={columnCellComponents} />
+            );
+        };
+    }, [CellComponent, columnCellComponents]);
+
     return (
         <ItemTableListStoreProvider activeRowId={activeRowId}>
             <ItemTableListConfigProvider value={tableConfigValue}>
@@ -1554,7 +1582,7 @@ const BaseItemTableList = ({
                     {StickyGroupRow}
                     <MemoizedVirtualizedTableGrid
                         calculatedColumnWidths={calculatedColumnWidths}
-                        CellComponent={CellComponent}
+                        CellComponent={optimizedCellComponent}
                         cellPadding={cellPadding}
                         controls={controls}
                         data={data}

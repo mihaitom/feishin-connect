@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { parseIntParam, setSearchParam } from '/@/renderer/utils/query-params';
@@ -12,11 +12,16 @@ export const useItemListScrollPersist = ({ enabled }: UseItemListScrollPersistPr
 
     const scrollOffset = useMemo(() => parseIntParam(searchParams, 'scrollOffset'), [searchParams]);
 
-    const handleOnScrollEnd = (offset: number) => {
-        if (!enabled) return;
+    const handleOnScrollEnd = useCallback(
+        (offset: number) => {
+            if (!enabled) return;
 
-        setSearchParams((prev) => setSearchParam(prev, 'scrollOffset', offset), { replace: true });
-    };
+            setSearchParams((prev) => setSearchParam(prev, 'scrollOffset', offset), {
+                replace: true,
+            });
+        },
+        [enabled, setSearchParams],
+    );
 
     return { handleOnScrollEnd, scrollOffset };
 };

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -19,7 +19,7 @@ import { useLongPress } from '/@/shared/hooks/use-long-press';
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { DragOperation, DragTarget, DragTargetMap } from '/@/shared/types/drag-and-drop';
 
-export const PlaylistReorderColumn = (props: ItemTableListInnerColumn) => {
+const PlaylistReorderColumnBase = (props: ItemTableListInnerColumn) => {
     const { t } = useTranslation();
     const { playlistId } = useParams() as { playlistId?: string };
     const isHeaderEnabled = !!props.enableHeader;
@@ -363,3 +363,18 @@ export const PlaylistReorderColumn = (props: ItemTableListInnerColumn) => {
         </TableColumnContainer>
     );
 };
+
+export const PlaylistReorderColumn = memo(PlaylistReorderColumnBase, (prevProps, nextProps) => {
+    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
+    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
+
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.itemType === nextProps.itemType &&
+        prevProps.enableHeader === nextProps.enableHeader &&
+        prevItem === nextItem
+    );
+});

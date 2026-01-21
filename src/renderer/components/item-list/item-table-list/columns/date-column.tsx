@@ -1,3 +1,5 @@
+import { memo, useMemo } from 'react';
+
 import {
     ColumnNullFallback,
     ColumnSkeletonFixed,
@@ -29,15 +31,25 @@ const getDateTooltipLabel = (utcString: string) => {
     );
 };
 
-export const DateColumn = (props: ItemTableListInnerColumn) => {
+const DateColumnBase = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
     const row: string | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
+
+    const { formattedDate, tooltipLabel } = useMemo(() => {
+        if (typeof row === 'string' && row) {
+            return {
+                formattedDate: formatDateAbsolute(row),
+                tooltipLabel: getDateTooltipLabel(row),
+            };
+        }
+        return { formattedDate: null, tooltipLabel: null };
+    }, [row]);
 
     if (typeof row === 'string' && row) {
         return (
             <TableColumnTextContainer {...props}>
-                <Tooltip label={getDateTooltipLabel(row)} multiline={false}>
-                    <span>{formatDateAbsolute(row)}</span>
+                <Tooltip label={tooltipLabel} multiline={false}>
+                    <span>{formattedDate}</span>
                 </Tooltip>
             </TableColumnTextContainer>
         );
@@ -50,42 +62,70 @@ export const DateColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonFixed {...props} />;
 };
 
-export const AbsoluteDateColumn = (props: ItemTableListInnerColumn) => {
+export const DateColumn = memo(DateColumnBase, (prevProps, nextProps) => {
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns
+    );
+});
+
+const AbsoluteDateColumnBase = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
     const row: string | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
 
+    const releaseDateContent = useMemo(() => {
+        if (props.type === TableColumn.RELEASE_DATE) {
+            const item = rowItem as any;
+            if (item && 'releaseDate' in item && item.releaseDate) {
+                const releaseDate = item.releaseDate;
+                const originalDate =
+                    'originalDate' in item && item.originalDate && item.originalDate !== releaseDate
+                        ? item.originalDate
+                        : null;
+
+                if (originalDate) {
+                    const formattedOriginalDate = formatDateAbsoluteUTC(originalDate);
+                    const formattedReleaseDate = formatDateAbsoluteUTC(releaseDate);
+                    const displayText = `${formattedOriginalDate}${SEPARATOR_STRING}${formattedReleaseDate}`;
+
+                    return {
+                        displayText,
+                        tooltipLabel: getDateTooltipLabel(releaseDate),
+                    };
+                }
+
+                if (typeof releaseDate === 'string' && releaseDate) {
+                    return {
+                        displayText: formatDateAbsoluteUTC(releaseDate),
+                        tooltipLabel: getDateTooltipLabel(releaseDate),
+                    };
+                }
+            }
+        }
+        return null;
+    }, [props.type, rowItem]);
+
+    const { formattedDate, tooltipLabel } = useMemo(() => {
+        if (typeof row === 'string' && row) {
+            return {
+                formattedDate: formatDateAbsoluteUTC(row),
+                tooltipLabel: getDateTooltipLabel(row),
+            };
+        }
+        return { formattedDate: null, tooltipLabel: null };
+    }, [row]);
+
     if (props.type === TableColumn.RELEASE_DATE) {
-        const item = rowItem as any;
-        if (item && 'releaseDate' in item && item.releaseDate) {
-            const releaseDate = item.releaseDate;
-            const originalDate =
-                'originalDate' in item && item.originalDate && item.originalDate !== releaseDate
-                    ? item.originalDate
-                    : null;
-
-            if (originalDate) {
-                const formattedOriginalDate = formatDateAbsoluteUTC(originalDate);
-                const formattedReleaseDate = formatDateAbsoluteUTC(releaseDate);
-                const displayText = `${formattedOriginalDate}${SEPARATOR_STRING}${formattedReleaseDate}`;
-
-                return (
-                    <TableColumnTextContainer {...props}>
-                        <Tooltip label={getDateTooltipLabel(releaseDate)} multiline={false}>
-                            <span>{displayText}</span>
-                        </Tooltip>
-                    </TableColumnTextContainer>
-                );
-            }
-
-            if (typeof releaseDate === 'string' && releaseDate) {
-                return (
-                    <TableColumnTextContainer {...props}>
-                        <Tooltip label={getDateTooltipLabel(releaseDate)} multiline={false}>
-                            <span>{formatDateAbsoluteUTC(releaseDate)}</span>
-                        </Tooltip>
-                    </TableColumnTextContainer>
-                );
-            }
+        if (releaseDateContent) {
+            return (
+                <TableColumnTextContainer {...props}>
+                    <Tooltip label={releaseDateContent.tooltipLabel} multiline={false}>
+                        <span>{releaseDateContent.displayText}</span>
+                    </Tooltip>
+                </TableColumnTextContainer>
+            );
         }
 
         if (row === null) {
@@ -98,8 +138,8 @@ export const AbsoluteDateColumn = (props: ItemTableListInnerColumn) => {
     if (typeof row === 'string' && row) {
         return (
             <TableColumnTextContainer {...props}>
-                <Tooltip label={getDateTooltipLabel(row)} multiline={false}>
-                    <span>{formatDateAbsoluteUTC(row)}</span>
+                <Tooltip label={tooltipLabel} multiline={false}>
+                    <span>{formattedDate}</span>
                 </Tooltip>
             </TableColumnTextContainer>
         );
@@ -112,15 +152,35 @@ export const AbsoluteDateColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonFixed {...props} />;
 };
 
-export const RelativeDateColumn = (props: ItemTableListInnerColumn) => {
+export const AbsoluteDateColumn = memo(AbsoluteDateColumnBase, (prevProps, nextProps) => {
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.type === nextProps.type
+    );
+});
+
+const RelativeDateColumnBase = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
     const row: string | undefined = (rowItem as any)?.[props.columns[props.columnIndex].id];
+
+    const { formattedDate, tooltipLabel } = useMemo(() => {
+        if (typeof row === 'string') {
+            return {
+                formattedDate: formatDateRelative(row),
+                tooltipLabel: getDateTooltipLabel(row),
+            };
+        }
+        return { formattedDate: null, tooltipLabel: null };
+    }, [row]);
 
     if (typeof row === 'string') {
         return (
             <TableColumnTextContainer {...props}>
-                <Tooltip label={getDateTooltipLabel(row)} multiline={false}>
-                    <span>{formatDateRelative(row)}</span>
+                <Tooltip label={tooltipLabel} multiline={false}>
+                    <span>{formattedDate}</span>
                 </Tooltip>
             </TableColumnTextContainer>
         );
@@ -132,3 +192,12 @@ export const RelativeDateColumn = (props: ItemTableListInnerColumn) => {
 
     return <ColumnSkeletonFixed {...props} />;
 };
+
+export const RelativeDateColumn = memo(RelativeDateColumnBase, (prevProps, nextProps) => {
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns
+    );
+});

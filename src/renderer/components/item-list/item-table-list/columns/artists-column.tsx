@@ -109,6 +109,15 @@ const BaseArtistsColumn = (props: ItemTableListInnerColumn) => {
     }
 };
 
-const ArtistsColumnMemo = memo(BaseArtistsColumn);
+const ArtistsColumnMemo = memo(BaseArtistsColumn, (prevProps, nextProps) => {
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.itemType === nextProps.itemType &&
+        prevProps.size === nextProps.size
+    );
+});
 
 export { ArtistsColumnMemo as ArtistsColumn };

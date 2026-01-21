@@ -60,6 +60,13 @@ const GenreBadgeColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonVariable {...props} />;
 };
 
-export const GenreColumnMemo = memo(GenreBadgeColumn);
+export const GenreColumnMemo = memo(GenreBadgeColumn, (prevProps, nextProps) => {
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns
+    );
+});
 
 export { GenreColumnMemo as GenreBadgeColumn };

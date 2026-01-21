@@ -18,7 +18,7 @@ import { Text } from '/@/shared/components/text/text';
 import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
-export const RowIndexColumn = (props: ItemTableListInnerColumn) => {
+const RowIndexColumnBase = (props: ItemTableListInnerColumn) => {
     const { itemType } = props;
 
     switch (itemType) {
@@ -31,6 +31,19 @@ export const RowIndexColumn = (props: ItemTableListInnerColumn) => {
             return <DefaultRowIndexColumn {...props} />;
     }
 };
+
+export const RowIndexColumn = memo(RowIndexColumnBase, (prevProps, nextProps) => {
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.itemType === nextProps.itemType &&
+        prevProps.enableExpansion === nextProps.enableExpansion &&
+        prevProps.enableHeader === nextProps.enableHeader &&
+        prevProps.startRowIndex === nextProps.startRowIndex
+    );
+});
 
 const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
     const {

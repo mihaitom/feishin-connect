@@ -54,6 +54,14 @@ const AlbumArtistsColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonVariable {...props} />;
 };
 
-export const AlbumArtistsColumnMemo = memo(AlbumArtistsColumn);
+export const AlbumArtistsColumnMemo = memo(AlbumArtistsColumn, (prevProps, nextProps) => {
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.size === nextProps.size
+    );
+});
 
 export { AlbumArtistsColumnMemo as AlbumArtistsColumn };

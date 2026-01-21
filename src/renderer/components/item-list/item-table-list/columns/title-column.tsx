@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { memo } from 'react';
 import { Link } from 'react-router';
 
 import styles from './title-column.module.css';
@@ -14,7 +15,7 @@ import { useIsActiveRow } from '/@/renderer/components/item-list/item-table-list
 import { Text } from '/@/shared/components/text/text';
 import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
 
-export const TitleColumn = (props: ItemTableListInnerColumn) => {
+const TitleColumnBase = (props: ItemTableListInnerColumn) => {
     const { itemType } = props;
 
     switch (itemType) {
@@ -27,6 +28,21 @@ export const TitleColumn = (props: ItemTableListInnerColumn) => {
             return <DefaultTitleColumn {...props} />;
     }
 };
+
+export const TitleColumn = memo(TitleColumnBase, (prevProps, nextProps) => {
+    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
+    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
+
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.itemType === nextProps.itemType &&
+        prevProps.size === nextProps.size &&
+        prevItem === nextItem
+    );
+});
 
 function DefaultTitleColumn(props: ItemTableListInnerColumn) {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];

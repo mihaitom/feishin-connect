@@ -45,6 +45,18 @@ const ComposerColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonVariable {...props} />;
 };
 
-export const ComposerColumnMemo = memo(ComposerColumn);
+export const ComposerColumnMemo = memo(ComposerColumn, (prevProps, nextProps) => {
+    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
+    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
+
+    return (
+        prevProps.rowIndex === nextProps.rowIndex &&
+        prevProps.columnIndex === nextProps.columnIndex &&
+        prevProps.data === nextProps.data &&
+        prevProps.columns === nextProps.columns &&
+        prevProps.size === nextProps.size &&
+        prevItem === nextItem
+    );
+});
 
 export { ComposerColumnMemo as ComposerColumn };
