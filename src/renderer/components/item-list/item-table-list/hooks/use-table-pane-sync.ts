@@ -104,8 +104,9 @@ export const useTablePaneSync = ({
             target: root,
         });
 
+        let autoScrollCleanup: (() => void) | null = null;
         if (enableDrag) {
-            autoScrollForElements({
+            autoScrollCleanup = autoScrollForElements({
                 canScroll: () => true,
                 element: viewport,
                 getAllowedAxis: () => 'vertical',
@@ -114,6 +115,10 @@ export const useTablePaneSync = ({
         }
 
         return () => {
+            if (autoScrollCleanup) {
+                autoScrollCleanup();
+            }
+
             try {
                 const instance = osInstance();
                 const { current: root } = scrollContainerRef;
@@ -147,14 +152,21 @@ export const useTablePaneSync = ({
 
         const viewport = root.firstElementChild as HTMLElement;
 
+        let autoScrollCleanup: (() => void) | null = null;
         if (enableDrag) {
-            autoScrollForElements({
+            autoScrollCleanup = autoScrollForElements({
                 canScroll: () => true,
                 element: viewport,
                 getAllowedAxis: () => 'vertical',
                 getConfiguration: () => ({ maxScrollSpeed: 'fast' }),
             });
         }
+
+        return () => {
+            if (autoScrollCleanup) {
+                autoScrollCleanup();
+            }
+        };
     }, [enableDrag, pinnedLeftColumnCount, pinnedLeftColumnRef]);
 
     // Initialize overlayscrollbars for right pinned columns
@@ -176,8 +188,9 @@ export const useTablePaneSync = ({
             target: root,
         });
 
+        let autoScrollCleanup: (() => void) | null = null;
         if (enableDrag) {
-            autoScrollForElements({
+            autoScrollCleanup = autoScrollForElements({
                 canScroll: () => true,
                 element: viewport,
                 getAllowedAxis: () => 'vertical',
@@ -186,6 +199,10 @@ export const useTablePaneSync = ({
         }
 
         return () => {
+            if (autoScrollCleanup) {
+                autoScrollCleanup();
+            }
+
             try {
                 const instance = osInstanceRightPinned();
                 const { current: root } = pinnedRightColumnRef;
