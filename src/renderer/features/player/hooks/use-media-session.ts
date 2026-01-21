@@ -1,11 +1,12 @@
 import isElectron from 'is-electron';
-import { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import {
     usePlaybackSettings,
+    usePlaybackType,
     usePlayerStore,
     useSettingsStore,
     useSkipButtons,
@@ -142,4 +143,26 @@ export const useMediaSession = () => {
         },
         [isMediaSessionEnabled, mediaSession],
     );
+};
+
+const MediaSessionHookInner = () => {
+    useMediaSession();
+    return null;
+};
+
+export const MediaSessionHook = () => {
+    const isElectronEnv = isElectron();
+    const playbackType = usePlaybackType();
+    const isMediaSessionEnabled = useSettingsStore((state) => state.playback.mediaSession);
+
+    // We always want to enable media session when on web
+    // Otherwise, only enable if it is explicitly enabled in the settings AND using the web player
+    const shouldUseMediaSession =
+        !isElectronEnv || (isMediaSessionEnabled && playbackType === PlayerType.WEB);
+
+    if (!shouldUseMediaSession) {
+        return null;
+    }
+
+    return React.createElement(MediaSessionHookInner);
 };

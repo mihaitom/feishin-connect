@@ -32,6 +32,11 @@ export const useQueueRestoreTimestamp = () => {
     );
 };
 
+export const QueueRestoreTimestampHook = () => {
+    useQueueRestoreTimestamp();
+    return null;
+};
+
 export const useSaveQueue = () => {
     const serverId = useCurrentServerId();
 

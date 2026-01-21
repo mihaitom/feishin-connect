@@ -80,3 +80,8 @@ export const useUpdateCurrentSong = () => {
         [handleSongChange],
     );
 };
+
+export const UpdateCurrentSongHook = () => {
+    useUpdateCurrentSong();
+    return null;
+};

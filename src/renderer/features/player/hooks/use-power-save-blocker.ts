@@ -1,8 +1,7 @@
 import isElectron from 'is-electron';
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
-import { usePlayerStatus } from '/@/renderer/store';
-import { useWindowSettings } from '/@/renderer/store';
+import { usePlayerStatus, useSettingsStore, useWindowSettings } from '/@/renderer/store';
 import { PlayerStatus } from '/@/shared/types/types';
 
 const ipc = isElectron() ? window.api.ipc : null;
@@ -47,4 +46,20 @@ export const usePowerSaveBlocker = () => {
             stopPowerSaveBlocker();
         };
     }, [stopPowerSaveBlocker]);
+};
+
+const PowerSaveBlockerHookInner = () => {
+    usePowerSaveBlocker();
+    return null;
+};
+
+export const PowerSaveBlockerHook = () => {
+    const isElectronEnv = isElectron();
+    const preventSleepOnPlayback = useSettingsStore((state) => state.window.preventSleepOnPlayback);
+
+    if (!isElectronEnv || !preventSleepOnPlayback) {
+        return null;
+    }
+
+    return React.createElement(PowerSaveBlockerHookInner);
 };

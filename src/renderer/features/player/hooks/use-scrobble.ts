@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
@@ -8,6 +8,7 @@ import {
     usePlaybackSettings,
     usePlayerSong,
     usePlayerStore,
+    useSettingsStore,
     useTimestampStoreBase,
 } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
@@ -424,4 +425,20 @@ export const useScrobble = () => {
         },
         [handleScrobbleFromSongChange, handleProgressUpdate, handleScrobbleFromSeek],
     );
+};
+
+const ScrobbleHookInner = () => {
+    useScrobble();
+    return null;
+};
+
+export const ScrobbleHook = () => {
+    const isScrobbleEnabled = useSettingsStore((state) => state.playback.scrobble.enabled);
+    const privateMode = useAppStore((state) => state.privateMode);
+
+    if (!isScrobbleEnabled || privateMode) {
+        return null;
+    }
+
+    return React.createElement(ScrobbleHookInner);
 };

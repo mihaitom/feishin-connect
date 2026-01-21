@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
@@ -118,4 +118,21 @@ export const useMPRIS = () => {
         },
         [],
     );
+};
+
+const MPRISHookInner = () => {
+    useMPRIS();
+    return null;
+};
+
+export const MPRISHook = () => {
+    const isElectronEnv = isElectron();
+    const utils = isElectronEnv ? window.api.utils : null;
+    const mpris = isElectronEnv && utils?.isLinux() ? window.api.mpris : null;
+
+    if (mpris === null) {
+        return null;
+    }
+
+    return React.createElement(MPRISHookInner);
 };

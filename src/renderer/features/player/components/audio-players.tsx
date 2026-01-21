@@ -3,24 +3,24 @@ import { useEffect } from 'react';
 
 import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { UserFavoriteEventPayload, UserRatingEventPayload } from '/@/renderer/events/events';
-import { useDiscordRpc } from '/@/renderer/features/discord-rpc/use-discord-rpc';
-import { useMainPlayerListener } from '/@/renderer/features/player/audio-player/hooks/use-main-player-listener';
+import { DiscordRpcHook } from '/@/renderer/features/discord-rpc/use-discord-rpc';
+import { MainPlayerListenerHook } from '/@/renderer/features/player/audio-player/hooks/use-main-player-listener';
 import { MpvPlayer } from '/@/renderer/features/player/audio-player/mpv-player';
 import { WebPlayer } from '/@/renderer/features/player/audio-player/web-player';
-import { useAutoDJ } from '/@/renderer/features/player/hooks/use-auto-dj';
-import { useMediaSession } from '/@/renderer/features/player/hooks/use-media-session';
-import { useMPRIS } from '/@/renderer/features/player/hooks/use-mpris';
-import { usePlaybackHotkeys } from '/@/renderer/features/player/hooks/use-playback-hotkeys';
-import { usePowerSaveBlocker } from '/@/renderer/features/player/hooks/use-power-save-blocker';
-import { useQueueRestoreTimestamp } from '/@/renderer/features/player/hooks/use-queue-restore';
-import { useScrobble } from '/@/renderer/features/player/hooks/use-scrobble';
-import { useUpdateCurrentSong } from '/@/renderer/features/player/hooks/use-update-current-song';
+import { AutoDJHook } from '/@/renderer/features/player/hooks/use-auto-dj';
+import { MediaSessionHook } from '/@/renderer/features/player/hooks/use-media-session';
+import { MPRISHook } from '/@/renderer/features/player/hooks/use-mpris';
+import { PlaybackHotkeysHook } from '/@/renderer/features/player/hooks/use-playback-hotkeys';
+import { PowerSaveBlockerHook } from '/@/renderer/features/player/hooks/use-power-save-blocker';
+import { QueueRestoreTimestampHook } from '/@/renderer/features/player/hooks/use-queue-restore';
+import { ScrobbleHook } from '/@/renderer/features/player/hooks/use-scrobble';
+import { UpdateCurrentSongHook } from '/@/renderer/features/player/hooks/use-update-current-song';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { RadioWebPlayer } from '/@/renderer/features/radio/components/radio-web-player';
 import {
+    RadioAudioInstanceHook,
+    RadioMetadataHook,
     useIsRadioActive,
-    useRadioAudioInstance,
-    useRadioMetadata,
 } from '/@/renderer/features/radio/hooks/use-radio-player';
 import {
     updateQueueFavorites,
@@ -46,19 +46,54 @@ export const AudioPlayers = () => {
     } = usePlaybackSettings();
     const { setWebAudio, webAudio: audioContext } = useWebAudio();
 
-    useScrobble();
-    usePowerSaveBlocker();
-    useDiscordRpc();
-    useMPRIS();
-    useMainPlayerListener();
-    useMediaSession();
-    usePlaybackHotkeys();
-    useAutoDJ();
-    useQueueRestoreTimestamp();
-    useUpdateCurrentSong();
+    return (
+        <>
+            <ScrobbleHook />
+            <PowerSaveBlockerHook />
+            <DiscordRpcHook />
+            <MPRISHook />
+            <MainPlayerListenerHook />
+            <MediaSessionHook />
+            <PlaybackHotkeysHook />
+            <AutoDJHook />
+            <QueueRestoreTimestampHook />
+            <UpdateCurrentSongHook />
+            <RadioAudioInstanceHook />
+            <RadioMetadataHook />
+            <AudioPlayersContent
+                audioContext={audioContext}
+                audioDeviceId={audioDeviceId}
+                audioSampleRateHz={audioSampleRateHz}
+                playbackType={playbackType}
+                resetSampleRate={resetSampleRate}
+                serverId={serverId}
+                setWebAudio={setWebAudio}
+                webAudio={webAudio}
+            />
+        </>
+    );
+};
 
-    useRadioAudioInstance();
-    useRadioMetadata();
+const AudioPlayersContent = ({
+    audioContext,
+    audioDeviceId,
+    audioSampleRateHz,
+    playbackType,
+    resetSampleRate,
+    serverId,
+    setWebAudio,
+    webAudio,
+}: {
+    audioContext: ReturnType<typeof useWebAudio>['webAudio'];
+    audioDeviceId: null | string | undefined;
+    audioSampleRateHz: number | undefined;
+    playbackType: PlayerType;
+    resetSampleRate: ReturnType<typeof useSettingsStoreActions>['resetSampleRate'];
+    serverId: null | string;
+    setWebAudio: ReturnType<typeof useWebAudio>['setWebAudio'];
+    webAudio: boolean;
+}) => {
+    const isRadioActive = useIsRadioActive();
 
     useEffect(() => {
         if (webAudio && 'AudioContext' in window) {
@@ -142,8 +177,6 @@ export const AudioPlayers = () => {
             eventEmitter.off('USER_RATING', handleRating);
         };
     }, [serverId]);
-
-    const isRadioActive = useIsRadioActive();
 
     if (isRadioActive && playbackType === PlayerType.LOCAL) {
         return <MpvPlayer />;

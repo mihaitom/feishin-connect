@@ -150,3 +150,19 @@ export const useMainPlayerListener = () => {
         toggleShuffle,
     ]);
 };
+
+const MainPlayerListenerHookInner = () => {
+    useMainPlayerListener();
+    return null;
+};
+
+export const MainPlayerListenerHook = () => {
+    const isElectronEnv = isElectron();
+    const mpvPlayerListener = isElectronEnv ? window.api.mpvPlayerListener : null;
+
+    if (mpvPlayerListener === null) {
+        return null;
+    }
+
+    return <MainPlayerListenerHookInner />;
+};

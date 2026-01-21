@@ -38,3 +38,8 @@ export const usePlaybackHotkeys = () => {
 
     useHotkeys(playbackHotkeysItems);
 };
+
+export const PlaybackHotkeysHook = () => {
+    usePlaybackHotkeys();
+    return null;
+};

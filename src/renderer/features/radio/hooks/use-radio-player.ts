@@ -1,6 +1,6 @@
 import IcecastMetadataStats from 'icecast-metadata-stats';
 import isElectron from 'is-electron';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { createWithEqualityFn } from 'zustand/traditional';
 
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
@@ -286,4 +286,34 @@ export const useRadioMetadata = () => {
             setMetadata(null);
         };
     }, [currentStreamUrl, setMetadata, isUsingMpv]);
+};
+
+const RadioAudioInstanceHookInner = () => {
+    useRadioAudioInstance();
+    return null;
+};
+
+export const RadioAudioInstanceHook = () => {
+    const isRadioActive = useIsRadioActive();
+
+    if (!isRadioActive) {
+        return null;
+    }
+
+    return React.createElement(RadioAudioInstanceHookInner);
+};
+
+const RadioMetadataHookInner = () => {
+    useRadioMetadata();
+    return null;
+};
+
+export const RadioMetadataHook = () => {
+    const isRadioActive = useIsRadioActive();
+
+    if (!isRadioActive) {
+        return null;
+    }
+
+    return React.createElement(RadioMetadataHookInner);
 };
