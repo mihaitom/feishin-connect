@@ -21,12 +21,22 @@ import { Group } from '/@/shared/components/group/group';
 import { Text } from '/@/shared/components/text/text';
 import { PlayerStatus } from '/@/shared/types/types';
 
+// Ignore presets that are erroring out
+const IGNORED_PRESETS = ['Flexi + Martin - astral projection'];
+
 type ButterchurnVisualizer = {
     connectAudio: (audioNode: AudioNode) => void;
     loadPreset: (preset: any, blendTime: number) => void;
     render: () => void;
     setRendererSize: (width: number, height: number) => void;
 };
+
+export function getButterchurnPresetOptions(presets: Record<string, string>) {
+    if (!presets) return [];
+    return Object.fromEntries(
+        Object.entries(presets).filter(([preset]) => !IGNORED_PRESETS.includes(preset)),
+    );
+}
 
 const VisualizerInner = () => {
     const { webAudio } = useWebAudio();
@@ -62,7 +72,9 @@ const VisualizerInner = () => {
 
                 if (isMounted) {
                     butterchurnRef.current = butterchurnModule.default;
-                    butterchurnPresetsRef.current = presetsModule.default;
+                    butterchurnPresetsRef.current = butterchurnPresetsRef.current =
+                        getButterchurnPresetOptions(presetsModule.default);
+
                     setLibrariesLoaded(true);
                 }
             } catch (error) {
@@ -490,7 +502,9 @@ export const Visualizer = () => {
             try {
                 const presetsModule = await import('butterchurn-presets');
                 if (isMounted) {
-                    butterchurnPresetsRef.current = presetsModule.default;
+                    butterchurnPresetsRef.current = getButterchurnPresetOptions(
+                        presetsModule.default,
+                    );
                     setPresetsLoaded(true);
                 }
             } catch (error) {
