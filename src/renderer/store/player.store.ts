@@ -1984,6 +1984,26 @@ export const usePlayerSong = () => {
     );
 };
 
+export const usePlayerSongProperties = <T extends keyof QueueSong>(
+    properties: T[],
+): Partial<Pick<QueueSong, T>> => {
+    return usePlayerStoreBase(
+        useShallow((state) => {
+            const song = state.getCurrentSong();
+            if (!song) {
+                return {};
+            }
+
+            const result = {} as Pick<QueueSong, T>;
+
+            for (const prop of properties) {
+                result[prop] = song[prop];
+            }
+            return result;
+        }),
+    );
+};
+
 export const usePlayerNum = () => {
     return usePlayerStoreBase((state) => state.player.playerNum);
 };

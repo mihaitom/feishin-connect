@@ -6,8 +6,8 @@ import { ListConfigTable } from '/@/renderer/features/shared/components/list-con
 import {
     usePlaybackType,
     usePlayerActions,
-    usePlayerData,
     usePlayerProperties,
+    usePlayerSongProperties,
     usePlayerSpeed,
     usePlayerStatus,
 } from '/@/renderer/store';
@@ -51,13 +51,6 @@ const getMpvAudioDevices = async () => {
 
 export const PlayerConfig = () => {
     const { t } = useTranslation();
-    const { currentSong } = usePlayerData();
-    const speed = usePlayerSpeed();
-    const status = usePlayerStatus();
-    const playbackType = usePlaybackType();
-    const { crossfadeDuration, crossfadeStyle, transitionType } = usePlayerProperties();
-    const { setCrossfadeDuration, setCrossfadeStyle, setSpeed, setTransitionType } =
-        usePlayerActions();
     const preservePitch = useSettingsStore((state) => state.playback.preservePitch);
     const showLyricsInSidebar = useShowLyricsInSidebar();
     const showVisualizerInSidebar = useShowVisualizerInSidebar();
@@ -75,101 +68,15 @@ export const PlayerConfig = () => {
         [playbackSettings, setSettings],
     );
 
-    const [audioDevices, setAudioDevices] = useState<{ label: string; value: string }[]>([]);
-
-    useEffect(() => {
-        const fetchAudioDevices = async () => {
-            if (!isElectron()) {
-                return;
-            }
-
-            if (playbackType === PlayerType.WEB) {
-                getAudioDevice()
-                    .then((dev) =>
-                        setAudioDevices(dev.map((d) => ({ label: d.label, value: d.deviceId }))),
-                    )
-                    .catch(() =>
-                        toast.error({
-                            message: t('error.audioDeviceFetchError', {
-                                postProcess: 'sentenceCase',
-                            }),
-                        }),
-                    );
-            } else if (playbackType === PlayerType.LOCAL && mpvPlayer) {
-                try {
-                    const devices = await getMpvAudioDevices();
-                    setAudioDevices(devices);
-                } catch {
-                    toast.error({
-                        message: t('error.audioDeviceFetchError', {
-                            postProcess: 'sentenceCase',
-                        }),
-                    });
-                }
-            }
-        };
-
-        fetchAudioDevices();
-    }, [playbackType, t]);
-
     const options = useMemo(() => {
-        const formatPlaybackSpeedSliderLabel = (value: number) => {
-            const bpm = Number(currentSong?.bpm);
-            if (bpm > 0) {
-                return `${value} x / ${(bpm * value).toFixed(1)} BPM`;
-            }
-            return `${value} x`;
-        };
-
         const allOptions = [
             {
-                component: (
-                    <Select
-                        comboboxProps={{ withinPortal: false }}
-                        data={[
-                            {
-                                disabled: !isElectron(),
-                                label: 'MPV',
-                                value: PlayerType.LOCAL,
-                            },
-                            { label: 'Web', value: PlayerType.WEB },
-                        ]}
-                        defaultValue={playbackSettings.type}
-                        disabled={status === PlayerStatus.PLAYING}
-                        onChange={(e) => {
-                            setSettings({
-                                playback: { ...playbackSettings, type: e as PlayerType },
-                            });
-                            ipc?.send('settings-set', {
-                                property: 'playbackType',
-                                value: e,
-                            });
-                        }}
-                        width="100%"
-                    />
-                ),
+                component: <AudioPlayerTypeConfig />,
                 id: 'audioPlayerType',
                 label: t('setting.audioPlayer', { postProcess: 'titleCase' }),
             },
             {
-                component: (
-                    <Select
-                        clearable
-                        comboboxProps={{ withinPortal: false }}
-                        data={audioDevices}
-                        defaultValue={playbackSettings.audioDeviceId}
-                        disabled={status === PlayerStatus.PLAYING}
-                        onChange={(e) => {
-                            setSettings({
-                                playback: {
-                                    ...playbackSettings,
-                                    audioDeviceId: e,
-                                },
-                            });
-                        }}
-                        width="100%"
-                    />
-                ),
+                component: <AudioDeviceConfig />,
                 id: 'audioDevice',
                 label: t('setting.audioDevice', { postProcess: 'titleCase' }),
             },
@@ -180,93 +87,21 @@ export const PlayerConfig = () => {
                 label: '',
             },
             {
-                component: (
-                    <SegmentedControl
-                        data={[
-                            {
-                                label: t('setting.playbackStyle', {
-                                    context: 'optionNormal',
-                                    postProcess: 'titleCase',
-                                }),
-                                value: PlayerStyle.GAPLESS,
-                            },
-                            {
-                                label: t('setting.playbackStyle', {
-                                    context: 'optionCrossFade',
-                                    postProcess: 'titleCase',
-                                }),
-                                value: PlayerStyle.CROSSFADE,
-                            },
-                        ]}
-                        disabled={
-                            playbackSettings.type !== PlayerType.WEB ||
-                            status === PlayerStatus.PLAYING
-                        }
-                        onChange={(value) => setTransitionType(value as PlayerStyle)}
-                        size="sm"
-                        value={transitionType}
-                        w="100%"
-                    />
-                ),
+                component: <TransitionTypeConfig />,
                 id: 'transitionType',
                 label: t('setting.playbackStyle', {
                     postProcess: 'titleCase',
                 }),
             },
             {
-                component: (
-                    <Select
-                        comboboxProps={{ withinPortal: false }}
-                        data={[
-                            { label: 'Linear', value: CrossfadeStyle.LINEAR },
-                            { label: 'Equal Power', value: CrossfadeStyle.EQUAL_POWER },
-                            { label: 'S-Curve', value: CrossfadeStyle.S_CURVE },
-                            { label: 'Exponential', value: CrossfadeStyle.EXPONENTIAL },
-                        ]}
-                        defaultValue={crossfadeStyle}
-                        disabled={
-                            playbackSettings.type !== PlayerType.WEB ||
-                            transitionType !== PlayerStyle.CROSSFADE ||
-                            status === PlayerStatus.PLAYING
-                        }
-                        onChange={(e) => {
-                            if (e) {
-                                setCrossfadeStyle(e as CrossfadeStyle);
-                            }
-                        }}
-                        width="100%"
-                    />
-                ),
+                component: <CrossfadeStyleConfig />,
                 id: 'crossfadeStyle',
                 label: t('setting.crossfadeStyle', {
                     postProcess: 'titleCase',
                 }),
             },
             {
-                component: (
-                    <Slider
-                        defaultValue={crossfadeDuration}
-                        disabled={
-                            playbackSettings.type !== PlayerType.WEB ||
-                            transitionType !== PlayerStyle.CROSSFADE ||
-                            status === PlayerStatus.PLAYING
-                        }
-                        marks={[
-                            { label: '3', value: 3 },
-                            { label: '6', value: 6 },
-                            { label: '9', value: 9 },
-                            { label: '12', value: 12 },
-                            { label: '15', value: 15 },
-                        ]}
-                        max={15}
-                        min={3}
-                        onChangeEnd={setCrossfadeDuration}
-                        styles={{
-                            root: {},
-                        }}
-                        w="100%"
-                    />
-                ),
+                component: <CrossfadeDurationConfig />,
                 id: 'crossfadeDuration',
                 label: t('setting.crossfadeDuration', {
                     postProcess: 'titleCase',
@@ -279,31 +114,7 @@ export const PlayerConfig = () => {
                 label: '',
             },
             {
-                component: (
-                    <Slider
-                        defaultValue={speed}
-                        label={formatPlaybackSpeedSliderLabel}
-                        marks={[
-                            { label: '0.5', value: 0.5 },
-                            { label: '0.75', value: 0.75 },
-                            { label: '1', value: 1 },
-                            { label: '1.25', value: 1.25 },
-                            { label: '1.5', value: 1.5 },
-                            { label: '1.75', value: 1.75 },
-                            { label: '2', value: 2 },
-                        ]}
-                        max={2}
-                        min={0.5}
-                        onChangeEnd={setSpeed}
-                        onDoubleClick={() => setSpeed(1)}
-                        step={0.01}
-                        styles={{
-                            markLabel: {},
-                            root: {},
-                        }}
-                        w="100%"
-                    />
-                ),
+                component: <PlaybackSpeedSlider />,
                 id: 'playbackSpeed',
                 label: t('player.playbackSpeed', { postProcess: 'titleCase' }),
             },
@@ -376,20 +187,8 @@ export const PlayerConfig = () => {
         return allOptions;
     }, [
         t,
-        playbackSettings,
-        status,
-        audioDevices,
-        transitionType,
-        crossfadeStyle,
-        crossfadeDuration,
-        setCrossfadeDuration,
-        speed,
-        setSpeed,
         preservePitch,
-        currentSong?.bpm,
         setSettings,
-        setTransitionType,
-        setCrossfadeStyle,
         setPreservePitch,
         showLyricsInSidebar,
         showVisualizerInSidebar,
@@ -417,5 +216,240 @@ export const PlayerConfig = () => {
                 <ListConfigTable options={options} />
             </Popover.Dropdown>
         </Popover>
+    );
+};
+
+const AudioPlayerTypeConfig = () => {
+    const status = usePlayerStatus();
+    const playbackSettings = usePlaybackSettings();
+    const { setSettings } = useSettingsStoreActions();
+
+    return (
+        <Select
+            comboboxProps={{ withinPortal: false }}
+            data={[
+                {
+                    disabled: !isElectron(),
+                    label: 'MPV',
+                    value: PlayerType.LOCAL,
+                },
+                { label: 'Web', value: PlayerType.WEB },
+            ]}
+            defaultValue={playbackSettings.type}
+            disabled={status === PlayerStatus.PLAYING}
+            onChange={(e) => {
+                setSettings({
+                    playback: { ...playbackSettings, type: e as PlayerType },
+                });
+                ipc?.send('settings-set', {
+                    property: 'playbackType',
+                    value: e,
+                });
+            }}
+            width="100%"
+        />
+    );
+};
+
+const AudioDeviceConfig = () => {
+    const { t } = useTranslation();
+    const status = usePlayerStatus();
+    const playbackType = usePlaybackType();
+    const playbackSettings = usePlaybackSettings();
+    const { setSettings } = useSettingsStoreActions();
+    const [audioDevices, setAudioDevices] = useState<{ label: string; value: string }[]>([]);
+
+    useEffect(() => {
+        const fetchAudioDevices = async () => {
+            if (!isElectron()) {
+                return;
+            }
+
+            if (playbackType === PlayerType.WEB) {
+                getAudioDevice()
+                    .then((dev) =>
+                        setAudioDevices(dev.map((d) => ({ label: d.label, value: d.deviceId }))),
+                    )
+                    .catch(() =>
+                        toast.error({
+                            message: t('error.audioDeviceFetchError', {
+                                postProcess: 'sentenceCase',
+                            }),
+                        }),
+                    );
+            } else if (playbackType === PlayerType.LOCAL && mpvPlayer) {
+                try {
+                    const devices = await getMpvAudioDevices();
+                    setAudioDevices(devices);
+                } catch {
+                    toast.error({
+                        message: t('error.audioDeviceFetchError', {
+                            postProcess: 'sentenceCase',
+                        }),
+                    });
+                }
+            }
+        };
+
+        fetchAudioDevices();
+    }, [playbackType, t]);
+
+    return (
+        <Select
+            clearable
+            comboboxProps={{ withinPortal: false }}
+            data={audioDevices}
+            defaultValue={playbackSettings.audioDeviceId}
+            disabled={status === PlayerStatus.PLAYING}
+            onChange={(e) => {
+                setSettings({
+                    playback: {
+                        ...playbackSettings,
+                        audioDeviceId: e,
+                    },
+                });
+            }}
+            width="100%"
+        />
+    );
+};
+
+const TransitionTypeConfig = () => {
+    const { t } = useTranslation();
+    const status = usePlayerStatus();
+    const playbackSettings = usePlaybackSettings();
+    const { transitionType } = usePlayerProperties();
+    const { setTransitionType } = usePlayerActions();
+
+    return (
+        <SegmentedControl
+            data={[
+                {
+                    label: t('setting.playbackStyle', {
+                        context: 'optionNormal',
+                        postProcess: 'titleCase',
+                    }),
+                    value: PlayerStyle.GAPLESS,
+                },
+                {
+                    label: t('setting.playbackStyle', {
+                        context: 'optionCrossFade',
+                        postProcess: 'titleCase',
+                    }),
+                    value: PlayerStyle.CROSSFADE,
+                },
+            ]}
+            disabled={playbackSettings.type !== PlayerType.WEB || status === PlayerStatus.PLAYING}
+            onChange={(value) => setTransitionType(value as PlayerStyle)}
+            size="sm"
+            value={transitionType}
+            w="100%"
+        />
+    );
+};
+
+const CrossfadeStyleConfig = () => {
+    const status = usePlayerStatus();
+    const playbackSettings = usePlaybackSettings();
+    const { crossfadeStyle, transitionType } = usePlayerProperties();
+    const { setCrossfadeStyle } = usePlayerActions();
+
+    return (
+        <Select
+            comboboxProps={{ withinPortal: false }}
+            data={[
+                { label: 'Linear', value: CrossfadeStyle.LINEAR },
+                { label: 'Equal Power', value: CrossfadeStyle.EQUAL_POWER },
+                { label: 'S-Curve', value: CrossfadeStyle.S_CURVE },
+                { label: 'Exponential', value: CrossfadeStyle.EXPONENTIAL },
+            ]}
+            defaultValue={crossfadeStyle}
+            disabled={
+                playbackSettings.type !== PlayerType.WEB ||
+                transitionType !== PlayerStyle.CROSSFADE ||
+                status === PlayerStatus.PLAYING
+            }
+            onChange={(e) => {
+                if (e) {
+                    setCrossfadeStyle(e as CrossfadeStyle);
+                }
+            }}
+            width="100%"
+        />
+    );
+};
+
+const CrossfadeDurationConfig = () => {
+    const status = usePlayerStatus();
+    const playbackSettings = usePlaybackSettings();
+    const { crossfadeDuration, transitionType } = usePlayerProperties();
+    const { setCrossfadeDuration } = usePlayerActions();
+
+    return (
+        <Slider
+            defaultValue={crossfadeDuration}
+            disabled={
+                playbackSettings.type !== PlayerType.WEB ||
+                transitionType !== PlayerStyle.CROSSFADE ||
+                status === PlayerStatus.PLAYING
+            }
+            marks={[
+                { label: '3', value: 3 },
+                { label: '6', value: 6 },
+                { label: '9', value: 9 },
+                { label: '12', value: 12 },
+                { label: '15', value: 15 },
+            ]}
+            max={15}
+            min={3}
+            onChangeEnd={setCrossfadeDuration}
+            styles={{
+                root: {},
+            }}
+            w="100%"
+        />
+    );
+};
+
+export const PlaybackSpeedSlider = () => {
+    const speed = usePlayerSpeed();
+    const { setSpeed } = usePlayerActions();
+    const { bpm } = usePlayerSongProperties(['bpm']) ?? {};
+
+    const formatPlaybackSpeedSliderLabel = useMemo(
+        () => (value: number) => {
+            const bpmValue = Number(bpm);
+            if (bpmValue > 0) {
+                return `${value} x / ${(bpmValue * value).toFixed(1)} BPM`;
+            }
+            return `${value} x`;
+        },
+        [bpm],
+    );
+
+    return (
+        <Slider
+            defaultValue={speed}
+            label={formatPlaybackSpeedSliderLabel}
+            marks={[
+                { label: '0.5', value: 0.5 },
+                { label: '0.75', value: 0.75 },
+                { label: '1', value: 1 },
+                { label: '1.25', value: 1.25 },
+                { label: '1.5', value: 1.5 },
+                { label: '1.75', value: 1.75 },
+                { label: '2', value: 2 },
+            ]}
+            max={2}
+            min={0.5}
+            onChangeEnd={setSpeed}
+            onDoubleClick={() => setSpeed(1)}
+            step={0.01}
+            styles={{
+                markLabel: {},
+                root: {},
+            }}
+            w="100%"
+        />
     );
 };

@@ -16,7 +16,7 @@ import {
     useButtonSize,
     usePlayerRepeat,
     usePlayerShuffle,
-    usePlayerSong,
+    usePlayerSongProperties,
     usePlayerStatus,
     useSkipButtons,
 } from '/@/renderer/store';
@@ -197,13 +197,14 @@ const SkipBackwardButton = ({ disabled }: { disabled?: boolean }) => {
 };
 
 const CenterPlayButton = ({ disabled }: { disabled?: boolean }) => {
-    const currentSong = usePlayerSong();
+    const { id: currentSongId } = usePlayerSongProperties(['id']) ?? {};
+
     const status = usePlayerStatus();
     const { mediaTogglePlayPause } = usePlayer();
 
     return (
         <MainPlayButton
-            disabled={disabled || currentSong?.id === undefined}
+            disabled={disabled || currentSongId === undefined}
             isPaused={status === PlayerStatus.PAUSED}
             onClick={mediaTogglePlayPause}
         />
