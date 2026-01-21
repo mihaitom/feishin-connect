@@ -15,7 +15,7 @@ import { RatingResponse, SetRatingArgs } from '/@/shared/types/domain-types';
 
 const setRatingMutationKey = ['set-rating'];
 
-export const useSetRating = (args: MutationHookArgs) => {
+export const useSetRatingMutation = (args: MutationHookArgs) => {
     const { options } = args || {};
     const queryClient = useQueryClient();
     const { t } = useTranslation();

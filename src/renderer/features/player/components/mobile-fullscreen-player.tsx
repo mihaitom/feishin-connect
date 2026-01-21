@@ -24,9 +24,8 @@ import { MobileFullscreenPlayerControls } from '/@/renderer/features/player/comp
 import { MobileFullscreenPlayerHeader } from '/@/renderer/features/player/components/mobile-fullscreen-player-header';
 import { MobileFullscreenPlayerMetadata } from '/@/renderer/features/player/components/mobile-fullscreen-player-metadata';
 import { MobileFullscreenPlayerProgress } from '/@/renderer/features/player/components/mobile-fullscreen-player-progress';
-import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
-import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
-import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
+import { useSetFavorite } from '/@/renderer/features/shared/hooks/use-set-favorite';
+import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import {
     useCurrentServer,
@@ -377,9 +376,8 @@ export const MobileFullscreenPlayer = () => {
     const currentSong = usePlayerSong();
     const { currentSong: currentSongData } = usePlayerData();
     const server = useCurrentServer();
-    const addToFavoritesMutation = useCreateFavorite({});
-    const removeFromFavoritesMutation = useDeleteFavorite({});
-    const updateRatingMutation = useSetRating({});
+    const setFavorite = useSetFavorite();
+    const setRating = useSetRating();
 
     const [isPageHovered, setIsPageHovered] = useState(false);
 
@@ -414,25 +412,9 @@ export const MobileFullscreenPlayer = () => {
             const song = currentSongData;
             if (!song?.id) return;
 
-            if (song.userFavorite) {
-                removeFromFavoritesMutation.mutate({
-                    apiClientProps: { serverId: song?._serverId || '' },
-                    query: {
-                        id: [song.id],
-                        type: LibraryItem.SONG,
-                    },
-                });
-            } else {
-                addToFavoritesMutation.mutate({
-                    apiClientProps: { serverId: song?._serverId || '' },
-                    query: {
-                        id: [song.id],
-                        type: LibraryItem.SONG,
-                    },
-                });
-            }
+            setFavorite(song._serverId, [song.id], LibraryItem.SONG, !song.userFavorite);
         },
-        [currentSongData, addToFavoritesMutation, removeFromFavoritesMutation],
+        [currentSongData, setFavorite],
     );
 
     const handleToggleLyrics = useCallback(() => {
@@ -443,16 +425,9 @@ export const MobileFullscreenPlayer = () => {
         (rating: number) => {
             if (!currentSong?.id) return;
 
-            updateRatingMutation.mutate({
-                apiClientProps: { serverId: currentSong?._serverId || '' },
-                query: {
-                    id: [currentSong.id],
-                    rating,
-                    type: LibraryItem.SONG,
-                },
-            });
+            setRating(currentSong._serverId, [currentSong.id], LibraryItem.SONG, rating);
         },
-        [currentSong, updateRatingMutation],
+        [currentSong, setRating],
     );
 
     const isPlayerState = activeTab !== 'queue' && activeTab !== 'lyrics';

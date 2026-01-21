@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
+import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { useCurrentServer, useCurrentServerId, useShowRatings } from '/@/renderer/store';
 import { ContextMenu } from '/@/shared/components/context-menu/context-menu';
 import { Rating } from '/@/shared/components/rating/rating';
@@ -19,21 +19,14 @@ export const SetRatingAction = ({ ids, itemType }: SetRatingActionProps) => {
     const serverId = useCurrentServerId();
     const showRatings = useShowRatings();
 
-    const setRatingMutation = useSetRating({});
+    const setRating = useSetRating();
 
     const isRatingSupported = useMemo(() => {
         return server?.type === ServerType.NAVIDROME || server?.type === ServerType.SUBSONIC;
     }, [server?.type]);
 
     const onRating = (rating: number) => {
-        setRatingMutation.mutate({
-            apiClientProps: { serverId },
-            query: {
-                id: ids,
-                rating,
-                type: itemType,
-            },
-        });
+        setRating(serverId, ids, itemType, rating);
     };
 
     if (!showRatings || !isRatingSupported) {

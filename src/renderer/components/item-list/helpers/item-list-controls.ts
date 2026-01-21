@@ -6,6 +6,8 @@ import { ItemListStateItemWithRequiredProperties } from '/@/renderer/components/
 import { DefaultItemControlProps, ItemControls } from '/@/renderer/components/item-list/types';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { useSetFavorite } from '/@/renderer/features/shared/hooks/use-set-favorite';
+import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
 import { Play, TableColumn } from '/@/shared/types/types';
 
@@ -33,6 +35,8 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
     const player = usePlayer();
     const navigate = useNavigate();
     const navigateRef = useRef(navigate);
+    const setFavorite = useSetFavorite();
+    const setRating = useSetRating();
 
     useEffect(() => {
         navigateRef.current = navigate;
@@ -301,7 +305,7 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                     return;
                 }
 
-                player.setFavorite(item._serverId, [item.id], apiItemType, favorite);
+                setFavorite(item._serverId, [item.id], apiItemType, favorite);
             },
 
             onMore: ({ event, internalState, item, itemType }: DefaultItemControlProps) => {
@@ -398,12 +402,12 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                     newRating = 0;
                 }
 
-                player.setRating(item._serverId, [item.id], apiItemType, newRating);
+                setRating(item._serverId, [item.id], apiItemType, newRating);
             },
 
             ...overrides,
         };
-    }, [onColumnReordered, onColumnResized, overrides, player]);
+    }, [overrides, onColumnReordered, onColumnResized, player, setFavorite, setRating]);
 
     return controls;
 };

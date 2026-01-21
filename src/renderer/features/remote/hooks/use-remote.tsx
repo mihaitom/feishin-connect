@@ -3,9 +3,9 @@ import { useEffect, useRef } from 'react';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
+import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
-import { useSetRating } from '/@/renderer/features/shared/mutations/set-rating-mutation';
 import { usePlayerActions, usePlayerStore, useRemoteSettings } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { logMsg } from '/@/renderer/utils/logger-message';
@@ -21,7 +21,7 @@ export const useRemote = () => {
     const player = usePlayerStore();
 
     const remoteSettings = useRemoteSettings();
-    const updateRatingMutation = useSetRating({});
+    const setRating = useSetRating();
     const addToFavoritesMutation = useCreateFavorite({});
     const removeFromFavoritesMutation = useDeleteFavorite({});
 
@@ -88,14 +88,7 @@ export const useRemote = () => {
                     category: LogCategory.REMOTE,
                     meta: { id: data.id, rating: data.rating, serverId: data.serverId },
                 });
-                updateRatingMutation.mutate({
-                    apiClientProps: { serverId: data.serverId },
-                    query: {
-                        id: [data.id],
-                        rating: data.rating,
-                        type: LibraryItem.SONG,
-                    },
-                });
+                setRating(data.serverId, [data.id], LibraryItem.SONG, data.rating);
             },
         );
 
@@ -140,7 +133,7 @@ export const useRemote = () => {
         player,
         removeFromFavoritesMutation,
         setVolume,
-        updateRatingMutation,
+        setRating,
     ]);
 
     // Send initial song if one is already playing
