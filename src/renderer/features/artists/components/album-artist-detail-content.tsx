@@ -402,6 +402,7 @@ const AlbumArtistMetadataTopSongsContent = ({
                     data={filteredSongs}
                     enableAlternateRowColors={tableConfig.enableAlternateRowColors}
                     enableDrag
+                    enableDragScroll={false}
                     enableExpansion={false}
                     enableHeader
                     enableHorizontalBorders={tableConfig.enableHorizontalBorders}
