@@ -1,11 +1,15 @@
 import isElectron from 'is-electron';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
+import {
+    useIsRadioActive,
+    useRadioPlayer,
+} from '/@/renderer/features/radio/hooks/use-radio-player';
 import { usePlayerSong, usePlayerStore } from '/@/renderer/store';
-import { LibraryItem } from '/@/shared/types/domain-types';
-import { PlayerShuffle } from '/@/shared/types/types';
+import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { PlayerShuffle, ServerType } from '/@/shared/types/types';
 
 const ipc = isElectron() ? window.api.ipc : null;
 const utils = isElectron() ? window.api.utils : null;
@@ -14,6 +18,8 @@ const mpris = isElectron() && utils?.isLinux() ? window.api.mpris : null;
 export const useMPRIS = () => {
     const player = usePlayerStore();
     const currentSong = usePlayerSong();
+    const isRadioActive = useIsRadioActive();
+    const { isPlaying: isRadioPlaying, metadata: radioMetadata, stationName } = useRadioPlayer();
 
     const imageUrl = useItemImageUrl({
         id: currentSong?.imageId || undefined,
@@ -21,6 +27,89 @@ export const useMPRIS = () => {
         itemType: LibraryItem.SONG,
         type: 'itemCard',
     });
+
+    const radioSong = useMemo((): QueueSong | undefined => {
+        if (!isRadioActive || !isRadioPlaying) {
+            return undefined;
+        }
+
+        const title = radioMetadata?.title || stationName || 'Radio';
+        const artist = radioMetadata?.artist || stationName || null;
+        const album = stationName || null;
+
+        const radioId = `radio-${stationName || 'unknown'}`;
+
+        return {
+            _itemType: LibraryItem.SONG,
+            _serverId: '',
+            _serverType: ServerType.NAVIDROME,
+            _uniqueId: radioId,
+            album: album || null,
+            albumArtistName: artist || '',
+            albumArtists: artist
+                ? [
+                      {
+                          id: '',
+                          imageId: null,
+                          imageUrl: null,
+                          name: artist,
+                          userFavorite: false,
+                          userRating: null,
+                      },
+                  ]
+                : [],
+            albumId: '',
+            artistName: artist || '',
+            artists: artist
+                ? [
+                      {
+                          id: '',
+                          imageId: null,
+                          imageUrl: null,
+                          name: artist,
+                          userFavorite: false,
+                          userRating: null,
+                      },
+                  ]
+                : [],
+            bitDepth: null,
+            bitRate: 0,
+            bpm: null,
+            channels: null,
+            comment: null,
+            compilation: null,
+            container: null,
+            createdAt: '',
+            discNumber: 0,
+            discSubtitle: null,
+            duration: 0,
+            explicitStatus: null,
+            gain: null,
+            genres: [],
+            id: radioId,
+            imageId: null,
+            imageUrl: null,
+            lastPlayedAt: null,
+            lyrics: null,
+            mbzRecordingId: null,
+            mbzTrackId: null,
+            name: title,
+            participants: null,
+            path: null,
+            peak: null,
+            playCount: 0,
+            releaseDate: null,
+            releaseYear: null,
+            sampleRate: null,
+            size: 0,
+            tags: null,
+            trackNumber: 0,
+            trackSubtitle: null,
+            updatedAt: new Date().toISOString(),
+            userFavorite: false,
+            userRating: null,
+        };
+    }, [isRadioActive, isRadioPlaying, radioMetadata, stationName]);
 
     useEffect(() => {
         if (!mpris) {
@@ -56,14 +145,18 @@ export const useMPRIS = () => {
         };
     }, [player]);
 
-    // Update MPRIS when song or imageUrl changes
+    // Update MPRIS when song, imageUrl, or radio metadata changes
     useEffect(() => {
         if (!mpris) {
             return;
         }
 
-        mpris?.updateSong(currentSong, imageUrl);
-    }, [currentSong, imageUrl]);
+        // Use radio song if radio is active and playing, otherwise use current song
+        const songToUpdate = isRadioActive && isRadioPlaying ? radioSong : currentSong;
+        const imageUrlToUpdate = isRadioActive && isRadioPlaying ? null : imageUrl;
+
+        mpris?.updateSong(songToUpdate, imageUrlToUpdate);
+    }, [currentSong, imageUrl, isRadioActive, isRadioPlaying, radioSong]);
 
     usePlayerEvents(
         {
