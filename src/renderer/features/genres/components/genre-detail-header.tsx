@@ -30,7 +30,7 @@ export const GenreDetailHeader = ({ title }: GenreDetailHeaderProps) => {
     return (
         <Stack gap={0}>
             <PageHeader>
-                <LibraryHeaderBar>
+                <LibraryHeaderBar ignoreMaxWidth>
                     <PlayButton />
                     <LibraryHeaderBar.Title>{pageTitle}</LibraryHeaderBar.Title>
                     <LibraryHeaderBar.Badge isLoading={!itemCount}>

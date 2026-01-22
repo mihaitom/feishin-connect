@@ -6,7 +6,6 @@ import { useGenreList } from '/@/renderer/features/genres/api/genres-api';
 import { GenreDetailContent } from '/@/renderer/features/genres/components/genre-detail-content';
 import { GenreDetailHeader } from '/@/renderer/features/genres/components/genre-detail-header';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
-import { LibraryContainer } from '/@/renderer/features/shared/components/library-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 
 const GenreDetailRoute = () => {
@@ -33,10 +32,8 @@ const GenreDetailRoute = () => {
     return (
         <AnimatedPage>
             <ListContext.Provider value={providerValue}>
-                <LibraryContainer>
-                    <GenreDetailHeader title={name} />
-                    <GenreDetailContent />
-                </LibraryContainer>
+                <GenreDetailHeader title={name} />
+                <GenreDetailContent />
             </ListContext.Provider>
         </AnimatedPage>
     );
