@@ -205,11 +205,69 @@ function BaseGridCarousel(props: GridCarouselProps) {
         ],
     );
 
+    const swipeCooldownRef = useRef(0);
+    const dragStartTargetRef = useRef<HTMLElement | null>(null);
+    const swipeCooldownMs = 300;
+    const swipeThreshold = 50;
+    const swipeVelocityThreshold = 500;
+
+    const handleDragStart = useCallback((event: MouseEvent | PointerEvent | TouchEvent) => {
+        dragStartTargetRef.current = (event.target as HTMLElement) || null;
+    }, []);
+
+    const handleDragEnd = useCallback(
+        (
+            _event: MouseEvent | PointerEvent | TouchEvent,
+            info: { offset: { x: number }; velocity: { x: number } },
+        ) => {
+            const startTarget = dragStartTargetRef.current;
+            if (startTarget) {
+                if (startTarget.closest('button, a, input, select, textarea, [role="button"]')) {
+                    dragStartTargetRef.current = null;
+                    return;
+                }
+            }
+
+            const now = Date.now();
+            const elapsed = now - swipeCooldownRef.current;
+
+            if (elapsed < swipeCooldownMs) {
+                dragStartTargetRef.current = null;
+                return;
+            }
+
+            const { offset, velocity } = info;
+            const absOffset = Math.abs(offset.x);
+            const absVelocity = Math.abs(velocity.x);
+
+            if (absOffset > swipeThreshold || absVelocity > swipeVelocityThreshold) {
+                swipeCooldownRef.current = now;
+
+                if (offset.x > 0 && !isPrevDisabled) {
+                    handlePrevPage();
+                } else if (offset.x < 0 && !isNextDisabled) {
+                    handleNextPage();
+                }
+            }
+
+            dragStartTargetRef.current = null;
+        },
+        [handleNextPage, handlePrevPage, isNextDisabled, isPrevDisabled],
+    );
+
     return (
         <div className={styles.gridCarousel} ref={ref}>
             {cq.isCalculated && (
                 <>
-                    <div className={styles.navigation}>
+                    <motion.div
+                        className={styles.navigation}
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0}
+                        dragMomentum={false}
+                        onDragEnd={handleDragEnd}
+                        onDragStart={handleDragStart}
+                    >
                         {typeof title === 'string' ? (
                             <Group gap="xs" justify="space-between" w="100%">
                                 <Group gap="xs">
@@ -269,7 +327,7 @@ function BaseGridCarousel(props: GridCarouselProps) {
                                 </Group>
                             </div>
                         )}
-                    </div>
+                    </motion.div>
                     <AnimatePresence custom={currentPage} initial={false} mode="wait">
                         <motion.div
                             animate="animate"
