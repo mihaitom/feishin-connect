@@ -448,6 +448,9 @@ const VolumeButton = () => {
                     max={100}
                     min={0}
                     onChange={handleVolumeSlider}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                    }}
                     onWheel={handleVolumeWheel}
                     size={6}
                     value={sliderValue}
