@@ -48,6 +48,8 @@ export const ScrollArea = forwardRef((props: ScrollAreaProps, ref: Ref<HTMLDivEl
     useEffect(() => {
         const { current: root } = containerRef;
 
+        let autoScrollCleanup: (() => void) | null = null;
+
         if (scroller && root) {
             initialize({
                 elements: { viewport: scroller as HTMLElement },
@@ -55,7 +57,7 @@ export const ScrollArea = forwardRef((props: ScrollAreaProps, ref: Ref<HTMLDivEl
             });
 
             if (allowDragScroll) {
-                autoScrollForElements({
+                autoScrollCleanup = autoScrollForElements({
                     canScroll: (args) => {
                         const data = args.source.data as unknown as DragData<unknown>;
                         if (data.type === DragTarget.TABLE_COLUMN) return false;
@@ -68,7 +70,13 @@ export const ScrollArea = forwardRef((props: ScrollAreaProps, ref: Ref<HTMLDivEl
             }
         }
 
-        return () => osInstance()?.destroy();
+        return () => {
+            if (autoScrollCleanup) {
+                autoScrollCleanup();
+            }
+
+            osInstance()?.destroy();
+        };
     }, [allowDragScroll, initialize, osInstance, scroller]);
 
     const mergedRef = useMergedRef(ref, containerRef);
