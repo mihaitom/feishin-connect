@@ -768,6 +768,7 @@ export interface TableItemProps {
     enableColumnReorder?: boolean;
     enableColumnResize?: boolean;
     enableDrag?: ItemTableListProps['enableDrag'];
+    enableDragScroll?: boolean;
     enableExpansion?: ItemTableListProps['enableExpansion'];
     enableHeader?: ItemTableListProps['enableHeader'];
     enableHorizontalBorders?: ItemTableListProps['enableHorizontalBorders'];
@@ -802,6 +803,7 @@ interface ItemTableListProps {
     data: unknown[];
     enableAlternateRowColors?: boolean;
     enableDrag?: boolean;
+    enableDragScroll?: boolean;
     enableEntranceAnimation?: boolean;
     enableExpansion?: boolean;
     enableHeader?: boolean;
@@ -849,6 +851,7 @@ const BaseItemTableList = ({
     data,
     enableAlternateRowColors = false,
     enableDrag = true,
+    enableDragScroll = true,
     enableEntranceAnimation = true,
     enableExpansion = true,
     enableHeader = true,
@@ -1001,6 +1004,7 @@ const BaseItemTableList = ({
 
     useTablePaneSync({
         enableDrag,
+        enableDragScroll,
         enableHeader,
         handleRef,
         onScrollEndRef,

@@ -7,6 +7,7 @@ import { ItemListStateActions } from '/@/renderer/components/item-list/helpers/i
 
 export const useTablePaneSync = ({
     enableDrag,
+    enableDragScroll,
     enableHeader,
     handleRef,
     onScrollEndRef,
@@ -22,6 +23,7 @@ export const useTablePaneSync = ({
     setShowTopShadow,
 }: {
     enableDrag: boolean | undefined;
+    enableDragScroll: boolean | undefined;
     enableHeader: boolean;
     handleRef: React.RefObject<null | { internalState: ItemListStateActions }>;
     onScrollEndRef: React.RefObject<
@@ -105,7 +107,7 @@ export const useTablePaneSync = ({
         });
 
         let autoScrollCleanup: (() => void) | null = null;
-        if (enableDrag) {
+        if (enableDrag && enableDragScroll) {
             autoScrollCleanup = autoScrollForElements({
                 canScroll: () => true,
                 element: viewport,
@@ -137,7 +139,14 @@ export const useTablePaneSync = ({
                 // Ignore error
             }
         };
-    }, [enableDrag, initialize, osInstance, pinnedRightColumnCount, scrollContainerRef]);
+    }, [
+        enableDrag,
+        enableDragScroll,
+        initialize,
+        osInstance,
+        pinnedRightColumnCount,
+        scrollContainerRef,
+    ]);
 
     useEffect(() => {
         if (pinnedLeftColumnCount === 0) {
@@ -153,7 +162,7 @@ export const useTablePaneSync = ({
         const viewport = root.firstElementChild as HTMLElement;
 
         let autoScrollCleanup: (() => void) | null = null;
-        if (enableDrag) {
+        if (enableDrag && enableDragScroll) {
             autoScrollCleanup = autoScrollForElements({
                 canScroll: () => true,
                 element: viewport,
@@ -167,7 +176,7 @@ export const useTablePaneSync = ({
                 autoScrollCleanup();
             }
         };
-    }, [enableDrag, pinnedLeftColumnCount, pinnedLeftColumnRef]);
+    }, [enableDrag, enableDragScroll, pinnedLeftColumnCount, pinnedLeftColumnRef]);
 
     // Initialize overlayscrollbars for right pinned columns
     useEffect(() => {
@@ -189,7 +198,7 @@ export const useTablePaneSync = ({
         });
 
         let autoScrollCleanup: (() => void) | null = null;
-        if (enableDrag) {
+        if (enableDrag && enableDragScroll) {
             autoScrollCleanup = autoScrollForElements({
                 canScroll: () => true,
                 element: viewport,
@@ -223,6 +232,7 @@ export const useTablePaneSync = ({
         };
     }, [
         enableDrag,
+        enableDragScroll,
         initializeRightPinned,
         osInstanceRightPinned,
         pinnedRightColumnCount,
