@@ -18,6 +18,7 @@ import {
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
 import {
+    HomeFeatureStyle,
     SideQueueType,
     useFontSettings,
     useGeneralSettings,
@@ -26,6 +27,7 @@ import {
 import { type Font, FONT_OPTIONS } from '/@/renderer/types/fonts';
 import { FileInput } from '/@/shared/components/file-input/file-input';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
+import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
 import { Select } from '/@/shared/components/select/select';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
@@ -36,6 +38,23 @@ const localSettings = isElectron() ? window.api.localSettings : null;
 const ipc = isElectron() ? window.api.ipc : null;
 // Electron 32+ removed file.path, use this which is exposed in preload to get real path
 const webUtils = isElectron() ? window.electron.webUtils : null;
+
+const HOME_FEATURE_STYLE_OPTIONS = [
+    {
+        label: t('setting.homeFeatureStyle', {
+            context: 'optionSingle',
+            postProcess: 'sentenceCase',
+        }),
+        value: HomeFeatureStyle.SINGLE,
+    },
+    {
+        label: t('setting.homeFeatureStyle', {
+            context: 'optionMultiple',
+            postProcess: 'sentenceCase',
+        }),
+        value: HomeFeatureStyle.MULTIPLE,
+    },
+];
 
 const SIDE_QUEUE_OPTIONS = [
     {
@@ -344,6 +363,29 @@ export const ApplicationSettings = memo(() => {
                             general: {
                                 ...settings,
                                 homeFeature: e.currentTarget.checked,
+                            },
+                        })
+                    }
+                />
+            ),
+            description: t('setting.homeFeature', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: false,
+            title: t('setting.homeFeature', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <SegmentedControl
+                    aria-label={t('setting.homeFeatureStyle', { postProcess: 'sentenceCase' })}
+                    data={HOME_FEATURE_STYLE_OPTIONS}
+                    defaultValue={settings.homeFeatureStyle}
+                    onChange={(e) =>
+                        setSettings({
+                            general: {
+                                ...settings,
+                                homeFeatureStyle: e as HomeFeatureStyle,
                             },
                         })
                     }
