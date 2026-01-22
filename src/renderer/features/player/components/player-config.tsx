@@ -1,10 +1,10 @@
 import isElectron from 'is-electron';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useAudioDevices } from '/@/renderer/features/settings/components/playback/audio-settings';
 import { ListConfigTable } from '/@/renderer/features/shared/components/list-config-menu';
 import {
-    usePlaybackType,
     usePlayerActions,
     usePlayerProperties,
     usePlayerSongProperties,
@@ -25,29 +25,9 @@ import { SegmentedControl } from '/@/shared/components/segmented-control/segment
 import { Select } from '/@/shared/components/select/select';
 import { Slider } from '/@/shared/components/slider/slider';
 import { Switch } from '/@/shared/components/switch/switch';
-import { toast } from '/@/shared/components/toast/toast';
 import { CrossfadeStyle, PlayerStatus, PlayerStyle, PlayerType } from '/@/shared/types/types';
 
 const ipc = isElectron() ? window.api.ipc : null;
-const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
-
-const getAudioDevice = async () => {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    return (devices || []).filter((dev: MediaDeviceInfo) => dev.kind === 'audiooutput');
-};
-
-const getMpvAudioDevices = async () => {
-    if (!mpvPlayer) {
-        return [];
-    }
-
-    try {
-        return await mpvPlayer.getAudioDevices();
-    } catch (error) {
-        console.error('Failed to get MPV audio devices:', error);
-        return [];
-    }
-};
 
 export const PlayerConfig = () => {
     const { t } = useTranslation();
@@ -252,47 +232,11 @@ const AudioPlayerTypeConfig = () => {
 };
 
 const AudioDeviceConfig = () => {
-    const { t } = useTranslation();
     const status = usePlayerStatus();
-    const playbackType = usePlaybackType();
     const playbackSettings = usePlaybackSettings();
     const { setSettings } = useSettingsStoreActions();
-    const [audioDevices, setAudioDevices] = useState<{ label: string; value: string }[]>([]);
 
-    useEffect(() => {
-        const fetchAudioDevices = async () => {
-            if (!isElectron()) {
-                return;
-            }
-
-            if (playbackType === PlayerType.WEB) {
-                getAudioDevice()
-                    .then((dev) =>
-                        setAudioDevices(dev.map((d) => ({ label: d.label, value: d.deviceId }))),
-                    )
-                    .catch(() =>
-                        toast.error({
-                            message: t('error.audioDeviceFetchError', {
-                                postProcess: 'sentenceCase',
-                            }),
-                        }),
-                    );
-            } else if (playbackType === PlayerType.LOCAL && mpvPlayer) {
-                try {
-                    const devices = await getMpvAudioDevices();
-                    setAudioDevices(devices);
-                } catch {
-                    toast.error({
-                        message: t('error.audioDeviceFetchError', {
-                            postProcess: 'sentenceCase',
-                        }),
-                    });
-                }
-            }
-        };
-
-        fetchAudioDevices();
-    }, [playbackType, t]);
+    const audioDevices = useAudioDevices();
 
     return (
         <Select
