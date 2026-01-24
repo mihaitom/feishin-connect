@@ -10,8 +10,10 @@
 
 .navigation {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
     touch-action: pan-x;
     cursor: grab;
     user-select: none;
@@ -39,13 +41,6 @@
     grid-template-columns: repeat(var(--cards-to-show, 2), minmax(0, 1fr));
     gap: var(--theme-spacing-md);
     overflow: hidden;
-    touch-action: pan-x;
-    cursor: grab;
-    user-select: none;
-}
-
-.grid:active {
-    cursor: grabbing;
 }
 
 .page-indicator {

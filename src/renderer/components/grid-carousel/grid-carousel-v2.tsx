@@ -265,6 +265,7 @@ function BaseGridCarousel(props: GridCarouselProps) {
                         dragConstraints={{ left: 0, right: 0 }}
                         dragElastic={0}
                         dragMomentum={false}
+                        dragPropagation={false}
                         onDragEnd={handleDragEnd}
                         onDragStart={handleDragStart}
                     >
