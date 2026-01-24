@@ -491,7 +491,7 @@ export const TableColumnTextContainer = (
                     props.enableHorizontalBorders &&
                     props.enableHeader &&
                     props.rowIndex > 0 &&
-                    !isLastRow,
+                    (props.rowIndex === 1 || !isLastRow),
                 [styles.withVerticalBorder]: props.enableVerticalBorders && !isLastColumn,
             })}
             data-row-index={isDataRow ? `${props.tableId}-${props.rowIndex}` : undefined}
@@ -644,7 +644,7 @@ export const TableColumnContainer = (
                     props.enableHorizontalBorders &&
                     props.enableHeader &&
                     props.rowIndex > 0 &&
-                    !isLastRow,
+                    (props.rowIndex === 1 || !isLastRow),
                 [styles.withVerticalBorder]: props.enableVerticalBorders && !isLastColumn,
             })}
             data-row-index={isDataRow ? `${props.tableId}-${props.rowIndex}` : undefined}
