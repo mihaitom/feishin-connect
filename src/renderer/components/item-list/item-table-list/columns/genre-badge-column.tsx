@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './genre-badge-column.module.css';
@@ -60,13 +60,4 @@ const GenreBadgeColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonVariable {...props} />;
 };
 
-export const GenreColumnMemo = memo(GenreBadgeColumn, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns
-    );
-});
-
-export { GenreColumnMemo as GenreBadgeColumn };
+export { GenreBadgeColumn };

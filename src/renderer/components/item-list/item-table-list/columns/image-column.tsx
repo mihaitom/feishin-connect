@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { memo, useState } from 'react';
+import { useState } from 'react';
 
 import styles from './image-column.module.css';
 
@@ -137,17 +137,4 @@ const ImageColumnBase = (props: ItemTableListInnerColumn) => {
     );
 };
 
-export const ImageColumn = memo(ImageColumnBase, (prevProps, nextProps) => {
-    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
-    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
-
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.itemType === nextProps.itemType &&
-        prevProps.size === nextProps.size &&
-        prevItem === nextItem
-    );
-});
+export const ImageColumn = ImageColumnBase;

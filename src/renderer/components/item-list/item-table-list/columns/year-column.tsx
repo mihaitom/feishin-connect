@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import {
     ColumnNullFallback,
@@ -42,15 +42,4 @@ const YearColumnBase = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonFixed {...props} />;
 };
 
-export const YearColumn = memo(YearColumnBase, (prevProps, nextProps) => {
-    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
-    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
-
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevItem === nextItem
-    );
-});
+export const YearColumn = YearColumnBase;

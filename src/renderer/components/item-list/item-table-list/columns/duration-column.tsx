@@ -1,5 +1,5 @@
 import formatDuration from 'format-duration';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import {
     ColumnNullFallback,
@@ -27,11 +27,4 @@ const DurationColumnBase = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonFixed {...props} />;
 };
 
-export const DurationColumn = React.memo(DurationColumnBase, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns
-    );
-});
+export const DurationColumn = DurationColumnBase;

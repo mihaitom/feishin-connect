@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import { memo } from 'react';
 
 import styles from './row-index-column.module.css';
 
@@ -32,18 +31,7 @@ const RowIndexColumnBase = (props: ItemTableListInnerColumn) => {
     }
 };
 
-export const RowIndexColumn = memo(RowIndexColumnBase, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.itemType === nextProps.itemType &&
-        prevProps.enableExpansion === nextProps.enableExpansion &&
-        prevProps.enableHeader === nextProps.enableHeader &&
-        prevProps.startRowIndex === nextProps.startRowIndex
-    );
-});
+export const RowIndexColumn = RowIndexColumnBase;
 
 const DefaultRowIndexColumn = (props: ItemTableListInnerColumn) => {
     const {
@@ -125,30 +113,28 @@ const QueueSongRowIndexColumn = (props: ItemTableListInnerColumn) => {
     );
 };
 
-const InnerQueueSongRowIndexColumn = memo(
-    (
-        props: ItemTableListInnerColumn & {
-            adjustedRowIndex: number;
-            isActive: boolean;
-            isPlaying: boolean;
-        },
-    ) => {
-        return (
-            <TableColumnTextContainer {...props}>
-                {props.isActive ? (
-                    props.isPlaying ? (
-                        <Flex>
-                            <Icon fill="primary" icon="mediaPlay" />
-                        </Flex>
-                    ) : (
-                        <Flex>
-                            <Icon fill="primary" icon="mediaPause" />
-                        </Flex>
-                    )
-                ) : (
-                    props.adjustedRowIndex
-                )}
-            </TableColumnTextContainer>
-        );
+const InnerQueueSongRowIndexColumn = (
+    props: ItemTableListInnerColumn & {
+        adjustedRowIndex: number;
+        isActive: boolean;
+        isPlaying: boolean;
     },
-);
+) => {
+    return (
+        <TableColumnTextContainer {...props}>
+            {props.isActive ? (
+                props.isPlaying ? (
+                    <Flex>
+                        <Icon fill="primary" icon="mediaPlay" />
+                    </Flex>
+                ) : (
+                    <Flex>
+                        <Icon fill="primary" icon="mediaPause" />
+                    </Flex>
+                )
+            ) : (
+                props.adjustedRowIndex
+            )}
+        </TableColumnTextContainer>
+    );
+};

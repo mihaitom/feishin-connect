@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { CSSProperties, memo } from 'react';
+import { CSSProperties } from 'react';
 import { Link } from 'react-router';
 
 import styles from './title-artist-column.module.css';
@@ -208,17 +208,4 @@ const TitleArtistColumnBase = (props: ItemTableListInnerColumn) => {
     }
 };
 
-export const TitleArtistColumn = memo(TitleArtistColumnBase, (prevProps, nextProps) => {
-    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
-    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
-
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.itemType === nextProps.itemType &&
-        prevProps.size === nextProps.size &&
-        prevItem === nextItem
-    );
-});
+export const TitleArtistColumn = TitleArtistColumnBase;

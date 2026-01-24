@@ -446,14 +446,16 @@ const VirtualizedTableGrid = ({
                 />
             );
         },
-        [pinnedLeftColumnCount, CellComponent],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [pinnedLeftColumnCount, CellComponent, featureFlags, calculatedColumnWidths],
     );
 
     const PinnedColumnCell = useCallback(
         (cellProps: CellComponentProps & TableItemProps) => {
             return <CellComponent {...cellProps} rowIndex={cellProps.rowIndex + pinnedRowCount} />;
         },
-        [pinnedRowCount, CellComponent],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [pinnedRowCount, CellComponent, featureFlags, calculatedColumnWidths],
     );
 
     const PinnedRightColumnCell = useCallback(
@@ -466,7 +468,15 @@ const VirtualizedTableGrid = ({
                 />
             );
         },
-        [pinnedLeftColumnCount, pinnedRowCount, totalColumnCount, CellComponent],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [
+            pinnedLeftColumnCount,
+            pinnedRowCount,
+            totalColumnCount,
+            CellComponent,
+            featureFlags,
+            calculatedColumnWidths,
+        ],
     );
 
     const PinnedRightIntersectionCell = useCallback(
@@ -478,7 +488,14 @@ const VirtualizedTableGrid = ({
                 />
             );
         },
-        [pinnedLeftColumnCount, totalColumnCount, CellComponent],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [
+            pinnedLeftColumnCount,
+            totalColumnCount,
+            CellComponent,
+            featureFlags,
+            calculatedColumnWidths,
+        ],
     );
 
     const RowCell = useCallback(
@@ -491,7 +508,14 @@ const VirtualizedTableGrid = ({
                 />
             );
         },
-        [pinnedLeftColumnCount, pinnedRowCount, CellComponent],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [
+            pinnedLeftColumnCount,
+            pinnedRowCount,
+            CellComponent,
+            featureFlags,
+            calculatedColumnWidths,
+        ],
     );
 
     const handleOnCellsRendered = useCallback(

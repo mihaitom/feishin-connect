@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import {
     ColumnNullFallback,
@@ -27,11 +27,4 @@ const SizeColumnBase = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonFixed {...props} />;
 };
 
-export const SizeColumn = memo(SizeColumnBase, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns
-    );
-});
+export const SizeColumn = SizeColumnBase;

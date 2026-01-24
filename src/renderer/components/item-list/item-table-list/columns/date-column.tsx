@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import {
     ColumnNullFallback,
@@ -62,14 +62,7 @@ const DateColumnBase = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonFixed {...props} />;
 };
 
-export const DateColumn = memo(DateColumnBase, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns
-    );
-});
+export const DateColumn = DateColumnBase;
 
 const AbsoluteDateColumnBase = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
@@ -152,15 +145,7 @@ const AbsoluteDateColumnBase = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonFixed {...props} />;
 };
 
-export const AbsoluteDateColumn = memo(AbsoluteDateColumnBase, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.type === nextProps.type
-    );
-});
+export const AbsoluteDateColumn = AbsoluteDateColumnBase;
 
 const RelativeDateColumnBase = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
@@ -193,11 +178,4 @@ const RelativeDateColumnBase = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonFixed {...props} />;
 };
 
-export const RelativeDateColumn = memo(RelativeDateColumnBase, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns
-    );
-});
+export const RelativeDateColumn = RelativeDateColumnBase;

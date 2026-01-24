@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { Fragment, memo, useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './album-artists-column.module.css';
@@ -109,15 +109,4 @@ const BaseArtistsColumn = (props: ItemTableListInnerColumn) => {
     }
 };
 
-const ArtistsColumnMemo = memo(BaseArtistsColumn, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.itemType === nextProps.itemType &&
-        prevProps.size === nextProps.size
-    );
-});
-
-export { ArtistsColumnMemo as ArtistsColumn };
+export { BaseArtistsColumn as ArtistsColumn };

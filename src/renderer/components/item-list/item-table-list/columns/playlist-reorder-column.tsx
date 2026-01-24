@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -364,17 +364,4 @@ const PlaylistReorderColumnBase = (props: ItemTableListInnerColumn) => {
     );
 };
 
-export const PlaylistReorderColumn = memo(PlaylistReorderColumnBase, (prevProps, nextProps) => {
-    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
-    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
-
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.itemType === nextProps.itemType &&
-        prevProps.enableHeader === nextProps.enableHeader &&
-        prevItem === nextItem
-    );
-});
+export const PlaylistReorderColumn = PlaylistReorderColumnBase;

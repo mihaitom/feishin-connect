@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import { memo } from 'react';
 import { Link } from 'react-router';
 
 import styles from './title-column.module.css';
@@ -29,20 +28,7 @@ const TitleColumnBase = (props: ItemTableListInnerColumn) => {
     }
 };
 
-export const TitleColumn = memo(TitleColumnBase, (prevProps, nextProps) => {
-    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
-    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
-
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.itemType === nextProps.itemType &&
-        prevProps.size === nextProps.size &&
-        prevItem === nextItem
-    );
-});
+export const TitleColumn = TitleColumnBase;
 
 function DefaultTitleColumn(props: ItemTableListInnerColumn) {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];

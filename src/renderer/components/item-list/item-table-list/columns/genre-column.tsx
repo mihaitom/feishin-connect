@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { Fragment, memo, useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './genre-column.module.css';
@@ -64,14 +64,4 @@ const GenreColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonVariable {...props} />;
 };
 
-export const GenreColumnMemo = memo(GenreColumn, (prevProps, nextProps) => {
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.size === nextProps.size
-    );
-});
-
-export { GenreColumnMemo as GenreColumn };
+export { GenreColumn };

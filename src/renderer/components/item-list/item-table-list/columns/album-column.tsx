@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import styles from './album-column.module.css';
@@ -75,18 +75,4 @@ const AlbumColumn = (props: ItemTableListInnerColumn) => {
     return <ColumnSkeletonVariable {...props} />;
 };
 
-export const AlbumColumnMemo = memo(AlbumColumn, (prevProps, nextProps) => {
-    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
-    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
-
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.size === nextProps.size &&
-        prevItem === nextItem
-    );
-});
-
-export { AlbumColumnMemo as AlbumColumn };
+export { AlbumColumn };

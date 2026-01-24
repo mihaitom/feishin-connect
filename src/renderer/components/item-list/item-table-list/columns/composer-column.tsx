@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import { memo } from 'react';
 
 import styles from './composer-column.module.css';
 
@@ -12,7 +11,7 @@ import {
 import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { Album, RelatedArtist, Song } from '/@/shared/types/domain-types';
 
-const ComposerColumn = (props: ItemTableListInnerColumn) => {
+export const ComposerColumn = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
     const item = rowItem as Album | Song | undefined;
 
@@ -44,19 +43,3 @@ const ComposerColumn = (props: ItemTableListInnerColumn) => {
 
     return <ColumnSkeletonVariable {...props} />;
 };
-
-export const ComposerColumnMemo = memo(ComposerColumn, (prevProps, nextProps) => {
-    const prevItem = prevProps.getRowItem?.(prevProps.rowIndex);
-    const nextItem = nextProps.getRowItem?.(nextProps.rowIndex);
-
-    return (
-        prevProps.rowIndex === nextProps.rowIndex &&
-        prevProps.columnIndex === nextProps.columnIndex &&
-        prevProps.data === nextProps.data &&
-        prevProps.columns === nextProps.columns &&
-        prevProps.size === nextProps.size &&
-        prevItem === nextItem
-    );
-});
-
-export { ComposerColumnMemo as ComposerColumn };
