@@ -149,7 +149,12 @@ export const applyRatingOptimisticUpdates = (
                 queryKey: infiniteListQueryKey,
             });
 
-            infiniteListQueries.forEach(([queryKey, data]) => {
+            const homeQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: ['home', 'album'],
+            });
+
+            infiniteListQueries.concat(homeQueries).forEach(([queryKey, data]) => {
                 if (data) {
                     pendingUpdates.push({
                         previousData: data,

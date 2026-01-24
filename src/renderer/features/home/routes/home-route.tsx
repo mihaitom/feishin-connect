@@ -46,6 +46,7 @@ const HomeRoute = () => {
 
     const carousels = {
         [HomeItem.MOST_PLAYED]: {
+            enableRefresh: true,
             itemType: isJellyfin ? LibraryItem.SONG : LibraryItem.ALBUM,
             sortBy: isJellyfin ? SongListSort.PLAY_COUNT : AlbumListSort.PLAY_COUNT,
             sortOrder: SortOrder.DESC,
@@ -59,18 +60,21 @@ const HomeRoute = () => {
             title: t('page.home.explore', { postProcess: 'sentenceCase' }),
         },
         [HomeItem.RECENTLY_ADDED]: {
+            enableRefresh: true,
             itemType: LibraryItem.ALBUM,
             sortBy: AlbumListSort.RECENTLY_ADDED,
             sortOrder: SortOrder.DESC,
             title: t('page.home.newlyAdded', { postProcess: 'sentenceCase' }),
         },
         [HomeItem.RECENTLY_PLAYED]: {
+            enableRefresh: true,
             itemType: isJellyfin ? LibraryItem.SONG : LibraryItem.ALBUM,
             sortBy: isJellyfin ? SongListSort.RECENTLY_PLAYED : AlbumListSort.RECENTLY_PLAYED,
             sortOrder: SortOrder.DESC,
             title: t('page.home.recentlyPlayed', { postProcess: 'sentenceCase' }),
         },
         [HomeItem.RECENTLY_RELEASED]: {
+            enableRefresh: true,
             itemType: LibraryItem.ALBUM,
             sortBy: AlbumListSort.RELEASE_DATE,
             sortOrder: SortOrder.DESC,
@@ -142,7 +146,7 @@ const HomeRoute = () => {
                                         containerQuery={containerQuery}
                                         enableRefresh={carousel.enableRefresh}
                                         key={`carousel-${carousel.uniqueId}`}
-                                        queryKey={['home', carousel.uniqueId] as const}
+                                        queryKey={['home', 'album', carousel.uniqueId] as const}
                                         rowCount={1}
                                         sortBy={carousel.sortBy as AlbumListSort}
                                         sortOrder={carousel.sortOrder}
@@ -157,7 +161,7 @@ const HomeRoute = () => {
                                         containerQuery={containerQuery}
                                         enableRefresh={carousel.enableRefresh}
                                         key={`carousel-${carousel.uniqueId}`}
-                                        queryKey={['home', carousel.uniqueId] as const}
+                                        queryKey={['home', 'song', carousel.uniqueId] as const}
                                         rowCount={1}
                                         sortBy={carousel.sortBy as SongListSort}
                                         sortOrder={carousel.sortOrder}

@@ -15,6 +15,7 @@ import {
     PlaylistSongListResponse,
     Song,
     SongDetailResponse,
+    SongListResponse,
     TopSongListResponse,
 } from '/@/shared/types/domain-types';
 
@@ -155,7 +156,12 @@ export const applyFavoriteOptimisticUpdates = (
                 queryKey: infiniteListQueryKey,
             });
 
-            infiniteListQueries.forEach(([queryKey, data]) => {
+            const homeQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: ['home', 'album'],
+            });
+
+            infiniteListQueries.concat(homeQueries).forEach(([queryKey, data]) => {
                 if (data) {
                     pendingUpdates.push({
                         previousData: data,
@@ -533,6 +539,33 @@ export const applyFavoriteOptimisticUpdates = (
                                 createFavoriteUpdater<Song>(item),
                             );
                             return updatedItems ? { ...prev, items: updatedItems } : prev;
+                        },
+                    });
+                }
+            });
+
+            const homeQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: ['home', 'song'],
+            });
+
+            homeQueries.concat(homeQueries).forEach(([queryKey, data]) => {
+                if (data) {
+                    pendingUpdates.push({
+                        previousData: data,
+                        queryKey,
+                        updater: (
+                            current:
+                                | undefined
+                                | { pageParams: string[]; pages: SongListResponse[] },
+                        ) => {
+                            if (!current) return current;
+                            const updatedPages = updateItemsInPages<Song, SongListResponse>(
+                                current.pages.filter((p): p is SongListResponse => !!p),
+                                itemIdSet,
+                                (item) => createFavoriteUpdater<Song>(item),
+                            );
+                            return updatedPages ? { ...current, pages: updatedPages } : current;
                         },
                     });
                 }
