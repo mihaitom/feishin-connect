@@ -787,7 +787,7 @@ const BaseItemGridList = ({
             ref={mergedContainerRef}
             tabIndex={0}
             {...animationProps.fadeIn}
-            transition={{ duration: enableEntranceAnimation ? 1 : 0, ease: 'anticipate' }}
+            transition={{ duration: enableEntranceAnimation ? 0.5 : 0, ease: 'anticipate' }}
         >
             <AutoSizer>
                 {({ height, width }) => (

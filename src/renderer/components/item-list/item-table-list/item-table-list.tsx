@@ -1604,7 +1604,7 @@ const BaseItemTableList = ({
                     ref={mergedContainerRef}
                     tabIndex={0}
                     {...animationProps.fadeIn}
-                    transition={{ duration: enableEntranceAnimation ? 1 : 0, ease: 'anticipate' }}
+                    transition={{ duration: enableEntranceAnimation ? 0.3 : 0, ease: 'anticipate' }}
                 >
                     {StickyHeader}
                     {StickyGroupRow}
