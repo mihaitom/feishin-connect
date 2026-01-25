@@ -13,12 +13,15 @@ import styles from './image.module.css';
 
 import { AppIcon, Icon } from '/@/shared/components/icon/icon';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
+import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
 import { useInViewport } from '/@/shared/hooks/use-in-viewport';
 
 export interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
     containerClassName?: string;
     enableAnimation?: boolean;
+    enableDebounce?: boolean;
     enableViewport?: boolean;
+    fetchPriority?: 'auto' | 'high' | 'low';
     imageContainerProps?: Omit<ImageContainerProps, 'children'>;
     includeLoader?: boolean;
     includeUnloader?: boolean;
@@ -48,7 +51,9 @@ export function BaseImage({
     className,
     containerClassName,
     enableAnimation = false,
+    enableDebounce = true,
     enableViewport = true,
+    fetchPriority,
     imageContainerProps,
     includeLoader = true,
     includeUnloader = true,
@@ -56,6 +61,23 @@ export function BaseImage({
     unloaderIcon = 'emptyImage',
     ...props
 }: ImageProps) {
+    if (enableDebounce) {
+        return (
+            <ImageWithDebounce
+                className={className}
+                containerClassName={containerClassName}
+                enableAnimation={enableAnimation}
+                enableViewport={enableViewport}
+                imageContainerProps={imageContainerProps}
+                includeLoader={includeLoader}
+                includeUnloader={includeUnloader}
+                src={src}
+                unloaderIcon={unloaderIcon}
+                {...props}
+            />
+        );
+    }
+
     if (enableViewport) {
         return (
             <ImageWithViewport
@@ -84,10 +106,90 @@ export function BaseImage({
                         [styles.animated]: enableAnimation,
                     })}
                     decoding="async"
-                    fetchPriority="high"
+                    fetchPriority={fetchPriority}
                     loader={includeLoader ? <ImageLoader className={className} /> : null}
                     loading="eager"
                     src={src}
+                    unloader={
+                        includeUnloader ? (
+                            <ImageUnloader className={className} icon={unloaderIcon} />
+                        ) : null
+                    }
+                    {...props}
+                />
+            ) : (
+                <ImageUnloader className={className} icon={unloaderIcon} />
+            )}
+        </ImageContainer>
+    );
+}
+
+function ImageWithDebounce({
+    className,
+    containerClassName,
+    enableAnimation,
+    enableViewport,
+    fetchPriority,
+    imageContainerProps,
+    includeLoader,
+    includeUnloader,
+    src,
+    unloaderIcon,
+    ...props
+}: ImageProps) {
+    const [debouncedSrc] = useDebouncedValue(src, 150, { waitForInitial: true });
+    const viewport = useInViewport();
+    const { inViewport, ref } = enableViewport ? viewport : { inViewport: true, ref: undefined };
+
+    if (enableViewport) {
+        return (
+            <ImageContainer
+                className={containerClassName}
+                enableAnimation={enableAnimation}
+                ref={ref}
+                {...imageContainerProps}
+            >
+                {inViewport && debouncedSrc ? (
+                    <Img
+                        className={clsx(styles.image, className, {
+                            [styles.animated]: enableAnimation,
+                        })}
+                        decoding="async"
+                        fetchPriority={fetchPriority}
+                        loader={includeLoader ? <ImageLoader className={className} /> : null}
+                        loading="eager"
+                        src={debouncedSrc}
+                        unloader={
+                            includeUnloader ? (
+                                <ImageUnloader className={className} icon={unloaderIcon} />
+                            ) : null
+                        }
+                        {...props}
+                    />
+                ) : !src ? (
+                    <ImageUnloader className={className} icon={unloaderIcon} />
+                ) : (
+                    <ImageLoader className={className} />
+                )}
+            </ImageContainer>
+        );
+    }
+
+    return (
+        <ImageContainer
+            className={containerClassName}
+            enableAnimation={enableAnimation}
+            {...imageContainerProps}
+        >
+            {debouncedSrc ? (
+                <Img
+                    className={clsx(styles.image, className, {
+                        [styles.animated]: enableAnimation,
+                    })}
+                    decoding="async"
+                    fetchPriority={fetchPriority}
+                    loader={includeLoader ? <ImageLoader className={className} /> : null}
+                    src={debouncedSrc}
                     unloader={
                         includeUnloader ? (
                             <ImageUnloader className={className} icon={unloaderIcon} />
@@ -108,6 +210,7 @@ function ImageWithViewport({
     className,
     containerClassName,
     enableAnimation,
+    fetchPriority,
     imageContainerProps,
     includeLoader,
     includeUnloader,
@@ -130,7 +233,7 @@ function ImageWithViewport({
                         [styles.animated]: enableAnimation,
                     })}
                     decoding="async"
-                    fetchPriority="high"
+                    fetchPriority={fetchPriority}
                     loader={includeLoader ? <ImageLoader className={className} /> : null}
                     loading="eager"
                     src={src}
