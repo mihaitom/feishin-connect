@@ -1,18 +1,18 @@
 {
     "action": {
-        "addToFavorites": "add to $t(entity.favorite_other)",
-        "addToPlaylist": "add to $t(entity.playlist_one)",
+        "addToFavorites": "add to $t(entity.favorite, {\"count\": 2})",
+        "addToPlaylist": "add to $t(entity.playlist, {\"count\": 1})",
         "addOrRemoveFromSelection": "add or remove from selection",
         "selectRangeOfItems": "select a range of items",
         "clearQueue": "clear queue",
-        "createPlaylist": "create $t(entity.playlist_one)",
-        "createRadioStation": "create $t(entity.radioStation_one)",
-        "deletePlaylist": "delete $t(entity.playlist_one)",
-        "deleteRadioStation": "delete $t(entity.radioStation_one)",
+        "createPlaylist": "create $t(entity.playlist, {\"count\": 1})",
+        "createRadioStation": "create $t(entity.radioStation, {\"count\": 1})",
+        "deletePlaylist": "delete $t(entity.playlist, {\"count\": 1})",
+        "deleteRadioStation": "delete $t(entity.radioStation, {\"count\": 1})",
         "selectAll": "select all",
         "deselectAll": "deselect all",
         "downloadStarted": "started download of {{count}} items",
-        "editPlaylist": "edit $t(entity.playlist_one)",
+        "editPlaylist": "edit $t(entity.playlist, {\"count\": 1})",
         "goToPage": "go to page",
         "moveToNext": "move to next",
         "moveToBottom": "move to bottom",
@@ -26,12 +26,12 @@
         "shuffleAll": "shuffle all",
         "shuffleSelected": "shuffle selected",
         "refresh": "$t(common.refresh)",
-        "removeFromFavorites": "remove from $t(entity.favorite_other)",
-        "removeFromPlaylist": "remove from $t(entity.playlist_one)",
+        "removeFromFavorites": "remove from $t(entity.favorite, {\"count\": 2})",
+        "removeFromPlaylist": "remove from $t(entity.playlist, {\"count\": 1})",
         "removeFromQueue": "remove from queue",
         "setRating": "set rating",
         "toggleSmartPlaylistEditor": "toggle $t(entity.smartPlaylist) editor",
-        "viewPlaylists": "view $t(entity.playlist_other)",
+        "viewPlaylists": "view $t(entity.playlist, {\"count\": 2})",
         "viewMore": "view more",
         "openApplicationDirectory": "open application directory",
         "openIn": {
@@ -69,7 +69,7 @@
         "configure": "configure",
         "confirm": "confirm",
         "create": "create",
-        "currentSong": "current $t(entity.track_one)",
+        "currentSong": "current $t(entity.track, {\"count\": 1})",
         "decrease": "decrease",
         "delete": "delete",
         "descending": "descending",
@@ -117,7 +117,7 @@
         "path": "path",
         "playerMustBePaused": "player must be paused",
         "preview": "preview",
-        "previousSong": "previous $t(entity.track_one)",
+        "previousSong": "previous $t(entity.track, {\"count\": 1})",
         "private": "private",
         "public": "public",
         "quit": "quit",
@@ -194,7 +194,7 @@
         "play_other": "{{count}} plays",
         "playlistWithCount_one": "{{count}} playlist",
         "playlistWithCount_other": "{{count}} playlists",
-        "smartPlaylist": "smart $t(entity.playlist_one)",
+        "smartPlaylist": "smart $t(entity.playlist, {\"count\": 1})",
         "track_one": "track",
         "track_other": "tracks",
         "song_one": "song",
@@ -234,14 +234,14 @@
         "settingsSyncError": "discrepancies were found between the settings in the renderer and the main process. restart the application to apply the changes"
     },
     "filter": {
-        "album": "$t(entity.album_one)",
-        "albumArtist": "$t(entity.albumArtist_one)",
-        "albumCount": "$t(entity.album_other) count",
-        "artist": "$t(entity.artist_one)",
+        "album": "$t(entity.album, {\"count\": 1})",
+        "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+        "albumCount": "$t(entity.album, {\"count\": 2}) count",
+        "artist": "$t(entity.artist, {\"count\": 1})",
         "biography": "biography",
         "bitrate": "bitrate",
         "bpm": "bpm",
-        "channels": "$t(common.channel_other)",
+        "channels": "$t(common.channel, {\"count\": 2})",
         "comment": "comment",
         "communityRating": "community rating",
         "criticRating": "critic rating",
@@ -250,7 +250,7 @@
         "duration": "duration",
         "favorited": "favorited",
         "fromYear": "from year",
-        "genre": "$t(entity.genre_one)",
+        "genre": "$t(entity.genre, {\"count\": 1})",
         "id": "id",
         "isCompilation": "is compilation",
         "isFavorited": "is favorited",
@@ -329,20 +329,20 @@
             "description": "This action will add all items in the current filtered view"
         },
         "addToPlaylist": {
-            "create": "create $t(entity.playlist_one) {{playlist}}",
-            "input_playlists": "$t(entity.playlist_other)",
+            "create": "create $t(entity.playlist, {\"count\": 1}) {{playlist}}",
+            "input_playlists": "$t(entity.playlist, {\"count\": 2})",
             "input_skipDuplicates": "skip duplicates",
-            "searchOrCreate": "search $t(entity.playlist_other) or type to create a new one",
+            "searchOrCreate": "search $t(entity.playlist, {\"count\": 2}) or type to create a new one",
             "success": "added $t(entity.trackWithCount, {\"count\": {{message}} }) to $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
-            "title": "add to $t(entity.playlist_one)"
+            "title": "add to $t(entity.playlist, {\"count\": 1})"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
             "input_name": "$t(common.name)",
             "input_owner": "$t(common.owner)",
             "input_public": "public",
-            "success": "$t(entity.playlist_one) created successfully",
-            "title": "create $t(entity.playlist_one)"
+            "success": "$t(entity.playlist, {\"count\": 1}) created successfully",
+            "title": "create $t(entity.playlist, {\"count\": 1})"
         },
         "createRadioStation": {
             "success": "radio station created successfully",
@@ -352,15 +352,15 @@
             "input_streamUrl": "stream url"
         },
         "deletePlaylist": {
-            "input_confirm": "type the name of the $t(entity.playlist_one) to confirm",
-            "success": "$t(entity.playlist_one) deleted successfully",
-            "title": "delete $t(entity.playlist_one)"
+            "input_confirm": "type the name of the $t(entity.playlist, {\"count\": 1}) to confirm",
+            "success": "$t(entity.playlist, {\"count\": 1}) deleted successfully",
+            "title": "delete $t(entity.playlist, {\"count\": 1})"
         },
         "editPlaylist": {
             "publicJellyfinNote": "Jellyfin for some reason does not expose whether a playlist is public or not. If you wish for this to remain public, please have the following input selected",
             "editNote": "manual edits are not recommended for large playlists. are you sure you accept the risk of data loss incurred by overwriting the existing playlist?",
-            "success": "$t(entity.playlist_one) updated successfully",
-            "title": "edit $t(entity.playlist_one)"
+            "success": "$t(entity.playlist, {\"count\": 1}) updated successfully",
+            "title": "edit $t(entity.playlist, {\"count\": 1})"
         },
         "lyricsExport": {
             "export": "export lyrics",
@@ -368,7 +368,7 @@
             "input_offset": "$t(setting.lyricOffset)"
         },
         "lyricSearch": {
-            "input_artist": "$t(entity.artist_one)",
+            "input_artist": "$t(entity.artist, {\"count\": 1})",
             "input_name": "$t(common.name)",
             "title": "lyric search"
         },
@@ -394,7 +394,7 @@
         },
         "shuffleAll": {
             "title": "play random",
-            "input_genre": "$t(entity.genre_one)",
+            "input_genre": "$t(entity.genre, {\"count\": 1})",
             "input_limit": "how many songs?",
             "input_minYear": "from year",
             "input_maxYear": "to year",
@@ -421,30 +421,30 @@
             "groupingTypePrimary": "primary release types",
             "recentReleases": "recent releases",
             "viewDiscography": "view discography",
-            "relatedArtists": "related $t(entity.artist_other)",
+            "relatedArtists": "related $t(entity.artist, {\"count\": 2})",
             "topSongs": "top songs",
             "topSongsFrom": "top songs from {{title}}",
             "viewAll": "view all",
-            "viewAllTracks": "view all $t(entity.track_other)"
+            "viewAllTracks": "view all $t(entity.track, {\"count\": 2})"
         },
         "albumArtistList": {
-            "title": "$t(entity.albumArtist_other)"
+            "title": "$t(entity.albumArtist, {\"count\": 2})"
         },
         "albumDetail": {
-            "moreFromArtist": "more from this $t(entity.artist_one)",
+            "moreFromArtist": "more from this $t(entity.artist, {\"count\": 1})",
             "moreFromGeneric": "more from {{item}}",
             "released": "released"
         },
         "albumList": {
             "artistAlbums": "albums by {{artist}}",
-            "genreAlbums": "\"{{genre}}\" $t(entity.album_other)",
-            "title": "$t(entity.album_other)"
+            "genreAlbums": "\"{{genre}}\" $t(entity.album, {\"count\": 2})",
+            "title": "$t(entity.album, {\"count\": 2})"
         },
         "radioList": {
             "title": "radio stations"
         },
         "favorites": {
-            "title": "$t(entity.favorite_other)"
+            "title": "$t(entity.favorite, {\"count\": 2})"
         },
         "appMenu": {
             "collapseSidebar": "collapse sidebar",
@@ -461,7 +461,7 @@
             "selectMusicFolder": "select music folder",
             "noMusicFolder": "no music folder selected",
             "multipleMusicFolders": "{{count}} music folders selected",
-            "settings": "$t(common.setting_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
             "version": "version {{version}}"
         },
         "manageServers": {
@@ -496,8 +496,8 @@
             "playShuffled": "$t(player.shuffle)",
             "shareItem": "share item",
             "goTo": "go to",
-            "goToAlbum": "go to $t(entity.album_one)",
-            "goToAlbumArtist": "go to $t(entity.albumArtist_one)",
+            "goToAlbum": "go to $t(entity.album, {\"count\": 1})",
+            "goToAlbumArtist": "go to $t(entity.albumArtist, {\"count\": 1})",
             "showDetails": "get info"
         },
         "fullscreenPlayer": {
@@ -524,12 +524,12 @@
             "noLyrics": "no lyrics found"
         },
         "genreList": {
-            "showAlbums": "show $t(entity.genre_one) $t(entity.album_other)",
-            "showTracks": "show $t(entity.genre_one) $t(entity.track_other)",
-            "title": "$t(entity.genre_other)"
+            "showAlbums": "show $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})",
+            "showTracks": "show $t(entity.genre, {\"count\": 1}) $t(entity.track, {\"count\": 2})",
+            "title": "$t(entity.genre, {\"count\": 2})"
         },
         "folderList": {
-            "title": "$t(entity.folder_other)"
+            "title": "$t(entity.folder, {\"count\": 2})"
         },
         "globalSearch": {
             "commands": {
@@ -541,7 +541,7 @@
         },
         "home": {
             "explore": "explore from your library",
-            "genres": "$t(entity.genre_other)",
+            "genres": "$t(entity.genre, {\"count\": 2})",
             "mostPlayed": "most played",
             "newlyAdded": "newly added releases",
             "recentlyPlayed": "recently played",
@@ -557,7 +557,7 @@
             "reorder": "reordering only enabled when sorting by id"
         },
         "playlistList": {
-            "title": "$t(entity.playlist_other)"
+            "title": "$t(entity.playlist, {\"count\": 2})"
         },
         "setting": {
             "advanced": "advanced",
@@ -585,26 +585,26 @@
             "playerFilters": "player filters"
         },
         "sidebar": {
-            "albumArtists": "$t(entity.albumArtist_other)",
-            "albums": "$t(entity.album_other)",
-            "artists": "$t(entity.artist_other)",
-            "favorites": "$t(entity.favorite_other)",
-            "folders": "$t(entity.folder_other)",
-            "genres": "$t(entity.genre_other)",
+            "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
+            "albums": "$t(entity.album, {\"count\": 2})",
+            "artists": "$t(entity.artist, {\"count\": 2})",
+            "favorites": "$t(entity.favorite, {\"count\": 2})",
+            "folders": "$t(entity.folder, {\"count\": 2})",
+            "genres": "$t(entity.genre, {\"count\": 2})",
             "home": "$t(common.home)",
-            "radio": "$t(entity.radioStation_other)",
+            "radio": "$t(entity.radioStation, {\"count\": 2})",
             "myLibrary": "my library",
             "nowPlaying": "now playing",
-            "playlists": "$t(entity.playlist_other)",
+            "playlists": "$t(entity.playlist, {\"count\": 2})",
             "search": "$t(common.search)",
-            "settings": "$t(common.setting_other)",
-            "shared": "shared $t(entity.playlist_other)",
-            "tracks": "$t(entity.track_other)"
+            "settings": "$t(common.setting, {\"count\": 2})",
+            "shared": "shared $t(entity.playlist, {\"count\": 2})",
+            "tracks": "$t(entity.track, {\"count\": 2})"
         },
         "trackList": {
             "artistTracks": "tracks by {{artist}}",
-            "genreTracks": "\"{{genre}}\" $t(entity.track_other)",
-            "title": "$t(entity.track_other)"
+            "genreTracks": "\"{{genre}}\" $t(entity.track, {\"count\": 2})",
+            "title": "$t(entity.track, {\"count\": 2})"
         }
     },
     "player": {
@@ -654,9 +654,9 @@
         "standardTags": "standard tags",
         "customTags": "custom tags"
     },
-    "releaseType": {
+        "releaseType": {
         "primary": {
-            "album": "$t(entity.album_one)",
+            "album": "$t(entity.album, {\"count\": 1})",
             "broadcast": "broadcast",
             "ep": "ep",
             "other": "other",
@@ -943,9 +943,9 @@
         "replayGainFallback_description": "gain in db to apply if the file has no {{ReplayGain}} tags",
         "replayGainFallback": "{{ReplayGain}} fallback",
         "replayGainMode_description": "adjust volume gain according to {{ReplayGain}} values stored in the file metadata",
-        "replayGainMode_optionAlbum": "$t(entity.album_one)",
+        "replayGainMode_optionAlbum": "$t(entity.album, {\"count\": 1})",
         "replayGainMode_optionNone": "$t(common.none)",
-        "replayGainMode_optionTrack": "$t(entity.track_one)",
+        "replayGainMode_optionTrack": "$t(entity.track, {\"count\": 1})",
         "replayGainMode": "{{ReplayGain}} mode",
         "replayGainPreamp_description": "adjust the preamp gain applied to the {{ReplayGain}} values",
         "replayGainPreamp": "{{ReplayGain}} preamp (dB)",
@@ -1019,19 +1019,19 @@
         "column": {
             "album": "album",
             "albumArtist": "album artist",
-            "albumCount": "$t(entity.album_other)",
-            "artist": "$t(entity.artist_one)",
+            "albumCount": "$t(entity.album, {\"count\": 2})",
+            "artist": "$t(entity.artist, {\"count\": 1})",
             "biography": "biography",
             "bitDepth": "$t(common.bitDepth)",
             "bitrate": "bitrate",
             "bpm": "bpm",
-            "channels": "$t(common.channel_other)",
+            "channels": "$t(common.channel, {\"count\": 2})",
             "codec": "$t(common.codec)",
             "comment": "comment",
             "dateAdded": "date added",
             "discNumber": "disc",
             "favorite": "favorite",
-            "genre": "$t(entity.genre_one)",
+            "genre": "$t(entity.genre, {\"count\": 1})",
             "lastPlayed": "last played",
             "path": "path",
             "playCount": "plays",
@@ -1040,7 +1040,7 @@
             "releaseYear": "year",
             "sampleRate": "$t(common.sampleRate)",
             "size": "$t(common.size)",
-            "songCount": "$t(entity.track_other)",
+            "songCount": "$t(entity.track, {\"count\": 2})",
             "title": "title",
             "trackNumber": "track",
             "owner": "owner"
@@ -1078,24 +1078,24 @@
                 "verticalBorders": "column borders"
             },
             "label": {
-                "actions": "$t(common.action_other)",
-                "album": "$t(entity.album_one)",
-                "albumCount": "$t(entity.album_other)",
-                "albumArtist": "$t(entity.albumArtist_one)",
-                "artist": "$t(entity.artist_one)",
+                "actions": "$t(common.action, {\"count\": 2})",
+                "album": "$t(entity.album, {\"count\": 1})",
+                "albumCount": "$t(entity.album, {\"count\": 2})",
+                "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+                "artist": "$t(entity.artist, {\"count\": 1})",
                 "biography": "$t(common.biography)",
                 "bitDepth": "$t(common.bitDepth)",
                 "bitrate": "$t(common.bitrate)",
                 "bpm": "$t(common.bpm)",
-                "channels": "$t(common.channel_other)",
+                "channels": "$t(common.channel, {\"count\": 2})",
                 "codec": "$t(common.codec)",
                 "composer": "composer",
                 "dateAdded": "date added",
                 "discNumber": "disc number",
                 "duration": "$t(common.duration)",
                 "favorite": "$t(common.favorite)",
-                "genre": "$t(entity.genre_one)",
-                "genreBadge": "$t(entity.genre_one) (badges)",
+                "genre": "$t(entity.genre, {\"count\": 1})",
+                "genreBadge": "$t(entity.genre, {\"count\": 1}) (badges)",
                 "image": "image",
                 "lastPlayed": "last played",
                 "note": "$t(common.note)",
@@ -1107,7 +1107,7 @@
                 "rowIndex": "row index",
                 "sampleRate": "$t(common.sampleRate)",
                 "size": "$t(common.size)",
-                "songCount": "$t(entity.track_other)",
+                "songCount": "$t(entity.track, {\"count\": 2})",
                 "title": "$t(common.title)",
                 "titleArtist": "$t(common.title) (artist)",
                 "titleCombined": "$t(common.title) (combined)",
