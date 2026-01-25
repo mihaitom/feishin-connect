@@ -18,6 +18,7 @@ import { useInViewport } from '/@/shared/hooks/use-in-viewport';
 export interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
     containerClassName?: string;
     enableAnimation?: boolean;
+    enableViewport?: boolean;
     imageContainerProps?: Omit<ImageContainerProps, 'children'>;
     includeLoader?: boolean;
     includeUnloader?: boolean;
@@ -47,11 +48,71 @@ export function BaseImage({
     className,
     containerClassName,
     enableAnimation = false,
+    enableViewport = true,
     imageContainerProps,
     includeLoader = true,
     includeUnloader = true,
     src,
     unloaderIcon = 'emptyImage',
+    ...props
+}: ImageProps) {
+    if (enableViewport) {
+        return (
+            <ImageWithViewport
+                className={className}
+                containerClassName={containerClassName}
+                enableAnimation={enableAnimation}
+                imageContainerProps={imageContainerProps}
+                includeLoader={includeLoader}
+                includeUnloader={includeUnloader}
+                src={src}
+                unloaderIcon={unloaderIcon}
+                {...props}
+            />
+        );
+    }
+
+    return (
+        <ImageContainer
+            className={containerClassName}
+            enableAnimation={enableAnimation}
+            {...imageContainerProps}
+        >
+            {src ? (
+                <Img
+                    className={clsx(styles.image, className, {
+                        [styles.animated]: enableAnimation,
+                    })}
+                    decoding="async"
+                    fetchPriority="high"
+                    loader={includeLoader ? <ImageLoader className={className} /> : null}
+                    loading="eager"
+                    src={src}
+                    unloader={
+                        includeUnloader ? (
+                            <ImageUnloader className={className} icon={unloaderIcon} />
+                        ) : null
+                    }
+                    {...props}
+                />
+            ) : !src ? (
+                <ImageUnloader className={className} icon={unloaderIcon} />
+            ) : (
+                <ImageLoader className={className} />
+            )}
+        </ImageContainer>
+    );
+}
+
+function ImageWithViewport({
+    className,
+    containerClassName,
+    enableAnimation,
+    imageContainerProps,
+    includeLoader,
+    includeUnloader,
+    src,
+    unloaderIcon,
     ...props
 }: ImageProps) {
     const { inViewport, ref } = useInViewport();
