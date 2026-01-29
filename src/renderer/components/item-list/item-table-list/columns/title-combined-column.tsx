@@ -103,6 +103,8 @@ export const DefaultTitleCombinedColumn = (props: ItemTableListInnerColumn) => {
                 >
                     <ItemImage
                         containerClassName={styles.image}
+                        enableDebounce={true}
+                        enableViewport={false}
                         id={item?.imageId}
                         itemType={item?._itemType}
                         src={item?.imageUrl}

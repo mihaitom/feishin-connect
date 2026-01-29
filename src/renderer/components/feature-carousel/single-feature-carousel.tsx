@@ -116,8 +116,11 @@ const CarouselItem = ({ album }: CarouselItemProps) => {
                         <ItemImage
                             className={styles.albumImage}
                             containerClassName={styles.albumImageContainer}
+                            enableDebounce={false}
+                            enableViewport={false}
                             id={album.imageId}
                             itemType={LibraryItem.ALBUM}
+                            fetchPriority="high"
                             type="itemCard"
                         />
                         <div className={styles.playButtonOverlay}>

@@ -51,6 +51,8 @@ export function ArtistMultiSelectRow({
         >
             <ItemImage
                 containerClassName={styles.rowImage}
+                enableDebounce={true}
+                enableViewport={false}
                 itemType={LibraryItem.ARTIST}
                 src={options[index].imageUrl}
                 type="table"

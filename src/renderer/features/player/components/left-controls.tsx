@@ -121,9 +121,11 @@ export const LeftControls = () => {
                                             styles.playerbarImage,
                                             PlaybackSelectors.playerCoverArt,
                                         )}
+                                        enableDebounce={false}
+                                        enableViewport={false}
+                                        fetchPriority="high"
                                         id={currentSong?.imageId}
                                         itemType={LibraryItem.SONG}
-                                        loading="eager"
                                         serverId={currentSong?._serverId}
                                         type="table"
                                     />

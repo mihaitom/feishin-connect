@@ -94,11 +94,13 @@ export function BaseImage({
         );
     }
 
+    const { className: containerPropsClassName, ...restContainerProps } = imageContainerProps || {};
+
     return (
         <ImageContainer
-            className={containerClassName}
+            className={clsx(containerClassName, containerPropsClassName)}
             enableAnimation={enableAnimation}
-            {...imageContainerProps}
+            {...restContainerProps}
         >
             {src ? (
                 <Img
@@ -140,14 +142,15 @@ function ImageWithDebounce({
     const [debouncedSrc] = useDebouncedValue(src, 150, { waitForInitial: true });
     const viewport = useInViewport();
     const { inViewport, ref } = enableViewport ? viewport : { inViewport: true, ref: undefined };
+    const { className: containerPropsClassName, ...restContainerProps } = imageContainerProps || {};
 
     if (enableViewport) {
         return (
             <ImageContainer
-                className={containerClassName}
+                className={clsx(containerClassName, containerPropsClassName)}
                 enableAnimation={enableAnimation}
                 ref={ref}
-                {...imageContainerProps}
+                {...restContainerProps}
             >
                 {inViewport && debouncedSrc ? (
                     <Img
@@ -177,9 +180,9 @@ function ImageWithDebounce({
 
     return (
         <ImageContainer
-            className={containerClassName}
+            className={clsx(containerClassName, containerPropsClassName)}
             enableAnimation={enableAnimation}
-            {...imageContainerProps}
+            {...restContainerProps}
         >
             {debouncedSrc ? (
                 <Img
@@ -219,13 +222,14 @@ function ImageWithViewport({
     ...props
 }: ImageProps) {
     const { inViewport, ref } = useInViewport();
+    const { className: containerPropsClassName, ...restContainerProps } = imageContainerProps || {};
 
     return (
         <ImageContainer
-            className={containerClassName}
+            className={clsx(containerClassName, containerPropsClassName)}
             enableAnimation={enableAnimation}
             ref={ref}
-            {...imageContainerProps}
+            {...restContainerProps}
         >
             {inViewport && src ? (
                 <Img

@@ -87,6 +87,8 @@ const ImageColumnBase = (props: ItemTableListInnerColumn) => {
                             [styles.imageContainerWithAspectRatio]:
                                 props.size === 'default' || props.size === 'large',
                         })}
+                        enableDebounce={true}
+                        enableViewport={false}
                         id={item?.imageId}
                         itemType={item?._itemType}
                         src={item?.imageUrl}

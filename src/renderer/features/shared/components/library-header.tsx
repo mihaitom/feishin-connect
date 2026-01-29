@@ -105,6 +105,9 @@ export const LibraryHeader = forwardRef(
                     >
                         <BaseImage
                             alt="cover"
+                            enableDebounce={false}
+                            enableViewport={false}
+                            fetchPriority="high"
                             src={imageUrl}
                             style={{
                                 maxHeight: '100%',
@@ -137,6 +140,9 @@ export const LibraryHeader = forwardRef(
                         <ItemImage
                             className={styles.image}
                             containerClassName={styles.image}
+                            enableDebounce={false}
+                            enableViewport={false}
+                            fetchPriority="high"
                             id={item.imageId}
                             itemType={item.type as LibraryItem}
                             onError={onImageError}
