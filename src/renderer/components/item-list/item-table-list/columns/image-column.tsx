@@ -84,6 +84,7 @@ const ImageColumnBase = (props: ItemTableListInnerColumn) => {
                 >
                     <ItemImage
                         containerClassName={clsx({
+                            [styles.compactImageContainer]: props.size === 'compact',
                             [styles.imageContainerWithAspectRatio]:
                                 props.size === 'default' || props.size === 'large',
                         })}
