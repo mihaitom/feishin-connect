@@ -46,6 +46,7 @@ const ALBUM_LIST_SORT_MAPPING: Record<AlbumListSort, AlbumListSortType | undefin
     [AlbumListSort.RECENTLY_PLAYED]: AlbumListSortType.RECENT,
     [AlbumListSort.RELEASE_DATE]: AlbumListSortType.BY_YEAR,
     [AlbumListSort.SONG_COUNT]: undefined,
+    [AlbumListSort.SORT_NAME]: AlbumListSortType.ALPHABETICAL_BY_NAME,
     [AlbumListSort.YEAR]: AlbumListSortType.BY_YEAR,
 };
 

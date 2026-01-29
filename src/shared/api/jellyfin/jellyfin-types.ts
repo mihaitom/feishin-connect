@@ -560,6 +560,7 @@ const album = z.object({
     RunTimeTicks: z.number(),
     ServerId: z.string(),
     Songs: z.array(song).optional(), // This is not a native Jellyfin property -- this is used for combined album detail
+    SortName: z.string().optional(),
     Studios: z.array(studio),
     Tags: z.string().array().optional(),
     Type: z.string(),

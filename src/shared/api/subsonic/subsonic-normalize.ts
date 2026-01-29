@@ -196,6 +196,7 @@ const normalizeSong = (
         releaseYear: item.year || null,
         sampleRate: item.samplingRate || null,
         size: item.size,
+        sortName: item.title,
         tags: null,
         trackNumber: item.track || 1,
         trackSubtitle: null,
@@ -321,6 +322,7 @@ const normalizeAlbum = (
             (item as z.infer<typeof ssType._response.album>).song?.map((song) =>
                 normalizeSong(song, server, pathReplace, pathReplaceWith, undefined, discTitleMap),
             ) || [],
+        sortName: item.title,
         tags: null,
         updatedAt: item.created,
         userFavorite: Boolean(item.starred) || false,

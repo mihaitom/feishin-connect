@@ -187,6 +187,11 @@ const CLIENT_SIDE_SONG_FILTERS = [
         value: SongListSort.NAME,
     },
     {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.sortName', { postProcess: 'titleCase' }),
+        value: SongListSort.SORT_NAME,
+    },
+    {
         defaultOrder: SortOrder.DESC,
         name: i18n.t('filter.playCount', { postProcess: 'titleCase' }),
         value: SongListSort.PLAY_COUNT,
@@ -233,6 +238,11 @@ export const CLIENT_SIDE_ALBUM_FILTERS = [
         defaultOrder: SortOrder.ASC,
         name: i18n.t('filter.name', { postProcess: 'titleCase' }),
         value: AlbumListSort.NAME,
+    },
+    {
+        defaultOrder: SortOrder.ASC,
+        name: i18n.t('filter.sortName', { postProcess: 'titleCase' }),
+        value: AlbumListSort.SORT_NAME,
     },
     {
         defaultOrder: SortOrder.DESC,
