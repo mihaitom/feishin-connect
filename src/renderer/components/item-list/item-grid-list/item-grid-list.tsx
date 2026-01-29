@@ -56,6 +56,7 @@ interface VirtualizedGridListProps {
     dataVersion?: number;
     enableDrag?: boolean;
     enableExpansion: boolean;
+    enableMultiSelect: boolean;
     enableSelection: boolean;
     gap: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
     getItem?: (index: number) => ItemCardProps['data'];
@@ -86,6 +87,7 @@ const VirtualizedGridList = React.memo(
         dataVersion,
         enableDrag,
         enableExpansion,
+        enableMultiSelect,
         enableSelection,
         gap,
         getItem,
@@ -116,6 +118,7 @@ const VirtualizedGridList = React.memo(
                 dataVersion,
                 enableDrag,
                 enableExpansion,
+                enableMultiSelect,
                 enableSelection,
                 gap,
                 getItem,
@@ -135,6 +138,7 @@ const VirtualizedGridList = React.memo(
             dataVersion,
             enableDrag,
             enableExpansion,
+            enableMultiSelect,
             enableSelection,
             gap,
             internalState,
@@ -313,6 +317,7 @@ export interface GridItemProps {
     dataVersion?: number;
     enableDrag?: boolean;
     enableExpansion?: boolean;
+    enableMultiSelect: boolean;
     enableSelection?: boolean;
     gap: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
     getItem?: (index: number) => ItemCardProps['data'];
@@ -335,6 +340,7 @@ export interface ItemGridListProps {
     enableDrag?: boolean;
     enableEntranceAnimation?: boolean;
     enableExpansion?: boolean;
+    enableMultiSelect?: boolean;
     enableSelection?: boolean;
     enableSelectionDialog?: boolean;
     gap?: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
@@ -364,6 +370,7 @@ const BaseItemGridList = ({
     enableDrag = true,
     enableEntranceAnimation = true,
     enableExpansion = false,
+    enableMultiSelect = false,
     enableSelection = true,
     gap = 'sm',
     getItem,
@@ -798,6 +805,7 @@ const BaseItemGridList = ({
                         dataVersion={dataVersion}
                         enableDrag={enableDrag}
                         enableExpansion={enableExpansion}
+                        enableMultiSelect={enableMultiSelect}
                         enableSelection={enableSelection}
                         gap={gap}
                         getItem={resolvedGetItem}
@@ -828,8 +836,18 @@ const BaseItemGridList = ({
 
 const ListComponent = memo((props: ListChildComponentProps<GridItemProps>) => {
     const { index, style } = props;
-    const { columns, controls, enableDrag, gap, getItem, itemCount, itemType, rows, size } =
-        props.data;
+    const {
+        columns,
+        controls,
+        enableDrag,
+        enableMultiSelect,
+        gap,
+        getItem,
+        itemCount,
+        itemType,
+        rows,
+        size,
+    } = props.data;
 
     const items: ReactNode[] = [];
     const startIndex = index * columns;
@@ -857,6 +875,7 @@ const ListComponent = memo((props: ListChildComponentProps<GridItemProps>) => {
                         data={item}
                         enableDrag={enableDrag}
                         enableExpansion={props.data.enableExpansion}
+                        imageAsLink={!enableMultiSelect}
                         internalState={props.data.internalState}
                         itemType={itemType}
                         rows={rows}

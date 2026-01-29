@@ -9,7 +9,7 @@ import { useListContext } from '/@/renderer/context/list-context';
 import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
 import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
 import { searchLibraryItems } from '/@/renderer/features/shared/utils';
-import { useListSettings } from '/@/renderer/store';
+import { useGeneralSettings, useListSettings } from '/@/renderer/store';
 import { sortSongList } from '/@/shared/api/utils';
 import {
     LibraryItem,
@@ -56,10 +56,12 @@ export const PlaylistDetailSongListGrid = forwardRef<any, PlaylistDetailSongList
             ItemListKey.PLAYLIST_SONG,
             gridProps.size,
         );
+        const { enableGridMultiSelect } = useGeneralSettings();
 
         return (
             <ItemGridList
                 data={songData}
+                enableMultiSelect={enableGridMultiSelect}
                 gap={gridProps.itemGap}
                 initialTop={{
                     to: scrollOffset ?? 0,

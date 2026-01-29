@@ -7,6 +7,7 @@ import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpe
 import { ItemGridList } from '/@/renderer/components/item-list/item-grid-list/item-grid-list';
 import { ItemListGridComponentProps } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
+import { useGeneralSettings } from '/@/renderer/store';
 import {
     AlbumListQuery,
     AlbumListSort,
@@ -52,12 +53,14 @@ export const AlbumListInfiniteGrid = ({
     });
 
     const rows = useGridRows(LibraryItem.ALBUM, ItemListKey.ALBUM, size);
+    const { enableGridMultiSelect } = useGeneralSettings();
 
     return (
         <ItemGridList
             data={loadedItems}
             dataVersion={dataVersion}
             enableExpansion
+            enableMultiSelect={enableGridMultiSelect}
             gap={gap}
             getItem={getItem}
             getItemIndex={getItemIndex}

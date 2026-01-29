@@ -9,6 +9,7 @@ import { ItemListWithPagination } from '/@/renderer/components/item-list/item-li
 import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
 import { ItemListGridComponentProps } from '/@/renderer/components/item-list/types';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
+import { useGeneralSettings } from '/@/renderer/store';
 import {
     ArtistListQuery,
     ArtistListSort,
@@ -56,6 +57,7 @@ export const ArtistListPaginatedGrid = ({
     });
 
     const rows = useGridRows(LibraryItem.ARTIST, ItemListKey.ARTIST, size);
+    const { enableGridMultiSelect } = useGeneralSettings();
 
     return (
         <ItemListWithPagination
@@ -68,6 +70,7 @@ export const ArtistListPaginatedGrid = ({
             <ItemGridList
                 currentPage={currentPage}
                 data={data || []}
+                enableMultiSelect={enableGridMultiSelect}
                 gap={gap}
                 initialTop={{
                     to: scrollOffset ?? 0,

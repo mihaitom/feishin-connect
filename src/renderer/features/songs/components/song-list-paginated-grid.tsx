@@ -8,6 +8,7 @@ import { ItemListWithPagination } from '/@/renderer/components/item-list/item-li
 import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
 import { ItemListGridComponentProps } from '/@/renderer/components/item-list/types';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
+import { useGeneralSettings } from '/@/renderer/store';
 import { LibraryItem, SongListQuery, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
@@ -45,6 +46,7 @@ export const SongListPaginatedGrid = ({
     });
 
     const rows = useGridRows(LibraryItem.SONG, ItemListKey.SONG, size);
+    const { enableGridMultiSelect } = useGeneralSettings();
 
     return (
         <ItemListWithPagination
@@ -57,6 +59,7 @@ export const SongListPaginatedGrid = ({
             <ItemGridList
                 currentPage={currentPage}
                 data={data || []}
+                enableMultiSelect={enableGridMultiSelect}
                 gap={gap}
                 itemsPerRow={itemsPerRow}
                 itemType={LibraryItem.SONG}

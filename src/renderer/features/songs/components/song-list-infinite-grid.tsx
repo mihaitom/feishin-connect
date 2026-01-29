@@ -7,6 +7,7 @@ import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpe
 import { ItemGridList } from '/@/renderer/components/item-list/item-grid-list/item-grid-list';
 import { ItemListGridComponentProps } from '/@/renderer/components/item-list/types';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
+import { useGeneralSettings } from '/@/renderer/store';
 import { LibraryItem, SongListQuery, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
@@ -47,11 +48,13 @@ export const SongListInfiniteGrid = ({
     });
 
     const rows = useGridRows(LibraryItem.SONG, ItemListKey.SONG, size);
+    const { enableGridMultiSelect } = useGeneralSettings();
 
     return (
         <ItemGridList
             data={loadedItems}
             dataVersion={dataVersion}
+            enableMultiSelect={enableGridMultiSelect}
             gap={gap}
             getItem={getItem}
             getItemIndex={getItemIndex}

@@ -7,6 +7,7 @@ import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpe
 import { ItemGridList } from '/@/renderer/components/item-list/item-grid-list/item-grid-list';
 import { ItemListGridComponentProps } from '/@/renderer/components/item-list/types';
 import { genresQueries } from '/@/renderer/features/genres/api/genres-api';
+import { useGeneralSettings } from '/@/renderer/store';
 import {
     GenreListQuery,
     GenreListSort,
@@ -52,11 +53,13 @@ export const GenreListInfiniteGrid = ({
     });
 
     const rows = useGridRows(LibraryItem.GENRE, ItemListKey.GENRE, size);
+    const { enableGridMultiSelect } = useGeneralSettings();
 
     return (
         <ItemGridList
             data={loadedItems}
             dataVersion={dataVersion}
+            enableMultiSelect={enableGridMultiSelect}
             gap={gap}
             getItem={getItem}
             getItemIndex={getItemIndex}

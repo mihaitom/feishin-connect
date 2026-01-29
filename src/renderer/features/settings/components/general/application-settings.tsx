@@ -624,6 +624,28 @@ export const ApplicationSettings = memo(() => {
         {
             control: (
                 <Switch
+                    aria-label={t('setting.enableGridMultiSelect', { postProcess: 'sentenceCase' })}
+                    defaultChecked={settings.enableGridMultiSelect}
+                    onChange={(e) =>
+                        setSettings({
+                            general: {
+                                ...settings,
+                                enableGridMultiSelect: e.currentTarget.checked,
+                            },
+                        })
+                    }
+                />
+            ),
+            description: t('setting.enableGridMultiSelect', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: false,
+            title: t('setting.enableGridMultiSelect', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Switch
                     aria-label={t('setting.playerbarOpenDrawer', { postProcess: 'sentenceCase' })}
                     defaultChecked={settings.playerbarOpenDrawer}
                     onChange={(e) =>
