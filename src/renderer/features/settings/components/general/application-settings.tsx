@@ -391,12 +391,12 @@ export const ApplicationSettings = memo(() => {
                     }
                 />
             ),
-            description: t('setting.homeFeature', {
+            description: t('setting.homeFeatureStyle', {
                 context: 'description',
                 postProcess: 'sentenceCase',
             }),
             isHidden: false,
-            title: t('setting.homeFeature', { postProcess: 'sentenceCase' }),
+            title: t('setting.homeFeatureStyle', { postProcess: 'sentenceCase' }),
         },
         {
             control: (
