@@ -169,6 +169,18 @@ export const TableConfig = ({
             {
                 component: (
                     <ListConfigBooleanControl
+                        onChange={(e) => setList(listKey, { table: { enableHeader: e } })}
+                        value={list.table.enableHeader}
+                    />
+                ),
+                id: 'enableHeader',
+                label: t('table.config.general.showHeader', {
+                    postProcess: 'sentenceCase',
+                }),
+            },
+            {
+                component: (
+                    <ListConfigBooleanControl
                         onChange={(e) =>
                             setList(listKey, { table: { enableRowHoverHighlight: e } })
                         }

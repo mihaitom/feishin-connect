@@ -655,7 +655,7 @@
         "standardTags": "standard tags",
         "customTags": "custom tags"
     },
-        "releaseType": {
+    "releaseType": {
         "primary": {
             "album": "$t(entity.album, {\"count\": 1})",
             "broadcast": "broadcast",
@@ -1080,6 +1080,7 @@
                 "alternateRowColors": "alternate row colors",
                 "horizontalBorders": "row borders",
                 "rowHoverHighlight": "row hover highlight",
+                "showHeader": "show header",
                 "verticalBorders": "column borders"
             },
             "label": {

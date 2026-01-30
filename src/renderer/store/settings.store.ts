@@ -190,6 +190,7 @@ const ItemTableListPropsSchema = z.object({
     autoFitColumns: z.boolean(),
     columns: z.array(ItemTableListColumnConfigSchema),
     enableAlternateRowColors: z.boolean(),
+    enableHeader: z.boolean(),
     enableHorizontalBorders: z.boolean(),
     enableRowHoverHighlight: z.boolean(),
     enableVerticalBorders: z.boolean(),
@@ -1098,6 +1099,7 @@ const initialState: SettingsState = {
                     ],
                 }),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1126,6 +1128,7 @@ const initialState: SettingsState = {
                     width: column.width,
                 })),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1176,6 +1179,7 @@ const initialState: SettingsState = {
                     width: column.width,
                 })),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1216,6 +1220,7 @@ const initialState: SettingsState = {
                     ],
                 }),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1261,6 +1266,7 @@ const initialState: SettingsState = {
                     ],
                 }),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1306,6 +1312,7 @@ const initialState: SettingsState = {
                     width: column.width,
                 })),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1341,6 +1348,7 @@ const initialState: SettingsState = {
                     ],
                 }),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1387,6 +1395,7 @@ const initialState: SettingsState = {
                     width: column.width,
                 })),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1415,6 +1424,7 @@ const initialState: SettingsState = {
                     width: column.width,
                 })),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1461,6 +1471,7 @@ const initialState: SettingsState = {
                     width: column.width,
                 })),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1491,6 +1502,7 @@ const initialState: SettingsState = {
                     ],
                 }),
                 enableAlternateRowColors: false,
+                enableHeader: true,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -1998,10 +2010,24 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
+                if (version <= 22) {
+                    // Add enableHeader to all list table configs
+                    Object.keys(state.lists).forEach((listKey) => {
+                        const listConfig = state.lists[listKey as keyof typeof state.lists];
+                        if (
+                            listConfig?.table &&
+                            typeof listConfig.table === 'object' &&
+                            !('enableHeader' in listConfig.table)
+                        ) {
+                            (listConfig.table as any).enableHeader = true;
+                        }
+                    });
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 22,
+            version: 23,
         },
     ),
 );

@@ -84,6 +84,7 @@ export interface ItemListTableComponentProps<TQuery> extends ItemListComponentPr
     autoFitColumns?: boolean;
     columns: ItemTableListColumnConfig[];
     enableAlternateRowColors?: boolean;
+    enableHeader?: boolean;
     enableHorizontalBorders?: boolean;
     enableRowHoverHighlight?: boolean;
     enableSelection?: boolean;

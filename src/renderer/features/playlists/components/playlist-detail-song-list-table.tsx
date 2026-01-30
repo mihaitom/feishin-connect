@@ -34,6 +34,7 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
             columns,
             data,
             enableAlternateRowColors = false,
+            enableHeader = true,
             enableHorizontalBorders = false,
             enableRowHoverHighlight = true,
             enableSelection = true,
@@ -115,6 +116,7 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
                 data={songData}
                 enableAlternateRowColors={enableAlternateRowColors}
                 enableExpansion={false}
+                enableHeader={enableHeader}
                 enableHorizontalBorders={enableHorizontalBorders}
                 enableRowHoverHighlight={enableRowHoverHighlight}
                 enableSelection={enableSelection}
@@ -143,6 +145,7 @@ export const PlaylistDetailSongListEditTable = forwardRef<any, PlaylistDetailSon
             columns,
             data,
             enableAlternateRowColors = false,
+            enableHeader = true,
             enableHorizontalBorders = false,
             enableRowHoverHighlight = true,
             enableSelection = true,
@@ -205,6 +208,7 @@ export const PlaylistDetailSongListEditTable = forwardRef<any, PlaylistDetailSon
                 enableAlternateRowColors={enableAlternateRowColors}
                 enableDrag
                 enableExpansion={false}
+                enableHeader={enableHeader}
                 enableHorizontalBorders={enableHorizontalBorders}
                 enableRowHoverHighlight={enableRowHoverHighlight}
                 enableSelection={enableSelection}

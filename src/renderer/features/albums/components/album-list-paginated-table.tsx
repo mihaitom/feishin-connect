@@ -25,6 +25,7 @@ export const AlbumListPaginatedTable = ({
     autoFitColumns = false,
     columns,
     enableAlternateRowColors = false,
+    enableHeader = true,
     enableHorizontalBorders = false,
     enableRowHoverHighlight = true,
     enableSelection = true,
@@ -86,6 +87,7 @@ export const AlbumListPaginatedTable = ({
                 columns={columns}
                 data={data || []}
                 enableAlternateRowColors={enableAlternateRowColors}
+                enableHeader={enableHeader}
                 enableHorizontalBorders={enableHorizontalBorders}
                 enableRowHoverHighlight={enableRowHoverHighlight}
                 enableSelection={enableSelection}

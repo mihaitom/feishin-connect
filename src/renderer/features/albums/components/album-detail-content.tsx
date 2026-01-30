@@ -774,7 +774,7 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
                 enableDragScroll={false}
                 enableEntranceAnimation={false}
                 enableExpansion={false}
-                enableHeader
+                enableHeader={tableConfig.enableHeader}
                 enableHorizontalBorders={tableConfig.enableHorizontalBorders}
                 enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
                 enableSelection

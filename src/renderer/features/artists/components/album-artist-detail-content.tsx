@@ -404,7 +404,7 @@ const AlbumArtistMetadataTopSongsContent = ({
                     enableDrag
                     enableDragScroll={false}
                     enableExpansion={false}
-                    enableHeader
+                    enableHeader={tableConfig.enableHeader}
                     enableHorizontalBorders={tableConfig.enableHorizontalBorders}
                     enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
                     enableSelection
