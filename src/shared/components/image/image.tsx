@@ -111,7 +111,6 @@ export function BaseImage({
                     decoding="async"
                     fetchPriority={fetchPriority}
                     loader={includeLoader ? <ImageLoader className={className} /> : null}
-                    loading="eager"
                     src={src}
                     unloader={
                         includeUnloader ? (
@@ -177,7 +176,6 @@ function ImageWithDebounce({
                         decoding="async"
                         fetchPriority={fetchPriority}
                         loader={includeLoader ? <ImageLoader className={className} /> : null}
-                        loading="eager"
                         src={debouncedSrc}
                         unloader={
                             includeUnloader ? (
@@ -270,7 +268,6 @@ function ImageWithViewport({
                     decoding="async"
                     fetchPriority={fetchPriority}
                     loader={includeLoader ? <ImageLoader className={className} /> : null}
-                    loading="eager"
                     src={src}
                     unloader={
                         includeUnloader ? (
