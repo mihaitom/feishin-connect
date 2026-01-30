@@ -262,7 +262,7 @@ const AlbumArtistMetadataTopSongsContent = ({
     const filteredSongs = useMemo(() => {
         const filtered = searchLibraryItems(songs, debouncedSearchTerm, LibraryItem.SONG);
         // When searching, show all results. Otherwise, limit to 5 if not showing all
-        if (debouncedSearchTerm.trim() || showAll) {
+        if (debouncedSearchTerm?.trim() || showAll) {
             return filtered;
         }
         return filtered.slice(0, 5);

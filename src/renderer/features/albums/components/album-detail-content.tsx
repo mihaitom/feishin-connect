@@ -639,7 +639,7 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
 
     const groups = useMemo(() => {
         // Remove groups when filtering
-        if (debouncedSearchTerm.trim()) {
+        if (debouncedSearchTerm?.trim()) {
             return undefined;
         }
 

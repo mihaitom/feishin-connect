@@ -227,11 +227,11 @@ export const createFuseForLibraryItem = <T extends FuseSearchableItem>(
 
 export const searchLibraryItems = <T extends FuseSearchableItem>(
     items: T[],
-    searchTerm: string,
+    searchTerm: string | undefined,
     itemType: LibraryItem,
     options?: CreateFuseOptions,
 ): T[] => {
-    if (!searchTerm.trim()) {
+    if (!searchTerm?.trim()) {
         return items;
     }
 
