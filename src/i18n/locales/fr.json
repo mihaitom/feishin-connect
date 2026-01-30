@@ -565,7 +565,7 @@
         "remotePort": "port du serveur de contrôle à distance",
         "hotkey_playbackNext": "piste suivante",
         "lyricFetch_description": "récupère les paroles depuis divers source d'internet",
-        "lyricFetchProvider_description": "sélectionnez le fournisseur auprès desquels récupérer les paroles. l'ordre des fournisseurs et l'ordre dans lequel ils seront interrogés",
+        "lyricFetchProvider_description": "sélectionnez les fournisseurs auprès desquels récupérer les paroles",
         "globalMediaHotkeys_description": "active ou désactive l'utilisation des raccourcis clavier multimédia système pour contrôler la lecture",
         "followLyric": "suivre les paroles actuelles",
         "discordIdleStatus": "afficher l'état d'inactivité dans le statut de l'activité",

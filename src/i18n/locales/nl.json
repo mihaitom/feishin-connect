@@ -155,7 +155,8 @@
         "noFilters": "geen filters ingesteld",
         "example": "voorbeeld",
         "mood": "stemming",
-        "retry": "opnieuw proberen"
+        "retry": "opnieuw proberen",
+        "filter_single": "single"
     },
     "filter": {
         "rating": "rating",

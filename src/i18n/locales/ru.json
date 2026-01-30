@@ -36,7 +36,8 @@
         "shuffleAll": "перемешать все",
         "shuffleSelected": "Смешать выбранное",
         "viewMore": "Посмотреть больше",
-        "openApplicationDirectory": "открыть папку приложения"
+        "openApplicationDirectory": "открыть папку приложения",
+        "selectRangeOfItems": "выбрать диапазон элементов"
     },
     "common": {
         "backward": "назад",
@@ -155,7 +156,9 @@
         "sort": "сортировать",
         "clean": "очистить",
         "gridRows": "Строки в сетке",
-        "tableColumns": "Столбцы таблицы"
+        "tableColumns": "Столбцы таблицы",
+        "doNotShowAgain": "не показывать снова",
+        "itemsMore": "{{count}} более"
     },
     "entity": {
         "album_one": "альбом",
@@ -261,7 +264,8 @@
                 "year": "$t(common.year)",
                 "albumArtist": "$t(entity.albumArtist_one)",
                 "codec": "$t(common.codec)",
-                "songCount": "$t(entity.track_other)"
+                "songCount": "$t(entity.track_other)",
+                "titleArtist": "$t(common.title) (артист)"
             }
         },
         "column": {
@@ -397,7 +401,15 @@
         "addLast": "последний",
         "mute": "отключить звук",
         "skip_forward": "вперёд",
-        "viewQueue": "показать очередь"
+        "viewQueue": "показать очередь",
+        "addLastShuffled": "последний (смешанный)",
+        "addNextShuffled": "следующий (смешанный)",
+        "artistRadio": "Радио артист",
+        "holdToShuffle": "удержать для смешивания",
+        "lyrics": "тексты песен",
+        "restoreQueueFromServer": "восстановить очередь с сервера",
+        "saveQueueToServer": "сохранить очередь на сервер",
+        "trackRadio": "трек радио"
     },
     "page": {
         "sidebar": {
@@ -453,7 +465,8 @@
             "privateModeOn": "Включить приватный режим",
             "selectMusicFolder": "выбрать папку с музыкой",
             "noMusicFolder": "папка с музыкой не выбрана",
-            "multipleMusicFolders": "{{count}} выбрано музыкальных папок"
+            "multipleMusicFolders": "{{count}} выбрано музыкальных папок",
+            "commandPalette": "открыть командную строку"
         },
         "manageServers": {
             "title": "сервера",
@@ -518,7 +531,9 @@
             "audio": "аудио",
             "lyrics": "тексты песен",
             "lyricsDisplay": "отображение текстов песен",
-            "transcoding": "транскодирование"
+            "transcoding": "транскодирование",
+            "scrobble": "скробблер",
+            "logger": "Отладка"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist_other)"
@@ -878,7 +893,28 @@
         "artistBackground": "Фоновое изображение исполнителя",
         "artistBackground_description": "Добавляет фоновое изображение для страниц исполнителя, содержащих обложку исполнителя",
         "artistBackgroundBlur": "процент размытия обложки исполнителя",
-        "artistBackgroundBlur_description": "регулирует процент размытия к заднему фону исполнителя"
+        "artistBackgroundBlur_description": "регулирует процент размытия к заднему фону исполнителя",
+        "autoDJ_description": "автоматически добавлять похожие песни в очередь воспроизведения",
+        "autoDJ_itemCount": "количество элементов",
+        "autoDJ_itemCount_description": "количество элементов, которые пытаются добавить в очередь при включенной функции автоматического диджеинга",
+        "autoDJ_timing": "расчетное время",
+        "autoDJ_timing_description": "количество песен, оставшихся в очереди до срабатывания автоматического диджея",
+        "useThemeAccentColor": "использовать цвет темы",
+        "useThemeAccentColor_description": "используйте основной цвет определенный в выбранной теме вместо пользовательского акцентного цвета",
+        "analyticsDisable": "Отказаться от аналитики на основе использования",
+        "analyticsDisable_description": "Анонимизированные данные об использовании отправляются разработчику для улучшения приложения",
+        "crossfadeStyle": "стиль перехода",
+        "customCss_description": "пользовательский CSS-контент. Примечание: свойства content и remote urls не допускаются. Предварительный просмотр вашего контента показан ниже. Дополнительные поля, которые вы не задали, присутствуют из-за проверки на наличие ошибок",
+        "customCss": "Пользовательский CSS",
+        "customCssNotice": "Предупреждение: несмотря на некоторую очистку (запрет использования url() и content:), использование пользовательских CSS-стилей всё ещё может представлять риски, изменяя интерфейс",
+        "releaseChannel_optionBeta": "Бета",
+        "releaseChannel_optionLatest": "последний",
+        "releaseChannel": "Тип релиза",
+        "releaseChannel_description": "Выберите  между стабильной или бета версией для автоматического обновления",
+        "discordDisplayType_artistname": "Имя (имена) исполнителя",
+        "discordDisplayType_description": "это меняет то, что вы слушаете в своем статусе",
+        "discordDisplayType_songname": "имя песни",
+        "discordDisplayType": "{{discord}} тип отображения"
     },
     "releaseType": {
         "secondary": {
@@ -887,10 +923,15 @@
             "compilation": "подборка",
             "interview": "интервью",
             "remix": "ремикс",
-            "live": "прямой эфир"
+            "live": "прямой эфир",
+            "soundtrack": "саундтрек",
+            "spokenWord": "Художественная декламация"
         },
         "primary": {
-            "other": "другие"
+            "other": "другие",
+            "broadcast": "транслировать",
+            "ep": "эп",
+            "single": "сингл"
         }
     },
     "datetime": {
@@ -919,5 +960,30 @@
         "notInPlaylist": "не в",
         "notInTheLast": "не в последнем",
         "startsWith": "начинается с"
+    },
+    "queryBuilder": {
+        "standardTags": "стандартные теги",
+        "customTags": "пользовательские теги"
+    },
+    "visualizer": {
+        "presets": "Пресеты",
+        "selectPreset": "Выбрать Пресет",
+        "applyPreset": "Применить Пресет",
+        "saveAsPreset": "Сохранить пресет",
+        "updatePreset": "Обновить пресет",
+        "copyConfiguration": "Копировать Конфигурацию",
+        "pasteConfiguration": "Вставить Конфигурацию",
+        "pasteConfigurationPlaceholder": "Вставить JSON конфигурацию",
+        "pasteFromClipboard": "Вставить из буфера обмена",
+        "applyConfiguration": "Применить Конфигурацию",
+        "configCopied": "Конфигурация скопирована в буфер обмена",
+        "configCopyFailed": "Ошибка применения конфигурации",
+        "configPasted": "Конфигурация успешно установлена",
+        "configPasteFailed": "Ошибка применения конфигурации. Проверьте формат.",
+        "configPasteReadFailed": "Ошибка чтения из буфера обмена",
+        "presetName": "Название пресета",
+        "presetNamePlaceholder": "Введите название пресета",
+        "general": "Главная",
+        "lineWidth": "Ширина линии"
     }
 }

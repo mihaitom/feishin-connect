@@ -18,12 +18,12 @@
             "musicbrainz": "Ireki MusicBrainz-en"
         },
         "clearQueue": "garbitu ilara",
-        "createPlaylist": "sortu $t(entity.playlist_one)",
-        "deletePlaylist": "ezabatu $t(entity.playlist_one)",
+        "createPlaylist": "sortu $t(entity.playlist, {\"count\": 1})",
+        "deletePlaylist": "ezabatu $t(entity.playlist, {\"count\": 1})",
         "addToFavorites": "gehitu gogokoetara",
         "addToPlaylist": "gehitu $t(entity.playlist_one)ra",
-        "createRadioStation": "sortu $t(entity.radioStation_one)",
-        "deleteRadioStation": "ezabatu $t(entity.radioStation_one)",
+        "createRadioStation": "sortu $t(entity.radioStation, {\"count\": 1})",
+        "deleteRadioStation": "ezabatu $t(entity.radioStation, {\"count\": 1})",
         "viewMore": "ikusi gehiago",
         "shuffle": "nahastu",
         "selectAll": "aukeratu guztiak",
@@ -31,7 +31,9 @@
         "addOrRemoveFromSelection": "gehitu edo kendu hautapenetik",
         "selectRangeOfItems": "aukeratu elementu sorta bat",
         "shuffleAll": "nahastu dena",
-        "shuffleSelected": "nahastu aukeratutak"
+        "shuffleSelected": "nahastu aukeratutak",
+        "moveItems": "elementuak mugitu",
+        "openApplicationDirectory": "ireki aplikazioaren direktorioa"
     },
     "common": {
         "add": "gehitu",
@@ -146,7 +148,8 @@
         "sort": "ordenatu",
         "recordLabel": "diskoetxea",
         "example": "adibidea",
-        "tableColumns": "taulako zutabeak"
+        "tableColumns": "taulako zutabeak",
+        "doNotShowAgain": "ez erakutsi hau berriro"
     },
     "player": {
         "repeat": "errepikatu",
@@ -184,7 +187,9 @@
         "restoreQueueFromServer": "berrezarri ilara zerbitzaritik",
         "saveQueueToServer": "gorde ilara zerbitzarira",
         "addLastShuffled": "azkena (ausaz)",
-        "addNextShuffled": "hurrengoa (ausaz)"
+        "addNextShuffled": "hurrengoa (ausaz)",
+        "artistRadio": "artista irratia",
+        "trackRadio": "pista irratia"
     },
     "table": {
         "config": {
@@ -344,7 +349,8 @@
         "systemFontError": "errore bat gertatu da sistemaren letra-tipoak lortzen saiatzean",
         "noNetwork": "zerbitzaria ez dago erabilgarri",
         "noNetworkDescription": "ezin izan da zerbitzari honetara konektatu",
-        "saveQueueFailed": "huts egin du ilara gordetzean"
+        "saveQueueFailed": "huts egin du ilara gordetzean",
+        "multipleServerSaveQueueError": "erreprodukzio-ilarak zerbitzarikoak ez diren abesti bat edo gehiago ditu. hau ez da onartzen"
     },
     "filter": {
         "disc": "diskoa",
@@ -635,7 +641,41 @@
         "transcodeBitrate": "transkodetzeko bit-emaria",
         "transcodeFormat_description": "transkodetzeko formatua hautatzen du. utzi hutsik zerbitzariak erabaki dezan",
         "transcodeFormat": "transkodetzeko formatua",
-        "queryBuilderCustomFields_inputLabel": "etiketa"
+        "queryBuilderCustomFields_inputLabel": "etiketa",
+        "autoDJ": "DJ automatikoa",
+        "autoDJ_description": "automatikoki gehitu antzeko abestiak ilaran",
+        "autoDJ_itemCount_description": "DJ automatikoa gaituta dagoenean ilaran gehitzen saiatu diren elementuen kopurua",
+        "autoDJ_timing_description": "DJ automatikoa aktibatu aurretik ilaran geratzen diren abestien kopurua",
+        "analyticsDisable": "Erabileran oinarritutako analisiei uko egin",
+        "analyticsDisable_description": "Erabilera-datu anonimoak garatzaileari bidaltzen zaizkio aplikazioa hobetzen laguntzeko",
+        "contextMenu_description": "elementu batean eskuineko botoiarekin klik egitean menuan agertzen diren elementuak ezkutatzeko aukera ematen dizu. hautatuta ez dauden elementuak ezkutatuta egongo dira",
+        "enableAutoTranslation_description": "Gaitu itzulpena automatikoki letra kargatzen denean",
+        "exportImportSettings_control_description": "JSON bidez ezarpenak esportatu eta inportatu",
+        "exportImportSettings_destructiveWarning": "Ezarpenak inportatzea arriskutsua da, mesedez, berrikusi goikoa beheko \"inportatu\" klikatu aurretik!",
+        "exportImportSettings_importSuccess": "ezarpenak behar bezala inportatu dira!",
+        "exportImportSettings_offendingKeyError": "\"{{offendingKey}}\" okerra da - {{reason}}",
+        "hotkey_listPlayDefault": "zerrenda erreproduzitu",
+        "hotkey_listPlayLast": "zerrenda erreproduzitu amaieran",
+        "hotkey_listPlayNow": "zerrenda erreproduzitu orain",
+        "logLevel": "erregistro maila",
+        "logLevel_description": "Bistaratzeko erregistroen gutxieneko maila ezartzen du. Debug-ek erregistro guztiak erakusten ditu, «erroreak» erroreak bakarrik erakusten ditu",
+        "logLevel_optionDebug": "arazketa",
+        "playerFilters_description": "saltatu abestiak ilaran gehitzea irizpide hauen arabera",
+        "artistRadioCount_description": "artista eta abestien irratian bilatu beharreko abesti kopurua ezartzen du",
+        "artistRadioCount": "artista/abesti irratiko kopurua",
+        "imageResolution_optionItemCard": "elementu txartela",
+        "imageResolution_optionHeader": "goiburua",
+        "imageResolution_optionFullScreenPlayer": "pantaila osoko erreproduzitzailea",
+        "showVisualizerInSidebar": "erakutsi bistaratzailea erreproduzitzailearen alboko barran",
+        "combinedLyricsAndVisualizer_description": "konbinatu letrak eta bistaratzailea panel berean",
+        "combinedLyricsAndVisualizer": "konbinatu letrak eta bistaratzailea erreproduzitzailearen alboko barran",
+        "preventSleepOnPlayback_description": "saihestu pantaila lotan jartzea musika erreproduzitzen ari den bitartean",
+        "remotePassword_description": "urruneko kontrol zerbitzariaren pasahitza ezartzen du. Kredentzial hauek modu ez-seguruan transferitzen dira lehenespenez, beraz, axola ez zaizun pasahitz bakarra erabili beharko zenuke",
+        "remotePassword": "urruneko kontrol zerbitzariaren pasahitza",
+        "remotePort_description": "urruneko kontrol zerbitzariaren portua ezartzen du",
+        "remotePort": "urruneko kontrol zerbitzariaren ataka",
+        "remoteUsername_description": "urruneko kontrol zerbitzariaren erabiltzaile-izena ezartzen du. Erabiltzaile-izena eta pasahitza hutsik badaude, autentifikazioa desgaituta egongo da",
+        "remoteUsername": "urruneko kontrol zerbitzariaren erabiltzaile-izena"
     },
     "form": {
         "addServer": {
@@ -936,7 +976,8 @@
             "compilation": "konpilazioa",
             "audiobook": "audioliburua",
             "interview": "elkarrizketa",
-            "remix": "nahasketa"
+            "remix": "nahasketa",
+            "djMix": "dj nahasketa"
         }
     },
     "datetime": {
@@ -946,7 +987,8 @@
         "dayShort": "d"
     },
     "queryBuilder": {
-        "customTags": "etiketa pertsonalizatutak"
+        "customTags": "etiketa pertsonalizatutak",
+        "standardTags": "etiketa estandarrak"
     },
     "filterOperator": {
         "is": "da",
@@ -984,7 +1026,8 @@
             "gradient": {
                 "classic": "Klasikoa",
                 "prism": "Prisma",
-                "rainbow": "Ostadarra"
+                "rainbow": "Ostadarra",
+                "orangered": "Laranja-gorria"
             },
             "weightingFilter": {
                 "none": "Bat ere ez",
@@ -993,6 +1036,24 @@
                 "c": "C",
                 "d": "D",
                 "z": "Z"
+            },
+            "mode": {
+                "0": "[0] Maiztasun Diskretuak",
+                "1": "[1] 1/24 oktaba / 240 banda",
+                "2": "[2] 1/12 oktaba / 120 banda",
+                "3": "[3] 1/8 oktaba / 80 banda",
+                "4": "[4] 1/6ko oktaba / 60 banda",
+                "5": "[5] 1/4 oktaba / 40 banda",
+                "6": "[6] 1/3 oktaba / 30 banda",
+                "7": "[7] Oktaba erdi / 20 banda",
+                "8": "[8] Oktaba osoa / 10 banda",
+                "10": "[10] Lerroa / Azalera grafikoa"
+            },
+            "frequencyScale": {
+                "none": "Bat ere ez",
+                "linear": "Eskala Lineala",
+                "bark": "Bark Eskala",
+                "mel": "Mel Eskala"
             }
         },
         "opacity": "Opakotasuna",
@@ -1009,6 +1070,33 @@
         "configCopyFailed": "Konfigurazioa kopiatzeak huts egin du",
         "configPasted": "Konfigurazioa behar bezala aplikatu da",
         "configPasteFailed": "Konfigurazioa aplikatzeak huts egin du. Mesedez, egiaztatu formatua.",
-        "configPasteReadFailed": "Arbelatik irakurtzeak huts egin du"
+        "configPasteReadFailed": "Arbelatik irakurtzeak huts egin du",
+        "colorMode": "Kolore Modua",
+        "fftSize": "FFT tamaina",
+        "frequencyRangeAndScaling": "Maiztasun-tartea eta eskalatzea",
+        "showScaleY": "Erakutsi Y Eskala",
+        "pasteGradientPlaceholder": "Itsatsi JSON gradientea hemen...",
+        "pasteGradient": "Itsatsi Gradientea",
+        "addColor": "Gehitu Kolorea",
+        "colorStops": "Kolore Geldialdiak",
+        "gradientNamePlaceholder": "Gradientearen Izena",
+        "gradientName": "Gradientearen Izena",
+        "addCustomGradient": "Gehitu Gradiente Pertsonalizatua",
+        "customGradients": "Gradiente Pertsonalizatuak",
+        "maxFPS": "FPS maximoak",
+        "channelLayout": "Kanalaren Diseinua",
+        "lineWidth": "Lerroaren Zabalera",
+        "presetNamePlaceholder": "Sartu aurrezarpenaren izena",
+        "presetName": "Aurrezarpenaren Izena",
+        "applyConfiguration": "Aplikatu konfigurazioa",
+        "pasteFromClipboard": "Itsatsi Arbeletik",
+        "pasteConfigurationPlaceholder": "Itsatsi JSON konfigurazioa hemen...",
+        "pasteConfiguration": "Itsatsi Konfigurazioa",
+        "copyConfiguration": "Kopiatu Konfigurazioa",
+        "updatePreset": "Aurrezarpena Eguneratu",
+        "saveAsPreset": "Aurrezarpen gisa gorde",
+        "applyPreset": "Aurrezarpena Aplikatu",
+        "selectPreset": "Aukeratu Aurrezarpena",
+        "presets": "Aurrezarpenak"
     }
 }

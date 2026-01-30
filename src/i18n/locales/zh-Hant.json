@@ -813,11 +813,11 @@
         }
     },
     "action": {
-        "addToFavorites": "新增到$t(entity.favorite_other)",
+        "addToFavorites": "新增到$t(entity.favorite, {\"count\": 2})",
         "clearQueue": "清空播放佇列",
         "createPlaylist": "創建$t(entity.playlist_one)",
         "deletePlaylist": "刪除$t(entity.playlist_one)",
-        "addToPlaylist": "新增到$t(entity.playlist_one)",
+        "addToPlaylist": "新增到$t(entity.playlist, {\"count\": 1})",
         "deselectAll": "取消全選",
         "editPlaylist": "編輯 $t(entity.playlist_one)",
         "goToPage": "前往頁面",
@@ -907,7 +907,7 @@
         "recentlyUpdated": "最近更新",
         "releaseDate": "發布日期",
         "songCount": "曲目數",
-        "album": "$t(entity.album_one)",
+        "album": "$t(entity.album, {\"count\": 1})",
         "albumArtist": "$t(entity.albumArtist_one)",
         "favorited": "已收藏",
         "recentlyAdded": "最近新增",
