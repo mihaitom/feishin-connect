@@ -511,7 +511,10 @@ const BaseItemGridList = ({
         });
     }, [containerWidth, resolvedItemCount, throttledSetTableMeta, containerRef]);
 
-    const controls = useDefaultItemListControls({ overrides: overrideControls });
+    const controls = useDefaultItemListControls({
+        enableMultiSelect,
+        overrides: overrideControls,
+    });
 
     const scrollToIndex = useCallback(
         (
@@ -875,6 +878,7 @@ const ListComponent = memo((props: ListChildComponentProps<GridItemProps>) => {
                         data={item}
                         enableDrag={enableDrag}
                         enableExpansion={props.data.enableExpansion}
+                        enableMultiSelect={enableMultiSelect}
                         imageAsLink={!enableMultiSelect}
                         internalState={props.data.internalState}
                         itemType={itemType}

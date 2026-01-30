@@ -56,6 +56,7 @@ export interface ItemCardProps {
     data: Album | AlbumArtist | Artist | Playlist | Song | undefined;
     enableDrag?: boolean;
     enableExpansion?: boolean;
+    enableMultiSelect?: boolean;
     enableNavigation?: boolean;
     imageAsLink?: boolean;
     internalState?: ItemListStateActions;
@@ -71,6 +72,7 @@ export const ItemCard = ({
     data,
     enableDrag,
     enableExpansion,
+    enableMultiSelect,
     enableNavigation = true,
     imageAsLink,
     internalState,
@@ -92,6 +94,7 @@ export const ItemCard = ({
                     data={data}
                     enableDrag={enableDrag}
                     enableExpansion={enableExpansion}
+                    enableMultiSelect={enableMultiSelect}
                     enableNavigation={enableNavigation}
                     imageAsLink={imageAsLink}
                     imageUrl={imageUrl}
@@ -110,6 +113,7 @@ export const ItemCard = ({
                     data={data}
                     enableDrag={enableDrag}
                     enableExpansion={enableExpansion}
+                    enableMultiSelect={enableMultiSelect}
                     enableNavigation={enableNavigation}
                     imageAsLink={imageAsLink}
                     imageUrl={imageUrl}
@@ -159,6 +163,7 @@ const CompactItemCard = ({
     data,
     enableDrag,
     enableExpansion,
+    enableMultiSelect,
     enableNavigation,
     imageAsLink,
     internalState,
@@ -180,29 +185,29 @@ const CompactItemCard = ({
             return [];
         }
 
-        const draggedItems = getDraggedItems(data, internalState);
+        const draggedItems = getDraggedItems(data, internalState, enableMultiSelect !== false);
         return draggedItems.map((item) => item.id);
-    }, [data, internalState]);
+    }, [data, internalState, enableMultiSelect]);
 
     const getItem = useCallback(() => {
         if (!data) {
             return [];
         }
 
-        const draggedItems = getDraggedItems(data, internalState);
+        const draggedItems = getDraggedItems(data, internalState, enableMultiSelect !== false);
         return draggedItems;
-    }, [data, internalState]);
+    }, [data, internalState, enableMultiSelect]);
 
     const onDragStart = useCallback(() => {
         if (!data) {
             return;
         }
 
-        const draggedItems = getDraggedItems(data, internalState);
+        const draggedItems = getDraggedItems(data, internalState, enableMultiSelect !== false);
         if (internalState) {
             internalState.setDragging(draggedItems);
         }
-    }, [data, internalState]);
+    }, [data, internalState, enableMultiSelect]);
 
     const onDrop = useCallback(() => {
         if (internalState) {
@@ -667,6 +672,7 @@ const PosterItemCard = ({
     data,
     enableDrag,
     enableExpansion,
+    enableMultiSelect,
     enableNavigation,
     imageAsLink,
     internalState,
@@ -688,29 +694,29 @@ const PosterItemCard = ({
             return [];
         }
 
-        const draggedItems = getDraggedItems(data, internalState);
+        const draggedItems = getDraggedItems(data, internalState, enableMultiSelect !== false);
         return draggedItems.map((item) => item.id);
-    }, [data, internalState]);
+    }, [data, internalState, enableMultiSelect]);
 
     const getItem = useCallback(() => {
         if (!data) {
             return [];
         }
 
-        const draggedItems = getDraggedItems(data, internalState);
+        const draggedItems = getDraggedItems(data, internalState, enableMultiSelect !== false);
         return draggedItems;
-    }, [data, internalState]);
+    }, [data, internalState, enableMultiSelect]);
 
     const onDragStart = useCallback(() => {
         if (!data) {
             return;
         }
 
-        const draggedItems = getDraggedItems(data, internalState);
+        const draggedItems = getDraggedItems(data, internalState, enableMultiSelect !== false);
         if (internalState) {
             internalState.setDragging(draggedItems);
         }
-    }, [data, internalState]);
+    }, [data, internalState, enableMultiSelect]);
 
     const onDrop = useCallback(() => {
         if (internalState) {

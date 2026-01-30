@@ -12,6 +12,7 @@ import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
 import { Play, TableColumn } from '/@/shared/types/types';
 
 interface UseDefaultItemListControlsArgs {
+    enableMultiSelect?: boolean;
     onColumnReordered?: (
         columnIdFrom: TableColumn,
         columnIdTo: TableColumn,
@@ -42,7 +43,7 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
         navigateRef.current = navigate;
     }, [navigate]);
 
-    const { onColumnReordered, onColumnResized, overrides } = args || {};
+    const { enableMultiSelect = true, onColumnReordered, onColumnResized, overrides } = args || {};
 
     const controls: ItemControls = useMemo(() => {
         return {
@@ -333,6 +334,13 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
 
                 if (!rowId) return;
 
+                if (!enableMultiSelect) {
+                    return ContextMenuController.call({
+                        cmd: { items: [item] as any[], type: actualItemType as any },
+                        event,
+                    });
+                }
+
                 // If none selected, select this item
                 if (internalState.getSelected().length === 0) {
                     internalState.setSelected([item]);
@@ -407,7 +415,15 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
 
             ...overrides,
         };
-    }, [overrides, onColumnReordered, onColumnResized, player, setFavorite, setRating]);
+    }, [
+        enableMultiSelect,
+        overrides,
+        onColumnReordered,
+        onColumnResized,
+        player,
+        setFavorite,
+        setRating,
+    ]);
 
     return controls;
 };
