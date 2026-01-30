@@ -81,7 +81,7 @@ export const SearchHeader = ({ navigationId }: SearchHeaderProps) => {
                             }}
                             variant={itemType === LibraryItem.SONG ? 'filled' : 'default'}
                         >
-                            {t('entity.track_other', { postProcess: 'sentenceCase' })}
+                            {t('entity.track', { count: 2, postProcess: 'sentenceCase' })}
                         </Button>
                         <Button
                             component={Link}
@@ -97,7 +97,7 @@ export const SearchHeader = ({ navigationId }: SearchHeaderProps) => {
                             }}
                             variant={itemType === LibraryItem.ALBUM ? 'filled' : 'default'}
                         >
-                            {t('entity.album_other', { postProcess: 'sentenceCase' })}
+                            {t('entity.album', { count: 2, postProcess: 'sentenceCase' })}
                         </Button>
                         <Button
                             component={Link}
@@ -113,7 +113,7 @@ export const SearchHeader = ({ navigationId }: SearchHeaderProps) => {
                             }}
                             variant={itemType === LibraryItem.ALBUM_ARTIST ? 'filled' : 'default'}
                         >
-                            {t('entity.artist_other', { postProcess: 'sentenceCase' })}
+                            {t('entity.artist', { count: 2, postProcess: 'sentenceCase' })}
                         </Button>
                     </ButtonGroup>
                     <ListConfigMenu {...listConfigMenuProps[itemType]} />

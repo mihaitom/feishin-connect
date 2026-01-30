@@ -186,7 +186,7 @@ export const PlayerConfig = () => {
                     size="sm"
                     stopsPropagation
                     tooltip={{
-                        label: t('common.setting_other', { postProcess: 'titleCase' }),
+                        label: t('common.setting', { count: 2, postProcess: 'titleCase' }),
                         openDelay: 0,
                     }}
                     variant="subtle"
