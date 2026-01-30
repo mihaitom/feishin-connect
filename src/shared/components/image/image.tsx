@@ -139,7 +139,7 @@ function ImageWithDebounce({
     unloaderIcon,
     ...props
 }: ImageProps) {
-    const [debouncedSrc] = useDebouncedValue(src, 150, { waitForInitial: true });
+    const [debouncedSrc] = useDebouncedValue(src, 100, { waitForInitial: true });
     const viewport = useInViewport();
     const { inViewport, ref } = enableViewport ? viewport : { inViewport: true, ref: undefined };
     const { className: containerPropsClassName, ...restContainerProps } = imageContainerProps || {};
