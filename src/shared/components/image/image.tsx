@@ -6,6 +6,7 @@ import {
     type ImgHTMLAttributes,
     memo,
     ReactNode,
+    useRef,
 } from 'react';
 import { Img } from 'react-image';
 
@@ -144,6 +145,22 @@ function ImageWithDebounce({
     const { inViewport, ref } = enableViewport ? viewport : { inViewport: true, ref: undefined };
     const { className: containerPropsClassName, ...restContainerProps } = imageContainerProps || {};
 
+    const hasBeenInViewportRef = useRef(false);
+    const prevDebouncedSrcRef = useRef(debouncedSrc);
+
+    if (prevDebouncedSrcRef.current !== debouncedSrc) {
+        prevDebouncedSrcRef.current = debouncedSrc;
+        hasBeenInViewportRef.current = false;
+    }
+
+    if (inViewport && debouncedSrc) {
+        hasBeenInViewportRef.current = true;
+    }
+
+    const shouldShowImage = enableViewport
+        ? (inViewport || hasBeenInViewportRef.current) && debouncedSrc
+        : debouncedSrc;
+
     if (enableViewport) {
         return (
             <ImageContainer
@@ -152,7 +169,7 @@ function ImageWithDebounce({
                 ref={ref}
                 {...restContainerProps}
             >
-                {inViewport && debouncedSrc ? (
+                {shouldShowImage && debouncedSrc ? (
                     <Img
                         className={clsx(styles.image, className, {
                             [styles.animated]: enableAnimation,
@@ -224,6 +241,20 @@ function ImageWithViewport({
     const { inViewport, ref } = useInViewport();
     const { className: containerPropsClassName, ...restContainerProps } = imageContainerProps || {};
 
+    const hasBeenInViewportRef = useRef(false);
+    const prevSrcRef = useRef(src);
+
+    if (prevSrcRef.current !== src) {
+        prevSrcRef.current = src;
+        hasBeenInViewportRef.current = false;
+    }
+
+    if (inViewport && src) {
+        hasBeenInViewportRef.current = true;
+    }
+
+    const shouldShowImage = (inViewport || hasBeenInViewportRef.current) && src;
+
     return (
         <ImageContainer
             className={clsx(containerClassName, containerPropsClassName)}
@@ -231,7 +262,7 @@ function ImageWithViewport({
             ref={ref}
             {...restContainerProps}
         >
-            {inViewport && src ? (
+            {shouldShowImage ? (
                 <Img
                     className={clsx(styles.image, className, {
                         [styles.animated]: enableAnimation,
