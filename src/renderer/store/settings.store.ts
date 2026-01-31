@@ -1,6 +1,7 @@
 import isElectron from 'is-electron';
 import mergeWith from 'lodash/mergeWith';
 import { nanoid } from 'nanoid';
+import { useMemo } from 'react';
 import { generatePath } from 'react-router';
 import { z } from 'zod';
 import { devtools, persist, subscribeWithSelector } from 'zustand/middleware';
@@ -26,7 +27,7 @@ import { FontValueSchema } from '/@/renderer/types/fonts';
 import { randomString } from '/@/renderer/utils';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
 import { AppTheme } from '/@/shared/themes/app-theme-types';
-import { LibraryItem, LyricSource } from '/@/shared/types/domain-types';
+import { LibraryItem, LyricSource, SavedCollection } from '/@/shared/types/domain-types';
 import {
     FontType,
     ItemListKey,
@@ -153,6 +154,13 @@ const GenreTargetSchema = z.enum(['album', 'track']);
 const SideQueueTypeSchema = z.enum(['sideDrawerQueue', 'sideQueue']);
 
 const SidebarPanelTypeSchema = z.enum(['queue', 'lyrics', 'visualizer']);
+
+const CollectionSchema = z.object({
+    filterQueryString: z.string(),
+    id: z.string(),
+    name: z.string(),
+    type: z.enum([LibraryItem.ALBUM, LibraryItem.SONG]),
+});
 
 const SidebarItemTypeSchema = z.object({
     disabled: z.boolean(),
@@ -408,6 +416,7 @@ export const GeneralSettingsSchema = z.object({
     artistRadioCount: z.number(),
     artistReleaseTypeItems: z.array(SortableItemSchema(ArtistReleaseTypeItemSchema)),
     buttonSize: z.number(),
+    collections: z.array(CollectionSchema),
     combinedLyricsAndVisualizer: z.boolean(),
     disabledContextMenu: z.record(z.string(), z.boolean()),
     enableGridMultiSelect: z.boolean(),
@@ -755,6 +764,7 @@ export enum SidebarItem {
     ALBUMS = 'Albums',
     ARTISTS = 'Artists',
     ARTISTS_ALL = 'Artists-all',
+    COLLECTIONS = 'Collections',
     FAVORITES = 'Favorites',
     FOLDERS = 'Folders',
     GENRES = 'Genres',
@@ -792,6 +802,8 @@ export type PlayerFilterOperator = z.infer<typeof PlayerFilterOperatorSchema>;
 
 export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
     actions: {
+        addCollection: (collection: SavedCollection) => void;
+        removeCollection: (id: string) => void;
         reset: () => void;
         resetSampleRate: () => void;
         setArtistItems: (item: SortableItem<ArtistItem>[]) => void;
@@ -806,6 +818,7 @@ export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
         setTranscodingConfig: (config: TranscodingConfig) => void;
         toggleMediaSession: () => void;
         toggleSidebarCollapseShare: () => void;
+        updateCollection: (id: string, updates: Partial<Omit<SavedCollection, 'id'>>) => void;
     };
 }
 export interface SettingsState extends z.infer<typeof SettingsStateSchema> {}
@@ -883,6 +896,12 @@ export const sidebarItems: SidebarItemType[] = [
         id: 'Playlists',
         label: i18n.t('page.sidebar.playlists'),
         route: AppRoute.PLAYLISTS,
+    },
+    {
+        disabled: false,
+        id: 'Collections',
+        label: i18n.t('page.sidebar.collections'),
+        route: '',
     },
     {
         disabled: false,
@@ -967,6 +986,7 @@ const initialState: SettingsState = {
         artistRadioCount: 20,
         artistReleaseTypeItems,
         buttonSize: 15,
+        collections: [],
         combinedLyricsAndVisualizer: false,
         disabledContextMenu: {},
         enableGridMultiSelect: false,
@@ -1659,6 +1679,18 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
             subscribeWithSelector(
                 immer((set) => ({
                     actions: {
+                        addCollection: (collection: SavedCollection) => {
+                            set((state) => {
+                                state.general.collections.push(collection);
+                            });
+                        },
+                        removeCollection: (id: string) => {
+                            set((state) => {
+                                state.general.collections = state.general.collections.filter(
+                                    (c) => c.id !== id,
+                                );
+                            });
+                        },
                         reset: () => {
                             localStorage.removeItem('store_settings');
                             window.location.reload();
@@ -1746,6 +1778,17 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                             set((state) => {
                                 state.general.sidebarCollapseShared =
                                     !state.general.sidebarCollapseShared;
+                            });
+                        },
+                        updateCollection: (
+                            id: string,
+                            updates: Partial<Omit<SavedCollection, 'id'>>,
+                        ) => {
+                            set((state) => {
+                                const idx = state.general.collections.findIndex((c) => c.id === id);
+                                if (idx !== -1) {
+                                    Object.assign(state.general.collections[idx], updates);
+                                }
                             });
                         },
                     },
@@ -2134,6 +2177,15 @@ export const useSideQueueType = () =>
 
 export const useVolumeWheelStep = () =>
     useSettingsStore((state) => state.general.volumeWheelStep, shallow);
+
+export const useCollections = () => {
+    const collections = useSettingsStore((state) => state.general.collections, shallow);
+
+    return useMemo(
+        () => [...(collections ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+        [collections],
+    );
+};
 
 export const useSidebarPlaylistList = () =>
     useSettingsStore((state) => state.general.sidebarPlaylistList, shallow);

@@ -47,8 +47,16 @@ export const ListFiltersModal = ({ isActive, itemType }: ListFiltersProps) => {
 
     const [isOpen, handlers] = useDisclosure(false);
 
+    const albumListFilters = useAlbumListFilters(pageKey as ItemListKey);
+    const songListFilters = useSongListFilters(pageKey as ItemListKey);
+    const clear = itemType === LibraryItem.ALBUM ? albumListFilters.clear : songListFilters.clear;
+
     const handlePin = () => {
         setIsSidebarOpen?.(!isSidebarOpen);
+    };
+
+    const handleReset = () => {
+        clear();
     };
 
     const canPin = Boolean(setIsSidebarOpen);
@@ -72,15 +80,21 @@ export const ListFiltersModal = ({ isActive, itemType }: ListFiltersProps) => {
                     },
                 }}
                 title={
-                    <Group>
-                        {canPin && (
-                            <ActionIcon
-                                icon={isSidebarOpen ? 'unpin' : 'pin'}
-                                onClick={handlePin}
-                                variant="subtle"
-                            />
-                        )}
-                        {t('common.filters', { postProcess: 'sentenceCase' })}
+                    <Group justify="space-between" style={{ paddingRight: '3rem', width: '100%' }}>
+                        <Group>
+                            {canPin && (
+                                <ActionIcon
+                                    icon={isSidebarOpen ? 'unpin' : 'pin'}
+                                    onClick={handlePin}
+                                    variant="subtle"
+                                />
+                            )}
+
+                            {t('common.filters', { postProcess: 'sentenceCase' })}
+                        </Group>
+                        <Button onClick={handleReset} size="compact-sm" variant="subtle">
+                            {t('common.reset', { postProcess: 'sentenceCase' })}
+                        </Button>
                     </Group>
                 }
             >

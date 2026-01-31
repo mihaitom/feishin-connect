@@ -10,6 +10,7 @@ import { ContextMenuController } from '/@/renderer/features/context-menu/context
 import { useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { ActionBar } from '/@/renderer/features/sidebar/components/action-bar';
 import { ServerSelector } from '/@/renderer/features/sidebar/components/server-selector';
+import { SidebarCollectionList } from '/@/renderer/features/sidebar/components/sidebar-collection-list';
 import { SidebarIcon } from '/@/renderer/features/sidebar/components/sidebar-icon';
 import { SidebarItem } from '/@/renderer/features/sidebar/components/sidebar-item';
 import {
@@ -49,6 +50,7 @@ export const Sidebar = () => {
             Albums: t('page.sidebar.albums', { postProcess: 'titleCase' }),
             Artists: t('page.sidebar.albumArtists', { postProcess: 'titleCase' }),
             'Artists-all': t('page.sidebar.artists', { postProcess: 'titleCase' }),
+            Collections: t('page.sidebar.collections', { postProcess: 'titleCase' }),
             Favorites: t('page.sidebar.favorites', { postProcess: 'titleCase' }),
             Folders: t('page.sidebar.folders', { postProcess: 'titleCase' }),
             Genres: t('page.sidebar.genres', { postProcess: 'titleCase' }),
@@ -84,6 +86,12 @@ export const Sidebar = () => {
         return items;
     }, [sidebarItems, translatedSidebarItemMap]);
 
+    /* Library accordion: only items with a route (exclude Collections section) */
+    const libraryItemsWithRoute = useMemo(
+        () => sidebarItemsWithRoute.filter((item) => item.id !== 'Collections' && item.route),
+        [sidebarItemsWithRoute],
+    );
+
     const isCustomWindowBar =
         windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS;
 
@@ -105,7 +113,7 @@ export const Sidebar = () => {
                         item: styles.accordionItem,
                         root: styles.accordionRoot,
                     }}
-                    defaultValue={['library', 'playlists']}
+                    defaultValue={['library', 'collections', 'playlists']}
                     multiple
                 >
                     <Accordion.Item value="library">
@@ -117,7 +125,7 @@ export const Sidebar = () => {
                             </Text>
                         </Accordion.Control>
                         <Accordion.Panel>
-                            {sidebarItemsWithRoute.map((item) => {
+                            {libraryItemsWithRoute.map((item) => {
                                 return (
                                     <SidebarItem key={`sidebar-${item.route}`} to={item.route}>
                                         <Group gap="md">
@@ -129,6 +137,7 @@ export const Sidebar = () => {
                             })}
                         </Accordion.Panel>
                     </Accordion.Item>
+                    <SidebarCollectionList />
                     {sidebarPlaylistList && (
                         <>
                             <SidebarPlaylistList />

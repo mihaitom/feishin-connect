@@ -4,6 +4,7 @@ import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { ListFilters, ListFiltersTitle } from '/@/renderer/features/shared/components/list-filters';
 import { ListWithSidebarContainer } from '/@/renderer/features/shared/components/list-with-sidebar-container';
+import { SaveAsCollectionButton } from '/@/renderer/features/shared/components/save-as-collection-button';
 import { ItemListSettings, useCurrentServer, useListSettings } from '/@/renderer/store';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Spinner } from '/@/shared/components/spinner/spinner';
@@ -38,11 +39,14 @@ const AlbumListPaginatedTable = lazy(() =>
 const AlbumListFilters = () => {
     return (
         <ListWithSidebarContainer.SidebarPortal>
-            <Stack h="100%">
+            <Stack h="100%" style={{ minHeight: 0 }}>
                 <ListFiltersTitle itemType={LibraryItem.ALBUM} />
-                <ScrollArea>
+                <ScrollArea style={{ flex: 1, minHeight: 0 }}>
                     <ListFilters itemType={LibraryItem.ALBUM} />
                 </ScrollArea>
+                <Stack p="sm">
+                    <SaveAsCollectionButton fullWidth itemType={LibraryItem.ALBUM} />
+                </Stack>
             </Stack>
         </ListWithSidebarContainer.SidebarPortal>
     );

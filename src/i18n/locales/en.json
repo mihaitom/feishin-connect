@@ -128,6 +128,7 @@
         "releaseType": "release type",
         "refresh": "refresh",
         "reload": "reload",
+        "rename": "rename",
         "reset": "reset",
         "resetToDefault": "reset to default",
         "restartRequired": "restart required",
@@ -560,6 +561,10 @@
         "playlistList": {
             "title": "$t(entity.playlist, {\"count\": 2})"
         },
+        "collections": {
+            "overrideExisting": "override existing",
+            "saveAsCollection": "save as collection"
+        },
         "setting": {
             "advanced": "advanced",
             "analytics": "analytics",
@@ -588,6 +593,7 @@
         "sidebar": {
             "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
             "albums": "$t(entity.album, {\"count\": 2})",
+            "collections": "collections",
             "artists": "$t(entity.artist, {\"count\": 2})",
             "favorites": "$t(entity.favorite, {\"count\": 2})",
             "folders": "$t(entity.folder, {\"count\": 2})",

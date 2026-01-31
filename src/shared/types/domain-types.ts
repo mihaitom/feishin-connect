@@ -76,6 +76,13 @@ export type QueueSong = Song & {
     _uniqueId: string;
 };
 
+export interface SavedCollection {
+    filterQueryString: string;
+    id: string;
+    name: string;
+    type: LibraryItem.ALBUM | LibraryItem.SONG;
+}
+
 export type ServerListItem = {
     features?: ServerFeatures;
     id: string;
