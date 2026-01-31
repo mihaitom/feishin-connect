@@ -1,5 +1,5 @@
 {
     "action": {
-        "addToFavorites": "додати до $t(entity.favorite_other)"
+        "addToFavorites": "додати до $t(entity.favorite, {\"count\": 2})"
     }
 }

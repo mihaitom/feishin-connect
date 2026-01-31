@@ -1,21 +1,21 @@
 {
     "action": {
-        "editPlaylist": "pas $t(entity.playlist_one) aan",
+        "editPlaylist": "pas $t(entity.playlist, {\"count\": 1}) aan",
         "goToPage": "ga naar pagina",
         "moveToTop": "verplaats naar begin",
-        "addToFavorites": "toevoegen aan $t(entity.favorite_other)",
-        "addToPlaylist": "toevoegen aan $t(entity.playlist_one)",
-        "createPlaylist": "maak $t(entity.playlist_one)",
-        "removeFromPlaylist": "verwijder uit $t(entity.playlist_one)",
-        "viewPlaylists": "bekijk $t(entity.playlist_other)",
+        "addToFavorites": "toevoegen aan $t(entity.favorite, {\"count\": 2})",
+        "addToPlaylist": "toevoegen aan $t(entity.playlist, {\"count\": 1})",
+        "createPlaylist": "maak $t(entity.playlist, {\"count\": 1})",
+        "removeFromPlaylist": "verwijder uit $t(entity.playlist, {\"count\": 1})",
+        "viewPlaylists": "bekijk $t(entity.playlist, {\"count\": 2})",
         "refresh": "$t(common.refresh)",
-        "deletePlaylist": "verwijder $t(entity.playlist_one)",
+        "deletePlaylist": "verwijder $t(entity.playlist, {\"count\": 1})",
         "removeFromQueue": "verwijder uit wachtrij",
         "deselectAll": "deselecteer alles",
         "moveToBottom": "verplaats naar einde",
         "setRating": "kies beoordeling",
         "toggleSmartPlaylistEditor": "editor $t(entity.smartPlaylist) schakelen",
-        "removeFromFavorites": "verwijder uit $t(entity.favorite_other)",
+        "removeFromFavorites": "verwijder uit $t(entity.favorite, {\"count\": 2})",
         "clearQueue": "verwijder lijst",
         "openIn": {
             "lastfm": "Open in Last.fm",
@@ -30,8 +30,8 @@
         "viewMore": "bekijk meer",
         "addOrRemoveFromSelection": "toevoegen aan of verwijderen uit selectie",
         "selectRangeOfItems": "selecteer een reeks van nummers",
-        "createRadioStation": "maak $t(entity.radioStation_one)",
-        "deleteRadioStation": "verwijder $t(entity.radioStation_one)",
+        "createRadioStation": "maak $t(entity.radioStation, {\"count\": 1})",
+        "deleteRadioStation": "verwijder $t(entity.radioStation, {\"count\": 1})",
         "selectAll": "selecteer alles",
         "moveUp": "verplaats omhoog",
         "moveDown": "verplaats omlaag",
@@ -48,7 +48,7 @@
         "edit": "aanpassen",
         "favorite": "favoriet",
         "left": "links",
-        "currentSong": "huidig $t(entity.track_one)",
+        "currentSong": "huidig $t(entity.track, {\"count\": 1})",
         "collapse": "samenvouwen",
         "descending": "aflopend",
         "add": "toevoegen",
@@ -92,7 +92,7 @@
         "disable": "deactiveren",
         "none": "geen",
         "menu": "menu",
-        "previousSong": "vorige $t(entity.track_one)",
+        "previousSong": "vorige $t(entity.track, {\"count\": 1})",
         "noResultsFromQuery": "de zoekopdracht leverde geen resultaten op",
         "quit": "sluiten",
         "expand": "vergroten",
@@ -172,28 +172,28 @@
         "isRated": "is rated",
         "owner": "$t(common.owner)",
         "bitrate": "bitrate",
-        "genre": "$t(entity.genre_one)",
+        "genre": "$t(entity.genre, {\"count\": 1})",
         "recentlyAdded": "recentelijk toegevoegd",
         "note": "notitie",
         "name": "naam",
         "dateAdded": "datum toegevoegd",
-        "albumCount": "$t(entity.album_other) totaal",
+        "albumCount": "$t(entity.album, {\"count\": 2}) totaal",
         "path": "pad",
         "favorited": "favoriet",
-        "albumArtist": "$t(entity.albumArtist_one)",
+        "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
         "isRecentlyPlayed": "is recentelijk afgespeeld",
         "isFavorited": "is favoriet",
         "bpm": "bpm",
         "id": "id",
         "disc": "disk",
         "biography": "biografie",
-        "artist": "$t(entity.artist_one)",
+        "artist": "$t(entity.artist, {\"count\": 1})",
         "duration": "duratie",
         "isPublic": "is publiek",
         "random": "willekeurig",
         "lastPlayed": "laatst gespeeld",
         "fromYear": "van jaar",
-        "album": "$t(entity.album_one)",
+        "album": "$t(entity.album, {\"count\": 1})",
         "title": "titel",
         "search": "zoeken",
         "releaseDate": "releasedatum",
@@ -223,8 +223,8 @@
             "removeFromQueue": "$t(action.removeFromQueue)",
             "download": "download",
             "shareItem": "deel item",
-            "goToAlbum": "ga naar $t(entity.album_one)",
-            "goToAlbumArtist": "ga naar $t(entity.albumArtist_one)",
+            "goToAlbum": "ga naar $t(entity.album, {\"count\": 1})",
+            "goToAlbumArtist": "ga naar $t(entity.albumArtist, {\"count\": 1})",
             "showDetails": "haal info op",
             "moveItems": "$t(action.moveItems)",
             "moveToNext": "$t(action.moveToNext)",
@@ -235,7 +235,7 @@
         "appMenu": {
             "selectServer": "selecteer server",
             "version": "versie {{version}}",
-            "settings": "$t(common.setting_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
             "manageServers": "beheer servers",
             "expandSidebar": "sidebar uitklappen",
             "collapseSidebar": "sidebar inklappen",
@@ -251,7 +251,7 @@
             "commandPalette": "open opdrachtvenster"
         },
         "albumDetail": {
-            "moreFromArtist": "meer van deze $t(entity.artist_one)",
+            "moreFromArtist": "meer van deze $t(entity.artist, {\"count\": 1})",
             "moreFromGeneric": "meer van {{item}}",
             "released": "uitgebracht"
         },
@@ -279,22 +279,22 @@
             "visualizer": "visualizer"
         },
         "albumArtistList": {
-            "title": "$t(entity.albumArtist_other)"
+            "title": "$t(entity.albumArtist, {\"count\": 2})"
         },
         "albumList": {
-            "title": "$t(entity.album_other)",
+            "title": "$t(entity.album, {\"count\": 2})",
             "artistAlbums": "albums van {{artist}}",
-            "genreAlbums": "\"{{genre}}\" $t(entity.album_other)"
+            "genreAlbums": "\"{{genre}}\" $t(entity.album, {\"count\": 2})"
         },
         "albumArtistDetail": {
             "about": "Over {{artist}}",
             "appearsOn": "verschijnt op",
             "viewDiscography": "bekijk discografie",
-            "relatedArtists": "gerelateerd $t(entity.artist_other)",
+            "relatedArtists": "gerelateerd $t(entity.artist, {\"count\": 2})",
             "topSongs": "top nummers",
             "topSongsFrom": "top nummers van {{title}}",
             "viewAll": "bekijk alle",
-            "viewAllTracks": "bekijk alle $t(entity.track_other)",
+            "viewAllTracks": "bekijk alle $t(entity.track, {\"count\": 2})",
             "recentReleases": "recente uitgaven",
             "groupingTypeAll": "alle soorten publicaties",
             "groupingTypePrimary": "primaire publicatiesoorten"
@@ -308,9 +308,9 @@
             "removeServer": "verwijder server"
         },
         "genreList": {
-            "showAlbums": "toon $t(entity.genre_one) $t(entity.album_other)",
-            "showTracks": "toon $t(entity.genre_one) $t(entity.track_other)",
-            "title": "$t(entity.genre_other)"
+            "showAlbums": "toon $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})",
+            "showTracks": "toon $t(entity.genre, {\"count\": 1}) $t(entity.track, {\"count\": 2})",
+            "title": "$t(entity.genre, {\"count\": 2})"
         },
         "globalSearch": {
             "commands": {
@@ -327,10 +327,10 @@
             "recentlyPlayed": "recent afgespeeld",
             "recentlyReleased": "recent uitgekomen",
             "title": "$t(common.home)",
-            "genres": "$t(entity.genre_other)"
+            "genres": "$t(entity.genre, {\"count\": 2})"
         },
         "favorites": {
-            "title": "$t(entity.favorite_other)"
+            "title": "$t(entity.favorite, {\"count\": 2})"
         },
         "itemDetail": {
             "copyPath": "kopieer pad naar klembord",
@@ -341,7 +341,7 @@
             "reorder": "herschikken is alleen ingeschakeld wanneer er op ID wordt gestorteerd"
         },
         "playlistList": {
-            "title": "$t(entity.playlist_other)"
+            "title": "$t(entity.playlist, {\"count\": 2})"
         },
         "setting": {
             "advanced": "geavanceerd",
@@ -369,32 +369,32 @@
             "playerFilters": "spelerfilters"
         },
         "sidebar": {
-            "albumArtists": "$t(entity.albumArtist_other)",
-            "albums": "$t(entity.album_other)",
-            "artists": "$t(entity.artist_other)",
-            "favorites": "$t(entity.favorite_other)",
-            "folders": "$t(entity.folder_other)",
-            "genres": "$t(entity.genre_other)",
+            "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
+            "albums": "$t(entity.album, {\"count\": 2})",
+            "artists": "$t(entity.artist, {\"count\": 2})",
+            "favorites": "$t(entity.favorite, {\"count\": 2})",
+            "folders": "$t(entity.folder, {\"count\": 2})",
+            "genres": "$t(entity.genre, {\"count\": 2})",
             "home": "$t(common.home)",
             "myLibrary": "mijn bibliotheek",
             "nowPlaying": "nu aan het spelen",
-            "playlists": "$t(entity.playlist_other)",
+            "playlists": "$t(entity.playlist, {\"count\": 2})",
             "search": "$t(common.search)",
-            "settings": "$t(common.setting_other)",
-            "shared": "$t(entity.playlist_other) gedeeld",
-            "tracks": "$t(entity.track_other)",
-            "radio": "$t(entity.radioStation_other)"
+            "settings": "$t(common.setting, {\"count\": 2})",
+            "shared": "$t(entity.playlist, {\"count\": 2}) gedeeld",
+            "tracks": "$t(entity.track, {\"count\": 2})",
+            "radio": "$t(entity.radioStation, {\"count\": 2})"
         },
         "trackList": {
             "artistTracks": "nummers van {{artist}}",
-            "genreTracks": "\"{{genre}}\" $t(entity.track_other)",
-            "title": "$t(entity.track_other)"
+            "genreTracks": "\"{{genre}}\" $t(entity.track, {\"count\": 2})",
+            "title": "$t(entity.track, {\"count\": 2})"
         },
         "radioList": {
             "title": "radiostations"
         },
         "folderList": {
-            "title": "$t(entity.folder_other)"
+            "title": "$t(entity.folder, {\"count\": 2})"
         }
     },
     "error": {
@@ -453,7 +453,7 @@
         "artistWithCount_other": "{{count}} artiesten",
         "folder_one": "folder",
         "folder_other": "folders",
-        "smartPlaylist": "smart $t(entity.playlist_one)",
+        "smartPlaylist": "smart $t(entity.playlist, {\"count\": 1})",
         "album_one": "album",
         "album_other": "albums",
         "genreWithCount_one": "{{count}} genre",
@@ -781,25 +781,25 @@
             "input_remoteUrlPlaceholder": "optioneel: publieke url voor externe mogelijkheden"
         },
         "deletePlaylist": {
-            "title": "verwijder $t(entity.playlist_one)",
-            "success": "$t(entity.playlist_one) succesvol verwijdert",
-            "input_confirm": "Typ de naam van $t(entity.playlist_one) om te bevestigen"
+            "title": "verwijder $t(entity.playlist, {\"count\": 1})",
+            "success": "$t(entity.playlist, {\"count\": 1}) succesvol verwijdert",
+            "input_confirm": "Typ de naam van $t(entity.playlist, {\"count\": 1}) om te bevestigen"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
-            "title": "$t(entity.playlist_one) aanmaken",
+            "title": "$t(entity.playlist, {\"count\": 1}) aanmaken",
             "input_public": "publiek",
             "input_name": "$t(common.name)",
-            "success": "$t(entity.playlist_one) aangemaakt",
+            "success": "$t(entity.playlist, {\"count\": 1}) aangemaakt",
             "input_owner": "$t(common.owner)"
         },
         "addToPlaylist": {
             "success": "$t(entity.trackWithCount, {\"count\": {{message}} }) aan $t(entity.trackWithCount, {\"count\": {{message}} }) toegevoegd",
-            "title": "aan $t(entity.playlist_one) toevoegen",
+            "title": "aan $t(entity.playlist, {\"count\": 1}) toevoegen",
             "input_skipDuplicates": "duplicaten overslaan",
-            "input_playlists": "$t(entity.playlist_other)",
-            "create": "maak $t(entity.playlist_one) {{playlist}}",
-            "searchOrCreate": "zoek $t(entity.playlist_other) of typ om een nieuwe te maken"
+            "input_playlists": "$t(entity.playlist, {\"count\": 2})",
+            "create": "maak $t(entity.playlist, {\"count\": 1}) {{playlist}}",
+            "searchOrCreate": "zoek $t(entity.playlist, {\"count\": 2}) of typ om een nieuwe te maken"
         },
         "queryEditor": {
             "input_optionMatchAll": "alles matchen",
@@ -812,13 +812,13 @@
         },
         "lyricSearch": {
             "input_name": "$t(common.name)",
-            "input_artist": "$t(entity.artist_one)",
+            "input_artist": "$t(entity.artist, {\"count\": 1})",
             "title": "tekst zoeken"
         },
         "editPlaylist": {
-            "title": "$t(entity.playlist_one) aanpassen",
+            "title": "$t(entity.playlist, {\"count\": 1}) aanpassen",
             "publicJellyfinNote": "Jellyfin laat niet weten of een playlist publiek of privaat is. Als u wilt dat dit publiek blijft, selecteer de volgende invoer",
-            "success": "$t(entity.playlist_one) succesvol geüpdatet",
+            "success": "$t(entity.playlist, {\"count\": 1}) succesvol geüpdatet",
             "editNote": "Handmatige bewerking wordt afgeraden voor grote afspeellijsten. Weet je zeker dat je het risico op dataverlies wilt accepteren door de bestaande afspeellijst te overschrijven?"
         },
         "updateServer": {
@@ -844,7 +844,7 @@
         },
         "shuffleAll": {
             "title": "willekeurig afspelen",
-            "input_genre": "$t(entity.genre_one)",
+            "input_genre": "$t(entity.genre, {\"count\": 1})",
             "input_limit": "hoeveel nummers?",
             "input_minYear": "van jaar",
             "input_maxYear": "naar jaar",
@@ -943,7 +943,7 @@
     },
     "releaseType": {
         "primary": {
-            "album": "$t(entity.album_one)",
+            "album": "$t(entity.album, {\"count\": 1})",
             "broadcast": "uitzending",
             "ep": "ep",
             "other": "overig",

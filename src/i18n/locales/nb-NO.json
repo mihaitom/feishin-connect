@@ -5,22 +5,22 @@
             "musicbrainz": "Åpne i MusicBrainz"
         },
         "moveToBottom": "flytt til bunnen",
-        "deletePlaylist": "slett $t(entity.playlist_one)",
+        "deletePlaylist": "slett $t(entity.playlist, {\"count\": 1})",
         "deselectAll": "avmarker alle",
-        "editPlaylist": "rediger $t(entity.playlist_one)",
-        "addToFavorites": "legg til $t(entity.favorite_other)",
-        "addToPlaylist": "legg til $t(entity.playlist_one)",
+        "editPlaylist": "rediger $t(entity.playlist, {\"count\": 1})",
+        "addToFavorites": "legg til $t(entity.favorite, {\"count\": 2})",
+        "addToPlaylist": "legg til $t(entity.playlist, {\"count\": 1})",
         "clearQueue": "tøm kø",
-        "createPlaylist": "opprett $t(entity.playlist_one)",
+        "createPlaylist": "opprett $t(entity.playlist, {\"count\": 1})",
         "goToPage": "gå til side",
         "moveToTop": "flytt til toppen",
         "refresh": "$t(common.refresh)",
-        "removeFromFavorites": "fjern fra $t(entity.favorite_other)",
+        "removeFromFavorites": "fjern fra $t(entity.favorite, {\"count\": 2})",
         "moveToNext": "flytt til neste",
         "setRating": "angi vurdering",
         "removeFromQueue": "fjern fra kø",
-        "removeFromPlaylist": "fjern fra $t(entity.playlist_one)",
-        "viewPlaylists": "vise $t(entity.playlist_other)",
+        "removeFromPlaylist": "fjern fra $t(entity.playlist, {\"count\": 1})",
+        "viewPlaylists": "vise $t(entity.playlist, {\"count\": 2})",
         "toggleSmartPlaylistEditor": "bytt $t(entity.smartPlaylist) editor"
     },
     "common": {
@@ -31,7 +31,7 @@
         "collapse": "slå sammen",
         "configure": "konfigurer",
         "confirm": "bekreft",
-        "currentSong": "gjeldende $t(entity.track_one)",
+        "currentSong": "gjeldende $t(entity.track, {\"count\": 1})",
         "version": "versjon",
         "areYouSure": "er du sikker?",
         "ascending": "stigende",
@@ -69,7 +69,7 @@
         "owner": "eier",
         "playerMustBePaused": "spilleren må settes på pause",
         "path": "sti",
-        "previousSong": "forrige $t(entity.track_one)",
+        "previousSong": "forrige $t(entity.track, {\"count\": 1})",
         "refresh": "frisk opp",
         "rating": "vurdering",
         "random": "vilkårlig",
@@ -121,7 +121,7 @@
         "sampleRate": "samplingsfrekvens"
     },
     "entity": {
-        "smartPlaylist": "smart $t(entity.playlist_one)",
+        "smartPlaylist": "smart $t(entity.playlist, {\"count\": 1})",
         "album_one": "album",
         "album_other": "album",
         "albumArtist_one": "albumartist",
@@ -189,10 +189,10 @@
         "id": "id",
         "name": "navn",
         "bitrate": "bithastighet",
-        "albumArtist": "$t(entity.albumArtist_one)",
-        "artist": "$t(entity.artist_one)",
+        "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+        "artist": "$t(entity.artist, {\"count\": 1})",
         "biography": "biografi",
-        "album": "$t(entity.album_one)",
+        "album": "$t(entity.album, {\"count\": 1})",
         "duration": "lengde",
         "favorited": "merket som favoritt",
         "comment": "kommentar",
@@ -223,21 +223,21 @@
         "isFavorited": "er merket som favoritt",
         "recentlyAdded": "nylig lagt til",
         "channels": "$t(common.channel_other)",
-        "genre": "$t(entity.genre_one)",
+        "genre": "$t(entity.genre, {\"count\": 1})",
         "trackNumber": "spor",
-        "albumCount": "$t(entity.album_other) opptelling"
+        "albumCount": "$t(entity.album, {\"count\": 2}) opptelling"
     },
     "form": {
         "createPlaylist": {
             "input_description": "$t(common.description)",
             "input_owner": "$t(common.owner)",
             "input_public": "offentlig",
-            "title": "opprett $t(entity.playlist_one)",
+            "title": "opprett $t(entity.playlist, {\"count\": 1})",
             "input_name": "$t(common.name)",
-            "success": "$t(entity.playlist_one) opprettet"
+            "success": "$t(entity.playlist, {\"count\": 1}) opprettet"
         },
         "lyricSearch": {
-            "input_artist": "$t(entity.artist_one)",
+            "input_artist": "$t(entity.artist, {\"count\": 1})",
             "input_name": "$t(common.name)",
             "title": "sangtekstsøk"
         },
@@ -256,18 +256,18 @@
         },
         "addToPlaylist": {
             "success": "la $t(entity.trackWithCount, {\"count\": {{message}} }) til $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
-            "title": "legg til i $t(entity.playlist_one)",
+            "title": "legg til i $t(entity.playlist, {\"count\": 1})",
             "input_skipDuplicates": "hopp over duplikater",
-            "input_playlists": "$t(entity.playlist_other)"
+            "input_playlists": "$t(entity.playlist, {\"count\": 2})"
         },
         "deletePlaylist": {
-            "title": "slett $t(entity.playlist_one)",
-            "success": "$t(entity.playlist_one) er slettet",
-            "input_confirm": "skrive inn navnet på $t(entity.playlist_one) for å bekrefte"
+            "title": "slett $t(entity.playlist, {\"count\": 1})",
+            "success": "$t(entity.playlist, {\"count\": 1}) er slettet",
+            "input_confirm": "skrive inn navnet på $t(entity.playlist, {\"count\": 1}) for å bekrefte"
         },
         "editPlaylist": {
-            "title": "rediger $t(entity.playlist_one)",
-            "success": "$t(entity.playlist_one) er oppdatert"
+            "title": "rediger $t(entity.playlist, {\"count\": 1})",
+            "success": "$t(entity.playlist, {\"count\": 1}) er oppdatert"
         },
         "shareItem": {
             "allowDownloading": "tillat nedlasting",
@@ -296,7 +296,7 @@
             "manageServers": "administrere servere",
             "goBack": "gå tilbake",
             "openBrowserDevtools": "åpne utviklingsverktøy i nettleser",
-            "settings": "$t(common.setting_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
             "expandSidebar": "utvid sidefelt",
             "goForward": "gå fremover"
         },
@@ -329,22 +329,22 @@
             "viewDiscography": "se diskografi",
             "recentReleases": "nylige utgivelser",
             "topSongsFrom": "beste sanger fra {{title}}",
-            "viewAllTracks": "se alle $t(entity.track_other)",
+            "viewAllTracks": "se alle $t(entity.track, {\"count\": 2})",
             "viewAll": "se alle",
             "about": "Om {{artist}}",
             "appearsOn": "opptrer på",
-            "relatedArtists": "relatert $t(entity.artist_other)"
+            "relatedArtists": "relatert $t(entity.artist, {\"count\": 2})"
         },
         "albumList": {
             "artistAlbums": "album av {{artist}}",
-            "genreAlbums": "\"{{genre}}\" $t(entity.album_other)",
-            "title": "$t(entity.album_other)"
+            "genreAlbums": "\"{{genre}}\" $t(entity.album, {\"count\": 2})",
+            "title": "$t(entity.album, {\"count\": 2})"
         },
         "albumArtistList": {
-            "title": "$t(entity.albumArtist_other)"
+            "title": "$t(entity.albumArtist, {\"count\": 2})"
         },
         "albumDetail": {
-            "moreFromArtist": "mer fra denne $t(entity.artist_one)",
+            "moreFromArtist": "mer fra denne $t(entity.artist, {\"count\": 1})",
             "moreFromGeneric": "mer fra {{item}}",
             "released": "utgitt"
         },
@@ -372,9 +372,9 @@
             "related": "relatert"
         },
         "genreList": {
-            "title": "$t(entity.genre_other)",
-            "showAlbums": "vis $t(entity.genre_one) $t(entity.album_other)",
-            "showTracks": "vis $t(entity.genre_one) $t(entity.track_other)"
+            "title": "$t(entity.genre, {\"count\": 2})",
+            "showAlbums": "vis $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})",
+            "showTracks": "vis $t(entity.genre, {\"count\": 1}) $t(entity.track, {\"count\": 2})"
         },
         "globalSearch": {
             "title": "kommandoer",
@@ -405,23 +405,23 @@
             "copyPath": "kopier stien til utklippstavlen"
         },
         "trackList": {
-            "genreTracks": "\"{{genre}}\" $t(entity.track_other)",
-            "title": "$t(entity.track_other)",
+            "genreTracks": "\"{{genre}}\" $t(entity.track, {\"count\": 2})",
+            "title": "$t(entity.track, {\"count\": 2})",
             "artistTracks": "spor fra {{artist}}"
         },
         "sidebar": {
-            "albumArtists": "$t(entity.albumArtist_other)",
-            "tracks": "$t(entity.track_other)",
+            "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
+            "tracks": "$t(entity.track, {\"count\": 2})",
             "nowPlaying": "spilles nå",
-            "folders": "$t(entity.folder_other)",
-            "genres": "$t(entity.genre_other)",
+            "folders": "$t(entity.folder, {\"count\": 2})",
+            "genres": "$t(entity.genre, {\"count\": 2})",
             "home": "$t(common.home)",
-            "albums": "$t(entity.album_other)",
-            "playlists": "$t(entity.playlist_other)",
+            "albums": "$t(entity.album, {\"count\": 2})",
+            "playlists": "$t(entity.playlist, {\"count\": 2})",
             "search": "$t(common.search)",
-            "settings": "$t(common.setting_other)",
-            "shared": "delt $t(entity.playlist_other)",
-            "artists": "$t(entity.artist_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
+            "shared": "delt $t(entity.playlist, {\"count\": 2})",
+            "artists": "$t(entity.artist, {\"count\": 2})",
             "myLibrary": "mitt bibliotek"
         },
         "setting": {
@@ -432,7 +432,7 @@
             "windowTab": "vindu"
         },
         "playlistList": {
-            "title": "$t(entity.playlist_other)"
+            "title": "$t(entity.playlist, {\"count\": 2})"
         },
         "playlist": {
             "reorder": "omorganisering kun mulig ved sortering på id"

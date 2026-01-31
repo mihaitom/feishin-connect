@@ -1,18 +1,18 @@
 {
     "action": {
         "deselectAll": "deshautatu dena",
-        "editPlaylist": "editatu $t(entity.playlist_one)",
+        "editPlaylist": "editatu $t(entity.playlist, {\"count\": 1})",
         "goToPage": "joan orrira",
         "moveToNext": "mugitu hurrengora",
         "moveToBottom": "mugitu behera",
         "moveToTop": "mugitu gora",
         "refresh": "$t(common.refresh)",
         "removeFromFavorites": "kendu gogokoetatik",
-        "removeFromPlaylist": "kendu $t(entity.playlist_one)-(e)tik",
+        "removeFromPlaylist": "kendu $t(entity.playlist, {\"count\": 1})-(e)tik",
         "removeFromQueue": "kendu ilaratik",
         "setRating": "ezarri balorazioa",
         "toggleSmartPlaylistEditor": "txandakatu $t(entity.smartPlaylist) editorea",
-        "viewPlaylists": "ikusi $t(entity.playlist_other)",
+        "viewPlaylists": "ikusi $t(entity.playlist, {\"count\": 2})",
         "openIn": {
             "lastfm": "Ireki Last.fm-n",
             "musicbrainz": "Ireki MusicBrainz-en"
@@ -21,7 +21,7 @@
         "createPlaylist": "sortu $t(entity.playlist, {\"count\": 1})",
         "deletePlaylist": "ezabatu $t(entity.playlist, {\"count\": 1})",
         "addToFavorites": "gehitu gogokoetara",
-        "addToPlaylist": "gehitu $t(entity.playlist_one)ra",
+        "addToPlaylist": "gehitu $t(entity.playlist, {\"count\": 1})ra",
         "createRadioStation": "sortu $t(entity.radioStation, {\"count\": 1})",
         "deleteRadioStation": "ezabatu $t(entity.radioStation, {\"count\": 1})",
         "viewMore": "ikusi gehiago",
@@ -50,7 +50,7 @@
         "configure": "konfiguratu",
         "confirm": "berretsi",
         "create": "sortu",
-        "currentSong": "uneko $t(entity.track_one)",
+        "currentSong": "uneko $t(entity.track, {\"count\": 1})",
         "decrease": "gutxitu",
         "delete": "ezabatu",
         "descending": "beheranzkoa",
@@ -103,7 +103,7 @@
         "path": "bidea",
         "playerMustBePaused": "erreproduzitzailea pausatuta egon behar da",
         "preview": "aurrebista",
-        "previousSong": "aurreko $t(entity.track_one)",
+        "previousSong": "aurreko $t(entity.track, {\"count\": 1})",
         "quit": "irten",
         "random": "ausazkoa",
         "rating": "balorazioa",
@@ -220,9 +220,9 @@
             },
             "label": {
                 "actions": "$t(common.action_other)",
-                "album": "$t(entity.album_one)",
-                "albumArtist": "$t(entity.albumArtist_one)",
-                "artist": "$t(entity.artist_one)",
+                "album": "$t(entity.album, {\"count\": 1})",
+                "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+                "artist": "$t(entity.artist, {\"count\": 1})",
                 "biography": "$t(common.biography)",
                 "bitrate": "$t(common.bitrate)",
                 "bpm": "$t(common.bpm)",
@@ -230,13 +230,13 @@
                 "codec": "$t(common.codec)",
                 "duration": "$t(common.duration)",
                 "favorite": "$t(common.favorite)",
-                "genre": "$t(entity.genre_one)",
+                "genre": "$t(entity.genre, {\"count\": 1})",
                 "note": "$t(common.note)",
                 "owner": "$t(common.owner)",
                 "path": "$t(common.path)",
                 "rating": "$t(common.rating)",
                 "size": "$t(common.size)",
-                "songCount": "$t(entity.track_other)",
+                "songCount": "$t(entity.track, {\"count\": 2})",
                 "title": "$t(common.title)",
                 "year": "$t(common.year)",
                 "titleCombined": "$t(common.title) (batuta)",
@@ -245,7 +245,7 @@
                 "lastPlayed": "azken aldiz entzunda",
                 "discNumber": "disko zenbakia",
                 "dateAdded": "gehitze data",
-                "albumCount": "$t(entity.album_other)",
+                "albumCount": "$t(entity.album, {\"count\": 2})",
                 "image": "irudia",
                 "bitDepth": "$t(common.bitDepth)",
                 "sampleRate": "$t(common.sampleRate)"
@@ -253,20 +253,20 @@
         },
         "column": {
             "album": "albuma",
-            "albumCount": "$t(entity.album_other)",
-            "artist": "$t(entity.artist_one)",
+            "albumCount": "$t(entity.album, {\"count\": 2})",
+            "artist": "$t(entity.artist, {\"count\": 1})",
             "biography": "biografia",
             "bitrate": "bit-emaria",
             "channels": "$t(common.channel_other)",
             "codec": "$t(common.codec)",
             "discNumber": "diskoa",
             "favorite": "gogokoa",
-            "genre": "$t(entity.genre_one)",
+            "genre": "$t(entity.genre, {\"count\": 1})",
             "path": "bidea",
             "rating": "balorazioa",
             "releaseYear": "urtea",
             "size": "$t(common.size)",
-            "songCount": "$t(entity.track_other)",
+            "songCount": "$t(entity.track, {\"count\": 2})",
             "title": "tituloa",
             "trackNumber": "pista",
             "bpm": "bpm",
@@ -310,7 +310,7 @@
         "play_other": "{{count}} erreprodukzio",
         "playlistWithCount_one": "erreprodukzio-zerrenda {{count}}",
         "playlistWithCount_other": "{{count}} erreprodukzio-zerrenda",
-        "smartPlaylist": "$t(entity.playlist_one) adimentsua",
+        "smartPlaylist": "$t(entity.playlist, {\"count\": 1}) adimentsua",
         "track_one": "pista",
         "track_other": "pistak",
         "song_one": "abestia",
@@ -364,19 +364,19 @@
         "random": "ausazkoa",
         "rating": "balorazioa",
         "trackNumber": "pista",
-        "album": "$t(entity.album_one)",
-        "albumArtist": "$t(entity.albumArtist_one)",
-        "artist": "$t(entity.artist_one)",
+        "album": "$t(entity.album, {\"count\": 1})",
+        "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+        "artist": "$t(entity.artist, {\"count\": 1})",
         "biography": "biografia",
         "bitrate": "bit-emaria",
         "bpm": "bpm-ak",
         "channels": "$t(common.channel_other)",
         "comment": "iruzkina",
         "favorited": "gogoko gisa markatua",
-        "genre": "$t(entity.genre_one)",
+        "genre": "$t(entity.genre, {\"count\": 1})",
         "search": "bilatu",
         "title": "tituloa",
-        "albumCount": "$t(entity.album_other) kopurua",
+        "albumCount": "$t(entity.album, {\"count\": 2}) kopurua",
         "communityRating": "komunitatearen balorazioa",
         "criticRating": "kritikarien balorazioa",
         "dateAdded": "gehitutako data",
@@ -403,9 +403,9 @@
         "playbackStyle_optionNormal": "normala",
         "playButtonBehavior_optionPlay": "$t(player.play)",
         "playButtonBehavior_optionPlayShuffled": "$t(player.shuffle)",
-        "replayGainMode_optionAlbum": "$t(entity.album_one)",
+        "replayGainMode_optionAlbum": "$t(entity.album, {\"count\": 1})",
         "replayGainMode_optionNone": "$t(common.none)",
-        "replayGainMode_optionTrack": "$t(entity.track_one)",
+        "replayGainMode_optionTrack": "$t(entity.track, {\"count\": 1})",
         "font": "letra-tipoa",
         "hotkey_playbackStop": "gelditu",
         "buttonSize_description": "erreproduzitzailearen barrako botoien tamaina",
@@ -695,23 +695,23 @@
             "input_remoteUrl": "URL publikoa"
         },
         "addToPlaylist": {
-            "input_playlists": "$t(entity.playlist_other)",
+            "input_playlists": "$t(entity.playlist, {\"count\": 2})",
             "success": "$t(entity.trackWithCount, {\"count\": {{message}} }) gehitu da $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })-ra",
             "input_skipDuplicates": "saltatu bikoiztuak",
-            "title": "gehitu $t(entity.playlist_one)-(a)ri",
-            "create": "sortu $t(entity.playlist_one) {{playlist}}",
-            "searchOrCreate": "bilatu $t(entity.playlist_other) edo idatzi berri bat sortzeko"
+            "title": "gehitu $t(entity.playlist, {\"count\": 1})-(a)ri",
+            "create": "sortu $t(entity.playlist, {\"count\": 1}) {{playlist}}",
+            "searchOrCreate": "bilatu $t(entity.playlist, {\"count\": 2}) edo idatzi berri bat sortzeko"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
             "input_name": "$t(common.name)",
             "input_owner": "$t(common.owner)",
             "input_public": "publikoa",
-            "title": "$t(entity.playlist_one) sortu",
-            "success": "$t(entity.playlist_one) behar bezala sortu da"
+            "title": "$t(entity.playlist, {\"count\": 1}) sortu",
+            "success": "$t(entity.playlist, {\"count\": 1}) behar bezala sortu da"
         },
         "lyricSearch": {
-            "input_artist": "$t(entity.artist_one)",
+            "input_artist": "$t(entity.artist, {\"count\": 1})",
             "input_name": "$t(common.name)",
             "title": "letra bilatu"
         },
@@ -724,13 +724,13 @@
             "createFailed": "partekatzea sortzeak huts egin du (partekatzea gaituta al dago?)"
         },
         "deletePlaylist": {
-            "success": "$t(entity.playlist_one) behar bezala ezabatu da",
-            "title": "$t(entity.playlist_one) ezabatu",
-            "input_confirm": "idatzi $t(entity.playlist_one)-(a)ren izena berresteko"
+            "success": "$t(entity.playlist, {\"count\": 1}) behar bezala ezabatu da",
+            "title": "$t(entity.playlist, {\"count\": 1}) ezabatu",
+            "input_confirm": "idatzi $t(entity.playlist, {\"count\": 1})-(a)ren izena berresteko"
         },
         "editPlaylist": {
-            "success": "$t(entity.playlist_one) behar bezala eguneratu da",
-            "title": "$t(entity.playlist_one) editatu",
+            "success": "$t(entity.playlist, {\"count\": 1}) behar bezala eguneratu da",
+            "title": "$t(entity.playlist, {\"count\": 1}) editatu",
             "publicJellyfinNote": "Arrazoiren batengatik, Jellyfin ez du erakusten erreprodukzio-zerrendak publikoak diren edo ez. Hau publiko izaten jarraitzea nahi baduzu, hautatu sarrera hau",
             "editNote": "ez da gomendatzen eskuzko edizioak egitea erreprodukzio-zerrenda handietarako. ziur zaude onartzen duzula lehendik dagoen erreprodukzio-zerrenda gainidazteagatik datuak galtzeko arriskua?"
         },
@@ -765,7 +765,7 @@
             "input_offset": "$t(setting.lyricOffset)"
         },
         "shuffleAll": {
-            "input_genre": "$t(entity.genre_one)",
+            "input_genre": "$t(entity.genre, {\"count\": 1})",
             "title": "ausaz erreproduzitu",
             "input_limit": "zenbat abesti?",
             "input_played_optionAll": "pista guztiak",
@@ -778,21 +778,21 @@
     },
     "page": {
         "albumArtistList": {
-            "title": "$t(entity.albumArtist_other)"
+            "title": "$t(entity.albumArtist, {\"count\": 2})"
         },
         "albumDetail": {
             "released": "argitaratuta",
-            "moreFromArtist": "$t(entity.artist_one) honetatik gehiago",
+            "moreFromArtist": "$t(entity.artist, {\"count\": 1}) honetatik gehiago",
             "moreFromGeneric": "{{item}}-(e)tik gehiago"
         },
         "albumList": {
-            "title": "$t(entity.album_other)",
-            "genreAlbums": "\"{{genre}}\" $t(entity.album_other)",
+            "title": "$t(entity.album, {\"count\": 2})",
+            "genreAlbums": "\"{{genre}}\" $t(entity.album, {\"count\": 2})",
             "artistAlbums": "{{artist}}-(a)ren albumak"
         },
         "appMenu": {
             "quit": "$t(common.quit)",
-            "settings": "$t(common.setting_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
             "collapseSidebar": "tolestu alboko barra",
             "expandSidebar": "zabaldu alboko barra",
             "goBack": "atzera",
@@ -838,7 +838,7 @@
             "playShuffled": "$t(player.shuffle)",
             "numberSelected": "{{count}} hautatuta",
             "shareItem": "partekatu elementua",
-            "goToAlbum": "joan $t(entity.album_one)-(e)ra",
+            "goToAlbum": "joan $t(entity.album, {\"count\": 1})-(e)ra",
             "goToAlbumArtist": "joan albumera",
             "showDetails": "informazioa lortu",
             "moveItems": "$t(action.moveItems)"
@@ -867,9 +867,9 @@
             "noLyrics": "ez da letrarik aurkitu"
         },
         "genreList": {
-            "title": "$t(entity.genre_other)",
-            "showAlbums": "erakutsi $t(entity.genre_one) $t(entity.album_other)",
-            "showTracks": "erakutsi $t(entity.genre_one) $t(entity.track_other)"
+            "title": "$t(entity.genre, {\"count\": 2})",
+            "showAlbums": "erakutsi $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})",
+            "showTracks": "erakutsi $t(entity.genre, {\"count\": 1}) $t(entity.track, {\"count\": 2})"
         },
         "globalSearch": {
             "title": "komandoak",
@@ -886,10 +886,10 @@
             "recentlyPlayed": "azken aldian entzundakoak",
             "recentlyReleased": "azken aldian argitaratutak",
             "explore": "arakatu zure liburutegitik",
-            "genres": "$t(entity.genre_other)"
+            "genres": "$t(entity.genre, {\"count\": 2})"
         },
         "playlistList": {
-            "title": "$t(entity.playlist_other)"
+            "title": "$t(entity.playlist, {\"count\": 2})"
         },
         "setting": {
             "advanced": "aurreratua",
@@ -914,34 +914,34 @@
             "lyricsDisplay": "erakutsi letrak"
         },
         "sidebar": {
-            "albumArtists": "$t(entity.albumArtist_other)",
-            "albums": "$t(entity.album_other)",
-            "artists": "$t(entity.artist_other)",
-            "folders": "$t(entity.folder_other)",
-            "genres": "$t(entity.genre_other)",
+            "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
+            "albums": "$t(entity.album, {\"count\": 2})",
+            "artists": "$t(entity.artist, {\"count\": 2})",
+            "folders": "$t(entity.folder, {\"count\": 2})",
+            "genres": "$t(entity.genre, {\"count\": 2})",
             "home": "$t(common.home)",
-            "playlists": "$t(entity.playlist_other)",
+            "playlists": "$t(entity.playlist, {\"count\": 2})",
             "search": "$t(common.search)",
-            "settings": "$t(common.setting_other)",
-            "tracks": "$t(entity.track_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
+            "tracks": "$t(entity.track, {\"count\": 2})",
             "myLibrary": "nire liburutegia",
             "nowPlaying": "orain erreproduzitzen",
-            "shared": "partekatutako $t(entity.playlist_other)",
-            "favorites": "$t(entity.favorite_other)",
-            "radio": "$t(entity.radioStation_other)"
+            "shared": "partekatutako $t(entity.playlist, {\"count\": 2})",
+            "favorites": "$t(entity.favorite, {\"count\": 2})",
+            "radio": "$t(entity.radioStation, {\"count\": 2})"
         },
         "trackList": {
-            "title": "$t(entity.track_other)",
-            "genreTracks": "\"{{genre}}\" $t(entity.track_other)",
+            "title": "$t(entity.track, {\"count\": 2})",
+            "genreTracks": "\"{{genre}}\" $t(entity.track, {\"count\": 2})",
             "artistTracks": "{{artist}}-(r)en abestiak"
         },
         "albumArtistDetail": {
             "about": "{{artist}}-(r)i buruz",
-            "relatedArtists": "erlazionatutako $t(entity.artist_other)",
+            "relatedArtists": "erlazionatutako $t(entity.artist, {\"count\": 2})",
             "topSongs": "abesti nagusiak",
             "topSongsFrom": "{{title}}-(a)ren abesti nagusiak",
             "viewAll": "ikusi guztiak",
-            "viewAllTracks": "ikusi $t(entity.track_other) guztiak",
+            "viewAllTracks": "ikusi $t(entity.track, {\"count\": 2}) guztiak",
             "appearsOn": "agertzen da hemen",
             "recentReleases": "azken argitalpenak",
             "viewDiscography": "ikusi diskografia",
@@ -957,10 +957,10 @@
             "reorder": "berrantolaketa IDaren arabera ordenatzean bakarrik gaituta dago"
         },
         "folderList": {
-            "title": "$t(entity.folder_other)"
+            "title": "$t(entity.folder, {\"count\": 2})"
         },
         "favorites": {
-            "title": "$t(entity.favorite_other)"
+            "title": "$t(entity.favorite, {\"count\": 2})"
         },
         "radioList": {
             "title": "irrati-kateak"
@@ -968,7 +968,7 @@
     },
     "releaseType": {
         "primary": {
-            "album": "$t(entity.album_one)",
+            "album": "$t(entity.album, {\"count\": 1})",
             "other": "bestelakoa",
             "ep": "ep"
         },

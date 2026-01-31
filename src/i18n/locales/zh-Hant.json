@@ -40,7 +40,7 @@
         "owner": "所有者",
         "path": "路徑",
         "playerMustBePaused": "播放器必須被暫停",
-        "previousSong": "上一首$t(entity.track_one)",
+        "previousSong": "上一首$t(entity.track, {\"count\": 1})",
         "quit": "退出",
         "random": "隨機",
         "rating": "評分",
@@ -66,7 +66,7 @@
         "channel_other": "聲道",
         "configure": "配置",
         "create": "創建",
-        "currentSong": "目前$t(entity.track_one)",
+        "currentSong": "目前$t(entity.track, {\"count\": 1})",
         "minimize": "最小化",
         "modified": "已修改",
         "name": "名稱",
@@ -167,8 +167,8 @@
             "playShuffled": "$t(player.shuffle)",
             "shareItem": "分享項目",
             "showDetails": "取得資訊",
-            "goToAlbum": "前往 $t(entity.album_one)",
-            "goToAlbumArtist": "前往 $t(entity.albumArtist_one)",
+            "goToAlbum": "前往 $t(entity.album, {\"count\": 1})",
+            "goToAlbumArtist": "前往 $t(entity.albumArtist, {\"count\": 1})",
             "moveItems": "$t(action.moveItems)",
             "goTo": "前往"
         },
@@ -187,7 +187,7 @@
             "mostPlayed": "最多播放",
             "newlyAdded": "最近新增的發行",
             "recentlyReleased": "最近發佈",
-            "genres": "$t(entity.genre_other)"
+            "genres": "$t(entity.genre, {\"count\": 2})"
         },
         "appMenu": {
             "openBrowserDevtools": "打開瀏覽器開發者工具",
@@ -197,7 +197,7 @@
             "goForward": "前進",
             "quit": "$t(common.quit)",
             "selectServer": "選擇伺服器",
-            "settings": "$t(common.setting_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
             "version": "版本 {{version}}",
             "manageServers": "管理伺服器",
             "privateModeOff": "關閉私人模式",
@@ -231,7 +231,7 @@
             "noLyrics": "未找到歌詞"
         },
         "playlistList": {
-            "title": "$t(entity.playlist_other)"
+            "title": "$t(entity.playlist, {\"count\": 2})"
         },
         "setting": {
             "hotkeysTab": "快捷鍵",
@@ -259,55 +259,55 @@
             "lyricsDisplay": "歌詞顯示"
         },
         "albumArtistList": {
-            "title": "$t(entity.albumArtist_other)"
+            "title": "$t(entity.albumArtist, {\"count\": 2})"
         },
         "albumDetail": {
-            "moreFromArtist": "更多來自 $t(entity.artist_one) 的作品",
+            "moreFromArtist": "更多來自 $t(entity.artist, {\"count\": 1}) 的作品",
             "moreFromGeneric": "更多{{item}}作品",
             "released": "發行"
         },
         "albumList": {
-            "title": "$t(entity.album_other)",
+            "title": "$t(entity.album, {\"count\": 2})",
             "artistAlbums": "{{artist}} 的專輯",
-            "genreAlbums": "\"{{genre}}\" $t(entity.album_other)"
+            "genreAlbums": "\"{{genre}}\" $t(entity.album, {\"count\": 2})"
         },
         "genreList": {
-            "title": "$t(entity.genre_other)",
-            "showAlbums": "顯示 $t(entity.genre_one) $t(entity.album_other)",
-            "showTracks": "顯示 $t(entity.genre_one) $t(entity.track_other)"
+            "title": "$t(entity.genre, {\"count\": 2})",
+            "showAlbums": "顯示 $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})",
+            "showTracks": "顯示 $t(entity.genre, {\"count\": 1}) $t(entity.track, {\"count\": 2})"
         },
         "sidebar": {
-            "albumArtists": "$t(entity.albumArtist_other)",
-            "albums": "$t(entity.album_other)",
-            "artists": "$t(entity.artist_other)",
-            "folders": "$t(entity.folder_other)",
+            "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
+            "albums": "$t(entity.album, {\"count\": 2})",
+            "artists": "$t(entity.artist, {\"count\": 2})",
+            "folders": "$t(entity.folder, {\"count\": 2})",
             "search": "$t(common.search)",
-            "settings": "$t(common.setting_other)",
-            "tracks": "$t(entity.track_other)",
-            "genres": "$t(entity.genre_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
+            "tracks": "$t(entity.track, {\"count\": 2})",
+            "genres": "$t(entity.genre, {\"count\": 2})",
             "home": "$t(common.home)",
             "nowPlaying": "正在播放",
-            "playlists": "$t(entity.playlist_other)",
+            "playlists": "$t(entity.playlist, {\"count\": 2})",
             "myLibrary": "我的媒體庫",
-            "shared": "已分享 $t(entity.playlist_other)",
-            "favorites": "$t(entity.favorite_other)",
-            "radio": "$t(entity.radioStation_other)"
+            "shared": "已分享 $t(entity.playlist, {\"count\": 2})",
+            "favorites": "$t(entity.favorite, {\"count\": 2})",
+            "radio": "$t(entity.radioStation, {\"count\": 2})"
         },
         "trackList": {
-            "title": "$t(entity.track_other)",
+            "title": "$t(entity.track, {\"count\": 2})",
             "artistTracks": "{{artist}} 的歌曲",
-            "genreTracks": "\"{{genre}}\" $t(entity.track_other)"
+            "genreTracks": "\"{{genre}}\" $t(entity.track, {\"count\": 2})"
         },
         "albumArtistDetail": {
             "about": "關於{{artist}}",
             "appearsOn": "出現在",
             "recentReleases": "最近發行",
             "viewDiscography": "查看音樂作品",
-            "relatedArtists": "關聯$t(entity.artist_other)",
+            "relatedArtists": "關聯$t(entity.artist, {\"count\": 2})",
             "topSongs": "熱門歌曲",
             "topSongsFrom": "{{title}} 的熱門歌曲",
             "viewAll": "檢視所有",
-            "viewAllTracks": "檢視所有$t(entity.track_other)",
+            "viewAllTracks": "檢視所有$t(entity.track, {\"count\": 2})",
             "groupingTypeAll": "所有發佈類型",
             "groupingTypePrimary": "主要發佈類型"
         },
@@ -328,10 +328,10 @@
             "reorder": "僅當按 ID 排序時才啟用重新排序"
         },
         "favorites": {
-            "title": "$t(entity.favorite_other)"
+            "title": "$t(entity.favorite, {\"count\": 2})"
         },
         "folderList": {
-            "title": "$t(entity.folder_other)"
+            "title": "$t(entity.folder, {\"count\": 2})"
         },
         "radioList": {
             "title": "電台"
@@ -475,9 +475,9 @@
         "replayGainFallback_description": "歌曲沒有{{ReplayGain}}標簽時使用的增益（以分貝為單位）",
         "replayGainMode": "{{ReplayGain}}模式",
         "replayGainMode_description": "根據歌曲標籤中儲存的{{ReplayGain}}值調整音量增益",
-        "replayGainMode_optionAlbum": "$t(entity.album_one)",
+        "replayGainMode_optionAlbum": "$t(entity.album, {\"count\": 1})",
         "replayGainMode_optionNone": "$t(common.none)",
-        "replayGainMode_optionTrack": "$t(entity.track_one)",
+        "replayGainMode_optionTrack": "$t(entity.track, {\"count\": 1})",
         "replayGainPreamp": "{{ReplayGain}}前置放大（分貝）",
         "replayGainPreamp_description": "調整使用在{{ReplayGain}}值上的前置放大增益",
         "savePlayQueue": "儲存播放佇列",
@@ -743,9 +743,9 @@
             },
             "label": {
                 "actions": "$t(common.action_other)",
-                "album": "$t(entity.album_one)",
-                "albumArtist": "$t(entity.albumArtist_one)",
-                "artist": "$t(entity.artist_one)",
+                "album": "$t(entity.album, {\"count\": 1})",
+                "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+                "artist": "$t(entity.artist, {\"count\": 1})",
                 "bpm": "$t(common.bpm)",
                 "biography": "$t(common.biography)",
                 "bitrate": "$t(common.bitrate)",
@@ -754,7 +754,7 @@
                 "discNumber": "光碟編號",
                 "duration": "$t(common.duration)",
                 "favorite": "$t(common.favorite)",
-                "genre": "$t(entity.genre_one)",
+                "genre": "$t(entity.genre, {\"count\": 1})",
                 "lastPlayed": "最後播放",
                 "note": "$t(common.note)",
                 "owner": "$t(common.owner)",
@@ -769,9 +769,9 @@
                 "year": "$t(common.year)",
                 "rating": "$t(common.rating)",
                 "codec": "$t(common.codec)",
-                "songCount": "$t(entity.track_other)",
-                "albumCount": "$t(entity.album_other)",
-                "genreBadge": "$t(entity.genre_one) (徽章)",
+                "songCount": "$t(entity.track, {\"count\": 2})",
+                "albumCount": "$t(entity.album, {\"count\": 2})",
+                "genreBadge": "$t(entity.genre, {\"count\": 1}) (徽章)",
                 "image": "圖片",
                 "bitDepth": "$t(common.bitDepth)",
                 "sampleRate": "$t(common.sampleRate)"
@@ -785,8 +785,8 @@
         "column": {
             "album": "專輯",
             "albumArtist": "專輯藝人",
-            "albumCount": "$t(entity.album_other)",
-            "artist": "$t(entity.artist_one)",
+            "albumCount": "$t(entity.album, {\"count\": 2})",
+            "artist": "$t(entity.artist, {\"count\": 1})",
             "biography": "簡介",
             "bitrate": "比特率",
             "channels": "$t(common.channel_other)",
@@ -800,9 +800,9 @@
             "rating": "評價",
             "releaseDate": "發布日期",
             "releaseYear": "年份",
-            "genre": "$t(entity.genre_one)",
+            "genre": "$t(entity.genre, {\"count\": 1})",
             "bpm": "bpm",
-            "songCount": "$t(entity.track_other)",
+            "songCount": "$t(entity.track, {\"count\": 2})",
             "title": "標題",
             "trackNumber": "曲目編號",
             "size": "$t(common.size)",
@@ -815,21 +815,21 @@
     "action": {
         "addToFavorites": "新增到$t(entity.favorite, {\"count\": 2})",
         "clearQueue": "清空播放佇列",
-        "createPlaylist": "創建$t(entity.playlist_one)",
-        "deletePlaylist": "刪除$t(entity.playlist_one)",
+        "createPlaylist": "創建$t(entity.playlist, {\"count\": 1})",
+        "deletePlaylist": "刪除$t(entity.playlist, {\"count\": 1})",
         "addToPlaylist": "新增到$t(entity.playlist, {\"count\": 1})",
         "deselectAll": "取消全選",
-        "editPlaylist": "編輯 $t(entity.playlist_one)",
+        "editPlaylist": "編輯 $t(entity.playlist, {\"count\": 1})",
         "goToPage": "前往頁面",
         "moveToBottom": "移至底部",
         "moveToTop": "移至頂部",
         "refresh": "$t(common.refresh)",
-        "removeFromFavorites": "從$t(entity.favorite_other)移除",
-        "removeFromPlaylist": "從$t(entity.playlist_one)移除",
+        "removeFromFavorites": "從$t(entity.favorite, {\"count\": 2})移除",
+        "removeFromPlaylist": "從$t(entity.playlist, {\"count\": 1})移除",
         "removeFromQueue": "從播放佇列中移除",
         "setRating": "評分",
         "toggleSmartPlaylistEditor": "切換$t(entity.smartPlaylist)編輯器",
-        "viewPlaylists": "查看$t(entity.playlist_other)",
+        "viewPlaylists": "查看$t(entity.playlist, {\"count\": 2})",
         "moveToNext": "移至下一項",
         "openIn": {
             "lastfm": "在Last.fm開啟",
@@ -845,8 +845,8 @@
         "moveDown": "向下移動",
         "holdToMoveToTop": "按住以移動至頂部",
         "holdToMoveToBottom": "按住以移動至底部",
-        "createRadioStation": "創建 $t(entity.radioStation_one)",
-        "deleteRadioStation": "刪除 $t(entity.radioStation_one)",
+        "createRadioStation": "創建 $t(entity.radioStation, {\"count\": 1})",
+        "deleteRadioStation": "刪除 $t(entity.radioStation, {\"count\": 1})",
         "openApplicationDirectory": "開啟應用程式目錄",
         "addOrRemoveFromSelection": "新增或移除選取項目",
         "selectAll": "全選"
@@ -864,7 +864,7 @@
         "genreWithCount_other": "{{count}} 種曲風",
         "playlist_other": "播放清單",
         "playlistWithCount_other": "{{count}} 個播放清單",
-        "smartPlaylist": "智慧$t(entity.playlist_one)",
+        "smartPlaylist": "智慧$t(entity.playlist, {\"count\": 1})",
         "track_other": "曲目",
         "trackWithCount_other": "{{count}} 首曲目",
         "albumWithCount_other": "{{count}} 張專輯",
@@ -874,8 +874,8 @@
         "radioStationWithCount_other": "{{count}} 個電台"
     },
     "filter": {
-        "albumCount": "$t(entity.album_other)數",
-        "artist": "$t(entity.artist_one)",
+        "albumCount": "$t(entity.album, {\"count\": 2})數",
+        "artist": "$t(entity.artist, {\"count\": 1})",
         "biography": "個人簡介",
         "bitrate": "比特率",
         "bpm": "bpm",
@@ -888,7 +888,7 @@
         "duration": "時長",
         "id": "id",
         "fromYear": "從年份",
-        "genre": "$t(entity.genre_one)",
+        "genre": "$t(entity.genre, {\"count\": 1})",
         "isCompilation": "為合輯",
         "isFavorited": "已收藏",
         "isPublic": "已公開",
@@ -908,7 +908,7 @@
         "releaseDate": "發布日期",
         "songCount": "曲目數",
         "album": "$t(entity.album, {\"count\": 1})",
-        "albumArtist": "$t(entity.albumArtist_one)",
+        "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
         "favorited": "已收藏",
         "recentlyAdded": "最近新增",
         "releaseYear": "發布年份",
@@ -938,25 +938,25 @@
             "input_remoteUrlPlaceholder": "選用：對外功能的公開網址"
         },
         "addToPlaylist": {
-            "input_playlists": "$t(entity.playlist_other)",
+            "input_playlists": "$t(entity.playlist, {\"count\": 2})",
             "input_skipDuplicates": "跳過重複",
             "success": "新增 $t(entity.trackWithCount, {\"count\": {{message}} }) 到 $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
-            "title": "新增到$t(entity.playlist_one)",
-            "create": "創建 $t(entity.playlist_one) {{playlist}}",
-            "searchOrCreate": "搜尋$t(entity.playlist_other) 或輸入內容以建立新項目"
+            "title": "新增到$t(entity.playlist, {\"count\": 1})",
+            "create": "創建 $t(entity.playlist, {\"count\": 1}) {{playlist}}",
+            "searchOrCreate": "搜尋$t(entity.playlist, {\"count\": 2}) 或輸入內容以建立新項目"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
             "input_name": "$t(common.name)",
             "input_owner": "$t(common.owner)",
             "input_public": "公開",
-            "success": "已成功創建 $t(entity.playlist_one)",
-            "title": "創建$t(entity.playlist_one)"
+            "success": "已成功創建 $t(entity.playlist, {\"count\": 1})",
+            "title": "創建$t(entity.playlist, {\"count\": 1})"
         },
         "lyricSearch": {
             "input_name": "$t(common.name)",
             "title": "搜尋歌詞",
-            "input_artist": "$t(entity.artist_one)"
+            "input_artist": "$t(entity.artist, {\"count\": 1})"
         },
         "queryEditor": {
             "input_optionMatchAll": "匹配全部",
@@ -972,14 +972,14 @@
             "title": "更新伺服器"
         },
         "deletePlaylist": {
-            "input_confirm": "輸入$t(entity.playlist_one)的名稱進行確認",
-            "title": "刪除$t(entity.playlist_one)",
-            "success": "$t(entity.playlist_one)已成功刪除"
+            "input_confirm": "輸入$t(entity.playlist, {\"count\": 1})的名稱進行確認",
+            "title": "刪除$t(entity.playlist, {\"count\": 1})",
+            "success": "$t(entity.playlist, {\"count\": 1})已成功刪除"
         },
         "editPlaylist": {
-            "title": "編輯$t(entity.playlist_one)",
+            "title": "編輯$t(entity.playlist, {\"count\": 1})",
             "publicJellyfinNote": "Jellyfin 出於某種原因，不會顯示播放清單是否公開。如果您希望保持公開狀態，請選擇以下輸入",
-            "success": "$t(entity.playlist_one) 更新成功",
+            "success": "$t(entity.playlist, {\"count\": 1}) 更新成功",
             "editNote": "不建議手動編輯大型播放清單，你確定要承擔覆寫現有播放清單可能造成的資料遺失風險嗎？"
         },
         "shareItem": {
@@ -1001,7 +1001,7 @@
         },
         "shuffleAll": {
             "title": "隨機播放",
-            "input_genre": "$t(entity.genre_one)",
+            "input_genre": "$t(entity.genre, {\"count\": 1})",
             "input_limit": "多少曲目？",
             "input_minYear": "起始年份",
             "input_maxYear": "結束年份",
@@ -1028,7 +1028,7 @@
     },
     "releaseType": {
         "primary": {
-            "album": "$t(entity.album_one)",
+            "album": "$t(entity.album, {\"count\": 1})",
             "ep": "EP",
             "other": "其他",
             "broadcast": "廣播",

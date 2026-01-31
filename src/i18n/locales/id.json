@@ -1,26 +1,26 @@
 {
     "action": {
-        "createPlaylist": "buat $t(entity.playlist_one)",
+        "createPlaylist": "buat $t(entity.playlist, {\"count\": 1})",
         "toggleSmartPlaylistEditor": "ubah editor $t(entity.smartPlaylist)",
         "goToPage": "pergi ke halaman",
         "moveToTop": "pindah ke atas",
-        "addToPlaylist": "tambahkan ke $t(entity.playlist_one)",
-        "removeFromFavorites": "hapus dari $t(entity.favorite_other)",
-        "removeFromPlaylist": "hapus dari $t(entity.playlist_one)",
+        "addToPlaylist": "tambahkan ke $t(entity.playlist, {\"count\": 1})",
+        "removeFromFavorites": "hapus dari $t(entity.favorite, {\"count\": 2})",
+        "removeFromPlaylist": "hapus dari $t(entity.playlist, {\"count\": 1})",
         "deselectAll": "batalkan pilih semua",
-        "editPlaylist": "ubah $t(entity.playlist_one)",
+        "editPlaylist": "ubah $t(entity.playlist, {\"count\": 1})",
         "moveToNext": "pindah ke berikutnya",
         "refresh": "$t(common.refresh)",
         "removeFromQueue": "hapus dari antrean",
         "setRating": "setel penilaian",
-        "viewPlaylists": "lihat $t(entity.playlist_other)",
+        "viewPlaylists": "lihat $t(entity.playlist, {\"count\": 2})",
         "openIn": {
             "lastfm": "Buka di Last.fm",
             "musicbrainz": "Buka di MusicBrainz"
         },
-        "addToFavorites": "tambahkan ke $t(entity.favorite_other)",
+        "addToFavorites": "tambahkan ke $t(entity.favorite, {\"count\": 2})",
         "clearQueue": "kosongkan antrian",
-        "deletePlaylist": "hapus $t(entity.playlist_one)",
+        "deletePlaylist": "hapus $t(entity.playlist, {\"count\": 1})",
         "moveToBottom": "pindah ke bawah"
     },
     "common": {
@@ -38,7 +38,7 @@
         "cancel": "batal",
         "close": "Tutup",
         "configure": "konfigurasi",
-        "currentSong": "lagu saat ini $t(entity.track_one)",
+        "currentSong": "lagu saat ini $t(entity.track, {\"count\": 1})",
         "delete": "hapus",
         "description": "deskripsi",
         "edit": "ubah",
@@ -74,7 +74,7 @@
         "owner": "pemilik",
         "playerMustBePaused": "pemain harus dijeda",
         "preview": "Pratinjau",
-        "previousSong": "lagu sebelumnya $t(entity.track_one)",
+        "previousSong": "lagu sebelumnya $t(entity.track, {\"count\": 1})",
         "quit": "keluar",
         "random": "acak",
         "rating": "penilaian",
@@ -126,7 +126,7 @@
         "playlist_other": "daftar putar",
         "play_other": "Putar {{count}}",
         "playlistWithCount_other": "{{count}} daftar putar",
-        "smartPlaylist": "$t(entity.playlist_one) pintar",
+        "smartPlaylist": "$t(entity.playlist, {\"count\": 1}) pintar",
         "track_other": "pista",
         "song_other": "lagu",
         "trackWithCount_other": "{{count}} pista"
@@ -156,10 +156,10 @@
         "systemFontError": "terjadi kesalahan saat mencoba mendapatkan font sistem"
     },
     "filter": {
-        "album": "$t(entity.album_one)",
-        "albumArtist": "$t(entity.albumArtist_one)",
-        "albumCount": "Hitung $t(entity.album_other)",
-        "artist": "$t(entity.artist_one)",
+        "album": "$t(entity.album, {\"count\": 1})",
+        "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+        "albumCount": "Hitung $t(entity.album, {\"count\": 2})",
+        "artist": "$t(entity.artist, {\"count\": 1})",
         "biography": "biografi",
         "bitrate": "bitrate",
         "bpm": "lpm",
@@ -171,7 +171,7 @@
         "disc": "disk",
         "duration": "durasi",
         "favorited": "favorit",
-        "genre": "$t(entity.genre_one)",
+        "genre": "$t(entity.genre, {\"count\": 1})",
         "id": "id",
         "isCompilation": "apakah ini kompilasi",
         "isFavorited": "apakah ini favorit",
@@ -214,31 +214,31 @@
             "title": "tambah server"
         },
         "addToPlaylist": {
-            "input_playlists": "$t(entity.playlist_other)",
+            "input_playlists": "$t(entity.playlist, {\"count\": 2})",
             "input_skipDuplicates": "lewati duplikat",
             "success": "ditambahkan $t(entity.trackWithCount, {\"count\": {{message}} }) ke $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
-            "title": "tambahkan ke $t(entity.playlist_one)"
+            "title": "tambahkan ke $t(entity.playlist, {\"count\": 1})"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
             "input_name": "$t(common.name)",
             "input_owner": "$t(common.owner)",
             "input_public": "publik",
-            "success": "$t(entity.playlist_one) berhasil dibuat",
-            "title": "buat $t(entity.playlist_one)"
+            "success": "$t(entity.playlist, {\"count\": 1}) berhasil dibuat",
+            "title": "buat $t(entity.playlist, {\"count\": 1})"
         },
         "deletePlaylist": {
-            "input_confirm": "ketik nama $t(entity.playlist_one) untuk mengonfirmasi",
-            "success": "$t(entity.playlist_one) berhasil dihapus",
-            "title": "hapus $t(entity.playlist_one)"
+            "input_confirm": "ketik nama $t(entity.playlist, {\"count\": 1}) untuk mengonfirmasi",
+            "success": "$t(entity.playlist, {\"count\": 1}) berhasil dihapus",
+            "title": "hapus $t(entity.playlist, {\"count\": 1})"
         },
         "editPlaylist": {
             "publicJellyfinNote": "Jellyfin entah bagaimana tidak menampilkan apakah playlist ini publik atau tidak. Jika Anda ingin playlist ini tetap publik, harap pilih entri berikut",
-            "success": "$t(entity.playlist_one) berhasil diperbarui",
-            "title": "ubah $t(entity.playlist_one)"
+            "success": "$t(entity.playlist, {\"count\": 1}) berhasil diperbarui",
+            "title": "ubah $t(entity.playlist, {\"count\": 1})"
         },
         "lyricSearch": {
-            "input_artist": "$t(entity.artist_one)",
+            "input_artist": "$t(entity.artist, {\"count\": 1})",
             "input_name": "$t(common.name)",
             "title": "cari lirik"
         },
@@ -264,25 +264,25 @@
             "about": "Tentang {{artist}}",
             "recentReleases": "Rilis terbaru",
             "viewDiscography": "Lihat diskografi",
-            "relatedArtists": "$t(entity.artist_other) serupa",
+            "relatedArtists": "$t(entity.artist, {\"count\": 2}) serupa",
             "topSongs": "Lagu terbaik",
             "topSongsFrom": "Lagu terbaik dari {{title}}",
             "viewAll": "Lihat semua",
-            "viewAllTracks": "Lihat semua $t(entity.track_other)",
+            "viewAllTracks": "Lihat semua $t(entity.track, {\"count\": 2})",
             "appearsOn": "Tampil di"
         },
         "albumArtistList": {
-            "title": "$t(entity.albumArtist_other)"
+            "title": "$t(entity.albumArtist, {\"count\": 2})"
         },
         "albumDetail": {
-            "moreFromArtist": "lebih banyak dari $t(entity.artist_one) ini",
+            "moreFromArtist": "lebih banyak dari $t(entity.artist, {\"count\": 1}) ini",
             "moreFromGeneric": "lebih banyak dari {{item}}",
             "released": "dirilis"
         },
         "albumList": {
             "artistAlbums": "album dari {{artist}}",
-            "genreAlbums": "\"{{genre}}\" $t(entity.album_other)",
-            "title": "$t(entity.album_other)"
+            "genreAlbums": "\"{{genre}}\" $t(entity.album, {\"count\": 2})",
+            "title": "$t(entity.album, {\"count\": 2})"
         },
         "appMenu": {
             "collapseSidebar": "perkecil sidebar",
@@ -293,7 +293,7 @@
             "openBrowserDevtools": "buka alat pengembang browser",
             "quit": "$t(common.quit)",
             "selectServer": "pilih server",
-            "settings": "$t(common.setting_other)",
+            "settings": "$t(common.setting, {\"count\": 2})",
             "version": "versi {{version}}"
         },
         "manageServers": {
@@ -352,9 +352,9 @@
             "visualizer": "visualisasi"
         },
         "genreList": {
-            "showAlbums": "Tampilkan $t(entity.genre_one) $t(entity.album_other)",
-            "showTracks": "Tampilkan $t(entity.genre_one) $t(entity.track_other)",
-            "title": "$t(entity.genre_other)"
+            "showAlbums": "Tampilkan $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})",
+            "showTracks": "Tampilkan $t(entity.genre, {\"count\": 1}) $t(entity.track, {\"count\": 2})",
+            "title": "$t(entity.genre, {\"count\": 2})"
         },
         "globalSearch": {
             "commands": {
@@ -380,7 +380,7 @@
             "reorder": "penataan ulang hanya aktif saat mengurutkan berdasarkan ID"
         },
         "playlistList": {
-            "title": "$t(entity.playlist_other)"
+            "title": "$t(entity.playlist, {\"count\": 2})"
         },
         "setting": {
             "advanced": "Lanjutan",
@@ -390,23 +390,23 @@
             "windowTab": "jendela"
         },
         "sidebar": {
-            "albumArtists": "$t(entity.albumArtist_other)",
-            "albums": "$t(entity.album_other)",
-            "artists": "$t(entity.artist_other)",
-            "folders": "$t(entity.folder_other)",
-            "genres": "$t(entity.genre_other)",
+            "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
+            "albums": "$t(entity.album, {\"count\": 2})",
+            "artists": "$t(entity.artist, {\"count\": 2})",
+            "folders": "$t(entity.folder, {\"count\": 2})",
+            "genres": "$t(entity.genre, {\"count\": 2})",
             "home": "$t(common.home)",
             "nowPlaying": "sedang diputar",
-            "playlists": "$t(entity.playlist_other)",
+            "playlists": "$t(entity.playlist, {\"count\": 2})",
             "search": "$t(common.search)",
-            "settings": "$t(common.setting_other)",
-            "shared": "berbagi $t(entity.playlist_other)",
-            "tracks": "$t(entity.track_other)"
+            "settings": "$t(common.setting, {\"count\": 2})",
+            "shared": "berbagi $t(entity.playlist, {\"count\": 2})",
+            "tracks": "$t(entity.track, {\"count\": 2})"
         },
         "trackList": {
             "artistTracks": "lagu oleh {{artist}}",
-            "genreTracks": "\"{{genre}}\" $t(entity.track_other)",
-            "title": "$t(entity.track_other)"
+            "genreTracks": "\"{{genre}}\" $t(entity.track, {\"count\": 2})",
+            "title": "$t(entity.track, {\"count\": 2})"
         }
     },
     "player": {
@@ -593,9 +593,9 @@
         "replayGainFallback_description": "gain dalam dB yang akan diterapkan jika file tidak memiliki tag {{ReplayGain}}",
         "replayGainMode": "mode {{ReplayGain}}",
         "replayGainMode_description": "menyesuaikan volume gain sesuai dengan nilai {{ReplayGain}} yang disimpan dalam metadata file",
-        "replayGainMode_optionAlbum": "$t(entity.album_one)",
+        "replayGainMode_optionAlbum": "$t(entity.album, {\"count\": 1})",
         "replayGainMode_optionNone": "$t(common.none)",
-        "replayGainMode_optionTrack": "$t(entity.track_one)",
+        "replayGainMode_optionTrack": "$t(entity.track, {\"count\": 1})",
         "replayGainPreamp": "preamplifier (dB) {{ReplayGain}}",
         "replayGainPreamp_description": "menyesuaikan gain preamplifier yang diterapkan ke nilai {{ReplayGain}}",
         "sampleRate_description": "pilih rasio sampel output yang akan digunakan jika frekuensi sampel yang dipilih berbeda dari media yang sedang diputar. nilai di bawah 8000 akan menggunakan frekuensi default",
@@ -659,8 +659,8 @@
         "column": {
             "album": "album",
             "albumArtist": "artis album",
-            "albumCount": "$t(entity.album_other)",
-            "artist": "$t(entity.artist_one)",
+            "albumCount": "$t(entity.album, {\"count\": 2})",
+            "artist": "$t(entity.artist, {\"count\": 1})",
             "biography": "biografi",
             "bitrate": "bitrate",
             "bpm": "lpm",
@@ -670,7 +670,7 @@
             "dateAdded": "tanggal ditambahkan",
             "discNumber": "nomor disk",
             "favorite": "favorit",
-            "genre": "$t(entity.genre_one)",
+            "genre": "$t(entity.genre, {\"count\": 1})",
             "lastPlayed": "terakhir diputar",
             "path": "jalur",
             "playCount": "putaran",
@@ -678,7 +678,7 @@
             "releaseDate": "tanggal rilis",
             "releaseYear": "tahun",
             "size": "$t(common.size)",
-            "songCount": "$t(entity.track_other)",
+            "songCount": "$t(entity.track, {\"count\": 2})",
             "title": "judul",
             "trackNumber": "pista"
         },
@@ -695,9 +695,9 @@
             },
             "label": {
                 "actions": "$t(common.action_other)",
-                "album": "$t(entity.album_one)",
-                "albumArtist": "$t(entity.albumArtist_one)",
-                "artist": "$t(entity.artist_one)",
+                "album": "$t(entity.album, {\"count\": 1})",
+                "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+                "artist": "$t(entity.artist, {\"count\": 1})",
                 "biography": "$t(common.biography)",
                 "bitrate": "$t(common.bitrate)",
                 "bpm": "$t(common.bpm)",
@@ -707,7 +707,7 @@
                 "discNumber": "nomor disk",
                 "duration": "$t(common.duration)",
                 "favorite": "$t(common.favorite)",
-                "genre": "$t(entity.genre_one)",
+                "genre": "$t(entity.genre, {\"count\": 1})",
                 "lastPlayed": "terakhir diputar",
                 "note": "$t(common.note)",
                 "owner": "$t(common.owner)",
@@ -717,7 +717,7 @@
                 "releaseDate": "tanggal rilis",
                 "rowIndex": "indeks baris",
                 "size": "$t(common.size)",
-                "songCount": "$t(entity.track_other)",
+                "songCount": "$t(entity.track, {\"count\": 2})",
                 "title": "$t(common.title)",
                 "titleCombined": "$t(common.title) (digabungkan)",
                 "trackNumber": "nomor pista",
