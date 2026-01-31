@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router';
 
 import styles from './sidebar-collection-list.module.css';
 
+import { SidebarIcon } from '/@/renderer/features/sidebar/components/sidebar-icon';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCollections, useSettingsStoreActions } from '/@/renderer/store';
 import { getFilterQueryStringFromSearchParams } from '/@/renderer/utils/query-params';
@@ -13,7 +14,6 @@ import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Group } from '/@/shared/components/group/group';
-import { Icon } from '/@/shared/components/icon/icon';
 import { Popover } from '/@/shared/components/popover/popover';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
@@ -93,13 +93,15 @@ const CollectionRow = ({
             <Popover.Target>
                 <div className={clsx(styles.row, { [styles.rowActive]: isActive })}>
                     <Link className={styles.rowLink} to={to}>
-                        <Group className={styles.rowContent}>
-                            <Icon
-                                color={isActive ? 'primary' : 'muted'}
-                                icon={
-                                    collection.type === LibraryItem.ALBUM ? 'itemAlbum' : 'itemSong'
+                        <Group className={styles.rowContent} wrap="nowrap">
+                            <SidebarIcon
+                                active={isActive}
+                                route={
+                                    collection.type === LibraryItem.ALBUM
+                                        ? AppRoute.LIBRARY_ALBUMS
+                                        : AppRoute.LIBRARY_SONGS
                                 }
-                                size="md"
+                                size="1rem"
                             />
                             <Text className={styles.name} fw={500} size="md">
                                 {collection.name}

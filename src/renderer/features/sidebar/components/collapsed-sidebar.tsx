@@ -15,6 +15,7 @@ import { ServerSelectorItems } from '/@/renderer/features/sidebar/components/ser
 import { getCollectionTo } from '/@/renderer/features/sidebar/components/sidebar-collection-list';
 import { SidebarIcon } from '/@/renderer/features/sidebar/components/sidebar-icon';
 import { AppMenu } from '/@/renderer/features/titlebar/components/app-menu';
+import { AppRoute } from '/@/renderer/router/routes';
 import {
     SidebarItemType,
     useCollections,
@@ -141,15 +142,13 @@ export const CollapsedSidebar = () => {
                                                         component={Link}
                                                         key={collection.id}
                                                         leftSection={
-                                                            <Icon
-                                                                color="muted"
-                                                                icon={
+                                                            <SidebarIcon
+                                                                route={
                                                                     collection.type ===
                                                                     LibraryItem.ALBUM
-                                                                        ? 'itemAlbum'
-                                                                        : 'itemSong'
+                                                                        ? AppRoute.LIBRARY_ALBUMS
+                                                                        : AppRoute.LIBRARY_SONGS
                                                                 }
-                                                                size="sm"
                                                             />
                                                         }
                                                         to={to}
