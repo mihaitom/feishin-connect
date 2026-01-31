@@ -28,6 +28,7 @@
     overflow: hidden;
     color: inherit;
     text-decoration: none;
+    border-radius: var(--theme-radius-md);
 
     &::before {
         position: absolute;
