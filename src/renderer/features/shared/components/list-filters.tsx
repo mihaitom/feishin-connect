@@ -62,7 +62,8 @@ export const ListFiltersModal = ({ isActive, itemType }: ListFiltersProps) => {
     const canPin = Boolean(setIsSidebarOpen);
 
     const disableArtistFilter = pageKey === ItemListKey.ALBUM_ARTIST_ALBUM;
-    const disableGenreFilter = pageKey === ItemListKey.GENRE_ALBUM;
+    const disableGenreFilter =
+        pageKey === ItemListKey.GENRE_ALBUM || pageKey === ItemListKey.GENRE_SONG;
 
     return (
         <>
@@ -114,7 +115,8 @@ export const ListFilters = ({ itemType }: ListFiltersProps) => {
     const { pageKey } = useListContext();
 
     const disableArtistFilter = pageKey === ItemListKey.ALBUM_ARTIST_ALBUM;
-    const disableGenreFilter = pageKey === ItemListKey.GENRE_ALBUM;
+    const disableGenreFilter =
+        pageKey === ItemListKey.GENRE_ALBUM || pageKey === ItemListKey.GENRE_SONG;
 
     return (
         <ComponentErrorBoundary>
