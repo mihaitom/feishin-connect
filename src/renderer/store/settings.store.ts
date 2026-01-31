@@ -554,6 +554,7 @@ const PlaybackSettingsSchema = z.object({
     audioFadeOnStatusChange: z.boolean(),
     filters: z.array(PlayerFilterSchema),
     mediaSession: z.boolean(),
+    mpvAudioDeviceId: z.string().nullable().optional(),
     mpvExtraParameters: z.array(z.string()),
     mpvProperties: MpvSettingsSchema,
     preservePitch: z.boolean(),
@@ -1538,6 +1539,7 @@ const initialState: SettingsState = {
         audioFadeOnStatusChange: true,
         filters: [],
         mediaSession: false,
+        mpvAudioDeviceId: undefined,
         mpvExtraParameters: [],
         mpvProperties: {
             audioExclusiveMode: 'no',

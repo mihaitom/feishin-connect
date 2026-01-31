@@ -56,7 +56,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const hasPopulatedQueueRef = useRef<boolean>(false);
     const isMountedRef = useRef<boolean>(true);
 
-    const { audioDeviceId, transcode } = usePlaybackSettings();
+    const { mpvAudioDeviceId, transcode } = usePlaybackSettings();
     const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
     const mpvProperties = useSettingsStore((store) => store.playback.mpvProperties);
     const [reloadTrigger, setReloadTrigger] = useState(0);
@@ -108,8 +108,8 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
             const extraParameters: string[] = [...mpvExtraParameters];
 
-            if (audioDeviceId) {
-                extraParameters.push(`--audio-device=${audioDeviceId}`);
+            if (mpvAudioDeviceId) {
+                extraParameters.push(`--audio-device=${mpvAudioDeviceId}`);
             }
 
             await mpvPlayer?.initialize({
@@ -154,7 +154,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         // update callbacks in usePlayerEvents.
         // reloadTrigger is included to allow manual reload via MPV_RELOAD event.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mpvExtraParameters, mpvProperties, audioDeviceId, reloadTrigger]);
+    }, [mpvExtraParameters, mpvProperties, mpvAudioDeviceId, reloadTrigger]);
 
     // Update volume
     useEffect(() => {
