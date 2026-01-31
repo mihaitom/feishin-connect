@@ -38,22 +38,26 @@ import {
     Album,
     AlbumArtist,
     Artist,
+    Genre,
     LibraryItem,
     Playlist,
     Song,
 } from '/@/shared/types/domain-types';
 import { DragOperation, DragTarget } from '/@/shared/types/drag-and-drop';
+import { stringToColor } from '/@/shared/utils/string-to-color';
 
 export type DataRow = {
     align?: 'center' | 'end' | 'start';
-    format: (data: Album | AlbumArtist | Artist | Playlist | Song) => null | ReactNode | string;
+    format: (
+        data: Album | AlbumArtist | Artist | Genre | Playlist | Song,
+    ) => null | ReactNode | string;
     id: string;
     isMuted?: boolean;
 };
 
 export interface ItemCardProps {
     controls?: ItemControls;
-    data: Album | AlbumArtist | Artist | Playlist | Song | undefined;
+    data: Album | AlbumArtist | Artist | Genre | Playlist | Song | undefined;
     enableDrag?: boolean;
     enableExpansion?: boolean;
     enableMultiSelect?: boolean;
@@ -341,16 +345,28 @@ const CompactItemCard = ({
 
         const imageContainerContent = (
             <>
-                <ItemImage
-                    className={clsx(styles.image, {
-                        [styles.isRound]: isRound,
-                    })}
-                    enableDebounce={false}
-                    id={data?.imageId}
-                    itemType={itemType}
-                    src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
-                    type="itemCard"
-                />
+                {itemType === LibraryItem.GENRE &&
+                data &&
+                'name' in data &&
+                typeof (data as Genre).name === 'string' ? (
+                    <GenreImagePlaceholder
+                        className={clsx(styles.image, styles.genrePlaceholder, {
+                            [styles.isRound]: isRound,
+                        })}
+                        name={(data as Genre).name}
+                    />
+                ) : (
+                    <ItemImage
+                        className={clsx(styles.image, {
+                            [styles.isRound]: isRound,
+                        })}
+                        enableDebounce={false}
+                        id={data?.imageId}
+                        itemType={itemType}
+                        src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
+                        type="itemCard"
+                    />
+                )}
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
@@ -565,14 +581,26 @@ const DefaultItemCard = ({
 
         const imageContainerContent = (
             <>
-                <ItemImage
-                    className={clsx(styles.image, { [styles.isRound]: isRound })}
-                    enableDebounce={false}
-                    id={data?.imageId}
-                    itemType={itemType}
-                    src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
-                    type="itemCard"
-                />
+                {itemType === LibraryItem.GENRE &&
+                data &&
+                'name' in data &&
+                typeof (data as Genre).name === 'string' ? (
+                    <GenreImagePlaceholder
+                        className={clsx(styles.image, styles.genrePlaceholder, {
+                            [styles.isRound]: isRound,
+                        })}
+                        name={(data as Genre).name}
+                    />
+                ) : (
+                    <ItemImage
+                        className={clsx(styles.image, { [styles.isRound]: isRound })}
+                        enableDebounce={false}
+                        id={data?.imageId}
+                        itemType={itemType}
+                        src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
+                        type="itemCard"
+                    />
+                )}
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
@@ -850,14 +878,26 @@ const PosterItemCard = ({
 
         const imageContainerContent = (
             <>
-                <ItemImage
-                    className={clsx(styles.image, { [styles.isRound]: isRound })}
-                    enableDebounce={false}
-                    id={(data as { imageId: string })?.imageId}
-                    itemType={itemType}
-                    src={(data as { imageUrl: string })?.imageUrl}
-                    type="itemCard"
-                />
+                {itemType === LibraryItem.GENRE &&
+                data &&
+                'name' in data &&
+                typeof (data as Genre).name === 'string' ? (
+                    <GenreImagePlaceholder
+                        className={clsx(styles.image, styles.genrePlaceholder, {
+                            [styles.isRound]: isRound,
+                        })}
+                        name={(data as Genre).name}
+                    />
+                ) : (
+                    <ItemImage
+                        className={clsx(styles.image, { [styles.isRound]: isRound })}
+                        enableDebounce={false}
+                        id={(data as { imageId: string })?.imageId}
+                        itemType={itemType}
+                        src={(data as { imageUrl: string })?.imageUrl}
+                        type="itemCard"
+                    />
+                )}
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
@@ -995,6 +1035,17 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
                                                     albumArtistId: data.id,
                                                 },
                                             )}
+                                        >
+                                            {data.name}
+                                        </Link>
+                                    );
+                                case LibraryItem.GENRE:
+                                    return (
+                                        <Link
+                                            state={{ item: data }}
+                                            to={generatePath(AppRoute.LIBRARY_GENRES_DETAIL, {
+                                                genreId: data.id,
+                                            })}
                                         >
                                             {data.name}
                                         </Link>
@@ -1227,7 +1278,7 @@ export const getDataRowsCount = () => {
     return getDataRows().length;
 };
 
-const getImageUrl = (data: Album | AlbumArtist | Artist | Playlist | Song | undefined) => {
+const getImageUrl = (data: Album | AlbumArtist | Artist | Genre | Playlist | Song | undefined) => {
     if (data && 'imageUrl' in data) {
         return data.imageUrl || undefined;
     }
@@ -1235,8 +1286,30 @@ const getImageUrl = (data: Album | AlbumArtist | Artist | Playlist | Song | unde
     return undefined;
 };
 
+const GenreImagePlaceholder = ({ className, name }: { className?: string; name: string }) => {
+    const { color, isLight } = useMemo(() => stringToColor(name), [name]);
+    return (
+        <div
+            className={className}
+            style={{
+                alignItems: 'center',
+                backgroundColor: color,
+                color: isLight ? '#000' : '#fff',
+                display: 'flex',
+                height: '100%',
+                justifyContent: 'center',
+                padding: 'var(--theme-spacing-sm)',
+                textAlign: 'center',
+                width: '100%',
+            }}
+        >
+            <span className={styles.genrePlaceholderText}>{name}</span>
+        </div>
+    );
+};
+
 const getItemNavigationPath = (
-    data: Album | AlbumArtist | Artist | Playlist | Song | undefined,
+    data: Album | AlbumArtist | Artist | Genre | Playlist | Song | undefined,
     itemType: LibraryItem,
 ): null | string => {
     if (!data || !('id' in data) || !data.id) {
@@ -1255,7 +1328,7 @@ const ItemCardRow = memo(
         row,
         type,
     }: {
-        data: Album | AlbumArtist | Artist | Playlist | Song | undefined;
+        data: Album | AlbumArtist | Artist | Genre | Playlist | Song | undefined;
         index: number;
         row: DataRow;
         type?: 'compact' | 'default' | 'poster';
