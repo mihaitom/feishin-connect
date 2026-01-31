@@ -447,6 +447,10 @@
         "favorites": {
             "title": "$t(entity.favorite, {\"count\": 2})"
         },
+        "windowBar": {
+            "paused": "(Paused) ",
+            "privateMode": "(Private mode)"
+        },
         "appMenu": {
             "collapseSidebar": "collapse sidebar",
             "commandPalette": "open command palette",
