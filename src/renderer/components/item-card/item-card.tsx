@@ -1292,15 +1292,8 @@ const GenreImagePlaceholder = ({ className, name }: { className?: string; name: 
         <div
             className={className}
             style={{
-                alignItems: 'center',
                 backgroundColor: color,
                 color: isLight ? '#000' : '#fff',
-                display: 'flex',
-                height: '100%',
-                justifyContent: 'center',
-                padding: 'var(--theme-spacing-sm)',
-                textAlign: 'center',
-                width: '100%',
             }}
         >
             <span className={styles.genrePlaceholderText}>{name}</span>

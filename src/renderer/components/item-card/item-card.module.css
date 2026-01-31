@@ -115,14 +115,25 @@
 
 .genre-placeholder {
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: var(--theme-spacing-sm);
+    text-align: center;
 }
 
 .genre-placeholder-text {
+    display: -webkit-box;
+    width: 100%;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
     font-weight: 600;
     line-height: 1.2;
-    white-space: nowrap;
+    -webkit-box-orient: vertical;
 }
 
 .detail-container {
