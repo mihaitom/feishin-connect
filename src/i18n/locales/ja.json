@@ -445,7 +445,7 @@
         "delete": "削除",
         "cancel": "キャンセル",
         "forceRestartRequired": "変更を適用するために再起動が必要です… 通知を閉じると再起動します",
-        "setting": "設定",
+        "setting_other": "設定",
         "version": "バージョン",
         "title": "タイトル",
         "filter_other": "フィルタ",
@@ -517,7 +517,8 @@
         "tableColumns": "テーブル列",
         "clean": "クリーン",
         "filter_single": "シングル",
-        "filter_multiple": "複数枚組"
+        "filter_multiple": "複数枚組",
+        "rename": "名前を変更"
     },
     "table": {
         "config": {
@@ -712,7 +713,8 @@
             "myLibrary": "マイライブラリ",
             "shared": "$t(entity.playlist, {\"count\": 2}) を共有",
             "radio": "$t(entity.radioStation, {\"count\": 2})",
-            "favorites": "$t(entity.favorite, {\"count\": 2})"
+            "favorites": "$t(entity.favorite, {\"count\": 2})",
+            "collections": "コレクション"
         },
         "fullscreenPlayer": {
             "config": {
@@ -888,6 +890,14 @@
         },
         "folderList": {
             "title": "$t(entity.folder, {\"count\": 2})"
+        },
+        "windowBar": {
+            "paused": "(一時停止) ",
+            "privateMode": "(プライベートモード)"
+        },
+        "collections": {
+            "overrideExisting": "既存のものを上書き",
+            "saveAsCollection": "コレクションとして保存"
         }
     },
     "form": {

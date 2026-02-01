@@ -465,7 +465,9 @@
         "delete": "odstranit",
         "cancel": "zrušit",
         "forceRestartRequired": "restartujte pro použití změn… zavřete oznámení pro restartování",
-        "setting": "nastavení",
+        "setting_one": "nastavení",
+        "setting_few": "nastavení",
+        "setting_other": "nastavení",
         "version": "verze",
         "title": "název",
         "filter_one": "filtr",
@@ -543,7 +545,8 @@
         "mood": "nálada",
         "example": "příklad",
         "filter_single": "jeden",
-        "filter_multiple": "několik"
+        "filter_multiple": "několik",
+        "rename": "přejmenovat"
     },
     "table": {
         "config": {
@@ -745,7 +748,8 @@
             "shared": "$t(entity.playlist, {\"count\": 2}) sdíleny",
             "myLibrary": "moje knihovna",
             "favorites": "$t(entity.favorite, {\"count\": 2})",
-            "radio": "$t(entity.radioStation, {\"count\": 2})"
+            "radio": "$t(entity.radioStation, {\"count\": 2})",
+            "collections": "sbírky"
         },
         "fullscreenPlayer": {
             "config": {
@@ -921,6 +925,14 @@
         },
         "radioList": {
             "title": "stanice rádia"
+        },
+        "windowBar": {
+            "paused": "(Pozastaveno) ",
+            "privateMode": "(Soukromý režim)"
+        },
+        "collections": {
+            "overrideExisting": "nahradit existující",
+            "saveAsCollection": "uložit jako sbírku"
         }
     },
     "form": {

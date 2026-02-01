@@ -84,8 +84,8 @@
         "forceRestartRequired": "перезапустите приложение, чтобы применить изменения... закройте уведомление для перезапуска",
         "setting": "настройка",
         "setting_one": "настройка",
-        "setting_few": "",
-        "setting_many": "",
+        "setting_few": "настройки",
+        "setting_many": "настроек",
         "version": "версия",
         "title": "название",
         "filter_one": "фильтр",
@@ -158,7 +158,12 @@
         "gridRows": "Строки в сетке",
         "tableColumns": "Столбцы таблицы",
         "doNotShowAgain": "не показывать снова",
-        "itemsMore": "{{count}} более"
+        "itemsMore": "{{count}} более",
+        "view": "посмотреть",
+        "example": "пример",
+        "rename": "переименовать",
+        "explicit": "нецензурная лексика",
+        "externalLinks": "внешние ссылки"
     },
     "entity": {
         "album_one": "альбом",
@@ -425,7 +430,8 @@
             "artists": "$t(entity.artist, {\"count\": 2})",
             "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
             "myLibrary": "Моя библиотека",
-            "shared": "Публичные плейлисты $t(entity.playlist, {\"count\": 2})"
+            "shared": "Публичные плейлисты $t(entity.playlist, {\"count\": 2})",
+            "collections": "коллекции"
         },
         "fullscreenPlayer": {
             "config": {
@@ -533,7 +539,8 @@
             "lyricsDisplay": "отображение текстов песен",
             "transcoding": "транскодирование",
             "scrobble": "скробблер",
-            "logger": "Отладка"
+            "logger": "Отладка",
+            "playerFilters": "фильтры проигрывателя"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist, {\"count\": 2})"
@@ -587,6 +594,12 @@
         },
         "radioList": {
             "title": "радиостанции"
+        },
+        "windowBar": {
+            "privateMode": "(Режим приватности)"
+        },
+        "collections": {
+            "saveAsCollection": "сохранить коллекцией"
         }
     },
     "form": {
@@ -925,7 +938,8 @@
             "remix": "ремикс",
             "live": "прямой эфир",
             "soundtrack": "саундтрек",
-            "spokenWord": "Художественная декламация"
+            "spokenWord": "Художественная декламация",
+            "audioDrama": "радиопостановка"
         },
         "primary": {
             "other": "другие",

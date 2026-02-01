@@ -464,7 +464,9 @@
         "delete": "eliminar",
         "cancel": "cancelar",
         "forceRestartRequired": "reiniciar para aplicar cambios... cerrar la notificación para reiniciar",
-        "setting": "configuración",
+        "setting_one": "configuración",
+        "setting_many": "configuraciones",
+        "setting_other": "configuraciones",
         "version": "versión",
         "title": "título",
         "filters": "filtros",
@@ -543,7 +545,8 @@
         "mood": "Estado de ánimo",
         "example": "Ejemplo",
         "filter_single": "simple",
-        "filter_multiple": "multi"
+        "filter_multiple": "multi",
+        "rename": "Renombrar"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",
@@ -638,7 +641,8 @@
             "shared": "compartido $t(entity.playlist, {\"count\": 2})",
             "myLibrary": "Mi biblioteca",
             "favorites": "$t(entity.favorite, {\"count\": 2})",
-            "radio": "$t(entity.radioStation, {\"count\": 2})"
+            "radio": "$t(entity.radioStation, {\"count\": 2})",
+            "collections": "Colecciones"
         },
         "appMenu": {
             "selectServer": "seleccionar servidor",
@@ -814,6 +818,14 @@
         },
         "radioList": {
             "title": "Estaciones de radio"
+        },
+        "windowBar": {
+            "privateMode": "(Modo privado)",
+            "paused": "(Pausado) "
+        },
+        "collections": {
+            "overrideExisting": "Sobreescribir existente",
+            "saveAsCollection": "Guardar como colección"
         }
     },
     "form": {
