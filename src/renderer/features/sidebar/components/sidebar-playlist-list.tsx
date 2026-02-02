@@ -23,13 +23,8 @@ import {
     useCurrentServer,
     useCurrentServerId,
     usePermissions,
-    useSidebarPlaylistSorting,
-} from '/@/renderer/store';
-import {
-    useCurrentServer,
-    useCurrentServerId,
-    usePermissions,
     useSidebarPlaylistListFilterRegex,
+    useSidebarPlaylistSorting,
 } from '/@/renderer/store';
 import { formatDurationString } from '/@/renderer/utils';
 import { Accordion } from '/@/shared/components/accordion/accordion';
