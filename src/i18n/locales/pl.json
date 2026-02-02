@@ -162,7 +162,8 @@
         "mood": "nastrój",
         "example": "przykład",
         "filter_multiple": "multi",
-        "filter_single": "single"
+        "filter_single": "single",
+        "rename": "zmień nazwę"
     },
     "entity": {
         "genre_one": "gatunek",
@@ -512,7 +513,8 @@
             "shared": "udostępniono $t(entity.playlist, {\"count\": 2})",
             "myLibrary": "Moja biblioteka",
             "favorites": "$t(entity.favorite, {\"count\": 2})",
-            "radio": "$t(entity.radioStation, {\"count\": 2})"
+            "radio": "$t(entity.radioStation, {\"count\": 2})",
+            "collections": "kolekcje"
         },
         "home": {
             "mostPlayed": "najczęściej odtwarzane",
@@ -601,6 +603,14 @@
         },
         "radioList": {
             "title": "stacje radiowe"
+        },
+        "windowBar": {
+            "paused": "(Wstrzymane) ",
+            "privateMode": "(Tryb prywatny)"
+        },
+        "collections": {
+            "overrideExisting": "nadpisz istniejące",
+            "saveAsCollection": "zapisz jako kolekcję"
         }
     },
     "player": {
@@ -984,7 +994,10 @@
         "enableGridMultiSelect_description": "gdy włączone, pozwala na wybieranie wielu elementów w widokach siatki, gdy wyłączone, klikanie obrazów elementów siatki będzie przenosić na stronę elementu",
         "enableGridMultiSelect": "wybieranie wielu w siatce",
         "sidebarPlaylistSorting_description": "pozwala na ręczne sortowanie playlist w bocznym pasku używając przeciągania i upuszczania zamiast używania domyślnej kolejności serwera",
-        "sidebarPlaylistSorting": "sortowanie playlist w bocznym pasku"
+        "sidebarPlaylistSorting": "sortowanie playlist w bocznym pasku",
+        "sidebarPlaylistListFilterRegex_description": "ukryj playlisty w pasku bocznym pasujące do wyrażenia regularnego",
+        "sidebarPlaylistListFilterRegex_placeholder": "np. ^Miks codzienny.^",
+        "sidebarPlaylistListFilterRegex": "filtr playlist regex"
     },
     "table": {
         "config": {
