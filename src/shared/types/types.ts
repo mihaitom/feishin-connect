@@ -101,6 +101,10 @@ export enum AuthState {
 }
 
 export enum CrossfadeStyle {
+    CONSTANT_POWER = 'constantPower',
+    CONSTANT_POWER_SLOW_CUT = 'constantPowerSlowCut',
+    CONSTANT_POWER_SLOW_FADE = 'constantPowerSlowFade',
+    DIPPED = 'dipped',
     EQUAL_POWER = 'equalPower',
     EXPONENTIAL = 'exponential',
     LINEAR = 'linear',
