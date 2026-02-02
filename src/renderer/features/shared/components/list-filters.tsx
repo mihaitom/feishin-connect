@@ -8,6 +8,7 @@ import { SubsonicAlbumFilters } from '/@/renderer/features/albums/components/sub
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { ComponentErrorBoundary } from '/@/renderer/features/shared/components/component-error-boundary';
 import { FilterButton } from '/@/renderer/features/shared/components/filter-button';
+import { SaveAsCollectionButton } from '/@/renderer/features/shared/components/save-as-collection-button';
 import { JellyfinSongFilters } from '/@/renderer/features/songs/components/jellyfin-song-filters';
 import { NavidromeSongFilters } from '/@/renderer/features/songs/components/navidrome-song-filters';
 import { SubsonicSongFilters } from '/@/renderer/features/songs/components/subsonic-song-filters';
@@ -18,6 +19,7 @@ import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Modal } from '/@/shared/components/modal/modal';
 import { Spinner } from '/@/shared/components/spinner/spinner';
+import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
@@ -103,6 +105,12 @@ export const ListFiltersModal = ({ isActive, itemType }: ListFiltersProps) => {
                     disableArtistFilter={disableArtistFilter}
                     disableGenreFilter={disableGenreFilter}
                 />
+                <Stack p="md">
+                    <SaveAsCollectionButton
+                        fullWidth
+                        itemType={itemType as LibraryItem.ALBUM | LibraryItem.SONG}
+                    />
+                </Stack>
             </Modal>
         </>
     );
