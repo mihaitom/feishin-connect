@@ -13,6 +13,8 @@ import {
     LibraryHeader,
     LibraryHeaderMenu,
 } from '/@/renderer/features/shared/components/library-header';
+import { useSetFavorite } from '/@/renderer/features/shared/hooks/use-set-favorite';
+import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useShowRatings } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
@@ -65,7 +67,9 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
         },
     ];
 
-    const { addToQueueByFetch, setFavorite, setRating } = usePlayer();
+    const { addToQueueByFetch } = usePlayer();
+    const setFavorite = useSetFavorite();
+    const setRating = useSetRating();
     const playButtonBehavior = usePlayButtonBehavior();
 
     const handlePlay = useCallback(
