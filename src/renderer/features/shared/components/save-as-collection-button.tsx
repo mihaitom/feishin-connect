@@ -94,7 +94,7 @@ export const SaveAsCollectionButton = ({ fullWidth, itemType }: SaveAsCollection
     }, []);
 
     return (
-        <Popover onClose={handlers.close} opened={isOpen} position="bottom-start" width={320}>
+        <Popover onClose={handlers.close} opened={isOpen} width="target">
             <Popover.Target>
                 {fullWidth ? (
                     <Button fullWidth onClick={handleOpen} variant="default">
