@@ -30,7 +30,7 @@
         "dev:watch": "electron-vite dev --watch",
         "i18next": "i18next -c src/i18n/i18next-parser.config.js",
         "postinstall": "electron-builder install-app-deps",
-        "lint": "pnpm run lint-code && pnpm run lint-styles",
+        "lint": "pnpm run typecheck && pnpm run lint-code && pnpm run lint-styles",
         "lint-code": "eslint --max-warnings=0 --cache .",
         "lint-code:fix": "eslint --cache --fix .",
         "lint-styles": "stylelint --max-warnings=0 'src/**/*.{css,scss}'",
