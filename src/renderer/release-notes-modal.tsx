@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import packageJson from '../../package.json';
 
+import { formatHrDateTime } from '/@/renderer/utils/format';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
@@ -19,7 +20,7 @@ import { Text } from '/@/shared/components/text/text';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 
 const GITHUB_RELEASES_URL = 'https://api.github.com/repos/jeffvli/feishin/releases';
-const RELEASES_TO_FETCH = 5;
+const RELEASES_TO_FETCH = 30;
 
 interface GitHubRelease {
     body: null | string;
@@ -54,11 +55,19 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
     });
 
     const releaseOptions = useMemo(() => {
-        const versions = releasesList.map((r) => parseVersionFromTag(r.tag_name));
+        const options = releasesList.slice(0, RELEASES_TO_FETCH).map((r) => {
+            const v = parseVersionFromTag(r.tag_name);
+            const dateStr = formatHrDateTime(r.published_at);
+            return {
+                label: dateStr ? `${v} - ${dateStr}` : v,
+                value: v,
+            };
+        });
+        const versions = options.map((o) => o.value);
         if (!versions.includes(version)) {
-            versions.unshift(version);
+            options.unshift({ label: version, value: version });
         }
-        return versions.slice(0, RELEASES_TO_FETCH).map((v) => ({ label: v, value: v }));
+        return options;
     }, [releasesList, version]);
 
     const {
@@ -141,7 +150,6 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
                 {releaseOptions.length > 1 && (
                     <Select
                         data={releaseOptions}
-                        label={t('common.version', { postProcess: 'sentenceCase' })}
                         onChange={(v) => v && setSelectedVersion(v)}
                         value={selectedVersion}
                     />
@@ -171,7 +179,6 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
             {releaseOptions.length > 1 && (
                 <Select
                     data={releaseOptions}
-                    label={t('common.version', { postProcess: 'sentenceCase' })}
                     onChange={(v) => v && setSelectedVersion(v)}
                     value={selectedVersion}
                 />
