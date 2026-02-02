@@ -2,7 +2,7 @@ import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import packageJson from '../../package.json';
@@ -12,32 +12,67 @@ import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
+import { Select } from '/@/shared/components/select/select';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
+
+const GITHUB_RELEASES_URL = 'https://api.github.com/repos/jeffvli/feishin/releases';
+const RELEASES_TO_FETCH = 5;
+
+interface GitHubRelease {
+    body: null | string;
+    name: null | string;
+    published_at: string;
+    tag_name: string;
+}
 
 interface ReleaseNotesContentProps {
     onDismiss: () => void;
     version: string;
 }
 
+function parseVersionFromTag(tagName: string): string {
+    return tagName.startsWith('v') ? tagName.slice(1) : tagName;
+}
+
 const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) => {
     const { t } = useTranslation();
+    const [selectedVersion, setSelectedVersion] = useState(version);
 
-    // Fetch release notes from GitHub API
+    // Fetch list of recent releases for the selector
+    const { data: releasesList = [] } = useQuery({
+        queryFn: async () => {
+            const response = await axios.get<GitHubRelease[]>(GITHUB_RELEASES_URL, {
+                params: { per_page: RELEASES_TO_FETCH },
+            });
+            return response.data;
+        },
+        queryKey: ['github-releases-list'],
+        retry: 2,
+    });
+
+    const releaseOptions = useMemo(() => {
+        const versions = releasesList.map((r) => parseVersionFromTag(r.tag_name));
+        if (!versions.includes(version)) {
+            versions.unshift(version);
+        }
+        return versions.slice(0, RELEASES_TO_FETCH).map((v) => ({ label: v, value: v }));
+    }, [releasesList, version]);
+
     const {
         data: releaseData,
         isError,
         isLoading,
     } = useQuery({
         queryFn: async () => {
-            const response = await axios.get(
-                `https://api.github.com/repos/jeffvli/feishin/releases/tags/v${version}`,
+            const response = await axios.get<GitHubRelease>(
+                `${GITHUB_RELEASES_URL}/tags/v${selectedVersion}`,
             );
             return response.data;
         },
-        queryKey: ['github-release', version],
+        queryKey: ['github-release', selectedVersion],
         retry: 2,
     });
 
@@ -49,7 +84,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
                 'https://api.github.com/markdown',
                 {
                     mode: 'gfm',
-                    text: releaseData.body,
+                    text: releaseData?.body ?? '',
                 },
                 {
                     headers: {
@@ -103,11 +138,19 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
     if (isError || !releaseData) {
         return (
             <Stack gap="md">
+                {releaseOptions.length > 1 && (
+                    <Select
+                        data={releaseOptions}
+                        label={t('common.version', { postProcess: 'sentenceCase' })}
+                        onChange={(v) => v && setSelectedVersion(v)}
+                        value={selectedVersion}
+                    />
+                )}
                 <Text size="sm">{t('error.genericError', { postProcess: 'sentenceCase' })}</Text>
                 <Group justify="flex-end">
                     <Button
                         component="a"
-                        href={`https://github.com/jeffvli/feishin/releases/tag/v${version}`}
+                        href={`https://github.com/jeffvli/feishin/releases/tag/v${selectedVersion}`}
                         onClick={onDismiss}
                         rightSection={<Icon icon="externalLink" />}
                         target="_blank"
@@ -125,6 +168,14 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
 
     return (
         <Stack gap="md">
+            {releaseOptions.length > 1 && (
+                <Select
+                    data={releaseOptions}
+                    label={t('common.version', { postProcess: 'sentenceCase' })}
+                    onChange={(v) => v && setSelectedVersion(v)}
+                    value={selectedVersion}
+                />
+            )}
             <ScrollArea
                 style={{
                     height: '400px',
@@ -140,7 +191,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
             <Group justify="flex-end">
                 <Button
                     component="a"
-                    href={`https://github.com/jeffvli/feishin/releases/tag/v${version}`}
+                    href={`https://github.com/jeffvli/feishin/releases/tag/v${selectedVersion}`}
                     onClick={onDismiss}
                     rightSection={<Icon icon="externalLink" />}
                     target="_blank"
