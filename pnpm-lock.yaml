@@ -19,10 +19,10 @@ importers:
         version: 1.1.0
       '@electron-toolkit/preload':
         specifier: ^3.0.1
-        version: 3.0.2(electron@39.2.7)
+        version: 3.0.2(electron@39.4.0)
       '@electron-toolkit/utils':
         specifier: ^4.0.0
-        version: 4.0.0(electron@39.2.7)
+        version: 4.0.0(electron@39.4.0)
       '@mantine/colors-generator':
         specifier: ^8.3.8
         version: 8.3.8(chroma-js@3.1.2)
@@ -268,8 +268,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       electron:
-        specifier: ^39.2.7
-        version: 39.2.7
+        specifier: ^39.4.0
+        version: 39.4.0
       electron-builder:
         specifier: ^26.0.12
         version: 26.0.12(electron-builder-squirrel-windows@26.0.12)
@@ -2862,8 +2862,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@39.2.7:
-    resolution: {integrity: sha512-KU0uFS6LSTh4aOIC3miolcbizOFP7N1M46VTYVfqIgFiuA2ilfNaOHLDS9tCMvwwHRowAsvqBrh9NgMXcTOHCQ==}
+  electron@39.4.0:
+    resolution: {integrity: sha512-NCK/FTAqgG/N+09OXFES6bubamgPZs7TEPIjWZIrbEnm8GzEwxC22ZG6SEPid2DmJnJmBurJ6M0G4EShdSc28Q==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -3787,9 +3787,6 @@ packages:
 
   jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
-
-  jsonfile@6.1.0:
-    resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
 
   jsonfile@6.2.0:
     resolution: {integrity: sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg==}
@@ -6694,17 +6691,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron-toolkit/preload@3.0.2(electron@39.2.7)':
+  '@electron-toolkit/preload@3.0.2(electron@39.4.0)':
     dependencies:
-      electron: 39.2.7
+      electron: 39.4.0
 
   '@electron-toolkit/tsconfig@2.0.0(@types/node@24.10.1)':
     dependencies:
       '@types/node': 24.10.1
 
-  '@electron-toolkit/utils@4.0.0(electron@39.2.7)':
+  '@electron-toolkit/utils@4.0.0(electron@39.4.0)':
     dependencies:
-      electron: 39.2.7
+      electron: 39.4.0
 
   '@electron/asar@3.2.18':
     dependencies:
@@ -6799,7 +6796,7 @@ snapshots:
       '@malept/cross-spawn-promise': 2.0.0
       debug: 4.4.3
       dir-compare: 4.2.0
-      fs-extra: 11.3.2
+      fs-extra: 11.3.3
       minimatch: 9.0.5
       plist: 3.1.0
     transitivePeerDependencies:
@@ -7613,7 +7610,7 @@ snapshots:
 
   '@types/electron-localshortcut@3.1.3':
     dependencies:
-      electron: 39.2.7
+      electron: 39.4.0
     transitivePeerDependencies:
       - supports-color
 
@@ -8770,7 +8767,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@39.2.7:
+  electron@39.4.0:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 22.15.32
@@ -9222,7 +9219,7 @@ snapshots:
   fs-extra@10.1.0:
     dependencies:
       graceful-fs: 4.2.11
-      jsonfile: 6.1.0
+      jsonfile: 6.2.0
       universalify: 2.0.1
 
   fs-extra@11.3.2:
@@ -9236,7 +9233,6 @@ snapshots:
       graceful-fs: 4.2.11
       jsonfile: 6.2.0
       universalify: 2.0.1
-    optional: true
 
   fs-extra@7.0.1:
     dependencies:
@@ -9864,12 +9860,6 @@ snapshots:
   json5@2.2.3: {}
 
   jsonfile@4.0.0:
-    optionalDependencies:
-      graceful-fs: 4.2.11
-
-  jsonfile@6.1.0:
-    dependencies:
-      universalify: 2.0.1
     optionalDependencies:
       graceful-fs: 4.2.11
 
