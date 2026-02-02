@@ -26,7 +26,7 @@ export interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 's
     imageContainerProps?: Omit<ImageContainerProps, 'children'>;
     includeLoader?: boolean;
     includeUnloader?: boolean;
-    src: string | string[] | undefined;
+    src: string | undefined;
     thumbHash?: string;
     unloaderIcon?: keyof typeof AppIcon;
 }
@@ -147,20 +147,31 @@ function ImageWithDebounce({
     const hasBeenInViewportRef = useRef(false);
     const prevDebouncedSrcRef = useRef(debouncedSrc);
 
+    const srcInDisplayedCache = isInDisplayedCache(src);
+
+    if (srcInDisplayedCache) {
+        hasBeenInViewportRef.current = true;
+    }
+
     if (prevDebouncedSrcRef.current !== debouncedSrc) {
         prevDebouncedSrcRef.current = debouncedSrc;
-        hasBeenInViewportRef.current = false;
+        if (!srcInDisplayedCache) hasBeenInViewportRef.current = false;
     }
 
     if (inViewport && debouncedSrc) {
         hasBeenInViewportRef.current = true;
     }
 
+    const effectiveSrc = debouncedSrc ?? (srcInDisplayedCache ? src : undefined);
     const shouldShowImage = enableViewport
-        ? (inViewport || hasBeenInViewportRef.current) && debouncedSrc
-        : debouncedSrc;
+        ? (inViewport || hasBeenInViewportRef.current) && effectiveSrc
+        : effectiveSrc;
 
     if (enableViewport) {
+        if (shouldShowImage && effectiveSrc) {
+            addToDisplayedCache(effectiveSrc);
+        }
+
         return (
             <ImageContainer
                 className={clsx(containerClassName, containerPropsClassName)}
@@ -168,7 +179,7 @@ function ImageWithDebounce({
                 ref={ref}
                 {...restContainerProps}
             >
-                {shouldShowImage && debouncedSrc ? (
+                {shouldShowImage && effectiveSrc ? (
                     <Img
                         className={clsx(styles.image, className, {
                             [styles.animated]: enableAnimation,
@@ -176,7 +187,7 @@ function ImageWithDebounce({
                         decoding="async"
                         fetchPriority={fetchPriority}
                         loader={includeLoader ? <ImageLoader className={className} /> : null}
-                        src={debouncedSrc}
+                        src={effectiveSrc}
                         unloader={
                             includeUnloader ? (
                                 <ImageUnloader className={className} icon={unloaderIcon} />
@@ -193,13 +204,14 @@ function ImageWithDebounce({
         );
     }
 
+    if (effectiveSrc) addToDisplayedCache(effectiveSrc);
     return (
         <ImageContainer
             className={clsx(containerClassName, containerPropsClassName)}
             enableAnimation={enableAnimation}
             {...restContainerProps}
         >
-            {debouncedSrc ? (
+            {effectiveSrc ? (
                 <Img
                     className={clsx(styles.image, className, {
                         [styles.animated]: enableAnimation,
@@ -207,7 +219,7 @@ function ImageWithDebounce({
                     decoding="async"
                     fetchPriority={fetchPriority}
                     loader={includeLoader ? <ImageLoader className={className} /> : null}
-                    src={debouncedSrc}
+                    src={effectiveSrc}
                     unloader={
                         includeUnloader ? (
                             <ImageUnloader className={className} icon={unloaderIcon} />
@@ -242,9 +254,14 @@ function ImageWithViewport({
     const hasBeenInViewportRef = useRef(false);
     const prevSrcRef = useRef(src);
 
+    const srcInDisplayedCache = isInDisplayedCache(src);
+    if (srcInDisplayedCache) {
+        hasBeenInViewportRef.current = true;
+    }
+
     if (prevSrcRef.current !== src) {
         prevSrcRef.current = src;
-        hasBeenInViewportRef.current = false;
+        if (!srcInDisplayedCache) hasBeenInViewportRef.current = false;
     }
 
     if (inViewport && src) {
@@ -253,6 +270,7 @@ function ImageWithViewport({
 
     const shouldShowImage = (inViewport || hasBeenInViewportRef.current) && src;
 
+    if (shouldShowImage && src) addToDisplayedCache(src);
     return (
         <ImageContainer
             className={clsx(containerClassName, containerPropsClassName)}
@@ -283,6 +301,46 @@ function ImageWithViewport({
             )}
         </ImageContainer>
     );
+}
+
+const DISPLAYED_SRC_CACHE_KEY = 'feishin-displayed-src-cache';
+const MAX_DISPLAYED_SRC_CACHE = 500;
+
+function addToDisplayedCache(src: string | undefined) {
+    if (!src) return;
+    try {
+        const cache = getDisplayedSrcCache();
+        if (cache.includes(src)) {
+            return;
+        }
+
+        while (cache.length >= MAX_DISPLAYED_SRC_CACHE) {
+            cache.shift();
+        }
+
+        cache.push(src);
+        sessionStorage.setItem(DISPLAYED_SRC_CACHE_KEY, JSON.stringify(cache));
+    } catch {
+        // ignore error if sessionStorage is unavailable
+    }
+}
+
+function getDisplayedSrcCache(): string[] {
+    try {
+        const raw = sessionStorage.getItem(DISPLAYED_SRC_CACHE_KEY);
+        return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+        return [];
+    }
+}
+
+function isInDisplayedCache(src: string | undefined): boolean {
+    if (!src) return false;
+    try {
+        return getDisplayedSrcCache().includes(src);
+    } catch {
+        return false;
+    }
 }
 
 export const Image = memo(BaseImage);
