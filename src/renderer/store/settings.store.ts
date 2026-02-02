@@ -454,6 +454,7 @@ export const GeneralSettingsSchema = z.object({
     sidebarItems: z.array(SidebarItemTypeSchema),
     sidebarPanelOrder: z.array(SidebarPanelTypeSchema),
     sidebarPlaylistList: z.boolean(),
+    sidebarPlaylistListFilterRegex: z.string(),
     sidebarPlaylistSorting: z.boolean(),
     sideQueueType: SideQueueTypeSchema,
     skipButtons: SkipButtonsSchema,
@@ -1030,6 +1031,7 @@ const initialState: SettingsState = {
         sidebarItems,
         sidebarPanelOrder: ['queue', 'lyrics', 'visualizer'],
         sidebarPlaylistList: true,
+        sidebarPlaylistListFilterRegex: '',
         sidebarPlaylistSorting: false,
         sideQueueType: 'sideQueue',
         skipButtons: {
@@ -2192,6 +2194,9 @@ export const useSidebarPlaylistList = () =>
 
 export const useSidebarPlaylistSorting = () =>
     useSettingsStore((state) => state.general.sidebarPlaylistSorting, shallow);
+
+export const useSidebarPlaylistListFilterRegex = () =>
+    useSettingsStore((state) => state.general.sidebarPlaylistListFilterRegex, shallow);
 
 export const useSidebarItems = () =>
     useSettingsStore((state) => state.general.sidebarItems, shallow);
