@@ -2,7 +2,7 @@ import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import packageJson from '../../package.json';
@@ -216,16 +216,50 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
 
 const WAIT_FOR_LOCAL_STORAGE = 1000 * 2;
 
-export const ReleaseNotesModal = () => {
-    const { version } = packageJson;
-    const { t } = useTranslation();
+interface ReleaseNotesModalContentWrapperProps {
+    setDismissRef?: (fn: (() => void) | undefined) => void;
+}
 
+const ReleaseNotesModalContentWrapper = ({
+    setDismissRef,
+}: ReleaseNotesModalContentWrapperProps) => {
+    const { version } = packageJson;
     const [, setValue] = useLocalStorage({ key: 'version' });
 
     const handleDismiss = useCallback(() => {
         setValue(version);
         closeAllModals();
     }, [setValue, version]);
+
+    useEffect(() => {
+        setDismissRef?.(handleDismiss);
+        return () => setDismissRef?.(undefined);
+    }, [handleDismiss, setDismissRef]);
+
+    return <ReleaseNotesContent onDismiss={handleDismiss} version={version} />;
+};
+
+export const openReleaseNotesModal = (title: string) => {
+    const dismissRef = { current: null as (() => void) | null };
+
+    openModal({
+        children: (
+            <ReleaseNotesModalContentWrapper
+                setDismissRef={(fn) => {
+                    dismissRef.current = fn ?? null;
+                }}
+            />
+        ),
+        onClose: () => dismissRef.current?.(),
+        size: 'xl',
+        title,
+    });
+};
+
+export const ReleaseNotesModal = () => {
+    const { version } = packageJson;
+    const { t } = useTranslation();
+    const dismissRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -235,8 +269,14 @@ export const ReleaseNotesModal = () => {
             // Only show modal if the stored version is different from current version
             if (valueFromLocalStorage !== versionString) {
                 openModal({
-                    children: <ReleaseNotesContent onDismiss={handleDismiss} version={version} />,
-                    onClose: handleDismiss,
+                    children: (
+                        <ReleaseNotesModalContentWrapper
+                            setDismissRef={(fn) => {
+                                dismissRef.current = fn ?? null;
+                            }}
+                        />
+                    ),
+                    onClose: () => dismissRef.current?.(),
                     size: 'xl',
                     title: t('common.newVersion', {
                         postProcess: 'sentenceCase',
@@ -249,7 +289,7 @@ export const ReleaseNotesModal = () => {
         return () => {
             clearTimeout(timeoutId);
         };
-    }, [handleDismiss, t, version]);
+    }, [t, version]);
 
     return null;
 };
