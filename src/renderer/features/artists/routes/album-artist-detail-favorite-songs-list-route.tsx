@@ -9,7 +9,7 @@ import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table
 import { ItemControls } from '/@/renderer/components/item-list/types';
 import { ListContext } from '/@/renderer/context/list-context';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
-import { AlbumArtistDetailTopSongsListHeader } from '/@/renderer/features/artists/components/album-artist-detail-top-songs-list-header';
+import { AlbumArtistDetailFavoriteSongsListHeader } from '/@/renderer/features/artists/components/album-artist-detail-favorite-songs-list-header';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
@@ -19,7 +19,7 @@ import { useSettingsStore } from '/@/renderer/store/settings.store';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { ItemListKey, Play } from '/@/shared/types/types';
 
-const AlbumArtistDetailTopSongsListRoute = () => {
+const AlbumArtistDetailFavoriteSongsListRoute = () => {
     const { albumArtistId, artistId } = useParams() as {
         albumArtistId?: string;
         artistId?: string;
@@ -35,16 +35,19 @@ const AlbumArtistDetailTopSongsListRoute = () => {
         }),
     );
 
-    const topSongsQuery = useQuery(
-        artistsQueries.topSongs({
+    const favoriteSongsQuery = useQuery(
+        artistsQueries.favoriteSongs({
             options: { enabled: !!detailQuery?.data?.name },
-            query: { artist: detailQuery?.data?.name || '', artistId: routeId },
+            query: { artistId: routeId },
             serverId: server?.id,
         }),
     );
 
-    const itemCount = topSongsQuery?.data?.items?.length || 0;
-    const songs = useMemo(() => topSongsQuery?.data?.items || [], [topSongsQuery?.data?.items]);
+    const itemCount = favoriteSongsQuery?.data?.items?.length || 0;
+    const songs = useMemo(
+        () => favoriteSongsQuery?.data?.items || [],
+        [favoriteSongsQuery?.data?.items],
+    );
 
     const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.SONG]?.table);
     const currentSong = usePlayerSong();
@@ -92,7 +95,7 @@ const AlbumArtistDetailTopSongsListRoute = () => {
         return (
             <AnimatedPage>
                 <ListContext.Provider value={providerValue}>
-                    <AlbumArtistDetailTopSongsListHeader
+                    <AlbumArtistDetailFavoriteSongsListHeader
                         data={songs}
                         itemCount={itemCount}
                         title={detailQuery?.data?.name || 'Unknown'}
@@ -105,7 +108,7 @@ const AlbumArtistDetailTopSongsListRoute = () => {
     return (
         <AnimatedPage>
             <ListContext.Provider value={providerValue}>
-                <AlbumArtistDetailTopSongsListHeader
+                <AlbumArtistDetailFavoriteSongsListHeader
                     data={songs}
                     itemCount={itemCount}
                     title={detailQuery?.data?.name || 'Unknown'}
@@ -139,7 +142,7 @@ const AlbumArtistDetailTopSongsListRoute = () => {
 const AlbumArtistDetailTopSongsListRouteWithBoundary = () => {
     return (
         <PageErrorBoundary>
-            <AlbumArtistDetailTopSongsListRoute />
+            <AlbumArtistDetailFavoriteSongsListRoute />
         </PageErrorBoundary>
     );
 };

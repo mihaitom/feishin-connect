@@ -55,6 +55,10 @@ const AlbumArtistDetailTopSongsListRoute = lazy(
     () => import('../features/artists/routes/album-artist-detail-top-songs-list-route'),
 );
 
+const AlbumArtistDetailFavoriteSongsListRoute = lazy(
+    () => import('../features/artists/routes/album-artist-detail-favorite-songs-list-route'),
+);
+
 const AlbumDetailRoute = lazy(
     () => import('/@/renderer/features/albums/routes/album-detail-route'),
 );
@@ -251,6 +255,14 @@ export const AppRouter = () => {
                                                 element={<AlbumArtistDetailTopSongsListRoute />}
                                                 path={AppRoute.LIBRARY_ARTISTS_DETAIL_TOP_SONGS}
                                             />
+                                            <Route
+                                                element={
+                                                    <AlbumArtistDetailFavoriteSongsListRoute />
+                                                }
+                                                path={
+                                                    AppRoute.LIBRARY_ARTISTS_DETAIL_FAVORITE_SONGS
+                                                }
+                                            />
                                         </Route>
                                         <Route
                                             element={<DummyAlbumDetailRoute />}
@@ -293,6 +305,14 @@ export const AppRouter = () => {
                                                     element={<AlbumArtistDetailTopSongsListRoute />}
                                                     path={
                                                         AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_TOP_SONGS
+                                                    }
+                                                />
+                                                <Route
+                                                    element={
+                                                        <AlbumArtistDetailFavoriteSongsListRoute />
+                                                    }
+                                                    path={
+                                                        AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_FAVORITE_SONGS
                                                     }
                                                 />
                                             </Route>

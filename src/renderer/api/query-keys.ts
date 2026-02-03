@@ -73,6 +73,13 @@ export const queryKeys: Record<
 
             return [serverId, 'albumArtists', 'detail'] as const;
         },
+        favoriteSongs: (serverId: string, artistId?: string) => {
+            if (artistId) {
+                return [serverId, 'albumArtists', 'favoriteSongs', artistId] as const;
+            }
+
+            return [serverId, 'albumArtists', 'favoriteSongs'] as const;
+        },
         infiniteList: (serverId: string, query?: AlbumArtistListQuery) => {
             const { filter, pagination } = splitPaginatedQuery(query);
             if (query && pagination) {

@@ -77,6 +77,7 @@ const HomeItemSchema = z.enum([
 const ArtistItemSchema = z.enum([
     'biography',
     'compilations',
+    'favoriteSongs',
     'recentAlbums',
     'similarArtists',
     'topSongs',
@@ -655,6 +656,7 @@ export const SettingsStateSchema = ValidationSettingsStateSchema.merge(
 
 export enum ArtistItem {
     BIOGRAPHY = 'biography',
+    FAVORITE_SONGS = 'favoriteSongs',
     RECENT_ALBUMS = 'recentAlbums',
     SIMILAR_ARTISTS = 'similarArtists',
     TOP_SONGS = 'topSongs',
@@ -2071,10 +2073,24 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
+                if (version <= 23) {
+                    // Add FAVORITE_SONGS to album artist page configuration
+                    const hasFavoriteSongs = state.general.artistItems?.some(
+                        (item) => item.id === ArtistItem.FAVORITE_SONGS,
+                    );
+
+                    if (!hasFavoriteSongs) {
+                        state.general.artistItems.push({
+                            disabled: false,
+                            id: ArtistItem.FAVORITE_SONGS,
+                        });
+                    }
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 23,
+            version: 24,
         },
     ),
 );

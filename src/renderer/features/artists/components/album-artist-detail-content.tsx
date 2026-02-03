@@ -450,6 +450,213 @@ const AlbumArtistMetadataTopSongs = ({
     );
 };
 
+interface AlbumArtistMetadataFavoriteSongsProps {
+    routeId: string;
+}
+
+const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavoriteSongsProps) => {
+    const { t } = useTranslation();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
+    const [showAll, setShowAll] = useState(false);
+    const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.SONG]?.table);
+    const currentSong = usePlayerSong();
+    const player = usePlayer();
+    const serverId = useCurrentServerId();
+
+    const favoriteSongsQuery = useQuery({
+        ...artistsQueries.favoriteSongs({
+            query: {
+                artistId: routeId,
+            },
+            serverId: serverId,
+        }),
+    });
+
+    const songs = useMemo(
+        () => favoriteSongsQuery.data?.items || [],
+        [favoriteSongsQuery.data?.items],
+    );
+
+    const columns = useMemo(() => {
+        return tableConfig?.columns || [];
+    }, [tableConfig?.columns]);
+
+    const filteredSongs = useMemo(() => {
+        const filtered = searchLibraryItems(songs, debouncedSearchTerm, LibraryItem.SONG);
+        // When searching, show all results. Otherwise, limit to 5 if not showing all
+        if (debouncedSearchTerm?.trim() || showAll) {
+            return filtered;
+        }
+        return filtered.slice(0, 5);
+    }, [songs, debouncedSearchTerm, showAll]);
+
+    const { handleColumnReordered } = useItemListColumnReorder({
+        itemListKey: ItemListKey.SONG,
+    });
+
+    const { handleColumnResized } = useItemListColumnResize({
+        itemListKey: ItemListKey.SONG,
+    });
+
+    const overrideControls: Partial<ItemControls> = useMemo(() => {
+        return {
+            onDoubleClick: ({ index, internalState, item, meta }) => {
+                if (!item) {
+                    return;
+                }
+
+                const playType = (meta?.playType as Play) || Play.NOW;
+                const items = internalState?.getData() as Song[];
+
+                if (index !== undefined) {
+                    player.addToQueueByData(items, playType, item.id);
+                }
+            },
+        };
+    }, [player]);
+
+    if (favoriteSongsQuery.isLoading || !favoriteSongsQuery.data) {
+        return null;
+    }
+
+    if (!favoriteSongsQuery?.data?.items?.length) return null;
+
+    if (!tableConfig || columns.length === 0) {
+        return (
+            <section>
+                <div className={styles.albumSectionTitle}>
+                    <Group>
+                        <TextTitle fw={700} order={3}>
+                            {t('page.albumArtistDetail.favoriteSongs', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </TextTitle>
+                        <Badge>{favoriteSongsQuery.data?.items?.length}</Badge>
+                    </Group>
+                    <div className={styles.albumSectionDividerContainer}>
+                        <div className={styles.albumSectionDivider} />
+                        <Button
+                            component={Link}
+                            size="compact-md"
+                            to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_FAVORITE_SONGS, {
+                                albumArtistId: routeId,
+                            })}
+                            uppercase
+                            variant="subtle"
+                        >
+                            {t('page.albumArtistDetail.viewAll', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </Button>
+                    </div>
+                </div>
+            </section>
+        );
+    }
+
+    const currentSongId = currentSong?.id;
+
+    return (
+        <section>
+            <Stack gap="md">
+                <div className={styles.albumSectionTitle}>
+                    <Group>
+                        <TextTitle fw={700} order={3}>
+                            {t('page.albumArtistDetail.favoriteSongs', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </TextTitle>
+                        <Badge>{favoriteSongsQuery.data?.items?.length}</Badge>
+                    </Group>
+                    <div className={styles.albumSectionDividerContainer}>
+                        <div className={styles.albumSectionDivider} />
+                        <Button
+                            component={Link}
+                            size="compact-md"
+                            to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_FAVORITE_SONGS, {
+                                albumArtistId: routeId,
+                            })}
+                            uppercase
+                            variant="subtle"
+                        >
+                            {t('page.albumArtistDetail.viewAll', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </Button>
+                    </div>
+                </div>
+                <Group gap="sm" w="100%">
+                    <TextInput
+                        flex={1}
+                        leftSection={<Icon icon="search" />}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder={t('common.search', { postProcess: 'sentenceCase' })}
+                        radius="xl"
+                        rightSection={
+                            searchTerm ? (
+                                <ActionIcon
+                                    icon="x"
+                                    onClick={() => setSearchTerm('')}
+                                    size="sm"
+                                    variant="transparent"
+                                />
+                            ) : null
+                        }
+                        styles={{
+                            input: {
+                                background: 'transparent',
+                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                            },
+                        }}
+                        value={searchTerm}
+                    />
+                    <ListConfigMenu
+                        displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
+                        listKey={ItemListKey.SONG}
+                        optionsConfig={{
+                            table: {
+                                itemsPerPage: { hidden: true },
+                                pagination: { hidden: true },
+                            },
+                        }}
+                        tableColumnsData={SONG_TABLE_COLUMNS}
+                    />
+                </Group>
+                <ItemTableList
+                    activeRowId={currentSongId}
+                    autoFitColumns={tableConfig.autoFitColumns}
+                    CellComponent={ItemTableListColumn}
+                    columns={columns}
+                    data={filteredSongs}
+                    enableAlternateRowColors={tableConfig.enableAlternateRowColors}
+                    enableDrag
+                    enableDragScroll={false}
+                    enableExpansion={false}
+                    enableHeader={tableConfig.enableHeader}
+                    enableHorizontalBorders={tableConfig.enableHorizontalBorders}
+                    enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
+                    enableSelection
+                    enableSelectionDialog={false}
+                    enableVerticalBorders={tableConfig.enableVerticalBorders}
+                    itemType={LibraryItem.SONG}
+                    onColumnReordered={handleColumnReordered}
+                    onColumnResized={handleColumnResized}
+                    overrideControls={overrideControls}
+                    size={tableConfig.size}
+                />
+                {!searchTerm.trim() && songs.length > 5 && !showAll && (
+                    <Group justify="center" w="100%">
+                        <Button onClick={() => setShowAll(true)} variant="subtle">
+                            {t('action.viewMore', { postProcess: 'sentenceCase' })}
+                        </Button>
+                    </Group>
+                )}
+            </Stack>
+        </section>
+    );
+};
+
 interface AlbumArtistMetadataExternalLinksProps {
     artistName?: string;
     externalLinks: boolean;
@@ -726,6 +933,11 @@ export const AlbumArtistDetailContent = ({
                                 detailQuery={detailQuery}
                                 routeId={routeId}
                             />
+                        </Grid.Col>
+                    )}
+                    {enabledItem.favoriteSongs && (
+                        <Grid.Col order={itemOrder.favoriteSongs} span={12}>
+                            <AlbumArtistMetadataFavoriteSongs routeId={routeId} />
                         </Grid.Col>
                     )}
                 </Grid>
