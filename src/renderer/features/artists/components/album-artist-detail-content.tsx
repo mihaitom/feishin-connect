@@ -295,40 +295,35 @@ const AlbumArtistMetadataTopSongsContent = ({
         };
     }, [player]);
 
+    const handlePlay = useCallback(
+        (playType: Play) => {
+            if (songs.length === 0) return;
+            player.addToQueueByData(songs, playType);
+        },
+        [songs, player],
+    );
+
+    const handlePlayNext = usePlayButtonClick({
+        onClick: () => handlePlay(Play.NEXT),
+        onLongPress: () => handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.NEXT]),
+    });
+    const handlePlayNow = usePlayButtonClick({
+        onClick: () => handlePlay(Play.NOW),
+        onLongPress: () => handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.NOW]),
+    });
+    const handlePlayLast = usePlayButtonClick({
+        onClick: () => handlePlay(Play.LAST),
+        onLongPress: () => handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.LAST]),
+    });
+
     if (topSongsQuery.isLoading || !topSongsQuery.data) {
         return null;
     }
 
     if (!topSongsQuery?.data?.items?.length) return null;
 
-    if (!tableConfig || columns.length === 0) {
-        return (
-            <section>
-                <div className={styles.albumSectionTitle}>
-                    <TextTitle fw={700} order={3}>
-                        {t('page.albumArtistDetail.topSongs', {
-                            postProcess: 'sentenceCase',
-                        })}
-                    </TextTitle>
-                    <div className={styles.albumSectionDividerContainer}>
-                        <div className={styles.albumSectionDivider} />
-                        <Button
-                            component={Link}
-                            size="compact-md"
-                            to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_TOP_SONGS, {
-                                albumArtistId: routeId,
-                            })}
-                            uppercase
-                            variant="subtle"
-                        >
-                            {t('page.albumArtistDetail.viewAll', {
-                                postProcess: 'sentenceCase',
-                            })}
-                        </Button>
-                    </div>
-                </div>
-            </section>
-        );
+    if (!tableConfig) {
+        return null;
     }
 
     const currentSongId = currentSong?.id;
@@ -337,11 +332,14 @@ const AlbumArtistMetadataTopSongsContent = ({
         <section>
             <Stack gap="md">
                 <div className={styles.albumSectionTitle}>
-                    <TextTitle fw={700} order={3}>
-                        {t('page.albumArtistDetail.topSongs', {
-                            postProcess: 'sentenceCase',
-                        })}
-                    </TextTitle>
+                    <Group>
+                        <TextTitle fw={700} order={3}>
+                            {t('page.albumArtistDetail.topSongs', {
+                                postProcess: 'sentenceCase',
+                            })}
+                        </TextTitle>
+                        <Badge>{songs.length}</Badge>
+                    </Group>
                     <div className={styles.albumSectionDividerContainer}>
                         <div className={styles.albumSectionDivider} />
                         <Button
@@ -357,6 +355,40 @@ const AlbumArtistMetadataTopSongsContent = ({
                                 postProcess: 'sentenceCase',
                             })}
                         </Button>
+                        {songs.length > 0 && (
+                            <ActionIconGroup>
+                                <PlayTooltip type={Play.NOW}>
+                                    <ActionIcon
+                                        icon="mediaPlay"
+                                        iconProps={{ size: 'md' }}
+                                        size="xs"
+                                        variant="subtle"
+                                        {...handlePlayNow.handlers}
+                                        {...handlePlayNow.props}
+                                    />
+                                </PlayTooltip>
+                                <PlayTooltip type={Play.NEXT}>
+                                    <ActionIcon
+                                        icon="mediaPlayNext"
+                                        iconProps={{ size: 'md' }}
+                                        size="xs"
+                                        variant="subtle"
+                                        {...handlePlayNext.handlers}
+                                        {...handlePlayNext.props}
+                                    />
+                                </PlayTooltip>
+                                <PlayTooltip type={Play.LAST}>
+                                    <ActionIcon
+                                        icon="mediaPlayLast"
+                                        iconProps={{ size: 'md' }}
+                                        size="xs"
+                                        variant="subtle"
+                                        {...handlePlayLast.handlers}
+                                        {...handlePlayLast.props}
+                                    />
+                                </PlayTooltip>
+                            </ActionIconGroup>
+                        )}
                     </div>
                 </div>
                 <Group gap="sm" w="100%">
@@ -516,43 +548,35 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
         };
     }, [player]);
 
+    const handlePlay = useCallback(
+        (playType: Play) => {
+            if (songs.length === 0) return;
+            player.addToQueueByData(songs, playType);
+        },
+        [songs, player],
+    );
+
+    const handlePlayNext = usePlayButtonClick({
+        onClick: () => handlePlay(Play.NEXT),
+        onLongPress: () => handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.NEXT]),
+    });
+    const handlePlayNow = usePlayButtonClick({
+        onClick: () => handlePlay(Play.NOW),
+        onLongPress: () => handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.NOW]),
+    });
+    const handlePlayLast = usePlayButtonClick({
+        onClick: () => handlePlay(Play.LAST),
+        onLongPress: () => handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.LAST]),
+    });
+
     if (favoriteSongsQuery.isLoading || !favoriteSongsQuery.data) {
         return null;
     }
 
     if (!favoriteSongsQuery?.data?.items?.length) return null;
 
-    if (!tableConfig || columns.length === 0) {
-        return (
-            <section>
-                <div className={styles.albumSectionTitle}>
-                    <Group>
-                        <TextTitle fw={700} order={3}>
-                            {t('page.albumArtistDetail.favoriteSongs', {
-                                postProcess: 'sentenceCase',
-                            })}
-                        </TextTitle>
-                        <Badge>{favoriteSongsQuery.data?.items?.length}</Badge>
-                    </Group>
-                    <div className={styles.albumSectionDividerContainer}>
-                        <div className={styles.albumSectionDivider} />
-                        <Button
-                            component={Link}
-                            size="compact-md"
-                            to={generatePath(AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL_FAVORITE_SONGS, {
-                                albumArtistId: routeId,
-                            })}
-                            uppercase
-                            variant="subtle"
-                        >
-                            {t('page.albumArtistDetail.viewAll', {
-                                postProcess: 'sentenceCase',
-                            })}
-                        </Button>
-                    </div>
-                </div>
-            </section>
-        );
+    if (!tableConfig) {
+        return null;
     }
 
     const currentSongId = currentSong?.id;
@@ -584,6 +608,40 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
                                 postProcess: 'sentenceCase',
                             })}
                         </Button>
+                        {songs.length > 0 && (
+                            <ActionIconGroup>
+                                <PlayTooltip type={Play.NOW}>
+                                    <ActionIcon
+                                        icon="mediaPlay"
+                                        iconProps={{ size: 'md' }}
+                                        size="xs"
+                                        variant="subtle"
+                                        {...handlePlayNow.handlers}
+                                        {...handlePlayNow.props}
+                                    />
+                                </PlayTooltip>
+                                <PlayTooltip type={Play.NEXT}>
+                                    <ActionIcon
+                                        icon="mediaPlayNext"
+                                        iconProps={{ size: 'md' }}
+                                        size="xs"
+                                        variant="subtle"
+                                        {...handlePlayNext.handlers}
+                                        {...handlePlayNext.props}
+                                    />
+                                </PlayTooltip>
+                                <PlayTooltip type={Play.LAST}>
+                                    <ActionIcon
+                                        icon="mediaPlayLast"
+                                        iconProps={{ size: 'md' }}
+                                        size="xs"
+                                        variant="subtle"
+                                        {...handlePlayLast.handlers}
+                                        {...handlePlayLast.props}
+                                    />
+                                </PlayTooltip>
+                            </ActionIconGroup>
+                        )}
                     </div>
                 </div>
                 <Group gap="sm" w="100%">
