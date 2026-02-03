@@ -13,6 +13,7 @@ import {
 import JellyfinIcon from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeIcon from '/@/renderer/features/servers/assets/navidrome.png';
 import SubsonicIcon from '/@/renderer/features/servers/assets/opensubsonic.png';
+import { IgnoreCorsSslSwitches } from '/@/renderer/features/servers/components/ignore-cors-ssl-switches';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -229,6 +230,7 @@ const LoginRoute = () => {
                                     variant="filled"
                                     {...form.getInputProps('password')}
                                 />
+                                <IgnoreCorsSslSwitches />
                             </Stack>
 
                             <Button
