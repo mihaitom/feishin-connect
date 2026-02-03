@@ -345,7 +345,6 @@ const AlbumMetadataExternalLinks = ({
                         }}
                         radius="md"
                         rel="noopener noreferrer"
-                        size="md"
                         target="_blank"
                         tooltip={{
                             label: t('action.openIn.musicbrainz'),
