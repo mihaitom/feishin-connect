@@ -133,7 +133,7 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
             const root = document.documentElement;
             root.style.setProperty(
                 '--theme-content-font-family',
-                'dynamic-font, "Noto Sans JP", sans-serif',
+                'dynamic-font, "Noto Sans JP", "Noto Sans Hebrew", sans-serif',
             );
 
             if (!textStyleRef.current) {
@@ -150,7 +150,7 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
             const root = document.documentElement;
             root.style.setProperty(
                 '--theme-content-font-family',
-                'dynamic-font, "Noto Sans JP", sans-serif',
+                'dynamic-font, "Noto Sans JP", "Noto Sans Hebrew", sans-serif',
             );
 
             if (!textStyleRef.current) {
@@ -167,7 +167,7 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
             const root = document.documentElement;
             root.style.setProperty(
                 '--theme-content-font-family',
-                `${builtIn}, "Noto Sans JP", sans-serif`,
+                `${builtIn}, "Noto Sans JP", "Noto Sans Hebrew", sans-serif`,
             );
         }
     }, [builtIn, custom, system, type]);
