@@ -12,6 +12,7 @@ import {
     AlbumListResponse,
     ArtistListResponse,
     LibraryItem,
+    PlaylistSongListResponse,
     SetRatingArgs,
     Song,
     SongDetailResponse,
@@ -489,6 +490,30 @@ export const applyRatingOptimisticUpdates = (
                                 return { ...prev, userRating: rating };
                             }
                             return prev;
+                        },
+                    });
+                }
+            });
+
+            const playlistSongListQueryKey = queryKeys.playlists.songList(
+                variables.apiClientProps.serverId,
+            );
+            const playlistSongListQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: playlistSongListQueryKey,
+            });
+
+            playlistSongListQueries.forEach(([queryKey, data]) => {
+                if (data) {
+                    pendingUpdates.push({
+                        previousData: data,
+                        queryKey,
+                        updater: (prev: PlaylistSongListResponse | undefined) => {
+                            if (!prev) return prev;
+                            const updatedItems = updateItemInArray(prev.items, itemIdSet, (item) =>
+                                createRatingUpdater<Song>(item),
+                            );
+                            return updatedItems ? { ...prev, items: updatedItems } : prev;
                         },
                     });
                 }
