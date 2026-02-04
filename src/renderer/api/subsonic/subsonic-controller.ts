@@ -1361,7 +1361,7 @@ export const SubsonicController: InternalControllerEndpoint = {
                 throw new Error('Failed to get song list');
             }
 
-            const allResults =
+            let allResults =
                 (res.body.starred?.song || []).map((song) =>
                     ssNormalize.song(
                         song,
@@ -1370,6 +1370,15 @@ export const SubsonicController: InternalControllerEndpoint = {
                         context?.pathReplaceWith,
                     ),
                 ) || [];
+
+            const filterArtistIds = query.albumArtistIds || query.artistIds;
+
+            if (filterArtistIds?.length) {
+                const idSet = new Set(filterArtistIds);
+                allResults = allResults.filter((song) =>
+                    song.albumArtists?.some((aa) => idSet.has(aa.id)),
+                );
+            }
 
             return sortAndPaginate(allResults, {
                 limit: query.limit,
