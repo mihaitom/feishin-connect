@@ -26,6 +26,7 @@ export interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 's
     imageContainerProps?: Omit<ImageContainerProps, 'children'>;
     includeLoader?: boolean;
     includeUnloader?: boolean;
+    isExplicit?: boolean;
     src: string | undefined;
     thumbHash?: string;
     unloaderIcon?: keyof typeof AppIcon;
@@ -34,6 +35,7 @@ export interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 's
 interface ImageContainerProps extends HTMLAttributes<HTMLDivElement> {
     children: ReactNode;
     enableAnimation?: boolean;
+    isExplicit?: boolean;
 }
 
 interface ImageLoaderProps {
@@ -58,6 +60,7 @@ export function BaseImage({
     imageContainerProps,
     includeLoader = true,
     includeUnloader = true,
+    isExplicit = false,
     src,
     unloaderIcon = 'emptyImage',
     ...props
@@ -72,6 +75,7 @@ export function BaseImage({
                 imageContainerProps={imageContainerProps}
                 includeLoader={includeLoader}
                 includeUnloader={includeUnloader}
+                isExplicit={isExplicit}
                 src={src}
                 unloaderIcon={unloaderIcon}
                 {...props}
@@ -88,6 +92,7 @@ export function BaseImage({
                 imageContainerProps={imageContainerProps}
                 includeLoader={includeLoader}
                 includeUnloader={includeUnloader}
+                isExplicit={isExplicit}
                 src={src}
                 unloaderIcon={unloaderIcon}
                 {...props}
@@ -101,6 +106,7 @@ export function BaseImage({
         <ImageContainer
             className={clsx(containerClassName, containerPropsClassName)}
             enableAnimation={enableAnimation}
+            isExplicit={isExplicit}
             {...restContainerProps}
         >
             {src ? (
@@ -135,6 +141,7 @@ function ImageWithDebounce({
     imageContainerProps,
     includeLoader,
     includeUnloader,
+    isExplicit = false,
     src,
     unloaderIcon,
     ...props
@@ -176,6 +183,7 @@ function ImageWithDebounce({
             <ImageContainer
                 className={clsx(containerClassName, containerPropsClassName)}
                 enableAnimation={enableAnimation}
+                isExplicit={isExplicit}
                 ref={ref}
                 {...restContainerProps}
             >
@@ -209,6 +217,7 @@ function ImageWithDebounce({
         <ImageContainer
             className={clsx(containerClassName, containerPropsClassName)}
             enableAnimation={enableAnimation}
+            isExplicit={isExplicit}
             {...restContainerProps}
         >
             {effectiveSrc ? (
@@ -244,6 +253,7 @@ function ImageWithViewport({
     imageContainerProps,
     includeLoader,
     includeUnloader,
+    isExplicit = false,
     src,
     unloaderIcon,
     ...props
@@ -275,6 +285,7 @@ function ImageWithViewport({
         <ImageContainer
             className={clsx(containerClassName, containerPropsClassName)}
             enableAnimation={enableAnimation}
+            isExplicit={isExplicit}
             ref={ref}
             {...restContainerProps}
         >
@@ -347,19 +358,17 @@ export const Image = memo(BaseImage);
 
 const ImageContainer = forwardRef(
     (
-        { children, className, enableAnimation, ...props }: ImageContainerProps,
+        { children, className, isExplicit, ...props }: ImageContainerProps,
         ref: ForwardedRef<HTMLDivElement>,
     ) => {
-        if (!enableAnimation) {
-            return (
-                <div className={clsx(styles.imageContainer, className)} ref={ref} {...props}>
-                    {children}
-                </div>
-            );
-        }
-
         return (
-            <div className={clsx(styles.imageContainer, className)} ref={ref} {...props}>
+            <div
+                className={clsx(styles.imageContainer, className, {
+                    [styles.censored]: isExplicit,
+                })}
+                ref={ref}
+                {...props}
+            >
                 {children}
             </div>
         );

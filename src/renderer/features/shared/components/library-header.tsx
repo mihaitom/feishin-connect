@@ -27,7 +27,7 @@ import { BaseImage } from '/@/shared/components/image/image';
 import { Rating } from '/@/shared/components/rating/rating';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { ExplicitStatus, LibraryItem } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
 interface LibraryHeaderProps {
@@ -37,6 +37,7 @@ interface LibraryHeaderProps {
     imageUrl?: null | string;
     item: {
         children?: ReactNode;
+        explicitStatus?: ExplicitStatus | null;
         imageId?: null | string;
         imageUrl?: null | string;
         route: string;
@@ -108,6 +109,7 @@ export const LibraryHeader = forwardRef(
                             enableDebounce={false}
                             enableViewport={false}
                             fetchPriority="high"
+                            isExplicit={item.explicitStatus === ExplicitStatus.EXPLICIT}
                             src={imageUrl}
                             style={{
                                 maxHeight: '100%',
@@ -120,7 +122,7 @@ export const LibraryHeader = forwardRef(
                 ),
                 fullScreen: true,
             });
-        }, [item.imageId, item.type]);
+        }, [item.explicitStatus, item.imageId, item.type]);
 
         return (
             <div className={clsx(styles.libraryHeader, containerClassName)} ref={ref}>
@@ -142,6 +144,7 @@ export const LibraryHeader = forwardRef(
                             containerClassName={styles.image}
                             enableDebounce={false}
                             enableViewport={false}
+                            explicitStatus={item.explicitStatus ?? null}
                             fetchPriority="high"
                             id={item.imageId}
                             itemType={item.type as LibraryItem}

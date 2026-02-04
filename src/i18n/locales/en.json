@@ -936,6 +936,8 @@
         "showLyricsInSidebar": "show lyrics in player sidebar",
         "showRatings_description": "controls if the star ratings feature shows up in the interface",
         "showRatings": "show star ratings",
+        "blurExplicitImages": "blur explicit images",
+        "blurExplicitImages_description": "album and song artwork tagged as explicit will be blurred",
         "enableGridMultiSelect": "enable grid multi-select",
         "enableGridMultiSelect_description": "when enabled, allows selecting multiple items in grid views. when disabled, clicking grid item images will navigate to the item page",
         "showVisualizerInSidebar_description": "a panel will be added to the player sidebar that displays the visualizer",

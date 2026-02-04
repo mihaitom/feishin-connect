@@ -362,6 +362,9 @@ const CompactItemCard = ({
                             [styles.isRound]: isRound,
                         })}
                         enableDebounce={false}
+                        explicitStatus={
+                            'explicitStatus' in data && data ? data.explicitStatus : null
+                        }
                         id={data?.imageId}
                         itemType={itemType}
                         src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
@@ -596,6 +599,9 @@ const DefaultItemCard = ({
                     <ItemImage
                         className={clsx(styles.image, { [styles.isRound]: isRound })}
                         enableDebounce={false}
+                        explicitStatus={
+                            'explicitStatus' in data && data ? data.explicitStatus : null
+                        }
                         id={data?.imageId}
                         itemType={itemType}
                         src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
@@ -893,6 +899,9 @@ const PosterItemCard = ({
                     <ItemImage
                         className={clsx(styles.image, { [styles.isRound]: isRound })}
                         enableDebounce={false}
+                        explicitStatus={
+                            'explicitStatus' in data && data ? data.explicitStatus : null
+                        }
                         id={(data as { imageId: string })?.imageId}
                         itemType={itemType}
                         src={(data as { imageUrl: string })?.imageUrl}

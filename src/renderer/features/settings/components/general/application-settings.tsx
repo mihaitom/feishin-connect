@@ -624,6 +624,28 @@ export const ApplicationSettings = memo(() => {
         {
             control: (
                 <Switch
+                    aria-label={t('setting.blurExplicitImages', { postProcess: 'sentenceCase' })}
+                    defaultChecked={settings.blurExplicitImages}
+                    onChange={(e) =>
+                        setSettings({
+                            general: {
+                                ...settings,
+                                blurExplicitImages: e.currentTarget.checked,
+                            },
+                        })
+                    }
+                />
+            ),
+            description: t('setting.blurExplicitImages', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: false,
+            title: t('setting.blurExplicitImages', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Switch
                     aria-label={t('setting.enableGridMultiSelect', { postProcess: 'sentenceCase' })}
                     defaultChecked={settings.enableGridMultiSelect}
                     onChange={(e) =>
