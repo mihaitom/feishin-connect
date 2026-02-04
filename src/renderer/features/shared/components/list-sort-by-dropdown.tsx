@@ -130,7 +130,7 @@ export const ListSortByDropdownControlled = ({
     );
 };
 
-const CLIENT_SIDE_SONG_FILTERS = [
+export const CLIENT_SIDE_SONG_FILTERS = [
     {
         defaultOrder: SortOrder.ASC,
         name: i18n.t('filter.id', { postProcess: 'titleCase' }),
