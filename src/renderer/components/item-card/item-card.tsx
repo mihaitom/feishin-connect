@@ -28,6 +28,7 @@ import {
     formatRating,
 } from '/@/renderer/utils/format';
 import { SEPARATOR_STRING } from '/@/shared/api/utils';
+import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Separator } from '/@/shared/components/separator/separator';
@@ -1010,6 +1011,7 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
     return [
         {
             format: (data) => {
+                const explicitStatus = 'explicitStatus' in data ? data.explicitStatus : null;
                 if ('name' in data && data.name) {
                     if ('id' in data && data.id) {
                         if ('_itemType' in data) {
@@ -1022,6 +1024,7 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
                                                 albumId: data.id,
                                             })}
                                         >
+                                            <ExplicitIndicator explicitStatus={explicitStatus} />
                                             {data.name}
                                         </Link>
                                     );
@@ -1036,6 +1039,7 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
                                                 },
                                             )}
                                         >
+                                            <ExplicitIndicator explicitStatus={explicitStatus} />
                                             {data.name}
                                         </Link>
                                     );
@@ -1062,11 +1066,21 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
                                         </Link>
                                     );
                                 default:
-                                    return data.name;
+                                    return (
+                                        <>
+                                            <ExplicitIndicator explicitStatus={explicitStatus} />
+                                            {data.name}
+                                        </>
+                                    );
                             }
                         }
                     }
-                    return data.name;
+                    return (
+                        <>
+                            <ExplicitIndicator explicitStatus={explicitStatus} />
+                            {data.name}
+                        </>
+                    );
                 }
                 return '';
             },
