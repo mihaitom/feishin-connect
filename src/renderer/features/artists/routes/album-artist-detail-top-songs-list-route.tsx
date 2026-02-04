@@ -16,6 +16,7 @@ import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-e
 import { usePlayerSong } from '/@/renderer/store';
 import { useCurrentServer } from '/@/renderer/store/auth.store';
 import { useSettingsStore } from '/@/renderer/store/settings.store';
+import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { ItemListKey, Play } from '/@/shared/types/types';
 
@@ -28,6 +29,11 @@ const AlbumArtistDetailTopSongsListRoute = () => {
     const server = useCurrentServer();
     const pageKey = LibraryItem.SONG;
 
+    const [topSongsQueryType] = useLocalStorage<'community' | 'personal'>({
+        defaultValue: 'community',
+        key: 'album-artist-top-songs-query-type',
+    });
+
     const detailQuery = useQuery(
         artistsQueries.albumArtistDetail({
             query: { id: routeId },
@@ -38,7 +44,11 @@ const AlbumArtistDetailTopSongsListRoute = () => {
     const topSongsQuery = useQuery(
         artistsQueries.topSongs({
             options: { enabled: !!detailQuery?.data?.name },
-            query: { artist: detailQuery?.data?.name || '', artistId: routeId },
+            query: {
+                artist: detailQuery?.data?.name || '',
+                artistId: routeId,
+                type: topSongsQueryType,
+            },
             serverId: server?.id,
         }),
     );

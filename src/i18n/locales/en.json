@@ -425,7 +425,9 @@
             "viewDiscography": "view discography",
             "relatedArtists": "related $t(entity.artist, {\"count\": 2})",
             "topSongs": "top songs",
+            "topSongsCommunity": "community",
             "topSongsFrom": "top songs from {{title}}",
+            "topSongsPersonal": "personal",
             "favoriteSongsFrom": "favorite songs from {{title}}",
             "viewAll": "view all",
             "viewAllTracks": "view all $t(entity.track, {\"count\": 2})"

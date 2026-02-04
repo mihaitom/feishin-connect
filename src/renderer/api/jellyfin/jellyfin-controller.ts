@@ -1281,17 +1281,26 @@ export const JellyfinController: InternalControllerEndpoint = {
             throw new Error('No userId found');
         }
 
+        const type = query.type === 'personal' ? 'personal' : 'community';
+
         const res = await jfApiClient(apiClientProps).getTopSongsList({
             params: {
                 userId: apiClientProps.server?.userId,
             },
             query: {
                 ArtistIds: query.artistId,
-                Fields: 'Genres, DateCreated, MediaSources, ParentId, SortName',
+                Fields:
+                    type === 'personal'
+                        ? 'Genres, DateCreated, MediaSources, ParentId, SortName, UserData'
+                        : 'Genres, DateCreated, MediaSources, ParentId, SortName',
+
                 IncludeItemTypes: 'Audio',
                 Limit: query.limit,
                 Recursive: true,
-                SortBy: 'CommunityRating,SortName',
+                SortBy:
+                    type === 'personal'
+                        ? JFSongListSort.PLAY_COUNT
+                        : JFSongListSort.COMMUNITY_RATING,
                 SortOrder: 'Descending',
                 UserId: apiClientProps.server?.userId,
             },
@@ -1301,15 +1310,31 @@ export const JellyfinController: InternalControllerEndpoint = {
             throw new Error('Failed to get top song list');
         }
 
-        return {
-            items: res.body.Items.map((item) =>
-                jfNormalize.song(
-                    item,
-                    apiClientProps.server,
-                    args.context?.pathReplace,
-                    args.context?.pathReplaceWith,
-                ),
+        const items = res.body.Items.map((item) =>
+            jfNormalize.song(
+                item,
+                apiClientProps.server,
+                args.context?.pathReplace,
+                args.context?.pathReplaceWith,
             ),
+        );
+
+        if (type === 'personal') {
+            const sorted = orderBy(
+                items,
+                ['playCount', 'albumId', 'trackNumber'],
+                ['desc', 'asc', 'asc'],
+            );
+
+            return {
+                items: sorted,
+                startIndex: 0,
+                totalRecordCount: res.body.TotalRecordCount,
+            };
+        }
+
+        return {
+            items,
             startIndex: 0,
             totalRecordCount: res.body.TotalRecordCount,
         };

@@ -1316,6 +1316,7 @@ export type TopSongListQuery = {
     artist: string;
     artistId: string;
     limit?: number;
+    type?: 'community' | 'personal';
 };
 
 // Top Songs List

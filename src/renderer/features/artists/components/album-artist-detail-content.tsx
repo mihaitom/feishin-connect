@@ -66,6 +66,7 @@ import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Grid } from '/@/shared/components/grid/grid';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -74,6 +75,7 @@ import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
 import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
 import { useHotkeys } from '/@/shared/hooks/use-hotkeys';
+import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 import {
     Album,
     AlbumArtist,
@@ -236,6 +238,10 @@ const AlbumArtistMetadataTopSongsContent = ({
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
     const [showAll, setShowAll] = useState(false);
+    const [topSongsQueryType, setTopSongsQueryType] = useLocalStorage<'community' | 'personal'>({
+        defaultValue: 'community',
+        key: 'album-artist-top-songs-query-type',
+    });
     const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.SONG]?.table);
     const currentSong = usePlayerSong();
     const player = usePlayer();
@@ -249,6 +255,7 @@ const AlbumArtistMetadataTopSongsContent = ({
             query: {
                 artist: detailQuery.data?.name || '',
                 artistId: routeId,
+                type: topSongsQueryType,
             },
             serverId: serverId,
         }),
@@ -316,15 +323,9 @@ const AlbumArtistMetadataTopSongsContent = ({
         onLongPress: () => handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.LAST]),
     });
 
-    if (topSongsQuery.isLoading || !topSongsQuery.data) {
-        return null;
-    }
+    const isLoading = topSongsQuery.isLoading || !topSongsQuery.data;
 
-    if (!topSongsQuery?.data?.items?.length) return null;
-
-    if (!tableConfig) {
-        return null;
-    }
+    if (!isLoading && !tableConfig) return null;
 
     const currentSongId = currentSong?.id;
 
@@ -338,7 +339,7 @@ const AlbumArtistMetadataTopSongsContent = ({
                                 postProcess: 'sentenceCase',
                             })}
                         </TextTitle>
-                        <Badge>{songs.length}</Badge>
+                        {!isLoading && <Badge>{songs.length}</Badge>}
                     </Group>
                     <div className={styles.albumSectionDividerContainer}>
                         <div className={styles.albumSectionDivider} />
@@ -365,6 +366,7 @@ const AlbumArtistMetadataTopSongsContent = ({
                                         variant="subtle"
                                         {...handlePlayNow.handlers}
                                         {...handlePlayNow.props}
+                                        disabled={isLoading}
                                     />
                                 </PlayTooltip>
                                 <PlayTooltip type={Play.NEXT}>
@@ -375,6 +377,7 @@ const AlbumArtistMetadataTopSongsContent = ({
                                         variant="subtle"
                                         {...handlePlayNext.handlers}
                                         {...handlePlayNext.props}
+                                        disabled={isLoading}
                                     />
                                 </PlayTooltip>
                                 <PlayTooltip type={Play.LAST}>
@@ -385,78 +388,108 @@ const AlbumArtistMetadataTopSongsContent = ({
                                         variant="subtle"
                                         {...handlePlayLast.handlers}
                                         {...handlePlayLast.props}
+                                        disabled={isLoading}
                                     />
                                 </PlayTooltip>
                             </ActionIconGroup>
                         )}
                     </div>
                 </div>
-                <Group gap="sm" w="100%">
-                    <TextInput
-                        flex={1}
-                        leftSection={<Icon icon="search" />}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder={t('common.search', { postProcess: 'sentenceCase' })}
-                        radius="xl"
-                        rightSection={
-                            searchTerm ? (
-                                <ActionIcon
-                                    icon="x"
-                                    onClick={() => setSearchTerm('')}
-                                    size="sm"
-                                    variant="transparent"
-                                />
-                            ) : null
-                        }
-                        styles={{
-                            input: {
-                                background: 'transparent',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
-                            },
-                        }}
-                        value={searchTerm}
-                    />
-                    <ListConfigMenu
-                        displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
-                        listKey={ItemListKey.SONG}
-                        optionsConfig={{
-                            table: {
-                                itemsPerPage: { hidden: true },
-                                pagination: { hidden: true },
-                            },
-                        }}
-                        tableColumnsData={SONG_TABLE_COLUMNS}
-                    />
-                </Group>
-                <ItemTableList
-                    activeRowId={currentSongId}
-                    autoFitColumns={tableConfig.autoFitColumns}
-                    CellComponent={ItemTableListColumn}
-                    columns={columns}
-                    data={filteredSongs}
-                    enableAlternateRowColors={tableConfig.enableAlternateRowColors}
-                    enableDrag
-                    enableDragScroll={false}
-                    enableExpansion={false}
-                    enableHeader={tableConfig.enableHeader}
-                    enableHorizontalBorders={tableConfig.enableHorizontalBorders}
-                    enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
-                    enableSelection
-                    enableSelectionDialog={false}
-                    enableVerticalBorders={tableConfig.enableVerticalBorders}
-                    itemType={LibraryItem.SONG}
-                    onColumnReordered={handleColumnReordered}
-                    onColumnResized={handleColumnResized}
-                    overrideControls={overrideControls}
-                    size={tableConfig.size}
-                />
-                {!searchTerm.trim() && songs.length > 5 && !showAll && (
-                    <Group justify="center" w="100%">
-                        <Button onClick={() => setShowAll(true)} variant="subtle">
-                            {t('action.viewMore', { postProcess: 'sentenceCase' })}
-                        </Button>
+                {isLoading ? (
+                    <Group justify="center" py="md">
+                        <Spinner container />
                     </Group>
-                )}
+                ) : tableConfig ? (
+                    <>
+                        <Group gap="sm" w="100%">
+                            <TextInput
+                                flex={1}
+                                leftSection={<Icon icon="search" />}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder={t('common.search', { postProcess: 'sentenceCase' })}
+                                radius="xl"
+                                rightSection={
+                                    searchTerm ? (
+                                        <ActionIcon
+                                            icon="x"
+                                            onClick={() => setSearchTerm('')}
+                                            size="sm"
+                                            variant="transparent"
+                                        />
+                                    ) : null
+                                }
+                                styles={{
+                                    input: {
+                                        background: 'transparent',
+                                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                                    },
+                                }}
+                                value={searchTerm}
+                            />
+                            <SegmentedControl
+                                data={[
+                                    {
+                                        label: t('page.albumArtistDetail.topSongsCommunity', {
+                                            postProcess: 'sentenceCase',
+                                        }),
+                                        value: 'community',
+                                    },
+                                    {
+                                        label: t('page.albumArtistDetail.topSongsPersonal', {
+                                            postProcess: 'sentenceCase',
+                                        }),
+                                        value: 'personal',
+                                    },
+                                ]}
+                                onChange={(value) =>
+                                    setTopSongsQueryType(value as 'community' | 'personal')
+                                }
+                                size="xs"
+                                value={topSongsQueryType}
+                            />
+                            <ListConfigMenu
+                                displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
+                                listKey={ItemListKey.SONG}
+                                optionsConfig={{
+                                    table: {
+                                        itemsPerPage: { hidden: true },
+                                        pagination: { hidden: true },
+                                    },
+                                }}
+                                tableColumnsData={SONG_TABLE_COLUMNS}
+                            />
+                        </Group>
+                        <ItemTableList
+                            activeRowId={currentSongId}
+                            autoFitColumns={tableConfig.autoFitColumns}
+                            CellComponent={ItemTableListColumn}
+                            columns={columns}
+                            data={filteredSongs}
+                            enableAlternateRowColors={tableConfig.enableAlternateRowColors}
+                            enableDrag
+                            enableDragScroll={false}
+                            enableExpansion={false}
+                            enableHeader={tableConfig.enableHeader}
+                            enableHorizontalBorders={tableConfig.enableHorizontalBorders}
+                            enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
+                            enableSelection
+                            enableSelectionDialog={false}
+                            enableVerticalBorders={tableConfig.enableVerticalBorders}
+                            itemType={LibraryItem.SONG}
+                            onColumnReordered={handleColumnReordered}
+                            onColumnResized={handleColumnResized}
+                            overrideControls={overrideControls}
+                            size={tableConfig.size}
+                        />
+                        {!searchTerm.trim() && songs.length > 5 && !showAll && (
+                            <Group justify="center" w="100%">
+                                <Button onClick={() => setShowAll(true)} variant="subtle">
+                                    {t('action.viewMore', { postProcess: 'sentenceCase' })}
+                                </Button>
+                            </Group>
+                        )}
+                    </>
+                ) : null}
             </Stack>
         </section>
     );
@@ -569,15 +602,9 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
         onLongPress: () => handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.LAST]),
     });
 
-    if (favoriteSongsQuery.isLoading || !favoriteSongsQuery.data) {
-        return null;
-    }
+    const isLoading = favoriteSongsQuery.isLoading || !favoriteSongsQuery.data;
 
-    if (!favoriteSongsQuery?.data?.items?.length) return null;
-
-    if (!tableConfig) {
-        return null;
-    }
+    if (!isLoading && !tableConfig) return null;
 
     const currentSongId = currentSong?.id;
 
@@ -591,7 +618,7 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
                                 postProcess: 'sentenceCase',
                             })}
                         </TextTitle>
-                        <Badge>{favoriteSongsQuery.data?.items?.length}</Badge>
+                        {!isLoading && <Badge>{songs.length}</Badge>}
                     </Group>
                     <div className={styles.albumSectionDividerContainer}>
                         <div className={styles.albumSectionDivider} />
@@ -618,6 +645,7 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
                                         variant="subtle"
                                         {...handlePlayNow.handlers}
                                         {...handlePlayNow.props}
+                                        disabled={isLoading}
                                     />
                                 </PlayTooltip>
                                 <PlayTooltip type={Play.NEXT}>
@@ -628,6 +656,7 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
                                         variant="subtle"
                                         {...handlePlayNext.handlers}
                                         {...handlePlayNext.props}
+                                        disabled={isLoading}
                                     />
                                 </PlayTooltip>
                                 <PlayTooltip type={Play.LAST}>
@@ -638,78 +667,87 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
                                         variant="subtle"
                                         {...handlePlayLast.handlers}
                                         {...handlePlayLast.props}
+                                        disabled={isLoading}
                                     />
                                 </PlayTooltip>
                             </ActionIconGroup>
                         )}
                     </div>
                 </div>
-                <Group gap="sm" w="100%">
-                    <TextInput
-                        flex={1}
-                        leftSection={<Icon icon="search" />}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder={t('common.search', { postProcess: 'sentenceCase' })}
-                        radius="xl"
-                        rightSection={
-                            searchTerm ? (
-                                <ActionIcon
-                                    icon="x"
-                                    onClick={() => setSearchTerm('')}
-                                    size="sm"
-                                    variant="transparent"
-                                />
-                            ) : null
-                        }
-                        styles={{
-                            input: {
-                                background: 'transparent',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
-                            },
-                        }}
-                        value={searchTerm}
-                    />
-                    <ListConfigMenu
-                        displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
-                        listKey={ItemListKey.SONG}
-                        optionsConfig={{
-                            table: {
-                                itemsPerPage: { hidden: true },
-                                pagination: { hidden: true },
-                            },
-                        }}
-                        tableColumnsData={SONG_TABLE_COLUMNS}
-                    />
-                </Group>
-                <ItemTableList
-                    activeRowId={currentSongId}
-                    autoFitColumns={tableConfig.autoFitColumns}
-                    CellComponent={ItemTableListColumn}
-                    columns={columns}
-                    data={filteredSongs}
-                    enableAlternateRowColors={tableConfig.enableAlternateRowColors}
-                    enableDrag
-                    enableDragScroll={false}
-                    enableExpansion={false}
-                    enableHeader={tableConfig.enableHeader}
-                    enableHorizontalBorders={tableConfig.enableHorizontalBorders}
-                    enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
-                    enableSelection
-                    enableSelectionDialog={false}
-                    enableVerticalBorders={tableConfig.enableVerticalBorders}
-                    itemType={LibraryItem.SONG}
-                    onColumnReordered={handleColumnReordered}
-                    onColumnResized={handleColumnResized}
-                    overrideControls={overrideControls}
-                    size={tableConfig.size}
-                />
-                {!searchTerm.trim() && songs.length > 5 && !showAll && (
-                    <Group justify="center" w="100%">
-                        <Button onClick={() => setShowAll(true)} variant="subtle">
-                            {t('action.viewMore', { postProcess: 'sentenceCase' })}
-                        </Button>
+                {isLoading ? (
+                    <Group justify="center" py="md">
+                        <Spinner />
                     </Group>
-                )}
+                ) : tableConfig ? (
+                    <>
+                        <Group gap="sm" w="100%">
+                            <TextInput
+                                flex={1}
+                                leftSection={<Icon icon="search" />}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder={t('common.search', { postProcess: 'sentenceCase' })}
+                                radius="xl"
+                                rightSection={
+                                    searchTerm ? (
+                                        <ActionIcon
+                                            icon="x"
+                                            onClick={() => setSearchTerm('')}
+                                            size="sm"
+                                            variant="transparent"
+                                        />
+                                    ) : null
+                                }
+                                styles={{
+                                    input: {
+                                        background: 'transparent',
+                                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                                    },
+                                }}
+                                value={searchTerm}
+                            />
+                            <ListConfigMenu
+                                displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
+                                listKey={ItemListKey.SONG}
+                                optionsConfig={{
+                                    table: {
+                                        itemsPerPage: { hidden: true },
+                                        pagination: { hidden: true },
+                                    },
+                                }}
+                                tableColumnsData={SONG_TABLE_COLUMNS}
+                            />
+                        </Group>
+                        <ItemTableList
+                            activeRowId={currentSongId}
+                            autoFitColumns={tableConfig.autoFitColumns}
+                            CellComponent={ItemTableListColumn}
+                            columns={columns}
+                            data={filteredSongs}
+                            enableAlternateRowColors={tableConfig.enableAlternateRowColors}
+                            enableDrag
+                            enableDragScroll={false}
+                            enableExpansion={false}
+                            enableHeader={tableConfig.enableHeader}
+                            enableHorizontalBorders={tableConfig.enableHorizontalBorders}
+                            enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
+                            enableSelection
+                            enableSelectionDialog={false}
+                            enableVerticalBorders={tableConfig.enableVerticalBorders}
+                            itemType={LibraryItem.SONG}
+                            onColumnReordered={handleColumnReordered}
+                            onColumnResized={handleColumnResized}
+                            overrideControls={overrideControls}
+                            size={tableConfig.size}
+                        />
+                        {!searchTerm.trim() && songs.length > 5 && !showAll && (
+                            <Group justify="center" w="100%">
+                                <Button onClick={() => setShowAll(true)} variant="subtle">
+                                    {t('action.viewMore', { postProcess: 'sentenceCase' })}
+                                </Button>
+                            </Group>
+                        )}
+                    </>
+                ) : null}
             </Stack>
         </section>
     );

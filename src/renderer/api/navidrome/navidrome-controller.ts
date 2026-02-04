@@ -1,4 +1,5 @@
 import { set } from 'idb-keyval';
+import orderBy from 'lodash/orderBy';
 
 import { ndApiClient } from '/@/renderer/api/navidrome/navidrome-api';
 import { ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
@@ -17,7 +18,9 @@ import {
     PlaylistSongListArgs,
     PlaylistSongListResponse,
     ServerListItemWithCredential,
+    SongListSort,
     songListSortMap,
+    SortOrder,
     sortOrderMap,
     tagListSortMap,
     userListSortMap,
@@ -807,7 +810,59 @@ export const NavidromeController: InternalControllerEndpoint = {
             tags,
         };
     },
-    getTopSongs: SubsonicController.getTopSongs,
+    getTopSongs: async (args) => {
+        const { apiClientProps, query } = args;
+
+        const type = query.type === 'personal' ? 'personal' : 'community';
+
+        if (type === 'community') {
+            const res = await ssApiClient(apiClientProps).getTopSongsList({
+                query: {
+                    artist: query.artist,
+                    count: query.limit,
+                },
+            });
+
+            if (res.status !== 200) {
+                throw new Error('Failed to get top songs');
+            }
+
+            return {
+                items: (res.body.topSongs?.song || []).map((song) =>
+                    ssNormalize.song(
+                        song,
+                        apiClientProps.server,
+                        args.context?.pathReplace,
+                        args.context?.pathReplaceWith,
+                    ),
+                ),
+                startIndex: 0,
+                totalRecordCount: res.body.topSongs?.song?.length || 0,
+            };
+        }
+
+        const res = await NavidromeController.getSongList({
+            apiClientProps,
+            query: {
+                artistIds: [query.artistId],
+                sortBy: SongListSort.PLAY_COUNT,
+                sortOrder: SortOrder.DESC,
+                startIndex: 0,
+            },
+        });
+
+        const songsWithPlayCount = orderBy(
+            res.items.filter((song) => song.playCount > 0),
+            ['playCount', 'albumId', 'trackNumber'],
+            ['desc', 'asc', 'asc'],
+        );
+
+        return {
+            items: songsWithPlayCount,
+            startIndex: 0,
+            totalRecordCount: res.totalRecordCount,
+        };
+    },
     getUserInfo: SubsonicController.getUserInfo,
     getUserList: async (args) => {
         const { apiClientProps, query } = args;
