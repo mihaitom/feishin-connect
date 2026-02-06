@@ -186,6 +186,7 @@ export type Album = {
     isCompilation: boolean | null;
     lastPlayedAt: null | string;
     mbzId: null | string;
+    mbzReleaseGroupId: null | string;
     name: string;
     originalDate: null | string;
     originalYear: null | number;

@@ -303,6 +303,7 @@ const normalizeAlbum = (
         isCompilation: null,
         lastPlayedAt: null,
         mbzId: item.ProviderIds?.MusicBrainzAlbum || null,
+        mbzReleaseGroupId: item.ProviderIds?.MusicBrainzReleaseGroup || null,
         name: item.Name,
         originalDate: item.PremiereDate || null,
         originalYear: item.ProductionYear || null,

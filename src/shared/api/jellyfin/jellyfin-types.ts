@@ -457,7 +457,10 @@ const participant = z.object({
 
 const providerIds = z.object({
     MusicBrainzAlbum: z.string().optional(),
+    MusicBrainzAlbumArtist: z.string().optional(),
     MusicBrainzArtist: z.string().optional(),
+    MusicBrainzRecording: z.string().optional(),
+    MusicBrainzReleaseGroup: z.string().optional(),
     MusicBrainzTrack: z.string().optional(),
 });
 
