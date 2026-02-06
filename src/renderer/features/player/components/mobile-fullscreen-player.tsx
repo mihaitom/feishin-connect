@@ -24,6 +24,10 @@ import { MobileFullscreenPlayerControls } from '/@/renderer/features/player/comp
 import { MobileFullscreenPlayerHeader } from '/@/renderer/features/player/components/mobile-fullscreen-player-header';
 import { MobileFullscreenPlayerMetadata } from '/@/renderer/features/player/components/mobile-fullscreen-player-metadata';
 import { MobileFullscreenPlayerProgress } from '/@/renderer/features/player/components/mobile-fullscreen-player-progress';
+import {
+    useIsRadioActive,
+    useRadioPlayer,
+} from '/@/renderer/features/radio/hooks/use-radio-player';
 import { useSetFavorite } from '/@/renderer/features/shared/hooks/use-set-favorite';
 import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { useFastAverageColor } from '/@/renderer/hooks';
@@ -376,7 +380,12 @@ export const MobileFullscreenPlayer = () => {
         useFullScreenPlayerStore();
     const currentSong = usePlayerSong();
     const { currentSong: currentSongData } = usePlayerData();
+    const isRadioActive = useIsRadioActive();
+    const { isPlaying: isRadioPlaying, metadata: radioMetadata, stationName } = useRadioPlayer();
     const server = useCurrentServer();
+
+    const isPlayingRadio = isRadioActive && isRadioPlaying;
+    const effectiveDynamicBackground = dynamicBackground && !isPlayingRadio;
     const setFavorite = useSetFavorite();
     const { showRatings: showRatingsSetting } = useGeneralSettings();
     const setRating = useSetRating();
@@ -443,11 +452,11 @@ export const MobileFullscreenPlayer = () => {
 
     return (
         <MobilePlayerContainer
-            dynamicBackground={dynamicBackground}
+            dynamicBackground={effectiveDynamicBackground}
             dynamicIsImage={dynamicIsImage}
         >
             <BackgroundImageOverlay
-                dynamicBackground={dynamicBackground}
+                dynamicBackground={effectiveDynamicBackground}
                 dynamicImageBlur={dynamicImageBlur}
             />
             <motion.div
@@ -470,6 +479,9 @@ export const MobileFullscreenPlayer = () => {
                     currentSong={currentSong}
                     onToggleFavorite={handleToggleFavorite}
                     onUpdateRating={handleUpdateRating}
+                    radioArtist={isPlayingRadio ? (radioMetadata?.artist ?? undefined) : undefined}
+                    radioStationName={isPlayingRadio ? (stationName ?? undefined) : undefined}
+                    radioTitle={isPlayingRadio ? (radioMetadata?.title ?? undefined) : undefined}
                     showRating={showRating}
                 />
                 <MobileFullscreenPlayerProgress currentSong={currentSong} />

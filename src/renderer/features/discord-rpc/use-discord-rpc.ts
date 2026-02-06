@@ -5,6 +5,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '/@/renderer/api';
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import {
+    useIsRadioActive,
+    useRadioPlayer,
+} from '/@/renderer/features/radio/hooks/use-radio-player';
+import {
     DiscordDisplayType,
     DiscordLinkType,
     useAppStore,
@@ -37,6 +41,9 @@ export const useDiscordRpc = () => {
     const privateMode = useAppStore((state) => state.privateMode);
     const [lastUniqueId, setlastUniqueId] = useState('');
 
+    const isRadioActive = useIsRadioActive();
+    const { isPlaying: isRadioPlaying, metadata: radioMetadata, stationName } = useRadioPlayer();
+
     const currentSong = usePlayerSong();
     const imageUrl = useItemImageUrl({
         id: currentSong?.imageId || undefined,
@@ -67,14 +74,17 @@ export const useDiscordRpc = () => {
                     : song !== previousSong;
             const trackChanged = song ? lastUniqueId !== song._uniqueId : false;
 
+            const isPlayingRadio = isRadioActive && isRadioPlaying;
+            const hasTrackOrRadio = Boolean(current[0]) || isPlayingRadio;
+
             if (
-                !current[0] || // No track
-                (current[2] === 'paused' && !discordSettings.showPaused) // Track paused with show paused setting disabled
+                !hasTrackOrRadio || // No track and not playing radio
+                (current[2] === 'paused' && !discordSettings.showPaused) // Paused with show paused setting disabled
             ) {
                 let reason: string;
-                if (!current[0]) {
-                    reason = 'no_track';
-                } else if (current[1] === 0) {
+                if (!hasTrackOrRadio) {
+                    reason = current[0] ? 'no_track' : 'no_track_or_radio';
+                } else if (current[1] === 0 && !isPlayingRadio) {
                     reason = 'start_of_track';
                 } else {
                     reason = 'paused_with_show_paused_disabled';
@@ -88,6 +98,46 @@ export const useDiscordRpc = () => {
                     },
                 });
                 return discordRpc?.clearActivity();
+            }
+
+            if (isPlayingRadio) {
+                const title = radioMetadata?.title || stationName || 'Radio';
+                const artist = radioMetadata?.artist || stationName || '';
+
+                const activity: SetActivity = {
+                    details: truncate(title),
+                    instance: false,
+                    largeImageKey: 'icon',
+                    largeImageText: truncate(stationName || 'Radio'),
+                    smallImageKey: current[2] === PlayerStatus.PLAYING ? 'playing' : 'paused',
+                    smallImageText: sentenceCase(current[2]),
+                    state: truncate(artist),
+                    statusDisplayType: StatusDisplayType.STATE,
+                    type: discordSettings.showAsListening ? 2 : 0,
+                };
+
+                const isConnected = await discordRpc?.isConnected();
+                if (!isConnected) {
+                    logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcInitialized, {
+                        category: LogCategory.EXTERNAL,
+                        meta: { clientId: discordSettings.clientId },
+                    });
+                    previousEnabledRef.current = true;
+                    await discordRpc?.initialize(discordSettings.clientId);
+                }
+
+                logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcSetActivity, {
+                    category: LogCategory.EXTERNAL,
+                    meta: {
+                        currentStatus: current[2],
+                        reason: 'radio',
+                        showAsListening: discordSettings.showAsListening,
+                        stationName: stationName || 'Radio',
+                        title,
+                    },
+                });
+                discordRpc?.setActivity(activity);
+                return;
             }
 
             if (!song) {
@@ -306,6 +356,11 @@ export const useDiscordRpc = () => {
             discordSettings.linkType,
             lastUniqueId,
             currentSong?._uniqueId,
+            isRadioActive,
+            isRadioPlaying,
+            radioMetadata?.artist,
+            radioMetadata?.title,
+            stationName,
         ],
     );
 

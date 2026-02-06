@@ -21,7 +21,9 @@ import {
     useSetFullScreenPlayerStore,
 } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
 import { Separator } from '/@/shared/components/separator/separator';
 import { Text } from '/@/shared/components/text/text';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
@@ -48,7 +50,7 @@ export const LeftControls = () => {
     const { bindings } = useHotkeySettings();
 
     const isRadioMode = isRadioActive;
-    const hideImage = (image && !collapsed) || isRadioMode;
+    const hideImage = image && !collapsed;
     const isSongDefined = Boolean(currentSong?.id) && !isRadioMode;
     const title = currentSong?.name;
     const artists = currentSong?.artists;
@@ -116,20 +118,31 @@ export const LeftControls = () => {
                                     })}
                                     openDelay={0}
                                 >
-                                    <ItemImage
-                                        className={clsx(
-                                            styles.playerbarImage,
-                                            PlaybackSelectors.playerCoverArt,
-                                        )}
-                                        enableDebounce={false}
-                                        enableViewport={false}
-                                        explicitStatus={currentSong?.explicitStatus}
-                                        fetchPriority="high"
-                                        id={currentSong?.imageId}
-                                        itemType={LibraryItem.SONG}
-                                        serverId={currentSong?._serverId}
-                                        type="table"
-                                    />
+                                    {isRadioMode ? (
+                                        <Center
+                                            className={clsx(
+                                                styles.playerbarImage,
+                                                styles.radioImage,
+                                            )}
+                                        >
+                                            <Icon color="muted" icon="radio" size="40%" />
+                                        </Center>
+                                    ) : (
+                                        <ItemImage
+                                            className={clsx(
+                                                styles.playerbarImage,
+                                                PlaybackSelectors.playerCoverArt,
+                                            )}
+                                            enableDebounce={false}
+                                            enableViewport={false}
+                                            explicitStatus={currentSong?.explicitStatus}
+                                            fetchPriority="high"
+                                            id={currentSong?.imageId}
+                                            itemType={LibraryItem.SONG}
+                                            serverId={currentSong?._serverId}
+                                            type="table"
+                                        />
+                                    )}
                                 </Tooltip>
                                 {!collapsed && (
                                     <ActionIcon

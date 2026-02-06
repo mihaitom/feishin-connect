@@ -7,7 +7,10 @@ import styles from './sidebar.module.css';
 
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
-import { useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
+import {
+    useIsRadioActive,
+    useRadioPlayer,
+} from '/@/renderer/features/radio/hooks/use-radio-player';
 import { ActionBar } from '/@/renderer/features/sidebar/components/action-bar';
 import { ServerSelector } from '/@/renderer/features/sidebar/components/server-selector';
 import { SidebarCollectionList } from '/@/renderer/features/sidebar/components/sidebar-collection-list';
@@ -32,7 +35,9 @@ import {
 } from '/@/renderer/store/settings.store';
 import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
 import { ImageUnloader } from '/@/shared/components/image/image';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Text } from '/@/shared/components/text/text';
@@ -68,8 +73,7 @@ export const Sidebar = () => {
     const sidebarItems = useSidebarItems();
     const { windowBarStyle } = useWindowSettings();
     const sidebarImageEnabled = useAppStore((state) => state.sidebar.image);
-    const isRadioPlaying = useRadioStore((state) => state.isPlaying);
-    const showImage = sidebarImageEnabled && !isRadioPlaying;
+    const showImage = sidebarImageEnabled;
 
     const sidebarItemsWithRoute: SidebarItemType[] = useMemo(() => {
         if (!sidebarItems) return [];
@@ -161,6 +165,8 @@ const SidebarImage = () => {
     const leftWidth = useAppStore((state) => state.sidebar.leftWidth);
     const { setSideBar } = useAppStoreActions();
     const currentSong = usePlayerSong();
+    const isRadioActive = useIsRadioActive();
+    const { isPlaying: isRadioPlaying } = useRadioPlayer();
 
     const imageUrl = useItemImageUrl({
         id: currentSong?.imageId || undefined,
@@ -169,6 +175,7 @@ const SidebarImage = () => {
         type: 'sidebar',
     });
 
+    const isPlayingRadio = isRadioActive && isRadioPlaying;
     const isSongDefined = Boolean(currentSong?.id);
 
     const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
@@ -181,7 +188,7 @@ const SidebarImage = () => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (!currentSong) {
+        if (!currentSong || isPlayingRadio) {
             return;
         }
 
@@ -215,7 +222,19 @@ const SidebarImage = () => {
                     postProcess: 'sentenceCase',
                 })}
             >
-                {imageUrl ? (
+                {isPlayingRadio ? (
+                    <Center
+                        className={styles.sidebarImage}
+                        style={{
+                            background: 'var(--theme-colors-surface)',
+                            borderRadius: 'var(--theme-card-default-radius)',
+                            height: '100%',
+                            width: '100%',
+                        }}
+                    >
+                        <Icon color="muted" icon="radio" size="40%" />
+                    </Center>
+                ) : imageUrl ? (
                     <img className={styles.sidebarImage} loading="eager" src={imageUrl} />
                 ) : (
                     <ImageUnloader icon="emptySongImage" />
