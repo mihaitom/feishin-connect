@@ -41,6 +41,13 @@ export const UpdateSettings = memo(() => {
                             }),
                             value: 'beta',
                         },
+                        {
+                            label: t('setting.releaseChannel', {
+                                context: 'optionAlpha',
+                                postProcess: 'titleCase',
+                            }),
+                            value: 'alpha',
+                        },
                     ]}
                     defaultValue={
                         (localSettings?.get('release_channel') as string | undefined) || 'latest'
@@ -50,7 +57,7 @@ export const UpdateSettings = memo(() => {
                         localSettings?.set('release_channel', value);
                         setSettings({
                             window: {
-                                releaseChannel: value as 'beta' | 'latest',
+                                releaseChannel: value as 'alpha' | 'beta' | 'latest',
                             },
                         });
                     }}

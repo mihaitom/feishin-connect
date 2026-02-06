@@ -1,12 +1,12 @@
-# Nightly builds published to Cloudflare R2 with date versioning (e.g. 1.0.0-nightly-20260205).
+# Alpha builds published to Cloudflare R2 with date versioning (e.g. 1.0.0-alpha-20260205).
 # Required repo secrets: R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY (from R2 API token in Cloudflare dashboard).
-name: Publish Nightly
+name: Publish Alpha
 
 on:
     workflow_dispatch:
         inputs:
             version:
-                description: 'Semantic version number (e.g., 1.0.0) - nightly suffix will be added automatically'
+                description: 'Semantic version number (e.g., 1.0.0) - alpha suffix will be added automatically'
                 required: false
                 type: string
     schedule:
@@ -14,7 +14,27 @@ on:
         - cron: '0 11 * * *'
 
 jobs:
+    check-new-commits:
+        runs-on: ubuntu-latest
+        outputs:
+            has_new_commits: ${{ steps.manual.outputs.has_new_commits || steps.check.outputs['has-new-commits'] }}
+        steps:
+            - name: Set has new commits (manual trigger)
+              id: manual
+              if: github.event_name == 'workflow_dispatch'
+              run: echo "has_new_commits=true" >> "$GITHUB_OUTPUT"
+
+            - name: Check for new commits (24 hr interval)
+              id: check
+              if: github.event_name != 'workflow_dispatch'
+              uses: adriangl/check-new-commits-action@v1
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  seconds: 86400
+
     prepare:
+        needs: check-new-commits
+        if: needs.check-new-commits.outputs.has_new_commits == 'true'
         runs-on: ubuntu-latest
         outputs:
             version: ${{ steps.version.outputs.version }}
@@ -30,7 +50,7 @@ jobs:
             - name: Install dependencies
               run: pnpm install
 
-            - name: Set date-based nightly version
+            - name: Set date-based alpha version
               id: version
               shell: pwsh
               run: |
@@ -70,15 +90,15 @@ jobs:
                   $pst = [TimeZoneInfo]::FindSystemTimeZoneById('America/Los_Angeles')
                   $dateInPst = [TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcNow, $pst)
                   $dateStr = $dateInPst.ToString("yyyyMMdd")
-                  $nightlyVersion = "$inputVersion-nightly-$dateStr"
-                  Write-Host "Nightly version: $nightlyVersion"
+                  $alphaVersion = "$inputVersion-alpha-$dateStr"
+                  Write-Host "Alpha version: $alphaVersion"
 
                   # Update package.json
                   $packageJson = Get-Content package.json | ConvertFrom-Json
-                  $packageJson.version = $nightlyVersion
+                  $packageJson.version = $alphaVersion
                   $packageJson | ConvertTo-Json -Depth 10 | Set-Content package.json
 
-                  echo "version=$nightlyVersion" >> $env:GITHUB_OUTPUT
+                  echo "version=$alphaVersion" >> $env:GITHUB_OUTPUT
 
     cleanup:
         needs: prepare
@@ -132,7 +152,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run publish:win:nightly
+                      pnpm run publish:win:alpha
                   on_retry_command: pnpm cache delete
 
             - name: Build and Publish to R2 (macOS)
@@ -143,7 +163,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run publish:mac:nightly
+                      pnpm run publish:mac:alpha
                   on_retry_command: pnpm cache delete
 
             - name: Build and Publish to R2 (Linux)
@@ -154,7 +174,7 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run publish:linux:nightly
+                      pnpm run publish:linux:alpha
                   on_retry_command: pnpm cache delete
 
             - name: Build and Publish to R2 (Linux ARM64)
@@ -165,5 +185,5 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run publish:linux-arm64:nightly
+                      pnpm run publish:linux-arm64:alpha
                   on_retry_command: pnpm cache delete

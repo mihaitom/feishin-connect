@@ -588,7 +588,7 @@ const WindowSettingsSchema = z.object({
     exitToTray: z.boolean(),
     minimizeToTray: z.boolean(),
     preventSleepOnPlayback: z.boolean(),
-    releaseChannel: z.enum(['beta', 'latest']),
+    releaseChannel: z.enum(['alpha', 'beta', 'latest']),
     startMinimized: z.boolean(),
     tray: z.boolean(),
     windowBarStyle: z.nativeEnum(Platform),

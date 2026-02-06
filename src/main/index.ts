@@ -18,7 +18,7 @@ import {
 } from 'electron';
 import electronLocalShortcut from 'electron-localshortcut';
 import log from 'electron-log/main';
-import { autoUpdater } from 'electron-updater';
+import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
 import { access, constants } from 'fs';
 import path, { join } from 'path';
 
@@ -40,38 +40,109 @@ import './features';
 
 import { PlayerType, TitleTheme } from '/@/shared/types/types';
 
-export default class AppUpdater {
+const ALPHA_UPDATER_CONFIG: {
+    bucket: string;
+    channel: string;
+    endpoint: string;
+    provider: 's3';
+} = {
+    bucket: '',
+    channel: 'alpha',
+    endpoint: 'https://feishin-nightly-bucket.jeffvli.org',
+    provider: 's3',
+};
+
+type UpdaterInstance = AppImageUpdater | MacUpdater | NsisUpdater | typeof autoUpdater;
+
+class AlphaAppUpdater {
     constructor() {
+        const updater = createAlphaUpdaterInstance();
         log.transports.file.level = 'info';
-        autoUpdater.logger = autoUpdaterLogInterface;
+        updater.logger = autoUpdaterLogInterface;
+        updater.channel = ALPHA_UPDATER_CONFIG.channel;
+        updater.allowPrerelease = true;
+        updater.disableDifferentialDownload = true;
+        updater.allowDowngrade = true;
+        updater.autoInstallOnAppQuit = true;
+        updater.autoRunAppAfterInstall = true;
+        updater.checkForUpdatesAndNotify();
+    }
+}
 
-        const isBetaVersion = packageJson.version.includes('-beta');
-        const releaseChannel = store.get('release_channel');
-        const isNotConfigured = !releaseChannel;
-
-        console.log('Release channel: ', releaseChannel);
-        console.log('Is beta version: ', isBetaVersion);
-
-        if (isNotConfigured) {
-            console.log(
-                'Release channel not configured, setting to ',
-                isBetaVersion ? 'beta' : 'latest',
-            );
-            store.set('release_channel', isBetaVersion ? 'beta' : 'latest');
+class AppUpdater {
+    constructor() {
+        const effectiveChannel = store.get('release_channel') as string;
+        console.log('Effective update channel:', effectiveChannel);
+        if (effectiveChannel === 'alpha') {
+            return new AlphaAppUpdater();
         }
 
-        if (releaseChannel === 'beta') {
-            autoUpdater.channel = 'beta';
-            autoUpdater.allowPrerelease = true;
-            autoUpdater.disableDifferentialDownload = true;
-        } else if (releaseChannel === 'latest') {
-            autoUpdater.channel = 'latest';
-            autoUpdater.allowDowngrade = true;
-            autoUpdater.allowPrerelease = false;
-        }
-
+        configureAndGetUpdater();
         autoUpdater.checkForUpdatesAndNotify();
     }
+}
+
+function configureAndGetUpdater(): UpdaterInstance {
+    const isBetaVersion = packageJson.version.includes('-beta');
+    const isAlphaVersion = packageJson.version.includes('-alpha');
+    let releaseChannel = store.get('release_channel');
+    const isNotConfigured = !releaseChannel;
+
+    console.log('Release channel:', releaseChannel);
+    console.log('Is beta version:', isBetaVersion);
+    console.log('Is alpha version:', isAlphaVersion);
+    console.log('Is not configured:', isNotConfigured);
+
+    if (isNotConfigured) {
+        console.log('Release channel not configured, setting default channel');
+        const defaultChannel = isAlphaVersion ? 'alpha' : isBetaVersion ? 'beta' : 'latest';
+        store.set('release_channel', defaultChannel);
+        releaseChannel = defaultChannel;
+    }
+
+    const effectiveChannel = store.get('release_channel') as string;
+
+    if (effectiveChannel === 'alpha') {
+        const updater = createAlphaUpdaterInstance();
+        log.transports.file.level = 'info';
+        updater.logger = autoUpdaterLogInterface;
+        updater.channel = ALPHA_UPDATER_CONFIG.channel;
+        updater.allowPrerelease = true;
+        updater.disableDifferentialDownload = true;
+        updater.allowDowngrade = true;
+        updater.autoInstallOnAppQuit = true;
+        updater.autoRunAppAfterInstall = true;
+        return updater;
+    }
+
+    log.transports.file.level = 'info';
+    autoUpdater.logger = autoUpdaterLogInterface;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.autoRunAppAfterInstall = true;
+
+    if (effectiveChannel === 'beta') {
+        autoUpdater.channel = 'beta';
+        autoUpdater.allowPrerelease = true;
+        autoUpdater.disableDifferentialDownload = true;
+    } else {
+        autoUpdater.channel = 'latest';
+        autoUpdater.allowDowngrade = true;
+        autoUpdater.allowPrerelease = false;
+    }
+
+    return autoUpdater;
+}
+
+function createAlphaUpdaterInstance(): AppImageUpdater | MacUpdater | NsisUpdater {
+    if (isMacOS()) {
+        return new MacUpdater(ALPHA_UPDATER_CONFIG);
+    }
+
+    if (isLinux()) {
+        return new AppImageUpdater(ALPHA_UPDATER_CONFIG);
+    }
+
+    return new NsisUpdater(ALPHA_UPDATER_CONFIG);
 }
 
 protocol.registerSchemesAsPrivileged([{ privileges: { bypassCSP: true }, scheme: 'feishin' }]);
@@ -358,6 +429,36 @@ async function createWindow(first = true): Promise<void> {
     ipcMain.handle('window-clear-cache', async () => {
         return mainWindow?.webContents.session.clearCache();
     });
+
+    ipcMain.handle(
+        'app-check-for-updates',
+        async (): Promise<{ updateAvailable: boolean; version?: string }> => {
+            if (disableAutoUpdates()) {
+                console.log('Auto updates are disabled');
+                return { updateAvailable: false };
+            }
+
+            try {
+                console.log('Checking for updates');
+                const updater = configureAndGetUpdater();
+                const result = await updater.checkForUpdates();
+                const updateAvailable = result?.isUpdateAvailable ?? false;
+                console.log('Update available:', updateAvailable);
+                if (updateAvailable && store.get('disable_auto_updates') !== true) {
+                    console.log('Downloading update');
+                    updater.downloadUpdate();
+                }
+
+                return {
+                    updateAvailable,
+                    version: result?.updateInfo?.version,
+                };
+            } catch {
+                console.log('Error checking for updates');
+                return { updateAvailable: false };
+            }
+        },
+    );
 
     ipcMain.on('app-restart', () => {
         // Fix for .AppImage

@@ -39,6 +39,10 @@ const download = (url: string) => {
     ipcRenderer.send('download-url', url);
 };
 
+const checkForUpdates = (): Promise<{ updateAvailable: boolean; version?: string }> => {
+    return ipcRenderer.invoke('app-check-for-updates');
+};
+
 const forceGarbageCollection = (): boolean => {
     try {
         if (typeof global.gc === 'function') {
@@ -58,6 +62,7 @@ const forceGarbageCollection = (): boolean => {
 };
 
 export const utils = {
+    checkForUpdates,
     disableAutoUpdates,
     download,
     forceGarbageCollection,

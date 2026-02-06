@@ -20,11 +20,27 @@ import { Text } from '/@/shared/components/text/text';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 
 const GITHUB_RELEASES_URL = 'https://api.github.com/repos/jeffvli/feishin/releases';
+const GITHUB_COMPARE_URL = 'https://api.github.com/repos/jeffvli/feishin/compare';
 const RELEASES_TO_FETCH = 30;
+
+interface GitHubCompareCommit {
+    commit: {
+        author: { date: string; name: string };
+        message: string;
+    };
+    html_url: string;
+    sha: string;
+}
+
+interface GitHubCompareResponse {
+    commits: GitHubCompareCommit[];
+    total_commits: number;
+}
 
 interface GitHubRelease {
     body: null | string;
     name: null | string;
+    prerelease: boolean;
     published_at: string;
     tag_name: string;
 }
@@ -34,13 +50,22 @@ interface ReleaseNotesContentProps {
     version: string;
 }
 
+function isAlphaVersion(version: string): boolean {
+    return version.includes('-alpha');
+}
+
 function parseVersionFromTag(tagName: string): string {
     return tagName.startsWith('v') ? tagName.slice(1) : tagName;
+}
+
+function toTag(version: string): string {
+    return version.startsWith('v') ? version : `v${version}`;
 }
 
 const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) => {
     const { t } = useTranslation();
     const [selectedVersion, setSelectedVersion] = useState(version);
+    const isAlpha = isAlphaVersion(selectedVersion);
 
     // Fetch list of recent releases for the selector
     const { data: releasesList = [] } = useQuery({
@@ -53,6 +78,10 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         queryKey: ['github-releases-list'],
         retry: 2,
     });
+
+    const latestStableRelease = useMemo(() => {
+        return releasesList.find((r) => !r.prerelease);
+    }, [releasesList]);
 
     const releaseOptions = useMemo(() => {
         const options = releasesList.slice(0, RELEASES_TO_FETCH).map((r) => {
@@ -70,14 +99,36 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         return options;
     }, [releasesList, version]);
 
+    // For alpha: fetch commits between latest stable and current alpha
+    const {
+        data: compareData,
+        isError: isCompareError,
+        isLoading: isCompareLoading,
+    } = useQuery({
+        enabled: isAlpha && !!latestStableRelease,
+        queryFn: async () => {
+            const base = latestStableRelease!.tag_name;
+            const head = toTag(selectedVersion);
+            const response = await axios.get<GitHubCompareResponse>(
+                `${GITHUB_COMPARE_URL}/${base}...${head}`,
+                { params: { per_page: 100 } },
+            );
+            return response.data;
+        },
+        queryKey: ['github-compare', latestStableRelease?.tag_name, selectedVersion],
+        retry: 2,
+    });
+
+    // For non-alpha: fetch release by tag
     const {
         data: releaseData,
         isError,
         isLoading,
     } = useQuery({
+        enabled: !isAlpha,
         queryFn: async () => {
             const response = await axios.get<GitHubRelease>(
-                `${GITHUB_RELEASES_URL}/tags/v${selectedVersion}`,
+                `${GITHUB_RELEASES_URL}/tags/${toTag(selectedVersion)}`,
             );
             return response.data;
         },
@@ -87,7 +138,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
 
     // Convert markdown to HTML using GitHub's markdown API
     const { data: htmlContent, isLoading: isConverting } = useQuery({
-        enabled: !!releaseData?.body,
+        enabled: !isAlpha && !!releaseData?.body,
         queryFn: async () => {
             const response = await axios.post(
                 'https://api.github.com/markdown',
@@ -136,7 +187,10 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         });
     }, [htmlContent]);
 
-    if (isLoading || isConverting) {
+    const isLoadingState = isAlpha ? isCompareLoading : isLoading || isConverting;
+    const isErrorState = isAlpha ? isCompareError : isError || !releaseData;
+
+    if (isLoadingState) {
         return (
             <Center h={400}>
                 <Spinner />
@@ -144,7 +198,8 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         );
     }
 
-    if (isError || !releaseData) {
+    if (isErrorState) {
+        const showCompareError = isAlpha && latestStableRelease;
         return (
             <Stack gap="md">
                 {releaseOptions.length > 1 && (
@@ -158,7 +213,11 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
                 <Group justify="flex-end">
                     <Button
                         component="a"
-                        href={`https://github.com/jeffvli/feishin/releases/tag/v${selectedVersion}`}
+                        href={
+                            showCompareError
+                                ? `https://github.com/jeffvli/feishin/compare/${latestStableRelease.tag_name}...${toTag(selectedVersion)}`
+                                : `https://github.com/jeffvli/feishin/releases/tag/${toTag(selectedVersion)}`
+                        }
                         onClick={onDismiss}
                         rightSection={<Icon icon="externalLink" />}
                         target="_blank"
@@ -167,6 +226,128 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
                         {t('common.viewReleaseNotes', { postProcess: 'sentenceCase' })}
                     </Button>
                     <Button onClick={onDismiss} variant="default">
+                        {t('common.dismiss', { postProcess: 'titleCase' })}
+                    </Button>
+                </Group>
+            </Stack>
+        );
+    }
+
+    if (isAlpha && !latestStableRelease) {
+        return (
+            <Stack gap="md">
+                {releaseOptions.length > 1 && (
+                    <Select
+                        data={releaseOptions}
+                        onChange={(v) => v && setSelectedVersion(v)}
+                        value={selectedVersion}
+                    />
+                )}
+                <Text isMuted size="sm">
+                    {t('page.releasenotes.noStableReleaseToCompare', {
+                        postProcess: 'sentenceCase',
+                    })}
+                </Text>
+                <Group justify="flex-end">
+                    <Button
+                        component="a"
+                        href={`https://github.com/jeffvli/feishin/releases/tag/${toTag(selectedVersion)}`}
+                        onClick={onDismiss}
+                        rightSection={<Icon icon="externalLink" />}
+                        target="_blank"
+                        variant="subtle"
+                    >
+                        {t('action.viewMore', { postProcess: 'sentenceCase' })}
+                    </Button>
+                    <Button onClick={onDismiss} variant="filled">
+                        {t('common.dismiss', { postProcess: 'titleCase' })}
+                    </Button>
+                </Group>
+            </Stack>
+        );
+    }
+
+    if (isAlpha && compareData) {
+        const commits = compareData.commits ?? [];
+        const compareUrl = `https://github.com/jeffvli/feishin/compare/${latestStableRelease?.tag_name}...${toTag(selectedVersion)}`;
+        return (
+            <Stack gap="md">
+                {releaseOptions.length > 1 && (
+                    <Select
+                        data={releaseOptions}
+                        onChange={(v) => v && setSelectedVersion(v)}
+                        value={selectedVersion}
+                    />
+                )}
+                <Text isMuted size="sm">
+                    {t('page.releasenotes.commitsSinceStable', {
+                        postProcess: 'sentenceCase',
+                        stable: latestStableRelease
+                            ? parseVersionFromTag(latestStableRelease.tag_name)
+                            : '',
+                    })}
+                </Text>
+                <ScrollArea
+                    style={{
+                        height: '400px',
+                    }}
+                >
+                    <Stack gap="xs">
+                        {commits.length === 0 ? (
+                            <Text isMuted size="sm">
+                                {t('page.releasenotes.noNewCommits', {
+                                    postProcess: 'sentenceCase',
+                                })}
+                            </Text>
+                        ) : (
+                            commits.map((c) => {
+                                const firstLine = c.commit.message.split('\n')[0];
+                                return (
+                                    <Group
+                                        gap="sm"
+                                        key={c.sha}
+                                        style={{ alignItems: 'flex-start' }}
+                                        wrap="nowrap"
+                                    >
+                                        <Text
+                                            size="sm"
+                                            style={{ flex: 1 }}
+                                            title={c.commit.message}
+                                            truncate
+                                        >
+                                            {firstLine}
+                                        </Text>
+                                        <Text isMuted size="xs">
+                                            {formatHrDateTime(c.commit.author.date)}
+                                        </Text>
+                                        <Button
+                                            component="a"
+                                            href={c.html_url}
+                                            rightSection={<Icon icon="externalLink" />}
+                                            size="compact-xs"
+                                            target="_blank"
+                                            variant="subtle"
+                                        >
+                                            {t('common.view', { postProcess: 'sentenceCase' })}
+                                        </Button>
+                                    </Group>
+                                );
+                            })
+                        )}
+                    </Stack>
+                </ScrollArea>
+                <Group justify="flex-end">
+                    <Button
+                        component="a"
+                        href={compareUrl}
+                        onClick={onDismiss}
+                        rightSection={<Icon icon="externalLink" />}
+                        target="_blank"
+                        variant="subtle"
+                    >
+                        {t('action.viewMore', { postProcess: 'sentenceCase' })}
+                    </Button>
+                    <Button onClick={onDismiss} variant="filled">
                         {t('common.dismiss', { postProcess: 'titleCase' })}
                     </Button>
                 </Group>
@@ -198,7 +379,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
             <Group justify="flex-end">
                 <Button
                     component="a"
-                    href={`https://github.com/jeffvli/feishin/releases/tag/v${selectedVersion}`}
+                    href={`https://github.com/jeffvli/feishin/releases/tag/${toTag(selectedVersion)}`}
                     onClick={onDismiss}
                     rightSection={<Icon icon="externalLink" />}
                     target="_blank"
