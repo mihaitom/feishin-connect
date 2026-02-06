@@ -49,9 +49,7 @@ export const UpdateSettings = memo(() => {
                             value: 'alpha',
                         },
                     ]}
-                    defaultValue={
-                        (localSettings?.get('release_channel') as string | undefined) || 'latest'
-                    }
+                    defaultValue={settings.releaseChannel || 'latest'}
                     onChange={(value) => {
                         if (!value) return;
                         localSettings?.set('release_channel', value);
