@@ -53,6 +53,18 @@ const VERSION_INFO: VersionInfo = [
     ['10.0.0', { [ServerFeature.TAGS]: [1] }],
 ];
 
+const JF_FIELDS = {
+    ALBUM_ARTIST_DETAIL: 'Genres, Overview, SortName, ProviderIds',
+    ALBUM_ARTIST_LIST: 'Genres, DateCreated, ExternalUrls, Overview, SortName, ProviderIds',
+    ALBUM_DETAIL: 'Genres, DateCreated, ChildCount, People, Tags, ProviderIds',
+    ALBUM_LIST: 'People, Tags, Studios, SortName, UserData, ProviderIds',
+    FOLDER: 'Genres, DateCreated, MediaSources, UserData, ParentId',
+    GENRE: 'ItemCounts',
+    PLAYLIST_DETAIL: 'Genres, DateCreated, MediaSources, ChildCount, ParentId, SortName',
+    PLAYLIST_LIST: 'ChildCount, Genres, DateCreated, ParentId, Overview',
+    SONG: 'Genres, DateCreated, MediaSources, ParentId, People, Tags, SortName, UserData, ProviderIds',
+} as const;
+
 export const JellyfinController: InternalControllerEndpoint = {
     addToPlaylist: async (args) => {
         const { apiClientProps, body, query } = args;
@@ -230,7 +242,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                     userId: apiClientProps.server?.userId,
                 },
                 query: {
-                    Fields: 'Genres, Overview, SortName',
+                    Fields: JF_FIELDS.ALBUM_ARTIST_DETAIL,
                 },
             }),
             jfApiClient(apiClientProps).getSimilarArtistList({
@@ -257,7 +269,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 
         const res = await jfApiClient(apiClientProps).getAlbumArtistList({
             query: {
-                Fields: 'Genres, DateCreated, ExternalUrls, Overview, SortName',
+                Fields: JF_FIELDS.ALBUM_ARTIST_LIST,
                 ImageTypeLimit: 1,
                 Limit: query.limit,
                 ParentId: getLibraryId(query.musicFolderId),
@@ -300,7 +312,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId: apiClientProps.server.userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, ChildCount, People, Tags',
+                Fields: JF_FIELDS.ALBUM_DETAIL,
             },
         });
 
@@ -309,7 +321,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId: apiClientProps.server.userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags, SortName',
+                Fields: JF_FIELDS.SONG,
                 IncludeItemTypes: 'Audio',
                 ParentId: query.id,
                 SortBy: 'ParentIndexNumber,IndexNumber,SortName',
@@ -367,7 +379,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             },
             query: {
                 ...artistQuery,
-                Fields: 'People, Tags, Studios, SortName',
+                Fields: JF_FIELDS.ALBUM_LIST,
                 GenreIds: query.genreIds ? query.genreIds.join(',') : undefined,
                 IncludeItemTypes: 'MusicAlbum',
                 IsFavorite: query.favorite,
@@ -403,7 +415,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 
         const res = await jfApiClient(apiClientProps).getArtistList({
             query: {
-                Fields: 'Genres, DateCreated, ExternalUrls, Overview, SortName',
+                Fields: JF_FIELDS.ALBUM_ARTIST_LIST,
                 ImageTypeLimit: 1,
                 Limit: query.limit,
                 ParentId: getLibraryId(query.musicFolderId),
@@ -442,7 +454,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 itemId: query.artistId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, ParentId, SortName',
+                Fields: JF_FIELDS.SONG,
                 Limit: query.count,
                 UserId: apiClientProps.server?.userId || undefined,
             },
@@ -567,7 +579,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId',
+                Fields: JF_FIELDS.FOLDER,
                 ParentId: query.id,
                 SortBy: query.sortBy
                     ? (songListSortMap.jellyfin[query.sortBy] as string) || 'SortName'
@@ -596,7 +608,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                         userId,
                     },
                     query: {
-                        Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId',
+                        Fields: JF_FIELDS.FOLDER,
                         ParentId: parentId,
                     },
                 });
@@ -683,7 +695,7 @@ export const JellyfinController: InternalControllerEndpoint = {
         const res = await jfApiClient(apiClientProps).getGenreList({
             query: {
                 EnableTotalRecordCount: true,
-                Fields: 'ItemCounts',
+                Fields: JF_FIELDS.GENRE,
                 Limit: query.limit === -1 ? undefined : query.limit,
                 ParentId: getLibraryId(query.musicFolderId),
                 Recursive: true,
@@ -798,7 +810,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId: apiClientProps.server?.userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, ChildCount, ParentId, SortName',
+                Fields: JF_FIELDS.PLAYLIST_DETAIL,
                 Ids: query.id,
             },
         });
@@ -821,7 +833,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId: apiClientProps.server?.userId,
             },
             query: {
-                Fields: 'ChildCount, Genres, DateCreated, ParentId, Overview',
+                Fields: JF_FIELDS.PLAYLIST_LIST,
                 IncludeItemTypes: 'Playlist',
                 Limit: query.limit,
                 Recursive: true,
@@ -859,7 +871,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 id: query.id,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId, People, Tags, SortName',
+                Fields: JF_FIELDS.SONG,
                 IncludeItemTypes: 'Audio',
                 UserId: apiClientProps.server?.userId,
             },
@@ -906,7 +918,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId: apiClientProps.server?.userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags, SortName',
+                Fields: JF_FIELDS.SONG,
                 GenreIds: query.genre ? query.genre : undefined,
                 IncludeItemTypes: 'Audio',
                 IsPlayed:
@@ -978,7 +990,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                     itemId: query.songId,
                 },
                 query: {
-                    Fields: 'Genres, DateCreated, MediaSources, ParentId, SortName',
+                    Fields: JF_FIELDS.SONG,
                     Limit: query.count,
                     UserId: apiClientProps.server?.userId || undefined,
                 },
@@ -1011,7 +1023,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 itemId: query.songId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, ParentId, SortName',
+                Fields: JF_FIELDS.SONG,
                 Limit: query.count,
                 UserId: apiClientProps.server?.userId || undefined,
             },
@@ -1096,7 +1108,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                     query: {
                         AlbumIds: albumIdsFilter,
                         ArtistIds: artistIdsFilter,
-                        Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags, SortName',
+                        Fields: JF_FIELDS.SONG,
                         GenreIds: query.genreIds?.join(','),
                         IncludeItemTypes: 'Audio',
                         IsFavorite: query.favorite,
@@ -1131,7 +1143,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 query: {
                     AlbumIds: albumIdsFilter,
                     ArtistIds: artistIdsFilter,
-                    Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags, SortName',
+                    Fields: JF_FIELDS.SONG,
                     GenreIds: query.genreIds?.join(','),
                     IncludeItemTypes: 'Audio',
                     IsFavorite: query.favorite,
@@ -1289,11 +1301,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             },
             query: {
                 ArtistIds: query.artistId,
-                Fields:
-                    type === 'personal'
-                        ? 'Genres, DateCreated, MediaSources, ParentId, SortName, UserData'
-                        : 'Genres, DateCreated, MediaSources, ParentId, SortName',
-
+                Fields: JF_FIELDS.SONG,
                 IncludeItemTypes: 'Audio',
                 Limit: query.limit,
                 Recursive: true,
@@ -1408,7 +1416,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 id: query.id,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, UserData, ParentId, People, Tags, SortName',
+                Fields: JF_FIELDS.SONG,
                 IncludeItemTypes: 'Audio',
                 UserId: apiClientProps.server?.userId,
             },
@@ -1434,7 +1442,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId: apiClientProps.server?.userId,
             },
             query: {
-                Fields: 'Genres, DateCreated, MediaSources, ChildCount, ParentId, SortName',
+                Fields: JF_FIELDS.PLAYLIST_DETAIL,
                 Ids: query.id,
             },
         });
@@ -1592,7 +1600,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 },
                 query: {
                     EnableTotalRecordCount: true,
-                    Fields: 'People, Tags, SortName',
+                    Fields: JF_FIELDS.ALBUM_LIST,
                     ImageTypeLimit: 1,
                     IncludeItemTypes: 'MusicAlbum',
                     Limit: query.albumLimit,
@@ -1615,7 +1623,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             const res = await jfApiClient(apiClientProps).getAlbumArtistList({
                 query: {
                     EnableTotalRecordCount: true,
-                    Fields: 'Genres, DateCreated, ExternalUrls, Overview',
+                    Fields: JF_FIELDS.ALBUM_ARTIST_LIST,
                     ImageTypeLimit: 1,
                     IncludeArtists: true,
                     Limit: query.albumArtistLimit,
@@ -1640,7 +1648,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 },
                 query: {
                     EnableTotalRecordCount: true,
-                    Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags, SortName',
+                    Fields: JF_FIELDS.SONG,
                     IncludeItemTypes: 'Audio',
                     Limit: query.songLimit,
                     Recursive: true,
