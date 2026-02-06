@@ -32,6 +32,7 @@ export default defineConfig({
     },
     css: {
         modules: {
+            generateScopedName: 'fs-[name]-[local]',
             localsConvention: 'camelCase',
         },
     },
