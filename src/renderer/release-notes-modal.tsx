@@ -99,7 +99,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         return options;
     }, [releasesList, version]);
 
-    // For alpha: fetch commits between latest stable and current alpha
+    // For alpha: fetch commits between latest stable and development branch
     const {
         data: compareData,
         isError: isCompareError,
@@ -108,14 +108,14 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         enabled: isAlpha && !!latestStableRelease,
         queryFn: async () => {
             const base = latestStableRelease!.tag_name;
-            const head = toTag(selectedVersion);
+            const head = 'development';
             const response = await axios.get<GitHubCompareResponse>(
                 `${GITHUB_COMPARE_URL}/${base}...${head}`,
                 { params: { per_page: 100 } },
             );
             return response.data;
         },
-        queryKey: ['github-compare', latestStableRelease?.tag_name, selectedVersion],
+        queryKey: ['github-compare', latestStableRelease?.tag_name, 'development'],
         retry: 2,
     });
 
@@ -269,7 +269,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
 
     if (isAlpha && compareData) {
         const commits = compareData.commits ?? [];
-        const compareUrl = `https://github.com/jeffvli/feishin/compare/${latestStableRelease?.tag_name}...${toTag(selectedVersion)}`;
+        const compareUrl = `https://github.com/jeffvli/feishin/compare/${latestStableRelease?.tag_name}...development`;
         return (
             <Stack gap="md">
                 {releaseOptions.length > 1 && (
