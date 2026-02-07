@@ -10,6 +10,7 @@ import isElectron from 'is-electron';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
 import i18n from '/@/i18n/i18n';
+import { openSettingsModal } from '/@/renderer/features/settings/utils/open-settings-modal';
 import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
 import { useCheckForUpdates } from '/@/renderer/hooks/use-check-for-updates';
 import { useSyncSettingsToMain } from '/@/renderer/hooks/use-sync-settings-to-main';
@@ -78,6 +79,19 @@ export const App = () => {
             i18n.changeLanguage(language);
         }
     }, [language]);
+
+    useEffect(() => {
+        if (isElectron()) {
+            window.api.utils.rendererOpenSettings(() => {
+                openSettingsModal();
+            });
+
+            return () => {
+                ipc?.removeAllListeners('renderer-open-settings');
+            };
+        }
+        return undefined;
+    }, []);
 
     const notificationStyles = useMemo(
         () => ({
