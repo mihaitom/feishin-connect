@@ -988,7 +988,7 @@ const initialState: SettingsState = {
         showServerImage: false,
     },
     font: {
-        builtIn: 'Poppins',
+        builtIn: 'Inter',
         custom: null,
         system: null,
         type: FontType.BUILT_IN,
