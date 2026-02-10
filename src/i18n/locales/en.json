@@ -1145,6 +1145,7 @@
                 "year": "$t(common.year)"
             },
             "view": {
+                "detail": "detail",
                 "grid": "grid",
                 "list": "list",
                 "table": "table"
