@@ -29,7 +29,11 @@
             "topSongsFrom": "les millors cançons de {{title}}",
             "viewAll": "mostra-ho tot",
             "groupingTypeAll": "tots els tipus de llançaments",
-            "groupingTypePrimary": "tipus principals de llançament"
+            "groupingTypePrimary": "tipus principals de llançament",
+            "favoriteSongs": "Cançons preferides",
+            "topSongsCommunity": "comunitat",
+            "topSongsPersonal": "personal",
+            "favoriteSongsFrom": "cançons preferides de {{title}}"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist, {\"count\": 2})"
@@ -200,6 +204,11 @@
         "collections": {
             "overrideExisting": "sobreescriu existents",
             "saveAsCollection": "desa com a col·lecció"
+        },
+        "releasenotes": {
+            "commitsSinceStable": "commits des de {{stable}}",
+            "noNewCommits": "no hi ha hagut commits en aquest període",
+            "noStableReleaseToCompare": "no hi ha actualitzacions disponibles amb les quals comparar"
         }
     },
     "common": {
@@ -779,7 +788,7 @@
         "releaseChannel_optionLatest": "última versió",
         "releaseChannel_optionBeta": "beta",
         "releaseChannel": "canal de versions",
-        "releaseChannel_description": "tria entre versions estables i versions beta per les actualitzacions automàtiques",
+        "releaseChannel_description": "trieu entre versions estables i beta o alfa (diàries) per les actualitzacions automàtiques",
         "mediaSession": "activa Media Session",
         "mediaSession_description": "activa la integració amb Media Session per mostrar els controls multimèdia i les metadades a l'indicador de volum del sistema i la pantalla de bloqueig",
         "crossfadeStyle": "estil de fosa encadenada",
@@ -878,7 +887,14 @@
         "sidebarPlaylistSorting": "ordenació de llistes de reproducció de la barra lateral",
         "sidebarPlaylistListFilterRegex_description": "amaga les llistes de reproducció de la barra lateral que coincideixin amb aquesta expressió regular",
         "sidebarPlaylistListFilterRegex_placeholder": "ex. ^Mescla diària.*",
-        "sidebarPlaylistListFilterRegex": "regex pel filtre de llistes"
+        "sidebarPlaylistListFilterRegex": "regex pel filtre de llistes",
+        "analyticsEnable": "envia analítiques basades en l'ús",
+        "analyticsEnable_description": "s'envien dades d'ús anonimitzades al desenvolupar per ajudar a millorar l'aplicació",
+        "automaticUpdates": "actualitzacions automàtiques",
+        "automaticUpdates_description": "cerca i instal·la actualitzacions automàticament",
+        "releaseChannel_optionAlpha": "alfa (diària)",
+        "blurExplicitImages": "desenfoca imatges explícites",
+        "blurExplicitImages_description": "les caràtules d'àlbums i cançons marcades com a explícites quedaran desenfocades"
     },
     "table": {
         "column": {
@@ -983,7 +999,8 @@
             "view": {
                 "table": "taula",
                 "grid": "quadrícula",
-                "list": "llista"
+                "list": "llista",
+                "detail": "detall"
             }
         }
     },
@@ -1072,7 +1089,16 @@
         "restoreQueueFromServer": "restaura la cua del servidor",
         "saveQueueToServer": "desa la cua al servidor",
         "artistRadio": "ràdio de l'artista",
-        "trackRadio": "ràdio de la pista"
+        "trackRadio": "ràdio de la pista",
+        "sleepTimer": "temporitzador d'adormir",
+        "sleepTimer_endOfSong": "final de la cançó actual",
+        "sleepTimer_minutes": "{{count}} min",
+        "sleepTimer_hours": "{{count}} h",
+        "sleepTimer_custom": "personalitzat",
+        "sleepTimer_off": "apagat",
+        "sleepTimer_timeRemaining": "queden {{time}}",
+        "sleepTimer_setCustom": "configura el temporitzador",
+        "sleepTimer_cancel": "cancel·la el temporitzador"
     },
     "error": {
         "credentialsRequired": "credencials requerides",
