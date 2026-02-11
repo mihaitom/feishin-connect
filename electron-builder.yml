@@ -13,8 +13,14 @@ asarUnpack:
     - resources/**
 win:
     target:
-        - zip
-        - nsis
+        - target: zip
+          arch:
+              - x64
+              - arm64
+        - target: nsis
+          arch:
+              - x64
+              - arm64
     icon: assets/icons/icon.ico
 
 nsis:
