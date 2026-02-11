@@ -385,7 +385,11 @@
         "sidebarPlaylistListFilterRegex_placeholder": "p. ej. ^Mezcla diaria.*",
         "blurExplicitImages": "Desenfocar imágenes explícitas",
         "blurExplicitImages_description": "El álbum y la carátula de la canción etiquetados como explícitos serán desenfocados",
-        "releaseChannel_optionAlpha": "Alpha (nightly)"
+        "releaseChannel_optionAlpha": "Alpha (nightly)",
+        "analyticsEnable": "Enviar analíticas basadas en el uso",
+        "analyticsEnable_description": "Se envían datos de uso anonimizados al desarrollador para ayudar a mejorar la aplicación",
+        "automaticUpdates": "Actualizaciones automáticas",
+        "automaticUpdates_description": "Busca e instala actualizaciones automáticamente"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist, {\"count\": 1})",
@@ -470,8 +474,8 @@
         "cancel": "cancelar",
         "forceRestartRequired": "reiniciar para aplicar cambios... cerrar la notificación para reiniciar",
         "setting_one": "configuración",
-        "setting_many": "configuraciones",
-        "setting_other": "configuraciones",
+        "setting_many": "configuración",
+        "setting_other": "configuración",
         "version": "versión",
         "title": "título",
         "filters": "filtros",
@@ -1053,7 +1057,8 @@
             "view": {
                 "table": "tabla",
                 "list": "Lista",
-                "grid": "Cuadrícula"
+                "grid": "Cuadrícula",
+                "detail": "Detalle"
             }
         }
     },

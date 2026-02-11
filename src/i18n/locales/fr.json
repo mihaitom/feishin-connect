@@ -204,7 +204,8 @@
         "mood": "humeur",
         "retry": "réessayer",
         "filter_single": "unique",
-        "filter_multiple": "multiple"
+        "filter_multiple": "multiple",
+        "rename": "renommer"
     },
     "error": {
         "remotePortWarning": "redémarrer le serveur pour appliquer le nouveau port",
@@ -280,7 +281,8 @@
         "artist": "$t(entity.artist, {\"count\": 1})",
         "isPublic": "est public",
         "album": "$t(entity.album, {\"count\": 1})",
-        "explicitStatus": "$t(common.explicitStatus)"
+        "explicitStatus": "$t(common.explicitStatus)",
+        "sortName": "tri par nom"
     },
     "page": {
         "sidebar": {
@@ -447,7 +449,12 @@
             "viewDiscography": "voir la discographie",
             "relatedArtists": "$t(entity.artist, {\"count\": 2}) similaires",
             "topSongs": "meilleurs titres",
-            "groupingTypeAll": "toutes les types de sortie"
+            "groupingTypeAll": "toutes les types de sortie",
+            "favoriteSongs": "titres préférées",
+            "groupingTypePrimary": "types de parution principale",
+            "topSongsCommunity": "communauté",
+            "topSongsPersonal": "personnel",
+            "favoriteSongsFrom": "meilleurs titres de {{title}}"
         },
         "itemDetail": {
             "copyPath": "copier le chemin dans le presse-papiers",
@@ -473,6 +480,14 @@
         },
         "radioList": {
             "title": "stations radio"
+        },
+        "releasenotes": {
+            "commitsSinceStable": "commits depuis {{stable}}",
+            "noNewCommits": "pas de nouveaux commits dans cette plage"
+        },
+        "windowBar": {
+            "paused": "(Pause) ",
+            "privateMode": "(Mode Privé)"
         }
     },
     "setting": {

@@ -399,7 +399,16 @@
         "restoreQueueFromServer": "從伺服器還原播放佇列",
         "saveQueueToServer": "將播放佇列儲存至伺服器",
         "artistRadio": "藝人電台",
-        "trackRadio": "曲目電台"
+        "trackRadio": "曲目電台",
+        "sleepTimer": "睡眠定時器",
+        "sleepTimer_endOfSong": "歌曲播完時",
+        "sleepTimer_minutes": "{{count}} 分鐘",
+        "sleepTimer_hours": "{{count}} 小時",
+        "sleepTimer_custom": "自訂",
+        "sleepTimer_off": "關閉",
+        "sleepTimer_timeRemaining": "剩餘 {{time}}",
+        "sleepTimer_setCustom": "設定定時器",
+        "sleepTimer_cancel": "取消定時器"
     },
     "setting": {
         "audioPlayer_description": "選擇用於播放的音訊播放器",
@@ -746,7 +755,11 @@
         "sidebarPlaylistListFilterRegex": "播放清單過濾器正規表達式",
         "blurExplicitImages": "模糊露骨圖片",
         "blurExplicitImages_description": "標記為露骨的專輯和歌曲封面將被模糊",
-        "releaseChannel_optionAlpha": "alpha (每日建構版)"
+        "releaseChannel_optionAlpha": "alpha (每日建構版)",
+        "analyticsEnable": "傳送基於使用情況的分析報告",
+        "analyticsEnable_description": "匿名化的使用情況資料會傳送給開發者，以協助改進應用程式",
+        "automaticUpdates": "自動更新",
+        "automaticUpdates_description": "自動檢查並安裝更新"
     },
     "table": {
         "config": {
@@ -822,7 +835,8 @@
             "view": {
                 "table": "表格",
                 "grid": "網格",
-                "list": "列表"
+                "list": "列表",
+                "detail": "詳情"
             }
         },
         "column": {

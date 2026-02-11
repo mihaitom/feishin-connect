@@ -22,7 +22,7 @@
         "holdToMoveToTop": "утримуйте, щоб перемістити вгору",
         "holdToMoveToBottom": "утримувати, щоб перемістити вниз",
         "moveItems": "перемістити елементи",
-        "shuffle": "відтворити випадково",
+        "shuffle": "перемішати",
         "shuffleAll": "все випадково",
         "shuffleSelected": "вибране випадково",
         "refresh": "$t(common.refresh)",
@@ -415,9 +415,130 @@
             "success": "посилання для спільного використання скопійовано в буфер обміну (натисніть тут, щоб відкрити)",
             "expireInvalid": "термін дії повинен бути в майбутньому",
             "createFailed": "не вдалося створити спільний доступ (чи ввімкнено спільний доступ?)"
+        },
+        "shuffleAll": {
+            "title": "відтворити випадково",
+            "input_genre": "$t(entity.genre, {\"count\": 1})",
+            "input_limit": "скільки пісень?",
+            "input_minYear": "від року",
+            "input_maxYear": "до року",
+            "input_played": "відтворити фільтр",
+            "input_played_optionAll": "всі треки",
+            "input_played_optionUnplayed": "тільки не відтворені треки",
+            "input_played_optionPlayed": "тільки відтворені треки"
+        },
+        "updateServer": {
+            "success": "сервер успішно оновлено",
+            "title": "оновити сервер"
+        },
+        "privateMode": {
+            "enabled": "приватний режим увімкнено, стан відтворення тепер приховано від зовнішніх інтеграцій",
+            "disabled": "приватний режим вимкнено, стан відтворення тепер видно для увімкнених зовнішніх інтеграцій",
+            "title": "приватний режим"
         }
     },
     "player": {
         "skip": "пропустити"
+    },
+    "page": {
+        "albumArtistDetail": {
+            "about": "Про {{artist}}",
+            "appearsOn": "з'являється на",
+            "favoriteSongs": "улюблені пісні",
+            "groupingTypeAll": "всі типи випуску",
+            "groupingTypePrimary": "основні типи випуску",
+            "recentReleases": "останні випуски",
+            "viewDiscography": "переглянути дискографію",
+            "relatedArtists": "подібні $t(entity.artist, {\"count\": 2})",
+            "topSongs": "найкращі пісні",
+            "topSongsCommunity": "спільнота",
+            "topSongsFrom": "найкращі пісні від {{title}}",
+            "topSongsPersonal": "особисте",
+            "favoriteSongsFrom": "улюблені пісні від {{title}}",
+            "viewAll": "показати все",
+            "viewAllTracks": "показати усі $t(entity.track, {\"count\": 2})"
+        },
+        "albumArtistList": {
+            "title": "$t(entity.albumArtist, {\"count\": 2})"
+        },
+        "albumDetail": {
+            "moreFromArtist": "більше від цього $t(entity.artist, {\"count\": 1})",
+            "moreFromGeneric": "більше від {{item}}",
+            "released": "видано"
+        },
+        "albumList": {
+            "artistAlbums": "альбоми виконавця {{artist}}",
+            "genreAlbums": "\"{{genre}}\" $t(entity.album, {\"count\": 2})",
+            "title": "$t(entity.album, {\"count\": 2})"
+        },
+        "radioList": {
+            "title": "радіостанції"
+        },
+        "releasenotes": {
+            "commitsSinceStable": "комміти від {{stable}}",
+            "noNewCommits": "немає нових коммітів у цьому періоді",
+            "noStableReleaseToCompare": "немає доступної стабільної версії для порівняння"
+        },
+        "favorites": {
+            "title": "$t(entity.favorite, {\"count\": 2})"
+        },
+        "windowBar": {
+            "paused": "(Призупинено) ",
+            "privateMode": "(Приватний режим)"
+        },
+        "appMenu": {
+            "collapseSidebar": "згорнути бічну панель",
+            "commandPalette": "відкрити палітру команд",
+            "expandSidebar": "розгорнути бічну панель",
+            "goBack": "повернутися назад",
+            "goForward": "перейти вперед",
+            "manageServers": "управління серверами",
+            "privateModeOff": "вимкнути приватний режим",
+            "privateModeOn": "увімкнути приватний режим",
+            "openBrowserDevtools": "відкрити інструменти розробника",
+            "quit": "$t(common.quit)",
+            "selectServer": "вибрати сервер",
+            "selectMusicFolder": "вибрати папку з музикою",
+            "noMusicFolder": "не вибрано папку з музикою",
+            "multipleMusicFolders": "Вибрано {{count}} папок з музикою",
+            "settings": "$t(common.setting, {\"count\": 2})",
+            "version": "версія {{version}}"
+        },
+        "manageServers": {
+            "title": "управління серверами",
+            "serverDetails": "інформація про сервер",
+            "url": "URL-адреса",
+            "username": "Ім'я користувача",
+            "editServerDetailsTooltip": "редагувати дані сервера",
+            "removeServer": "видалити сервер"
+        },
+        "contextMenu": {
+            "addFavorite": "$t(action.addToFavorites)",
+            "addLast": "$t(player.addLast)",
+            "addNext": "$t(player.addNext)",
+            "addToFavorites": "$t(action.addToFavorites)",
+            "addToPlaylist": "$t(action.addToPlaylist)",
+            "createPlaylist": "$t(action.createPlaylist)",
+            "deletePlaylist": "$t(action.deletePlaylist)",
+            "deselectAll": "$t(action.deselectAll)",
+            "download": "завантажити",
+            "moveItems": "$t(action.moveItems)",
+            "moveToNext": "$t(action.moveToNext)",
+            "moveToBottom": "$t(action.moveToBottom)",
+            "moveToTop": "$t(action.moveToTop)",
+            "numberSelected": "{{count}} вибрано",
+            "play": "$t(player.play)",
+            "playSimilarSongs": "$t(player.playSimilarSongs)",
+            "removeFromFavorites": "$t(action.removeFromFavorites)",
+            "removeFromPlaylist": "$t(action.removeFromPlaylist)",
+            "removeFromQueue": "$t(action.removeFromQueue)",
+            "setRating": "$t(action.setRating)",
+            "playShuffled": "$t(player.shuffle)",
+            "shareItem": "поділитися елементом",
+            "goTo": "перейти до",
+            "goToAlbum": "перейти до $t(entity.album, {\"count\": 1})",
+            "goToAlbumArtist": "перейти до $t(entity.albumArtist, {\"count\": 1})",
+            "showDetails": "отримати інформацію"
+        }
     }
 }
