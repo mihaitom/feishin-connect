@@ -661,7 +661,16 @@
         "restoreQueueFromServer": "przywróć kolejkę z serwera",
         "saveQueueToServer": "zapisz kolejkę na serwerze",
         "artistRadio": "radio wykonawcy",
-        "trackRadio": "radio utworu"
+        "trackRadio": "radio utworu",
+        "sleepTimer": "wyłącznik czasowy",
+        "sleepTimer_endOfSong": "do końca aktualnej piosenki",
+        "sleepTimer_minutes": "{{count}} min",
+        "sleepTimer_hours": "{{count}} godz",
+        "sleepTimer_custom": "niestandardowy",
+        "sleepTimer_off": "wyłączony",
+        "sleepTimer_timeRemaining": "pozostało {{time}}",
+        "sleepTimer_setCustom": "ustaw wyłącznik",
+        "sleepTimer_cancel": "anuluj wyłączanie"
     },
     "setting": {
         "crossfadeStyle_description": "wybierz styl przenikania, który ma być używany do odtwarzania dźwięku",
@@ -1008,14 +1017,19 @@
         "sidebarPlaylistListFilterRegex": "filtr playlist regex",
         "blurExplicitImages": "rozmazuj nieodpowiednie obrazy",
         "blurExplicitImages_description": "obrazy piosenek oraz albumów oznaczone jako nieodpowiednie będą rozmazywane",
-        "releaseChannel_optionAlpha": "alpha (nightly)"
+        "releaseChannel_optionAlpha": "alpha (nightly)",
+        "analyticsEnable": "Wysyłaj statystyki na podstawie użytkowania",
+        "analyticsEnable_description": "Zanonimizowane statystki użytkowania będą wysyłane do twórcy, aby pomóc w poprawie aplikacji",
+        "automaticUpdates": "Aktualizacje automatyczne",
+        "automaticUpdates_description": "Sprawdzaj i instaluj aktualizacje automatycznie"
     },
     "table": {
         "config": {
             "view": {
                 "table": "tabela",
                 "grid": "siatka",
-                "list": "lista"
+                "list": "lista",
+                "detail": "szczegół"
             },
             "general": {
                 "displayType": "typ wyświetlania",

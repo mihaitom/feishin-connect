@@ -38,7 +38,16 @@
         "restoreQueueFromServer": "obnovit frontu ze serveru",
         "saveQueueToServer": "uložit frontu na server",
         "artistRadio": "rádio umělce",
-        "trackRadio": "rádio skladby"
+        "trackRadio": "rádio skladby",
+        "sleepTimer": "časovač spánku",
+        "sleepTimer_endOfSong": "konec aktuální skladby",
+        "sleepTimer_minutes": "{{count}} min.",
+        "sleepTimer_hours": "{{count}} hod.",
+        "sleepTimer_custom": "vlastní",
+        "sleepTimer_off": "vypnuto",
+        "sleepTimer_timeRemaining": "zbývá {{time}}",
+        "sleepTimer_setCustom": "nastavit časovač",
+        "sleepTimer_cancel": "zrušit časovač"
     },
     "setting": {
         "crossfadeStyle_description": "vyberte způsob prolnutí u přehrávače zvuku",
@@ -385,7 +394,11 @@
         "sidebarPlaylistListFilterRegex_description": "v postranní liště skrýt seznamy skladeb, které odpovídají tomuto regulárnímu výrazu",
         "sidebarPlaylistListFilterRegex_placeholder": "např. ^Denní mix.*",
         "sidebarPlaylistListFilterRegex": "regulární výraz filtru seznamů skladeb",
-        "releaseChannel_optionAlpha": "alpha (noční)"
+        "releaseChannel_optionAlpha": "alpha (noční)",
+        "analyticsEnable": "Posílat analytiku založenou na využití",
+        "analyticsEnable_description": "Anonymizovaná data o používání jsou odesílána vývojáři za účelem zlepšení aplikace",
+        "automaticUpdates": "Automatické aktualizace",
+        "automaticUpdates_description": "Kontrolovat a automaticky instalovat aktualizace"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist, {\"count\": 1})",
@@ -558,7 +571,8 @@
             "view": {
                 "table": "tabulka",
                 "list": "seznam",
-                "grid": "mřížka"
+                "grid": "mřížka",
+                "detail": "podrobnosti"
             },
             "general": {
                 "displayType": "typ zobrazení",
