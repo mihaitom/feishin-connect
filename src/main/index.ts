@@ -1,3 +1,5 @@
+import type { UpdateCheckResult } from 'electron-updater';
+
 import { is } from '@electron-toolkit/utils';
 import {
     app,
@@ -21,6 +23,7 @@ import log from 'electron-log/main';
 import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
 import { access, constants } from 'fs';
 import path, { join } from 'path';
+import semver from 'semver';
 
 import packageJson from '../../package.json';
 import { disableMediaKeys, enableMediaKeys } from './features/core/player/media-keys';
@@ -54,32 +57,87 @@ const ALPHA_UPDATER_CONFIG: {
 
 type UpdaterInstance = AppImageUpdater | MacUpdater | NsisUpdater | typeof autoUpdater;
 
-class AlphaAppUpdater {
-    constructor() {
-        const updater = createAlphaUpdaterInstance();
-        log.transports.file.level = 'info';
-        updater.logger = autoUpdaterLogInterface;
-        updater.channel = ALPHA_UPDATER_CONFIG.channel;
-        updater.allowPrerelease = true;
-        updater.disableDifferentialDownload = true;
-        updater.allowDowngrade = true;
-        updater.autoInstallOnAppQuit = true;
-        updater.autoRunAppAfterInstall = true;
-        updater.checkForUpdatesAndNotify();
-    }
-}
-
 class AppUpdater {
     constructor() {
         const effectiveChannel = store.get('release_channel') as string;
         console.log('Effective update channel:', effectiveChannel);
         if (effectiveChannel === 'alpha') {
-            return new AlphaAppUpdater();
+            checkAllChannelsAndGetBest().then(({ updater: updaterInstance }) => {
+                updaterInstance.autoInstallOnAppQuit = true;
+                updaterInstance.autoRunAppAfterInstall = true;
+                updaterInstance.checkForUpdatesAndNotify();
+            });
+            return;
         }
 
         configureAndGetUpdater();
         autoUpdater.checkForUpdatesAndNotify();
     }
+}
+
+// When release channel is alpha, check alpha and latest for updates and return
+// the updater + result for the newest version found (so alpha users can receive
+// latest updates when they are newer than the current alpha).
+async function checkAllChannelsAndGetBest(): Promise<{
+    result: null | UpdateCheckResult;
+    updater: UpdaterInstance;
+}> {
+    const currentVersion = packageJson.version;
+    const candidates: Array<{
+        channel: 'alpha' | 'beta' | 'latest';
+        result: UpdateCheckResult;
+        updater: UpdaterInstance;
+    }> = [];
+
+    const alphaUpdater = createAlphaUpdaterInstance();
+    alphaUpdater.logger = autoUpdaterLogInterface;
+    alphaUpdater.channel = ALPHA_UPDATER_CONFIG.channel;
+    alphaUpdater.allowPrerelease = true;
+    alphaUpdater.disableDifferentialDownload = true;
+    alphaUpdater.allowDowngrade = true;
+
+    try {
+        const alphaResult = await alphaUpdater.checkForUpdates();
+        if (
+            alphaResult?.updateInfo?.version &&
+            alphaResult.isUpdateAvailable &&
+            semver.valid(alphaResult.updateInfo.version) &&
+            semver.gt(alphaResult.updateInfo.version, currentVersion)
+        ) {
+            candidates.push({ channel: 'alpha', result: alphaResult, updater: alphaUpdater });
+        }
+    } catch (e) {
+        log.warn('Alpha channel check failed', e);
+    }
+
+    try {
+        configureAutoUpdaterForChannel('latest');
+        const latestResult = await autoUpdater.checkForUpdates();
+        if (
+            latestResult?.updateInfo?.version &&
+            latestResult.isUpdateAvailable &&
+            semver.valid(latestResult.updateInfo.version) &&
+            semver.gt(latestResult.updateInfo.version, currentVersion)
+        ) {
+            candidates.push({ channel: 'latest', result: latestResult, updater: autoUpdater });
+        }
+    } catch (e) {
+        log.warn('Latest channel check failed', e);
+    }
+
+    if (candidates.length === 0) {
+        return { result: null, updater: alphaUpdater };
+    }
+
+    const best = candidates.reduce((a, b) =>
+        semver.gt(a.result.updateInfo.version, b.result.updateInfo.version) ? a : b,
+    );
+
+    if (best.channel === 'latest') {
+        configureAutoUpdaterForChannel('latest');
+    }
+
+    return { result: best.result, updater: best.updater };
 }
 
 function configureAndGetUpdater(): UpdaterInstance {
@@ -122,15 +180,35 @@ function configureAndGetUpdater(): UpdaterInstance {
 
     if (effectiveChannel === 'beta') {
         autoUpdater.channel = 'beta';
+        autoUpdater.allowDowngrade = true;
         autoUpdater.allowPrerelease = true;
         autoUpdater.disableDifferentialDownload = true;
     } else {
         autoUpdater.channel = 'latest';
-        autoUpdater.allowDowngrade = true;
         autoUpdater.allowPrerelease = false;
     }
 
     return autoUpdater;
+}
+
+/**
+ * Configures the global autoUpdater for a specific GitHub channel (beta or latest).
+ * Used when checking multiple channels or when the winning channel is beta/latest.
+ */
+function configureAutoUpdaterForChannel(channel: 'beta' | 'latest'): void {
+    log.transports.file.level = 'info';
+    autoUpdater.logger = autoUpdaterLogInterface;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.autoRunAppAfterInstall = true;
+    if (channel === 'beta') {
+        autoUpdater.channel = 'beta';
+        autoUpdater.allowDowngrade = true;
+        autoUpdater.allowPrerelease = true;
+        autoUpdater.disableDifferentialDownload = true;
+    } else {
+        autoUpdater.channel = 'latest';
+        autoUpdater.allowPrerelease = false;
+    }
 }
 
 function createAlphaUpdaterInstance(): AppImageUpdater | MacUpdater | NsisUpdater {
@@ -440,8 +518,19 @@ async function createWindow(first = true): Promise<void> {
 
             try {
                 console.log('Checking for updates');
-                const updater = configureAndGetUpdater();
-                const result = await updater.checkForUpdates();
+                const effectiveChannel = store.get('release_channel') as string;
+                let result: null | UpdateCheckResult;
+                let updater: UpdaterInstance;
+
+                if (effectiveChannel === 'alpha') {
+                    const best = await checkAllChannelsAndGetBest();
+                    result = best.result;
+                    updater = best.updater;
+                } else {
+                    updater = configureAndGetUpdater();
+                    result = await updater.checkForUpdates();
+                }
+
                 const updateAvailable = result?.isUpdateAvailable ?? false;
                 console.log('Update available:', updateAvailable);
                 if (updateAvailable && store.get('disable_auto_updates') !== true) {
