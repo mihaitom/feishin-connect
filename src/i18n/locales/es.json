@@ -168,7 +168,7 @@
         "customFontPath": "ruta de fuente personalizada",
         "followLyric": "seguir la letra actual",
         "crossfadeDuration": "duración del crossfade",
-        "discordIdleStatus": "mostrar el estado inactivo en el estado de actividad",
+        "discordIdleStatus": "mostrar estado inactivo en el estado de actividad",
         "sidePlayQueueStyle_optionDetached": "separada",
         "audioPlayer": "reproductor de audio",
         "hotkey_zoomOut": "reducir",
@@ -398,7 +398,9 @@
         "analyticsEnable": "Enviar analíticas basadas en el uso",
         "analyticsEnable_description": "Se envían datos de uso anonimizados al desarrollador para ayudar a mejorar la aplicación",
         "automaticUpdates": "Actualizaciones automáticas",
-        "automaticUpdates_description": "Busca e instala actualizaciones automáticamente"
+        "automaticUpdates_description": "Busca e instala actualizaciones automáticamente",
+        "discordStateIcon": "Mostrar icono de reproducción",
+        "discordStateIcon_description": "Muestra un icono pequeño de reproducción en el estado de actividad. El icono de pausa se muestra siempre cuando \"Mostrar estado de actividad cuando esté en pausa\" esté activado"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist, {\"count\": 1})",
