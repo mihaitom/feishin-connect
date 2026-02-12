@@ -12,9 +12,10 @@ server {
   gzip_types        text/plain text/css application/json application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript;
   gzip_comp_level   9;
 
+  # PUBLIC_PATH must be "/" or a subpath with trailing slash (e.g. "/feishin/")
   location ${PUBLIC_PATH} {
     alias /usr/share/nginx/html/;
-    try_files $uri $uri/ /index.html =404;
+    try_files $uri $uri/ /index.html;
   }
 
   location ${PUBLIC_PATH}settings.js {
