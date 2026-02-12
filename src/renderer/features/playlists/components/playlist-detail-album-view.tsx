@@ -12,6 +12,7 @@ import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { DefaultItemControlProps, ItemControls } from '/@/renderer/components/item-list/types';
 import { useListContext } from '/@/renderer/context/list-context';
+import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
 import { type PlaylistAlbumRow, playlistSongsToAlbums } from '/@/renderer/features/playlists/utils';
@@ -22,6 +23,7 @@ import { sortSongList } from '/@/shared/api/utils';
 import {
     LibraryItem,
     PlaylistSongListResponse,
+    Song,
     SongListSort,
     SortOrder,
 } from '/@/shared/types/domain-types';
@@ -65,12 +67,43 @@ export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListRespon
 
     const albumControlOverrides = useMemo<Partial<ItemControls>>(() => {
         return {
+            onMore: ({ event, internalState, item }: DefaultItemControlProps) => {
+                if (!event) return;
+
+                const selected = internalState?.getSelected();
+
+                if (selected?.length === 0 && !item) {
+                    return;
+                }
+
+                let itemsToUse: (PlaylistAlbumRow | Song)[];
+                if ((selected?.length ?? 0) > 0) {
+                    itemsToUse = selected as (PlaylistAlbumRow | Song)[];
+                } else {
+                    itemsToUse = [item as PlaylistAlbumRow | Song];
+                }
+
+                const songs: Song[] = [];
+                for (const item of itemsToUse) {
+                    if (item._itemType === LibraryItem.ALBUM) {
+                        songs.push(...((item as PlaylistAlbumRow)._playlistSongs ?? []));
+                    } else if (item._itemType === LibraryItem.SONG) {
+                        songs.push(item as Song);
+                    }
+                }
+
+                ContextMenuController.call({
+                    cmd: { items: songs, type: LibraryItem.PLAYLIST_SONG },
+                    event,
+                });
+            },
             onPlay: ({
                 item,
                 itemType,
                 playType,
             }: DefaultItemControlProps & { playType: Play }) => {
                 if (!item) return;
+
                 const rowSongs = (item as PlaylistAlbumRow)._playlistSongs;
                 if (itemType === LibraryItem.ALBUM && rowSongs?.length) {
                     player.addToQueueByData(rowSongs, playType);
