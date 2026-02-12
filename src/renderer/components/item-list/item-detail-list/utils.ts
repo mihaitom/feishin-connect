@@ -60,7 +60,6 @@ export function shouldShowHoverOnlyColumnContent(
     return (
         isRowHovered ||
         (columnId === TableColumn.USER_FAVORITE && song.userFavorite !== false) ||
-        (columnId === TableColumn.USER_RATING &&
-            (song.userRating !== null || song.userRating !== 0))
+        (columnId === TableColumn.USER_RATING && song.userRating !== null && song.userRating !== 0)
     );
 }
