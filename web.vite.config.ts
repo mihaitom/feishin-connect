@@ -5,7 +5,7 @@ import { ViteEjsPlugin } from 'vite-plugin-ejs';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-    base: './',
+    base: '/',
     build: {
         emptyOutDir: true,
         outDir: path.resolve(__dirname, './out/web'),
@@ -22,10 +22,6 @@ export default defineConfig({
                 preview_full_screen_player: normalizePath(
                     path.resolve(__dirname, './media/preview_full_screen_player.webp'),
                 ),
-            },
-            output: {
-                assetFileNames: 'assets/[name].[ext]',
-                sourcemapExcludeSources: false,
             },
         },
         sourcemap: true,
@@ -56,7 +52,7 @@ export default defineConfig({
                 // The PWA will not be shown during development
                 enabled: false,
             },
-            filename: 'assets/sw.js',
+            filename: 'sw.js',
             injectRegister: 'inline',
             manifest: {
                 background_color: '#FFDCB5',
@@ -112,9 +108,12 @@ export default defineConfig({
             manifestFilename: 'assets/manifest.webmanifest',
             outDir: path.resolve(__dirname, './out/web/'),
             registerType: 'autoUpdate',
-            scope: '/assets/',
+            scope: '/',
             workbox: {
+                cleanupOutdatedCaches: true,
+                clientsClaim: true,
                 maximumFileSizeToCacheInBytes: 1000000 * 5, // 5 MB
+                skipWaiting: true,
             },
         }),
     ],
