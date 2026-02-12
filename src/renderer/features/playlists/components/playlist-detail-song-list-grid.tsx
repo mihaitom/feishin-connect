@@ -95,7 +95,7 @@ export const PlaylistDetailSongListGrid = forwardRef<any, PlaylistDetailSongList
                     type: 'offset',
                 }}
                 itemsPerRow={gridProps.itemsPerRowEnabled ? gridProps.itemsPerRow : undefined}
-                itemType={LibraryItem.SONG}
+                itemType={LibraryItem.PLAYLIST_SONG}
                 onScrollEnd={handleOnScrollEnd}
                 rows={rows}
                 size={gridProps.size}
