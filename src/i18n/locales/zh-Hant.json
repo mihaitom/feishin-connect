@@ -759,7 +759,9 @@
         "analyticsEnable": "傳送基於使用情況的分析報告",
         "analyticsEnable_description": "匿名化的使用情況資料會傳送給開發者，以協助改進應用程式",
         "automaticUpdates": "自動更新",
-        "automaticUpdates_description": "自動檢查並安裝更新"
+        "automaticUpdates_description": "自動檢查並安裝更新",
+        "discordStateIcon": "顯示播放中圖示",
+        "discordStateIcon_description": "在 rich presence 狀態中顯示一個小的播放圖示。啟用「暫停時顯示 rich presence」時，會始終顯示暫停的圖示"
     },
     "table": {
         "config": {
