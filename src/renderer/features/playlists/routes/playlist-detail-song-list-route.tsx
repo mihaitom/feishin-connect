@@ -20,7 +20,7 @@ import { AnimatedPage } from '/@/renderer/features/shared/components/animated-pa
 import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer } from '/@/renderer/store';
+import { PlaylistTarget, useCurrentServer, usePlaylistTarget } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -29,7 +29,7 @@ import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { ServerType, SongListSort } from '/@/shared/types/domain-types';
+import { LibraryItem, ServerType, SongListSort } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 interface PlaylistQueryEditorProps {
@@ -154,14 +154,17 @@ const PlaylistQueryEditor = ({
     }, [detailQuery?.data?.rules?.order, detailQuery?.data?.rules?.sort]);
 
     return (
-        <div className="query-editor-container">
-            <Stack gap={0} h="100%" mah="30dvh" p="md" w="100%">
-                <Group justify="space-between" pb="md" wrap="nowrap">
+        <div
+            className="query-editor-container"
+            style={{ borderTop: '1px solid var(--theme-colors-border)' }}
+        >
+            <Stack gap={0} h="100%" mah="30dvh" p="sm" w="100%">
+                <Group justify="space-between" wrap="nowrap">
                     <Group gap="sm" wrap="nowrap">
                         <Button
                             leftSection={
                                 <Icon
-                                    icon={isQueryBuilderExpanded ? 'arrowUpS' : 'arrowDownS'}
+                                    icon={isQueryBuilderExpanded ? 'arrowDownS' : 'arrowUpS'}
                                     size="lg"
                                 />
                             }
@@ -396,6 +399,12 @@ const PlaylistDetailSongListRoute = () => {
         setIsQueryBuilderExpanded(true);
     };
 
+    const playlistTarget = usePlaylistTarget();
+    const displayMode: LibraryItem.ALBUM | LibraryItem.SONG =
+        playlistTarget === PlaylistTarget.ALBUM ? LibraryItem.ALBUM : LibraryItem.SONG;
+    const listKey =
+        displayMode === LibraryItem.ALBUM ? ItemListKey.PLAYLIST_ALBUM : ItemListKey.PLAYLIST_SONG;
+
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
     const [listData, setListData] = useState<unknown[]>([]);
     const [mode, setMode] = useState<'edit' | 'view'>('view');
@@ -403,17 +412,19 @@ const PlaylistDetailSongListRoute = () => {
     const providerValue = useMemo(() => {
         return {
             customFilters: undefined,
+            displayMode,
             id: playlistId,
             isSmartPlaylist,
             itemCount,
             listData,
+            listKey,
             mode,
-            pageKey: ItemListKey.PLAYLIST_SONG,
+            pageKey: listKey,
             setItemCount,
             setListData,
             setMode,
         };
-    }, [playlistId, isSmartPlaylist, itemCount, listData, mode]);
+    }, [playlistId, isSmartPlaylist, displayMode, listKey, itemCount, listData, mode]);
 
     return (
         <AnimatedPage key={`playlist-detail-songList-${playlistId}`}>
@@ -429,6 +440,10 @@ const PlaylistDetailSongListRoute = () => {
                     onDelete={() => openDeletePlaylistModal()}
                     onToggleQueryBuilder={handleToggleShowQueryBuilder}
                 />
+
+                <Suspense fallback={<Spinner container />}>
+                    <PlaylistDetailSongListContent />
+                </Suspense>
                 {(isSmartPlaylist || showQueryBuilder) && (
                     <PlaylistQueryEditor
                         createPlaylistMutation={createPlaylistMutation}
@@ -441,9 +456,6 @@ const PlaylistDetailSongListRoute = () => {
                         queryBuilderRef={queryBuilderRef}
                     />
                 )}
-                <Suspense fallback={<Spinner container />}>
-                    <PlaylistDetailSongListContent />
-                </Suspense>
             </ListContext.Provider>
         </AnimatedPage>
     );

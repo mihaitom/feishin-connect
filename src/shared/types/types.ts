@@ -26,6 +26,7 @@ export enum ItemListKey {
     GENRE_ALBUM = 'genreAlbum',
     GENRE_SONG = 'genreSong',
     PLAYLIST = LibraryItem.PLAYLIST,
+    PLAYLIST_ALBUM = 'playlistAlbum',
     PLAYLIST_SONG = LibraryItem.PLAYLIST_SONG,
     QUEUE_SONG = LibraryItem.QUEUE_SONG,
     RADIO = 'radio',

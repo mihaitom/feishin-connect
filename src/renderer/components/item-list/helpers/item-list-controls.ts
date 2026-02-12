@@ -244,8 +244,6 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                     const playType = (meta?.playType as Play) || Play.NOW;
                     const singleSongOnly = meta?.singleSongOnly === true;
 
-                    // For single-song actions (e.g. image play button), or NEXT/LAST/..., only add the clicked song
-                    // For row double-click with NOW/SHUFFLE, add a range of songs around the clicked song
                     let songsToAdd: Song[];
                     if (
                         singleSongOnly ||

@@ -152,6 +152,8 @@ const DiscordLinkTypeSchema = z.enum(['last_fm', 'musicbrainz', 'musicbrainz_las
 
 const GenreTargetSchema = z.enum(['album', 'track']);
 
+const PlaylistTargetSchema = z.enum(['album', 'track']);
+
 const SideQueueTypeSchema = z.enum(['sideDrawerQueue', 'sideQueue']);
 
 const SidebarPanelTypeSchema = z.enum(['queue', 'lyrics', 'visualizer']);
@@ -459,6 +461,7 @@ export const GeneralSettingsSchema = z.object({
     playButtonBehavior: z.nativeEnum(Play),
     playerbarOpenDrawer: z.boolean(),
     playerbarSlider: PlayerbarSliderSchema,
+    playlistTarget: PlaylistTargetSchema,
     resume: z.boolean(),
     showLyricsInSidebar: z.boolean(),
     showRatings: z.boolean(),
@@ -776,6 +779,11 @@ export enum PlayerbarSliderType {
     WAVEFORM = 'waveform',
 }
 
+export enum PlaylistTarget {
+    ALBUM = 'album',
+    TRACK = 'track',
+}
+
 export enum SidebarItem {
     ALBUMS = 'Albums',
     ARTISTS = 'Artists',
@@ -830,6 +838,7 @@ export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
         setHomeItems: (item: SortableItem<HomeItem>[]) => void;
         setList: (type: ItemListKey, data: DeepPartial<ItemListSettings>) => void;
         setPlaybackFilters: (filters: PlayerFilter[]) => void;
+        setPlaylistBehavior: (target: PlaylistTarget) => void;
         setSettings: (data: DeepPartial<SettingsState>) => void;
         setSidebarItems: (items: SidebarItemType[]) => void;
         setTable: (type: ItemListKey, data: DataTableProps) => void;
@@ -1041,6 +1050,7 @@ const initialState: SettingsState = {
             barWidth: 2,
             type: PlayerbarSliderType.SLIDER,
         },
+        playlistTarget: PlaylistTarget.TRACK,
         resume: true,
         showLyricsInSidebar: true,
         showRatings: true,
@@ -1162,6 +1172,83 @@ const initialState: SettingsState = {
             table: {
                 autoFitColumns: true,
                 columns: SONG_TABLE_COLUMNS.map((column) => ({
+                    align: column.align,
+                    autoSize: column.autoSize,
+                    id: column.value,
+                    isEnabled: column.isEnabled,
+                    pinned: column.pinned,
+                    width: column.width,
+                })),
+                enableAlternateRowColors: false,
+                enableHeader: true,
+                enableHorizontalBorders: false,
+                enableRowHoverHighlight: true,
+                enableVerticalBorders: false,
+                size: 'default',
+            },
+        },
+        [ItemListKey.PLAYLIST_ALBUM]: {
+            detail: {
+                columns: pickTableColumns({
+                    autoSizeColumns: [],
+                    columns: SONG_TABLE_COLUMNS,
+                    columnWidths: {
+                        [TableColumn.ACTIONS]: 60,
+                        [TableColumn.DURATION]: 100,
+                        [TableColumn.TITLE]: 400,
+                        [TableColumn.TRACK_NUMBER]: 50,
+                        [TableColumn.USER_FAVORITE]: 60,
+                    },
+                    enabledColumns: [
+                        TableColumn.TRACK_NUMBER,
+                        TableColumn.TITLE,
+                        TableColumn.DURATION,
+                        TableColumn.USER_FAVORITE,
+                        TableColumn.ACTIONS,
+                    ],
+                }),
+                enableAlternateRowColors: false,
+                enableHeader: true,
+                enableHorizontalBorders: false,
+                enableRowHoverHighlight: true,
+                enableVerticalBorders: false,
+                size: 'compact',
+            },
+            display: ListDisplayType.GRID,
+            grid: {
+                itemGap: 'sm',
+                itemsPerRow: 6,
+                itemsPerRowEnabled: false,
+                rows: pickGridRows({
+                    alignLeftColumns: [
+                        TableColumn.TITLE,
+                        TableColumn.ALBUM_ARTIST,
+                        TableColumn.YEAR,
+                    ],
+                    columns: ALBUM_TABLE_COLUMNS,
+                    enabledColumns: [TableColumn.TITLE, TableColumn.ALBUM_ARTIST, TableColumn.YEAR],
+                    pickColumns: [
+                        TableColumn.TITLE,
+                        TableColumn.DURATION,
+                        TableColumn.ALBUM_ARTIST,
+                        TableColumn.BIT_RATE,
+                        TableColumn.BPM,
+                        TableColumn.DATE_ADDED,
+                        TableColumn.GENRE,
+                        TableColumn.PLAY_COUNT,
+                        TableColumn.SONG_COUNT,
+                        TableColumn.RELEASE_DATE,
+                        TableColumn.LAST_PLAYED,
+                        TableColumn.YEAR,
+                    ],
+                }),
+                size: 'default',
+            },
+            itemsPerPage: 100,
+            pagination: ListPaginationType.INFINITE,
+            table: {
+                autoFitColumns: true,
+                columns: ALBUM_TABLE_COLUMNS.map((column) => ({
                     align: column.align,
                     autoSize: column.autoSize,
                     id: column.value,
@@ -1810,6 +1897,11 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                                 state.playback.filters = filters;
                             });
                         },
+                        setPlaylistBehavior: (target: PlaylistTarget) => {
+                            set((state) => {
+                                state.general.playlistTarget = target;
+                            });
+                        },
                         setSettings: (data) => {
                             set((state) => {
                                 deepMergeIntoState(state, data);
@@ -2219,6 +2311,9 @@ export const usePlayerbarSlider = () =>
     useSettingsStore((store) => store.general.playerbarSlider, shallow);
 
 export const useGenreTarget = () => useSettingsStore((store) => store.general.genreTarget, shallow);
+
+export const usePlaylistTarget = () =>
+    useSettingsStore((store) => store.general.playlistTarget, shallow);
 
 export const useLanguage = () => useSettingsStore((state) => state.general.language, shallow);
 

@@ -32,6 +32,7 @@ import { Play } from '/@/shared/types/types';
 
 interface LibraryHeaderProps {
     children?: ReactNode;
+    compact?: boolean;
     containerClassName?: string;
     imagePlaceholderUrl?: null | string;
     imageUrl?: null | string;
@@ -45,11 +46,20 @@ interface LibraryHeaderProps {
     };
     loading?: boolean;
     title: string;
+    topRight?: ReactNode;
 }
 
 export const LibraryHeader = forwardRef(
     (
-        { children, containerClassName, imageUrl, item, title }: LibraryHeaderProps,
+        {
+            children,
+            compact,
+            containerClassName,
+            imageUrl,
+            item,
+            title,
+            topRight,
+        }: LibraryHeaderProps,
         ref: Ref<HTMLDivElement>,
     ) => {
         const { t } = useTranslation();
@@ -125,7 +135,15 @@ export const LibraryHeader = forwardRef(
         }, [item.explicitStatus, item.imageId, item.type]);
 
         return (
-            <div className={clsx(styles.libraryHeader, containerClassName)} ref={ref}>
+            <div
+                className={clsx(
+                    styles.libraryHeader,
+                    containerClassName,
+                    compact && styles.compact,
+                )}
+                ref={ref}
+            >
+                {topRight && <div className={styles.topRight}>{topRight}</div>}
                 <div
                     className={styles.imageSection}
                     onClick={() => {

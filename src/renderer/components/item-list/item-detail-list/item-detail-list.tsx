@@ -84,6 +84,7 @@ interface ItemDetailListProps {
     internalState?: ItemListStateActions;
     itemCount?: number;
     items?: unknown[];
+    listKey?: ItemListKey;
     onColumnReordered?: (
         columnIdFrom: TableColumn,
         columnIdTo: TableColumn,
@@ -92,8 +93,15 @@ interface ItemDetailListProps {
     onColumnResized?: (columnId: TableColumn, width: number) => void;
     onRangeChanged?: (range: { startIndex: number; stopIndex: number }) => Promise<void> | void;
     onScrollEnd?: (rowIndex: number) => void;
+    onSongRowDoubleClick?: (params: {
+        index: number;
+        internalState: ItemListStateActions;
+        item: Song;
+    }) => void;
+    overrideControls?: Partial<ItemControls>;
     rowHeight?: number;
     scrollOffset?: number;
+    songsByAlbumId?: Record<string, Song[]>;
     tableId?: string;
 }
 
@@ -109,7 +117,13 @@ interface RowData {
     getItem?: (index: number) => unknown;
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
+    onSongRowDoubleClick?: (params: {
+        index: number;
+        internalState: ItemListStateActions;
+        item: Song;
+    }) => void;
     registerSongs: (albumId: string, songs: Song[]) => void;
+    songsByAlbumId?: Record<string, Song[]>;
     trackColumns: ItemTableListColumnConfig[];
     trackTableSize: 'compact' | 'default' | 'large';
 }
@@ -126,6 +140,11 @@ interface TrackRowProps {
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     isSongsLoading?: boolean;
+    onSongRowDoubleClick?: (params: {
+        index: number;
+        internalState: ItemListStateActions;
+        item: Song;
+    }) => void;
     rowIndex: number;
     size: 'compact' | 'default' | 'large';
     song: Song;
@@ -147,6 +166,7 @@ const TrackRow = memo(
         internalState,
         isMutatingFavorite,
         isSongsLoading,
+        onSongRowDoubleClick,
         rowIndex,
         size,
         song,
@@ -167,11 +187,37 @@ const TrackRow = memo(
             (e: React.MouseEvent) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (onSongRowDoubleClick) {
+                    onSongRowDoubleClick({
+                        index: internalState.findItemIndex(song.id),
+                        internalState,
+                        item: song,
+                    });
+                    return;
+                }
+                if (controls?.onDoubleClick) {
+                    controls.onDoubleClick({
+                        event: e,
+                        index: internalState.findItemIndex(song.id),
+                        internalState,
+                        item: song,
+                        itemType: LibraryItem.SONG,
+                    });
+                    return;
+                }
                 if (isSongsLoading || albumSongs.length === 0) return;
                 internalState.setSelected([song]);
                 playerContext.addToQueueByData(albumSongs, Play.NOW, song.id);
             },
-            [albumSongs, internalState, isSongsLoading, playerContext, song],
+            [
+                albumSongs,
+                controls,
+                internalState,
+                isSongsLoading,
+                onSongRowDoubleClick,
+                playerContext,
+                song,
+            ],
         );
 
         const handleRowClick = useCallback(
@@ -610,7 +656,9 @@ const RowContent = memo(
         index,
         internalState,
         isMutatingFavorite,
+        onSongRowDoubleClick,
         registerSongs,
+        songsByAlbumId,
         trackColumns,
         trackTableSize,
     }: RowContentProps) => {
@@ -622,8 +670,10 @@ const RowContent = memo(
             return (data?.[index] as Album | undefined) || undefined;
         }, [data, getItem, index]);
 
+        const useClientSideSongs = Boolean(songsByAlbumId);
+
         const songListQuery = useMemo(() => {
-            if (!item?.id || !item?._serverId) return null;
+            if (useClientSideSongs || !item?.id || !item?._serverId) return null;
             return {
                 query: {
                     albumIds: [item.id],
@@ -634,7 +684,7 @@ const RowContent = memo(
                 },
                 serverId: item?._serverId || '',
             };
-        }, [item]);
+        }, [item, useClientSideSongs]);
 
         const { data: songListData, isLoading: isSongsQueryLoading } = useQuery({
             enabled: !!songListQuery,
@@ -646,8 +696,17 @@ const RowContent = memo(
                   }),
         });
 
-        const songItems = songListData?.items;
-        const isSongsLoading = !!item && isSongsQueryLoading && !songItems?.length;
+        const songItemsFromQuery = songListData?.items;
+        const songItemsFromClient = useMemo(() => {
+            const rowSongs = (item as { _playlistSongs?: Song[] })?._playlistSongs;
+            if (rowSongs?.length) return rowSongs;
+            if (!songsByAlbumId || !item?.id) return undefined;
+            return songsByAlbumId[item.id];
+        }, [item, songsByAlbumId]);
+
+        const songItems = useClientSideSongs ? songItemsFromClient : songItemsFromQuery;
+        const isSongsLoading =
+            !useClientSideSongs && !!item && isSongsQueryLoading && !songItemsFromQuery?.length;
 
         const songs = useMemo(() => {
             return (
@@ -705,6 +764,7 @@ const RowContent = memo(
                                 isMutatingFavorite={isMutatingFavorite}
                                 isSongsLoading={isSongsLoading}
                                 key={song.id}
+                                onSongRowDoubleClick={onSongRowDoubleClick}
                                 rowIndex={rowIndex}
                                 size={trackTableSize}
                                 song={song as Song}
@@ -729,6 +789,7 @@ const RowContent = memo(
         prev.isMutatingFavorite === next.isMutatingFavorite &&
         prev.controls === next.controls &&
         prev.registerSongs === next.registerSongs &&
+        prev.songsByAlbumId === next.songsByAlbumId &&
         prev.trackColumns === next.trackColumns &&
         prev.trackTableSize === next.trackTableSize,
 );
@@ -1113,10 +1174,14 @@ export const ItemDetailList = ({
     getItem,
     itemCount: externalItemCount,
     items,
+    listKey = ItemListKey.ALBUM,
     onColumnReordered,
     onColumnResized,
     onRangeChanged,
     onScrollEnd,
+    onSongRowDoubleClick,
+    overrideControls,
+    songsByAlbumId,
     tableId = DEFAULT_DETAIL_TABLE_ID,
 }: ItemDetailListProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -1127,6 +1192,7 @@ export const ItemDetailList = ({
     const controls = useDefaultItemListControls({
         onColumnReordered,
         onColumnResized,
+        overrides: overrideControls,
     });
     const isMutatingCreateFavorite = useIsMutatingCreateFavorite();
     const isMutatingDeleteFavorite = useIsMutatingDeleteFavorite();
@@ -1172,7 +1238,7 @@ export const ItemDetailList = ({
 
     const internalState = useItemListState(getDataFn, extractRowIdSong);
 
-    const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.ALBUM]?.detail);
+    const tableConfig = useSettingsStore((state) => state.lists[listKey]?.detail);
     const trackColumns = useMemo((): ItemTableListColumnConfig[] => {
         const raw = tableConfig?.columns;
         if (raw && raw.length > 0) {
@@ -1263,8 +1329,10 @@ export const ItemDetailList = ({
             getItem,
             internalState,
             isMutatingFavorite,
+            onSongRowDoubleClick,
             queryClient,
             registerSongs,
+            songsByAlbumId,
             trackColumns,
             trackTableSize,
         }),
@@ -1279,8 +1347,10 @@ export const ItemDetailList = ({
             getItem,
             internalState,
             isMutatingFavorite,
+            onSongRowDoubleClick,
             queryClient,
             registerSongs,
+            songsByAlbumId,
             trackColumns,
             trackTableSize,
         ],
