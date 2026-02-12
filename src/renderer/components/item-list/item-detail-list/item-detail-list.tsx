@@ -32,10 +32,12 @@ import styles from './item-detail-list.module.css';
 
 import { ItemCardControls } from '/@/renderer/components/item-card/item-card-controls';
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
+import { getDraggedItems } from '/@/renderer/components/item-list/helpers/get-dragged-items';
 import { useDefaultItemListControls } from '/@/renderer/components/item-list/helpers/item-list-controls';
 import {
     ItemListStateActions,
     ItemListStateItemWithRequiredProperties,
+    useItemDraggingState,
     useItemListState,
     useItemSelectionState,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
@@ -62,6 +64,7 @@ import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
+import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useSettingsStore, useShowRatings } from '/@/renderer/store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
@@ -422,6 +425,61 @@ const MetadataSection = memo(
         const [isImageHovered, setIsImageHovered] = useState(false);
         const [isMetadataHovered, setIsMetadataHovered] = useState(false);
 
+        const getId = useCallback(() => {
+            const draggedItems = getDraggedItems(item, internalState, false);
+            return draggedItems.map((i) => i.id);
+        }, [item, internalState]);
+
+        const getItem = useCallback(() => {
+            return getDraggedItems(item, internalState, false);
+        }, [item, internalState]);
+
+        const onDragStart = useCallback(() => {
+            const draggedItems = getDraggedItems(item, internalState, false);
+            internalState?.setDragging(draggedItems);
+        }, [item, internalState]);
+
+        const onDrop = useCallback(() => {
+            internalState?.setDragging([]);
+        }, [internalState]);
+
+        const drag = useMemo(() => {
+            const playlistSongs = (item as { _playlistSongs?: Song[] })._playlistSongs;
+            if (playlistSongs && playlistSongs.length > 0) {
+                return {
+                    getId,
+                    getItem: () => playlistSongs,
+                    itemType: LibraryItem.SONG,
+                    onDragStart,
+                    onDrop,
+                    operation: [DragOperation.ADD],
+                    target: DragTarget.SONG,
+                };
+            }
+
+            return {
+                getId,
+                getItem,
+                itemType: item._itemType,
+                onDragStart,
+                onDrop,
+                operation: [DragOperation.ADD],
+                target: DragTarget.ALBUM,
+            };
+        }, [getId, getItem, item, onDragStart, onDrop]);
+
+        const { isDragging: isDraggingLocal, ref: dragRef } = useDragDrop<HTMLDivElement>({
+            drag,
+            isEnabled: !!item,
+        });
+        const isDraggingState = useItemDraggingState(internalState, item.id);
+        const isDragging = isDraggingState || isDraggingLocal;
+
+        const handleLinkDragStart = useCallback((e: React.DragEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, []);
+
         const isFavorite = item.userFavorite ?? false;
         const userRating = item.userRating ?? null;
         const hasRating = showRatings && userRating !== null && userRating > 0;
@@ -483,39 +541,48 @@ const MetadataSection = memo(
                 onMouseEnter={() => setIsMetadataHovered(true)}
                 onMouseLeave={() => setIsMetadataHovered(false)}
             >
-                <Link
-                    className={styles.imageWrapper}
-                    onMouseEnter={() => setIsImageHovered(true)}
-                    onMouseLeave={() => setIsImageHovered(false)}
-                    state={{ item }}
-                    to={generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
-                        albumId: item.id,
+                <div
+                    className={clsx(styles.imageWrapperOuter, {
+                        [styles.imageWrapperDragging]: isDragging,
                     })}
+                    ref={dragRef ?? undefined}
                 >
-                    <ItemImage
-                        className={styles.image}
-                        explicitStatus={item.explicitStatus}
-                        id={item.imageId}
-                        itemType={item._itemType}
-                        serverId={item._serverId}
-                        type="itemCard"
-                    />
-                    {isFavorite && <div className={styles.favoriteBadge} />}
-                    {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
-                    <AnimatePresence>
-                        {controls && isImageHovered && (
-                            <ItemCardControls
-                                controls={controls}
-                                enableExpansion={false}
-                                internalState={internalState}
-                                item={item}
-                                itemType={item._itemType}
-                                showRating={true}
-                                type="compact"
-                            />
-                        )}
-                    </AnimatePresence>
-                </Link>
+                    <Link
+                        className={styles.imageWrapper}
+                        draggable={false}
+                        onDragStart={handleLinkDragStart}
+                        onMouseEnter={() => setIsImageHovered(true)}
+                        onMouseLeave={() => setIsImageHovered(false)}
+                        state={{ item }}
+                        to={generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
+                            albumId: item.id,
+                        })}
+                    >
+                        <ItemImage
+                            className={styles.image}
+                            explicitStatus={item.explicitStatus}
+                            id={item.imageId}
+                            itemType={item._itemType}
+                            serverId={item._serverId}
+                            type="itemCard"
+                        />
+                        {isFavorite && <div className={styles.favoriteBadge} />}
+                        {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
+                        <AnimatePresence>
+                            {controls && isImageHovered && (
+                                <ItemCardControls
+                                    controls={controls}
+                                    enableExpansion={false}
+                                    internalState={internalState}
+                                    item={item}
+                                    itemType={item._itemType}
+                                    showRating={true}
+                                    type="compact"
+                                />
+                            )}
+                        </AnimatePresence>
+                    </Link>
+                </div>
                 <Link
                     className={styles.title}
                     state={{ item }}
