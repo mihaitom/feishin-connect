@@ -734,7 +734,7 @@
         "artistConfiguration_description": "configure what items are shown, and in what order, on the album artist page",
         "artistReleaseTypeConfiguration": "artist release type configuration",
         "artistReleaseTypeConfiguration_description": "configure what release types are shown, and in what order, on the album artist page",
-        "audioDevice_description": "select the audio device to use for playback (web player only)",
+        "audioDevice_description": "select the audio device to use for playback",
         "audioDevice": "audio device",
         "audioExclusiveMode_description": "enable exclusive output mode. In this mode, the system is usually locked out, and only mpv will be able to output audio",
         "audioExclusiveMode": "audio exclusive mode",
