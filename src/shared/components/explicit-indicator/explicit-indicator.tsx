@@ -32,10 +32,12 @@ export const ExplicitIndicator = ({
     return (
         <span
             aria-label={explicitStatus === ExplicitStatus.EXPLICIT ? 'Explicit' : 'Clean'}
-            className={clsx(styles.root, styles[`size-${size}`], className)}
+            className={clsx(styles.root, styles[`size-${size}`], className, {
+                [styles.withSpace]: withSpace,
+            })}
             {...rest}
         >
-            {withSpace ? `${symbol} ` : symbol}
+            {symbol}
         </span>
     );
 };

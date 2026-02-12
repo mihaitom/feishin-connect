@@ -39,3 +39,7 @@
 .muted {
     opacity: 0.85;
 }
+
+.with-space {
+    padding-right: var(--theme-spacing-sm);
+}
