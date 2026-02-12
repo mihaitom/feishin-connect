@@ -40,6 +40,7 @@ import {
     useItemSelectionState,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { parseTableColumns } from '/@/renderer/components/item-list/helpers/parse-table-columns';
+import { useListHotkeys } from '/@/renderer/components/item-list/helpers/use-list-hotkeys';
 import { getDetailListCellComponent } from '/@/renderer/components/item-list/item-detail-list/columns';
 import {
     getTrackColumnFixed,
@@ -68,6 +69,8 @@ import { SEPARATOR_STRING } from '/@/shared/api/utils';
 import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { useDoubleClick } from '/@/shared/hooks/use-double-click';
+import { useFocusWithin } from '/@/shared/hooks/use-focus-within';
+import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
 import { Album, LibraryItem, Song, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { dndUtils, DragData, DragOperation, DragTarget } from '/@/shared/types/drag-and-drop';
 import { ItemListKey, Play, TableColumn } from '/@/shared/types/types';
@@ -1186,6 +1189,8 @@ export const ItemDetailList = ({
 }: ItemDetailListProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const listRef = useListRef(null);
+    const { focused, ref: focusRef } = useFocusWithin();
+    const mergedContainerRef = useMergedRef(containerRef, focusRef);
     const lastVisibleStartIndexRef = useRef(0);
     const queryClient = useQueryClient();
 
@@ -1377,6 +1382,13 @@ export const ItemDetailList = ({
         },
     });
 
+    useListHotkeys({
+        controls,
+        focused,
+        internalState,
+        itemType: LibraryItem.SONG,
+    });
+
     useEffect(() => {
         const { current: container } = containerRef;
 
@@ -1433,7 +1445,7 @@ export const ItemDetailList = ({
                     trackTableSize={trackTableSize}
                 />
             )}
-            <div className={styles.container} ref={containerRef}>
+            <div className={styles.container} ref={mergedContainerRef}>
                 <List
                     listRef={listRef}
                     onRowsRendered={throttledHandleRowsRendered}
