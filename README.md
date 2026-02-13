@@ -116,7 +116,6 @@ services:
             - SERVER_URL= # http://address:port or https://address:port
             - LEGACY_AUTHENTICATION=false # When SERVER_LOCK is true, sets the legacy (plaintext) authentication flag for Subsonic/OpenSubsonic servers
             - ANALYTICS_DISABLED=true # Set to true to disable Umami analytics tracking
-            - PUBLIC_PATH=/feishin/ # Optional: if you want to host Feishin on a subpath (not `/`)
         ports:
             - 9180:9180
             # Alternatively, to restrict to only localhost, - 127.0.0.1:9180:8190
@@ -131,7 +130,7 @@ services:
 - **Navidrome** - For the best experience, select "Save password" when creating the server and configure the `SessionTimeout` setting in your Navidrome config to a larger value (e.g. 72h).
     - **Linux users** - The default password store uses `libsecret`. `kwallet4/5/6` are also supported, but must be explicitly set in Settings > Window > Passwords/secret store.
 
-3. _Optional_ - If you want to host Feishin on a subpath (not `/`), pass `PUBLIC_PATH` at **build time** (and the same value at run time for nginx). Use a trailing slash for subpaths, e.g. `PUBLIC_PATH=/feishin/`. Example: `docker build --build-arg PUBLIC_PATH=/feishin/ .` then run with `-e PUBLIC_PATH=/feishin/`.
+3. _Optional_ - If you want to host Feishin on a subpath (not `/`), then pass in the following environment variable: `PUBLIC_PATH=PATH`. For example, to host on `/feishin`, pass in `PUBLIC_PATH=/feishin`.
 
 4. _Optional_ - To hard code the server url, pass the following environment variables: `SERVER_NAME`, `SERVER_TYPE` (one of `jellyfin` or `navidrome` or `subsonic`), `SERVER_URL`. To prevent users from changing these settings, pass `SERVER_LOCK=true`. This can only be set if all three of the previous values are set. When `SERVER_LOCK=true`, you can also set `LEGACY_AUTHENTICATION=true` or `LEGACY_AUTHENTICATION=false` to configure the legacy authentication flag for the server (only applicable for Subsonic/OpenSubsonic servers).
 
