@@ -236,6 +236,8 @@
     "filter": {
         "album": "$t(entity.album, {\"count\": 1})",
         "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
+        "matchAnd": "and",
+        "matchOr": "or",
         "albumCount": "$t(entity.album, {\"count\": 2}) count",
         "artist": "$t(entity.artist, {\"count\": 1})",
         "biography": "biography",

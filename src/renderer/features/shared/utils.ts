@@ -61,10 +61,14 @@ enum SharedFilterKeys {
 
 enum SongFilterKeys {
     _CUSTOM = '_custom',
-    ALBUM_IDS = 'albumIds',
+    ALBUM_ARTIST_IDS = 'albumArtistIds',
+    ALBUM_ARTIST_IDS_MODE = 'albumArtistIdsMode',
     ARTIST_IDS = 'artistIds',
+    ARTIST_IDS_MODE = 'artistIdsMode',
     FAVORITE = 'favorite',
     GENRE_ID = 'genreIds',
+    GENRE_ID_MODE = 'genreIdsMode',
+    HAS_RATING = 'hasRating',
     MAX_YEAR = 'maxYear',
     MIN_YEAR = 'minYear',
 }

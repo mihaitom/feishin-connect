@@ -10,8 +10,12 @@ export interface AppSlice extends AppState {
     actions: {
         setAlbumArtistDetailGroupingType: (groupingType: 'all' | 'primary') => void;
         setAlbumArtistDetailSort: (sortBy: AlbumListSort, sortOrder: SortOrder) => void;
+        setAlbumArtistIdsMode: (mode: 'and' | 'or') => void;
+        setAlbumArtistSelectMode: (mode: 'multi' | 'single') => void;
         setAppStore: (data: Partial<AppSlice>) => void;
+        setArtistIdsMode: (mode: 'and' | 'or') => void;
         setArtistSelectMode: (mode: 'multi' | 'single') => void;
+        setGenreIdsMode: (mode: 'and' | 'or') => void;
         setGenreSelectMode: (mode: 'multi' | 'single') => void;
         setPageSidebar: (key: string, value: boolean) => void;
         setPrivateMode: (enabled: boolean) => void;
@@ -27,8 +31,12 @@ export interface AppState {
         sortBy: AlbumListSort;
         sortOrder: SortOrder;
     };
+    albumArtistIdsMode: 'and' | 'or';
+    albumArtistSelectMode: 'multi' | 'single';
+    artistIdsMode: 'and' | 'or';
     artistSelectMode: 'multi' | 'single';
     commandPalette: CommandPaletteProps;
+    genreIdsMode: 'and' | 'or';
     genreSelectMode: 'multi' | 'single';
     isReorderingQueue: boolean;
     pageSidebar: Record<string, boolean>;
@@ -79,12 +87,32 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                             };
                         });
                     },
+                    setAlbumArtistIdsMode: (mode) => {
+                        set((state) => {
+                            state.albumArtistIdsMode = mode;
+                        });
+                    },
+                    setAlbumArtistSelectMode: (mode) => {
+                        set((state) => {
+                            state.albumArtistSelectMode = mode;
+                        });
+                    },
                     setAppStore: (data) => {
                         set({ ...get(), ...data });
+                    },
+                    setArtistIdsMode: (mode) => {
+                        set((state) => {
+                            state.artistIdsMode = mode;
+                        });
                     },
                     setArtistSelectMode: (mode) => {
                         set((state) => {
                             state.artistSelectMode = mode;
+                        });
+                    },
+                    setGenreIdsMode: (mode) => {
+                        set((state) => {
+                            state.genreIdsMode = mode;
                         });
                     },
                     setGenreSelectMode: (mode) => {
@@ -123,6 +151,9 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                     sortBy: AlbumListSort.RELEASE_DATE,
                     sortOrder: SortOrder.DESC,
                 },
+                albumArtistIdsMode: 'and',
+                albumArtistSelectMode: 'multi',
+                artistIdsMode: 'and',
                 artistSelectMode: 'multi',
                 commandPalette: {
                     close: () => {
@@ -142,6 +173,7 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                         });
                     },
                 },
+                genreIdsMode: 'and',
                 genreSelectMode: 'multi',
                 isReorderingQueue: false,
                 pageSidebar: {

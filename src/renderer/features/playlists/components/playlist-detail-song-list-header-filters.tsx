@@ -1,6 +1,6 @@
 import { openContextModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -13,12 +13,17 @@ import {
 import { useListContext } from '/@/renderer/context/list-context';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
+import { ClientSideSongFilters } from '/@/renderer/features/playlists/components/client-side-song-filters';
+import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
+import { FilterButton } from '/@/renderer/features/shared/components/filter-button';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
+import { isFilterValueSet } from '/@/renderer/features/shared/components/list-filters';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
 import { MoreButton } from '/@/renderer/features/shared/components/more-button';
+import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
 import { useContainerQuery } from '/@/renderer/hooks';
 import {
     PlaylistTarget,
@@ -32,7 +37,9 @@ import { Divider } from '/@/shared/components/divider/divider';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
+import { Modal } from '/@/shared/components/modal/modal';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
+import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 import { LibraryItem, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
@@ -40,6 +47,69 @@ import { ItemListKey } from '/@/shared/types/types';
 interface PlaylistDetailSongListHeaderFiltersProps {
     isSmartPlaylist?: boolean;
 }
+
+const PlaylistSongListFiltersModal = () => {
+    const { t } = useTranslation();
+    const { isSidebarOpen, setIsSidebarOpen } = useListContext();
+    const { clear, query } = usePlaylistSongListFilters();
+    const [isOpen, handlers] = useDisclosure(false);
+
+    const hasActiveFilters = useMemo(() => {
+        return Boolean(
+            isFilterValueSet(query[FILTER_KEYS.SONG.ALBUM_ARTIST_IDS]) ||
+                isFilterValueSet(query[FILTER_KEYS.SONG.ARTIST_IDS]) ||
+                query[FILTER_KEYS.SONG.FAVORITE] !== undefined ||
+                isFilterValueSet(query[FILTER_KEYS.SONG.GENRE_ID]) ||
+                query[FILTER_KEYS.SONG.HAS_RATING] !== undefined ||
+                query[FILTER_KEYS.SONG.MAX_YEAR] !== undefined ||
+                query[FILTER_KEYS.SONG.MIN_YEAR] !== undefined,
+        );
+    }, [query]);
+
+    const handlePin = () => {
+        setIsSidebarOpen?.(!isSidebarOpen);
+    };
+
+    const canPin = Boolean(setIsSidebarOpen);
+
+    return (
+        <>
+            <FilterButton isActive={hasActiveFilters} onClick={handlers.toggle} />
+            <Modal
+                handlers={handlers}
+                opened={isOpen}
+                size="lg"
+                styles={{
+                    content: {
+                        height: '100%',
+                        maxHeight: '640px',
+                        maxWidth: 'var(--theme-content-max-width)',
+                        width: '100%',
+                    },
+                }}
+                title={
+                    <Group justify="space-between" style={{ paddingRight: '3rem', width: '100%' }}>
+                        <Group>
+                            {canPin && (
+                                <ActionIcon
+                                    icon={isSidebarOpen ? 'unpin' : 'pin'}
+                                    onClick={handlePin}
+                                    variant="subtle"
+                                />
+                            )}
+                            {t('common.filters', { postProcess: 'sentenceCase' })}
+                        </Group>
+                        <Button onClick={clear} size="compact-sm" variant="subtle">
+                            {t('common.reset', { postProcess: 'sentenceCase' })}
+                        </Button>
+                    </Group>
+                }
+            >
+                <ClientSideSongFilters />
+            </Modal>
+        </>
+    );
+};
 
 export const PlaylistDetailSongListHeaderFilters = ({
     isSmartPlaylist,
@@ -114,6 +184,8 @@ export const PlaylistDetailSongListHeaderFilters = ({
                     disabled={isEditMode}
                     listKey={ItemListKey.PLAYLIST_SONG}
                 />
+                <Divider orientation="vertical" />
+                <PlaylistSongListFiltersModal />
                 <ListRefreshButton disabled={isEditMode} listKey={listKey} />
                 <MoreButton onClick={handleMore} />
             </Group>

@@ -4,8 +4,9 @@ import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useLocation, useNavigate, useParams } from 'react-router';
 
-import { ListContext } from '/@/renderer/context/list-context';
+import { ListContext, useListContext } from '/@/renderer/context/list-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
+import { ClientSideSongFilters } from '/@/renderer/features/playlists/components/client-side-song-filters';
 import { PlaylistDetailSongListContent } from '/@/renderer/features/playlists/components/playlist-detail-song-list-content';
 import { PlaylistDetailSongListHeader } from '/@/renderer/features/playlists/components/playlist-detail-song-list-header';
 import {
@@ -13,18 +14,27 @@ import {
     PlaylistQueryBuilderRef,
 } from '/@/renderer/features/playlists/components/playlist-query-builder';
 import { SaveAsPlaylistForm } from '/@/renderer/features/playlists/components/save-as-playlist-form';
+import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
 import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
 import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
 import { convertQueryGroupToNDQuery } from '/@/renderer/features/playlists/utils';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
+import { ListWithSidebarContainer } from '/@/renderer/features/shared/components/list-with-sidebar-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
-import { PlaylistTarget, useCurrentServer, usePlaylistTarget } from '/@/renderer/store';
+import {
+    PlaylistTarget,
+    useCurrentServer,
+    usePageSidebar,
+    usePlaylistTarget,
+} from '/@/renderer/store';
+import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { ConfirmModal } from '/@/shared/components/modal/modal';
+import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
@@ -236,6 +246,38 @@ const PlaylistQueryEditor = ({
     );
 };
 
+const PlaylistSongListFiltersSidebar = () => {
+    const { t } = useTranslation();
+    const { setIsSidebarOpen } = useListContext();
+    const { clear } = usePlaylistSongListFilters();
+
+    return (
+        <Stack h="100%" style={{ minHeight: 0 }}>
+            <Group justify="space-between" pb={0} pl="md" pr="md" pt="md">
+                <Text fw={500} size="xl">
+                    {t('common.filters', { postProcess: 'sentenceCase' })}
+                </Text>
+                <Group gap="xs">
+                    <Button onClick={clear} size="compact-sm" variant="subtle">
+                        {t('common.reset', { postProcess: 'sentenceCase' })}
+                    </Button>
+                    {setIsSidebarOpen && (
+                        <ActionIcon
+                            icon="unpin"
+                            onClick={() => setIsSidebarOpen(false)}
+                            size="compact-sm"
+                            variant="subtle"
+                        />
+                    )}
+                </Group>
+            </Group>
+            <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+                <ClientSideSongFilters />
+            </ScrollArea>
+        </Stack>
+    );
+};
+
 const PlaylistDetailSongListRoute = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -408,23 +450,36 @@ const PlaylistDetailSongListRoute = () => {
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
     const [listData, setListData] = useState<unknown[]>([]);
     const [mode, setMode] = useState<'edit' | 'view'>('view');
+    const [isSidebarOpen, setIsSidebarOpen] = usePageSidebar(listKey);
 
     const providerValue = useMemo(() => {
         return {
             customFilters: undefined,
             displayMode,
             id: playlistId,
+            isSidebarOpen,
             isSmartPlaylist,
             itemCount,
             listData,
             listKey,
             mode,
             pageKey: listKey,
+            setIsSidebarOpen,
             setItemCount,
             setListData,
             setMode,
         };
-    }, [playlistId, isSmartPlaylist, displayMode, listKey, itemCount, listData, mode]);
+    }, [
+        playlistId,
+        isSmartPlaylist,
+        displayMode,
+        listKey,
+        isSidebarOpen,
+        itemCount,
+        listData,
+        mode,
+        setIsSidebarOpen,
+    ]);
 
     return (
         <AnimatedPage key={`playlist-detail-songList-${playlistId}`}>
@@ -441,9 +496,14 @@ const PlaylistDetailSongListRoute = () => {
                     onToggleQueryBuilder={handleToggleShowQueryBuilder}
                 />
 
-                <Suspense fallback={<Spinner container />}>
-                    <PlaylistDetailSongListContent />
-                </Suspense>
+                <ListWithSidebarContainer>
+                    <ListWithSidebarContainer.SidebarPortal>
+                        <PlaylistSongListFiltersSidebar />
+                    </ListWithSidebarContainer.SidebarPortal>
+                    <Suspense fallback={<Spinner container />}>
+                        <PlaylistDetailSongListContent />
+                    </Suspense>
+                </ListWithSidebarContainer>
                 {(isSmartPlaylist || showQueryBuilder) && (
                     <PlaylistQueryEditor
                         createPlaylistMutation={createPlaylistMutation}
