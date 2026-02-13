@@ -1055,6 +1055,7 @@ interface AlbumSectionProps {
     albums: Album[];
     controls: ItemControls;
     cq: ReturnType<typeof useContainerQuery>;
+    enableExpansion?: boolean;
     releaseType: string;
     rows: DataRow[] | undefined;
     title: React.ReactNode | string;
@@ -1074,7 +1075,15 @@ const getItemsPerRow = (cq: ReturnType<typeof useContainerQuery>) => {
     return 2;
 };
 
-const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumSectionProps) => {
+const AlbumSection = ({
+    albums,
+    controls,
+    cq,
+    enableExpansion,
+    releaseType,
+    rows,
+    title,
+}: AlbumSectionProps) => {
     const { t } = useTranslation();
 
     const itemsPerRow = getItemsPerRow(cq);
@@ -1199,6 +1208,7 @@ const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumS
                             controls={controls}
                             data={album}
                             enableDrag
+                            enableExpansion={enableExpansion ?? true}
                             itemType={LibraryItem.ALBUM}
                             rows={rows}
                             type="poster"
@@ -1376,13 +1386,14 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
     const routeId = (artistId || albumArtistId) as string;
 
     const rows = useGridRows(LibraryItem.ALBUM, ItemListKey.ALBUM);
-    const controls = useDefaultItemListControls();
 
     const filteredAndSortedAlbums = useMemo(() => {
         const albums = albumsQuery.data?.items || [];
         const searched = searchLibraryItems(albums, debouncedSearchTerm, LibraryItem.ALBUM);
         return sortAlbumList(searched, sortBy, sortOrder);
     }, [albumsQuery.data?.items, debouncedSearchTerm, sortBy, sortOrder]);
+
+    const controls = useDefaultItemListControls();
 
     const albumsByReleaseType = useMemo(() => {
         return groupAlbumsByReleaseType(filteredAndSortedAlbums, routeId, groupingType);
@@ -1652,6 +1663,7 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
                                     albums={albums}
                                     controls={controls}
                                     cq={cq}
+                                    enableExpansion
                                     key={releaseType}
                                     releaseType={releaseType}
                                     rows={rows}
