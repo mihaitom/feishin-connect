@@ -751,7 +751,9 @@
         "album": "$t(entity.album, {\"count\": 1})",
         "trackNumber": "skladba",
         "explicitStatus": "$t(common.explicitStatus)",
-        "sortName": "název v řazení"
+        "sortName": "název v řazení",
+        "matchAnd": "a",
+        "matchOr": "nebo"
     },
     "page": {
         "sidebar": {
