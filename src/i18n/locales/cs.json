@@ -55,7 +55,7 @@
         "hotkey_skipBackward": "přeskočení zpět",
         "replayGainMode_description": "úprava zesílení hlasitosti podle hodnot {{ReplayGain}} uložených v metadatech souborů",
         "volumeWheelStep_description": "počet procent, o které má být hlasitost posunuta při přejetí kolečkem myši na posuvníku hlasitosti",
-        "audioDevice_description": "vyberte zvukové zařízení k přehrávání (pouze webový přehrávač)",
+        "audioDevice_description": "vyberte zvukové zařízení k přehrávání",
         "theme_description": "nastavení motivu použitého v aplikaci",
         "hotkey_playbackPause": "pozastavení",
         "replayGainFallback": "fallback {{ReplayGain}}",
@@ -270,7 +270,7 @@
         "neteaseTranslation_description": "Pokud je povoleno, načte a zobrazí přeložené texty ze služby NetEase, pokud jsou dostupné",
         "preferLocalLyrics": "preferovat místní texty",
         "preferLocalLyrics_description": "preferovat místní texty před vzdálenými, pokud jsou dostupné",
-        "discordPausedStatus": "zobrazit rich presence při pozastavení",
+        "discordPausedStatus": "zobrazit stav při pozastavení",
         "discordPausedStatus_description": "pokud je povoleno, bude při pozastavení přehrávače zobrazen stav",
         "preservePitch": "zachovat výšku",
         "preservePitch_description": "zachová výšku při úpravě rychlosti přehrávání",
@@ -398,7 +398,9 @@
         "analyticsEnable": "Posílat analytiku založenou na využití",
         "analyticsEnable_description": "Anonymizovaná data o používání jsou odesílána vývojáři za účelem zlepšení aplikace",
         "automaticUpdates": "Automatické aktualizace",
-        "automaticUpdates_description": "Kontrolovat a automaticky instalovat aktualizace"
+        "automaticUpdates_description": "Kontrolovat a automaticky instalovat aktualizace",
+        "discordStateIcon": "zobrazit ikonu přehrávání",
+        "discordStateIcon_description": "zobrazit malou ikonu přehrávání ve stavu na Discordu. ikona pozastavení bude zobrazena vždy, když je povolena možnost „Zobrazit stav při pozastavení“"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist, {\"count\": 1})",
