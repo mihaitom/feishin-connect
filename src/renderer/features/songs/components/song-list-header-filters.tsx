@@ -52,7 +52,6 @@ export const SongListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarget
         const query = songFilters.query;
         return Boolean(
             isFilterValueSet(query[FILTER_KEYS.SONG._CUSTOM]) ||
-                isFilterValueSet(query[FILTER_KEYS.SONG.ALBUM_IDS]) ||
                 isFilterValueSet(query[FILTER_KEYS.SONG.ARTIST_IDS]) ||
                 query[FILTER_KEYS.SONG.FAVORITE] !== undefined ||
                 isFilterValueSet(query[FILTER_KEYS.SONG.GENRE_ID]) ||
