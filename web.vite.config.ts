@@ -24,7 +24,24 @@ export default defineConfig({
                 ),
             },
             output: {
-                assetFileNames: 'assets/[name].[ext]',
+                assetFileNames: (assetInfo) => {
+                    const stableNames = [
+                        '32x32',
+                        '64x64',
+                        '128x128',
+                        '256x256',
+                        '512x512',
+                        '1024x1024',
+                        'favicon',
+                        'preview_full_screen_player',
+                    ];
+
+                    if (assetInfo.name && stableNames.includes(assetInfo.name)) {
+                        return 'assets/[name][extname]';
+                    }
+
+                    return 'assets/[name]-[hash][extname]';
+                },
                 sourcemapExcludeSources: false,
             },
         },
@@ -114,7 +131,10 @@ export default defineConfig({
             registerType: 'autoUpdate',
             scope: '/assets/',
             workbox: {
+                cleanupOutdatedCaches: true,
+                clientsClaim: true,
                 maximumFileSizeToCacheInBytes: 1000000 * 5, // 5 MB
+                skipWaiting: true,
             },
         }),
     ],
