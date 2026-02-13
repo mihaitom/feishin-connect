@@ -424,7 +424,7 @@
         "applicationHotkeys": "應用程式快捷鍵",
         "applicationHotkeys_description": "設定應用程式快捷鍵。切換勾選框來設為全域快捷鍵（僅桌面端）",
         "audioDevice": "音訊設備",
-        "audioDevice_description": "選擇用於播放的音訊設備（僅 web 播放器）",
+        "audioDevice_description": "選擇用於播放的音訊設備",
         "audioExclusiveMode": "音訊獨占模式",
         "audioExclusiveMode_description": "啟用獨占輸出模式。在此模式下，系統通常被鎖定，只有 mpv 能夠輸出音訊",
         "audioPlayer": "音訊播放器",
@@ -977,7 +977,9 @@
         "toYear": "從年份",
         "trackNumber": "曲目",
         "explicitStatus": "$t(common.explicitStatus)",
-        "sortName": "排序名稱"
+        "sortName": "排序名稱",
+        "matchAnd": "和",
+        "matchOr": "或"
     },
     "form": {
         "addServer": {

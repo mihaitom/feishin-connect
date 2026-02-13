@@ -54,7 +54,7 @@
         "remotePort_description": "establece el puerto para el control remoto del servidor",
         "hotkey_skipBackward": "retroceder",
         "replayGainMode_description": "ajusta el volumen de ganancia acorde a los valores de {{ReplayGain}} almacenados en los metadatos del archivo",
-        "audioDevice_description": "selecciona el dispositivo de audio a usar durante la reproducción (solo reproductor web)",
+        "audioDevice_description": "selecciona el dispositivo de audio a usar durante la reproducción",
         "theme_description": "establece el tema a usar por la aplicación",
         "hotkey_playbackPause": "pausa",
         "replayGainFallback": "{{ReplayGain}} alternativa",
@@ -643,7 +643,9 @@
         "album": "$t(entity.album, {\"count\": 1})",
         "albumCount": "Número de $t(entity.album, {\"count\": 2})",
         "explicitStatus": "$t(common.explicitStatus)",
-        "sortName": "Ordenar por nombre"
+        "sortName": "Ordenar por nombre",
+        "matchAnd": "y",
+        "matchOr": "o"
     },
     "page": {
         "sidebar": {
