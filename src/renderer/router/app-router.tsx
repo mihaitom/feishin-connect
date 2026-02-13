@@ -8,6 +8,7 @@ import { AppOutlet } from '/@/renderer/router/app-outlet';
 import { AppRoute } from '/@/renderer/router/routes';
 import { TitlebarOutlet } from '/@/renderer/router/titlebar-outlet';
 import { BaseContextModal, ModalsProvider } from '/@/shared/components/modal/modal';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 
 const NowPlayingRoute = lazy(
     () => import('/@/renderer/features/now-playing/routes/now-playing-route'),
@@ -90,7 +91,7 @@ const LazyLyricsSettingsContextModal = lazy(() =>
 );
 
 const LyricsSettingsContextModal = (props: any) => (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<Spinner container />}>
         <LazyLyricsSettingsContextModal {...props} />
     </Suspense>
 );
@@ -102,7 +103,7 @@ const LazyShuffleAllContextModal = lazy(() =>
 );
 
 const ShuffleAllContextModal = (props: any) => (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<Spinner container />}>
         <LazyShuffleAllContextModal {...props} />
     </Suspense>
 );
@@ -116,7 +117,7 @@ const LazyAddToPlaylistContextModal = lazy(() =>
 );
 
 const AddToPlaylistContextModal = (props: any) => (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<Spinner container />}>
         <LazyAddToPlaylistContextModal {...props} />
     </Suspense>
 );
@@ -130,7 +131,7 @@ const LazySaveAndReplaceContextModal = lazy(() =>
 );
 
 const SaveAndReplaceContextModal = (props: any) => (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<Spinner container />}>
         <LazySaveAndReplaceContextModal {...props} />
     </Suspense>
 );
@@ -142,7 +143,7 @@ const LazyUpdatePlaylistContextModal = lazy(() =>
 );
 
 const UpdatePlaylistContextModal = (props: any) => (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<Spinner container />}>
         <LazyUpdatePlaylistContextModal {...props} />
     </Suspense>
 );
@@ -154,7 +155,7 @@ const LazySettingsContextModal = lazy(() =>
 );
 
 const SettingsContextModal = (props: any) => (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<Spinner container />}>
         <LazySettingsContextModal {...props} />
     </Suspense>
 );
@@ -166,7 +167,7 @@ const LazyShareItemContextModal = lazy(() =>
 );
 
 const ShareItemContextModal = (props: any) => (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<Spinner container />}>
         <LazyShareItemContextModal {...props} />
     </Suspense>
 );
@@ -180,7 +181,7 @@ const LazyVisualizerSettingsContextModal = lazy(() =>
 );
 
 const VisualizerSettingsContextModal = (props: any) => (
-    <Suspense fallback={<></>}>
+    <Suspense fallback={<Spinner container />}>
         <LazyVisualizerSettingsContextModal {...props} />
     </Suspense>
 );
