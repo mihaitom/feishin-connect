@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
-import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
+import {
+    ListConfigMenu,
+    SONG_DISPLAY_TYPES,
+} from '/@/renderer/features/shared/components/list-config-menu';
 import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
 import {
     isFilterValueSet,
@@ -91,7 +94,11 @@ export const SongListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarget
             </Group>
             <Group gap="sm" wrap="nowrap">
                 <ListDisplayTypeToggleButton listKey={ItemListKey.SONG} />
-                <ListConfigMenu listKey={ItemListKey.SONG} tableColumnsData={SONG_TABLE_COLUMNS} />
+                <ListConfigMenu
+                    displayTypes={SONG_DISPLAY_TYPES}
+                    listKey={ItemListKey.SONG}
+                    tableColumnsData={SONG_TABLE_COLUMNS}
+                />
             </Group>
         </Flex>
     );

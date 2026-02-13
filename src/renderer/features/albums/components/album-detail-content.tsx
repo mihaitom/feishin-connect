@@ -21,7 +21,10 @@ import { ItemControls } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumInfiniteCarousel } from '/@/renderer/features/albums/components/album-infinite-carousel';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
+import {
+    ListConfigMenu,
+    SONG_DISPLAY_TYPES,
+} from '/@/renderer/features/shared/components/list-config-menu';
 import {
     CLIENT_SIDE_SONG_FILTERS,
     ListSortByDropdownControlled,
@@ -755,7 +758,10 @@ const AlbumDetailSongsTable = ({ songs }: AlbumDetailSongsTableProps) => {
                     sortOrder={sortOrder}
                 />
                 <ListConfigMenu
-                    displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
+                    displayTypes={[
+                        { hidden: true, value: ListDisplayType.GRID },
+                        ...SONG_DISPLAY_TYPES,
+                    ]}
                     listKey={ItemListKey.ALBUM_DETAIL}
                     optionsConfig={{
                         table: {

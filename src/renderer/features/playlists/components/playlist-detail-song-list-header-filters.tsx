@@ -16,7 +16,10 @@ import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-a
 import { ClientSideSongFilters } from '/@/renderer/features/playlists/components/client-side-song-filters';
 import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
 import { FilterButton } from '/@/renderer/features/shared/components/filter-button';
-import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
+import {
+    ListConfigMenu,
+    SONG_DISPLAY_TYPES,
+} from '/@/renderer/features/shared/components/list-config-menu';
 import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
 import { isFilterValueSet } from '/@/renderer/features/shared/components/list-filters';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
@@ -229,6 +232,7 @@ export const PlaylistDetailSongListHeaderFilters = ({
                     />
                 ) : (
                     <ListConfigMenu
+                        displayTypes={SONG_DISPLAY_TYPES}
                         listKey={listKey}
                         tableColumnsData={PLAYLIST_SONG_TABLE_COLUMNS}
                     />

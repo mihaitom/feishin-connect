@@ -18,6 +18,10 @@ import { Table } from '/@/shared/components/table/table';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { ItemListKey, ListDisplayType } from '/@/shared/types/types';
 
+export const SONG_DISPLAY_TYPES: ListConfigMenuDisplayTypeConfig[] = [
+    { hidden: true, value: ListDisplayType.DETAIL },
+];
+
 const DISPLAY_TYPES = [
     {
         label: (

@@ -25,7 +25,10 @@ import { ItemControls } from '/@/renderer/components/item-list/types';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistGridCarousel } from '/@/renderer/features/artists/components/album-artist-grid-carousel';
 import { useIsPlayerFetching, usePlayer } from '/@/renderer/features/player/context/player-context';
-import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
+import {
+    ListConfigMenu,
+    SONG_DISPLAY_TYPES,
+} from '/@/renderer/features/shared/components/list-config-menu';
 import {
     CLIENT_SIDE_ALBUM_FILTERS,
     ListSortByDropdownControlled,
@@ -448,7 +451,10 @@ const AlbumArtistMetadataTopSongsContent = ({
                                 value={topSongsQueryType}
                             />
                             <ListConfigMenu
-                                displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
+                                displayTypes={[
+                                    { hidden: true, value: ListDisplayType.GRID },
+                                    ...SONG_DISPLAY_TYPES,
+                                ]}
                                 listKey={ItemListKey.SONG}
                                 optionsConfig={{
                                     table: {
@@ -706,7 +712,10 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
                                 value={searchTerm}
                             />
                             <ListConfigMenu
-                                displayTypes={[{ hidden: true, value: ListDisplayType.GRID }]}
+                                displayTypes={[
+                                    { hidden: true, value: ListDisplayType.GRID },
+                                    ...SONG_DISPLAY_TYPES,
+                                ]}
                                 listKey={ItemListKey.SONG}
                                 optionsConfig={{
                                     table: {
