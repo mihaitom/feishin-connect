@@ -21,6 +21,7 @@ import {
     LuArrowUpNarrowWide,
     LuArrowUpToLine,
     LuBookOpen,
+    LuBraces,
     LuCheck,
     LuChevronDown,
     LuChevronLast,
@@ -117,6 +118,7 @@ import {
     LuVolumeX,
     LuWifi,
     LuWifiOff,
+    LuWrench,
     LuX,
 } from 'react-icons/lu';
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md';
@@ -187,6 +189,7 @@ export const AppIcon = {
     info: LuInfo,
     itemAlbum: LuDisc3,
     itemSong: LuMusic,
+    json: LuBraces,
     keyboard: LuKeyboard,
     lastPlayed: LuHeadphones,
     layoutDetail: LuLayoutList,
@@ -227,6 +230,7 @@ export const AppIcon = {
     playlistAdd: LuListPlus,
     playlistDelete: LuListMinus,
     plus: LuPlus,
+    queryBuilder: LuWrench,
     queue: LuList,
     radio: LuRadio,
     refresh: LuRotateCw,

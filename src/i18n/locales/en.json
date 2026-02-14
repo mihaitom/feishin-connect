@@ -211,6 +211,7 @@
         "credentialsRequired": "credentials required",
         "endpointNotImplementedError": "endpoint {{endpoint}} is not implemented for {{serverType}}",
         "genericError": "an error occurred",
+        "invalidJson": "invalid JSON",
         "invalidServer": "invalid server",
         "localFontAccessDenied": "access denied to local fonts",
         "loginRateError": "too many login attempts, please try again in a few seconds",
