@@ -6,6 +6,7 @@ import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpe
 import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
 import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail-list';
 import { ItemListComponentProps } from '/@/renderer/components/item-list/types';
+import { useListContext } from '/@/renderer/context/list-context';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import {
     AlbumListQuery,
@@ -34,6 +35,7 @@ export const AlbumListInfiniteDetail = ({
     }) as UseSuspenseQueryOptions<number, Error, number, readonly unknown[]>;
 
     const listQueryFn = api.controller.getAlbumList;
+    const { pageKey } = useListContext();
 
     const { handleColumnReordered } = useItemListColumnReorder({
         itemListKey: ItemListKey.ALBUM,
@@ -46,7 +48,7 @@ export const AlbumListInfiniteDetail = ({
     });
 
     const { getItem, itemCount, loadedItems, onRangeChanged } = useItemListInfiniteLoader({
-        eventKey: ItemListKey.ALBUM,
+        eventKey: pageKey || ItemListKey.ALBUM,
         itemsPerPage,
         itemType: LibraryItem.ALBUM,
         listCountQuery,

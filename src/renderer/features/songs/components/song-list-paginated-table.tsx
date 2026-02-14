@@ -10,6 +10,7 @@ import { useItemListPagination } from '/@/renderer/components/item-list/item-lis
 import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemListTableComponentProps } from '/@/renderer/components/item-list/types';
+import { useListContext } from '/@/renderer/context/list-context';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { usePlayerSong } from '/@/renderer/store';
 import { LibraryItem, SongListQuery, SongListSort, SortOrder } from '/@/shared/types/domain-types';
@@ -35,6 +36,7 @@ export const SongListPaginatedTable = ({
     serverId,
     size = 'default',
 }: SongListPaginatedTableProps) => {
+    const { pageKey } = useListContext();
     const { currentPage, onChange } = useItemListPagination();
 
     const listCountQuery = songsQueries.listCount({
@@ -46,7 +48,7 @@ export const SongListPaginatedTable = ({
 
     const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
         currentPage,
-        eventKey: ItemListKey.SONG,
+        eventKey: pageKey || ItemListKey.SONG,
         itemsPerPage,
         itemType: LibraryItem.SONG,
         listCountQuery,

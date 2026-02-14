@@ -8,6 +8,7 @@ import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-lis
 import { ItemListWithPagination } from '/@/renderer/components/item-list/item-list-pagination/item-list-pagination';
 import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
 import { ItemListComponentProps } from '/@/renderer/components/item-list/types';
+import { useListContext } from '/@/renderer/context/list-context';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import {
     AlbumListQuery,
@@ -36,6 +37,7 @@ export const AlbumListPaginatedDetail = ({
     }) as UseSuspenseQueryOptions<number, Error, number, readonly unknown[]>;
 
     const listQueryFn = api.controller.getAlbumList;
+    const { pageKey } = useListContext();
 
     const { handleColumnReordered } = useItemListColumnReorder({
         itemListKey: ItemListKey.ALBUM,
@@ -51,7 +53,7 @@ export const AlbumListPaginatedDetail = ({
 
     const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
         currentPage,
-        eventKey: ItemListKey.ALBUM,
+        eventKey: pageKey || ItemListKey.ALBUM,
         itemsPerPage,
         itemType: LibraryItem.ALBUM,
         listCountQuery,
