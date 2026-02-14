@@ -172,11 +172,8 @@ function GlobalExpandedPanel() {
     if (!globalExpanded) return null;
 
     return (
-            <ExpandedListContainer>
-            <ExpandedListItem
-                item={globalExpanded.item}
-                itemType={globalExpanded.itemType}
-            />
+        <ExpandedListContainer>
+            <ExpandedListItem item={globalExpanded.item} itemType={globalExpanded.itemType} />
         </ExpandedListContainer>
     );
 }
