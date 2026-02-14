@@ -597,7 +597,9 @@
         "multipleServerSaveQueueError": "La cola de reproducción tiene una o más canciones que no son del servidor actual. Esto no está soportado",
         "settingsSyncError": "Se encontraron discrepancias entre las opciones del renderizador y el proceso principal. Reinicia la aplicación para aplicar los cambios",
         "noNetwork": "Servidor no disponible",
-        "noNetworkDescription": "No se pudo conectar a este servidor"
+        "noNetworkDescription": "No se pudo conectar a este servidor",
+        "invalidJson": "JSON inválido",
+        "serverLockSingleServer": "Solo se permite un servidor cuando el servidor está bloqueado"
     },
     "filter": {
         "mostPlayed": "más reproducidos",

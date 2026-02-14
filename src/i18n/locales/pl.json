@@ -254,7 +254,9 @@
         "saveQueueFailed": "nie udało się zapisać kolejki",
         "settingsSyncError": "zostały znalezione różnice pomiędzy ustawieniami w rendererze a głównym procesem. uruchom aplikację ponownie aby, zastosować zmiany",
         "noNetwork": "serwer niedostępny",
-        "noNetworkDescription": "nie udało się połączyć z tym serwerem"
+        "noNetworkDescription": "nie udało się połączyć z tym serwerem",
+        "invalidJson": "nieprawidłowy JSON",
+        "serverLockSingleServer": "dozwolony jest tylko jeden serwer gdy serwer jest zablokowany"
     },
     "filter": {
         "mostPlayed": "najczęściej odtwarzane",
@@ -300,7 +302,9 @@
         "isPublic": "jest publiczny",
         "album": "$t(entity.album, {\"count\": 1})",
         "explicitStatus": "$t(common.explicitStatus)",
-        "sortName": "sortowanie po nazwie"
+        "sortName": "sortowanie po nazwie",
+        "matchAnd": "i",
+        "matchOr": "lub"
     },
     "form": {
         "deletePlaylist": {
@@ -675,7 +679,7 @@
     "setting": {
         "crossfadeStyle_description": "wybierz styl przenikania, który ma być używany do odtwarzania dźwięku",
         "hotkey_skipBackward": "przeskocz do tyłu",
-        "audioDevice_description": "wybierz urządzenie dźwiękowe używane do odtwarzania (tylko odtwarzacz przeglądarkowy)",
+        "audioDevice_description": "wybierz urządzenie dźwiękowe używane do odtwarzania",
         "hotkey_playbackPause": "wstrzymaj",
         "hotkey_volumeUp": "podgłoś",
         "discordIdleStatus_description": "kiedy włączony, aktualizuje stan kiedy odtwarzacz jest bezczynny",

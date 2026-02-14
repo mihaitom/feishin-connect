@@ -218,7 +218,16 @@
         "addNextShuffled": "下一个（随机）",
         "artistRadio": "艺术家电台",
         "holdToShuffle": "按住即可随机",
-        "trackRadio": "追踪广播"
+        "trackRadio": "追踪广播",
+        "sleepTimer": "睡眠定时器",
+        "sleepTimer_endOfSong": "当前歌曲结束时",
+        "sleepTimer_minutes": "{{count}} 分钟",
+        "sleepTimer_hours": "{{count}} 小时",
+        "sleepTimer_custom": "自定义",
+        "sleepTimer_off": "关闭",
+        "sleepTimer_timeRemaining": "剩余时间 {{time}}",
+        "sleepTimer_setCustom": "设置定时器",
+        "sleepTimer_cancel": "取消定时器"
     },
     "setting": {
         "crossfadeStyle_description": "选择用于音频播放器的淡入淡出风格",
@@ -249,7 +258,7 @@
         "customFontPath_description": "设置应用使用的自定义字体路径",
         "gaplessAudio_optionWeak": "弱（推荐）",
         "font_description": "设置应用使用的字体",
-        "audioDevice_description": "选择用于播放的音频设备（仅 web 播放器）",
+        "audioDevice_description": "选择用于播放的音频设备",
         "enableRemote_description": "启用远程控制服务器，以允许其他设备控制此应用",
         "remotePort_description": "设置远程服务器端口",
         "hotkey_skipBackward": "向后跳过",
@@ -463,7 +472,7 @@
         "releaseChannel_optionLatest": "最新的",
         "releaseChannel_optionBeta": "测试版",
         "releaseChannel": "发布通道",
-        "releaseChannel_description": "选择稳定版、测试版或 Alpha（夜间构建版）以启用自动更新。",
+        "releaseChannel_description": "选择稳定版、测试版或 Alpha（夜间构建版）以启用自动更新",
         "mediaSession": "启用媒体会话",
         "mediaSession_description": "启用媒体会话集成，在系统音量叠加层和锁屏界面显示媒体控件和元数据",
         "exportImportSettings_control_description": "通过 JSON 导出和导入设置",
@@ -562,7 +571,16 @@
         "sidebarPlaylistListFilterRegex_placeholder": "例如：^每日精选*",
         "sidebarPlaylistListFilterRegex": "播放列表筛选正则表达式",
         "queryBuilder": "查询构建器",
-        "queryBuilderCustomFields": "自定义字段"
+        "queryBuilderCustomFields": "自定义字段",
+        "analyticsEnable": "发送基于使用情况的分析",
+        "analyticsEnable_description": "发送匿名使用数据帮助开发者改进应用程序",
+        "automaticUpdates": "自动更新",
+        "automaticUpdates_description": "自动检查并安装更新",
+        "releaseChannel_optionAlpha": "alpha（每日构建版）",
+        "discordStateIcon": "显示播放图标",
+        "discordStateIcon_description": "在 rich presence 状态中显示一个小的播放图标。启用“暂停时显示 rich presence 在线状态”后，暂停图标始终显示",
+        "blurExplicitImages": "模糊显式图片",
+        "blurExplicitImages_description": "专辑和歌曲封面若被标记为不雅内容，将会进行模糊处理"
     },
     "error": {
         "remotePortWarning": "重启服务器使新端口生效",
@@ -593,7 +611,9 @@
         "noNetwork": "服务器不可用",
         "noNetworkDescription": "无法连接到该服务器",
         "saveQueueFailed": "播放列表保存失败",
-        "settingsSyncError": "渲染器设置与主进程中存在差异，请重启程序以应用更改"
+        "settingsSyncError": "渲染器设置与主进程中存在差异，请重启程序以应用更改",
+        "invalidJson": "无效的 JSON",
+        "serverLockSingleServer": "服务器锁定时，只允许一台服务器运行"
     },
     "filter": {
         "mostPlayed": "最多播放过",
@@ -639,7 +659,9 @@
         "duration": "时长",
         "album": "$t(entity.album, {\"count\": 1})",
         "explicitStatus": "$t(common.explicitStatus)",
-        "sortName": "排序名称"
+        "sortName": "排序名称",
+        "matchAnd": "和",
+        "matchOr": "或"
     },
     "page": {
         "sidebar": {
@@ -808,7 +830,11 @@
             "appearsOn": "出现在",
             "viewAll": "查看全部",
             "groupingTypeAll": "所有发行类型",
-            "groupingTypePrimary": "首选发布类型"
+            "groupingTypePrimary": "首选发布类型",
+            "favoriteSongs": "收藏的歌曲",
+            "favoriteSongsFrom": "来自 {{title}} 收藏的歌曲",
+            "topSongsCommunity": "社区",
+            "topSongsPersonal": "个人"
         },
         "itemDetail": {
             "copyPath": "将路径复制到剪贴板",
@@ -842,6 +868,11 @@
         "collections": {
             "overrideExisting": "覆盖现有",
             "saveAsCollection": "保存为集合"
+        },
+        "releasenotes": {
+            "commitsSinceStable": "自 {{stable}} 以来的提交",
+            "noNewCommits": "此范围内没有新的提交",
+            "noStableReleaseToCompare": "目前没有稳定版本可供比较"
         }
     },
     "form": {
@@ -989,7 +1020,8 @@
             "view": {
                 "table": "表格",
                 "grid": "网格",
-                "list": "列表"
+                "list": "列表",
+                "detail": "详情"
             },
             "label": {
                 "releaseDate": "发布日期",
@@ -1173,7 +1205,9 @@
             "gradient": {
                 "classic": "经典",
                 "prism": "棱镜",
-                "rainbow": "彩虹"
+                "rainbow": "彩虹",
+                "steelblue": "钢蓝色",
+                "orangered": "橙红色"
             },
             "frequencyScale": {
                 "none": "无"
