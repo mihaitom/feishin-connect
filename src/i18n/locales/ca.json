@@ -12,7 +12,7 @@
             "search": "$t(common.search)",
             "settings": "$t(common.setting, {\"count\": 2})",
             "tracks": "$t(entity.track, {\"count\": 2})",
-            "nowPlaying": "ara sona",
+            "nowPlaying": "s'està reproduint",
             "shared": "$t(entity.playlist, {\"count\": 2}) compartides",
             "favorites": "$t(entity.favorite, {\"count\": 2})",
             "radio": "$t(entity.radioStation, {\"count\": 2})",
@@ -568,7 +568,7 @@
         "sidePlayQueueStyle_optionAttached": "unida",
         "sidePlayQueueStyle_optionDetached": "separada",
         "audioDevice": "dispositiu d'àudio",
-        "audioDevice_description": "seleccioneu el dispositiu d'àudio que voleu utilitzar per a la reproducció (només pel reproductor web)",
+        "audioDevice_description": "seleccioneu el dispositiu d'àudio que voleu utilitzar per a la reproducció",
         "audioPlayer": "reproductor d'àudio",
         "audioPlayer_description": "seleccioneu el reproductor d'àudio que voleu utilitzar per a la reproducció",
         "sidebarConfiguration_description": "selecciona els elements i l'ordre en què apareixen a la barra lateral",
@@ -614,9 +614,9 @@
         "customFontPath_description": "estableix la ruta a una font personalitzada per utilitzar-la a l'aplicació",
         "discordApplicationId": "id d'aplicació de {{discord}}",
         "discordApplicationId_description": "l'id d'aplicació per l'estat d'activitat de {{discord}} (per defecte, {{defaultId}})",
-        "discordPausedStatus": "mosta l'estat d'activitat quan està en pausa",
+        "discordPausedStatus": "mostra l'estat d'activitat quan està en pausa",
         "discordPausedStatus_description": "si està activat, l'estat es mostrarà quan el reproductor estigui pausat",
-        "discordIdleStatus": "mosta l'estat d'activitat en inactivitat",
+        "discordIdleStatus": "mosta l'estat d'activitat quan està inactiu",
         "discordIdleStatus_description": "si està activat, s'actualitzarà l'estat mentre el reproductor estigui inactiu",
         "discordListening": "mosta l'estat com escoltant",
         "discordListening_description": "mosta l'estat com escoltant en comptes de jugant",
@@ -894,7 +894,9 @@
         "automaticUpdates_description": "cerca i instal·la actualitzacions automàticament",
         "releaseChannel_optionAlpha": "alfa (diària)",
         "blurExplicitImages": "desenfoca imatges explícites",
-        "blurExplicitImages_description": "les caràtules d'àlbums i cançons marcades com a explícites quedaran desenfocades"
+        "blurExplicitImages_description": "les caràtules d'àlbums i cançons marcades com a explícites quedaran desenfocades",
+        "discordStateIcon": "mostra la icona de reproducció",
+        "discordStateIcon_description": "mostra una petita icona de reproducció a l'estat d'activitat. l'icona de pausa es mostra quan \"mostra l'estat d'activitat quan està en pausa\" està activat"
     },
     "table": {
         "column": {
@@ -1048,7 +1050,9 @@
         "path": "ruta",
         "songCount": "nombre de cançons",
         "explicitStatus": "$t(common.explicitStatus)",
-        "sortName": "ordena per nom"
+        "sortName": "ordena per nom",
+        "matchAnd": "i",
+        "matchOr": "o"
     },
     "player": {
         "muted": "silenciat",
