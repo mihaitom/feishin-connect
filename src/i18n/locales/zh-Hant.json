@@ -146,7 +146,9 @@
         "saveQueueFailed": "儲存播放佇列失敗",
         "settingsSyncError": "偵測到渲染器與主程序之間的設定不一致，請重新啟動應用程式以套用變更",
         "noNetwork": "伺服器無法連線",
-        "noNetworkDescription": "無法連接到此伺服器"
+        "noNetworkDescription": "無法連接到此伺服器",
+        "invalidJson": "無效的 JSON",
+        "serverLockSingleServer": "當伺服器鎖定時只允許一個伺服器"
     },
     "page": {
         "contextMenu": {

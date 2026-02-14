@@ -705,7 +705,9 @@
         "saveQueueFailed": "nepodařilo se uložit frontu",
         "settingsSyncError": "byly zjištěny nesrovnalosti mezi nastavením v rendereru a hlavním procesem. restartujte aplikaci, aby se změny projevily",
         "noNetwork": "server je nedostupný",
-        "noNetworkDescription": "k tomuto serveru se nepodařilo připojit"
+        "noNetworkDescription": "k tomuto serveru se nepodařilo připojit",
+        "invalidJson": "neplatný JSON",
+        "serverLockSingleServer": "při uzamčení serveru je povolen pouze jeden server"
     },
     "filter": {
         "mostPlayed": "nejvíce přehráváno",
