@@ -128,23 +128,12 @@ export const createFuseForLibraryItem = <T extends FuseSearchableItem>(
         });
     }
 
-    const sampleItem = items[0];
-
-    const stringKeys = Object.keys(sampleItem).filter(
-        (key) =>
-            typeof sampleItem[key as keyof T] === 'string' &&
-            !key.startsWith('_') &&
-            key !== 'id' &&
-            key !== 'albumId' &&
-            key !== 'streamUrl' &&
-            key !== 'serverId' &&
-            key !== 'ownerId',
-    ) as string[];
-
+    const stringKeys: string[] = [];
     const nestedKeys: Array<{ getFn: (item: T) => string; name: string }> = [];
 
     switch (itemType) {
         case LibraryItem.ALBUM: {
+            stringKeys.push('name', 'releaseType');
             nestedKeys.push(
                 {
                     getFn: (item) => {
@@ -172,6 +161,7 @@ export const createFuseForLibraryItem = <T extends FuseSearchableItem>(
         }
 
         case LibraryItem.ALBUM_ARTIST: {
+            stringKeys.push('name');
             nestedKeys.push({
                 getFn: (item) => {
                     const aa = item as AlbumArtist;
@@ -185,9 +175,10 @@ export const createFuseForLibraryItem = <T extends FuseSearchableItem>(
         case LibraryItem.ARTIST:
         case LibraryItem.GENRE:
         case LibraryItem.RADIO_STATION:
+            stringKeys.push('name');
             break;
-
         case LibraryItem.PLAYLIST: {
+            stringKeys.push('name');
             nestedKeys.push({
                 getFn: (item) => {
                     const p = item as Playlist;
@@ -200,7 +191,8 @@ export const createFuseForLibraryItem = <T extends FuseSearchableItem>(
 
         case LibraryItem.PLAYLIST_SONG:
         case LibraryItem.QUEUE_SONG:
-        case LibraryItem.SONG: {
+        case LibraryItem.SONG:
+            stringKeys.push('album', 'name');
             nestedKeys.push(
                 {
                     getFn: (item) => {
@@ -218,7 +210,6 @@ export const createFuseForLibraryItem = <T extends FuseSearchableItem>(
                 },
             );
             break;
-        }
     }
 
     return new Fuse(items, {

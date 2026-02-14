@@ -228,6 +228,39 @@ const AlbumArtistMetadataBiography = ({
     );
 };
 
+const TABLE_ROW_HEIGHT = {
+    compact: 40,
+    default: 64,
+    large: 88,
+} as const;
+
+const TABLE_HEADER_HEIGHT = 40;
+
+interface SongTableListContainerProps {
+    children: React.ReactNode;
+    enableHeader?: boolean;
+    itemCount: number;
+    maxRows?: number;
+    tableSize?: 'compact' | 'default' | 'large';
+}
+
+function getTableRowHeight(size: 'compact' | 'default' | 'large' | undefined): number {
+    return size ? TABLE_ROW_HEIGHT[size] : TABLE_ROW_HEIGHT.default;
+}
+
+const SongTableListContainer = ({
+    children,
+    enableHeader = true,
+    itemCount,
+    maxRows = 5,
+    tableSize = 'default',
+}: SongTableListContainerProps) => {
+    const rowHeight = getTableRowHeight(tableSize);
+    const headerOffset = enableHeader ? TABLE_HEADER_HEIGHT : 0;
+    const height = headerOffset + rowHeight * Math.min(itemCount, maxRows);
+    return <div style={{ height }}>{children}</div>;
+};
+
 interface AlbumArtistMetadataTopSongsProps {
     detailQuery: ReturnType<typeof useSuspenseQuery<AlbumArtistDetailResponse>>;
     routeId: string;
@@ -240,7 +273,6 @@ const AlbumArtistMetadataTopSongsContent = ({
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
-    const [showAll, setShowAll] = useState(false);
     const [topSongsQueryType, setTopSongsQueryType] = useLocalStorage<'community' | 'personal'>({
         defaultValue: 'community',
         key: 'album-artist-top-songs-query-type',
@@ -272,13 +304,8 @@ const AlbumArtistMetadataTopSongsContent = ({
     }, [tableConfig?.columns]);
 
     const filteredSongs = useMemo(() => {
-        const filtered = searchLibraryItems(songs, debouncedSearchTerm, LibraryItem.SONG);
-        // When searching, show all results. Otherwise, limit to 5 if not showing all
-        if (debouncedSearchTerm?.trim() || showAll) {
-            return filtered;
-        }
-        return filtered.slice(0, 5);
-    }, [songs, debouncedSearchTerm, showAll]);
+        return searchLibraryItems(songs, debouncedSearchTerm, LibraryItem.SONG);
+    }, [songs, debouncedSearchTerm]);
 
     const { handleColumnReordered } = useItemListColumnReorder({
         itemListKey: ItemListKey.SONG,
@@ -465,35 +492,35 @@ const AlbumArtistMetadataTopSongsContent = ({
                                 tableColumnsData={SONG_TABLE_COLUMNS}
                             />
                         </Group>
-                        <ItemTableList
-                            activeRowId={currentSongId}
-                            autoFitColumns={tableConfig.autoFitColumns}
-                            CellComponent={ItemTableListColumn}
-                            columns={columns}
-                            data={filteredSongs}
-                            enableAlternateRowColors={tableConfig.enableAlternateRowColors}
-                            enableDrag
-                            enableDragScroll={false}
-                            enableExpansion={false}
+                        <SongTableListContainer
                             enableHeader={tableConfig.enableHeader}
-                            enableHorizontalBorders={tableConfig.enableHorizontalBorders}
-                            enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
-                            enableSelection
-                            enableSelectionDialog={false}
-                            enableVerticalBorders={tableConfig.enableVerticalBorders}
-                            itemType={LibraryItem.SONG}
-                            onColumnReordered={handleColumnReordered}
-                            onColumnResized={handleColumnResized}
-                            overrideControls={overrideControls}
-                            size={tableConfig.size}
-                        />
-                        {!searchTerm.trim() && songs.length > 5 && !showAll && (
-                            <Group justify="center" w="100%">
-                                <Button onClick={() => setShowAll(true)} variant="subtle">
-                                    {t('action.viewMore', { postProcess: 'sentenceCase' })}
-                                </Button>
-                            </Group>
-                        )}
+                            itemCount={filteredSongs.length}
+                            maxRows={5}
+                            tableSize={tableConfig.size}
+                        >
+                            <ItemTableList
+                                activeRowId={currentSongId}
+                                autoFitColumns={tableConfig.autoFitColumns}
+                                CellComponent={ItemTableListColumn}
+                                columns={columns}
+                                data={filteredSongs}
+                                enableAlternateRowColors={tableConfig.enableAlternateRowColors}
+                                enableDrag
+                                enableDragScroll={false}
+                                enableExpansion={false}
+                                enableHeader={tableConfig.enableHeader}
+                                enableHorizontalBorders={tableConfig.enableHorizontalBorders}
+                                enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
+                                enableSelection
+                                enableSelectionDialog={false}
+                                enableVerticalBorders={tableConfig.enableVerticalBorders}
+                                itemType={LibraryItem.SONG}
+                                onColumnReordered={handleColumnReordered}
+                                onColumnResized={handleColumnResized}
+                                overrideControls={overrideControls}
+                                size={tableConfig.size}
+                            />
+                        </SongTableListContainer>
                     </>
                 ) : null}
             </Stack>
@@ -529,7 +556,6 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
-    const [showAll, setShowAll] = useState(false);
     const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.SONG]?.table);
     const currentSong = usePlayerSong();
     const player = usePlayer();
@@ -554,13 +580,8 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
     }, [tableConfig?.columns]);
 
     const filteredSongs = useMemo(() => {
-        const filtered = searchLibraryItems(songs, debouncedSearchTerm, LibraryItem.SONG);
-        // When searching, show all results. Otherwise, limit to 5 if not showing all
-        if (debouncedSearchTerm?.trim() || showAll) {
-            return filtered;
-        }
-        return filtered.slice(0, 5);
-    }, [songs, debouncedSearchTerm, showAll]);
+        return searchLibraryItems(songs, debouncedSearchTerm, LibraryItem.SONG);
+    }, [songs, debouncedSearchTerm]);
 
     const { handleColumnReordered } = useItemListColumnReorder({
         itemListKey: ItemListKey.SONG,
@@ -726,35 +747,35 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
                                 tableColumnsData={SONG_TABLE_COLUMNS}
                             />
                         </Group>
-                        <ItemTableList
-                            activeRowId={currentSongId}
-                            autoFitColumns={tableConfig.autoFitColumns}
-                            CellComponent={ItemTableListColumn}
-                            columns={columns}
-                            data={filteredSongs}
-                            enableAlternateRowColors={tableConfig.enableAlternateRowColors}
-                            enableDrag
-                            enableDragScroll={false}
-                            enableExpansion={false}
+                        <SongTableListContainer
                             enableHeader={tableConfig.enableHeader}
-                            enableHorizontalBorders={tableConfig.enableHorizontalBorders}
-                            enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
-                            enableSelection
-                            enableSelectionDialog={false}
-                            enableVerticalBorders={tableConfig.enableVerticalBorders}
-                            itemType={LibraryItem.SONG}
-                            onColumnReordered={handleColumnReordered}
-                            onColumnResized={handleColumnResized}
-                            overrideControls={overrideControls}
-                            size={tableConfig.size}
-                        />
-                        {!searchTerm.trim() && songs.length > 5 && !showAll && (
-                            <Group justify="center" w="100%">
-                                <Button onClick={() => setShowAll(true)} variant="subtle">
-                                    {t('action.viewMore', { postProcess: 'sentenceCase' })}
-                                </Button>
-                            </Group>
-                        )}
+                            itemCount={filteredSongs.length}
+                            maxRows={5}
+                            tableSize={tableConfig.size}
+                        >
+                            <ItemTableList
+                                activeRowId={currentSongId}
+                                autoFitColumns={tableConfig.autoFitColumns}
+                                CellComponent={ItemTableListColumn}
+                                columns={columns}
+                                data={filteredSongs}
+                                enableAlternateRowColors={tableConfig.enableAlternateRowColors}
+                                enableDrag
+                                enableDragScroll={false}
+                                enableExpansion={false}
+                                enableHeader={tableConfig.enableHeader}
+                                enableHorizontalBorders={tableConfig.enableHorizontalBorders}
+                                enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
+                                enableSelection
+                                enableSelectionDialog={false}
+                                enableVerticalBorders={tableConfig.enableVerticalBorders}
+                                itemType={LibraryItem.SONG}
+                                onColumnReordered={handleColumnReordered}
+                                onColumnResized={handleColumnResized}
+                                overrideControls={overrideControls}
+                                size={tableConfig.size}
+                            />
+                        </SongTableListContainer>
                     </>
                 ) : null}
             </Stack>
