@@ -100,7 +100,6 @@ export type OverridePlaylistSongListQuery = Omit<Partial<PlaylistSongListQuery>,
 
 interface PlaylistDetailSongListViewProps {
     data: PlaylistSongListResponse;
-    /** When provided, table/grid use this instead of computing from data (avoids duplicate filter/sort). */
     items?: Song[];
 }
 
@@ -283,7 +282,6 @@ export const PlaylistDetailSongListEdit = ({ data }: { data: PlaylistSongListRes
     }
 };
 
-/** Track view: view mode uses centralized list derivation; edit mode uses local reorder state. */
 const PlaylistDetailTrackView = ({ data }: { data: PlaylistSongListResponse }) => {
     const { isSmartPlaylist, mode } = useListContext();
 
@@ -298,7 +296,6 @@ const PlaylistDetailTrackView = ({ data }: { data: PlaylistSongListResponse }) =
     return <PlaylistDetailTrackViewContent data={data} />;
 };
 
-/** Uses usePlaylistTrackList once and passes derived items to the list view. */
 const PlaylistDetailTrackViewContent = ({ data }: { data: PlaylistSongListResponse }) => {
     const { sortedAndFilteredSongs } = usePlaylistTrackList(data);
     return <PlaylistDetailSongListView data={data} items={sortedAndFilteredSongs} />;

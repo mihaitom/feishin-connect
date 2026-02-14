@@ -28,7 +28,13 @@ import {
     SongListSort,
     SortOrder,
 } from '/@/shared/types/domain-types';
-import { ItemListKey, ListDisplayType, ListPaginationType, Play } from '/@/shared/types/types';
+import {
+    ItemListKey,
+    ListDisplayType,
+    ListPaginationType,
+    Play,
+    TableColumn,
+} from '/@/shared/types/types';
 
 export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListResponse }) => {
     const player = usePlayer();
@@ -75,6 +81,7 @@ export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListRespon
 
     const albumControlOverrides = useMemo<Partial<ItemControls>>(() => {
         return {
+            onFavorite: undefined,
             onMore: ({ event, internalState, item }: DefaultItemControlProps) => {
                 if (!event) return;
 
@@ -119,6 +126,7 @@ export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListRespon
                 }
                 player.addToQueueByFetch(item._serverId, [item.id], itemType, playType);
             },
+            onRating: undefined,
         };
     }, [player]);
 
@@ -146,6 +154,13 @@ export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListRespon
         tableKey: 'detail',
     });
     const rows = useGridRows(LibraryItem.ALBUM, ItemListKey.PLAYLIST_ALBUM, grid.size);
+
+    const tableColumns = useMemo(() => {
+        return table.columns.filter(
+            (column) =>
+                column.id !== TableColumn.USER_FAVORITE && column.id !== TableColumn.USER_RATING,
+        );
+    }, [table.columns]);
 
     const renderAlbumList = () => {
         switch (display) {
@@ -193,7 +208,7 @@ export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListRespon
                     <ItemTableList
                         autoFitColumns={table.autoFitColumns}
                         CellComponent={ItemTableListColumn}
-                        columns={table.columns}
+                        columns={tableColumns}
                         data={albumsToRender}
                         enableAlternateRowColors={table.enableAlternateRowColors}
                         enableHeader={table.enableHeader}
