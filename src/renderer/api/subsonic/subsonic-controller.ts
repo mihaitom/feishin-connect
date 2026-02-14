@@ -763,7 +763,7 @@ export const SubsonicController: InternalControllerEndpoint = {
     getFolder: async ({ apiClientProps, context, query }) => {
         const sortOrder = (query.sortOrder?.toLowerCase() ?? 'asc') as 'asc' | 'desc';
 
-        const isRootFolderId = /^\d+$/.test(query.id);
+        const isRootFolderId = query.id === '0';
 
         if (isRootFolderId) {
             const res = await ssApiClient(apiClientProps).getIndexes({
