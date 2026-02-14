@@ -227,6 +227,7 @@
         "remotePortError": "an error occurred when trying to set the remote server port",
         "remotePortWarning": "restart the server to apply the new port",
         "saveQueueFailed": "failed to save queue",
+        "serverLockSingleServer": "only one server is allowed when server is locked",
         "serverNotSelectedError": "no server selected",
         "serverRequired": "server required",
         "sessionExpiredError": "your session has expired",
