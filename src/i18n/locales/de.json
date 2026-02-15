@@ -35,7 +35,9 @@
         "selectAll": "alle auswählen",
         "openApplicationDirectory": "Anwendungsverzeichnis öffnen",
         "addOrRemoveFromSelection": "Zur Auswahl hinzufügen oder entfernen",
-        "selectRangeOfItems": "Wählen sie eine Reihe von Elementen"
+        "selectRangeOfItems": "Wählen sie eine Reihe von Elementen",
+        "holdToMoveToTop": "Halten um nach oben zu bewegen",
+        "holdToMoveToBottom": "Halten um nach unten zu bewegen"
     },
     "common": {
         "backward": "zurück",
@@ -155,7 +157,10 @@
         "countSelected": "{{count}} ausgewählt",
         "mood": "Stimmung",
         "example": "Beispiel",
-        "rename": "Umbenennen"
+        "rename": "Umbenennen",
+        "filter_single": "einzeln",
+        "filter_multiple": "mehrfach",
+        "retry": "Wiederholen"
     },
     "error": {
         "remotePortWarning": "Starten Sie den Server neu, um den neuen Port anzuwenden",
@@ -266,7 +271,8 @@
             "input_preferInstantMix": "Instant-Mix bevorzugen",
             "input_preferInstantMixDescription": "nur Instant-Mix verwenden, um ähnliche Songs zu erhalten. Nützlich bei Verwendung von Plugins, die in dieses Verhalten eingreifen",
             "input_preferRemoteUrl": "öffentliche URL bevorzugen",
-            "input_remoteUrl": "Öffentliche URL"
+            "input_remoteUrl": "Öffentliche URL",
+            "input_remoteUrlPlaceholder": "Optional: öffentliche URL für externe Funktionen"
         },
         "addToPlaylist": {
             "success": "$t(entity.trackWithCount, {\"count\": {{message}} }) zu $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} }) hinzugefügt",
@@ -292,7 +298,7 @@
         "editPlaylist": {
             "title": "Bearbeite $t(entity.playlist, {\"count\": 1})",
             "success": "$t(entity.playlist, {\"count\": 1}) erfolgreich aktualisiert",
-            "publicJellyfinNote": "Jellyfin legt aus irgendwelchen Gründen nicht offen ob eine Playlist öffentlich ist oder nicht. Wenn du möchtest, dass sie öffentlich bleibt, wähle bitte diese Option aus",
+            "publicJellyfinNote": "Jellyfin legt aus irgendwelchen Gründen nicht offen ob eine Wiedergabeliste öffentlich ist oder nicht. Wenn du möchtest, dass sie öffentlich bleibt, wähle bitte diese Option aus",
             "editNote": "Manuelles Bearbeiten wird für große Wiedergabelisten nicht empfohlen. Bist Du sicher, dass Du die aktuelle Wiedergabeliste unter dem Risiko von Datenverlust überschrieben möchtest?"
         },
         "lyricSearch": {
@@ -340,8 +346,8 @@
         },
         "lyricsExport": {
             "input_offset": "$t(setting.lyricOffset)",
-            "export": "Lyrics exportieren",
-            "input_synced": "Synchronisierte Lyrics exportieren"
+            "export": "Songtexte exportieren",
+            "input_synced": "Synchronisierte Songtexte exportieren"
         }
     },
     "entity": {
@@ -390,7 +396,8 @@
             "view": {
                 "table": "Tabelle",
                 "grid": "Raster",
-                "list": "Liste"
+                "list": "Liste",
+                "detail": "Detail"
             },
             "general": {
                 "tableColumns": "Tabellenspalten",
@@ -409,7 +416,20 @@
                 "size_large": "groß",
                 "pagination": "Seitenzahlen",
                 "pagination_itemsPerPage": "Elemente pro Seite",
-                "pagination_infinite": "unendlich"
+                "pagination_infinite": "unendlich",
+                "moveUp": "Nach oben bewegen",
+                "moveDown": "Nach unten bewegen",
+                "pinToLeft": "links anheften",
+                "pinToRight": "rechts anheften",
+                "itemGap": "Item Abstand (px)",
+                "itemSize": "Item Größe (px)",
+                "itemsPerRow": "Items pro Zeile",
+                "pagination_paginate": "paginiert",
+                "alternateRowColors": "Zeilenfarben abwechseln",
+                "horizontalBorders": "Zeilenbegrenzungen",
+                "rowHoverHighlight": "Zeilenhervorhebungen beim hovern",
+                "showHeader": "Spaltenüberschrift anzeigen",
+                "verticalBorders": "Spaltenbegrenzungen"
             },
             "label": {
                 "dateAdded": "Hinzugefügt am",
@@ -444,7 +464,9 @@
                 "image": "Bild",
                 "sampleRate": "$t(common.sampleRate)",
                 "songCount": "$t(entity.track, {\"count\": 2})",
-                "genreBadge": "$t(entity.genre, {\"count\": 1}) (Abzeichen)"
+                "genreBadge": "$t(entity.genre, {\"count\": 1}) (Abzeichen)",
+                "composer": "Komponist",
+                "titleArtist": "$t(common.title) (Interpret)"
             }
         },
         "column": {
@@ -609,7 +631,8 @@
             "transcoding": "Transcoding",
             "logger": "Logger",
             "playerFilters": "Player-Filter",
-            "remote": "Fernsteuerung"
+            "remote": "Fernsteuerung",
+            "lyricsDisplay": "Songtexte Anzeige"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist, {\"count\": 2})"
@@ -683,7 +706,8 @@
             "overrideExisting": "Bestehende überschreiben"
         },
         "releasenotes": {
-            "commitsSinceStable": "Commits seit {{stable}}"
+            "commitsSinceStable": "Commits seit {{stable}}",
+            "noStableReleaseToCompare": "Kein stable Relase zum vergleichen verfügbar"
         }
     },
     "player": {
@@ -710,7 +734,7 @@
         "queue_moveToBottom": "Ausgewählte nach oben verschieben",
         "shuffle_off": "Zufallswiedergabe deaktiviert",
         "stop": "stopp",
-        "toggleFullscreenPlayer": "vollbildmodus",
+        "toggleFullscreenPlayer": "Vollbildmodus",
         "skip_back": "zurückspulen",
         "pause": "Pause",
         "unfavorite": "Aus Favoriten entfernen",
@@ -729,7 +753,12 @@
         "sleepTimer_off": "aus",
         "sleepTimer_timeRemaining": "{{time}} verbleibend",
         "sleepTimer_cancel": "Timer abbrechen",
-        "sleepTimer_setCustom": "Timer stellen"
+        "sleepTimer_setCustom": "Timer stellen",
+        "sleepTimer": "Sleep Timer",
+        "sleepTimer_custom": "Benutzerdefiniert",
+        "sleepTimer_hours": "{{count}} std",
+        "sleepTimer_minutes": "{{count}} min",
+        "trackRadio": "Song Radio"
     },
     "setting": {
         "audioDevice_description": "wählen Sie das Audiogerät aus, das für die Wiedergabe verwendet werden soll (nur Webplayer)",
@@ -825,8 +854,8 @@
         "fontType_description": "Die integrierte Schriftart wählt eine der von feishin bereitgestellten Schriftarten aus. Mit der Systemschriftart können Sie jede von Ihrem Betriebssystem bereitgestellte Schriftart auswählen. Benutzerdefiniert erlaubt es eine eigene Schriftart bereitzustellen",
         "playButtonBehavior": "Verhalten der Wiedergabetaste",
         "volumeWheelStep": "Lautstärkeänderung mit Mausrad",
-        "sidebarPlaylistList_description": "Ein- oder Ausblenden der Playlisten-Liste in der Seitenleiste",
-        "sidebarPlaylistSorting_description": "sortiere Playlists in der Seitenleiste per Drag & Drop anstelle der standardmäßigen Serverreihenfolge",
+        "sidebarPlaylistList_description": "Ein- oder Ausblenden der Wiedergabelisten in der Seitenleiste",
+        "sidebarPlaylistSorting_description": "sortiere Wiedergabelisten in der Seitenleiste per Drag & Drop anstelle der standardmäßigen Serverreihenfolge",
         "sidePlayQueueStyle_description": "legt den Stil der Wiedergabeliste in der Seitenleiste fest",
         "replayGainMode": "{{ReplayGain}} Modus",
         "playbackStyle_optionNormal": "Normal",
@@ -841,7 +870,7 @@
         "useSystemTheme_description": "Folgt dem hellen oder dunklen Erscheinungsbild des Systems",
         "playButtonBehavior_optionAddNext": "$t(player.addNext)",
         "lyricFetch_description": "Songtexte aus verschiedenen Internetquellen abrufen",
-        "lyricFetchProvider_description": "Wählen Sie die Anbieter aus, von denen Sie Liedtexte abrufen möchten. Die Reihenfolge der Anbieter ist die Reihenfolge, in der sie abgefragt werden",
+        "lyricFetchProvider_description": "Wähle den Anbieter zum Abrufen von Songtexten aus",
         "globalMediaHotkeys_description": "aktivieren oder deaktivieren Sie die Verwendung der Medien-Kurzbefehle Ihres Systems zur Steuerung der Wiedergabe",
         "hotkey_zoomOut": "Herauszoomen",
         "hotkey_unfavoriteCurrentSong": "$t(common.currentSong) aus Favoriten entfernen",
@@ -850,10 +879,10 @@
         "remoteUsername": "Benutzername des Fernsteuerungsserver",
         "hotkey_browserBack": "Browser zurück",
         "showSkipButton": "Schaltflächen zum Überspringen anzeigen",
-        "sidebarPlaylistList": "Seitenleiste Playlisten-Liste",
-        "sidebarPlaylistSorting": "Playlist-Sortierung in der Seitenleiste",
+        "sidebarPlaylistList": "Wiedergabelisten in Seitenleiste",
+        "sidebarPlaylistSorting": "Wiedergabelisten-Sortierung in der Seitenleiste",
         "minimizeToTray": "Zur Taskleiste minimieren",
-        "skipPlaylistPage": "Playlisten-Seite überspringen",
+        "skipPlaylistPage": "Wiedergabeliste-Seite überspringen",
         "themeDark": "Erscheinungsbild (dunkel)",
         "sidebarCollapsedNavigation": "Navigation in der Seitenleiste (komprimiert)",
         "gaplessAudio_optionWeak": "schwach (empfohlen)",
@@ -880,7 +909,7 @@
         "sidePlayQueueStyle_optionDetached": "lösgelöst",
         "windowBarStyle_description": "Legt das Erscheinungsbild des Fensterrahmens fest",
         "hotkey_toggleCurrentSongFavorite": "$t(common.currentSong) zu Favoriten hinzufügen",
-        "clearQueryCache_description": "\"Weiches\" Zurücksetzen. Dies wird Playlisten, Musik-Metadaten und gespeicherte Liedtexte zurücksetzen, Zugangsinformationen und zwischengespeicherte Bilder werden behalten",
+        "clearQueryCache_description": "\"Weiches\" Zurücksetzen. Dies wird Wiedergabelisten, Musik-Metadaten und gespeicherte Songtexte zurücksetzen, Zugangsinformationen und zwischengespeicherte Bilder werden behalten",
         "discordRichPresence_description": "Aktiviert den Wiedergabestatus in {{discord}} Rich Presence. Angezeigte Bilder sind: {{icon}}, {{playing}}, und {{paused}}",
         "clearCache": "Browser-Zwischenspeicher löschen",
         "clearQueryCache": "feishins Zwischenspeicher leeren",
@@ -897,7 +926,7 @@
         "discordListening_description": "Status als hört zu statt als spielt anzeigen",
         "lastfm": "zeige last.fm links",
         "lastfm_description": "zeige links zu Last.fm auf dem Künstler/Album-Seiten",
-        "musicbrainz": "Zeig MusicBrainz links",
+        "musicbrainz": "Zeige MusicBrainz links",
         "customCssEnable": "benutzerdefiniertes CSS aktivieren",
         "albumBackground_description": "fügt ein Hintergrundbild für die Albumseiten hinzu, welche das Albumcover zeigen",
         "albumBackgroundBlur": "Größe der Album-Bildunschärfe",
@@ -1018,7 +1047,54 @@
         "analyticsEnable": "Nutzungsbasierte Analyse senden",
         "automaticUpdates": "Automatische Updates",
         "automaticUpdates_description": "Updates automatisch suchen und installieren",
-        "releaseChannel_optionAlpha": "Alpha (nightly)"
+        "releaseChannel_optionAlpha": "Alpha (nightly)",
+        "useThemeAccentColor": "Akzentfarbe des Themas nutzen",
+        "analyticsEnable_description": "Anonymisierte Nutzungsdaten werden an den Entwickler gesendet, um die Anwendung zu verbessern",
+        "artistReleaseTypeConfiguration_description": "Konfigurieren, welche Release-Typen und in welcher Reihenfolge diese auf der Album-Künstlerseite angezeigt werden",
+        "homeConfiguration_description": "Konfigurieren, welche Elemente und in welcher Reihenfolge diese auf der Startseite angezeigt werden",
+        "passwordStore_description": "Verwendeter Passwort/Geheimnis Speicher. Sollten Probleme beim Speichern von Passwörtern auftreten, wähle eine andere Methode",
+        "passwordStore": "Passwort/Geheimnis Speicher",
+        "audioFadeOnStatusChange_description": "ermöglicht Ein- und Ausblenden, wenn sich der Wiedergabe-/Pause-Status ändert",
+        "audioFadeOnStatusChange": "Audio Ein-/Ausblenden bei Statusveränderung",
+        "showRatings_description": "Aktiviere die Anzeige einer Bewertung in Sternen",
+        "showRatings": "Zeige Sternebewertungen",
+        "blurExplicitImages": "Explizite Bilder unkenntlich machen",
+        "blurExplicitImages_description": "Album- und Song-Cover, die als explizit gekennzeichnet sind, werden unscharf dargestellt",
+        "enableGridMultiSelect": "Raster-Mehrfachauswahl aktivieren",
+        "enableGridMultiSelect_description": "Wenn aktiviert, können in Rasteransichten mehrere Elemente ausgewählt werden. Wenn deaktiviert, führt ein Klick auf Rasterelement-Bilder zur Artikelseite",
+        "playerbarOpenDrawer_description": "Ermöglicht das Anklicken der Playerleiste, um den Vollbild-Player zu öffnen",
+        "playerbarOpenDrawer": "Playerleiste Vollbild-Umschalter",
+        "playerbarSlider": "Playerleiste-Schieberegler",
+        "playerbarSlider_description": "Die Wellenform Darstellung wird nicht empfohlen, wenn eine langsame oder tarifierte Internetverbindung genutzt wird",
+        "playerbarSliderType_optionSlider": "Schieberegler",
+        "playerbarSliderType_optionWaveform": "Wellenform",
+        "playerbarWaveformAlign": "Wellenform ausrichten",
+        "playerbarWaveformBarWidth": "Breite der Wellenform Leiste",
+        "playerbarWaveformGap": "Wellenform Lücke",
+        "playerbarWaveformRadius": "Wellenform Radius",
+        "artistRadioCount": "Interpreten/Song Radio Länge",
+        "artistRadioCount_description": "legt die Anzahl der Songs fest, die beim Interpreten-Radio und Song-Radio abgerufen werden",
+        "sidebarPlaylistListFilterRegex_description": "versteckt Wiedergabelisten in der Seitenleiste, die diesem regulären Ausdruck entsprechen",
+        "sidebarPlaylistListFilterRegex_placeholder": "z.B. ^Täglicher Mix.*",
+        "sidebarPlaylistListFilterRegex": "Wiedergabelisten Regex-Filter",
+        "showVisualizerInSidebar_description": "Ein Panel wird zur Player-Seitenleiste hinzugefügt, das den Visualizer anzeigt",
+        "showVisualizerInSidebar": "Visualizer in Seitenleiste anzeigen",
+        "combinedLyricsAndVisualizer_description": "Songtexte und Visualizer im selben Panel anzeigen",
+        "combinedLyricsAndVisualizer": "Songtexte und Visualizer geimeinsam in der Seitenleiste anzeigen",
+        "mpvExtraParameters_description": "zusätzliche Argumente die an mpv übergeben werden sollen",
+        "mpvExtraParameters_help": "Eins pro Zeile",
+        "pathReplace": "Dateipfad-Ersetzung",
+        "pathReplace_description": "Ersetze den Standard Dateipfad des Servers",
+        "pathReplace_optionRemovePrefix": "Präfix entfernen",
+        "pathReplace_optionAddPrefix": "Präfix hinzufügen",
+        "imageResolution_description": "Die Auflösung für die in der App verwendeten Bilder. Bei einem Wert von 0 wird die originale Bildauflösung verwendet",
+        "preservePitch_description": "Behält beim Anpassen der Wiedergabegeschwindigkeit die Tonhöhe bei",
+        "preventSleepOnPlayback_description": "Verhindert das Abschalten des Displays während der Musikwiedergabe",
+        "preventSleepOnPlayback": "Verhindert den Energiesparmodus während der Musikwiedergabe",
+        "trayEnabled_description": "Tray-Symbol anzeigen/verbergen. Bei Deaktivierung werden auch Minimieren/Beenden zum Tray deaktiviert",
+        "queryBuilder": "Abfrage-Editor",
+        "queryBuilderCustomFields_inputLabel": "Label",
+        "queryBuilderCustomFields_description": "Füge benutzerdefinierte Felder für den Abfrage-Editor hinzu"
     },
     "dragDropZone": {
         "error_oneFileOnly": "Bitte wähle nur 1 Datei",
@@ -1078,5 +1154,94 @@
         "secondShort": "Sek",
         "hourShort": "Std",
         "dayShort": "Tag"
+    },
+    "visualizer": {
+        "options": {
+            "weightingFilter": {
+                "z": "Z",
+                "d": "D",
+                "c": "C",
+                "none": "Keine",
+                "a": "A",
+                "b": "B"
+            },
+            "frequencyScale": {
+                "linear": "Lineare Skala",
+                "log": "Log Skala",
+                "mel": "Mel Skala"
+            }
+        },
+        "minimumFrequency": "Mindestfrequenz",
+        "minimumDecibels": "Minimale Dezibel",
+        "visualizerType": "Visualizer Art",
+        "cyclePresets": "Vorlagen durchrotieren",
+        "cycleTime": "Abspieldauer je Vorlage (Sekunden)",
+        "includeAllPresets": "Alle Vorlagen verwenden",
+        "ignoredPresets": "Ignorierte Vorlagen",
+        "selectedPresets": "Ausgewählte Vorlagen",
+        "randomizeNextPreset": "Nächste Vorlage zufällig wählen",
+        "blendTime": "Übergangsdauer",
+        "presets": "Vorlage",
+        "selectPreset": "Vorlage auswählen",
+        "applyPreset": "Vorlage anwenden",
+        "saveAsPreset": "Als Vorlage speichern",
+        "updatePreset": "Vorlage aktualisieren",
+        "copyConfiguration": "Konfiguration kopieren",
+        "pasteConfiguration": "Konfiguration einfügen",
+        "pasteConfigurationPlaceholder": "JSON Konfiguration hier einfügen...",
+        "pasteFromClipboard": "Aus Zwischenablage einfügen",
+        "applyConfiguration": "Konfiguration anwenden",
+        "configCopied": "Konfiguration in Zwischenablage kopiert",
+        "configCopyFailed": "Konfiguration konnte nicht kopiert werden",
+        "configPasted": "Konfiguration erfolgreich angewandt",
+        "configPasteFailed": "Konfiguration konnte nicht angewandt werden. Bitte Format überprüfen.",
+        "configPasteReadFailed": "Zwischenablage konnte nicht ausgelesen werden",
+        "presetName": "Vorlagen Name",
+        "presetNamePlaceholder": "Name der Vorlage eingeben",
+        "general": "Allgemein",
+        "mode": "Modus",
+        "mode1To8": "Modus 1 - 8",
+        "mode10": "Modus 10",
+        "lineWidth": "Linienbreite",
+        "channelLayout": "Kanallayout",
+        "maxFPS": "Max FPS",
+        "opacity": "Deckkraft",
+        "customGradients": "Benutzerdefinierte Gradienten",
+        "addCustomGradient": "Benutzerdefinierten Gradienten hinzufügen",
+        "gradientName": "Gradientenname",
+        "gradientNamePlaceholder": "Gradientenname",
+        "vertical": "Vertikal",
+        "horizontal": "Horizontal",
+        "addColor": "Farbe hinzufügen",
+        "position": "Position",
+        "level": "Ebene",
+        "remove": "Entfernen",
+        "pasteGradient": "Gradient einfügen",
+        "pasteGradientPlaceholder": "Gradient JSON hier einfügen...",
+        "custom": "Benutzerdefiniert",
+        "builtIn": "Eingebaut",
+        "colors": "Farben",
+        "colorMode": "Farbmodus",
+        "gradient": "Gradienten",
+        "gradientLeft": "Gradienten links",
+        "gradientRight": "Gradienten rechts",
+        "fft": "FFT",
+        "fftSize": "FFT Größe",
+        "smoothing": "Glätten",
+        "frequencyRangeAndScaling": "Frequenzbereich und Skalierung",
+        "maximumFrequency": "Maximale Frequenz",
+        "sensitivity": "Empfindlichkeit",
+        "weightingFilter": "Gewichtungsfilter",
+        "maximumDecibels": "Maximale Dezibel",
+        "linearAmplitude": "Lineare Amplitude",
+        "linearBoost": "Linearer Boost",
+        "radialSpectrum": "Radiales Spektrum",
+        "radial": "Radial",
+        "radialInvert": "Radial invertiert",
+        "radius": "Radius",
+        "miscellaneousSettings": "Verschiedenes Einstellungen",
+        "ansiBands": "ANSI Bänder",
+        "lowResolution": "Niedrige Auflösung",
+        "showFPS": "FPS anzeigen"
     }
 }
