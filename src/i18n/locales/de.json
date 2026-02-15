@@ -34,7 +34,8 @@
         "deleteRadioStation": "$t(entity.radioStation, {\"count\": 1}) löschen",
         "selectAll": "alle auswählen",
         "openApplicationDirectory": "Anwendungsverzeichnis öffnen",
-        "addOrRemoveFromSelection": "Zur Auswahl hinzufügen oder entfernen"
+        "addOrRemoveFromSelection": "Zur Auswahl hinzufügen oder entfernen",
+        "selectRangeOfItems": "Wählen sie eine Reihe von Elementen"
     },
     "common": {
         "backward": "zurück",
@@ -152,7 +153,9 @@
         "releaseType": "Veröffentlichungsformat",
         "view": "Betrachten",
         "countSelected": "{{count}} ausgewählt",
-        "mood": "Stimmung"
+        "mood": "Stimmung",
+        "example": "Beispiel",
+        "rename": "Umbenennen"
     },
     "error": {
         "remotePortWarning": "Starten Sie den Server neu, um den neuen Port anzuwenden",
@@ -182,7 +185,10 @@
         "saveQueueFailed": "Wiedergabeliste konnte nicht gespeichert werden",
         "multipleServerSaveQueueError": "die Wiedergabeliste enthält einen oder mehrere Titel, die nicht vom aktuellen Server stammen. dies wird nicht unterstützt",
         "noNetwork": "Server nicht verfügbar",
-        "noNetworkDescription": "Verbindung zum Server konnte nicht hergestellt werden"
+        "noNetworkDescription": "Verbindung zum Server konnte nicht hergestellt werden",
+        "invalidJson": "JSON ungültig",
+        "serverLockSingleServer": "Nur ein Server ist erlaubt, wenn der Server gesperrt ist",
+        "settingsSyncError": "Es wurden Unstimmigkeiten zwischen den Einstellungen im Renderer und dem Hauptprozess gefunden. Starte die Anwendung neu, um die Änderungen zu übernehmen"
     },
     "filter": {
         "mostPlayed": "Meistgespielt",
@@ -227,7 +233,9 @@
         "owner": "$t(common.owner)",
         "genre": "$t(entity.genre, {\"count\": 1})",
         "artist": "$t(entity.artist, {\"count\": 1})",
-        "explicitStatus": "$t(common.explicitStatus)"
+        "explicitStatus": "$t(common.explicitStatus)",
+        "matchAnd": "und",
+        "matchOr": "oder"
     },
     "form": {
         "deletePlaylist": {
@@ -256,7 +264,9 @@
             "ignoreCors": "CORS ignorieren $t(common.restartRequired)",
             "error_savePassword": "Beim Speichern des Passworts ist ein Fehler aufgetreten",
             "input_preferInstantMix": "Instant-Mix bevorzugen",
-            "input_preferInstantMixDescription": "nur Instant-Mix verwenden, um ähnliche Songs zu erhalten. Nützlich bei Verwendung von Plugins, die in dieses Verhalten eingreifen"
+            "input_preferInstantMixDescription": "nur Instant-Mix verwenden, um ähnliche Songs zu erhalten. Nützlich bei Verwendung von Plugins, die in dieses Verhalten eingreifen",
+            "input_preferRemoteUrl": "öffentliche URL bevorzugen",
+            "input_remoteUrl": "Öffentliche URL"
         },
         "addToPlaylist": {
             "success": "$t(entity.trackWithCount, {\"count\": {{message}} }) zu $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} }) hinzugefügt",
@@ -329,7 +339,9 @@
             "input_streamUrl": "Stream URL"
         },
         "lyricsExport": {
-            "input_offset": "$t(setting.lyricOffset)"
+            "input_offset": "$t(setting.lyricOffset)",
+            "export": "Lyrics exportieren",
+            "input_synced": "Synchronisierte Lyrics exportieren"
         }
     },
     "entity": {
@@ -633,7 +645,9 @@
             "groupingTypeAll": "alle Veröffentlichungsformate",
             "groupingTypePrimary": "primäre Veröffentlichungsformate",
             "favoriteSongs": "Lieblingssongs",
-            "favoriteSongsFrom": "Liebslingssongs von {{title}}"
+            "favoriteSongsFrom": "Liebslingssongs von {{title}}",
+            "topSongsCommunity": "Community",
+            "topSongsPersonal": "Persönlich"
         },
         "manageServers": {
             "title": "Servers verwalten",
@@ -665,7 +679,11 @@
             "privateMode": "(Privater Modus)"
         },
         "collections": {
-            "saveAsCollection": "Als Sammlung speichern"
+            "saveAsCollection": "Als Sammlung speichern",
+            "overrideExisting": "Bestehende überschreiben"
+        },
+        "releasenotes": {
+            "commitsSinceStable": "Commits seit {{stable}}"
         }
     },
     "player": {
@@ -705,7 +723,13 @@
         "holdToShuffle": "Halten für Zufallswiedergabe",
         "restoreQueueFromServer": "Wiedergabeliste von Server wiederherstellen",
         "saveQueueToServer": "Wiedergabeliste auf Server speichern",
-        "lyrics": "Songtexte"
+        "lyrics": "Songtexte",
+        "artistRadio": "Künstler Radio",
+        "sleepTimer_endOfSong": "Ende des aktuellen Liedes",
+        "sleepTimer_off": "aus",
+        "sleepTimer_timeRemaining": "{{time}} verbleibend",
+        "sleepTimer_cancel": "Timer abbrechen",
+        "sleepTimer_setCustom": "Timer stellen"
     },
     "setting": {
         "audioDevice_description": "wählen Sie das Audiogerät aus, das für die Wiedergabe verwendet werden soll (nur Webplayer)",
@@ -990,7 +1014,11 @@
         "imageResolution": "Bildauflösung",
         "imageResolution_optionTable": "Tabelle",
         "imageResolution_optionSidebar": "Seitenleiste",
-        "preservePitch": "Tonhöhe erhalten"
+        "preservePitch": "Tonhöhe erhalten",
+        "analyticsEnable": "Nutzungsbasierte Analyse senden",
+        "automaticUpdates": "Automatische Updates",
+        "automaticUpdates_description": "Updates automatisch suchen und installieren",
+        "releaseChannel_optionAlpha": "Alpha (nightly)"
     },
     "dragDropZone": {
         "error_oneFileOnly": "Bitte wähle nur 1 Datei",
