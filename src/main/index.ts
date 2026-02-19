@@ -390,8 +390,11 @@ const createTray = () => {
         },
         {
             click: () => {
-                mainWindow?.show();
-                createWinThumbarButtons();
+                if (mainWindow === null) createWindow(false);
+                else {
+                    mainWindow.show();
+                    createWinThumbarButtons();
+                }
             },
             label: 'Open main window',
         },
@@ -618,6 +621,7 @@ async function createWindow(first = true): Promise<void> {
 
     mainWindow.on('closed', () => {
         ipcMain.removeHandler('window-clear-cache');
+        ipcMain.removeHandler('app-check-for-updates');
         mainWindow = null;
     });
 
