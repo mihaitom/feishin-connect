@@ -308,7 +308,12 @@
             "input_legacyAuthentication": "aktiver tradisjonell autentisering",
             "input_name": "servernavn",
             "title": "legg til server",
-            "input_password": "passord"
+            "input_password": "passord",
+            "input_preferInstantMix": "foretrekk øyeblikkelig miks",
+            "input_preferInstantMixDescription": "bruk bare øyeblikkelig miks for innhenting av lignende sanger. nyttig hvis du har tilleggsmoduler som endrer funksjonaliteten",
+            "input_preferRemoteUrl": "foretrekk offentlig url",
+            "input_remoteUrl": "offentlig url",
+            "input_remoteUrlPlaceholder": "valgfritt: offentlig nettadresse for eksterne funksjoner"
         },
         "addToPlaylist": {
             "success": "la $t(entity.trackWithCount, {\"count\": {{message}} }) til $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
@@ -341,6 +346,10 @@
             "input_optionMatchAll": "match alle",
             "input_optionMatchAny": "matche hvilken som helst",
             "title": "redigeringsverktøy for spørringer"
+        },
+        "largeFetchConfirmation": {
+            "title": "legg til elementer i køen",
+            "description": "Denne handlingen vil legge alle elementene til den gjeldende filtervisningen"
         }
     },
     "page": {
@@ -586,6 +595,22 @@
         "endsWith": "ender med",
         "inPlaylist": "er inne i",
         "inTheLast": "er inne i de siste",
-        "inTheRange": "er innenfor området"
+        "inTheRange": "er innenfor området",
+        "isGreaterThan": "er større enn",
+        "isLessThan": "er mindre enn",
+        "matchesRegex": "samsvarer med regex",
+        "notContains": "inneholder ikke",
+        "notInPlaylist": "er ikke med i",
+        "notInTheLast": "er ikke med i de siste",
+        "startsWith": "starter med",
+        "inTheRangeDate": "er innenfor området (date)",
+        "is": "er",
+        "isNot": "er ikke"
+    },
+    "datetime": {
+        "minuteShort": "m",
+        "secondShort": "s",
+        "hourShort": "h",
+        "dayShort": "d"
     }
 }
