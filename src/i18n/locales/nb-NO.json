@@ -104,7 +104,7 @@
         "quit": "avslutt",
         "size": "størrelse",
         "setting_one": "innstilling",
-        "setting_other": "",
+        "setting_other": "innstillinger",
         "trackNumber": "spor",
         "title": "tittel",
         "channel_one": "kanal",
@@ -232,7 +232,8 @@
         "invalidJson": "ugyldig JSON",
         "saveQueueFailed": "kunne ikke lagre kø",
         "multipleServerSaveQueueError": "Spillekøen har en eller flere sanger som ikke finnes på gjeldene tjener. Dette er ikke støttet",
-        "serverLockSingleServer": "kun én tjener er tillatt når tjener er låst"
+        "serverLockSingleServer": "kun én tjener er tillatt når tjener er låst",
+        "settingsSyncError": "avvik ble funnet mellom innstillinger i avspilleren og hovedprosessen. ta en omstart av applikasjonen for å aktivere endringene"
     },
     "filter": {
         "bpm": "bpm",
@@ -278,7 +279,9 @@
         "trackNumber": "spor",
         "albumCount": "$t(entity.album, {\"count\": 2}) opptelling",
         "matchAnd": "og",
-        "matchOr": "eller"
+        "matchOr": "eller",
+        "sortName": "sorter navn",
+        "explicitStatus": "$t(common.explicitStatus)"
     },
     "form": {
         "createPlaylist": {
@@ -573,5 +576,16 @@
             "title": "tittel",
             "trackNumber": "spor"
         }
+    },
+    "filterOperator": {
+        "after": "er etter",
+        "afterDate": "er etter (date)",
+        "before": "er før",
+        "beforeDate": "er før (date)",
+        "contains": "inneholder",
+        "endsWith": "ender med",
+        "inPlaylist": "er inne i",
+        "inTheLast": "er inne i de siste",
+        "inTheRange": "er innenfor området"
     }
 }
