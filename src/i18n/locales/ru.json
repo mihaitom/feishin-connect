@@ -329,7 +329,9 @@
         "noNetwork": "сервер недоступен",
         "noNetworkDescription": "Не удалось подключиться к серверу",
         "saveQueueFailed": "Не удалось сохранить очередь",
-        "settingsSyncError": "обнаружены несоответствия между настройками рендерера и основным процессом. перезапустите приложение, чтобы изменения вступили в силу"
+        "settingsSyncError": "обнаружены несоответствия между настройками рендерера и основным процессом. перезапустите приложение, чтобы изменения вступили в силу",
+        "invalidJson": "невалидный JSON",
+        "serverLockSingleServer": "при заблокированном сервере разрешается использовать только один сервер"
     },
     "filter": {
         "isCompilation": "сборник",
@@ -373,7 +375,11 @@
         "lastPlayed": "последний раз проигрывалась",
         "toYear": "до года",
         "album": "$t(entity.album, {\"count\": 1})",
-        "trackNumber": "трек"
+        "trackNumber": "трек",
+        "matchAnd": "и",
+        "matchOr": "или",
+        "sortName": "сортировка по имени",
+        "explicitStatus": "$t(common.explicitStatus)"
     },
     "player": {
         "repeat_all": "повторять все",
@@ -414,7 +420,15 @@
         "lyrics": "тексты песен",
         "restoreQueueFromServer": "восстановить очередь с сервера",
         "saveQueueToServer": "сохранить очередь на сервер",
-        "trackRadio": "трек радио"
+        "trackRadio": "трек радио",
+        "albumRadio": "Радио по альбому",
+        "sleepTimer": "таймер сна",
+        "sleepTimer_endOfSong": "конец текущей песни",
+        "sleepTimer_minutes": "{{count}} минут",
+        "sleepTimer_hours": "{{count}} часов",
+        "sleepTimer_off": "выключено",
+        "sleepTimer_timeRemaining": "{{time}} осталось",
+        "sleepTimer_setCustom": "установить таймер"
     },
     "page": {
         "sidebar": {
@@ -431,7 +445,9 @@
             "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
             "myLibrary": "Моя библиотека",
             "shared": "Публичные плейлисты $t(entity.playlist, {\"count\": 2})",
-            "collections": "коллекции"
+            "collections": "коллекции",
+            "favorites": "$t(entity.favorite, {\"count\": 2})",
+            "radio": "$t(entity.radioStation, {\"count\": 2})"
         },
         "fullscreenPlayer": {
             "config": {
@@ -504,7 +520,11 @@
             "shareItem": "поделиться",
             "goToAlbum": "Перейти к $t(entity.album, {\"count\": 1})",
             "goToAlbumArtist": "Перейти к $t(entity.albumArtist, {\"count\": 1})",
-            "goTo": "перейти в"
+            "goTo": "перейти в",
+            "moveItems": "$t(action.moveItems)",
+            "moveToNext": "$t(action.moveToNext)",
+            "playSimilarSongs": "$t(player.playSimilarSongs)",
+            "playShuffled": "$t(player.shuffle)"
         },
         "home": {
             "mostPlayed": "слушают чаще всего",
@@ -512,7 +532,8 @@
             "title": "$t(common.home)",
             "explore": "откройте новое",
             "recentlyPlayed": "игралось недавно",
-            "recentlyReleased": "Новинки"
+            "recentlyReleased": "Новинки",
+            "genres": "$t(entity.genre, {\"count\": 2})"
         },
         "albumDetail": {
             "moreFromArtist": "больше от $t(entity.artist, {\"count\": 1})",
@@ -540,7 +561,9 @@
             "transcoding": "транскодирование",
             "scrobble": "скробблер",
             "logger": "Отладка",
-            "playerFilters": "фильтры проигрывателя"
+            "playerFilters": "фильтры проигрывателя",
+            "queryBuilder": "конструктор очереди",
+            "discord": "discord"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist, {\"count\": 2})"
@@ -585,7 +608,11 @@
             "about": "О {{artist}}",
             "topSongsFrom": "популярные треки из {{title}}",
             "groupingTypeAll": "все типы выпусков",
-            "groupingTypePrimary": "основные типы выпусков"
+            "groupingTypePrimary": "основные типы выпусков",
+            "favoriteSongs": "любимые треки",
+            "topSongsCommunity": "сообщество",
+            "topSongsPersonal": "личное",
+            "favoriteSongsFrom": "любимые треки от {{title}}"
         },
         "itemDetail": {
             "copyPath": "скопировать путь в буфер обмена",
@@ -596,10 +623,21 @@
             "title": "радиостанции"
         },
         "windowBar": {
-            "privateMode": "(Режим приватности)"
+            "privateMode": "(Режим приватности)",
+            "paused": "(Приостановлено) "
         },
         "collections": {
-            "saveAsCollection": "сохранить коллекцией"
+            "saveAsCollection": "сохранить коллекцией",
+            "overrideExisting": "переопределить существующий"
+        },
+        "releasenotes": {
+            "commitsSinceStable": "коммито после {{stable}}"
+        },
+        "favorites": {
+            "title": "$t(entity.favorite, {\"count\": 2})"
+        },
+        "folderList": {
+            "title": "$t(entity.folder, {\"count\": 2})"
         }
     },
     "form": {
@@ -672,7 +710,9 @@
             "createFailed": "не удалось создать ссылку для общего доступа (проверьте, включен ли общий доступ?)",
             "allowDownloading": "разрешить скачивание",
             "setExpiration": "установить срок действия",
-            "description": "описание"
+            "description": "описание",
+            "copyToClipboard": "Скопировано в буфер обмена: Ctrl+C, Enter",
+            "successMustClick": "Ссылка создана успешо. Нажимите, чтобы окрыть"
         },
         "privateMode": {
             "enabled": "Приватный режим включен. Статус воспроизведения скрыт от внешних интеграций",
@@ -706,7 +746,8 @@
             "input_played": "воспроизвести фильтр",
             "input_played_optionAll": "все треки",
             "input_played_optionUnplayed": "только не игранные треки",
-            "input_played_optionPlayed": "только игранные треки"
+            "input_played_optionPlayed": "только игранные треки",
+            "input_genre": "$t(entity.genre, {\"count\": 1})"
         }
     },
     "setting": {
