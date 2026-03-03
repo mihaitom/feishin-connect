@@ -69,7 +69,7 @@ export const ServerSelector = () => {
               : OpenSubsonicLogo;
 
     return (
-        <DropdownMenu offset={0} position="top">
+        <DropdownMenu offset={0} position="right">
             <DropdownMenu.Target>
                 <div className={styles.popoverTarget}>
                     <Box
@@ -93,7 +93,7 @@ export const ServerSelector = () => {
                 </div>
             </DropdownMenu.Target>
             <DropdownMenu.Dropdown style={{ width: `${widthOfTarget}px` }}>
-                <ScrollArea style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                <ScrollArea className={styles.scrollArea}>
                     <ServerSelectorItems />
                 </ScrollArea>
             </DropdownMenu.Dropdown>
