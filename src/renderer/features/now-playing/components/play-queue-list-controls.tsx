@@ -1,9 +1,11 @@
 import { useIsFetching } from '@tanstack/react-query';
 import { t } from 'i18next';
+import { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import { ItemListHandle } from '/@/renderer/components/item-list/types';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useRestoreQueue, useSaveQueue } from '/@/renderer/features/player/hooks/use-queue-restore';
 import {
@@ -11,7 +13,7 @@ import {
     SONG_DISPLAY_TYPES,
 } from '/@/renderer/features/shared/components/list-config-menu';
 import { SearchInput } from '/@/renderer/features/shared/components/search-input';
-import { useCurrentServer } from '/@/renderer/store';
+import { useCurrentServer, usePlayerStoreBase } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
@@ -21,12 +23,14 @@ import { ItemListKey, ListDisplayType } from '/@/shared/types/types';
 interface PlayQueueListOptionsProps {
     handleSearch: (value: string) => void;
     searchTerm?: string;
+    tableRef: RefObject<ItemListHandle | null>;
     type: ItemListKey;
 }
 
 export const PlayQueueListControls = ({
     handleSearch,
     searchTerm,
+    tableRef,
     type,
 }: PlayQueueListOptionsProps) => {
     const { t } = useTranslation();
@@ -34,6 +38,13 @@ export const PlayQueueListControls = ({
 
     const handleClearQueue = () => {
         player.clearQueue();
+    };
+
+    const handleJumpToCurrent = () => {
+        const index = usePlayerStoreBase.getState().player.index;
+        if (index !== -1) {
+            tableRef.current?.scrollToIndex(index);
+        }
     };
 
     const handleShuffleQueue = () => {
@@ -56,6 +67,13 @@ export const PlayQueueListControls = ({
                     iconProps={{ size: 'lg' }}
                     onClick={handleClearQueue}
                     tooltip={{ label: t('action.clearQueue', { postProcess: 'sentenceCase' }) }}
+                    variant="subtle"
+                />
+                <ActionIcon
+                    icon="goToItem"
+                    iconProps={{ size: 'lg' }}
+                    onClick={handleJumpToCurrent}
+                    tooltip={{ label: t('action.goToCurrent', { postProcess: 'sentenceCase' }) }}
                     variant="subtle"
                 />
             </Group>

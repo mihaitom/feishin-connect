@@ -5,6 +5,7 @@
         "addOrRemoveFromSelection": "add or remove from selection",
         "selectRangeOfItems": "select a range of items",
         "clearQueue": "clear queue",
+        "goToCurrent": "go to current item",
         "createPlaylist": "create $t(entity.playlist, {\"count\": 1})",
         "createRadioStation": "create $t(entity.radioStation, {\"count\": 1})",
         "deletePlaylist": "delete $t(entity.playlist, {\"count\": 1})",

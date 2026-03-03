@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { ItemListHandle } from '/@/renderer/components/item-list/types';
 import { NowPlayingHeader } from '/@/renderer/features/now-playing/components/now-playing-header';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { PlayQueueListControls } from '/@/renderer/features/now-playing/components/play-queue-list-controls';
@@ -11,6 +12,7 @@ import { ItemListKey } from '/@/shared/types/types';
 const NowPlayingRoute = () => {
     const [search, setSearch] = useState<string | undefined>(undefined);
     const { setSideBar } = useAppStoreActions();
+    const tableRef = useRef<ItemListHandle | null>(null);
 
     useEffect(() => {
         // On page enter, set rightExpanded to false
@@ -28,9 +30,10 @@ const NowPlayingRoute = () => {
             <PlayQueueListControls
                 handleSearch={setSearch}
                 searchTerm={search}
+                tableRef={tableRef}
                 type={ItemListKey.QUEUE_SONG}
             />
-            <PlayQueue listKey={ItemListKey.QUEUE_SONG} searchTerm={search} />
+            <PlayQueue listKey={ItemListKey.QUEUE_SONG} ref={tableRef} searchTerm={search} />
         </AnimatedPage>
     );
 };

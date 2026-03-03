@@ -62,6 +62,7 @@ export const PopoverPlayQueue = ({
                     <PlayQueueListControls
                         handleSearch={setSearch}
                         searchTerm={search}
+                        tableRef={queueRef}
                         type={ItemListKey.SIDE_QUEUE}
                     />
                     <PlayQueue

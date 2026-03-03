@@ -114,6 +114,7 @@ export const SidebarPlayQueue = () => {
                     <PlayQueueListControls
                         handleSearch={setSearch}
                         searchTerm={search}
+                        tableRef={tableRef}
                         type={ItemListKey.SIDE_QUEUE}
                     />
                     <div className={styles.playQueueSection}>
@@ -217,6 +218,7 @@ export const SidebarPlayQueue = () => {
                     <PlayQueueListControls
                         handleSearch={setSearch}
                         searchTerm={search}
+                        tableRef={tableRef}
                         type={ItemListKey.SIDE_QUEUE}
                     />
                     <Flex direction="column" style={{ flex: 1, minHeight: 0 }}>
