@@ -37,7 +37,8 @@
         "addOrRemoveFromSelection": "dodaj lub usuń z wyboru",
         "selectRangeOfItems": "wybierz zakres elementów",
         "selectAll": "wybierz wszystkie",
-        "openApplicationDirectory": "otwórz katalog aplikacji"
+        "openApplicationDirectory": "otwórz katalog aplikacji",
+        "goToCurrent": "przejdź do aktualnego elementu"
     },
     "common": {
         "increase": "zwiększ",
