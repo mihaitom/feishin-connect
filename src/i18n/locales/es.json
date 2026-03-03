@@ -441,7 +441,8 @@
         "openApplicationDirectory": "Abrir directorio de la aplicación",
         "addOrRemoveFromSelection": "Añadir o quitar de la selección",
         "selectRangeOfItems": "Seleccionar un intervalo de elementos",
-        "selectAll": "Seleccionar todo"
+        "selectAll": "Seleccionar todo",
+        "goToCurrent": "Ir al elemento actual"
     },
     "common": {
         "backward": "hacia atrás",

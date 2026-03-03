@@ -441,7 +441,8 @@
         "openApplicationDirectory": "otevřít adresář aplikace",
         "addOrRemoveFromSelection": "přidat nebo odebrat z výběru",
         "selectRangeOfItems": "vyberte rozsah položek",
-        "selectAll": "vybrat vše"
+        "selectAll": "vybrat vše",
+        "goToCurrent": "přejít na aktuální položku"
     },
     "common": {
         "backward": "zpátky",
