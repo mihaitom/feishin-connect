@@ -325,6 +325,10 @@ export const SubsonicController: InternalControllerEndpoint = {
             results = searchResults;
         }
 
+        if (query.favorite) {
+            results = results.filter((artist) => artist.userFavorite);
+        }
+
         return sortAndPaginate(results, {
             limit: query.limit,
             sortBy: query.sortBy,
