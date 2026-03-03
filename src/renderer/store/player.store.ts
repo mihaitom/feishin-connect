@@ -1238,14 +1238,24 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         });
 
                         const currentIndex = state.player.index;
-                        const filtered = state.queue.default.filter(
-                            (id) => !uniqueIds.includes(id),
-                        );
+                        let beforeCurrent = 0;
+                        const filtered = state.queue.default.filter((id, idx) => {
+                            const shouldMove = uniqueIds.includes(id);
+                            if (shouldMove && idx < currentIndex) {
+                                beforeCurrent++;
+                            }
+
+                            return !shouldMove;
+                        });
+
+                        // For every item that is before the current item, subtract one as
+                        // these items will shift the queue up
+                        const insertIndex = currentIndex + 1 - beforeCurrent;
 
                         const newQueue = [
-                            ...filtered.slice(0, currentIndex + 1),
+                            ...filtered.slice(0, insertIndex),
                             ...uniqueIds,
-                            ...filtered.slice(currentIndex + 1),
+                            ...filtered.slice(insertIndex),
                         ];
 
                         recalculatePlayerIndex(state, newQueue);
