@@ -294,6 +294,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             query: {
                 Fields: JF_FIELDS.ALBUM_ARTIST_LIST,
                 ImageTypeLimit: 1,
+                IsFavorite: query.favorite,
                 Limit: query.limit,
                 ParentId: getLibraryId(query.musicFolderId),
                 Recursive: true,
