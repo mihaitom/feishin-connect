@@ -913,7 +913,8 @@
         "openApplicationDirectory": "開啟應用程式目錄",
         "addOrRemoveFromSelection": "新增或移除選取項目",
         "selectAll": "全選",
-        "selectRangeOfItems": "批量選取"
+        "selectRangeOfItems": "批量選取",
+        "goToCurrent": "前往當前項目"
     },
     "entity": {
         "album_other": "專輯",
