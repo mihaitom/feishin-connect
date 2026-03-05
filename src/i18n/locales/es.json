@@ -401,7 +401,13 @@
         "automaticUpdates": "Actualizaciones automáticas",
         "automaticUpdates_description": "Busca e instala actualizaciones automáticamente",
         "discordStateIcon": "Mostrar icono de reproducción",
-        "discordStateIcon_description": "Muestra un icono pequeño de reproducción en el estado de actividad. El icono de pausa se muestra siempre cuando \"Mostrar estado de actividad cuando esté en pausa\" esté activado"
+        "discordStateIcon_description": "Muestra un icono pequeño de reproducción en el estado de actividad. El icono de pausa se muestra siempre cuando \"Mostrar estado de actividad cuando esté en pausa\" esté activado",
+        "playerItemConfiguration": "Configuración de elementos del reproductor",
+        "playerItemConfiguration_description": "Configura qué elementos se muestran, y en qué orden, en el reproductor a pantalla completa",
+        "primaryShade": "Tono principal",
+        "useThemePrimaryShade": "Usar tono principal del tema",
+        "useThemePrimaryShade_description": "Usa el tono principal definido en el tema seleccionado para las variantes de color primario",
+        "primaryShade_description": "Sobreescribe el tono principal (0-9) usado para los botones, enlaces, y otros elementos de colores primarios"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist, {\"count\": 1})",
@@ -601,7 +607,8 @@
         "noNetwork": "Servidor no disponible",
         "noNetworkDescription": "No se pudo conectar a este servidor",
         "invalidJson": "JSON inválido",
-        "serverLockSingleServer": "Solo se permite un servidor cuando el servidor está bloqueado"
+        "serverLockSingleServer": "Solo se permite un servidor cuando el servidor está bloqueado",
+        "playbackPausedDueToError": "La reproducción fue pausada debido a un error"
     },
     "filter": {
         "mostPlayed": "más reproducidos",

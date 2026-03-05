@@ -401,7 +401,13 @@
         "automaticUpdates": "Automatické aktualizace",
         "automaticUpdates_description": "Kontrolovat a automaticky instalovat aktualizace",
         "discordStateIcon": "zobrazit ikonu přehrávání",
-        "discordStateIcon_description": "zobrazit malou ikonu přehrávání ve stavu na Discordu. ikona pozastavení bude zobrazena vždy, když je povolena možnost „Zobrazit stav při pozastavení“"
+        "discordStateIcon_description": "zobrazit malou ikonu přehrávání ve stavu na Discordu. ikona pozastavení bude zobrazena vždy, když je povolena možnost „Zobrazit stav při pozastavení“",
+        "useThemePrimaryShade": "použít primární odstín motivu",
+        "useThemePrimaryShade_description": "použít primární odstín definovaný ve zvoleném motivu pro primární varianty barev",
+        "primaryShade": "primární odstín",
+        "primaryShade_description": "přepsat primární odstín (0–9) používaný pro tlačítka, odkazy a další prvky obarvené primární barvou",
+        "playerItemConfiguration_description": "nastavit, které položky budou zobrazeny a v jakém pořadí, v celoobrazovkovém přehrávači",
+        "playerItemConfiguration": "nastavení položek přehrávače"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist, {\"count\": 1})",
@@ -710,7 +716,8 @@
         "noNetwork": "server je nedostupný",
         "noNetworkDescription": "k tomuto serveru se nepodařilo připojit",
         "invalidJson": "neplatný JSON",
-        "serverLockSingleServer": "při uzamčení serveru je povolen pouze jeden server"
+        "serverLockSingleServer": "při uzamčení serveru je povolen pouze jeden server",
+        "playbackPausedDueToError": "přehrávání bylo pozastaveno z důvodu chyby"
     },
     "filter": {
         "mostPlayed": "nejvíce přehráváno",
