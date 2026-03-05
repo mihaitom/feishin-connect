@@ -25,6 +25,7 @@ interface WebPlayerEngineProps {
     isTransitioning: boolean;
     onEndedPlayer1: () => void;
     onEndedPlayer2: () => void;
+    onErrorPause: () => void;
     onProgressPlayer1: (e: PlayerOnProgressProps) => void;
     onProgressPlayer2: (e: PlayerOnProgressProps) => void;
     onStartedPlayer1: (player: ReactPlayer) => void;
@@ -38,6 +39,9 @@ interface WebPlayerEngineProps {
     src2: string | undefined;
     volume: number;
 }
+
+const MAX_NETWORK_RETRIES = 5;
+const NETWORK_RETRY_DELAY_MS = 2000;
 
 // Credits: https://gist.github.com/novwhisky/8a1a0168b94f3b6abfaa?permalink_comment_id=1551393#gistcomment-1551393
 // This is used so that the player will always have an <audio> element. This means that
@@ -53,6 +57,7 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
         isTransitioning,
         onEndedPlayer1,
         onEndedPlayer2,
+        onErrorPause,
         onProgressPlayer1,
         onProgressPlayer2,
         onStartedPlayer1,
@@ -69,6 +74,8 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
 
     const player1Ref = useRef<null | ReactPlayer>(null);
     const player2Ref = useRef<null | ReactPlayer>(null);
+    const networkRetryCount1 = useRef(0);
+    const networkRetryCount2 = useRef(0);
     const [ReactPlayerComponent, setReactPlayerComponent] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -150,7 +157,12 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
     const volume1 = convertToLogVolume(internalVolume1);
     const volume2 = convertToLogVolume(internalVolume2);
 
-    const handleOnError = (playerRef: React.RefObject<null | ReactPlayer>, onEnded: () => void) => {
+    const handleOnError = (
+        playerRef: React.RefObject<null | ReactPlayer>,
+        onEnded: () => void,
+        onErrorPause: () => void,
+        networkRetryCountRef: React.RefObject<number>,
+    ) => {
         return ({ target }: ErrorEvent) => {
             const { current: player } = playerRef;
 
@@ -165,16 +177,45 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
                 meta: { error },
             });
 
-            if (
-                error?.code !== MediaError.MEDIA_ERR_DECODE &&
-                error?.code !== MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
-            ) {
+            const isNetworkError =
+                error?.code === MediaError.MEDIA_ERR_NETWORK ||
+                error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED;
+
+            if (isNetworkError) {
+                if (networkRetryCountRef.current < MAX_NETWORK_RETRIES) {
+                    networkRetryCountRef.current += 1;
+                    const audio = target;
+                    setTimeout(() => {
+                        audio.load();
+                        audio.play().catch(() => {
+                            logFn.error(logMsg[LogCategory.PLAYER].playbackError, {
+                                category: LogCategory.PLAYER,
+                                meta: { error: 'Failed to play audio after network error' },
+                            });
+                        });
+                    }, NETWORK_RETRY_DELAY_MS);
+                    return;
+                }
+            }
+
+            if (error?.code !== MediaError.MEDIA_ERR_DECODE && !isNetworkError) {
                 return;
             }
 
-            onEnded();
+            if (error?.code === MediaError.MEDIA_ERR_DECODE) {
+                onEnded();
+            } else {
+                if (onErrorPause) {
+                    onErrorPause();
+                }
+            }
         };
     };
+
+    useEffect(() => {
+        networkRetryCount1.current = 0;
+        networkRetryCount2.current = 0;
+    }, [src1, src2]);
 
     useEffect(() => {
         const player1 = player1Ref.current?.getInternalPlayer();
@@ -224,7 +265,12 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
                 id="web-player-1"
                 muted={isMuted}
                 onEnded={src1 ? () => onEndedPlayer1() : undefined}
-                onError={handleOnError(player1Ref, () => onEndedPlayer1())}
+                onError={handleOnError(
+                    player1Ref,
+                    () => onEndedPlayer1(),
+                    onErrorPause,
+                    networkRetryCount1,
+                )}
                 onProgress={onProgressPlayer1}
                 onReady={handleOnReadyPlayer1}
                 playbackRate={speed || 1}
@@ -244,7 +290,12 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
                 id="web-player-2"
                 muted={isMuted}
                 onEnded={src2 ? () => onEndedPlayer2() : undefined}
-                onError={handleOnError(player2Ref, () => onEndedPlayer2())}
+                onError={handleOnError(
+                    player2Ref,
+                    () => onEndedPlayer2(),
+                    onErrorPause,
+                    networkRetryCount2,
+                )}
                 onProgress={onProgressPlayer2}
                 onReady={handleOnReadyPlayer2}
                 playbackRate={speed || 1}

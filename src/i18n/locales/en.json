@@ -224,6 +224,7 @@
         "notificationDenied": "permissions for notifications were denied. this setting has no effect",
         "openError": "could not open file",
         "playbackError": "an error occurred when trying to play the media",
+        "playbackPausedDueToError": "playback was paused due to an error",
         "remoteDisableError": "an error occurred when trying to $t(common.disable) the remote server",
         "remoteEnableError": "an error occurred when trying to $t(common.enable) the remote server",
         "remotePortError": "an error occurred when trying to set the remote server port",

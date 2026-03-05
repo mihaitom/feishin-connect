@@ -2,6 +2,7 @@ import type { Dispatch } from 'react';
 import type ReactPlayer from 'react-player';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
     WebPlayerEngine,
@@ -21,6 +22,7 @@ import {
     usePlayerProperties,
     usePlayerVolume,
 } from '/@/renderer/store';
+import { toast } from '/@/shared/components/toast/toast';
 import { QueueSong } from '/@/shared/types/domain-types';
 import { CrossfadeStyle, PlayerStatus, PlayerStyle } from '/@/shared/types/types';
 
@@ -29,8 +31,9 @@ const PLAY_PAUSE_FADE_INTERVAL = 10;
 
 export function WebPlayer() {
     const playerRef = useRef<null | WebPlayerEngineHandle>(null);
+    const { t } = useTranslation();
     const { num, player1, player2, status } = usePlayerData();
-    const { mediaAutoNext, setTimestamp } = usePlayerActions();
+    const { mediaAutoNext, mediaPause, setTimestamp } = usePlayerActions();
     const playback = useMpvSettings();
     const { webAudio } = useWebAudio();
 
@@ -443,12 +446,20 @@ export function WebPlayer() {
         [player2Source, player2Url, webAudio],
     );
 
+    const handleOnErrorPause = useCallback(() => {
+        mediaPause();
+        toast.error({
+            message: t('error.playbackPausedDueToError', { postProcess: 'sentenceCase' }),
+        });
+    }, [mediaPause, t]);
+
     return (
         <WebPlayerEngine
             isMuted={isMuted}
             isTransitioning={Boolean(isTransitioning)}
             onEndedPlayer1={handleOnEndedPlayer1}
             onEndedPlayer2={handleOnEndedPlayer2}
+            onErrorPause={handleOnErrorPause}
             onProgressPlayer1={onProgressPlayer1}
             onProgressPlayer2={onProgressPlayer2}
             onStartedPlayer1={handlePlayer1Start}
