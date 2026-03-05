@@ -6,10 +6,12 @@
         'main-content'
         'player';
     grid-template-rows: 0 calc(100vh - 90px) 90px;
+    grid-template-rows: 0 calc(100dvh - 90px) 90px;
     grid-template-columns: 1fr;
     gap: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     background: var(--theme-colors-background);
 }
@@ -17,6 +19,7 @@
 .windows,
 .macos {
     grid-template-rows: 30px calc(100vh - 120px) 90px;
+    grid-template-rows: 30px calc(100dvh - 120px) 90px;
 }
 
 .drawer-button {
