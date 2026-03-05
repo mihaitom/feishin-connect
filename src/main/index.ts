@@ -408,8 +408,17 @@ const createTray = () => {
     ]);
 
     tray.on('click', () => {
-        mainWindow?.show();
-        createWinThumbarButtons();
+        if (store.get('window_minimize_to_tray')) {
+            if (mainWindow?.isVisible()) {
+                mainWindow?.hide();
+            } else {
+                mainWindow?.show();
+                createWinThumbarButtons();
+            }
+        } else {
+            mainWindow?.show();
+            createWinThumbarButtons();
+        }
     });
 
     tray.setToolTip('Feishin');
