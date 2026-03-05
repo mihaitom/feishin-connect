@@ -37,7 +37,8 @@
         "shuffleAll": "acak semua",
         "shuffleSelected": "acak yang dipilih",
         "viewMore": "lihat lebih banyak",
-        "openApplicationDirectory": "buka direktori aplikasi"
+        "openApplicationDirectory": "buka direktori aplikasi",
+        "goToCurrent": "pergi ke item saat ini"
     },
     "common": {
         "clear": "bersihkan",
@@ -208,7 +209,9 @@
         "noNetworkDescription": "tidak dapat terhubung ke server ini",
         "notificationDenied": "izin untuk notifikasi ditolak. pengaturan ini tidak berpengaruh",
         "saveQueueFailed": "gagal menyimpan antrean",
-        "settingsSyncError": "ditemukan ketidaksesuaian antara pengaturan di perender dan proses utama. mulai ulang aplikasi untuk menerapkan perubahan"
+        "settingsSyncError": "ditemukan ketidaksesuaian antara pengaturan di perender dan proses utama. mulai ulang aplikasi untuk menerapkan perubahan",
+        "invalidJson": "JSON tidak valid",
+        "serverLockSingleServer": "hanya satu server yang diizinkan ketika server dikunci"
     },
     "filter": {
         "album": "$t(entity.album, {\"count\": 1})",
@@ -254,7 +257,9 @@
         "title": "judul",
         "path": "path(jalur)",
         "sortName": "nama pengurutan",
-        "explicitStatus": "$t(common.explicitStatus)"
+        "explicitStatus": "$t(common.explicitStatus)",
+        "matchAnd": "dan",
+        "matchOr": "atau"
     },
     "form": {
         "addServer": {
@@ -322,7 +327,9 @@
             "setExpiration": "Atur masa berlaku",
             "success": "Tautan berbagi berhasil disalin ke papan klip (atau klik di sini untuk membuka)",
             "expireInvalid": "Masa berlaku harus di masa depan",
-            "createFailed": "Tidak dapat membuat sumber daya berbagi (Apakah berbagi diaktifkan?)"
+            "createFailed": "Tidak dapat membuat sumber daya berbagi (Apakah berbagi diaktifkan?)",
+            "copyToClipboard": "Salin ke clipboard: Ctrl+C, Enter",
+            "successMustClick": "berbagi berhasil dibuat. klik di sini untuk membuka"
         },
         "updateServer": {
             "success": "Server berhasil diperbarui",
@@ -376,7 +383,11 @@
             "viewAllTracks": "Lihat semua $t(entity.track, {\"count\": 2})",
             "appearsOn": "Tampil di",
             "groupingTypeAll": "semua jenis rilis",
-            "groupingTypePrimary": "jenis rilis utama"
+            "groupingTypePrimary": "jenis rilis utama",
+            "favoriteSongs": "lagu favorit",
+            "topSongsCommunity": "komunitas",
+            "topSongsPersonal": "pribadi",
+            "favoriteSongsFrom": "lagu favorit dari {{title}}"
         },
         "albumArtistList": {
             "title": "$t(entity.albumArtist, {\"count\": 2})"
@@ -565,6 +576,11 @@
         "collections": {
             "overrideExisting": "timpa yang ada",
             "saveAsCollection": "simpan sebagai koleksi"
+        },
+        "releasenotes": {
+            "commitsSinceStable": "commit sejak {{stable}}",
+            "noNewCommits": "tidak ada commit baru dalam rentang ini",
+            "noStableReleaseToCompare": "tidak ada rilis stabil yang tersedia untuk dibandingkan"
         }
     },
     "player": {
@@ -606,7 +622,17 @@
         "lyrics": "lirik",
         "restoreQueueFromServer": "pulihkan antrean dari server",
         "saveQueueToServer": "simpan antrean ke server",
-        "trackRadio": "radio trek"
+        "trackRadio": "radio trek",
+        "albumRadio": "radio album",
+        "sleepTimer": "pengatur waktu tidur",
+        "sleepTimer_endOfSong": "akhir lagu saat ini",
+        "sleepTimer_minutes": "{{count}} menit",
+        "sleepTimer_hours": "{{count}} jam",
+        "sleepTimer_custom": "kustom",
+        "sleepTimer_off": "mati",
+        "sleepTimer_timeRemaining": "{{time}} tersisa",
+        "sleepTimer_setCustom": "atur pengatur waktu",
+        "sleepTimer_cancel": "batalkan pengatur waktu"
     },
     "setting": {
         "accentColor": "warna sorotan",
@@ -620,7 +646,7 @@
         "artistConfiguration": "Pengaturan halaman artis album",
         "artistConfiguration_description": "Atur elemen apa yang ditampilkan dan urutannya di halaman artis album",
         "audioDevice": "perangkat audio",
-        "audioDevice_description": "pilih perangkat audio yang digunakan untuk pemutaran (hanya pemutar web)",
+        "audioDevice_description": "pilih perangkat audio yang digunakan untuk pemutaran",
         "audioExclusiveMode": "mode audio eksklusif",
         "audioExclusiveMode_description": "aktifkan mode audio eksklusif. Dalam mode ini, sistem biasanya diblokir, dan hanya mpv yang akan diizinkan untuk output audio",
         "audioPlayer": "pemutar audio",
@@ -839,7 +865,7 @@
         "releaseChannel_optionBeta": "beta",
         "releaseChannel_optionLatest": "terbaru",
         "releaseChannel": "kanal rilis",
-        "releaseChannel_description": "pilih antara rilis stabil atau rilis beta untuk pembaruan otomatis",
+        "releaseChannel_description": "pilih antara rilis stabil, beta, atau alpha (nightly) untuk pembaruan otomatis",
         "discordDisplayType_artistname": "nama artis",
         "discordDisplayType_description": "mengubah apa yang Anda dengarkan di status Anda",
         "discordDisplayType_songname": "nama lagu",
@@ -947,7 +973,25 @@
         "queryBuilderCustomFields_inputLabel": "label",
         "queryBuilderCustomFields_inputTag": "tag",
         "queryBuilderCustomFields": "kolom kustom",
-        "queryBuilderCustomFields_description": "tambahkan kolom kustom untuk digunakan di pembuat kueri"
+        "queryBuilderCustomFields_description": "tambahkan kolom kustom untuk digunakan di pembuat kueri",
+        "useThemePrimaryShade": "gunakan warna utama tema",
+        "useThemePrimaryShade_description": "gunakan warna utama yang ditentukan dalam tema yang dipilih untuk varian warna utama",
+        "primaryShade": "warna utama tema",
+        "primaryShade_description": "timpa warna utama (0–9) yang digunakan untuk tombol, tautan, dan elemen berwarna utama lainnya",
+        "analyticsEnable": "Kirim analitik berbasis penggunaan",
+        "analyticsEnable_description": "Data penggunaan yang dianonimkan dikirim ke pengembang untuk membantu meningkatkan aplikasi",
+        "automaticUpdates": "Pembaruan otomatis",
+        "automaticUpdates_description": "Periksa dan instal pembaruan secara otomatis",
+        "releaseChannel_optionAlpha": "alpha (nightly)",
+        "discordStateIcon": "tampilkan ikon sedang diputar",
+        "discordStateIcon_description": "tampilkan ikon kecil sedang diputar di status rich presence. ikon dijeda selalu ditampilkan ketika \"Tampilkan rich presence saat dijeda\" diaktifkan",
+        "blurExplicitImages": "buramkan gambar eksplisit",
+        "blurExplicitImages_description": "sampul album dan lagu yang ditandai sebagai eksplisit akan diburamkan",
+        "playerItemConfiguration_description": "konfigurasikan item apa yang ditampilkan, dan dalam urutan apa, pada pemutar layar penuh",
+        "playerItemConfiguration": "konfigurasi item pemutar",
+        "sidebarPlaylistListFilterRegex_description": "sembunyikan playlist di bilah sisi yang cocok dengan ekspresi reguler ini",
+        "sidebarPlaylistListFilterRegex_placeholder": "mis. ^Daily Mix.*",
+        "sidebarPlaylistListFilterRegex": "regex filter playlist"
     },
     "table": {
         "column": {
@@ -1047,12 +1091,14 @@
                 "genreBadge": "$t(entity.genre, {\"count\": 1}) (lencana)",
                 "image": "gambar",
                 "sampleRate": "$t(common.sampleRate)",
-                "titleArtist": "$t(common.title) (artis)"
+                "titleArtist": "$t(common.title) (artis)",
+                "albumGroup": "grup album"
             },
             "view": {
                 "table": "tabel",
                 "grid": "kisi",
-                "list": "daftar"
+                "list": "daftar",
+                "detail": "detail"
             }
         }
     },
