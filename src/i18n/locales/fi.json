@@ -102,7 +102,24 @@
         "recordLabel": "levy-yhtiö",
         "releaseType": "julkaisun tyyppi",
         "explicit": "eksplisiittinen",
-        "clean": "puhdas"
+        "clean": "puhdas",
+        "countSelected": "{{count}} valittuna",
+        "doNotShowAgain": "älä näytä uudelleen",
+        "view": "katso",
+        "example": "esimerkki",
+        "externalLinks": "ulkoiset linkit",
+        "faster": "nopeammin",
+        "filter_single": "yksi",
+        "filter_multiple": "useampi",
+        "mood": "mieliala",
+        "noFilters": "suodattimia ei ole määritetty",
+        "retry": "yritä uudelleen",
+        "rename": "nimeä uudelleen",
+        "slower": "hitaammin",
+        "sort": "järjestä",
+        "gridRows": "ruudukon rivejä",
+        "tableColumns": "taulukon sarakkeita",
+        "itemsMore": "{{count}} lisää"
     },
     "entity": {
         "album_one": "albumi",
@@ -139,7 +156,11 @@
         "play_one": "{{count}} toisto",
         "play_other": "{{count}} toistoa",
         "song_one": "kappale",
-        "song_other": "kappaleet"
+        "song_other": "kappaleet",
+        "radioStation_one": "radioasema",
+        "radioStation_other": "radioasemaa",
+        "radioStationWithCount_one": "{{count}} radioasema",
+        "radioStationWithCount_other": "{{count}} radioasemaa"
     },
     "action": {
         "clearQueue": "tyhjennä jono",
@@ -153,7 +174,7 @@
             "musicbrainz": "Avaa MusicBrainz:ssä"
         },
         "goToPage": "mene sivulle",
-        "moveToBottom": "siirry pohjalle",
+        "moveToBottom": "siirrä alimmaksi",
         "moveToTop": "siirry ylös",
         "addToFavorites": "lisää kohteeseen $t(entity.favorite, {\"count\": 2})",
         "addToPlaylist": "lisää kohteeseen $t(entity.playlist, {\"count\": 1})",
@@ -163,7 +184,24 @@
         "deletePlaylist": "poista $t(entity.playlist, {\"count\": 1})",
         "removeFromPlaylist": "poista kohteesta $t(entity.playlist, {\"count\": 1})",
         "setRating": "aseta arvostelu",
-        "moveToNext": "siirry seuraavaan"
+        "moveToNext": "siirry seuraavaan",
+        "selectRangeOfItems": "valitse useita peräkkäisiä kohteita",
+        "goToCurrent": "siirry nykyiseen kohteeseen",
+        "createRadioStation": "luo $t(entity.radioStation, {\"count\": 1})",
+        "deleteRadioStation": "poista $t(entity.radioStation, {\"count\": 1})",
+        "selectAll": "valitse kaikki",
+        "downloadStarted": "aloitettiin lataamaan {{count}} kohdetta",
+        "moveUp": "siirrä ylöspäin",
+        "moveDown": "siirrä alaspäin",
+        "holdToMoveToTop": "pidä pohjassa siirtääksesi ylimmäksi",
+        "holdToMoveToBottom": "pidä pohjassa siirtääksesi alimmaksi",
+        "moveItems": "siirrä kohteet",
+        "shuffle": "sekoita",
+        "shuffleAll": "sekoita kaikki",
+        "shuffleSelected": "sekoita valitut",
+        "viewMore": "katso lisää",
+        "openApplicationDirectory": "avaa ohjelman kansio",
+        "addOrRemoveFromSelection": "lisää tai poista valinnasta"
     },
     "error": {
         "remoteEnableError": "virhe tapahtui yrittäessä $t(common.enable) etäpalvelinta",
@@ -189,7 +227,13 @@
         "remotePortWarning": "käynnistä palvelin uudestaan ottaaksesi uuden portin käyttöön",
         "endpointNotImplementedError": "päätepiste {{endpoint}} ei ole toteutettu {{serverType}} varten",
         "badValue": "kelpaamaton optio \"{{value}}\". tätä arvoa ei ole enää olemassa",
-        "notificationDenied": "luvat ilmouilmoituksia varten evättiin. tällä asetuksella ei ole vaikutusta"
+        "notificationDenied": "luvat ilmouilmoituksia varten evättiin. tällä asetuksella ei ole vaikutusta",
+        "invalidJson": "virheellinen JSON",
+        "multipleServerSaveQueueError": "soittojonossa on yksi tai useampi kappale, jotka eivät ole nykyiseltä palvelimelta. tätä ei ole tuettu",
+        "noNetwork": "palvelin ei ole käytettävissä",
+        "noNetworkDescription": "ei voida yhdistää palvelimeen",
+        "serverLockSingleServer": "lukitussa tilassa sallitaan vain yksi palvelin",
+        "settingsSyncError": "rendererin ja pääprosessin asetukset eivät täsmää. Käynnistä sovellus uudelleen, jotta muutokset otetaan käyttöön"
     },
     "filter": {
         "album": "$t(entity.album, {\"count\": 1})",
@@ -234,7 +278,10 @@
         "owner": "$t(common.owner)",
         "path": "polku",
         "songCount": "kappalemäärä",
-        "explicitStatus": "$t(common.explicitStatus)"
+        "explicitStatus": "$t(common.explicitStatus)",
+        "matchAnd": "ja",
+        "matchOr": "tai",
+        "sortName": "järjestä nimen mukaan"
     },
     "form": {
         "addServer": {
@@ -250,7 +297,10 @@
             "input_username": "käyttäjänimi",
             "success": "palvelin lisätty onnistuneesti",
             "input_preferInstantMix": "suosi pika-miksausta",
-            "input_preferInstantMixDescription": "käytä vain pika-miksausta saadaksesi samankaltaisia kappaleita. käytännöllinen jos sinulla on lisäosia, jotka muuttavat tätä käytöstä"
+            "input_preferInstantMixDescription": "käytä vain pika-miksausta saadaksesi samankaltaisia kappaleita. käytännöllinen jos sinulla on lisäosia, jotka muuttavat tätä käytöstä",
+            "input_preferRemoteUrl": "suosi julkista url-osoitetta",
+            "input_remoteUrl": "julkinen url-osoite",
+            "input_remoteUrlPlaceholder": "valinnainen: julkinen url-osoite ulkoisille toiminnoille"
         },
         "createPlaylist": {
             "input_public": "julkinen",
@@ -280,7 +330,8 @@
         "editPlaylist": {
             "success": "$t(entity.playlist, {\"count\": 1}) päivitetty onnistuneesti",
             "title": "muokkaa $t(entity.playlist, {\"count\": 1})",
-            "publicJellyfinNote": "Jellyfin ei jostain syystä kerro onko soittolista julkinen vai ei. Jos haluat sen pysyvän julkisena, pidä seuraava valinta valittuna"
+            "publicJellyfinNote": "Jellyfin ei jostain syystä kerro onko soittolista julkinen vai ei. Jos haluat sen pysyvän julkisena, pidä seuraava valinta valittuna",
+            "editNote": "manuaalisia muokkauksia ei suositella suurille soittolistoille. haluatko varmasti hyväksyä riskin, että nykyinen soittolista ylikirjoitetaan ja tietoja voi hävitä?"
         },
         "lyricSearch": {
             "input_artist": "$t(entity.artist, {\"count\": 1})",
@@ -304,6 +355,21 @@
             "enabled": "yksityinen tila käytössä, toistotila on nyt piilotettu ulkoisilta integraatioilta",
             "disabled": "yksityinen tila poissa käytössä, toistotila on nyt näkyvillä ulkoisille integraatioille",
             "title": "yksityinen tila"
+        },
+        "largeFetchConfirmation": {
+            "title": "lisää kohteet jonoon",
+            "description": "lisää kaikki suodatetun näkymän kohteet"
+        },
+        "createRadioStation": {
+            "success": "radiokanava luotu onnistuneesti",
+            "title": "luo radiokanava",
+            "input_homepageUrl": "kotisivun osoite",
+            "input_name": "nimi",
+            "input_streamUrl": "suoratoisto-osoite"
+        },
+        "lyricsExport": {
+            "export": "vie sanoitukset",
+            "input_synced": "vie ajastetut sanoitukset"
         }
     },
     "setting": {
@@ -828,5 +894,32 @@
             "soundtrack": "elokuvamusiikki",
             "spokenWord": "puhetta"
         }
+    },
+    "datetime": {
+        "minuteShort": "m",
+        "secondShort": "s",
+        "hourShort": "t",
+        "dayShort": "p"
+    },
+    "filterOperator": {
+        "after": "jälkeen",
+        "afterDate": "jälkeen (päivän)",
+        "before": "ennen",
+        "beforeDate": "ennen (päivää)",
+        "contains": "sisältää",
+        "endsWith": "loppuu",
+        "inPlaylist": "on",
+        "inTheLast": "on viimeisenä",
+        "inTheRange": "on välillä",
+        "inTheRangeDate": "on valitulla aikavälillä (päivä)",
+        "is": "on",
+        "isNot": "ei ole",
+        "isGreaterThan": "enemmän kuin",
+        "isLessThan": "vähemmän kuin",
+        "matchesRegex": "vastaa säännöllistä lausetta (regex)",
+        "notContains": "ei sisällä",
+        "notInPlaylist": "ei ole",
+        "notInTheLast": "ei ole viimeisenä",
+        "startsWith": "alkaa"
     }
 }
