@@ -138,6 +138,7 @@ export function RadioWebPlayer() {
             isTransitioning={false}
             onEndedPlayer1={onEndedPlayer1}
             onEndedPlayer2={() => {}}
+            onErrorPause={() => {}}
             onProgressPlayer1={onProgressPlayer1}
             onProgressPlayer2={() => {}}
             onStartedPlayer1={handlePlayer1Start}
