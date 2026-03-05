@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { t } from 'i18next';
 import { AnimatePresence, HTMLMotionProps, motion, Variants } from 'motion/react';
 import { Fragment, useEffect, useRef } from 'react';
 import { generatePath, Link } from 'react-router';
@@ -101,7 +102,7 @@ export const FullScreenPlayerImage = () => {
 
     const currentSong = usePlayerSong();
     const { nextSong } = usePlayerData();
-    const { blurExplicitImages } = useGeneralSettings();
+    const { blurExplicitImages, playerItems } = useGeneralSettings();
 
     const isPlayingRadio = isRadioActive && isRadioPlaying;
 
@@ -170,6 +171,38 @@ export const FullScreenPlayerImage = () => {
         currentSong?.explicitStatus,
         nextSong?.explicitStatus,
     ]);
+
+    const builtDataItems = {
+        bit_depth: currentSong?.bitDepth && <Badge>{currentSong?.bitDepth} bit</Badge>,
+        bit_rate: currentSong?.bitRate && <Badge>{currentSong?.bitRate} kbps</Badge>,
+        bpm: currentSong?.bpm && (
+            <Badge>
+                {currentSong?.bpm} {t('common.bpm')}
+            </Badge>
+        ),
+        codec: currentSong?.container && <Badge>{currentSong?.container}</Badge>,
+        disc_number: currentSong?.discNumber && (
+            <Badge>
+                {t('common.disc')} {currentSong?.discNumber}
+            </Badge>
+        ),
+        genres:
+            currentSong?.genres &&
+            currentSong?.genres
+                .slice(0, 2)
+                .map((genre) => <Badge key={genre.id}>{genre.name}</Badge>),
+        release_date: currentSong?.releaseDate && <Badge>{currentSong?.releaseDate}</Badge>,
+        release_type: currentSong?.tags?.releasetype && (
+            <Badge>{currentSong?.tags?.releasetype[0]}</Badge>
+        ),
+        release_year: currentSong?.releaseYear && <Badge>{currentSong?.releaseYear}</Badge>,
+        sample_rate: currentSong?.sampleRate && <Badge>{currentSong?.sampleRate / 1000} kHz</Badge>,
+        track_number: currentSong?.trackNumber && (
+            <Badge>
+                {t('common.trackNumber')} {currentSong?.trackNumber}
+            </Badge>
+        ),
+    };
 
     return (
         <Flex
@@ -283,12 +316,7 @@ export const FullScreenPlayerImage = () => {
                 </Text>
                 {!isPlayingRadio && (
                     <Group justify="center" mt="sm">
-                        {currentSong?.container && (
-                            <Badge variant="transparent">{currentSong?.container}</Badge>
-                        )}
-                        {currentSong?.releaseYear && (
-                            <Badge variant="transparent">{currentSong?.releaseYear}</Badge>
-                        )}
+                        {playerItems.map((i) => !i.disabled && builtDataItems[i.id])}
                     </Group>
                 )}
             </Stack>

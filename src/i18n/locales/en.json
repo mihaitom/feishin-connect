@@ -1013,6 +1013,8 @@
         "sidebarCollapsedNavigation": "sidebar (collapsed) navigation",
         "sidebarConfiguration_description": "select the items and order in which they appear in the sidebar",
         "sidebarConfiguration": "sidebar configuration",
+        "playerItemConfiguration_description": "configure what items are shown, and in what order, on the fullscreen player",
+        "playerItemConfiguration": "player item configuration",
         "sidebarPlaylistList_description": "show or hide the playlist list in the sidebar",
         "sidebarPlaylistList": "sidebar playlist list",
         "sidebarPlaylistSorting_description": "allows manual playlist sorting in the sidebar using drag and drop instead of the default server order",
