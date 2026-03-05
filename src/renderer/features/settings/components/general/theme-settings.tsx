@@ -13,6 +13,7 @@ import { THEME_DATA, useSetColorScheme } from '/@/renderer/themes/use-app-theme'
 import { ColorInput } from '/@/shared/components/color-input/color-input';
 import { Group } from '/@/shared/components/group/group';
 import { Select } from '/@/shared/components/select/select';
+import { Slider } from '/@/shared/components/slider/slider';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { getAppTheme } from '/@/shared/themes/app-theme';
@@ -252,6 +253,51 @@ export const ThemeSettings = memo(() => {
                 postProcess: 'sentenceCase',
             }),
             title: t('setting.accentColor', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Switch
+                    checked={settings.useThemePrimaryShade}
+                    onChange={(e) => {
+                        setSettings({
+                            general: {
+                                useThemePrimaryShade: e.currentTarget.checked,
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.useThemePrimaryShade', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: false,
+            title: t('setting.useThemePrimaryShade', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Slider
+                    defaultValue={settings.primaryShade}
+                    label={(value) => value}
+                    max={9}
+                    min={0}
+                    onChangeEnd={(value) => {
+                        setSettings({
+                            general: {
+                                primaryShade: value,
+                            },
+                        });
+                    }}
+                    step={1}
+                    w={120}
+                />
+            ),
+            description: t('setting.primaryShade', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: settings.useThemePrimaryShade,
+            title: t('setting.primaryShade', { postProcess: 'sentenceCase' }),
         },
     ];
 

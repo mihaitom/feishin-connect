@@ -103,6 +103,7 @@ type SettingsProperties = {
     'settings.themeLight': string;
     'settings.tray': boolean;
     'settings.useThemeAccentColor': boolean;
+    'settings.useThemePrimaryShade': boolean;
     'settings.windowBarStyle': Platform;
     'settings.zoomFactor': number;
 };
@@ -192,6 +193,7 @@ const getSettingsProperties = (): SettingsProperties => {
         'settings.themeLight': settings.general.themeLight,
         'settings.tray': ignoreWeb(settings.window.tray),
         'settings.useThemeAccentColor': settings.general.useThemeAccentColor,
+        'settings.useThemePrimaryShade': settings.general.useThemePrimaryShade,
         'settings.windowBarStyle': ignoreWeb(settings.window.windowBarStyle),
         'settings.zoomFactor': ignoreWeb(settings.general.zoomFactor),
     } as any;

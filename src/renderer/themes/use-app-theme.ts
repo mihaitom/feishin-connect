@@ -52,7 +52,7 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
     const themeInlineStylesRef = useRef<HTMLStyleElement | null>(null);
     const getCurrentTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
     const [isDarkTheme, setIsDarkTheme] = useState(getCurrentTheme());
-    const { followSystemTheme, theme, themeDark, themeLight, useThemeAccentColor } =
+    const { followSystemTheme, primaryShade, theme, themeDark, themeLight, useThemeAccentColor, useThemePrimaryShade } =
         useThemeSettings();
 
     const mqListener = (e: any) => {
@@ -144,14 +144,23 @@ export const useAppTheme = (overrideTheme?: AppTheme) => {
             ? themeProperties.colors?.primary || themeProperties.colors?.['state-info'] || accent
             : accent;
 
+        // Use theme's primary shade if useThemePrimaryShade is enabled, otherwise use slider value
+        const effectivePrimaryShade = useThemePrimaryShade
+            ? themeProperties.mantineOverride?.primaryShade
+            : { dark: primaryShade, light: primaryShade };
+
         return {
             ...themeProperties,
             colors: {
                 ...themeProperties.colors,
                 primary: primaryColor,
             },
+            mantineOverride: {
+                ...themeProperties.mantineOverride,
+                ...(effectivePrimaryShade != null && { primaryShade: effectivePrimaryShade }),
+            },
         };
-    }, [accent, selectedTheme, useThemeAccentColor]);
+    }, [accent, primaryShade, selectedTheme, useThemeAccentColor, useThemePrimaryShade]);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -241,7 +250,7 @@ export const useAppThemeColors = () => {
     const accent = useAccent();
     const getCurrentTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
     const [isDarkTheme] = useState(getCurrentTheme());
-    const { followSystemTheme, theme, themeDark, themeLight, useThemeAccentColor } =
+    const { followSystemTheme, primaryShade, theme, themeDark, themeLight, useThemeAccentColor, useThemePrimaryShade } =
         useThemeSettings();
 
     const getSelectedTheme = () => {
@@ -262,14 +271,23 @@ export const useAppThemeColors = () => {
             ? themeProperties.colors?.primary || themeProperties.colors?.['state-info'] || accent
             : accent;
 
+        // Use theme's primary shade if useThemePrimaryShade is enabled, otherwise use slider value
+        const effectivePrimaryShade = useThemePrimaryShade
+            ? themeProperties.mantineOverride?.primaryShade
+            : { dark: primaryShade, light: primaryShade };
+
         return {
             ...themeProperties,
             colors: {
                 ...themeProperties.colors,
                 primary: primaryColor,
             },
+            mantineOverride: {
+                ...themeProperties.mantineOverride,
+                ...(effectivePrimaryShade != null && { primaryShade: effectivePrimaryShade }),
+            },
         };
-    }, [accent, selectedTheme, useThemeAccentColor]);
+    }, [accent, primaryShade, selectedTheme, useThemeAccentColor, useThemePrimaryShade]);
 
     const themeVars = useMemo(() => {
         return Object.entries(appTheme?.app ?? {})
