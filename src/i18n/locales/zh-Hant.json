@@ -148,7 +148,8 @@
         "noNetwork": "伺服器無法連線",
         "noNetworkDescription": "無法連接到此伺服器",
         "invalidJson": "無效的 JSON",
-        "serverLockSingleServer": "當伺服器鎖定時只允許一個伺服器"
+        "serverLockSingleServer": "當伺服器鎖定時只允許一個伺服器",
+        "playbackPausedDueToError": "發生錯誤，已停止播放"
     },
     "page": {
         "contextMenu": {
@@ -764,7 +765,13 @@
         "automaticUpdates": "自動更新",
         "automaticUpdates_description": "自動檢查並安裝更新",
         "discordStateIcon": "顯示播放中圖示",
-        "discordStateIcon_description": "在 rich presence 狀態中顯示一個小的播放圖示。啟用「暫停時顯示 rich presence」時，會始終顯示暫停的圖示"
+        "discordStateIcon_description": "在 rich presence 狀態中顯示一個小的播放圖示。啟用「暫停時顯示 rich presence」時，會始終顯示暫停的圖示",
+        "useThemePrimaryShade": "套用主題主色調",
+        "useThemePrimaryShade_description": "使用所選主題中定義的主色調作為主色變體",
+        "primaryShade": "主要色調",
+        "primaryShade_description": "覆蓋按鈕、連結及其他主色調元素所使用的主色調(0–9)",
+        "playerItemConfiguration_description": "設定全螢幕播放器顯示的項目及排列順序",
+        "playerItemConfiguration": "播放器項目配置"
     },
     "table": {
         "config": {
