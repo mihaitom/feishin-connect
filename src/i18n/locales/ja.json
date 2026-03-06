@@ -1021,7 +1021,7 @@
         "shuffleAll": {
             "title": "ランダムに再生",
             "input_genre": "$t(entity.genre, {\"count\": 1})",
-            "input_limit": "曲が多すぎます",
+            "input_limit": "何曲?",
             "input_minYear": "年から",
             "input_maxYear": "年まで",
             "input_played_optionAll": "すべてのトラック",
@@ -1109,6 +1109,7 @@
         "notInTheLast": "より前"
     },
     "visualizer": {
-        "visualizerType": "ビジュアライザーの種類"
+        "visualizerType": "ビジュアライザーの種類",
+        "colors": "色"
     }
 }
