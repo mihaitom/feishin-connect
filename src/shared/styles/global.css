@@ -120,6 +120,13 @@ button {
 }
 
 @font-face {
+    font-family: Symbola;
+    src: url('../../../assets/fonts/Symbola.woff2');
+    font-display: swap;
+}
+
+
+@font-face {
     font-family: Inter;
     font-weight: 100 1000;
     src: url('../../../assets/fonts/Inter-VariableFont_opsz,wght.woff2');
