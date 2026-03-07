@@ -1,4 +1,5 @@
 import isElectron from 'is-electron';
+import cloneDeep from 'lodash/cloneDeep';
 import mergeWith from 'lodash/mergeWith';
 import { nanoid } from 'nanoid';
 import { useMemo } from 'react';
@@ -22,6 +23,7 @@ import {
 } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { audiomotionanalyzerPresets } from '/@/renderer/features/visualizer/components/audiomotionanalyzer/presets';
 import { AppRoute } from '/@/renderer/router/routes';
+import { getEnvSettingsOverrides } from '/@/renderer/store/env-settings-overrides';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
 import { FontValueSchema } from '/@/renderer/types/fonts';
 import { randomString } from '/@/renderer/utils';
@@ -1889,6 +1891,11 @@ const initialState: SettingsState = {
     },
 };
 
+const initialStateWithEnv = mergeWith(
+    cloneDeep(initialState),
+    getEnvSettingsOverrides(),
+) as SettingsState;
+
 export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
     persist(
         devtools(
@@ -2035,7 +2042,7 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                             });
                         },
                     },
-                    ...initialState,
+                    ...initialStateWithEnv,
                 })),
             ),
             { name: 'store_settings' },
