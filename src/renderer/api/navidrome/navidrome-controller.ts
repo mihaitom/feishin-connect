@@ -30,6 +30,7 @@ import { ServerFeature } from '/@/shared/types/features-types';
 const VERSION_INFO: VersionInfo = [
     // Why 2? Subsonic controller will return 1 for its own implementation
     // Use 2 to denote that Navidrome's own API has a different endpoint
+    ['0.60.4', { [ServerFeature.TRACK_YES_NO_RATING_FILTER]: [1] }],
     ['0.57.0', { [ServerFeature.SERVER_PLAY_QUEUE]: [2] }],
     ['0.56.0', { [ServerFeature.TRACK_ALBUM_ARTIST_SEARCH]: [1] }],
     ['0.55.0', { [ServerFeature.BFR]: [1], [ServerFeature.TAGS]: [1] }],
@@ -669,6 +670,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             ...subsonicArgs.features,
             ...navidromeFeatures,
             publicPlaylist: [1],
+            [ServerFeature.ALBUM_YES_NO_RATING_FILTER]: [1],
             [ServerFeature.MUSIC_FOLDER_MULTISELECT]: [1],
         };
 
@@ -741,6 +743,10 @@ export const NavidromeController: InternalControllerEndpoint = {
                 album_id: query.albumIds,
                 genre_id: query.genreIds,
                 [getArtistSongKey(apiClientProps.server)]: query.artistIds ?? query.albumArtistIds,
+                ...(hasFeature(apiClientProps.server, ServerFeature.TRACK_YES_NO_RATING_FILTER) &&
+                query.hasRating !== undefined
+                    ? { has_rating: query.hasRating }
+                    : {}),
                 library_id: getLibraryId(query.musicFolderId),
                 starred: query.favorite,
                 title: query.searchTerm,
