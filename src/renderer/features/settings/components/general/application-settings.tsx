@@ -688,6 +688,59 @@ export const ApplicationSettings = memo(() => {
             isHidden: false,
             title: t('setting.playerbarOpenDrawer', { postProcess: 'sentenceCase' }),
         },
+        {
+            control: (
+                <Switch
+                    aria-label={t('setting.autosave', { postProcess: 'sentenceCase' })}
+                    defaultChecked={settings.autoSave.enabled}
+                    onChange={(e) => {
+                        setSettings({
+                            general: {
+                                ...settings,
+                                autoSave: {
+                                    ...settings.autoSave,
+                                    enabled: e.currentTarget.checked,
+                                },
+                            },
+                        });
+                    }}
+                />
+            ),
+            description: t('setting.autosave', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            title: t('setting.autosave', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <NumberInput
+                    min={1}
+                    onBlur={(e) => {
+                        if (!e) return;
+                        const newVal = e.currentTarget.value
+                            ? Math.max(Number(e.currentTarget.value), 1)
+                            : settings.autoSave.count;
+                        setSettings({
+                            general: {
+                                ...settings,
+                                autoSave: {
+                                    ...settings.autoSave,
+                                    count: newVal,
+                                },
+                            },
+                        });
+                    }}
+                    value={settings.autoSave.count}
+                />
+            ),
+            description: t('setting.autosaveCount', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: !settings.autoSave.enabled,
+            title: t('setting.autosaveCount', { postProcess: 'sentenceCase' }),
+        },
     ];
 
     return (

@@ -430,6 +430,11 @@ export enum HomeFeatureStyle {
     SINGLE = 'single',
 }
 
+const AutoSaveSchema = z.object({
+    count: z.number().min(0),
+    enabled: z.boolean(),
+});
+
 export const GeneralSettingsSchema = z.object({
     accent: z
         .string()
@@ -446,6 +451,7 @@ export const GeneralSettingsSchema = z.object({
     artistItems: z.array(SortableItemSchema(ArtistItemSchema)),
     artistRadioCount: z.number(),
     artistReleaseTypeItems: z.array(SortableItemSchema(ArtistReleaseTypeItemSchema)),
+    autoSave: AutoSaveSchema,
     blurExplicitImages: z.boolean(),
     buttonSize: z.number(),
     collections: z.array(CollectionSchema),
@@ -1094,6 +1100,10 @@ const initialState: SettingsState = {
         artistItems,
         artistRadioCount: 20,
         artistReleaseTypeItems,
+        autoSave: {
+            count: 10,
+            enabled: false,
+        },
         blurExplicitImages: false,
         buttonSize: 15,
         collections: [],

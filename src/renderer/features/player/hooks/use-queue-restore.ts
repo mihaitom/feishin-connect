@@ -89,8 +89,7 @@ export const useSaveQueue = () => {
                 });
 
                 toast.success({
-                    message: '',
-                    title: t('form.saveQueue.success', { postProcess: 'sentenceCase' }),
+                    message: t('form.saveQueue.success', { postProcess: 'sentenceCase' }),
                 });
             } catch (error) {
                 toast.error({
