@@ -25,7 +25,7 @@ export const useAutosave = () => {
                 priorSongId.current = currentSong?._uniqueId;
             }
         }
-    }, [enabled, count, currentSong?._uniqueId, savePlayQueue, server.type]);
+    }, [enabled, count, currentSong?._uniqueId, savePlayQueue, server?.type]);
 };
 
 export const AutosaveHook = () => {
