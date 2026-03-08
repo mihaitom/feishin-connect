@@ -44,7 +44,13 @@ import { Modal } from '/@/shared/components/modal/modal';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
-import { LibraryItem, SongListSort, SortOrder } from '/@/shared/types/domain-types';
+import {
+    LibraryItem,
+    Playlist,
+    SongListSort,
+    SortOrder,
+    UpdatePlaylistBody,
+} from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 interface PlaylistDetailSongListHeaderFiltersProps {
@@ -193,7 +199,7 @@ export const PlaylistDetailSongListHeaderFilters = ({
                 <MoreButton onClick={handleMore} />
             </Group>
             <Group gap="sm" wrap="nowrap">
-                {isViewEditMode && <SaveAndReplaceButton mode={mode} />}
+                {isViewEditMode && <SaveAndReplaceButton mode={mode} playlist={detailQuery.data} />}
                 {isViewEditMode && (
                     <Button
                         onClick={() => setMode?.(mode === 'edit' ? 'view' : 'edit')}
@@ -242,24 +248,39 @@ export const PlaylistDetailSongListHeaderFilters = ({
     );
 };
 
-export const openSaveAndReplaceModal = (playlistId: string, listData: unknown[]) => {
+export const openSaveAndReplaceModal = (playlistId: string, updateBody: UpdatePlaylistBody) => {
     openContextModal({
-        innerProps: { listData, playlistId },
+        innerProps: { playlistId, updateBody },
         modalKey: 'saveAndReplace',
         size: 'sm',
         title: i18n.t('common.saveAndReplace', { postProcess: 'titleCase' }) as string,
     });
 };
 
-const SaveAndReplaceButton = ({ mode }: { mode: 'edit' | 'view' | undefined }) => {
+const SaveAndReplaceButton = ({
+    mode,
+    playlist,
+}: {
+    mode: 'edit' | 'view' | undefined;
+    playlist: Playlist | undefined;
+}) => {
     const { t } = useTranslation();
     const { playlistId } = useParams() as { playlistId: string };
-    const { listData } = useListContext();
 
     const handleOpenModal = useCallback(() => {
-        if (!playlistId || !listData) return;
-        openSaveAndReplaceModal(playlistId, listData);
-    }, [playlistId, listData]);
+        if (!playlistId || !playlist) return;
+
+        const updateBody: UpdatePlaylistBody = {
+            comment: playlist.description ?? '',
+            name: playlist.name,
+            ownerId: playlist.ownerId ?? '',
+            public: playlist.public ?? false,
+            queryBuilderRules: playlist.rules ?? undefined,
+            sync: playlist.sync ?? false,
+        };
+
+        openSaveAndReplaceModal(playlistId, updateBody);
+    }, [playlistId, playlist]);
 
     if (mode === 'view') {
         return null;

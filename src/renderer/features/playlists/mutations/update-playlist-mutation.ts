@@ -31,6 +31,9 @@ export const useUpdatePlaylist = (args: MutationHookArgs) => {
                 queryClient.invalidateQueries({
                     queryKey: queryKeys.playlists.detail(serverId, query.id),
                 });
+                queryClient.invalidateQueries({
+                    queryKey: queryKeys.playlists.songList(serverId, query.id),
+                });
             }
         },
         ...options,

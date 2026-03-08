@@ -1,40 +1,22 @@
 import { closeAllModals, ContextModalProps } from '@mantine/modals';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useReplacePlaylist } from '/@/renderer/features/playlists/mutations/replace-playlist-mutation';
+import { useUpdatePlaylist } from '/@/renderer/features/playlists/mutations/update-playlist-mutation';
 import { useCurrentServerId } from '/@/renderer/store';
 import { ConfirmModal } from '/@/shared/components/modal/modal';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { Song } from '/@/shared/types/domain-types';
+import { UpdatePlaylistBody } from '/@/shared/types/domain-types';
 
 export const SaveAndReplaceContextModal = ({
     innerProps,
-}: ContextModalProps<{ listData: unknown[]; playlistId: string }>) => {
+}: ContextModalProps<{ playlistId: string; updateBody: UpdatePlaylistBody }>) => {
     const { t } = useTranslation();
-    const { listData, playlistId } = innerProps;
+    const { playlistId, updateBody } = innerProps;
     const serverId = useCurrentServerId();
 
-    const replacePlaylistMutation = useReplacePlaylist({});
-
-    // Get current songs from list data
-    const currentSongIds = useMemo(() => {
-        if (!listData || !Array.isArray(listData)) {
-            return [];
-        }
-
-        return listData
-            .filter((item): item is Song => {
-                return (
-                    typeof item === 'object' &&
-                    item !== null &&
-                    'id' in item &&
-                    typeof (item as any).id === 'string'
-                );
-            })
-            .map((song) => song.id);
-    }, [listData]);
+    const updatePlaylistMutation = useUpdatePlaylist({});
 
     const handleConfirm = useCallback(() => {
         if (!serverId || !playlistId) {
@@ -42,24 +24,11 @@ export const SaveAndReplaceContextModal = ({
             return;
         }
 
-        if (currentSongIds.length === 0) {
-            console.error('currentSongIds is empty');
-            toast.error({
-                message: t('error.genericError', { postProcess: 'sentenceCase' }),
-                title: t('error.genericError', { postProcess: 'sentenceCase' }),
-            });
-            return;
-        }
-
-        replacePlaylistMutation.mutate(
+        updatePlaylistMutation.mutate(
             {
                 apiClientProps: { serverId },
-                body: {
-                    songId: currentSongIds,
-                },
-                query: {
-                    id: playlistId,
-                },
+                body: updateBody,
+                query: { id: playlistId },
             },
             {
                 onError: (err) => {
@@ -81,10 +50,10 @@ export const SaveAndReplaceContextModal = ({
                 },
             },
         );
-    }, [t, currentSongIds, serverId, playlistId, replacePlaylistMutation]);
+    }, [t, serverId, playlistId, updateBody, updatePlaylistMutation]);
 
     return (
-        <ConfirmModal loading={replacePlaylistMutation.isPending} onConfirm={handleConfirm}>
+        <ConfirmModal loading={updatePlaylistMutation.isPending} onConfirm={handleConfirm}>
             <Text>{t('form.editPlaylist.editNote', { postProcess: 'sentenceCase' })}</Text>
         </ConfirmModal>
     );

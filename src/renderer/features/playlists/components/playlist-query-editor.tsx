@@ -7,7 +7,7 @@ import {
     PlaylistQueryBuilder,
     PlaylistQueryBuilderRef,
 } from '/@/renderer/features/playlists/components/playlist-query-builder';
-import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
+import { useUpdatePlaylist } from '/@/renderer/features/playlists/mutations/update-playlist-mutation';
 import { convertQueryGroupToNDQuery } from '/@/renderer/features/playlists/utils';
 import { JsonPreview } from '/@/renderer/features/shared/components/json-preview';
 import { Box } from '/@/shared/components/box/box';
@@ -25,7 +25,6 @@ import { toast } from '/@/shared/components/toast/toast';
 import { SongListSort } from '/@/shared/types/domain-types';
 
 export interface PlaylistQueryEditorProps {
-    createPlaylistMutation: ReturnType<typeof useCreatePlaylist>;
     detailQuery: ReturnType<typeof useQuery<any>>;
     handleSave: (
         filter: Record<string, any>,
@@ -39,6 +38,7 @@ export interface PlaylistQueryEditorProps {
     onToggleExpand: () => void;
     playlistId: string;
     queryBuilderRef: React.RefObject<null | PlaylistQueryBuilderRef>;
+    updatePlaylistMutation: ReturnType<typeof useUpdatePlaylist>;
 }
 
 type AppliedJsonState = {
@@ -77,7 +77,6 @@ const parseRulesJsonToSaveArgs = (
 };
 
 export const PlaylistQueryEditor = ({
-    createPlaylistMutation,
     detailQuery,
     handleSave,
     handleSaveAs,
@@ -85,6 +84,7 @@ export const PlaylistQueryEditor = ({
     onToggleExpand,
     playlistId,
     queryBuilderRef,
+    updatePlaylistMutation,
 }: PlaylistQueryEditorProps) => {
     const { t } = useTranslation();
 
@@ -322,7 +322,7 @@ export const PlaylistQueryEditor = ({
                         <Button
                             disabled={!isQueryBuilderExpanded}
                             leftSection={<Icon icon="save" />}
-                            loading={createPlaylistMutation?.isPending}
+                            loading={updatePlaylistMutation?.isPending}
                             onClick={() => {
                                 if (!isQueryBuilderExpanded) return;
                                 const payload = getFiltersForSave();

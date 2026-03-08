@@ -13,8 +13,8 @@ import { PlaylistQueryBuilderRef } from '/@/renderer/features/playlists/componen
 import { PlaylistQueryEditor } from '/@/renderer/features/playlists/components/playlist-query-editor';
 import { SaveAsPlaylistForm } from '/@/renderer/features/playlists/components/save-as-playlist-form';
 import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
-import { useCreatePlaylist } from '/@/renderer/features/playlists/mutations/create-playlist-mutation';
 import { useDeletePlaylist } from '/@/renderer/features/playlists/mutations/delete-playlist-mutation';
+import { useUpdatePlaylist } from '/@/renderer/features/playlists/mutations/update-playlist-mutation';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import { ListWithSidebarContainer } from '/@/renderer/features/shared/components/list-with-sidebar-container';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
@@ -80,8 +80,8 @@ const PlaylistDetailSongListRoute = () => {
         ...playlistsQueries.detail({ query: { id: playlistId }, serverId: server?.id }),
         placeholderData: location.state?.item,
     });
-    const createPlaylistMutation = useCreatePlaylist({});
     const deletePlaylistMutation = useDeletePlaylist({});
+    const updatePlaylistMutation = useUpdatePlaylist({});
 
     const handleSave = (
         filter: Record<string, any>,
@@ -89,8 +89,6 @@ const PlaylistDetailSongListRoute = () => {
     ) => {
         if (!detailQuery?.data) return;
 
-        // New syntax: sortBy is now a single string with comma-separated fields and +/- prefix
-        // e.g., "+album,-year" means sort by album ascending, then year descending
         const sortValue =
             extraFilters.sortBy && extraFilters.sortBy.length > 0
                 ? extraFilters.sortBy[0]
@@ -99,11 +97,10 @@ const PlaylistDetailSongListRoute = () => {
         const rules = {
             ...filter,
             limit: extraFilters.limit || undefined,
-            // order field is now optional - sort direction is embedded in sort field
             sort: sortValue,
         };
 
-        createPlaylistMutation.mutate(
+        updatePlaylistMutation.mutate(
             {
                 apiClientProps: { serverId: detailQuery?.data?._serverId },
                 body: {
@@ -114,22 +111,11 @@ const PlaylistDetailSongListRoute = () => {
                     queryBuilderRules: rules,
                     sync: detailQuery?.data?.sync || false,
                 },
+                query: { id: playlistId },
             },
             {
-                onSuccess: (data) => {
+                onSuccess: () => {
                     toast.success({ message: 'Playlist has been saved' });
-                    navigate(
-                        generatePath(AppRoute.PLAYLISTS_DETAIL_SONGS, {
-                            playlistId: data?.id || '',
-                        }),
-                        {
-                            replace: true,
-                        },
-                    );
-                    deletePlaylistMutation.mutate({
-                        apiClientProps: { serverId: detailQuery?.data?._serverId },
-                        query: { id: playlistId },
-                    });
                 },
             },
         );
@@ -297,7 +283,6 @@ const PlaylistDetailSongListRoute = () => {
                 </ListWithSidebarContainer>
                 {(isSmartPlaylist || showQueryBuilder) && (
                     <PlaylistQueryEditor
-                        createPlaylistMutation={createPlaylistMutation}
                         detailQuery={detailQuery}
                         handleSave={handleSave}
                         handleSaveAs={handleSaveAs}
@@ -305,6 +290,7 @@ const PlaylistDetailSongListRoute = () => {
                         onToggleExpand={handleToggleExpand}
                         playlistId={playlistId}
                         queryBuilderRef={queryBuilderRef}
+                        updatePlaylistMutation={updatePlaylistMutation}
                     />
                 )}
             </ListContext.Provider>
