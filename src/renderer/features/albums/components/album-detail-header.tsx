@@ -20,7 +20,7 @@ import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useShowRatings } from '/@/renderer/store';
 import { useArtistRadioCount, usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
+import { formatDateAbsoluteUTC, formatDurationString, formatSizeString } from '/@/renderer/utils';
 import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
 import { Group } from '/@/shared/components/group/group';
 import { Separator } from '/@/shared/components/separator/separator';
@@ -191,6 +191,12 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
                 {
                     id: 'explicitStatus',
                     value: detailQuery?.data?.explicitStatus,
+                },
+                {
+                    id: 'size',
+                    value: detailQuery?.data?.size
+                        ? formatSizeString(detailQuery?.data?.size)
+                        : undefined,
                 },
                 {
                     id: 'playCount',
