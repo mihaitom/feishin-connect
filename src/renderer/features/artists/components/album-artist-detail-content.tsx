@@ -5,8 +5,7 @@ import {
     UseSuspenseQueryResult,
 } from '@tanstack/react-query';
 import { LayoutGroup, motion } from 'motion/react';
-import { Suspense } from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createSearchParams, generatePath, Link, useLocation, useParams } from 'react-router';
 
@@ -70,6 +69,7 @@ import { Grid } from '/@/shared/components/grid/grid';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
+import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -201,18 +201,57 @@ const AlbumArtistMetadataGenres = ({ genres }: AlbumArtistMetadataGenresProps) =
 
 interface AlbumArtistMetadataBiographyProps {
     artistName?: string;
-    biography: null | string | undefined;
+    routeId: string;
 }
 
 const AlbumArtistMetadataBiography = ({
     artistName,
-    biography,
+    routeId,
 }: AlbumArtistMetadataBiographyProps) => {
     const { t } = useTranslation();
+    const server = useCurrentServer();
 
-    if (!biography) return null;
+    const artistInfoQuery = useQuery({
+        ...artistsQueries.albumArtistInfo({
+            query: { id: routeId, limit: 10 },
+            serverId: server?.id,
+        }),
+        enabled: Boolean(server?.id && routeId),
+    });
 
-    const sanitizedBiography = sanitize(biography);
+    const detailQuery = useQuery({
+        ...artistsQueries.albumArtistDetail({
+            query: { id: routeId },
+            serverId: server?.id,
+        }),
+        enabled: Boolean(server?.id && routeId),
+    });
+
+    const biography = artistInfoQuery.data?.biography || detailQuery.data?.biography;
+    const isLoading = !biography && (artistInfoQuery.isLoading || detailQuery.isLoading);
+
+    const sanitizedBiography = biography ? sanitize(biography) : '';
+
+    if (isLoading) {
+        return (
+            <section style={{ maxWidth: '1280px' }}>
+                <TextTitle fw={700} order={3}>
+                    {t('page.albumArtistDetail.about', {
+                        artist: artistName,
+                    })}
+                </TextTitle>
+                <Stack gap="xs">
+                    <Skeleton enableAnimation height="1rem" width="100%" />
+                    <Skeleton enableAnimation height="1rem" width="98%" />
+                    <Skeleton enableAnimation height="1rem" width="60%" />
+                </Stack>
+            </section>
+        );
+    }
+
+    if (!biography) {
+        return null;
+    }
 
     return (
         <section style={{ maxWidth: '1280px' }}>
@@ -850,20 +889,25 @@ const AlbumArtistMetadataExternalLinks = ({
 };
 
 interface AlbumArtistMetadataSimilarArtistsProps {
-    detailQuery: ReturnType<typeof useSuspenseQuery<AlbumArtistDetailResponse>>;
     routeId: string;
 }
 
-const AlbumArtistMetadataSimilarArtists = ({
-    detailQuery,
-    routeId,
-}: AlbumArtistMetadataSimilarArtistsProps) => {
+const AlbumArtistMetadataSimilarArtists = ({ routeId }: AlbumArtistMetadataSimilarArtistsProps) => {
     const { t } = useTranslation();
     const server = useCurrentServer();
     const serverId = useCurrentServerId();
 
+    const artistInfoQuery = useQuery({
+        ...artistsQueries.albumArtistInfo({
+            query: { id: routeId, limit: 10 },
+            serverId: server?.id,
+        }),
+        enabled: Boolean(server?.id && routeId),
+    });
+
+    const relatedArtists = artistInfoQuery.data?.similarArtists ?? null;
+
     const similarArtists = useMemo(() => {
-        const relatedArtists = detailQuery.data?.similarArtists;
         if (!relatedArtists || relatedArtists.length === 0) {
             return [];
         }
@@ -890,7 +934,7 @@ const AlbumArtistMetadataSimilarArtists = ({
                 userRating: relatedArtist.userRating,
             }),
         );
-    }, [detailQuery.data?.similarArtists, server?.type, serverId]);
+    }, [relatedArtists, server?.type, serverId]);
 
     const carouselTitle = useMemo(
         () => (
@@ -908,7 +952,7 @@ const AlbumArtistMetadataSimilarArtists = ({
         [t],
     );
 
-    if (similarArtists.length === 0) {
+    if (!artistInfoQuery.isLoading && similarArtists.length === 0) {
         return null;
     }
 
@@ -916,6 +960,7 @@ const AlbumArtistMetadataSimilarArtists = ({
         <AlbumArtistGridCarousel
             data={similarArtists}
             excludeIds={[routeId]}
+            isLoading={artistInfoQuery.isLoading}
             rowCount={1}
             title={carouselTitle}
         />
@@ -977,8 +1022,6 @@ export const AlbumArtistDetailContent = ({
         [routeId, detailQuery.data?.name],
     );
 
-    const biography =
-        detailQuery.data?.biography && enabledItem.biography ? detailQuery.data.biography : null;
     const showGenres = detailQuery.data?.genres ? detailQuery.data.genres.length !== 0 : false;
     const mbzId = detailQuery.data?.mbz;
 
@@ -1034,11 +1077,11 @@ export const AlbumArtistDetailContent = ({
                             />
                         </Grid.Col>
                     )}
-                    {biography && (
+                    {enabledItem.biography && (
                         <Grid.Col order={itemOrder.biography} span={12}>
                             <AlbumArtistMetadataBiography
                                 artistName={detailQuery.data?.name}
-                                biography={biography}
+                                routeId={routeId}
                             />
                         </Grid.Col>
                     )}
@@ -1047,10 +1090,7 @@ export const AlbumArtistDetailContent = ({
                     </Grid.Col>
                     {enabledItem.similarArtists && (
                         <Grid.Col order={itemOrder.similarArtists} span={12}>
-                            <AlbumArtistMetadataSimilarArtists
-                                detailQuery={detailQuery}
-                                routeId={routeId}
-                            />
+                            <AlbumArtistMetadataSimilarArtists routeId={routeId} />
                         </Grid.Col>
                     )}
                     {enabledItem.topSongs && (

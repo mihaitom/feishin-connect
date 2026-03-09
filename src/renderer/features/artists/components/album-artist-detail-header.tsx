@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { forwardRef, Fragment, Ref, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -69,9 +69,9 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
     ];
 
     const { addToQueueByFetch } = usePlayer();
+    const playButtonBehavior = usePlayButtonBehavior();
     const setFavorite = useSetFavorite();
     const setRating = useSetRating();
-    const playButtonBehavior = usePlayButtonBehavior();
 
     const handlePlay = useCallback(
         (type?: Play) => {
@@ -137,11 +137,19 @@ export const AlbumArtistDetailHeader = forwardRef((_props, ref: Ref<HTMLDivEleme
         type: 'itemCard',
     });
 
+    const artistInfoQuery = useQuery({
+        ...artistsQueries.albumArtistInfo({
+            query: { id: routeId, limit: 10 },
+            serverId: server?.id,
+        }),
+        enabled: Boolean(server?.id && routeId),
+    });
+
     const showRating = showRatings && detailQuery?.data?._serverType === ServerType.NAVIDROME;
 
     const selectedImageUrl = useMemo(() => {
-        return detailQuery.data?.imageUrl || imageUrl;
-    }, [detailQuery.data?.imageUrl, imageUrl]);
+        return detailQuery.data?.imageUrl || artistInfoQuery.data?.imageUrl || imageUrl;
+    }, [artistInfoQuery.data?.imageUrl, detailQuery.data?.imageUrl, imageUrl]);
 
     return (
         <LibraryHeader

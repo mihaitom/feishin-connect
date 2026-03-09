@@ -1,7 +1,8 @@
-import { useSuspenseQueries } from '@tanstack/react-query';
-import { Suspense, useRef } from 'react';
+import { useQuery, useQueryClient, useSuspenseQueries } from '@tanstack/react-query';
+import { Suspense, useEffect, useRef } from 'react';
 import { useParams } from 'react-router';
 
+import { queryKeys } from '/@/renderer/api/query-keys';
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
@@ -19,7 +20,12 @@ import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-e
 import { useFastAverageColor } from '/@/renderer/hooks';
 import { useArtistBackground, useCurrentServer, useCurrentServerId } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
-import { AlbumListSort, LibraryItem, SortOrder } from '/@/shared/types/domain-types';
+import {
+    AlbumArtistDetailResponse,
+    AlbumListSort,
+    LibraryItem,
+    SortOrder,
+} from '/@/shared/types/domain-types';
 
 const AlbumArtistDetailRouteContent = () => {
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -27,6 +33,7 @@ const AlbumArtistDetailRouteContent = () => {
     const server = useCurrentServer();
     const serverId = useCurrentServerId();
     const { artistBackground, artistBackgroundBlur } = useArtistBackground();
+    const queryClient = useQueryClient();
 
     const { albumArtistId, artistId } = useParams() as {
         albumArtistId?: string;
@@ -34,6 +41,26 @@ const AlbumArtistDetailRouteContent = () => {
     };
 
     const routeId = (artistId || albumArtistId) as string;
+
+    const artistInfoQuery = useQuery({
+        ...artistsQueries.albumArtistInfo({
+            query: { id: routeId, limit: 10 },
+            serverId: server?.id,
+        }),
+        enabled: Boolean(server?.id && routeId),
+    });
+
+    useEffect(() => {
+        const data = artistInfoQuery.data;
+        if (!data?.imageUrl || !server?.id || !routeId) return;
+        queryClient.setQueryData(
+            queryKeys.albumArtists.detail(server.id, { id: routeId }),
+            (prev: AlbumArtistDetailResponse | undefined) => {
+                if (!prev) return prev;
+                return { ...prev, imageUrl: data.imageUrl ?? prev.imageUrl };
+            },
+        );
+    }, [artistInfoQuery.data, queryClient, routeId, server?.id]);
 
     const [detailQuery, albumsQuery] = useSuspenseQueries({
         queries: [
@@ -60,13 +87,14 @@ const AlbumArtistDetailRouteContent = () => {
 
     const libraryBackgroundImageUrl = useItemImageUrl({
         id: detailQuery.data?.imageId || undefined,
+        imageUrl: detailQuery.data?.imageUrl,
         itemType: LibraryItem.ALBUM_ARTIST,
         type: 'itemCard',
     });
 
     const selectedImageUrl = imageUrl || detailQuery.data?.imageUrl;
 
-    const { background: backgroundColor, isLoading: isColorLoading } = useFastAverageColor({
+    const { background: backgroundColor } = useFastAverageColor({
         id: artistId,
         src: selectedImageUrl,
         srcLoaded: true,
@@ -76,9 +104,9 @@ const AlbumArtistDetailRouteContent = () => {
 
     const showBlurredImage = artistBackground;
 
-    if (isColorLoading) {
-        return <Spinner container />;
-    }
+    // if (isColorLoading) {
+    //     return <Spinner container />;
+    // }
 
     return (
         <AnimatedPage key={`album-artist-detail-${routeId}`}>
