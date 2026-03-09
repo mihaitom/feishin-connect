@@ -140,7 +140,10 @@ const AlbumArtistDetailRouteContent = () => {
                     <LibraryBackgroundOverlay backgroundColor={background} headerRef={headerRef} />
                 )}
                 <LibraryContainer>
-                    <AlbumArtistDetailHeader ref={headerRef as React.Ref<HTMLDivElement>} />
+                    <AlbumArtistDetailHeader
+                        albumsQuery={albumsQuery}
+                        ref={headerRef as React.Ref<HTMLDivElement>}
+                    />
                     <AlbumArtistDetailContent albumsQuery={albumsQuery} detailQuery={detailQuery} />
                 </LibraryContainer>
             </NativeScrollArea>
