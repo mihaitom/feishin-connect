@@ -1,11 +1,13 @@
 name: Publish (PR)
 
 on:
+    workflow_dispatch:
     pull_request:
         branches:
             - development
         paths:
             - 'src/**'
+            - 'electron-builder*.yml'
 
 jobs:
     wait-for-lint:
