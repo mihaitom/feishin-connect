@@ -185,12 +185,14 @@ export const AlbumArtistDetailHeader = forwardRef<HTMLDivElement, AlbumArtistDet
         const showRating = showRatings && detailQuery?.data?._serverType === ServerType.NAVIDROME;
 
         const selectedImageUrl = useMemo(() => {
-            return detailQuery.data?.imageUrl || artistInfoQuery.data?.imageUrl || imageUrl;
-        }, [artistInfoQuery.data?.imageUrl, detailQuery.data?.imageUrl, imageUrl]);
+            return detailQuery.data?.imageUrl || imageUrl;
+        }, [detailQuery.data?.imageUrl, imageUrl]);
+
+        const alternateImageUrl = artistInfoQuery.data?.imageUrl;
 
         return (
             <LibraryHeader
-                imageUrl={selectedImageUrl}
+                imageUrl={selectedImageUrl || alternateImageUrl}
                 item={{
                     imageId: detailQuery.data?.imageId,
                     imageUrl: detailQuery.data?.imageUrl,
