@@ -855,7 +855,11 @@
         "sidebarPlaylistSorting": "tri des listes de lecture dans la barre latérale",
         "sidebarPlaylistListFilterRegex_description": "masquer les listes de lecture dans la barre latérale qui correspondent à cette expression régulière",
         "sidebarPlaylistListFilterRegex_placeholder": "ex. ^Mix Journalier*",
-        "sidebarPlaylistListFilterRegex": "filtre d'expression régulière de liste de lecture"
+        "sidebarPlaylistListFilterRegex": "filtre d'expression régulière de liste de lecture",
+        "autosave": "sauvegarder automatiquement la file d'attente",
+        "autosave_description": "activez la sauvegarde automatique de la file d'attente de lecture sur votre serveur. Cette fonction est uniquement disponible avec Navidrome/Subsonic et ne permet pas d'utiliser une file d'attente mixte.",
+        "autosaveCount": "fréquence de sauvegarde automatique de la file d'attente",
+        "autosaveCount_description": "nombre de changement de piste avant la sauvegarde de la file d'attente. 1 (minimum) signifie chaque changement de titre"
     },
     "form": {
         "deletePlaylist": {

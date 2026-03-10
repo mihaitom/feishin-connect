@@ -578,7 +578,8 @@
         "example": "příklad",
         "filter_single": "jeden",
         "filter_multiple": "několik",
-        "rename": "přejmenovat"
+        "rename": "přejmenovat",
+        "newVersionAvailable": "je dostupná nová verze"
     },
     "table": {
         "config": {

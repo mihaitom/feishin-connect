@@ -157,10 +157,6 @@
         "mood": "氛围",
         "rename": "重命名",
         "filter_multiple": "多项",
-        "action_one": "action",
-        "channel_one": "channel",
-        "filter_one": "filter",
-        "setting_one": "setting",
         "newVersionAvailable": "a new version is available"
     },
     "entity": {
@@ -183,26 +179,7 @@
         "play_other": "{{count}} 次播放",
         "song_other": "歌曲",
         "radioStation_other": "广播电台",
-        "radioStationWithCount_other": "{{count}} 个广播电台",
-        "album_one": "album",
-        "albumArtist_one": "album artist",
-        "albumArtistCount_one": "{{count}} album artist",
-        "albumWithCount_one": "{{count}} album",
-        "radioStation_one": "radio station",
-        "radioStationWithCount_one": "{{count}} radio station",
-        "artist_one": "artist",
-        "artistWithCount_one": "{{count}} artist",
-        "favorite_one": "favorite",
-        "folder_one": "folder",
-        "folderWithCount_one": "{{count}} folder",
-        "genre_one": "genre",
-        "genreWithCount_one": "{{count}} genre",
-        "playlist_one": "playlist",
-        "play_one": "{{count}} play",
-        "playlistWithCount_one": "{{count}} playlist",
-        "track_one": "track",
-        "song_one": "song",
-        "trackWithCount_one": "{{count}} track"
+        "radioStationWithCount_other": "{{count}} 个广播电台"
     },
     "player": {
         "repeat_all": "循环全部",
@@ -253,9 +230,7 @@
         "sleepTimer_timeRemaining": "剩余时间 {{time}}",
         "sleepTimer_setCustom": "设置定时器",
         "sleepTimer_cancel": "取消定时器",
-        "albumRadio": "专辑电台",
-        "repeat_one": "repeat one",
-        "repeat_other": ""
+        "albumRadio": "专辑电台"
     },
     "setting": {
         "crossfadeStyle_description": "选择用于音频播放器的淡入淡出风格",

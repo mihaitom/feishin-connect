@@ -578,7 +578,8 @@
         "example": "Ejemplo",
         "filter_single": "simple",
         "filter_multiple": "multi",
-        "rename": "Renombrar"
+        "rename": "Renombrar",
+        "newVersionAvailable": "Una nueva versión está disponible"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",
