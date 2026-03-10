@@ -69,6 +69,7 @@ const getPathReplaceSettings = () => {
 
 const addContext = <T extends { apiClientProps: any; context?: any }>(args: T): T => {
     const pathSettings = getPathReplaceSettings();
+
     return {
         ...args,
         context: {
@@ -719,7 +720,9 @@ export const controller: GeneralController = {
         const server = getServerById(args.apiClientProps.serverId);
 
         if (!server) {
-            return '';
+            throw new Error(
+                `${i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' })}: getStreamUrl`,
+            );
         }
 
         return apiController(

@@ -1283,7 +1283,7 @@ export const JellyfinController: InternalControllerEndpoint = {
             apiClientProps,
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
-    getStreamUrl: ({ apiClientProps: { server }, query }) => {
+    getStreamUrl: async ({ apiClientProps: { server }, query }) => {
         const { bitrate, format, id, transcode } = query;
         const deviceId = '';
 
