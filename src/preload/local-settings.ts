@@ -74,6 +74,7 @@ const env = {
         SERVER_TYPE !== null
             ? process.env.LEGACY_AUTHENTICATION?.toLocaleLowerCase() === 'true'
             : false,
+    REMOTE_URL: process.env.REMOTE_URL ?? '',
     SERVER_LOCK:
         SERVER_TYPE !== null ? process.env.SERVER_LOCK?.toLocaleLowerCase() === 'true' : false,
     SERVER_NAME: process.env.SERVER_NAME ?? '',
