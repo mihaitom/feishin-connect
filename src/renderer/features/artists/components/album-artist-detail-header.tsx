@@ -192,10 +192,10 @@ export const AlbumArtistDetailHeader = forwardRef<HTMLDivElement, AlbumArtistDet
 
         return (
             <LibraryHeader
-                imageUrl={selectedImageUrl || alternateImageUrl}
+                imageUrl={alternateImageUrl || selectedImageUrl}
                 item={{
                     imageId: detailQuery.data?.imageId,
-                    imageUrl: detailQuery.data?.imageUrl,
+                    imageUrl: alternateImageUrl || detailQuery.data?.imageUrl,
                     route: AppRoute.LIBRARY_ALBUM_ARTISTS,
                     type: LibraryItem.ALBUM_ARTIST,
                 }}
