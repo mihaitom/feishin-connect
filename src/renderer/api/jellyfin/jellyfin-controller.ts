@@ -4,7 +4,7 @@ import filter from 'lodash/filter';
 import orderBy from 'lodash/orderBy';
 import { z } from 'zod';
 
-import { jfApiClient } from '/@/renderer/api/jellyfin/jellyfin-api';
+import { createAuthHeader, jfApiClient } from '/@/renderer/api/jellyfin/jellyfin-api';
 import { useRadioStore } from '/@/renderer/features/radio/store/radio-store';
 import { getServerUrl } from '/@/renderer/utils/normalize-server-url';
 import { jfNormalize } from '/@/shared/api/jellyfin/jellyfin-normalize';
@@ -15,10 +15,13 @@ import {
     albumListSortMap,
     Folder,
     genreListSortMap,
+    ImageArgs,
+    ImageRequest,
     InternalControllerEndpoint,
     LibraryItem,
     Played,
     playlistListSortMap,
+    ReplaceApiClientProps,
     ServerType,
     Song,
     SongListSort,
@@ -28,6 +31,33 @@ import {
     Tag,
 } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
+
+const getJellyfinImageRequest = ({
+    apiClientProps: { server },
+    baseUrl,
+    query,
+}: ReplaceApiClientProps<ImageArgs>): ImageRequest | null => {
+    const { id, size } = query;
+    const imageSize = size;
+
+    if (!server) {
+        return null;
+    }
+
+    const url = baseUrl || getServerUrl(server);
+
+    if (!url) {
+        return null;
+    }
+
+    return {
+        cacheKey: ['jellyfin', server.id, baseUrl || '', id, imageSize || ''].join(':'),
+        headers: server.credential
+            ? { Authorization: createAuthHeader().concat(`, Token="${server.credential}"`) }
+            : { Authorization: createAuthHeader() },
+        url: `${url}/Items/${id}/Images/Primary?quality=96${imageSize ? `&width=${imageSize}` : ''}`,
+    };
+};
 
 const formatCommaDelimitedString = (value: string[]) => {
     return value.join(',');
@@ -789,23 +819,8 @@ export const JellyfinController: InternalControllerEndpoint = {
             totalRecordCount: res.body?.TotalRecordCount || 0,
         };
     },
-    getImageUrl: ({ apiClientProps: { server }, baseUrl, query }) => {
-        const { id, size } = query;
-        const imageSize = size;
-        const url = baseUrl || getServerUrl(server);
-
-        if (!url) {
-            return null;
-        }
-
-        // For Jellyfin, we construct the URL pattern
-        // The server will return a 404 or placeholder if no image exists
-        const imageUrl = `${url}/Items/${id}/Images/Primary?quality=96${imageSize ? `&width=${imageSize}` : ''}`;
-
-        // For songs, we might want to fall back to album art, but we don't have albumId here
-        // The caller can handle this if needed
-        return imageUrl;
-    },
+    getImageRequest: getJellyfinImageRequest,
+    getImageUrl: (args) => getJellyfinImageRequest(args)?.url || null,
     getInternetRadioStations: async (args) => {
         const { apiClientProps } = args;
 

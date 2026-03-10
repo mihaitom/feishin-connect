@@ -20,15 +20,48 @@ import { hasFeature, sortAlbumArtistList, sortAlbumList, sortSongList } from '/@
 import {
     AlbumListSort,
     GenreListSort,
+    ImageArgs,
+    ImageRequest,
     InternalControllerEndpoint,
     LibraryItem,
     PlaylistListSort,
+    ReplaceApiClientProps,
     ServerType,
     Song,
     SongListSort,
     SortOrder,
 } from '/@/shared/types/domain-types';
 import { ServerFeature, ServerFeatures } from '/@/shared/types/features-types';
+
+const getSubsonicImageRequest = ({
+    apiClientProps: { server },
+    baseUrl,
+    query,
+}: ReplaceApiClientProps<ImageArgs>): ImageRequest | null => {
+    const { id, size } = query;
+    const imageSize = size;
+    const url = baseUrl || getServerUrl(server);
+
+    if (!url || !server?.credential) {
+        return null;
+    }
+
+    // Check for default placeholder image ID
+    if (id.match('2a96cbd8b46e442fc41c2b86b821562f')) {
+        return null;
+    }
+
+    return {
+        cacheKey: ['subsonic', server.id, baseUrl || '', id, imageSize || ''].join(':'),
+        url:
+            `${url}/rest/getCoverArt.view` +
+            `?id=${id}` +
+            `&${server.credential}` +
+            '&v=1.13.0' +
+            '&c=Feishin' +
+            (imageSize ? `&size=${imageSize}` : ''),
+    };
+};
 
 const ALBUM_LIST_SORT_MAPPING: Record<AlbumListSort, AlbumListSortType | undefined> = {
     [AlbumListSort.ALBUM_ARTIST]: AlbumListSortType.ALPHABETICAL_BY_ARTIST,
@@ -952,29 +985,8 @@ export const SubsonicController: InternalControllerEndpoint = {
             startIndex: query.startIndex,
         });
     },
-    getImageUrl: ({ apiClientProps: { server }, baseUrl, query }) => {
-        const { id, size } = query;
-        const imageSize = size;
-        const url = baseUrl || getServerUrl(server);
-
-        if (!url || !server?.credential) {
-            return null;
-        }
-
-        // Check for default placeholder image ID
-        if (id.match('2a96cbd8b46e442fc41c2b86b821562f')) {
-            return null;
-        }
-
-        return (
-            `${url}/rest/getCoverArt.view` +
-            `?id=${id}` +
-            `&${server.credential}` +
-            '&v=1.13.0' +
-            '&c=Feishin' +
-            (imageSize ? `&size=${imageSize}` : '')
-        );
-    },
+    getImageRequest: getSubsonicImageRequest,
+    getImageUrl: (args) => getSubsonicImageRequest(args)?.url || null,
     getInternetRadioStations: async (args) => {
         const { apiClientProps } = args;
 

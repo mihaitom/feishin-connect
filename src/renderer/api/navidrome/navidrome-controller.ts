@@ -545,6 +545,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
         };
     },
+    getImageRequest: SubsonicController.getImageRequest,
     getImageUrl: SubsonicController.getImageUrl,
     getInternetRadioStations: SubsonicController.getInternetRadioStations,
     getLyrics: SubsonicController.getLyrics,

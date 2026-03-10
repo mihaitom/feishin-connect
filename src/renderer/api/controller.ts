@@ -442,6 +442,25 @@ export const controller: GeneralController = {
             }),
         );
     },
+    getImageRequest(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            return null;
+        }
+
+        return (
+            apiController(
+                'getImageRequest',
+                server.type,
+            )?.(
+                addContext({
+                    ...args,
+                    apiClientProps: { ...args.apiClientProps, server },
+                }),
+            ) || null
+        );
+    },
     getImageUrl(args) {
         const server = getServerById(args.apiClientProps.serverId);
 

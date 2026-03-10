@@ -1397,6 +1397,7 @@ export type ControllerEndpoint = {
     getDownloadUrl: (args: DownloadArgs) => string;
     getFolder: (args: FolderArgs) => Promise<FolderResponse>;
     getGenreList: (args: GenreListArgs) => Promise<GenreListResponse>;
+    getImageRequest: (args: ImageArgs) => ImageRequest | null;
     getImageUrl: (args: ImageArgs) => null | string;
     getInternetRadioStations: (
         args: GetInternetRadioStationsArgs,
@@ -1471,6 +1472,13 @@ export type ImageArgs = BaseEndpointArgs & {
     query: ImageQuery;
 };
 
+export type ImageRequest = {
+    cacheKey: string;
+    credentials?: RequestCredentials;
+    headers?: Record<string, string>;
+    url: string;
+};
+
 export type ImageQuery = {
     id: string;
     itemType: LibraryItem;
@@ -1523,6 +1531,7 @@ export type InternalControllerEndpoint = {
     getDownloadUrl: (args: ReplaceApiClientProps<DownloadArgs>) => string;
     getFolder: (args: ReplaceApiClientProps<FolderArgs>) => Promise<FolderResponse>;
     getGenreList: (args: ReplaceApiClientProps<GenreListArgs>) => Promise<GenreListResponse>;
+    getImageRequest: (args: ReplaceApiClientProps<ImageArgs>) => ImageRequest | null;
     getImageUrl: (args: ReplaceApiClientProps<ImageArgs>) => null | string;
     getInternetRadioStations: (
         args: ReplaceApiClientProps<GetInternetRadioStationsArgs>,

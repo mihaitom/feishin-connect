@@ -12,7 +12,7 @@ import {
     useSettingsStore,
 } from '/@/renderer/store';
 import { BaseImage, ImageProps } from '/@/shared/components/image/image';
-import { ExplicitStatus, LibraryItem } from '/@/shared/types/domain-types';
+import { ExplicitStatus, ImageRequest, LibraryItem } from '/@/shared/types/domain-types';
 
 const getUnloaderIcon = (itemType: LibraryItem) => {
     switch (itemType) {
@@ -54,10 +54,19 @@ const BaseItemImage = (
         type: props.type,
     });
 
+    const imageRequest = useItemImageRequest({
+        id: props.id,
+        imageUrl: src,
+        itemType: props.itemType,
+        serverId: serverId || undefined,
+        type: props.type,
+    });
+
     const isExplicit = blurExplicitImages && explicitStatus === ExplicitStatus.EXPLICIT;
 
     return (
         <BaseImage
+            imageRequest={imageRequest}
             isExplicit={isExplicit}
             src={imageUrl}
             unloaderIcon={getUnloaderIcon(props.itemType)}
@@ -112,6 +121,79 @@ export const useItemImageUrl = (args: UseItemImageUrlProps) => {
         );
     }, [args.serverId, id, imageUrl, itemType, serverId, size, sizeByType, useRemoteUrl]);
 };
+
+export const useItemImageRequest = (args: UseItemImageUrlProps) => {
+    const { id, imageUrl, itemType, size, type, useRemoteUrl } = args;
+    const serverId = useCurrentServerId();
+
+    const imageRes = useImageRes();
+    const sizeByType: number | undefined = type ? imageRes[type] : undefined;
+
+    return useMemo(() => {
+        if (imageUrl) {
+            return {
+                cacheKey: imageUrl,
+                url: imageUrl,
+            } satisfies ImageRequest;
+        }
+
+        if (!id) {
+            return undefined;
+        }
+
+        const targetServerId = args.serverId || serverId;
+        let baseUrl: string | undefined;
+
+        if (useRemoteUrl) {
+            const server = getServerById(targetServerId);
+            baseUrl = server?.remoteUrl || server?.url;
+        }
+
+        return (
+            api.controller.getImageRequest({
+                apiClientProps: { serverId: targetServerId },
+                baseUrl,
+                query: { id, itemType, size: size ?? sizeByType },
+            }) || undefined
+        );
+    }, [args.serverId, id, imageUrl, itemType, serverId, size, sizeByType, useRemoteUrl]);
+};
+
+export function getItemImageRequest(args: UseItemImageUrlProps) {
+    const { id, imageUrl, itemType, size, type, useRemoteUrl } = args;
+    const authStore = useAuthStore.getState();
+    const currentServerId = authStore.currentServer?.id;
+    const serverId = (args.serverId || currentServerId) as string;
+
+    const imageRes = useSettingsStore.getState().general.imageRes;
+    const sizeByType: number | undefined = type ? imageRes[type] : undefined;
+
+    if (imageUrl) {
+        return {
+            cacheKey: imageUrl,
+            url: imageUrl,
+        } satisfies ImageRequest;
+    }
+
+    if (!id) {
+        return undefined;
+    }
+
+    let baseUrl: string | undefined;
+
+    if (useRemoteUrl) {
+        const server = getServerById(serverId);
+        baseUrl = server?.remoteUrl || server?.url;
+    }
+
+    return (
+        api.controller.getImageRequest({
+            apiClientProps: { serverId },
+            baseUrl,
+            query: { id, itemType, size: size ?? sizeByType },
+        }) || undefined
+    );
+}
 
 export function getItemImageUrl(args: UseItemImageUrlProps) {
     const { id, imageUrl, itemType, size, type, useRemoteUrl } = args;
