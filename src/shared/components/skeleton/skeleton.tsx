@@ -25,7 +25,7 @@ export function BaseSkeleton({
     containerClassName,
     count = 1,
     direction = 'ltr',
-    enableAnimation = false,
+    enableAnimation = true,
     height,
     inline,
     isCentered,
