@@ -30,6 +30,7 @@ import {
 } from '/@/renderer/features/shared/components/list-config-menu';
 import {
     CLIENT_SIDE_ALBUM_FILTERS,
+    CLIENT_SIDE_SONG_FILTERS,
     ListSortByDropdownControlled,
 } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButtonControlled } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
@@ -57,7 +58,7 @@ import {
     useSettingsStore,
 } from '/@/renderer/store/settings.store';
 import { sanitize } from '/@/renderer/utils/sanitize';
-import { sortAlbumList } from '/@/shared/api/utils';
+import { sortAlbumList, sortSongList } from '/@/shared/api/utils';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Button } from '/@/shared/components/button/button';
@@ -86,6 +87,7 @@ import {
     RelatedArtist,
     ServerType,
     Song,
+    SongListSort,
     SortOrder,
 } from '/@/shared/types/domain-types';
 import { ItemListKey, ListDisplayType, Play } from '/@/shared/types/types';
@@ -615,6 +617,14 @@ const AlbumArtistMetadataFavoriteSongs = ({
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
+    const albumArtistDetailFavoriteSongsSort = useAppStore(
+        (state) => state.albumArtistDetailFavoriteSongsSort,
+    );
+    const setAlbumArtistDetailFavoriteSongsSort = useAppStore(
+        (state) => state.actions.setAlbumArtistDetailFavoriteSongsSort,
+    );
+    const sortBy = albumArtistDetailFavoriteSongsSort.sortBy;
+    const sortOrder = albumArtistDetailFavoriteSongsSort.sortOrder;
     const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.SONG]?.table);
     const currentSong = usePlayerSong();
     const player = usePlayer();
@@ -639,8 +649,12 @@ const AlbumArtistMetadataFavoriteSongs = ({
     }, [tableConfig?.columns]);
 
     const filteredSongs = useMemo(() => {
-        return searchLibraryItems(songs, debouncedSearchTerm, LibraryItem.SONG);
-    }, [songs, debouncedSearchTerm]);
+        return sortSongList(
+            searchLibraryItems(songs, debouncedSearchTerm, LibraryItem.SONG),
+            sortBy,
+            sortOrder,
+        );
+    }, [songs, debouncedSearchTerm, sortBy, sortOrder]);
 
     const { handleColumnReordered } = useItemListColumnReorder({
         itemListKey: ItemListKey.SONG,
@@ -797,6 +811,26 @@ const AlbumArtistMetadataFavoriteSongs = ({
                                         },
                                     }}
                                     value={searchTerm}
+                                />
+                                <ListSortByDropdownControlled
+                                    filters={CLIENT_SIDE_SONG_FILTERS}
+                                    itemType={LibraryItem.SONG}
+                                    setSortBy={(value) =>
+                                        setAlbumArtistDetailFavoriteSongsSort(
+                                            value as SongListSort,
+                                            sortOrder,
+                                        )
+                                    }
+                                    sortBy={sortBy}
+                                />
+                                <ListSortOrderToggleButtonControlled
+                                    setSortOrder={(value) =>
+                                        setAlbumArtistDetailFavoriteSongsSort(
+                                            sortBy,
+                                            value as SortOrder,
+                                        )
+                                    }
+                                    sortOrder={sortOrder}
                                 />
                                 <ListConfigMenu
                                     displayTypes={[

@@ -1472,17 +1472,17 @@ export type ImageArgs = BaseEndpointArgs & {
     query: ImageQuery;
 };
 
+export type ImageQuery = {
+    id: string;
+    itemType: LibraryItem;
+    size?: number;
+};
+
 export type ImageRequest = {
     cacheKey: string;
     credentials?: RequestCredentials;
     headers?: Record<string, string>;
     url: string;
-};
-
-export type ImageQuery = {
-    id: string;
-    itemType: LibraryItem;
-    size?: number;
 };
 
 export type InternalControllerEndpoint = {

@@ -6,11 +6,12 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { createWithEqualityFn } from 'zustand/traditional';
 
-import { AlbumListSort, SortOrder } from '/@/shared/types/domain-types';
+import { AlbumListSort, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { Platform } from '/@/shared/types/types';
 
 export interface AppSlice extends AppState {
     actions: {
+        setAlbumArtistDetailFavoriteSongsSort: (sortBy: SongListSort, sortOrder: SortOrder) => void;
         setAlbumArtistDetailGroupingType: (groupingType: 'all' | 'primary') => void;
         setAlbumArtistDetailSort: (sortBy: AlbumListSort, sortOrder: SortOrder) => void;
         setAlbumArtistIdsMode: (mode: 'and' | 'or') => void;
@@ -30,6 +31,10 @@ export interface AppSlice extends AppState {
 }
 
 export interface AppState {
+    albumArtistDetailFavoriteSongsSort: {
+        sortBy: SongListSort;
+        sortOrder: SortOrder;
+    };
     albumArtistDetailSort: {
         groupingType: 'all' | 'primary';
         sortBy: AlbumListSort;
@@ -83,6 +88,14 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
         devtools(
             immer((set, get) => ({
                 actions: {
+                    setAlbumArtistDetailFavoriteSongsSort: (sortBy, sortOrder) => {
+                        set((state) => {
+                            state.albumArtistDetailFavoriteSongsSort = {
+                                sortBy,
+                                sortOrder,
+                            };
+                        });
+                    },
                     setAlbumArtistDetailGroupingType: (groupingType) => {
                         set((state) => {
                             state.albumArtistDetailSort.groupingType = groupingType;
@@ -160,6 +173,10 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                             state.titlebar = { ...state.titlebar, ...options };
                         });
                     },
+                },
+                albumArtistDetailFavoriteSongsSort: {
+                    sortBy: SongListSort.ID,
+                    sortOrder: SortOrder.ASC,
                 },
                 albumArtistDetailSort: {
                     groupingType: 'primary',
