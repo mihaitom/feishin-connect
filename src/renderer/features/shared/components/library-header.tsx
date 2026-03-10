@@ -1,6 +1,6 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import clsx from 'clsx';
-import { forwardRef, ReactNode, Ref, useCallback, useState } from 'react';
+import { forwardRef, ReactNode, Ref, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -64,12 +64,7 @@ export const LibraryHeader = forwardRef(
         ref: Ref<HTMLDivElement>,
     ) => {
         const { t } = useTranslation();
-        const [isImageError, setIsImageError] = useState<boolean | null>(false);
         const { blurExplicitImages } = useGeneralSettings();
-
-        const onImageError = () => {
-            setIsImageError(true);
-        };
 
         const itemTypeString = (): string => {
             switch (item.type) {
@@ -161,21 +156,18 @@ export const LibraryHeader = forwardRef(
                     style={{ cursor: 'pointer' }}
                     tabIndex={0}
                 >
-                    {!isImageError && (
-                        <ItemImage
-                            className={styles.image}
-                            containerClassName={styles.image}
-                            enableDebounce={false}
-                            enableViewport={false}
-                            explicitStatus={item.explicitStatus ?? null}
-                            fetchPriority="high"
-                            id={item.imageId}
-                            itemType={item.type as LibraryItem}
-                            onError={onImageError}
-                            src={imageUrl || ''}
-                            type="header"
-                        />
-                    )}
+                    <ItemImage
+                        className={styles.image}
+                        containerClassName={styles.image}
+                        enableDebounce={false}
+                        enableViewport={false}
+                        explicitStatus={item.explicitStatus ?? null}
+                        fetchPriority="high"
+                        id={item.imageId}
+                        itemType={item.type as LibraryItem}
+                        src={imageUrl || ''}
+                        type="header"
+                    />
                 </div>
                 {title && (
                     <div className={styles.metadataSection}>
