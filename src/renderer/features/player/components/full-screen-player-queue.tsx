@@ -118,7 +118,7 @@ export const FullScreenPlayerQueue = () => {
                     <FullScreenSimilarSongs />
                 </div>
             ) : activeTab === 'lyrics' ? (
-                <Lyrics />
+                <Lyrics fadeOutNoLyricsMessage={false} />
             ) : activeTab === 'visualizer' && type === PlayerType.WEB && webAudio ? (
                 <Suspense fallback={<></>}>
                     {visualizerType === 'butterchurn' ? (

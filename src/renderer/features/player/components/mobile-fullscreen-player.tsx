@@ -556,7 +556,7 @@ export const MobileFullscreenPlayer = () => {
                             />
                         </div>
                         <div className={styles.lyricsContent}>
-                            <Lyrics />
+                            <Lyrics fadeOutNoLyricsMessage={false} />
                         </div>
                     </motion.div>
                 )}
