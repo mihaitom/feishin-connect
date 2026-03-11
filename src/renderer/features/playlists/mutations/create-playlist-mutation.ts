@@ -3,8 +3,13 @@ import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { infiniteLoaderDataQueryKey } from '/@/renderer/components/item-list/helpers/item-list-infinite-loader';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { CreatePlaylistArgs, CreatePlaylistResponse } from '/@/shared/types/domain-types';
+import {
+    CreatePlaylistArgs,
+    CreatePlaylistResponse,
+    LibraryItem,
+} from '/@/shared/types/domain-types';
 
 export const useCreatePlaylist = (args: MutationHookArgs) => {
     const { options } = args || {};
@@ -17,12 +22,19 @@ export const useCreatePlaylist = (args: MutationHookArgs) => {
                 apiClientProps: { serverId: args.apiClientProps.serverId },
             });
         },
-        onSuccess: (_args, variables) => {
+        ...options,
+        onSuccess: (data, variables, context) => {
+            const { serverId } = variables.apiClientProps;
             queryClient.invalidateQueries({
                 exact: false,
-                queryKey: queryKeys.playlists.list(variables.apiClientProps.serverId),
+                queryKey: queryKeys.playlists.root(serverId),
             });
+
+            queryClient.invalidateQueries({
+                exact: false,
+                queryKey: infiniteLoaderDataQueryKey(serverId, LibraryItem.PLAYLIST),
+            });
+            options?.onSuccess?.(data, variables, context);
         },
-        ...options,
     });
 };
