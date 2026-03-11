@@ -25,19 +25,20 @@
         "addOrRemoveFromSelection": "добавить или удалить из выделения",
         "createRadioStation": "создать $t(entity.radioStation, {\"count\": 1})",
         "deleteRadioStation": "удалить $t(entity.radioStation, {\"count\": 1})",
-        "selectAll": "выделить все",
+        "selectAll": "выбрать все",
         "downloadStarted": "Начата загрузка {{count}} предметов",
-        "moveUp": "перейти наверх",
-        "moveDown": "Перейти вниз",
+        "moveUp": "перейти вверх",
+        "moveDown": "перейти вниз",
         "holdToMoveToTop": "Удержать для перехода на верх",
         "holdToMoveToBottom": "удержать для перехода вниз",
-        "moveItems": "переместить предметы",
+        "moveItems": "переместить элементы",
         "shuffle": "Перемешать",
         "shuffleAll": "перемешать все",
-        "shuffleSelected": "Смешать выбранное",
+        "shuffleSelected": "перемешать выбранные",
         "viewMore": "Посмотреть больше",
         "openApplicationDirectory": "открыть папку приложения",
-        "selectRangeOfItems": "выбрать диапазон элементов"
+        "selectRangeOfItems": "выбрать диапазон элементов",
+        "goToCurrent": "перейти к текущему элементу"
     },
     "common": {
         "backward": "назад",
@@ -136,7 +137,7 @@
         "albumPeak": "пик альбома",
         "trackPeak": "пик трека",
         "additionalParticipants": "Другие участники",
-        "newVersion": "новая версия приложения установлена ({{version}})",
+        "newVersion": "установлена новая версия ({{version}})",
         "viewReleaseNotes": "Список изменений",
         "bitDepth": "Разрядность",
         "sampleRate": "частота дискретизации",
@@ -163,7 +164,9 @@
         "example": "пример",
         "rename": "переименовать",
         "explicit": "нецензурная лексика",
-        "externalLinks": "внешние ссылки"
+        "externalLinks": "внешние ссылки",
+        "explicitStatus": "признак нецензурного контента",
+        "newVersionAvailable": "доступна новая версия"
     },
     "entity": {
         "album_one": "альбом",
@@ -182,8 +185,8 @@
         "play_one": "{{count}} прослушивание",
         "play_few": "{{count}} прослушивание",
         "play_many": "{{count}} прослушивание",
-        "artist_one": "автор",
-        "artist_few": "автора",
+        "artist_one": "исполнитель",
+        "artist_few": "исполнителя",
         "artist_many": "исполнителей",
         "folderWithCount_one": "{{count}} папка",
         "folderWithCount_few": "{{count}} папки",
@@ -203,9 +206,9 @@
         "albumWithCount_one": "{{count}} альбом",
         "albumWithCount_few": "{{count}} альбома",
         "albumWithCount_many": "{{count}} альбомов",
-        "favorite_one": "любимый",
-        "favorite_few": "любимых",
-        "favorite_many": "любимые",
+        "favorite_one": "избранное",
+        "favorite_few": "избранное",
+        "favorite_many": "избранные",
         "artistWithCount_one": "{{count}} автор",
         "artistWithCount_few": "{{count}} автора",
         "artistWithCount_many": "{{count}} авторов",
@@ -222,9 +225,9 @@
         "radioStation_one": "радиостанция",
         "radioStation_few": "радиостанции",
         "radioStation_many": "радиостанции",
-        "radioStationWithCount_one": "Радиостанция",
-        "radioStationWithCount_few": "Радиостанций",
-        "radioStationWithCount_many": "Радиостанции"
+        "radioStationWithCount_one": "{{count}} радиостанция",
+        "radioStationWithCount_few": "{{count}} радиостанции",
+        "radioStationWithCount_many": "{{count}} радиостанций"
     },
     "table": {
         "config": {
@@ -253,8 +256,6 @@
                 "trackNumber": "номер трека",
                 "rowIndex": "номер строки",
                 "rating": "$t(common.rating)",
-                "artist": "$t(entity.artist, {\"count\": 1})",
-                "album": "$t(entity.album, {\"count\": 1})",
                 "note": "$t(common.note)",
                 "biography": "$t(common.biography)",
                 "owner": "$t(common.owner)",
@@ -263,13 +264,10 @@
                 "playCount": "количество воспроизведений",
                 "bitrate": "$t(common.bitrate)",
                 "actions": "$t(common.action_other)",
-                "genre": "$t(entity.genre, {\"count\": 1})",
                 "discNumber": "номер диска",
                 "favorite": "$t(common.favorite)",
                 "year": "$t(common.year)",
-                "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
                 "codec": "$t(common.codec)",
-                "songCount": "$t(entity.track, {\"count\": 2})",
                 "titleArtist": "$t(common.title) (артист)"
             }
         },
@@ -281,9 +279,7 @@
             "lastPlayed": "последний",
             "releaseDate": "дата выхода",
             "title": "название",
-            "songCount": "$t(entity.track, {\"count\": 2})",
             "trackNumber": "трек",
-            "genre": "$t(entity.genre, {\"count\": 1})",
             "path": "путь",
             "discNumber": "диск",
             "size": "$t(common.size)",
@@ -293,8 +289,6 @@
             "biography": "биография",
             "codec": "$t(common.codec)",
             "comment": "комментарий",
-            "albumCount": "$t(entity.album, {\"count\": 2})",
-            "artist": "$t(entity.artist, {\"count\": 1})",
             "bitrate": "битрейт",
             "channels": "$t(common.channel_other)",
             "bpm": "bpm"
@@ -308,7 +302,7 @@
         "remotePortError": "произошла ошибка при попытке установить порт удаленного сервера",
         "serverRequired": "сервер не выбран",
         "authenticationFailed": "не удалось авторизироваться",
-        "apiRouteError": "невозможно выполнить запрос",
+        "apiRouteError": "не удалось выполнить запрос",
         "genericError": "произошла ошибка",
         "credentialsRequired": "введите данные для входа",
         "sessionExpiredError": "ваш сеанс истёк",
@@ -331,7 +325,8 @@
         "saveQueueFailed": "Не удалось сохранить очередь",
         "settingsSyncError": "обнаружены несоответствия между настройками рендерера и основным процессом. перезапустите приложение, чтобы изменения вступили в силу",
         "invalidJson": "невалидный JSON",
-        "serverLockSingleServer": "при заблокированном сервере разрешается использовать только один сервер"
+        "serverLockSingleServer": "при заблокированном сервере разрешается использовать только один сервер",
+        "playbackPausedDueToError": "воспроизведение было приостановлено из-за ошибки"
     },
     "filter": {
         "isCompilation": "сборник",
@@ -340,12 +335,10 @@
         "dateAdded": "дата добавления",
         "communityRating": "рейтинг сообщества",
         "favorited": "любимый",
-        "albumArtist": "$t(entity.albumArtist, {\"count\": 1})",
         "isFavorited": "любимые",
         "bpm": "уд./мин.",
         "disc": "диск",
         "biography": "биография",
-        "artist": "$t(entity.artist, {\"count\": 1})",
         "duration": "длительность",
         "fromYear": "год",
         "criticRating": "рейтинг критиков",
@@ -353,13 +346,11 @@
         "comment": "комментировать",
         "playCount": "количество воспроизведений",
         "recentlyUpdated": "обновленные недавно",
-        "channels": "$t(common.channel_other)",
         "recentlyPlayed": "проигрывались недавно",
         "owner": "$t(common.owner)",
         "title": "название",
         "rating": "рейтинг",
         "search": "поиск",
-        "genre": "$t(entity.genre, {\"count\": 1})",
         "recentlyAdded": "недавно добавленные",
         "note": "заметка",
         "name": "название",
@@ -378,8 +369,7 @@
         "trackNumber": "трек",
         "matchAnd": "и",
         "matchOr": "или",
-        "sortName": "сортировка по имени",
-        "explicitStatus": "$t(common.explicitStatus)"
+        "sortName": "сортировка по имени"
     },
     "player": {
         "repeat_all": "повторять все",
@@ -405,7 +395,7 @@
         "pause": "пауза",
         "queue_clear": "очистить очередь",
         "muted": "звук отключён",
-        "unfavorite": "убрать из любимых",
+        "unfavorite": "убрать из избранного",
         "queue_moveToTop": "переместить выделенное вниз",
         "queue_moveToBottom": "переместить выделенное вверх",
         "shuffle_off": "перемешивание выключено",
@@ -428,26 +418,18 @@
         "sleepTimer_hours": "{{count}} часов",
         "sleepTimer_off": "выключено",
         "sleepTimer_timeRemaining": "{{time}} осталось",
-        "sleepTimer_setCustom": "установить таймер"
+        "sleepTimer_setCustom": "установить таймер",
+        "sleepTimer_custom": "пользовательский",
+        "sleepTimer_cancel": "отменить таймер"
     },
     "page": {
         "sidebar": {
             "nowPlaying": "сейчас играет",
-            "playlists": "$t(entity.playlist, {\"count\": 2})",
             "search": "$t(common.search)",
-            "tracks": "$t(entity.track, {\"count\": 2})",
-            "albums": "$t(entity.album, {\"count\": 2})",
-            "genres": "$t(entity.genre, {\"count\": 2})",
-            "folders": "$t(entity.folder, {\"count\": 2})",
-            "settings": "$t(common.setting, {\"count\": 2})",
             "home": "$t(common.home)",
-            "artists": "$t(entity.artist, {\"count\": 2})",
-            "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
             "myLibrary": "Моя библиотека",
             "shared": "Публичные плейлисты $t(entity.playlist, {\"count\": 2})",
-            "collections": "коллекции",
-            "favorites": "$t(entity.favorite, {\"count\": 2})",
-            "radio": "$t(entity.radioStation, {\"count\": 2})"
+            "collections": "коллекции"
         },
         "fullscreenPlayer": {
             "config": {
@@ -475,7 +457,6 @@
         "appMenu": {
             "selectServer": "список серверов",
             "version": "версия {{version}}",
-            "settings": "$t(common.setting, {\"count\": 2})",
             "manageServers": "редактировать список серверов",
             "expandSidebar": "развернуть боковую панель",
             "collapseSidebar": "Скрыть боковую панель",
@@ -521,9 +502,7 @@
             "goToAlbum": "Перейти к $t(entity.album, {\"count\": 1})",
             "goToAlbumArtist": "Перейти к $t(entity.albumArtist, {\"count\": 1})",
             "goTo": "перейти в",
-            "moveItems": "$t(action.moveItems)",
             "moveToNext": "$t(action.moveToNext)",
-            "playSimilarSongs": "$t(player.playSimilarSongs)",
             "playShuffled": "$t(player.shuffle)"
         },
         "home": {
@@ -532,8 +511,7 @@
             "title": "$t(common.home)",
             "explore": "откройте новое",
             "recentlyPlayed": "игралось недавно",
-            "recentlyReleased": "Новинки",
-            "genres": "$t(entity.genre, {\"count\": 2})"
+            "recentlyReleased": "Новинки"
         },
         "albumDetail": {
             "moreFromArtist": "больше от $t(entity.artist, {\"count\": 1})",
@@ -562,20 +540,13 @@
             "scrobble": "скробблер",
             "logger": "Отладка",
             "playerFilters": "фильтры проигрывателя",
-            "queryBuilder": "конструктор очереди",
-            "discord": "discord"
-        },
-        "albumArtistList": {
-            "title": "$t(entity.albumArtist, {\"count\": 2})"
+            "queryBuilder": "конструктор очереди"
         },
         "genreList": {
-            "title": "$t(entity.genre, {\"count\": 2})",
             "showAlbums": "показать $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})",
             "showTracks": "показать $t(entity.genre, {\"count\": 1}) $t(entity.track, {\"count\": 2})"
         },
         "trackList": {
-            "title": "$t(entity.track, {\"count\": 2})",
-            "genreTracks": "\"{{genre}}\" $t(entity.track, {\"count\": 2})",
             "artistTracks": "Треки {{artist}}"
         },
         "globalSearch": {
@@ -589,13 +560,8 @@
         "playlist": {
             "reorder": "сортировка доступна только по ID"
         },
-        "playlistList": {
-            "title": "$t(entity.playlist, {\"count\": 2})"
-        },
         "albumList": {
-            "title": "$t(entity.album, {\"count\": 2})",
-            "artistAlbums": "альбомы {{artist}}",
-            "genreAlbums": "\"{{genre}}\" $t(entity.album, {\"count\": 2})"
+            "artistAlbums": "альбомы {{artist}}"
         },
         "albumArtistDetail": {
             "topSongs": "популярные треки",
@@ -631,13 +597,9 @@
             "overrideExisting": "переопределить существующий"
         },
         "releasenotes": {
-            "commitsSinceStable": "коммито после {{stable}}"
-        },
-        "favorites": {
-            "title": "$t(entity.favorite, {\"count\": 2})"
-        },
-        "folderList": {
-            "title": "$t(entity.folder, {\"count\": 2})"
+            "commitsSinceStable": "коммито после {{stable}}",
+            "noStableReleaseToCompare": "нет стабильной версии, с которой можно было бы сравнить",
+            "noNewCommits": "изменения в этом диапазоне отсутствуют"
         }
     },
     "form": {
@@ -676,7 +638,6 @@
             "success": "добавлено: $t(entity.trackWithCount, {\"count\": {{message}} }) в $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
             "title": "добавить в $t(entity.playlist, {\"count\": 1})",
             "input_skipDuplicates": "не добавлять дубликаты",
-            "input_playlists": "$t(entity.playlist, {\"count\": 2})",
             "create": "создать $t(entity.playlist, {\"count\": 1}) {{playlist}}",
             "searchOrCreate": "для создания нового списка выполните поиск по $t(entity.playlist, {\"count\": 2}) или введите соответствующий текст"
         },
@@ -695,7 +656,6 @@
         },
         "lyricSearch": {
             "input_name": "$t(common.name)",
-            "input_artist": "$t(entity.artist, {\"count\": 1})",
             "title": "поиск слов песни"
         },
         "editPlaylist": {
@@ -746,8 +706,7 @@
             "input_played": "воспроизвести фильтр",
             "input_played_optionAll": "все треки",
             "input_played_optionUnplayed": "только не игранные треки",
-            "input_played_optionPlayed": "только игранные треки",
-            "input_genre": "$t(entity.genre, {\"count\": 1})"
+            "input_played_optionPlayed": "только воспроизведённые треки"
         }
     },
     "setting": {
@@ -786,7 +745,7 @@
         "clearCache": "очистить кэш браузера",
         "clearQueryCache": "очистить кэш feishin",
         "audioDevice": "устройство воспроизведения",
-        "audioDevice_description": "выберите устройство воспроизведения (только в режиме аудиоплеера web)",
+        "audioDevice_description": "выберите устройство воспроизведения",
         "buttonSize": "размер кнопок панели управления воспроизведением",
         "hotkey_volumeDown": "уменьшить громкость",
         "playButtonBehavior_optionAddLast": "$t(player.addLast)",
@@ -800,9 +759,7 @@
         "hotkey_zoomOut": "уменьшить масштаб",
         "playbackStyle_optionCrossFade": "затухание",
         "replayGainMode": "режим {{ReplayGain}}",
-        "replayGainMode_optionAlbum": "$t(entity.album, {\"count\": 1})",
         "replayGainMode_optionNone": "$t(common.none)",
-        "replayGainMode_optionTrack": "$t(entity.track, {\"count\": 1})",
         "clearQueryCache_description": "так называемая \"мягкая очистка\" feishin: обновляются плейлисты, метаданные треков, но сохранённые тексты треков сбрасываются. настройки, учётные данные и кэшированные изображения сохраняются",
         "hotkey_favoriteCurrentSong": "добавить $t(common.currentSong) в избранное",
         "globalMediaHotkeys": "глобальные мультимедийные горячие клавиши",
@@ -963,11 +920,54 @@
         "releaseChannel_optionBeta": "Бета",
         "releaseChannel_optionLatest": "последний",
         "releaseChannel": "Тип релиза",
-        "releaseChannel_description": "Выберите  между стабильной или бета версией для автоматического обновления",
+        "releaseChannel_description": "Выберите между стабильной, бета или альфа (ночной) версией для автоматического обновления",
         "discordDisplayType_artistname": "Имя (имена) исполнителя",
         "discordDisplayType_description": "это меняет то, что вы слушаете в своем статусе",
         "discordDisplayType_songname": "имя песни",
-        "discordDisplayType": "{{discord}} тип отображения"
+        "discordDisplayType": "{{discord}} тип отображения",
+        "autosave": "автоматическое сохранение очереди воспроизведения",
+        "autosave_description": "включите автоматическое сохранение очереди воспроизведения на вашем сервере. это возможно только при использовании Navidrome/Subsonic, и у вас не может быть смешанной очереди воспроизведения.",
+        "autosaveCount_description": "количество изменений трека перед сохранением очереди. 1 (минимум) означает каждое изменение песни",
+        "useThemePrimaryShade": "используйте основной оттенок темы",
+        "useThemePrimaryShade_description": "используйте основной оттенок, определенный в выбранной теме, для выбора основного цвета",
+        "primaryShade": "основной оттенок",
+        "primaryShade_description": "переопределите основной оттенок (0-9), используемый для кнопок, ссылок и других элементов основного цвета",
+        "analyticsEnable": "Отправлять аналитику использования",
+        "analyticsEnable_description": "Анонимные данные использования отправляются разработчику с целью улучшения приложения",
+        "artistReleaseTypeConfiguration": "настройка типов релизов исполнителя",
+        "artistReleaseTypeConfiguration_description": "настройте, какие типы релизов отображаются и в каком порядке на странице исполнителя",
+        "automaticUpdates": "Автообновления",
+        "automaticUpdates_description": "Проверять и устанавливать обновления автоматически",
+        "discordLinkType_description": "добавляет ссылки на {{lastfm}} / {{musicbrainz}} в Rich Presence {{discord}} для треков и исполнителей. {{musicbrainz}} точнее, но зависит от тегов и не даёт ссылок на артистов {{lastfm}} почти всегда предоставляет ссылку. Без дополнительных сетевых запросов.",
+        "blurExplicitImages": "скрывать нецензурные изображения размытием",
+        "blurExplicitImages_description": "обложки с нецензурным контентом будут размываются",
+        "autosaveCount": "частота автоматического сохранения очереди воспроизведения",
+        "discordLinkType_mbz_lastfm": "{{musicbrainz}} (запасной источник: {{lastfm}} )",
+        "discordLinkType": "интеграция {{discord}} статуса",
+        "discordListening_description": "Показывать статус \"Слушает\" вместо \"Играет\"",
+        "discordListening": "показывать статус \"Слушает\"",
+        "discordPausedStatus_description": "если включено, статус будет отображаться даже когда воспроизведение на паузе",
+        "discordPausedStatus": "показывать расширенный статус при паузе",
+        "discordRichPresence": "{{discord}}: расширенный статус",
+        "discordStateIcon": "показывать иконку воспроизведения",
+        "enableAutoTranslation_description": "включить автоматический перевод при получении текста",
+        "enableAutoTranslation": "включить автоперевод",
+        "exportImportSettings_control_description": "экспорт/импорт настроек в JSON",
+        "exportImportSettings_control_exportText": "экспорт настроек",
+        "exportImportSettings_control_importText": "импорт настроек",
+        "exportImportSettings_control_title": "импорт/экспорт настроек",
+        "exportImportSettings_destructiveWarning": "Импорт настроек полностью заменит ваши текущие настройки. Убедитесь, что все данные выше верны, перед тем как нажать кнопку «Импорт»!",
+        "exportImportSettings_importBtn": "Импорт настроек",
+        "exportImportSettings_importModalTitle": "Импорт настроек Feishin",
+        "exportImportSettings_importSuccess": "Настройки успешно импортированы!",
+        "exportImportSettings_notValidJSON": "Некорректный JSON-файл",
+        "exportImportSettings_offendingKeyError": "Неверный ключ \"{{offendingKey}}\": {{reason}}",
+        "followCurrentSong_description": "Автоматически прокручивать очередь до текущего трека",
+        "followCurrentSong": "следить за текущим треком",
+        "homeFeatureStyle_description": "настройка стиля карусели на главном экране",
+        "homeFeatureStyle": "стиль карусели на главной",
+        "homeFeatureStyle_optionMultiple": "несколько",
+        "language": "Язык интерфейса"
     },
     "releaseType": {
         "secondary": {
@@ -979,7 +979,9 @@
             "live": "прямой эфир",
             "soundtrack": "саундтрек",
             "spokenWord": "Художественная декламация",
-            "audioDrama": "радиопостановка"
+            "audioDrama": "радиопостановка",
+            "fieldRecording": "запись вне студии",
+            "mixtape": "сборник"
         },
         "primary": {
             "other": "другие",
@@ -1027,7 +1029,7 @@
         "updatePreset": "Обновить пресет",
         "copyConfiguration": "Копировать Конфигурацию",
         "pasteConfiguration": "Вставить Конфигурацию",
-        "pasteConfigurationPlaceholder": "Вставить JSON конфигурацию",
+        "pasteConfigurationPlaceholder": "Вставить JSON конфигурацию...",
         "pasteFromClipboard": "Вставить из буфера обмена",
         "applyConfiguration": "Применить Конфигурацию",
         "configCopied": "Конфигурация скопирована в буфер обмена",

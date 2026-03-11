@@ -56,7 +56,7 @@
         "theme_description": "アプリケーションに使用するテーマを設定します",
         "hotkey_playbackPause": "一時停止",
         "replayGainFallback": "{{ReplayGain}} フォールバック",
-        "sidebarCollapsedNavigation_description": "折りたたみサイドバーのナビゲーションを表示/非表示にします",
+        "sidebarCollapsedNavigation_description": "折りたたまれたサイドバーのナビゲーションを表示または非表示にします",
         "hotkey_volumeUp": "音量を上げる",
         "skipDuration": "スキップの長さ",
         "discordIdleStatus_description": "有効にすると、プレーヤーがアイドル状態でもステータスを更新します",
@@ -150,7 +150,7 @@
         "fontType_description": "組み込みフォントの場合、Feishin が提供するフォントの中から 1 つ選択します。 システムフォントの場合、OS が提供する任意のフォントを選択できます。 カスタムフォントの場合、フォントファイルを自身で選択できます",
         "playButtonBehavior": "再生ボタンの動作",
         "volumeWheelStep": "音量ホイールステップ",
-        "sidebarPlaylistList_description": "サイドバーでプレイリストのリストを表示/非表示にします",
+        "sidebarPlaylistList_description": "サイドバーのプレイリストを表示または非表示にします",
         "accentColor": "アクセントカラー",
         "sidePlayQueueStyle_description": "サイド再生キューのスタイルを設定します",
         "accentColor_description": "アプリケーションが利用するアクセントカラーを設定します",
@@ -161,7 +161,7 @@
         "replayGainPreamp_description": "{{ReplayGain}} の値に適用されるプリアンプゲインを調整します",
         "hotkey_toggleRepeat": "リピートの切り替え",
         "lyricOffset_description": "歌詞のオフセットをミリ秒単位で指定します",
-        "sidebarConfiguration_description": "サイドバーに表示されるアイテムと並び順を選択します",
+        "sidebarConfiguration_description": "サイドバーに表示する項目と順序を選択します",
         "fontType": "フォントタイプ",
         "remotePort": "リモートコントロールサーバーのポート",
         "applicationHotkeys": "アプリケーションホットキー",
@@ -187,7 +187,7 @@
         "remoteUsername": "リモートコントロールサーバーのユーザー名",
         "hotkey_browserBack": "ブラウザ 戻る",
         "showSkipButton": "スキップボタンを表示",
-        "sidebarPlaylistList": "サイドバー プレイリスト リスト",
+        "sidebarPlaylistList": "サイドバーのプレイリスト",
         "minimizeToTray": "最小化時にシステムトレイに格納",
         "skipPlaylistPage": "プレイリストページをスキップ",
         "themeDark": "テーマ (ダーク)",
@@ -337,7 +337,7 @@
         "imageResolution": "画像の解像度",
         "imageResolution_description": "アプリ内で使用される画像の解像度。値を 0 に設定すると、デフォルトでネイティブ画像解像度が適用されます",
         "showLyricsInSidebar_description": "添付の再生キューに歌詞を表示するパネルが追加されます",
-        "showLyricsInSidebar": "プレーヤーのサイドバーに歌詞を表示する",
+        "showLyricsInSidebar": "サイドバーのプレーヤーに歌詞を表示",
         "showRatings": "星評価を表示する",
         "imageResolution_optionSidebar": "サイドバー",
         "imageResolution_optionHeader": "ヘッダー",
@@ -348,12 +348,12 @@
         "playerbarSliderType_optionWaveform": "波形",
         "playerbarWaveformAlign": "波形アライメント",
         "showRatings_description": "インターフェースに星評価機能を表示するかどうかを制御します",
-        "showVisualizerInSidebar": "プレーヤーのサイドバーにビジュアライザーを表示する",
-        "combinedLyricsAndVisualizer": "プレーヤーのサイドバーに歌詞とビジュアライザーを統合する",
+        "showVisualizerInSidebar": "サイドバーのプレーヤーにビジュアライザーを表示",
+        "combinedLyricsAndVisualizer": "サイドバーのプレーヤーに歌詞とビジュアライザーを統合",
         "audioFadeOnStatusChange_description": "再生 / 一時停止の状態が変わったときにフェードアウトとフェードインを有効にします",
         "audioFadeOnStatusChange": "ステータス変更時の音声フェード",
         "combinedLyricsAndVisualizer_description": "歌詞とビジュアライザーを同じパネルに統合します",
-        "showVisualizerInSidebar_description": "プレーヤーのサイドバーにビジュアライザーを表示するパネルが追加されます",
+        "showVisualizerInSidebar_description": "サイドバーのプレーヤーにビジュアライザーを表示するパネルが追加されます",
         "queryBuilderCustomFields": "カスタムフィールド",
         "queryBuilderCustomFields_inputLabel": "ラベル",
         "queryBuilderCustomFields_inputTag": "タグ",
@@ -375,7 +375,22 @@
         "automaticUpdates_description": "更新を自動的に確認してインストールします",
         "releaseChannel_optionAlpha": "アルファ (nightly)",
         "discordStateIcon": "再生中アイコンを表示",
-        "discordStateIcon_description": "Rich Presence ステータスに小さな再生アイコンを表示します。「一時停止時に Rich Presence を表示」が有効になっている場合は、常に一時停止アイコンが表示されます"
+        "discordStateIcon_description": "Rich Presence ステータスに小さな再生アイコンを表示します。「一時停止時に Rich Presence を表示」が有効になっている場合は、常に一時停止アイコンが表示されます",
+        "sidebarPlaylistListFilterRegex_description": "この正規表現に一致するプレイリストをサイドバーから非表示にします",
+        "sidebarPlaylistListFilterRegex_placeholder": "例: ^Daily Mix.*",
+        "sidebarPlaylistListFilterRegex": "プレイリストフィルターの正規表現",
+        "sidebarPlaylistSorting": "サイドバーでプレイリストを並べ替え",
+        "sidebarPlaylistSorting_description": "デフォルトのサーバー順ではなく、ドラッグアンドドロップを使用してサイドバーでプレイリストを手動で並べ替えることができます",
+        "playerItemConfiguration_description": "全画面プレーヤーに表示する項目と順序を設定します",
+        "playerItemConfiguration": "プレーヤーの項目設定",
+        "autosave": "再生キューを自動的に保存",
+        "autosave_description": "再生キューをサーバーに自動的に保存できるようにします。これは Navidrome/Subsonic を使用している場合にのみ可能であり、再生キューを混在させることはできません。",
+        "autosaveCount": "自動再生キューの保存頻度",
+        "autosaveCount_description": "キューが保存されるまでにトラックが変更される回数を設定します。1 (最小値) は曲が変わるたびに保存されることを意味します",
+        "useThemePrimaryShade_description": "選択したテーマで定義されたプライマリシェードをプライマリカラーのバリアントに使用します",
+        "useThemePrimaryShade": "テーマのプライマリシェードを使用",
+        "primaryShade": "プライマリシェード",
+        "primaryShade_description": "ボタン、リンク、およびその他の主要色要素に使用されるプライマリシェード (0–9) を上書きします"
     },
     "action": {
         "editPlaylist": "$t(entity.playlist, {\"count\": 1}) を編集",
@@ -415,7 +430,8 @@
         "holdToMoveToBottom": "押し続けると一番下に移動します",
         "openApplicationDirectory": "アプリケーションディレクトリを開く",
         "selectRangeOfItems": "項目の範囲を選択",
-        "addOrRemoveFromSelection": "選択に追加または削除"
+        "addOrRemoveFromSelection": "選択に追加または削除",
+        "goToCurrent": "現在の項目へ移動"
     },
     "common": {
         "backward": "戻る",
@@ -463,8 +479,8 @@
         "setting_other": "設定",
         "version": "バージョン",
         "title": "タイトル",
-        "filter_other": "フィルタ",
-        "filters": "フィルタ",
+        "filter_other": "フィルター",
+        "filters": "フィルター",
         "create": "作成",
         "bitrate": "ビットレート",
         "saveAndReplace": "保存して変更",
@@ -533,7 +549,8 @@
         "clean": "クリーン",
         "filter_single": "シングル",
         "filter_multiple": "複数枚組",
-        "rename": "名前を変更"
+        "rename": "名前を変更",
+        "newVersionAvailable": "新しいバージョンが利用可能です"
     },
     "table": {
         "config": {
@@ -666,7 +683,8 @@
         "saveQueueFailed": "キューを保存できませんでした",
         "settingsSyncError": "レンダラーとメインプロセスの設定に矛盾が見つかりました。変更を適用するにはアプリケーションを再起動してください",
         "invalidJson": "無効な JSON",
-        "serverLockSingleServer": "サーバーがロックされている場合、1 つのサーバーのみが許可されます"
+        "serverLockSingleServer": "サーバーがロックされている場合、1 つのサーバーのみが許可されます",
+        "playbackPausedDueToError": "エラーのため再生が一時停止されました"
     },
     "filter": {
         "mostPlayed": "最も多く再生",
@@ -712,7 +730,9 @@
         "id": "ID",
         "album": "$t(entity.album, {\"count\": 1})",
         "explicitStatus": "$t(common.explicitStatus)",
-        "sortName": "ソート名"
+        "sortName": "ソート名",
+        "matchAnd": "すべて",
+        "matchOr": "いずれか"
     },
     "page": {
         "sidebar": {
@@ -995,7 +1015,9 @@
             "setExpiration": "有効期限を設定",
             "success": "共有リンクがクリップボードにコピーされました (またはここをクリックして開きます)",
             "expireInvalid": "有効期限は将来の日時である必要があります",
-            "createFailed": "共有リンクを作成できませんでした (共有は有効になっていますか?)"
+            "createFailed": "共有リンクを作成できませんでした (共有は有効になっていますか?)",
+            "copyToClipboard": "クリップボードにコピー: Ctrl+C、Enter",
+            "successMustClick": "共有リンクが正常に作成されました。開くにはここをクリックしてください"
         },
         "privateMode": {
             "enabled": "プライベートモードが有効になりました。再生ステータスは外部連携から非表示になっています",

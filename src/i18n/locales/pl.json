@@ -164,7 +164,8 @@
         "example": "przykład",
         "filter_multiple": "multi",
         "filter_single": "single",
-        "rename": "zmień nazwę"
+        "rename": "zmień nazwę",
+        "newVersionAvailable": "nowa wersja jest dostępna"
     },
     "entity": {
         "genre_one": "gatunek",
@@ -1038,7 +1039,9 @@
         "primaryShade": "główny odcień",
         "primaryShade_description": "nadpisz główny odcień (0-9) używany dla przycisków, linków i innych głównie pokolorowanych elementów",
         "playerItemConfiguration_description": "skonfiguruj jakie elementy są pokazywane i w jakiej kolejności, w odtwarzaczu pełnoekranowym",
-        "playerItemConfiguration": "konfiguracja elementów odtwarzacza"
+        "playerItemConfiguration": "konfiguracja elementów odtwarzacza",
+        "autosave": "automatycznie zapisuj kolejkę odtwarzania",
+        "autosave_description": "włącz automatyczne zapisywanie kolejki odtwarzania na twój serwer. to jest możliwe tylko gdy używane jest Navidrome/Subsonic, i nie masz zmixowanej kolejki odtwarzania."
     },
     "table": {
         "config": {
