@@ -90,7 +90,7 @@ const LoginRoute = () => {
             value: serverUrl,
         },
         {
-            isValid: remoteUrl !== '',
+            isValid: true,
             key: 'REMOTE_URL',
             value: remoteUrl,
         },
