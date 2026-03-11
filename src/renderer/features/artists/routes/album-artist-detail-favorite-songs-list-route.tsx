@@ -10,12 +10,19 @@ import { ItemControls } from '/@/renderer/components/item-list/types';
 import { ListContext } from '/@/renderer/context/list-context';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistDetailFavoriteSongsListHeader } from '/@/renderer/features/artists/components/album-artist-detail-favorite-songs-list-header';
+import { AlbumArtistDetailFavoriteSongsListHeaderFilters } from '/@/renderer/features/artists/components/album-artist-detail-favorite-songs-list-header-filters';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { applyClientSideSongFilters } from '/@/renderer/features/playlists/hooks/use-playlist-track-list';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
+import { FilterBar } from '/@/renderer/features/shared/components/filter-bar';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
+import { useSearchTermFilter } from '/@/renderer/features/shared/hooks/use-search-term-filter';
+import { FILTER_KEYS, searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { usePlayerSong } from '/@/renderer/store';
+import { useAppStore } from '/@/renderer/store/app.store';
 import { useCurrentServer } from '/@/renderer/store/auth.store';
 import { useSettingsStore } from '/@/renderer/store/settings.store';
+import { sortSongList } from '/@/shared/api/utils';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { ItemListKey, Play } from '/@/shared/types/types';
 
@@ -43,11 +50,30 @@ const AlbumArtistDetailFavoriteSongsListRoute = () => {
         }),
     );
 
-    const itemCount = favoriteSongsQuery?.data?.items?.length || 0;
     const songs = useMemo(
         () => favoriteSongsQuery?.data?.items || [],
         [favoriteSongsQuery?.data?.items],
     );
+
+    const albumArtistDetailFavoriteSongsSort = useAppStore(
+        (state) => state.albumArtistDetailFavoriteSongsSort,
+    );
+    const sortBy = albumArtistDetailFavoriteSongsSort.sortBy;
+    const sortOrder = albumArtistDetailFavoriteSongsSort.sortOrder;
+
+    const { searchTerm } = useSearchTermFilter();
+
+    const sortedSongs = useMemo(() => {
+        const filtered = applyClientSideSongFilters(songs, {
+            [FILTER_KEYS.SHARED.SEARCH_TERM]: searchTerm,
+        });
+        const searched = searchTerm
+            ? searchLibraryItems(filtered, searchTerm, LibraryItem.SONG)
+            : filtered;
+        return sortSongList(searched, sortBy, sortOrder);
+    }, [songs, sortBy, sortOrder, searchTerm]);
+
+    const itemCount = sortedSongs.length;
 
     const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.SONG]?.table);
     const currentSong = usePlayerSong();
@@ -96,7 +122,7 @@ const AlbumArtistDetailFavoriteSongsListRoute = () => {
             <AnimatedPage>
                 <ListContext.Provider value={providerValue}>
                     <AlbumArtistDetailFavoriteSongsListHeader
-                        data={songs}
+                        data={sortedSongs}
                         itemCount={itemCount}
                         title={detailQuery?.data?.name || 'Unknown'}
                     />
@@ -109,16 +135,19 @@ const AlbumArtistDetailFavoriteSongsListRoute = () => {
         <AnimatedPage>
             <ListContext.Provider value={providerValue}>
                 <AlbumArtistDetailFavoriteSongsListHeader
-                    data={songs}
+                    data={sortedSongs}
                     itemCount={itemCount}
                     title={detailQuery?.data?.name || 'Unknown'}
                 />
+                <FilterBar>
+                    <AlbumArtistDetailFavoriteSongsListHeaderFilters />
+                </FilterBar>
                 <ItemTableList
                     activeRowId={currentSongId}
                     autoFitColumns={tableConfig.autoFitColumns}
                     CellComponent={ItemTableListColumn}
                     columns={columns}
-                    data={songs}
+                    data={sortedSongs}
                     enableAlternateRowColors={tableConfig.enableAlternateRowColors}
                     enableDrag
                     enableExpansion={false}
