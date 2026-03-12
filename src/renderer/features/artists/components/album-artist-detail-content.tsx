@@ -4,8 +4,8 @@ import {
     useSuspenseQuery,
     UseSuspenseQueryResult,
 } from '@tanstack/react-query';
-import { LayoutGroup, motion } from 'motion/react';
-import { Suspense, useCallback, useMemo, useRef, useState } from 'react';
+import { motion } from 'motion/react';
+import { memo, Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createSearchParams, generatePath, Link, useLocation, useParams } from 'react-router';
 
@@ -1182,8 +1182,8 @@ export const AlbumArtistDetailContent = ({
 interface AlbumSectionProps {
     albums: Album[];
     controls: ItemControls;
-    cq: ReturnType<typeof useContainerQuery>;
     enableExpansion?: boolean;
+    itemsPerRow: number;
     releaseType: string;
     rows: DataRow[] | undefined;
     title: React.ReactNode | string;
@@ -1203,18 +1203,16 @@ const getItemsPerRow = (cq: ReturnType<typeof useContainerQuery>) => {
     return 2;
 };
 
-const AlbumSection = ({
+const AlbumSection = memo(function AlbumSection({
     albums,
     controls,
-    cq,
     enableExpansion,
+    itemsPerRow,
     releaseType,
     rows,
     title,
-}: AlbumSectionProps) => {
+}: AlbumSectionProps) {
     const { t } = useTranslation();
-
-    const itemsPerRow = getItemsPerRow(cq);
     const albumCount = albums.length;
     const [showAll, setShowAll] = useState(false);
     const player = usePlayer();
@@ -1258,6 +1256,27 @@ const AlbumSection = ({
             handlePlay(LONG_PRESS_PLAY_BEHAVIOR[Play.LAST]);
         },
     });
+
+    const DisplayedAlbumsMemo = useMemo(() => {
+        return displayedAlbums.map((album) => (
+            <motion.div
+                className={styles.albumGridItem}
+                key={album.id}
+                layoutId={`${releaseType}-${album.id}`}
+            >
+                <MemoizedItemCard
+                    controls={controls}
+                    data={album}
+                    enableDrag
+                    enableExpansion={enableExpansion ?? true}
+                    itemType={LibraryItem.ALBUM}
+                    rows={rows}
+                    type="poster"
+                    withControls
+                />
+            </motion.div>
+        ));
+    }, [controls, displayedAlbums, enableExpansion, releaseType, rows]);
 
     return (
         <Stack gap="md">
@@ -1320,30 +1339,7 @@ const AlbumSection = ({
                     } as React.CSSProperties
                 }
             >
-                {displayedAlbums.map((album) => (
-                    <motion.div
-                        className={styles.albumGridItem}
-                        key={album.id}
-                        layout
-                        layoutId={`${releaseType}-${album.id}`}
-                        transition={{
-                            duration: 0.5,
-                            ease: 'easeInOut',
-                            layout: { duration: 0.5, ease: 'easeInOut' },
-                        }}
-                    >
-                        <MemoizedItemCard
-                            controls={controls}
-                            data={album}
-                            enableDrag
-                            enableExpansion={enableExpansion ?? true}
-                            itemType={LibraryItem.ALBUM}
-                            rows={rows}
-                            type="poster"
-                            withControls
-                        />
-                    </motion.div>
-                ))}
+                {DisplayedAlbumsMemo}
             </div>
             {hasMoreAlbums && !showAll && (
                 <Group justify="center" w="100%">
@@ -1354,7 +1350,7 @@ const AlbumSection = ({
             )}
         </Stack>
     );
-};
+});
 
 import { useArtistAlbumsGrouped } from '/@/renderer/features/artists/hooks/use-artist-albums-grouped';
 
@@ -1412,6 +1408,23 @@ const ArtistAlbums = ({ albumsQuery, order }: ArtistAlbumsProps) => {
         ],
     ]);
 
+    const itemsPerRow = getItemsPerRow(cq);
+
+    const ReleaseTypeEntriesMemo = useMemo(() => {
+        return releaseTypeEntries.map(({ albums, displayName, releaseType }) => (
+            <AlbumSection
+                albums={albums}
+                controls={controls}
+                enableExpansion
+                itemsPerRow={itemsPerRow}
+                key={releaseType}
+                releaseType={releaseType}
+                rows={rows}
+                title={displayName}
+            />
+        ));
+    }, [releaseTypeEntries, itemsPerRow, controls, rows]);
+
     return (
         <Grid.Col order={order} span={12}>
             <Stack gap="md">
@@ -1459,22 +1472,7 @@ const ArtistAlbums = ({ albumsQuery, order }: ArtistAlbumsProps) => {
                 </Group>
                 {releaseTypeEntries.length > 0 && (
                     <div className={styles.albumSectionContainer} ref={cq.ref}>
-                        {cq.isCalculated && (
-                            <LayoutGroup>
-                                {releaseTypeEntries.map(({ albums, displayName, releaseType }) => (
-                                    <AlbumSection
-                                        albums={albums}
-                                        controls={controls}
-                                        cq={cq}
-                                        enableExpansion
-                                        key={releaseType}
-                                        releaseType={releaseType}
-                                        rows={rows}
-                                        title={displayName}
-                                    />
-                                ))}
-                            </LayoutGroup>
-                        )}
+                        {cq.isCalculated && <>{ReleaseTypeEntriesMemo}</>}
                     </div>
                 )}
             </Stack>
