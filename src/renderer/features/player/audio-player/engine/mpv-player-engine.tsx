@@ -289,6 +289,9 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                 replaceMpvQueue(transcode);
             },
             onQueueCleared: () => {},
+            onQueueRestored: () => {
+                replaceMpvQueue(transcode);
+            },
         },
         [transcode],
     );
