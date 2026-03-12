@@ -7,6 +7,7 @@ import React, {
     memo,
     ReactElement,
     Ref,
+    RefObject,
     useCallback,
     useEffect,
     useId,
@@ -723,9 +724,21 @@ const VirtualizedTableGrid = ({
 
 VirtualizedTableGrid.displayName = 'VirtualizedTableGrid';
 
+function shallowEqualNumberArrays(a: number[], b: number[]): boolean {
+    if (a === b) return true;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+}
+
 const MemoizedVirtualizedTableGrid = memo(VirtualizedTableGrid, (prevProps, nextProps) => {
     return (
-        prevProps.calculatedColumnWidths === nextProps.calculatedColumnWidths &&
+        shallowEqualNumberArrays(
+            prevProps.calculatedColumnWidths,
+            nextProps.calculatedColumnWidths,
+        ) &&
         prevProps.cellPadding === nextProps.cellPadding &&
         prevProps.controls === nextProps.controls &&
         prevProps.data === nextProps.data &&
@@ -741,6 +754,7 @@ const MemoizedVirtualizedTableGrid = memo(VirtualizedTableGrid, (prevProps, next
         prevProps.enableScrollShadow === nextProps.enableScrollShadow &&
         prevProps.enableSelection === nextProps.enableSelection &&
         prevProps.enableVerticalBorders === nextProps.enableVerticalBorders &&
+        prevProps.getItem === nextProps.getItem &&
         prevProps.getRowHeight === nextProps.getRowHeight &&
         prevProps.groups === nextProps.groups &&
         prevProps.headerHeight === nextProps.headerHeight &&
@@ -867,6 +881,396 @@ interface ItemTableListProps {
     startRowIndex?: number;
 }
 
+const ItemTableListStickyUI = memo(
+    ({
+        calculatedColumnWidths,
+        CellComponent,
+        containerRef,
+        data,
+        enableHeader,
+        enableStickyGroupRows,
+        enableStickyHeader,
+        getRowHeightWrapper,
+        groups,
+        headerHeight,
+        internalState,
+        parsedColumns,
+        pinnedLeftColumnCount,
+        pinnedLeftColumnRef,
+        pinnedRightColumnCount,
+        pinnedRightColumnRef,
+        pinnedRowRef,
+        rowHeight,
+        rowRef,
+        size,
+        stickyHeaderItemProps,
+        totalColumnCount,
+    }: {
+        calculatedColumnWidths: number[];
+        CellComponent: JSXElementConstructor<CellComponentProps<TableItemProps>>;
+        containerRef: RefObject<HTMLDivElement | null>;
+        data: unknown[];
+        enableHeader: boolean;
+        enableStickyGroupRows: boolean;
+        enableStickyHeader: boolean;
+        getRowHeightWrapper: (index: number) => number;
+        groups?: TableGroupHeader[];
+        headerHeight: number;
+        internalState: ItemListStateActions;
+        parsedColumns: ReturnType<typeof parseTableColumns>;
+        pinnedLeftColumnCount: number;
+        pinnedLeftColumnRef: RefObject<HTMLDivElement | null>;
+        pinnedRightColumnCount: number;
+        pinnedRightColumnRef: RefObject<HTMLDivElement | null>;
+        pinnedRowRef: RefObject<HTMLDivElement | null>;
+        rowHeight?: ((index: number, cellProps: TableItemProps) => number) | number;
+        rowRef: RefObject<HTMLDivElement | null>;
+        size: 'compact' | 'default' | 'large';
+        stickyHeaderItemProps: TableItemProps;
+        totalColumnCount: number;
+    }) => {
+        const stickyHeaderRef = useRef<HTMLDivElement | null>(null);
+        const stickyGroupRowRef = useRef<HTMLDivElement | null>(null);
+        const stickyHeaderLeftRef = useRef<HTMLDivElement | null>(null);
+        const stickyHeaderMainRef = useRef<HTMLDivElement | null>(null);
+        const stickyHeaderRightRef = useRef<HTMLDivElement | null>(null);
+
+        const { shouldShowStickyHeader, stickyTop } = useStickyTableHeader({
+            containerRef,
+            enabled: enableHeader && enableStickyHeader,
+            headerRef: pinnedRowRef,
+            mainGridRef: rowRef,
+            pinnedLeftColumnRef,
+            pinnedRightColumnRef,
+            stickyHeaderMainRef,
+        });
+
+        useStickyHeaderPositioning({
+            containerRef,
+            shouldShowStickyHeader,
+            stickyHeaderRef,
+        });
+
+        const {
+            shouldShowStickyGroupRow,
+            stickyGroupIndex,
+            stickyTop: stickyGroupTop,
+        } = useStickyTableGroupRows({
+            containerRef,
+            enabled: enableStickyGroupRows && !!groups && groups.length > 0,
+            getRowHeight: getRowHeightWrapper,
+            groups,
+            headerHeight,
+            mainGridRef: rowRef,
+            shouldShowStickyHeader,
+            stickyHeaderTop: stickyTop,
+        });
+
+        const shouldRenderStickyGroupRow = shouldShowStickyGroupRow;
+
+        useStickyGroupRowPositioning({
+            containerRef,
+            shouldRenderStickyGroupRow,
+            stickyGroupRowRef,
+        });
+
+        const StickyHeader = useMemo(() => {
+            if (!shouldShowStickyHeader || !enableHeader) {
+                return null;
+            }
+
+            const pinnedLeftWidth = calculatedColumnWidths
+                .slice(0, pinnedLeftColumnCount)
+                .reduce((sum, width) => sum + width, 0);
+            const mainWidth = calculatedColumnWidths
+                .slice(pinnedLeftColumnCount, pinnedLeftColumnCount + totalColumnCount)
+                .reduce((sum, width) => sum + width, 0);
+            const pinnedRightWidth = calculatedColumnWidths
+                .slice(pinnedLeftColumnCount + totalColumnCount)
+                .reduce((sum, width) => sum + width, 0);
+
+            return (
+                <div
+                    className={styles.stickyHeader}
+                    ref={stickyHeaderRef}
+                    style={{
+                        top: `${stickyTop}px`,
+                    }}
+                >
+                    <div className={styles.stickyHeaderRow}>
+                        {pinnedLeftColumnCount > 0 && (
+                            <div
+                                className={clsx(
+                                    styles.stickyHeaderSection,
+                                    styles.stickyHeaderPinnedLeft,
+                                )}
+                                ref={stickyHeaderLeftRef}
+                                style={{
+                                    flex: '0 1 auto',
+                                    minWidth: `${pinnedLeftWidth}px`,
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                {parsedColumns
+                                    .filter((col) => col.pinned === 'left')
+                                    .map((col) => {
+                                        const columnIndex = parsedColumns.findIndex(
+                                            (c) => c === col,
+                                        );
+                                        return (
+                                            <CellComponent
+                                                ariaAttributes={{
+                                                    'aria-colindex': columnIndex + 1,
+                                                    role: 'gridcell',
+                                                }}
+                                                columnIndex={columnIndex}
+                                                key={col.id}
+                                                rowIndex={0}
+                                                style={{
+                                                    height: headerHeight,
+                                                    width: calculatedColumnWidths[columnIndex],
+                                                }}
+                                                {...stickyHeaderItemProps}
+                                            />
+                                        );
+                                    })}
+                            </div>
+                        )}
+                        <div
+                            className={clsx(
+                                styles.stickyHeaderSection,
+                                styles.stickyHeaderMain,
+                                styles.noScrollbar,
+                            )}
+                            ref={stickyHeaderMainRef}
+                            style={{
+                                flex: '1 1 auto',
+                                minWidth: 0,
+                                overflowX: 'auto',
+                                overflowY: 'hidden',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    minWidth: `${mainWidth}px`,
+                                }}
+                            >
+                                {parsedColumns
+                                    .filter((col) => col.pinned === null)
+                                    .map((col) => {
+                                        const columnIndex = parsedColumns.findIndex(
+                                            (c) => c === col,
+                                        );
+                                        return (
+                                            <CellComponent
+                                                ariaAttributes={{
+                                                    'aria-colindex': columnIndex + 1,
+                                                    role: 'gridcell',
+                                                }}
+                                                columnIndex={columnIndex}
+                                                key={col.id}
+                                                rowIndex={0}
+                                                style={{
+                                                    flexShrink: 0,
+                                                    height: headerHeight,
+                                                    width: calculatedColumnWidths[columnIndex],
+                                                }}
+                                                {...stickyHeaderItemProps}
+                                            />
+                                        );
+                                    })}
+                            </div>
+                        </div>
+                        {pinnedRightColumnCount > 0 && (
+                            <div
+                                className={clsx(
+                                    styles.stickyHeaderSection,
+                                    styles.stickyHeaderPinnedRight,
+                                )}
+                                ref={stickyHeaderRightRef}
+                                style={{
+                                    flex: '0 1 auto',
+                                    minWidth: `${pinnedRightWidth}px`,
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                {parsedColumns
+                                    .filter((col) => col.pinned === 'right')
+                                    .map((col) => {
+                                        const columnIndex = parsedColumns.findIndex(
+                                            (c) => c === col,
+                                        );
+                                        return (
+                                            <CellComponent
+                                                ariaAttributes={{
+                                                    'aria-colindex': columnIndex + 1,
+                                                    role: 'gridcell',
+                                                }}
+                                                columnIndex={columnIndex}
+                                                key={col.id}
+                                                rowIndex={0}
+                                                style={{
+                                                    height: headerHeight,
+                                                    width: calculatedColumnWidths[columnIndex],
+                                                }}
+                                                {...stickyHeaderItemProps}
+                                            />
+                                        );
+                                    })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }, [
+            shouldShowStickyHeader,
+            enableHeader,
+            stickyTop,
+            calculatedColumnWidths,
+            pinnedLeftColumnCount,
+            pinnedRightColumnCount,
+            totalColumnCount,
+            parsedColumns,
+            headerHeight,
+            CellComponent,
+            stickyHeaderItemProps,
+        ]);
+
+        const groupRowHeight = useMemo(() => {
+            if (stickyGroupIndex === null || !groups) {
+                const height = size === 'compact' ? 40 : size === 'large' ? 88 : 64;
+                return typeof rowHeight === 'number' ? rowHeight : height;
+            }
+
+            let cumulativeDataIndex = 0;
+            const headerOffset = enableHeader ? 1 : 0;
+            for (let i = 0; i < stickyGroupIndex; i++) {
+                cumulativeDataIndex += groups[i].itemCount;
+            }
+            const groupHeaderIndex = headerOffset + cumulativeDataIndex + stickyGroupIndex;
+
+            return getRowHeightWrapper(groupHeaderIndex);
+        }, [stickyGroupIndex, groups, getRowHeightWrapper, enableHeader, rowHeight, size]);
+
+        const StickyGroupRow = useMemo(() => {
+            if (!shouldRenderStickyGroupRow || stickyGroupIndex === null || !groups) {
+                return null;
+            }
+
+            const group = groups[stickyGroupIndex];
+            const originalData = data.filter((item) => item !== null);
+            let cumulativeDataIndex = 0;
+            for (let i = 0; i < stickyGroupIndex; i++) {
+                cumulativeDataIndex += groups[i].itemCount;
+            }
+
+            const groupContent = group.render({
+                data: originalData,
+                groupIndex: stickyGroupIndex,
+                index: 0,
+                internalState,
+                startDataIndex: cumulativeDataIndex,
+            });
+
+            const pinnedLeftWidth = calculatedColumnWidths
+                .slice(0, pinnedLeftColumnCount)
+                .reduce((sum, width) => sum + width, 0);
+            const mainWidth = calculatedColumnWidths
+                .slice(pinnedLeftColumnCount, pinnedLeftColumnCount + totalColumnCount)
+                .reduce((sum, width) => sum + width, 0);
+            const pinnedRightWidth = calculatedColumnWidths
+                .slice(pinnedLeftColumnCount + totalColumnCount)
+                .reduce((sum, width) => sum + width, 0);
+
+            const totalTableWidth = calculatedColumnWidths.reduce((sum, width) => sum + width, 0);
+            const actualStickyTop = stickyGroupTop;
+
+            return (
+                <div
+                    className={styles.stickyGroupRow}
+                    ref={stickyGroupRowRef}
+                    style={{
+                        top: `${actualStickyTop}px`,
+                    }}
+                >
+                    <div className={styles.stickyGroupRowContent}>
+                        {pinnedLeftColumnCount > 0 && (
+                            <div
+                                className={styles.stickyGroupRowSection}
+                                style={{ width: `${pinnedLeftWidth}px` }}
+                            >
+                                <div
+                                    style={{
+                                        height: groupRowHeight,
+                                        width: `${pinnedLeftWidth}px`,
+                                    }}
+                                >
+                                    {groupContent}
+                                </div>
+                            </div>
+                        )}
+                        <div
+                            className={styles.stickyGroupRowSection}
+                            style={{
+                                marginLeft: pinnedLeftColumnCount > 0 ? 0 : '-2rem',
+                                marginRight: '-2rem',
+                                paddingLeft: pinnedLeftColumnCount > 0 ? 0 : '2rem',
+                                paddingRight: '2rem',
+                                width: `${mainWidth}px`,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    height: groupRowHeight,
+                                    marginLeft: pinnedLeftWidth > 0 ? `-${pinnedLeftWidth}px` : 0,
+                                    width: `${totalTableWidth}px`,
+                                }}
+                            >
+                                {groupContent}
+                            </div>
+                        </div>
+                        {pinnedRightColumnCount > 0 && (
+                            <div
+                                className={styles.stickyGroupRowSection}
+                                style={{ width: `${pinnedRightWidth}px` }}
+                            >
+                                <div
+                                    style={{
+                                        height: groupRowHeight,
+                                        width: `${pinnedRightWidth}px`,
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }, [
+            shouldRenderStickyGroupRow,
+            stickyGroupIndex,
+            groups,
+            data,
+            internalState,
+            calculatedColumnWidths,
+            pinnedLeftColumnCount,
+            pinnedRightColumnCount,
+            totalColumnCount,
+            groupRowHeight,
+            stickyGroupTop,
+        ]);
+
+        return (
+            <>
+                {StickyHeader}
+                {StickyGroupRow}
+            </>
+        );
+    },
+);
+
+ItemTableListStickyUI.displayName = 'ItemTableListStickyUI';
+
 const BaseItemTableList = ({
     activeRowId,
     autoFitColumns = false,
@@ -965,28 +1369,6 @@ const BaseItemTableList = ({
     const { focused, ref: focusRef } = useFocusWithin();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const mergedContainerRef = useMergedRef(containerRef, focusRef);
-
-    const stickyHeaderRef = useRef<HTMLDivElement | null>(null);
-    const stickyGroupRowRef = useRef<HTMLDivElement | null>(null);
-    const stickyHeaderLeftRef = useRef<HTMLDivElement | null>(null);
-    const stickyHeaderMainRef = useRef<HTMLDivElement | null>(null);
-    const stickyHeaderRightRef = useRef<HTMLDivElement | null>(null);
-
-    const { shouldShowStickyHeader, stickyTop } = useStickyTableHeader({
-        containerRef: containerRef,
-        enabled: enableHeader && enableStickyHeader,
-        headerRef: pinnedRowRef,
-        mainGridRef: rowRef,
-        pinnedLeftColumnRef,
-        pinnedRightColumnRef,
-        stickyHeaderMainRef,
-    });
-
-    useStickyHeaderPositioning({
-        containerRef,
-        shouldShowStickyHeader,
-        stickyHeaderRef,
-    });
 
     useContainerWidthTracking({
         autoFitColumns,
@@ -1088,30 +1470,6 @@ const BaseItemTableList = ({
         },
         [enableHeader, headerHeight, rowHeight, pinnedRowCount, size],
     );
-
-    const {
-        shouldShowStickyGroupRow,
-        stickyGroupIndex,
-        stickyTop: stickyGroupTop,
-    } = useStickyTableGroupRows({
-        containerRef: containerRef,
-        enabled: enableStickyGroupRows && !!groups && groups.length > 0,
-        getRowHeight: getRowHeightWrapper,
-        groups,
-        headerHeight,
-        mainGridRef: rowRef,
-        shouldShowStickyHeader,
-        stickyHeaderTop: stickyTop,
-    });
-
-    // Show sticky group row whenever it should be shown
-    const shouldRenderStickyGroupRow = shouldShowStickyGroupRow;
-
-    useStickyGroupRowPositioning({
-        containerRef,
-        shouldRenderStickyGroupRow,
-        stickyGroupRowRef,
-    });
 
     const getDataFn = useCallback(() => {
         return data;
@@ -1247,291 +1605,6 @@ const BaseItemTableList = ({
         ],
     );
 
-    const StickyHeader = useMemo(() => {
-        if (!shouldShowStickyHeader || !enableHeader) {
-            return null;
-        }
-
-        const pinnedLeftWidth = calculatedColumnWidths
-            .slice(0, pinnedLeftColumnCount)
-            .reduce((sum, width) => sum + width, 0);
-        const mainWidth = calculatedColumnWidths
-            .slice(pinnedLeftColumnCount, pinnedLeftColumnCount + totalColumnCount)
-            .reduce((sum, width) => sum + width, 0);
-        const pinnedRightWidth = calculatedColumnWidths
-            .slice(pinnedLeftColumnCount + totalColumnCount)
-            .reduce((sum, width) => sum + width, 0);
-
-        return (
-            <div
-                className={styles.stickyHeader}
-                ref={stickyHeaderRef}
-                style={{
-                    top: `${stickyTop}px`,
-                }}
-            >
-                <div className={styles.stickyHeaderRow}>
-                    {pinnedLeftColumnCount > 0 && (
-                        <div
-                            className={clsx(
-                                styles.stickyHeaderSection,
-                                styles.stickyHeaderPinnedLeft,
-                            )}
-                            ref={stickyHeaderLeftRef}
-                            style={{
-                                flex: '0 1 auto',
-                                minWidth: `${pinnedLeftWidth}px`,
-                                overflow: 'hidden',
-                            }}
-                        >
-                            {parsedColumns
-                                .filter((col) => col.pinned === 'left')
-                                .map((col) => {
-                                    const columnIndex = parsedColumns.findIndex((c) => c === col);
-                                    return (
-                                        <CellComponent
-                                            ariaAttributes={{
-                                                'aria-colindex': columnIndex + 1,
-                                                role: 'gridcell',
-                                            }}
-                                            columnIndex={columnIndex}
-                                            key={col.id}
-                                            rowIndex={0}
-                                            style={{
-                                                height: headerHeight,
-                                                width: calculatedColumnWidths[columnIndex],
-                                            }}
-                                            {...stickyHeaderItemProps}
-                                        />
-                                    );
-                                })}
-                        </div>
-                    )}
-                    <div
-                        className={clsx(
-                            styles.stickyHeaderSection,
-                            styles.stickyHeaderMain,
-                            styles.noScrollbar,
-                        )}
-                        ref={stickyHeaderMainRef}
-                        style={{
-                            flex: '1 1 auto',
-                            minWidth: 0,
-                            overflowX: 'auto',
-                            overflowY: 'hidden',
-                        }}
-                    >
-                        <div
-                            style={{
-                                display: 'flex',
-                                minWidth: `${mainWidth}px`,
-                            }}
-                        >
-                            {parsedColumns
-                                .filter((col) => col.pinned === null)
-                                .map((col) => {
-                                    const columnIndex = parsedColumns.findIndex((c) => c === col);
-                                    return (
-                                        <CellComponent
-                                            ariaAttributes={{
-                                                'aria-colindex': columnIndex + 1,
-                                                role: 'gridcell',
-                                            }}
-                                            columnIndex={columnIndex}
-                                            key={col.id}
-                                            rowIndex={0}
-                                            style={{
-                                                flexShrink: 0,
-                                                height: headerHeight,
-                                                width: calculatedColumnWidths[columnIndex],
-                                            }}
-                                            {...stickyHeaderItemProps}
-                                        />
-                                    );
-                                })}
-                        </div>
-                    </div>
-                    {pinnedRightColumnCount > 0 && (
-                        <div
-                            className={clsx(
-                                styles.stickyHeaderSection,
-                                styles.stickyHeaderPinnedRight,
-                            )}
-                            ref={stickyHeaderRightRef}
-                            style={{
-                                flex: '0 1 auto',
-                                minWidth: `${pinnedRightWidth}px`,
-                                overflow: 'hidden',
-                            }}
-                        >
-                            {parsedColumns
-                                .filter((col) => col.pinned === 'right')
-                                .map((col) => {
-                                    const columnIndex = parsedColumns.findIndex((c) => c === col);
-                                    return (
-                                        <CellComponent
-                                            ariaAttributes={{
-                                                'aria-colindex': columnIndex + 1,
-                                                role: 'gridcell',
-                                            }}
-                                            columnIndex={columnIndex}
-                                            key={col.id}
-                                            rowIndex={0}
-                                            style={{
-                                                height: headerHeight,
-                                                width: calculatedColumnWidths[columnIndex],
-                                            }}
-                                            {...stickyHeaderItemProps}
-                                        />
-                                    );
-                                })}
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    }, [
-        shouldShowStickyHeader,
-        enableHeader,
-        stickyTop,
-        calculatedColumnWidths,
-        pinnedLeftColumnCount,
-        pinnedRightColumnCount,
-        totalColumnCount,
-        parsedColumns,
-        headerHeight,
-        CellComponent,
-        stickyHeaderItemProps,
-    ]);
-
-    // Calculate group row height (use same as regular table row height)
-    const groupRowHeight = useMemo(() => {
-        if (stickyGroupIndex === null || !groups) {
-            const height = size === 'compact' ? 40 : size === 'large' ? 88 : 64;
-            return typeof rowHeight === 'number' ? rowHeight : height;
-        }
-
-        // Calculate the row index for this group header
-        let cumulativeDataIndex = 0;
-        const headerOffset = enableHeader ? 1 : 0;
-        for (let i = 0; i < stickyGroupIndex; i++) {
-            cumulativeDataIndex += groups[i].itemCount;
-        }
-        const groupHeaderIndex = headerOffset + cumulativeDataIndex + stickyGroupIndex;
-
-        // Use the regular row height for group rows
-        return getRowHeightWrapper(groupHeaderIndex);
-    }, [stickyGroupIndex, groups, getRowHeightWrapper, enableHeader, rowHeight, size]);
-
-    const StickyGroupRow = useMemo(() => {
-        if (!shouldRenderStickyGroupRow || stickyGroupIndex === null || !groups) {
-            return null;
-        }
-
-        const group = groups[stickyGroupIndex];
-        const originalData = data.filter((item) => item !== null);
-        let cumulativeDataIndex = 0;
-        for (let i = 0; i < stickyGroupIndex; i++) {
-            cumulativeDataIndex += groups[i].itemCount;
-        }
-
-        const groupContent = group.render({
-            data: originalData,
-            groupIndex: stickyGroupIndex,
-            index: 0,
-            internalState,
-            startDataIndex: cumulativeDataIndex,
-        });
-
-        const pinnedLeftWidth = calculatedColumnWidths
-            .slice(0, pinnedLeftColumnCount)
-            .reduce((sum, width) => sum + width, 0);
-        const mainWidth = calculatedColumnWidths
-            .slice(pinnedLeftColumnCount, pinnedLeftColumnCount + totalColumnCount)
-            .reduce((sum, width) => sum + width, 0);
-        const pinnedRightWidth = calculatedColumnWidths
-            .slice(pinnedLeftColumnCount + totalColumnCount)
-            .reduce((sum, width) => sum + width, 0);
-
-        const totalTableWidth = calculatedColumnWidths.reduce((sum, width) => sum + width, 0);
-
-        // Calculate the actual sticky position accounting for sticky header
-        const actualStickyTop = stickyGroupTop;
-
-        return (
-            <div
-                className={styles.stickyGroupRow}
-                ref={stickyGroupRowRef}
-                style={{
-                    top: `${actualStickyTop}px`,
-                }}
-            >
-                <div className={styles.stickyGroupRowContent}>
-                    {pinnedLeftColumnCount > 0 && (
-                        <div
-                            className={styles.stickyGroupRowSection}
-                            style={{ width: `${pinnedLeftWidth}px` }}
-                        >
-                            <div
-                                style={{
-                                    height: groupRowHeight,
-                                    width: `${pinnedLeftWidth}px`,
-                                }}
-                            >
-                                {groupContent}
-                            </div>
-                        </div>
-                    )}
-                    <div
-                        className={styles.stickyGroupRowSection}
-                        style={{
-                            marginLeft: pinnedLeftColumnCount > 0 ? 0 : '-2rem',
-                            marginRight: '-2rem',
-                            paddingLeft: pinnedLeftColumnCount > 0 ? 0 : '2rem',
-                            paddingRight: '2rem',
-                            width: `${mainWidth}px`,
-                        }}
-                    >
-                        <div
-                            style={{
-                                height: groupRowHeight,
-                                marginLeft: pinnedLeftWidth > 0 ? `-${pinnedLeftWidth}px` : 0,
-                                width: `${totalTableWidth}px`,
-                            }}
-                        >
-                            {groupContent}
-                        </div>
-                    </div>
-                    {pinnedRightColumnCount > 0 && (
-                        <div
-                            className={styles.stickyGroupRowSection}
-                            style={{ width: `${pinnedRightWidth}px` }}
-                        >
-                            <div
-                                style={{
-                                    height: groupRowHeight,
-                                    width: `${pinnedRightWidth}px`,
-                                }}
-                            />
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    }, [
-        shouldRenderStickyGroupRow,
-        stickyGroupIndex,
-        groups,
-        data,
-        internalState,
-        calculatedColumnWidths,
-        pinnedLeftColumnCount,
-        pinnedRightColumnCount,
-        totalColumnCount,
-        groupRowHeight,
-        stickyGroupTop,
-    ]);
-
     useListHotkeys({
         controls,
         focused,
@@ -1607,8 +1680,30 @@ const BaseItemTableList = ({
                     {...animationProps.fadeIn}
                     transition={{ duration: enableEntranceAnimation ? 0.3 : 0, ease: 'anticipate' }}
                 >
-                    {StickyHeader}
-                    {StickyGroupRow}
+                    <ItemTableListStickyUI
+                        calculatedColumnWidths={calculatedColumnWidths}
+                        CellComponent={optimizedCellComponent}
+                        containerRef={containerRef}
+                        data={data}
+                        enableHeader={!!enableHeader}
+                        enableStickyGroupRows={!!enableStickyGroupRows}
+                        enableStickyHeader={!!enableStickyHeader}
+                        getRowHeightWrapper={getRowHeightWrapper}
+                        groups={groups}
+                        headerHeight={headerHeight}
+                        internalState={internalState}
+                        parsedColumns={parsedColumns}
+                        pinnedLeftColumnCount={pinnedLeftColumnCount}
+                        pinnedLeftColumnRef={pinnedLeftColumnRef}
+                        pinnedRightColumnCount={pinnedRightColumnCount}
+                        pinnedRightColumnRef={pinnedRightColumnRef}
+                        pinnedRowRef={pinnedRowRef}
+                        rowHeight={rowHeight}
+                        rowRef={rowRef}
+                        size={size}
+                        stickyHeaderItemProps={stickyHeaderItemProps}
+                        totalColumnCount={totalColumnCount}
+                    />
                     <MemoizedVirtualizedTableGrid
                         calculatedColumnWidths={calculatedColumnWidths}
                         CellComponent={optimizedCellComponent}
