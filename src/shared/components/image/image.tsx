@@ -20,6 +20,8 @@ import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
 import { useInViewport } from '/@/shared/hooks/use-in-viewport';
 import { ImageRequest } from '/@/shared/types/domain-types';
 
+const loadedImageCacheKeys = new Set<string>();
+
 export interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
     containerClassName?: string;
     enableAnimation?: boolean;
@@ -78,10 +80,14 @@ export function BaseImage({
         () => imageRequest ?? (src ? { cacheKey: src, url: src } : undefined),
         [imageRequest, src],
     );
+    const isInSessionCache = Boolean(
+        rawImageRequest?.cacheKey && loadedImageCacheKeys.has(rawImageRequest.cacheKey),
+    );
     const [debouncedImageRequest] = useDebouncedValue(rawImageRequest, 100, {
         waitForInitial: true,
     });
-    const effectiveImageRequest = enableDebounce ? debouncedImageRequest : rawImageRequest;
+    const effectiveImageRequest =
+        isInSessionCache || !enableDebounce ? rawImageRequest : debouncedImageRequest;
 
     const [hasLoadedInInstance, setHasLoadedInInstance] = useState(false);
 
@@ -90,7 +96,8 @@ export function BaseImage({
     }, [effectiveImageRequest?.cacheKey]);
 
     const shouldLoadImage = Boolean(
-        effectiveImageRequest && (!enableViewport || inViewport || hasLoadedInInstance),
+        effectiveImageRequest &&
+            (!enableViewport || isInSessionCache || inViewport || hasLoadedInInstance),
     );
 
     const nativeImage = useNativeImage({
@@ -109,6 +116,7 @@ export function BaseImage({
             return;
         }
 
+        loadedImageCacheKeys.add(effectiveImageRequest.cacheKey);
         setHasLoadedInInstance(true);
     }, [effectiveImageRequest?.cacheKey, nativeImage.isLoaded]);
 
