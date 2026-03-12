@@ -275,7 +275,9 @@ const PlaylistDetailSongListRoute = () => {
 
                 <ListWithSidebarContainer>
                     <ListWithSidebarContainer.SidebarPortal>
-                        <PlaylistSongListFiltersSidebar />
+                        <Suspense fallback={<Spinner container />}>
+                            <PlaylistSongListFiltersSidebar />
+                        </Suspense>
                     </ListWithSidebarContainer.SidebarPortal>
                     <Suspense fallback={<Spinner container />}>
                         <PlaylistDetailSongListContent />
