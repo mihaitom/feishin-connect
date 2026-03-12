@@ -64,6 +64,7 @@ export interface ItemCardProps {
     enableMultiSelect?: boolean;
     enableNavigation?: boolean;
     imageAsLink?: boolean;
+    imageFetchPriority?: 'auto' | 'high' | 'low';
     internalState?: ItemListStateActions;
     isRound?: boolean;
     itemType: LibraryItem;
@@ -80,6 +81,7 @@ export const ItemCard = ({
     enableMultiSelect,
     enableNavigation = true,
     imageAsLink,
+    imageFetchPriority,
     internalState,
     isRound,
     itemType,
@@ -102,6 +104,7 @@ export const ItemCard = ({
                     enableMultiSelect={enableMultiSelect}
                     enableNavigation={enableNavigation}
                     imageAsLink={imageAsLink}
+                    imageFetchPriority={imageFetchPriority}
                     imageUrl={imageUrl}
                     internalState={internalState}
                     isRound={isRound}
@@ -121,6 +124,7 @@ export const ItemCard = ({
                     enableMultiSelect={enableMultiSelect}
                     enableNavigation={enableNavigation}
                     imageAsLink={imageAsLink}
+                    imageFetchPriority={imageFetchPriority}
                     imageUrl={imageUrl}
                     internalState={internalState}
                     isRound={isRound}
@@ -140,6 +144,7 @@ export const ItemCard = ({
                     enableExpansion={enableExpansion}
                     enableNavigation={enableNavigation}
                     imageAsLink={imageAsLink}
+                    imageFetchPriority={imageFetchPriority}
                     imageUrl={imageUrl}
                     internalState={internalState}
                     isRound={isRound}
@@ -157,6 +162,7 @@ export interface ItemCardDerivativeProps extends Omit<ItemCardProps, 'type'> {
     enableExpansion?: boolean;
     enableNavigation?: boolean;
     imageAsLink?: boolean;
+    imageFetchPriority?: 'auto' | 'high' | 'low';
     imageUrl: string | undefined;
     internalState?: ItemListStateActions;
     rows: DataRow[];
@@ -171,6 +177,7 @@ const CompactItemCard = ({
     enableMultiSelect,
     enableNavigation,
     imageAsLink,
+    imageFetchPriority,
     internalState,
     isRound,
     itemType,
@@ -365,6 +372,7 @@ const CompactItemCard = ({
                         explicitStatus={
                             'explicitStatus' in data && data ? data.explicitStatus : null
                         }
+                        fetchPriority={imageFetchPriority}
                         id={data?.imageId}
                         itemType={itemType}
                         src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
@@ -475,6 +483,7 @@ const DefaultItemCard = ({
     enableExpansion,
     enableNavigation,
     imageAsLink,
+    imageFetchPriority,
     internalState,
     isRound,
     itemType,
@@ -602,6 +611,7 @@ const DefaultItemCard = ({
                         explicitStatus={
                             'explicitStatus' in data && data ? data.explicitStatus : null
                         }
+                        fetchPriority={imageFetchPriority}
                         id={data?.imageId}
                         itemType={itemType}
                         src={(data as Album | AlbumArtist | Playlist | Song)?.imageUrl}
@@ -710,6 +720,7 @@ const PosterItemCard = ({
     enableMultiSelect,
     enableNavigation,
     imageAsLink,
+    imageFetchPriority,
     internalState,
     isRound,
     itemType,
@@ -902,6 +913,7 @@ const PosterItemCard = ({
                         explicitStatus={
                             'explicitStatus' in data && data ? data.explicitStatus : null
                         }
+                        fetchPriority={imageFetchPriority}
                         id={(data as { imageId: string })?.imageId}
                         itemType={itemType}
                         src={(data as { imageUrl: string })?.imageUrl}

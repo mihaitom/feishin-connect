@@ -70,6 +70,7 @@ const BaseAlbumInfiniteCarousel = (props: AlbumCarouselProps & { rows: DataRow[]
                     data={album}
                     enableDrag
                     enableExpansion
+                    imageFetchPriority="low"
                     itemType={LibraryItem.ALBUM}
                     rows={rows}
                     type="poster"

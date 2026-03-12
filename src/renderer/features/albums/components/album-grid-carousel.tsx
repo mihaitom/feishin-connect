@@ -31,6 +31,7 @@ export function AlbumGridCarousel(props: AlbumGridCarouselProps) {
                     data={album}
                     enableDrag
                     enableExpansion
+                    imageFetchPriority="low"
                     itemType={LibraryItem.ALBUM}
                     rows={rows}
                     type="poster"

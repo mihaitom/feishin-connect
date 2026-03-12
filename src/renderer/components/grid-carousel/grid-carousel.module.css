@@ -40,7 +40,14 @@
     display: grid;
     grid-template-columns: repeat(var(--cards-to-show, 2), minmax(0, 1fr));
     gap: var(--theme-spacing-md);
+    contain: layout paint;
+    content-visibility: auto;
     overflow: hidden;
+    will-change: transform;
+}
+
+.card {
+    min-height: 0;
 }
 
 .page-indicator {

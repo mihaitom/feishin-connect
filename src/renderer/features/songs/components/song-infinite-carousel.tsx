@@ -86,6 +86,7 @@ const BaseSongInfiniteCarousel = (props: SongCarouselProps & { rows: DataRow[] }
                     controls={controls}
                     data={song}
                     enableDrag
+                    imageFetchPriority="low"
                     itemType={LibraryItem.SONG}
                     rows={rows}
                     type="poster"

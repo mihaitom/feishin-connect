@@ -69,6 +69,7 @@ const BaseAlbumArtistInfiniteCarousel = (props: AlbumArtistCarouselProps & { row
                     controls={controls}
                     data={albumArtist}
                     enableDrag
+                    imageFetchPriority="low"
                     itemType={LibraryItem.ALBUM_ARTIST}
                     rows={rows}
                     type="poster"
