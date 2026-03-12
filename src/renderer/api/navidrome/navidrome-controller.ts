@@ -744,46 +744,78 @@ export const NavidromeController: InternalControllerEndpoint = {
             args.context?.pathReplaceWith,
         );
     },
+
     getSongList: async (args) => {
         const { apiClientProps, query } = args;
 
-        const res = await ndApiClient(apiClientProps).getSongList({
-            query: {
-                _end: query.startIndex + (query.limit || -1),
-                _order: sortOrderMap.navidrome[query.sortOrder],
-                _sort: songListSortMap.navidrome[query.sortBy],
-                _start: query.startIndex,
-                album_id: query.albumIds,
-                genre_id: query.genreIds,
-                [getArtistSongKey(apiClientProps.server)]: query.artistIds ?? query.albumArtistIds,
-                ...(hasFeature(apiClientProps.server, ServerFeature.TRACK_YES_NO_RATING_FILTER) &&
-                query.hasRating !== undefined
-                    ? { has_rating: query.hasRating }
-                    : {}),
-                library_id: getLibraryId(query.musicFolderId),
-                starred: query.favorite,
-                title: query.searchTerm,
-                year: query.maxYear || query.minYear,
-                ...query._custom,
-                ...excludeMissing(apiClientProps.server),
-            },
-        });
+        const ALBUM_IDS_BATCH_SIZE = 500;
+        const albumIds = query.albumIds;
+        const shouldBatch = albumIds && albumIds.length > ALBUM_IDS_BATCH_SIZE;
 
-        if (res.status !== 200) {
-            throw new Error('Failed to get song list');
+        const fetchAlbums = async (albumIdBatch: string[] | undefined) => {
+            const res = await ndApiClient(apiClientProps).getSongList({
+                query: {
+                    _end: query.startIndex + (query.limit || -1),
+                    _order: sortOrderMap.navidrome[query.sortOrder],
+                    _sort: songListSortMap.navidrome[query.sortBy],
+                    _start: query.startIndex,
+                    album_id: albumIdBatch ?? query.albumIds,
+                    genre_id: query.genreIds,
+                    [getArtistSongKey(apiClientProps.server)]:
+                        query.artistIds ?? query.albumArtistIds,
+                    ...(hasFeature(
+                        apiClientProps.server,
+                        ServerFeature.TRACK_YES_NO_RATING_FILTER,
+                    ) && query.hasRating !== undefined
+                        ? { has_rating: query.hasRating }
+                        : {}),
+                    library_id: getLibraryId(query.musicFolderId),
+                    starred: query.favorite,
+                    title: query.searchTerm,
+                    year: query.maxYear || query.minYear,
+                    ...query._custom,
+                    ...excludeMissing(apiClientProps.server),
+                },
+            });
+
+            if (res.status !== 200) {
+                throw new Error('Failed to get song list');
+            }
+
+            return {
+                items: res.body.data.map((song) =>
+                    ndNormalize.song(
+                        song,
+                        apiClientProps.server,
+                        args.context?.pathReplace,
+                        args.context?.pathReplaceWith,
+                    ),
+                ),
+                totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
+            };
+        };
+
+        if (shouldBatch && albumIds) {
+            const batches: string[][] = [];
+            for (let i = 0; i < albumIds.length; i += ALBUM_IDS_BATCH_SIZE) {
+                batches.push(albumIds.slice(i, i + ALBUM_IDS_BATCH_SIZE));
+            }
+
+            const results = await Promise.all(batches.map((batch) => fetchAlbums(batch)));
+
+            return {
+                items: results.flatMap((r) => r.items),
+                startIndex: query?.startIndex ?? 0,
+                totalRecordCount: results.reduce((sum, r) => sum + r.totalRecordCount, 0),
+            };
         }
 
+        const albums = await fetchAlbums(undefined);
+
         return {
-            items: res.body.data.map((song) =>
-                ndNormalize.song(
-                    song,
-                    apiClientProps.server,
-                    args.context?.pathReplace,
-                    args.context?.pathReplaceWith,
-                ),
-            ),
-            startIndex: query?.startIndex || 0,
-            totalRecordCount: Number(res.body.headers.get('x-total-count') || 0),
+            items: albums.items,
+            startIndex: query?.startIndex ?? 0,
+            totalRecordCount: albums.totalRecordCount,
         };
     },
     getSongListCount: async ({ apiClientProps, query }) =>
