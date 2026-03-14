@@ -503,7 +503,7 @@
             "playlists": "$t(entity.playlist, {\"count\": 2})",
             "search": "$t(common.search)",
             "settings": "$t(common.setting, {\"count\": 2})",
-            "shared": "delt $t(entity.playlist, {\"count\": 2})",
+            "shared": "delte $t(entity.playlist, {\"count\": 2})",
             "artists": "$t(entity.artist, {\"count\": 2})",
             "myLibrary": "mitt bibliotek"
         },
