@@ -776,7 +776,11 @@
         "autosave": "自動儲存播放佇列",
         "autosave_description": "啟用自動將播放佇列儲存到您的伺服器。這只有在使用Navidrome/Subsonic時才可使用，並且您不能有混合播放佇列。",
         "autosaveCount": "自動播放佇列儲存頻率",
-        "autosaveCount_description": "在儲存佇列之前，有多少曲目更改。1（最小）表示每次歌曲更改"
+        "autosaveCount_description": "在儲存佇列之前，有多少曲目更改。1（最小）表示每次歌曲更改",
+        "spotify_description": "在藝人與專輯頁面顯示Spotify的連結",
+        "spotify": "顯示Spotify的連結",
+        "nativeSpotify_description": "在Spotify應用程式中開啟，而非在瀏覽器中開啟",
+        "nativeSpotify": "使用Spotify應用程式"
     },
     "table": {
         "config": {
@@ -908,7 +912,8 @@
         "moveToNext": "移至下一項",
         "openIn": {
             "lastfm": "在Last.fm開啟",
-            "musicbrainz": "在MusicBrainz開啟"
+            "musicbrainz": "在MusicBrainz開啟",
+            "spotify": "在Spotify中開啟"
         },
         "downloadStarted": "已開始下載 {{count}} 項內容",
         "moveItems": "移動項目",
