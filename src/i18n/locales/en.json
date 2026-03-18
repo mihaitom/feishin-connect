@@ -37,7 +37,9 @@
         "openApplicationDirectory": "open application directory",
         "openIn": {
             "lastfm": "Open in Last.fm",
+            "listenbrainz": "Open in ListenBrainz",
             "musicbrainz": "Open in MusicBrainz",
+            "qobuz": "Open in Qobuz",
             "spotify": "Open in Spotify"
         }
     },
@@ -898,6 +900,8 @@
         "language_description": "sets the language for the application ($t(common.restartRequired))",
         "lastfm_description": "show links to Last.fm on artist/album pages",
         "lastfm": "show last.fm links",
+        "listenbrainz_description": "show links to ListenBrainz on artist/album pages",
+        "listenbrainz": "show ListenBrainz links",
         "lastfmApiKey_description": "the API key for {{lastfm}}. required for cover art",
         "lastfmApiKey": "{{lastfm}} API key",
         "lyricFetch_description": "fetch lyrics from various internet sources",
@@ -925,6 +929,8 @@
         "mpvExtraParameters_help": "one per line",
         "musicbrainz_description": "show links to MusicBrainz on artist/album pages, where MusicBrainz ID exists",
         "musicbrainz": "show MusicBrainz links",
+        "qobuz_description": "show links to Qobuz on artist/album pages",
+        "qobuz": "show Qobuz links",
         "spotify_description": "show links to Spotify on artist/album pages",
         "spotify": "show Spotify links",
         "nativeSpotify_description": "open in the Spotify app instead of your browser",

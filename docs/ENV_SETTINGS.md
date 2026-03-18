@@ -29,12 +29,14 @@ These variables override app settings **on first run** when no persisted setting
 | `general.themeLight` | `defaultLight` | `FS_GENERAL_THEME_LIGHT` | Same as theme (used when system is light). |
 | `general.lastfmApiKey` | *(empty)* | `FS_GENERAL_LASTFM_API_KEY` | Last.fm API key. |
 | `general.lastFM` | `true` | `FS_GENERAL_LAST_FM` | `true` / `false` — Enable Last.fm. |
+| `general.listenBrainz` | `true` | `FS_GENERAL_LISTEN_BRAINZ` | `true` / `false` — ListenBrainz links. |
 | `general.musicBrainz` | `true` | `FS_GENERAL_MUSIC_BRAINZ` | `true` / `false` — MusicBrainz links. |
 | `general.nativeAspectRatio` | `false` | `FS_GENERAL_NATIVE_ASPECT_RATIO` | `true` / `false` — Use native cover art aspect ratio. |
 | `general.pathReplace` | *(empty)* | `FS_GENERAL_PATH_REPLACE` | Path pattern to replace (e.g. server path in Docker). |
 | `general.pathReplaceWith` | *(empty)* | `FS_GENERAL_PATH_REPLACE_WITH` | Replacement path. |
 | `general.playerbarOpenDrawer` | `false` | `FS_GENERAL_PLAYERBAR_OPEN_DRAWER` | `true` / `false` — Open queue/lyrics as drawer from player bar. |
 | `general.primaryShade` | `6` | `FS_GENERAL_PRIMARY_SHADE` | Mantine primary shade 0–9 (number). |
+| `general.qobuz` | `true` | `FS_GENERAL_QOBUZ` | `true` / `false` — Qobuz links. |
 | `general.resume` | `true` | `FS_GENERAL_RESUME` | `true` / `false` — Resume playback on load. |
 | `general.showLyricsInSidebar` | `true` | `FS_GENERAL_SHOW_LYRICS_IN_SIDEBAR` | `true` / `false` — Show lyrics in sidebar. |
 | `general.showRatings` | `true` | `FS_GENERAL_SHOW_RATINGS` | `true` / `false` — Show star ratings. |

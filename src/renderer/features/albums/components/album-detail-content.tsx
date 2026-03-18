@@ -296,25 +296,60 @@ interface AlbumMetadataExternalLinksProps {
     albumName?: string;
     externalLinks: boolean;
     lastFM: boolean;
+    listenBrainz: boolean;
     mbzId?: null | string;
+    mbzReleaseGroupId?: null | string;
     musicBrainz: boolean;
     nativeSpotify: boolean;
+    qobuz: boolean;
     spotify: boolean;
 }
+
+const getListenBrainzUrl = (
+    mbzReleaseGroupId: null | string,
+    albumArtist?: string,
+    albumName?: string,
+) => {
+    if (mbzReleaseGroupId) {
+        return `https://listenbrainz.org/album/${mbzReleaseGroupId}`;
+    }
+
+    if (albumArtist || albumName) {
+        return `https://listenbrainz.org/search/?search_term=${encodeURIComponent([albumArtist, albumName].filter(Boolean).join(' ').trim())}`;
+    }
+
+    return null;
+};
+
+const getQobuzUrl = (albumArtist?: string, albumName?: string) => {
+    if (albumArtist || albumName) {
+        return `https://www.qobuz.com/us-en/search/albums/${encodeURIComponent([albumArtist, albumName].filter(Boolean).join(' ').trim())}`;
+    }
+
+    return null;
+};
 
 const AlbumMetadataExternalLinks = ({
     albumArtist,
     albumName,
     externalLinks,
     lastFM,
+    listenBrainz,
     mbzId,
+    mbzReleaseGroupId,
     musicBrainz,
     nativeSpotify,
+    qobuz,
     spotify,
 }: AlbumMetadataExternalLinksProps) => {
     const { t } = useTranslation();
 
-    if (!externalLinks || (!lastFM && !musicBrainz && !spotify)) return null;
+    const listenBrainzUrl = getListenBrainzUrl(mbzReleaseGroupId || null, albumArtist, albumName);
+    const qobuzUrl = getQobuzUrl(albumArtist, albumName);
+
+    if (!externalLinks || (!lastFM && !listenBrainz && !musicBrainz && !qobuz && !spotify)) {
+        return null;
+    }
 
     return (
         <Stack gap="xs">
@@ -323,7 +358,7 @@ const AlbumMetadataExternalLinks = ({
                     postProcess: 'sentenceCase',
                 })}
             </Text>
-            <Group className={styles.externalLinksGroup} gap="sm">
+            <Group className={styles.externalLinksGroup} gap="xs">
                 {lastFM && (
                     <ActionIcon
                         component="a"
@@ -332,8 +367,7 @@ const AlbumMetadataExternalLinks = ({
                         )}/${encodeURIComponent(albumName || '')}`}
                         icon="brandLastfm"
                         iconProps={{
-                            fill: 'default',
-                            size: 'xl',
+                            size: '2xl',
                         }}
                         radius="md"
                         rel="noopener noreferrer"
@@ -350,8 +384,7 @@ const AlbumMetadataExternalLinks = ({
                         href={`https://musicbrainz.org/release/${mbzId}`}
                         icon="brandMusicBrainz"
                         iconProps={{
-                            fill: 'default',
-                            size: 'xl',
+                            size: '2xl',
                         }}
                         radius="md"
                         rel="noopener noreferrer"
@@ -362,6 +395,40 @@ const AlbumMetadataExternalLinks = ({
                         variant="subtle"
                     />
                 ) : null}
+                {listenBrainz && listenBrainzUrl && (
+                    <ActionIcon
+                        component="a"
+                        href={listenBrainzUrl}
+                        icon="brandListenBrainz"
+                        iconProps={{
+                            size: '2xl',
+                        }}
+                        radius="md"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        tooltip={{
+                            label: t('action.openIn.listenbrainz'),
+                        }}
+                        variant="subtle"
+                    />
+                )}
+                {qobuz && qobuzUrl && (
+                    <ActionIcon
+                        component="a"
+                        href={qobuzUrl}
+                        icon="brandQobuz"
+                        iconProps={{
+                            size: '2xl',
+                        }}
+                        radius="md"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        tooltip={{
+                            label: t('action.openIn.qobuz'),
+                        }}
+                        variant="subtle"
+                    />
+                )}
                 {spotify && (
                     <ActionIcon
                         component="a"
@@ -372,8 +439,7 @@ const AlbumMetadataExternalLinks = ({
                         }
                         icon="brandSpotify"
                         iconProps={{
-                            fill: 'default',
-                            size: 'xl',
+                            size: '2xl',
                         }}
                         radius="md"
                         rel="noopener noreferrer"
@@ -396,7 +462,8 @@ export const AlbumDetailContent = () => {
         albumQueries.detail({ query: { id: albumId }, serverId: server.id }),
     );
 
-    const { externalLinks, lastFM, musicBrainz, nativeSpotify, spotify } = useExternalLinks();
+    const { externalLinks, lastFM, listenBrainz, musicBrainz, nativeSpotify, qobuz, spotify } =
+        useExternalLinks();
 
     const comment = detailQuery?.data?.comment;
 
@@ -427,9 +494,12 @@ export const AlbumDetailContent = () => {
                             albumName={detailQuery?.data?.name}
                             externalLinks={externalLinks}
                             lastFM={lastFM}
+                            listenBrainz={listenBrainz}
                             mbzId={mbzId || undefined}
+                            mbzReleaseGroupId={detailQuery?.data?.mbzReleaseGroupId}
                             musicBrainz={musicBrainz}
                             nativeSpotify={nativeSpotify}
+                            qobuz={qobuz}
                             spotify={spotify}
                         />
                     </div>

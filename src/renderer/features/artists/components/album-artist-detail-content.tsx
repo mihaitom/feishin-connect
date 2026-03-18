@@ -888,26 +888,54 @@ interface AlbumArtistMetadataExternalLinksProps {
     artistName?: string;
     externalLinks: boolean;
     lastFM: boolean;
+    listenBrainz: boolean;
     mbzId?: null | string;
     musicBrainz: boolean;
     nativeSpotify: boolean;
     order?: number;
+    qobuz: boolean;
     spotify: boolean;
 }
+
+const getListenBrainzUrl = (mbzId: null | string, artistName?: string) => {
+    if (mbzId) {
+        return `https://listenbrainz.org/artist/${mbzId}`;
+    }
+
+    if (artistName) {
+        return `https://listenbrainz.org/search/?search_term=${encodeURIComponent(artistName)}`;
+    }
+
+    return null;
+};
+
+const getQobuzUrl = (artistName?: string) => {
+    if (artistName) {
+        return `https://www.qobuz.com/us-en/search/artists/${encodeURIComponent(artistName)}`;
+    }
+
+    return null;
+};
 
 const AlbumArtistMetadataExternalLinks = ({
     artistName,
     externalLinks,
     lastFM,
+    listenBrainz,
     mbzId,
     musicBrainz,
     nativeSpotify,
     order,
+    qobuz,
     spotify,
 }: AlbumArtistMetadataExternalLinksProps) => {
     const { t } = useTranslation();
+    const listenBrainzUrl = getListenBrainzUrl(mbzId || null, artistName);
+    const qobuzUrl = getQobuzUrl(artistName);
 
-    if (!externalLinks || (!lastFM && !musicBrainz && !spotify)) return null;
+    if (!externalLinks || (!lastFM && !listenBrainz && !musicBrainz && !qobuz && !spotify)) {
+        return null;
+    }
 
     return (
         <Grid.Col order={order} span={12}>
@@ -917,15 +945,14 @@ const AlbumArtistMetadataExternalLinks = ({
                         postProcess: 'sentenceCase',
                     })}
                 </Text>
-                <Group gap="sm">
+                <Group gap="xs">
                     {lastFM && (
                         <ActionIcon
                             component="a"
                             href={`https://www.last.fm/music/${encodeURIComponent(artistName || '')}`}
                             icon="brandLastfm"
                             iconProps={{
-                                fill: 'default',
-                                size: 'xl',
+                                size: '2xl',
                             }}
                             rel="noopener noreferrer"
                             target="_blank"
@@ -941,8 +968,7 @@ const AlbumArtistMetadataExternalLinks = ({
                             href={`https://musicbrainz.org/artist/${mbzId}`}
                             icon="brandMusicBrainz"
                             iconProps={{
-                                fill: 'default',
-                                size: 'xl',
+                                size: '2xl',
                             }}
                             rel="noopener noreferrer"
                             target="_blank"
@@ -952,6 +978,38 @@ const AlbumArtistMetadataExternalLinks = ({
                             variant="subtle"
                         />
                     ) : null}
+                    {listenBrainz && listenBrainzUrl && (
+                        <ActionIcon
+                            component="a"
+                            href={listenBrainzUrl}
+                            icon="brandListenBrainz"
+                            iconProps={{
+                                size: '2xl',
+                            }}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                            tooltip={{
+                                label: t('action.openIn.listenbrainz'),
+                            }}
+                            variant="subtle"
+                        />
+                    )}
+                    {qobuz && qobuzUrl && (
+                        <ActionIcon
+                            component="a"
+                            href={qobuzUrl}
+                            icon="brandQobuz"
+                            iconProps={{
+                                size: '2xl',
+                            }}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                            tooltip={{
+                                label: t('action.openIn.qobuz'),
+                            }}
+                            variant="subtle"
+                        />
+                    )}
                     {spotify && (
                         <ActionIcon
                             component="a"
@@ -962,8 +1020,7 @@ const AlbumArtistMetadataExternalLinks = ({
                             }
                             icon="brandSpotify"
                             iconProps={{
-                                fill: 'default',
-                                size: 'xl',
+                                size: '2xl',
                             }}
                             rel="noopener noreferrer"
                             target={nativeSpotify ? undefined : '_blank'}
@@ -1075,7 +1132,8 @@ export const AlbumArtistDetailContent = ({
 }: AlbumArtistDetailContentProps) => {
     const artistItems = useArtistItems();
     const artistRadioCount = useArtistRadioCount();
-    const { externalLinks, lastFM, musicBrainz, nativeSpotify, spotify } = useExternalLinks();
+    const { externalLinks, lastFM, listenBrainz, musicBrainz, nativeSpotify, qobuz, spotify } =
+        useExternalLinks();
     const { albumArtistId, artistId } = useParams() as {
         albumArtistId?: string;
         artistId?: string;
@@ -1161,18 +1219,21 @@ export const AlbumArtistDetailContent = ({
                         genres={detailQuery.data?.genres}
                         order={genresOrder}
                     />
-                    {externalLinks && (lastFM || musicBrainz || spotify) && (
-                        <AlbumArtistMetadataExternalLinks
-                            artistName={detailQuery.data?.name}
-                            externalLinks={externalLinks}
-                            lastFM={lastFM}
-                            mbzId={mbzId}
-                            musicBrainz={musicBrainz}
-                            nativeSpotify={nativeSpotify}
-                            order={externalLinksOrder}
-                            spotify={spotify}
-                        />
-                    )}
+                    {externalLinks &&
+                        (lastFM || listenBrainz || musicBrainz || qobuz || spotify) && (
+                            <AlbumArtistMetadataExternalLinks
+                                artistName={detailQuery.data?.name}
+                                externalLinks={externalLinks}
+                                lastFM={lastFM}
+                                listenBrainz={listenBrainz}
+                                mbzId={mbzId}
+                                musicBrainz={musicBrainz}
+                                nativeSpotify={nativeSpotify}
+                                order={externalLinksOrder}
+                                qobuz={qobuz}
+                                spotify={spotify}
+                            />
+                        )}
                     {enabledItem.biography && (
                         <AlbumArtistMetadataBiography
                             artistName={detailQuery.data?.name}
