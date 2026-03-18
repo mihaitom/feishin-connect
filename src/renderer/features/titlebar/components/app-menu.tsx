@@ -294,7 +294,7 @@ export const AppMenu = () => {
             items: [
                 {
                     component: (
-                        <Group gap="xs" grow w="100%">
+                        <Group gap="xs" grow pb="xs" pt="sm" px="xs" w="100%">
                             <ActionIcon
                                 icon="layoutPanelRight"
                                 iconProps={{
@@ -310,7 +310,9 @@ export const AppMenu = () => {
                                     position: 'bottom',
                                 }}
                                 variant={
-                                    settings.sideQueueLayout === 'horizontal' ? 'light' : 'default'
+                                    settings.sideQueueLayout === 'horizontal'
+                                        ? 'default'
+                                        : 'transparent'
                                 }
                             />
                             <ActionIcon
@@ -328,7 +330,9 @@ export const AppMenu = () => {
                                     position: 'bottom',
                                 }}
                                 variant={
-                                    settings.sideQueueLayout === 'vertical' ? 'light' : 'default'
+                                    settings.sideQueueLayout === 'vertical'
+                                        ? 'default'
+                                        : 'transparent'
                                 }
                             />
                         </Group>
