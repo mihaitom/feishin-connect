@@ -114,6 +114,7 @@
         "no": "no",
         "none": "none",
         "noResultsFromQuery": "the query returned no results",
+        "numberOfResults": "{{numberOfResults}} results",
         "noFilters": "no filters configured",
         "note": "note",
         "ok": "ok",

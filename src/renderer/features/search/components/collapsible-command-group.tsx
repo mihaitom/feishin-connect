@@ -2,6 +2,7 @@ import { ReactNode, useCallback, useState } from 'react';
 
 import styles from './collapsible-command-group.module.css';
 
+import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Paper } from '/@/shared/components/paper/paper';
 
@@ -11,6 +12,7 @@ interface CollapsibleCommandGroupProps {
     expanded?: boolean;
     heading: string;
     onToggle?: () => void;
+    subtitle?: string;
 }
 
 export function CollapsibleCommandGroup({
@@ -19,6 +21,7 @@ export function CollapsibleCommandGroup({
     expanded: controlledExpanded,
     heading,
     onToggle,
+    subtitle,
 }: CollapsibleCommandGroupProps) {
     const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
 
@@ -54,7 +57,10 @@ export function CollapsibleCommandGroup({
                     tabIndex={0}
                 >
                     <Icon className={styles.chevron} icon={expanded ? 'dropdown' : 'arrowRightS'} />
-                    <span>{heading}</span>
+                    <Group justify="space-between" w="100%">
+                        <span>{heading}</span>
+                        {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+                    </Group>
                 </div>
             </Paper>
             {expanded && <div className={styles.items}>{children}</div>}
