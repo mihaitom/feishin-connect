@@ -113,7 +113,7 @@ export const LibraryCommandItem = ({
                 </div>
                 <div className={styles.metadataWrapper}>
                     <Text overflow="hidden">{title}</Text>
-                    <Text isMuted overflow="hidden">
+                    <Text isMuted overflow="hidden" size="sm">
                         {subtitle}
                     </Text>
                 </div>

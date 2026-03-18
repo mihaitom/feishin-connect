@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { Fragment, useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useNavigate } from 'react-router';
 
 import { searchQueries } from '/@/renderer/features/search/api/search-api';
+import { CollapsibleCommandGroup } from '/@/renderer/features/search/components/collapsible-command-group';
 import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
 import { CommandItemSelectable } from '/@/renderer/features/search/components/command-item-selectable';
 import { GoToCommands } from '/@/renderer/features/search/components/go-to-commands';
@@ -13,8 +14,9 @@ import { ServerCommands } from '/@/renderer/features/search/components/server-co
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
-import { Box } from '/@/shared/components/box/box';
+import { Breadcrumb } from '/@/shared/components/breadcrumb/breadcrumb';
 import { Button } from '/@/shared/components/button/button';
+import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Kbd } from '/@/shared/components/kbd/kbd';
@@ -94,19 +96,10 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
             }}
             size="lg"
             styles={{
+                body: { padding: '0' },
                 header: { display: 'none' },
             }}
         >
-            <Group gap="sm" mb="1rem">
-                {pages.map((page, index) => (
-                    <Fragment key={page}>
-                        {index > 0 && ' > '}
-                        <Button disabled size="compact-md" variant="default">
-                            {page?.toLocaleUpperCase()}
-                        </Button>
-                    </Fragment>
-                ))}
-            </Group>
             <Command
                 filter={(value, search) => {
                     if (value.includes(search)) return 1;
@@ -130,26 +123,32 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                     onChange={(e) => setQuery(e.currentTarget.value)}
                     ref={searchInputRef}
                     rightSection={
-                        query && (
-                            <ActionIcon
-                                onClick={() => {
-                                    setQuery('');
-                                    searchInputRef.current?.focus();
-                                }}
-                                variant="transparent"
-                            >
-                                <Icon icon="x" />
-                            </ActionIcon>
+                        isLoading ? (
+                            <Spinner />
+                        ) : (
+                            query && (
+                                <ActionIcon
+                                    onClick={() => {
+                                        setQuery('');
+                                        searchInputRef.current?.focus();
+                                    }}
+                                    variant="transparent"
+                                >
+                                    <Icon icon="x" />
+                                </ActionIcon>
+                            )
                         )
                     }
                     size="sm"
                     value={query}
                 />
-                <Command.Separator />
+                <Divider my="sm" />
                 <Command.List>
-                    <Command.Empty>No results found.</Command.Empty>
+                    <Command.Empty>
+                        {t('common.noResultsFromQuery', { postProcess: 'sentenceCase' })}
+                    </Command.Empty>
                     {showAlbumGroup && (
-                        <Command.Group heading="Albums">
+                        <CollapsibleCommandGroup heading="Albums">
                             {data?.albums?.map((album) => (
                                 <CommandItemSelectable
                                     key={`search-album-${album.id}`}
@@ -180,10 +179,10 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                     )}
                                 </CommandItemSelectable>
                             ))}
-                        </Command.Group>
+                        </CollapsibleCommandGroup>
                     )}
                     {showArtistGroup && (
-                        <Command.Group heading="Artists">
+                        <CollapsibleCommandGroup heading="Artists">
                             {data?.albumArtists.map((artist) => (
                                 <CommandItemSelectable
                                     key={`artist-${artist.id}`}
@@ -219,10 +218,10 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                     )}
                                 </CommandItemSelectable>
                             ))}
-                        </Command.Group>
+                        </CollapsibleCommandGroup>
                     )}
                     {showTrackGroup && (
-                        <Command.Group heading="Tracks">
+                        <CollapsibleCommandGroup heading="Tracks">
                             {data?.songs.map((song) => (
                                 <CommandItemSelectable
                                     key={`artist-${song.id}`}
@@ -254,7 +253,7 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                                     )}
                                 </CommandItemSelectable>
                             ))}
-                        </Command.Group>
+                        </CollapsibleCommandGroup>
                     )}
                     {activePage === CommandPalettePages.HOME && (
                         <HomeCommands
@@ -281,19 +280,28 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                     )}
                 </Command.List>
             </Command>
-            <Box mt="0.5rem" p="0.5rem">
-                <Group justify="space-between">
-                    <Command.Loading>
-                        {isHome && isLoading && query !== '' && <Spinner />}
-                    </Command.Loading>
-                    <Group gap="sm">
-                        <Kbd size="md">ESC</Kbd>
-                        <Kbd size="md">↑</Kbd>
-                        <Kbd size="md">↓</Kbd>
-                        <Kbd size="md">⏎</Kbd>
-                    </Group>
+            <Divider my="sm" />
+            <Group justify="space-between">
+                <Breadcrumb separator={<Icon icon="arrowRight" />}>
+                    {pages.map((page, index) => (
+                        <Button
+                            key={page}
+                            onClick={() => setPages((prev) => prev.slice(0, index + 1))}
+                            size="compact-xs"
+                            variant="subtle"
+                        >
+                            {page?.toLocaleUpperCase()}
+                        </Button>
+                    ))}
+                </Breadcrumb>
+
+                <Group gap="sm">
+                    <Kbd size="md">ESC</Kbd>
+                    <Kbd size="md">↑</Kbd>
+                    <Kbd size="md">↓</Kbd>
+                    <Kbd size="md">⏎</Kbd>
                 </Group>
-            </Box>
+            </Group>
         </Modal>
     );
 };
