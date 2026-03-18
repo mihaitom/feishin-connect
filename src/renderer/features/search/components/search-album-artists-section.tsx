@@ -1,14 +1,18 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { nanoid } from 'nanoid/non-secure';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { generatePath, useNavigate } from 'react-router';
+import { createSearchParams, generatePath, useNavigate } from 'react-router';
 
 import { searchQueries } from '/@/renderer/features/search/api/search-api';
 import { CollapsibleCommandGroup } from '/@/renderer/features/search/components/collapsible-command-group';
 import { CommandItemSelectable } from '/@/renderer/features/search/components/command-item-selectable';
 import { LibraryCommandItem } from '/@/renderer/features/search/components/library-command-item';
+import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
 import { Box } from '/@/shared/components/box/box';
+import { Button } from '/@/shared/components/button/button';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
 import { LibraryItem } from '/@/shared/types/domain-types';
@@ -47,14 +51,50 @@ export function SearchAlbumArtistsSection({
     const showSection = isHome;
     const numberOfResults = hasNextPage ? `${artists.length}+` : artists.length;
 
+    const handleGoToPage = useCallback(() => {
+        navigate(
+            {
+                pathname: AppRoute.LIBRARY_ALBUM_ARTISTS,
+                search: createSearchParams({
+                    [FILTER_KEYS.SHARED.SEARCH_TERM]: debouncedQuery || query,
+                }).toString(),
+            },
+            { state: { navigationId: nanoid() } },
+        );
+        onSelectResult();
+    }, [debouncedQuery, navigate, onSelectResult, query]);
+
     if (!showSection) return null;
 
     return (
         <CollapsibleCommandGroup
             expanded={expanded}
-            heading="Artists"
+            heading={t('entity.albumArtist', { count: 2, postProcess: 'titleCase' })}
             onToggle={onToggle}
-            subtitle={isFetched ? t('common.numberOfResults', { numberOfResults }) : undefined}
+            subtitle={
+                isFetched ? (
+                    <>
+                        {query ? (
+                            <Button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleGoToPage();
+                                }}
+                                onKeyDown={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                }}
+                                size="compact-xs"
+                                variant="filled"
+                                w="8rem"
+                            >
+                                {t('common.numberOfResults', { numberOfResults })}
+                            </Button>
+                        ) : null}
+                    </>
+                ) : undefined
+            }
         >
             {isLoading ? (
                 <Box p="md">

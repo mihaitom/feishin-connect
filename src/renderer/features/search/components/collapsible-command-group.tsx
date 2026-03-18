@@ -12,7 +12,7 @@ interface CollapsibleCommandGroupProps {
     expanded?: boolean;
     heading: string;
     onToggle?: () => void;
-    subtitle?: string;
+    subtitle?: ReactNode;
 }
 
 export function CollapsibleCommandGroup({
@@ -48,7 +48,7 @@ export function CollapsibleCommandGroup({
 
     return (
         <div className={styles.root}>
-            <Paper p="xs" radius="sm" withBorder>
+            <Paper p="sm" radius="sm" withBorder>
                 <div
                     className={styles.heading}
                     onClick={toggle}
