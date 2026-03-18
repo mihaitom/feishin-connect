@@ -780,7 +780,11 @@
         "spotify_description": "在藝人與專輯頁面顯示 Spotify 的連結",
         "spotify": "顯示 Spotify 的連結",
         "nativeSpotify_description": "在 Spotify 應用程式中開啟，而非在瀏覽器中開啟",
-        "nativeSpotify": "使用 Spotify 應用程式"
+        "nativeSpotify": "使用 Spotify 應用程式",
+        "sidePlayQueueLayout": "側邊播放佇列佈局",
+        "sidePlayQueueLayout_description": "設定吸附側邊播放佇列的佈局",
+        "sidePlayQueueLayout_optionHorizontal": "水平",
+        "sidePlayQueueLayout_optionVertical": "垂直"
     },
     "table": {
         "config": {
