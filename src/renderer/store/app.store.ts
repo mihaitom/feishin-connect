@@ -19,6 +19,7 @@ export interface AppSlice extends AppState {
         setAppStore: (data: Partial<AppSlice>) => void;
         setArtistIdsMode: (mode: 'and' | 'or') => void;
         setArtistSelectMode: (mode: 'multi' | 'single') => void;
+        setCommandPaletteSearchSectionExpanded: (sectionId: string, expanded: boolean) => void;
         setGenreIdsMode: (mode: 'and' | 'or') => void;
         setGenreSelectMode: (mode: 'multi' | 'single') => void;
         setGlobalExpanded: (value: GlobalExpandedState | null) => void;
@@ -45,6 +46,7 @@ export interface AppState {
     artistIdsMode: 'and' | 'or';
     artistSelectMode: 'multi' | 'single';
     commandPalette: CommandPaletteProps;
+    commandPaletteSearchSectionsExpanded: Record<string, boolean>;
     genreIdsMode: 'and' | 'or';
     genreSelectMode: 'multi' | 'single';
     globalExpanded: GlobalExpandedState | null;
@@ -134,6 +136,11 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                             state.artistSelectMode = mode;
                         });
                     },
+                    setCommandPaletteSearchSectionExpanded: (sectionId, expanded) => {
+                        set((state) => {
+                            state.commandPaletteSearchSectionsExpanded[sectionId] = expanded;
+                        });
+                    },
                     setGenreIdsMode: (mode) => {
                         set((state) => {
                             state.genreIdsMode = mode;
@@ -206,6 +213,7 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                         });
                     },
                 },
+                commandPaletteSearchSectionsExpanded: {},
                 genreIdsMode: 'and',
                 genreSelectMode: 'multi',
                 globalExpanded: null,

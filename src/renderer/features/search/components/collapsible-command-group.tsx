@@ -8,19 +8,30 @@ import { Paper } from '/@/shared/components/paper/paper';
 interface CollapsibleCommandGroupProps {
     children: ReactNode;
     defaultExpanded?: boolean;
+    expanded?: boolean;
     heading: string;
+    onToggle?: () => void;
 }
 
 export function CollapsibleCommandGroup({
     children,
     defaultExpanded = true,
+    expanded: controlledExpanded,
     heading,
+    onToggle,
 }: CollapsibleCommandGroupProps) {
-    const [expanded, setExpanded] = useState(defaultExpanded);
+    const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
+
+    const isControlled = controlledExpanded !== undefined && onToggle !== undefined;
+    const expanded = isControlled ? controlledExpanded : internalExpanded;
 
     const toggle = useCallback(() => {
-        setExpanded((prev) => !prev);
-    }, []);
+        if (isControlled) {
+            onToggle?.();
+        } else {
+            setInternalExpanded((prev) => !prev);
+        }
+    }, [isControlled, onToggle]);
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {

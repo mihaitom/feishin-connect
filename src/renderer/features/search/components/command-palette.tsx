@@ -12,7 +12,7 @@ import { HomeCommands } from '/@/renderer/features/search/components/home-comman
 import { LibraryCommandItem } from '/@/renderer/features/search/components/library-command-item';
 import { ServerCommands } from '/@/renderer/features/search/components/server-commands';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer } from '/@/renderer/store';
+import { useAppStore, useCurrentServer } from '/@/renderer/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Breadcrumb } from '/@/shared/components/breadcrumb/breadcrumb';
 import { Button } from '/@/shared/components/button/button';
@@ -31,9 +31,21 @@ interface CommandPaletteProps {
     modalProps: (typeof useDisclosure)['arguments'];
 }
 
+const SEARCH_SECTION_IDS = {
+    albums: 'albums',
+    artists: 'artists',
+    tracks: 'tracks',
+} as const;
+
 export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
     const navigate = useNavigate();
     const server = useCurrentServer();
+    const searchSectionsExpanded = useAppStore(
+        (state) => state.commandPaletteSearchSectionsExpanded,
+    );
+    const setSearchSectionExpanded = useAppStore(
+        (state) => state.actions.setCommandPaletteSearchSectionExpanded,
+    );
     const [value, setValue] = useState('');
     const [query, setQuery] = useState('');
     const [debouncedQuery] = useDebouncedValue(query, 400);
@@ -148,7 +160,16 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                         {t('common.noResultsFromQuery', { postProcess: 'sentenceCase' })}
                     </Command.Empty>
                     {showAlbumGroup && (
-                        <CollapsibleCommandGroup heading="Albums">
+                        <CollapsibleCommandGroup
+                            expanded={searchSectionsExpanded[SEARCH_SECTION_IDS.albums] ?? true}
+                            heading="Albums"
+                            onToggle={() =>
+                                setSearchSectionExpanded(
+                                    SEARCH_SECTION_IDS.albums,
+                                    !(searchSectionsExpanded[SEARCH_SECTION_IDS.albums] ?? true),
+                                )
+                            }
+                        >
                             {data?.albums?.map((album) => (
                                 <CommandItemSelectable
                                     key={`search-album-${album.id}`}
@@ -182,7 +203,16 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                         </CollapsibleCommandGroup>
                     )}
                     {showArtistGroup && (
-                        <CollapsibleCommandGroup heading="Artists">
+                        <CollapsibleCommandGroup
+                            expanded={searchSectionsExpanded[SEARCH_SECTION_IDS.artists] ?? true}
+                            heading="Artists"
+                            onToggle={() =>
+                                setSearchSectionExpanded(
+                                    SEARCH_SECTION_IDS.artists,
+                                    !(searchSectionsExpanded[SEARCH_SECTION_IDS.artists] ?? true),
+                                )
+                            }
+                        >
                             {data?.albumArtists.map((artist) => (
                                 <CommandItemSelectable
                                     key={`artist-${artist.id}`}
@@ -221,7 +251,16 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                         </CollapsibleCommandGroup>
                     )}
                     {showTrackGroup && (
-                        <CollapsibleCommandGroup heading="Tracks">
+                        <CollapsibleCommandGroup
+                            expanded={searchSectionsExpanded[SEARCH_SECTION_IDS.tracks] ?? true}
+                            heading="Tracks"
+                            onToggle={() =>
+                                setSearchSectionExpanded(
+                                    SEARCH_SECTION_IDS.tracks,
+                                    !(searchSectionsExpanded[SEARCH_SECTION_IDS.tracks] ?? true),
+                                )
+                            }
+                        >
                             {data?.songs.map((song) => (
                                 <CommandItemSelectable
                                     key={`artist-${song.id}`}
