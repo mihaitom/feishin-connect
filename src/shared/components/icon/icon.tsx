@@ -135,7 +135,7 @@ import { PiMouseLeftClickFill, PiMouseRightClickFill } from 'react-icons/pi';
 import { RiPlayListAddLine, RiRepeat2Line, RiRepeatOneLine } from 'react-icons/ri';
 
 import styles from './icon.module.css';
-import lastfmLogoIcon from './lastfm_logo_icon.svg';
+import lastfmLogoIcon from './lastfm_logo_icon.png';
 import listenbrainzLogoIcon from './listenbrainz_logo_icon.svg';
 import musicbrainzLogoIcon from './musicbrainz_logo_icon.svg';
 import qobuzLogoIcon from './qobuz_logo_icon.png';
@@ -189,6 +189,7 @@ const MusicBrainzLogoIcon = forwardRef<HTMLImageElement, LogoImgProps>(
         />
     ),
 );
+
 const QobuzLogoIcon = forwardRef<HTMLImageElement, LogoImgProps>(
     ({ className, size, style, ...props }, ref) => (
         <img
