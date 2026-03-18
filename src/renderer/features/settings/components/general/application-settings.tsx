@@ -20,6 +20,7 @@ import {
 } from '/@/renderer/features/settings/components/settings-section';
 import {
     HomeFeatureStyle,
+    SideQueueLayout,
     SideQueueType,
     useFontSettings,
     useGeneralSettings,
@@ -71,6 +72,23 @@ const SIDE_QUEUE_OPTIONS = [
             postProcess: 'sentenceCase',
         }),
         value: 'sideDrawerQueue',
+    },
+];
+
+const SIDE_QUEUE_LAYOUT_OPTIONS = [
+    {
+        label: t('setting.sidePlayQueueLayout', {
+            context: 'optionHorizontal',
+            postProcess: 'sentenceCase',
+        }),
+        value: 'horizontal',
+    },
+    {
+        label: t('setting.sidePlayQueueLayout', {
+            context: 'optionVertical',
+            postProcess: 'sentenceCase',
+        }),
+        value: 'vertical',
     },
 ];
 
@@ -538,6 +556,29 @@ export const ApplicationSettings = memo(() => {
             }),
             isHidden: false,
             title: t('setting.sidePlayQueueStyle', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <SegmentedControl
+                    aria-label={t('setting.sidePlayQueueLayout', { postProcess: 'sentenceCase' })}
+                    data={SIDE_QUEUE_LAYOUT_OPTIONS}
+                    defaultValue={settings.sideQueueLayout}
+                    onChange={(e) =>
+                        setSettings({
+                            general: {
+                                ...settings,
+                                sideQueueLayout: e as SideQueueLayout,
+                            },
+                        })
+                    }
+                />
+            ),
+            description: t('setting.sidePlayQueueLayout', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: settings.sideQueueType !== 'sideQueue',
+            title: t('setting.sidePlayQueueLayout', { postProcess: 'sentenceCase' }),
         },
         {
             control: (

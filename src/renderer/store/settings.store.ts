@@ -171,6 +171,7 @@ const GenreTargetSchema = z.enum(['album', 'track']);
 const PlaylistTargetSchema = z.enum(['album', 'track']);
 
 const SideQueueTypeSchema = z.enum(['sideDrawerQueue', 'sideQueue']);
+const SideQueueLayoutSchema = z.enum(['horizontal', 'vertical']);
 
 const SidebarPanelTypeSchema = z.enum(['queue', 'lyrics', 'visualizer']);
 
@@ -498,6 +499,7 @@ export const GeneralSettingsSchema = z.object({
     sidebarPlaylistList: z.boolean(),
     sidebarPlaylistListFilterRegex: z.string(),
     sidebarPlaylistSorting: z.boolean(),
+    sideQueueLayout: SideQueueLayoutSchema,
     sideQueueType: SideQueueTypeSchema,
     skipButtons: SkipButtonsSchema,
     spotify: z.boolean(),
@@ -893,6 +895,7 @@ export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
 export interface SettingsState extends z.infer<typeof SettingsStateSchema> {}
 export type SidebarItemType = z.infer<typeof SidebarItemTypeSchema>;
 
+export type SideQueueLayout = z.infer<typeof SideQueueLayoutSchema>;
 export type SideQueueType = z.infer<typeof SideQueueTypeSchema>;
 
 export type SortableItem<T extends string> = {
@@ -1158,6 +1161,7 @@ const initialState: SettingsState = {
         sidebarPlaylistList: true,
         sidebarPlaylistListFilterRegex: '',
         sidebarPlaylistSorting: false,
+        sideQueueLayout: 'horizontal',
         sideQueueType: 'sideQueue',
         skipButtons: {
             enabled: false,
@@ -2381,10 +2385,16 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     });
                 }
 
+                if (version <= 27) {
+                    if (!state.general.sideQueueLayout) {
+                        state.general.sideQueueLayout = initialState.general.sideQueueLayout;
+                    }
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 26,
+            version: 27,
         },
     ),
 );
@@ -2491,6 +2501,9 @@ export const useThemeSettings = () =>
 
 export const useSideQueueType = () =>
     useSettingsStore((state) => state.general.sideQueueType, shallow);
+
+export const useSideQueueLayout = () =>
+    useSettingsStore((state) => state.general.sideQueueLayout, shallow);
 
 export const useVolumeWheelStep = () =>
     useSettingsStore((state) => state.general.volumeWheelStep, shallow);

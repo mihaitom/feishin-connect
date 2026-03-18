@@ -40,6 +40,7 @@ const LYRICS_ALIGNMENTS = new Set(['center', 'left', 'right']);
 const FONT_TYPES = new Set(['builtIn', 'custom', 'system']);
 const HOME_FEATURE_STYLES = new Set(['multiple', 'single']);
 const SIDE_QUEUE_TYPES = new Set(['sideDrawerQueue', 'sideQueue']);
+const SIDE_QUEUE_LAYOUTS = new Set(['horizontal', 'vertical']);
 
 export type EnvSettingsOverrides = DeepPartial<
     Pick<SettingsState, 'autoDJ' | 'css' | 'discord' | 'font' | 'general' | 'lyrics' | 'playback'>
@@ -198,6 +199,12 @@ const ENV_SETTING_SPECS: EnvSettingSpec[] = [
         enumSet: SIDE_QUEUE_TYPES,
         key: 'FS_GENERAL_SIDE_QUEUE_TYPE',
         path: ['general', 'sideQueueType'],
+        type: 'enum',
+    },
+    {
+        enumSet: SIDE_QUEUE_LAYOUTS,
+        key: 'FS_GENERAL_SIDE_QUEUE_LAYOUT',
+        path: ['general', 'sideQueueLayout'],
         type: 'enum',
     },
     { key: 'FS_GENERAL_RESUME', path: ['general', 'resume'], type: 'bool' },

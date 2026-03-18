@@ -75,6 +75,7 @@ type SidebarProps = {
     image: boolean;
     leftWidth: string;
     rightExpanded: boolean;
+    rightHeight: string;
     rightWidth: string;
 };
 
@@ -222,6 +223,7 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                     image: false,
                     leftWidth: '400px',
                     rightExpanded: false,
+                    rightHeight: '320px',
                     rightWidth: '600px',
                 },
                 titlebar: {
@@ -240,7 +242,12 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                     return {} as AppState;
                 }
 
-                return persistedState;
+                const state = persistedState as AppState;
+                if (version <= 4 && !state.sidebar.rightHeight) {
+                    state.sidebar.rightHeight = '320px';
+                }
+
+                return state;
             },
             name: 'store_app',
             partialize: (state) => {
@@ -248,7 +255,7 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
                 const { globalExpanded: _, ...rest } = state;
                 return rest;
             },
-            version: 4,
+            version: 5,
         },
     ),
 );

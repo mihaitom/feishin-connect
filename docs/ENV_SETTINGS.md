@@ -44,6 +44,7 @@ These variables override app settings **on first run** when no persisted setting
 | `general.sidebarPlaylistList` | `true` | `FS_GENERAL_SIDEBAR_PLAYLIST_LIST` | `true` / `false` — Show playlist list in sidebar. |
 | `general.sidebarPlaylistSorting` | `false` | `FS_GENERAL_SIDEBAR_PLAYLIST_SORTING` | `true` / `false` — Enable playlist sorting in sidebar. |
 | `general.sideQueueType` | `sideQueue` | `FS_GENERAL_SIDE_QUEUE_TYPE` | `sideDrawerQueue` / `sideQueue` — Side play queue style. |
+| `general.sideQueueLayout` | `horizontal` | `FS_GENERAL_SIDE_QUEUE_LAYOUT` | `horizontal` / `vertical` — Attached side queue layout orientation. |
 | `general.useThemeAccentColor` | `false` | `FS_GENERAL_USE_THEME_ACCENT_COLOR` | `true` / `false` — Use theme’s accent color instead of custom. |
 | `general.useThemePrimaryShade` | `true` | `FS_GENERAL_USE_THEME_PRIMARY_SHADE` | `true` / `false` — Use theme’s primary shade. |
 | `general.zoomFactor` | `100` | `FS_GENERAL_ZOOM_FACTOR` | UI zoom percentage (number). |
