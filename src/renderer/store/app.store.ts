@@ -239,10 +239,10 @@ export const useAppStore = createWithEqualityFn<AppSlice>()(
             },
             migrate: (persistedState, version) => {
                 if (version <= 2) {
-                    return {} as AppState;
+                    return {} as AppSlice;
                 }
 
-                const state = persistedState as AppState;
+                const state = persistedState as AppSlice;
                 if (version <= 4 && !state.sidebar.rightHeight) {
                     state.sidebar.rightHeight = '320px';
                 }
