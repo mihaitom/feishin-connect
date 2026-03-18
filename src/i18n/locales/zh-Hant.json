@@ -784,7 +784,11 @@
         "sidePlayQueueLayout": "側邊播放佇列佈局",
         "sidePlayQueueLayout_description": "設定吸附側邊播放佇列的佈局",
         "sidePlayQueueLayout_optionHorizontal": "水平",
-        "sidePlayQueueLayout_optionVertical": "垂直"
+        "sidePlayQueueLayout_optionVertical": "垂直",
+        "listenbrainz_description": "在藝術家/專輯頁面上顯示 ListenBrainz 的連結",
+        "listenbrainz": "顯示 ListenBrainz 連結",
+        "qobuz_description": "在藝術家/專輯頁面上顯示 Qobuz 的連結",
+        "qobuz": "顯示 Qobuz 連結"
     },
     "table": {
         "config": {
@@ -917,7 +921,9 @@
         "openIn": {
             "lastfm": "在Last.fm開啟",
             "musicbrainz": "在MusicBrainz開啟",
-            "spotify": "在 Spotify 中開啟"
+            "spotify": "在 Spotify 中開啟",
+            "listenbrainz": "在 ListenBrainz 中開啟",
+            "qobuz": "在 Qobuz 中開啟"
         },
         "downloadStarted": "已開始下載 {{count}} 項內容",
         "moveItems": "移動項目",
