@@ -134,6 +134,7 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
     const [pages, setPages] = useState<CommandPalettePages[]>([CommandPalettePages.HOME]);
     const activePage = pages[pages.length - 1];
     const isHome = activePage === CommandPalettePages.HOME;
+    const commandRootRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     const popPage = useCallback(() => {
@@ -189,8 +190,33 @@ export const CommandPalette = ({ modalProps }: CommandPaletteProps) => {
                     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                         searchInputRef.current?.focus();
                     }
+
+                    if (e.key === 'Tab' && !e.shiftKey) {
+                        const root = commandRootRef.current;
+                        if (!root) return;
+
+                        const selectedItem = root.querySelector(
+                            '[cmdk-item][aria-selected="true"]',
+                        ) as HTMLElement | null;
+
+                        if (!selectedItem) return;
+
+                        const focusTarget = selectedItem.querySelector(
+                            'button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+                        ) as HTMLElement | null;
+
+                        if (!focusTarget) return;
+
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        requestAnimationFrame(() => {
+                            focusTarget.focus();
+                        });
+                    }
                 }}
                 onValueChange={setValue}
+                ref={commandRootRef}
                 value={value}
             >
                 <CommandPaletteSearch
