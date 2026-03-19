@@ -415,7 +415,15 @@
         "spotify_description": "Muestra enlaces a Spotify en las páginas de artistas/álbumes",
         "spotify": "Mostrar enlaces de Spotify",
         "nativeSpotify_description": "Abre en la aplicación de Spotify en lugar de tu navegador",
-        "nativeSpotify": "Usar la aplicación de Spotify"
+        "nativeSpotify": "Usar la aplicación de Spotify",
+        "listenbrainz": "Mostrar enlaces a ListenBrainz",
+        "listenbrainz_description": "Muestra enlaces a ListenBrainz en las páginas de artistas/álbumes",
+        "qobuz_description": "Muestra enlaces a Qobuz en las páginas de artistas/álbumes",
+        "qobuz": "Mostrar enlaces a Qobuz",
+        "sidePlayQueueLayout_optionHorizontal": "Horizontal",
+        "sidePlayQueueLayout_optionVertical": "Vertical",
+        "sidePlayQueueLayout": "Diseño de la cola de reproducción lateral",
+        "sidePlayQueueLayout_description": "Establece el diseño de la cola de reproducción lateral adjunta"
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist, {\"count\": 1})",
@@ -438,7 +446,9 @@
         "openIn": {
             "lastfm": "Abrir en Last.fm",
             "musicbrainz": "Abrir en MusicBrainz",
-            "spotify": "Abrir en Spotify"
+            "spotify": "Abrir en Spotify",
+            "listenbrainz": "Abrir en ListenBrainz",
+            "qobuz": "Abrir en Qobuz"
         },
         "moveToNext": "pasar al siguiente",
         "downloadStarted": "Iniciada descarga de {{count}} elementos",
@@ -584,7 +594,8 @@
         "filter_single": "simple",
         "filter_multiple": "multi",
         "rename": "Renombrar",
-        "newVersionAvailable": "Una nueva versión está disponible"
+        "newVersionAvailable": "Una nueva versión está disponible",
+        "numberOfResults": "{{numberOfResults}} resultados"
     },
     "error": {
         "remotePortWarning": "reiniciar el servidor para aplicar el nuevo puerto",

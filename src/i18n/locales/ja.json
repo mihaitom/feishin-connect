@@ -94,7 +94,7 @@
         "hotkey_skipForward": "次へスキップ",
         "disableLibraryUpdateOnStartup": "起動時の新バージョンチェックを無効にします",
         "discordApplicationId_description": "{{discord}} に Rich Presence ステータスを表示するためのアプリケーション ID (デフォルトは {{defaultId}} です)",
-        "sidePlayQueueStyle": "サイド再生キュースタイル",
+        "sidePlayQueueStyle": "サイド再生キューの形式",
         "gaplessAudio": "ギャップレス再生",
         "playButtonBehavior_optionAddLast": "$t(player.addLast)",
         "zoom": "ズーム率",
@@ -156,7 +156,7 @@
         "volumeWheelStep": "音量ホイールステップ",
         "sidebarPlaylistList_description": "サイドバーのプレイリストを表示または非表示にします",
         "accentColor": "アクセントカラー",
-        "sidePlayQueueStyle_description": "サイド再生キューのスタイルを設定します",
+        "sidePlayQueueStyle_description": "サイド再生キューの形式を設定します",
         "accentColor_description": "アプリケーションが利用するアクセントカラーを設定します",
         "replayGainMode": "{{ReplayGain}} モード",
         "playbackStyle_optionNormal": "通常",
@@ -221,8 +221,8 @@
         "volumeWidth": "音量スライダーの幅",
         "webAudio_description": "Web Audio を使用します。これにより、リプレイゲインなどの高度な機能が有効になります。問題が発生した場合は無効にしてください",
         "mpvExtraParameters_help": "1 行に 1 つずつ",
-        "musicbrainz_description": "MusicBrainz ID が存在するアーティストまたはアルバムページに MusicBrainz へのリンクを表示します",
-        "musicbrainz": "MusicBrainz リンクを表示",
+        "musicbrainz_description": "MusicBrainz ID が存在するアーティストとアルバムページに MusicBrainz へのリンクを表示します",
+        "musicbrainz": "MusicBrainz のリンクを表示",
         "neteaseTranslation_description": "有効にすると、利用可能な場合は NetEase から翻訳された歌詞を取得して表示します",
         "neteaseTranslation": "NetEase 翻訳歌詞を有効にする",
         "passwordStore_description": "使用するパスワード / シークレットストア。パスワードの保存に問題がある場合はこれを変更してください",
@@ -238,8 +238,8 @@
         "imageAspectRatio": "ネイティブのカバーアートの縦横比を使用する",
         "language": "言語",
         "imageAspectRatio_description": "有効にすると、カバーアートはネイティブの縦横比で表示されます。縦横比が 1:1 でない場合、残りのスペースは空白になります",
-        "lastfm_description": "アーティスト/アルバムページに Last.fm へのリンクを表示します",
-        "lastfm": "Last.fm リンクを表示する",
+        "lastfm_description": "アーティストとアルバムページに Last.fm へのリンクを表示します",
+        "lastfm": "Last.fm のリンクを表示",
         "lastfmApiKey": "{{lastfm}} API キー",
         "homeConfiguration_description": "ホーム画面に表示する項目と表示順序を設定します",
         "homeConfiguration": "ホーム画面の設定",
@@ -412,10 +412,18 @@
         "hotkey_listPlayLast": "最後に再生",
         "hotkey_listPlayNext": "次に再生",
         "hotkey_listPlayNow": "今すぐ再生",
-        "spotify_description": "アーティストまたはアルバムページに Spotify へのリンクを表示します",
-        "spotify": "Spotify リンクを表示",
+        "spotify_description": "アーティストとアルバムページに Spotify へのリンクを表示します",
+        "spotify": "Spotify のリンクを表示",
         "nativeSpotify_description": "ブラウザーの代わりに Spotify アプリで開きます",
-        "nativeSpotify": "Spotify アプリを使用"
+        "nativeSpotify": "Spotify アプリを使用",
+        "listenbrainz_description": "アーティストとアルバムページに ListenBrainz へのリンクを表示します",
+        "listenbrainz": "ListenBrainz のリンクを表示",
+        "qobuz_description": "アーティストとアルバムページに Qobuz へのリンクを表示します",
+        "qobuz": "Qobuz のリンクを表示",
+        "sidePlayQueueLayout": "サイド再生キューのレイアウト",
+        "sidePlayQueueLayout_description": "結合されたサイド再生キューのレイアウトを設定します",
+        "sidePlayQueueLayout_optionHorizontal": "水平",
+        "sidePlayQueueLayout_optionVertical": "垂直"
     },
     "action": {
         "editPlaylist": "$t(entity.playlist, {\"count\": 1}) を編集",
@@ -438,7 +446,9 @@
         "openIn": {
             "lastfm": "Last.fm で開く",
             "musicbrainz": "MusicBrainz で開く",
-            "spotify": "Spotify で開く"
+            "spotify": "Spotify で開く",
+            "listenbrainz": "ListenBrainz で開く",
+            "qobuz": "Qobuz で開く"
         },
         "moveToNext": "次",
         "downloadStarted": "{{count}} 曲のダウンロードを開始しました",
@@ -576,7 +586,8 @@
         "filter_single": "シングル",
         "filter_multiple": "複数枚組",
         "rename": "名前を変更",
-        "newVersionAvailable": "新しいバージョンが利用可能です"
+        "newVersionAvailable": "新しいバージョンが利用可能です",
+        "numberOfResults": "{{numberOfResults}} 件の結果"
     },
     "table": {
         "config": {

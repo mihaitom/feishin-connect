@@ -415,7 +415,15 @@
         "spotify_description": "na stránkách umělců a alb zobrazit odkazy na Spotify",
         "spotify": "zobrazit odkazy na Spotify",
         "nativeSpotify_description": "otevřít v aplikaci Spotify namísto vašeho prohlížeče",
-        "nativeSpotify": "použít aplikaci Spotify"
+        "nativeSpotify": "použít aplikaci Spotify",
+        "listenbrainz_description": "na stránkách umělců a alb zobrazit odkazy na ListenBrainz",
+        "listenbrainz": "zobrazit odkazy na ListenBrainz",
+        "qobuz_description": "na stránkách umělců a alb zobrazit odkazy na Qobuz",
+        "qobuz": "zobrazit odkazy na Qobuz",
+        "sidePlayQueueLayout": "rozložení postranní fronty přehrávání",
+        "sidePlayQueueLayout_description": "nastaví rozložení postranní lišty přehrávání",
+        "sidePlayQueueLayout_optionHorizontal": "na šířku",
+        "sidePlayQueueLayout_optionVertical": "na výšku"
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist, {\"count\": 1})",
@@ -438,7 +446,9 @@
         "openIn": {
             "lastfm": "Otevřít v Last.fm",
             "musicbrainz": "Otevřít v MusicBrainz",
-            "spotify": "Otevřít na Spotify"
+            "spotify": "Otevřít na Spotify",
+            "listenbrainz": "Otevřít ve službě ListenBrainz",
+            "qobuz": "Otevřít ve službě Qobuz"
         },
         "moveToNext": "přesunout na další",
         "downloadStarted": "spuštěno stahování {{count}} položek",
@@ -584,7 +594,8 @@
         "filter_single": "jeden",
         "filter_multiple": "několik",
         "rename": "přejmenovat",
-        "newVersionAvailable": "je dostupná nová verze"
+        "newVersionAvailable": "je dostupná nová verze",
+        "numberOfResults": "{{numberOfResults}} výsledků"
     },
     "table": {
         "config": {
