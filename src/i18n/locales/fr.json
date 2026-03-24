@@ -70,7 +70,10 @@
         "removeFromFavorites": "retirer des $t(entity.favorite, {\"count\": 2})",
         "openIn": {
             "lastfm": "Ouvrir dans Last.fm",
-            "musicbrainz": "Ouvrir dans MusicBrainz"
+            "musicbrainz": "Ouvrir dans MusicBrainz",
+            "listenbrainz": "Ouvrir dans ListenBrainz",
+            "qobuz": "Ouvrir dans Qobuz",
+            "spotify": "Ouvrir dans Spotify"
         },
         "moveToNext": "passer au suivant",
         "downloadStarted": "téléchargement de {{count}} éléments en cours",
@@ -217,7 +220,8 @@
         "filter_single": "unique",
         "filter_multiple": "multiple",
         "rename": "renommer",
-        "newVersionAvailable": "une nouvelle version est disponible"
+        "newVersionAvailable": "une nouvelle version est disponible",
+        "numberOfResults": "{{numberOfResults}} résultats"
     },
     "error": {
         "remotePortWarning": "redémarrer le serveur pour appliquer le nouveau port",
@@ -238,7 +242,7 @@
         "mpvRequired": "MPV requis",
         "audioDeviceFetchError": "une erreur s’est produite lors de la tentative d’obtenir les périphériques audio",
         "invalidServer": "serveur invalide",
-        "loginRateError": "trop de tentative de connexion, merci de réessayer dans quelques secondes",
+        "loginRateError": "trop de tentatives de connexion, merci de réessayer dans quelques secondes",
         "openError": "impossible d'ouvrir le fichier",
         "networkError": "une erreur de réseau est survenue",
         "badAlbum": "vous voyez cette page parce que ce titre ne fait pas parti d'un album. vous rencontrez probablement cette erreur si vous avez un titre à la racine de votre dossier musique. Jellyfin gère les chansons uniquement si elles sont dans un sous-dossier, qui est lui-même dans un dossier \"Musique(s)\"",
@@ -874,7 +878,19 @@
         "hotkey_listPlayNext": "lire ensuite",
         "hotkey_listPlayNow": "lire maintenant",
         "playerItemConfiguration_description": "configurer les éléments affichés et leur ordre dans le lecteur plein écran",
-        "playerItemConfiguration": "configuration des éléments du lecteur"
+        "playerItemConfiguration": "configuration des éléments du lecteur",
+        "listenbrainz_description": "afficher les liens vers ListenBrainz sur les pages d'artiste/album",
+        "listenbrainz": "afficher les liens ListenBrainz",
+        "qobuz_description": "afficher les liens vers Qobuz sur les pages d'artiste/album",
+        "qobuz": "afficher les liens Qobuz",
+        "spotify_description": "afficher les liens vers Spotify sur les pages d'artiste/album",
+        "spotify": "afficher les liens Spotify",
+        "nativeSpotify_description": "ouvrir dans l'application Spotify plutôt que le navigateur",
+        "nativeSpotify": "utiliser l'application Spotify",
+        "sidePlayQueueLayout": "disposition de la file d'attente",
+        "sidePlayQueueLayout_description": "définit la disposition de la file d'attente attaché",
+        "sidePlayQueueLayout_optionHorizontal": "horizontal",
+        "sidePlayQueueLayout_optionVertical": "vertical"
     },
     "form": {
         "deletePlaylist": {
