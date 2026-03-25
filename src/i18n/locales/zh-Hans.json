@@ -19,7 +19,10 @@
         "goToPage": "前往页面",
         "openIn": {
             "lastfm": "在 Last.fm 中打开",
-            "musicbrainz": "在 MusicBrainz 中打开"
+            "musicbrainz": "在 MusicBrainz 中打开",
+            "listenbrainz": "在 ListenBrainz 中打开",
+            "qobuz": "在 Qobuz 中打开",
+            "spotify": "在 Spotify 中打开"
         },
         "moveToNext": "移至下一首",
         "downloadStarted": "开始下载 {{count}} 个项目",
@@ -157,7 +160,8 @@
         "mood": "氛围",
         "rename": "重命名",
         "filter_multiple": "多项",
-        "newVersionAvailable": "新版本现已可用"
+        "newVersionAvailable": "新版本现已可用",
+        "numberOfResults": "{{numberOfResults}} 结果"
     },
     "entity": {
         "albumArtist_other": "专辑艺术家",
@@ -448,7 +452,7 @@
         "discordServeImage": "从服务器提供 {{discord}} 图像",
         "discordServeImage_description": "从服务器本身分享 {{discord}} rich presence 的封面艺术，仅适用于 Jellyfin 和 Navidrome。 {{discord}} 使用机器人来获取图像，因此您的服务器必须可通过公共互联网访问",
         "musicbrainz": "显示 MusicBrainz 链接",
-        "musicbrainz_description": "在存在 MusicBrainz ID 的艺术家/专辑页面上显示 MusicBrainz 的链接",
+        "musicbrainz_description": "在艺术家/专辑页面上显示 MusicBrainz 链接（如果存在 MusicBrainz ID）",
         "lastfm": "显示 last.fm 链接",
         "lastfm_description": "在艺术家/专辑页面上显示 Last.fm 的链接",
         "preferLocalLyrics_description": "优先选择本地歌词（如有），而不是远程歌词",
@@ -593,7 +597,19 @@
         "primaryShade": "主色调",
         "primaryShade_description": "覆盖按钮、链接和其他主色元素使用的主色调（0-9）",
         "playerItemConfiguration_description": "配置全屏播放器上显示的项目及其显示顺序",
-        "playerItemConfiguration": "播放器项目配置"
+        "playerItemConfiguration": "播放器项目配置",
+        "listenbrainz_description": "在艺术家/专辑页面上显示 ListenBrainz 链接",
+        "listenbrainz": "显示 ListenBrainz 链接",
+        "qobuz_description": "在艺术家/专辑页面上显示 Qobuz 链接",
+        "qobuz": "显示 Qobuz 链接",
+        "spotify_description": "在艺术家/专辑页面上显示 Spotify 链接",
+        "spotify": "显示 Spotify 链接",
+        "nativeSpotify_description": "在 Spotify 应用中打开，而不是在浏览器中打开",
+        "nativeSpotify": "使用 Spotify 应用",
+        "sidePlayQueueLayout": "侧边播放队列布局",
+        "sidePlayQueueLayout_description": "设置附加侧边播放队列的布局",
+        "sidePlayQueueLayout_optionHorizontal": "水平",
+        "sidePlayQueueLayout_optionVertical": "垂直"
     },
     "error": {
         "remotePortWarning": "重启服务器使新端口生效",
