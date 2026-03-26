@@ -423,7 +423,9 @@
         "sidePlayQueueLayout": "サイド再生キューのレイアウト",
         "sidePlayQueueLayout_description": "結合されたサイド再生キューのレイアウトを設定します",
         "sidePlayQueueLayout_optionHorizontal": "水平",
-        "sidePlayQueueLayout_optionVertical": "垂直"
+        "sidePlayQueueLayout_optionVertical": "垂直",
+        "waveformLoadingDelay": "波形読み込みの遅延",
+        "waveformLoadingDelay_description": "波形を読み込むまでの遅延時間（秒単位）を設定します。Web プレーヤー使用時にカクつきが発生する場合は、この値を増やしてください。"
     },
     "action": {
         "editPlaylist": "$t(entity.playlist, {\"count\": 1}) を編集",

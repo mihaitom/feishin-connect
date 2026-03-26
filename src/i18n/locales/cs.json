@@ -423,7 +423,9 @@
         "sidePlayQueueLayout": "rozložení postranní fronty přehrávání",
         "sidePlayQueueLayout_description": "nastaví rozložení postranní lišty přehrávání",
         "sidePlayQueueLayout_optionHorizontal": "na šířku",
-        "sidePlayQueueLayout_optionVertical": "na výšku"
+        "sidePlayQueueLayout_optionVertical": "na výšku",
+        "waveformLoadingDelay": "zpoždění načítání vlnové křivky",
+        "waveformLoadingDelay_description": "zpoždění v sekundách před načtením vlnové křivky. zvyšte, pokud jste během používání webového přehrávače zaznamenali záseky."
     },
     "action": {
         "editPlaylist": "upravit $t(entity.playlist, {\"count\": 1})",

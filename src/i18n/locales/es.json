@@ -423,7 +423,9 @@
         "sidePlayQueueLayout_optionHorizontal": "Horizontal",
         "sidePlayQueueLayout_optionVertical": "Vertical",
         "sidePlayQueueLayout": "Diseño de la cola de reproducción lateral",
-        "sidePlayQueueLayout_description": "Establece el diseño de la cola de reproducción lateral adjunta"
+        "sidePlayQueueLayout_description": "Establece el diseño de la cola de reproducción lateral adjunta",
+        "waveformLoadingDelay": "Retraso de carga de la forma de onda",
+        "waveformLoadingDelay_description": "Retraso en segundos antes de cargar la forma de onda. Incrementa este valor si estás experimentando tartamudeos al usar el reproductor web."
     },
     "action": {
         "editPlaylist": "editar $t(entity.playlist, {\"count\": 1})",
