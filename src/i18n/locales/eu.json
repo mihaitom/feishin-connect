@@ -15,7 +15,10 @@
         "viewPlaylists": "ikusi $t(entity.playlist, {\"count\": 2})",
         "openIn": {
             "lastfm": "Ireki Last.fm-n",
-            "musicbrainz": "Ireki MusicBrainz-en"
+            "musicbrainz": "Ireki MusicBrainz-en",
+            "listenbrainz": "Ireki ListenBrainz-en",
+            "qobuz": "Ireki Qobuz-en",
+            "spotify": "Ireki Spotify-n"
         },
         "clearQueue": "garbitu ilara",
         "createPlaylist": "sortu $t(entity.playlist, {\"count\": 1})",
@@ -33,7 +36,8 @@
         "shuffleAll": "nahastu dena",
         "shuffleSelected": "nahastu aukeratutak",
         "moveItems": "elementuak mugitu",
-        "openApplicationDirectory": "ireki aplikazioaren direktorioa"
+        "openApplicationDirectory": "ireki aplikazioaren direktorioa",
+        "goToCurrent": "joan uneko elementura"
     },
     "common": {
         "add": "gehitu",
@@ -67,8 +71,8 @@
         "filter_other": "iragazkiak",
         "filters": "iragazkiak",
         "forceRestartRequired": "berreabiarazi aldaketak aplikatzeko... itxi notifikazioa berreabiarazteko",
-        "setting_one": "ezarpenak",
-        "setting_other": "",
+        "setting_one": "ezarpena",
+        "setting_other": "ezarpenak",
         "share": "partekatu",
         "action_one": "ekintza",
         "action_other": "ekintzak",
@@ -150,7 +154,10 @@
         "recordLabel": "diskoetxea",
         "example": "adibidea",
         "tableColumns": "taulako zutabeak",
-        "doNotShowAgain": "ez erakutsi hau berriro"
+        "doNotShowAgain": "ez erakutsi hau berriro",
+        "numberOfResults": "{{numberOfResults}} emaitza",
+        "rename": "berrizendatu",
+        "newVersionAvailable": "bertsio berri bat eskuragarri dago"
     },
     "player": {
         "repeat": "errepikatu",
@@ -351,7 +358,11 @@
         "noNetwork": "zerbitzaria ez dago erabilgarri",
         "noNetworkDescription": "ezin izan da zerbitzari honetara konektatu",
         "saveQueueFailed": "huts egin du ilara gordetzean",
-        "multipleServerSaveQueueError": "erreprodukzio-ilarak zerbitzarikoak ez diren abesti bat edo gehiago ditu. hau ez da onartzen"
+        "multipleServerSaveQueueError": "erreprodukzio-ilarak zerbitzarikoak ez diren abesti bat edo gehiago ditu. hau ez da onartzen",
+        "invalidJson": "JSON baliogabea",
+        "playbackPausedDueToError": "erreprodukzioa eten egin da errore baten ondorioz",
+        "serverLockSingleServer": "zerbitzaria blokeatuta dagoenean, zerbitzari bakarra onartzen da",
+        "settingsSyncError": "desadostasunak aurkitu dira errendatzailearen ezarpenen eta prozesu nagusiaren artean. berrabiarazi aplikazioa aldaketak aplikatzeko"
     },
     "filter": {
         "disc": "diskoa",
@@ -371,7 +382,7 @@
         "biography": "biografia",
         "bitrate": "bit-emaria",
         "bpm": "bpm-ak",
-        "channels": "$t(common.channel_other)",
+        "channels": "$t(common.channel, {\"count\": 2})",
         "comment": "iruzkina",
         "favorited": "gogoko gisa markatua",
         "genre": "$t(entity.genre, {\"count\": 1})",
@@ -396,7 +407,9 @@
         "releaseYear": "argitalpen urtea",
         "toYear": "urtera arte",
         "fromYear": "urtetik aurrera",
-        "explicitStatus": "$t(common.explicitStatus)"
+        "explicitStatus": "$t(common.explicitStatus)",
+        "matchAnd": "eta",
+        "matchOr": "edo"
     },
     "setting": {
         "hotkey_playbackPause": "pausatu",
@@ -739,7 +752,9 @@
             "input_optionMatchAll": "guztiak bat etorri",
             "input_optionMatchAny": "edozeinekin bat etorri",
             "resetToDefault": "lehenetsitako egoerara berrezarri",
-            "clearFilters": "garbitu iragazkiak"
+            "clearFilters": "garbitu iragazkiak",
+            "addRuleGroup": "gehitu arau-taldea",
+            "removeRuleGroup": "kendu arau-taldea"
         },
         "updateServer": {
             "success": "zerbitzaria behar bezala eguneratu da",
@@ -751,7 +766,8 @@
             "disabled": "modu pribatua desgaituta, erreprodukzio egoera ikusgai dago orain gaitutako kanpoko integrazioentzat"
         },
         "largeFetchConfirmation": {
-            "title": "gehitu elementuak ilaran"
+            "title": "gehitu elementuak ilaran",
+            "description": "Ekintza honek uneko iragazki-ikuspegian dauden elementu guztiak gehituko ditu"
         },
         "createRadioStation": {
             "input_homepageUrl": "hasierako orriaren URLa",
