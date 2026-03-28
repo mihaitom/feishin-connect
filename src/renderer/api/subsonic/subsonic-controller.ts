@@ -2118,6 +2118,22 @@ export const SubsonicController: InternalControllerEndpoint = {
             ),
         };
     },
+    setPlaylistSongs: async (args) => {
+        const { apiClientProps, body } = args;
+
+        const res = await ssApiClient(apiClientProps).createPlaylist({
+            query: {
+                playlistId: body.id,
+                songId: body.songIds,
+            },
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to update playlist songs');
+        }
+
+        return null;
+    },
     setRating: async (args) => {
         const { apiClientProps, query } = args;
 
