@@ -125,6 +125,10 @@ table {
     height: 100vh;
 }
 
+:has(.fs-window-bar-module-window-bar) .fs-main-content-module-main-content-container {
+    height: calc(100vh - 30px);
+}
+
 .mantine-Tabs-root {
     input {
         border-radius: 18px;
