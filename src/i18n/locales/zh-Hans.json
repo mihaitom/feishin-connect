@@ -161,7 +161,8 @@
         "rename": "重命名",
         "filter_multiple": "多项",
         "newVersionAvailable": "新版本现已可用",
-        "numberOfResults": "{{numberOfResults}} 结果"
+        "numberOfResults": "{{numberOfResults}} 结果",
+        "grouping": "分组"
     },
     "entity": {
         "albumArtist_other": "专辑艺术家",
@@ -609,7 +610,9 @@
         "sidePlayQueueLayout": "侧边播放队列布局",
         "sidePlayQueueLayout_description": "设置附加侧边播放队列的布局",
         "sidePlayQueueLayout_optionHorizontal": "水平",
-        "sidePlayQueueLayout_optionVertical": "垂直"
+        "sidePlayQueueLayout_optionVertical": "垂直",
+        "waveformLoadingDelay": "波形加载延迟",
+        "waveformLoadingDelay_description": "加载波形前的延迟时间（秒）。如果在使用网页播放器时遇到卡顿现象，请增加此值。"
     },
     "error": {
         "remotePortWarning": "重启服务器使新端口生效",
