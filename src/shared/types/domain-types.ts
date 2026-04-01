@@ -340,7 +340,7 @@ export type Playlist = {
     owner: null | string;
     ownerId: null | string;
     public: boolean | null;
-    rules?: null | Record<string, any>;
+    rules?: null | PlaylistRules;
     size: null | number;
     songCount: null | number;
     sync?: boolean | null;
@@ -947,7 +947,7 @@ export type CreatePlaylistBody = {
     name: string;
     ownerId?: string;
     public?: boolean;
-    queryBuilderRules?: Record<string, any>;
+    queryBuilderRules?: PlaylistRules;
     sync?: boolean;
 };
 
@@ -1008,6 +1008,12 @@ export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
 
 // Playlist List
 export type PlaylistListResponse = BasePaginatedResponse<Playlist[]>;
+
+export type PlaylistRules = Record<string, any> & {
+    limit?: number;
+    limitPercent?: number;
+    sort?: string;
+};
 
 export type RatingQuery = {
     id: string[];
@@ -1089,7 +1095,7 @@ export type UpdatePlaylistBody = {
     name: string;
     ownerId?: string;
     public?: boolean;
-    queryBuilderRules?: Record<string, any>;
+    queryBuilderRules?: PlaylistRules;
     sync?: boolean;
 };
 

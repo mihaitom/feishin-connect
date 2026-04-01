@@ -600,6 +600,14 @@ const songListParameters = paginationParameters.extend({
     year: z.number().optional(),
 });
 
+const playlistRules = z
+    .object({
+        limit: z.number().optional(),
+        limitPercent: z.number().optional(),
+        sort: z.string().optional(),
+    })
+    .catchall(z.any());
+
 const playlist = z.object({
     comment: z.string(),
     createdAt: z.string(),
@@ -611,7 +619,7 @@ const playlist = z.object({
     ownerName: z.string(),
     path: z.string(),
     public: z.boolean(),
-    rules: z.record(z.string(), z.any()),
+    rules: playlistRules,
     size: z.number(),
     songCount: z.number(),
     sync: z.boolean(),
@@ -643,7 +651,7 @@ const createPlaylistParameters = z.object({
     name: z.string(),
     ownerId: z.string().optional(),
     public: z.boolean().optional(),
-    rules: z.record(z.any()).optional(),
+    rules: playlistRules.optional(),
     sync: z.boolean().optional(),
 });
 
