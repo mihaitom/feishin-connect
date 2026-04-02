@@ -33,6 +33,7 @@ import {
     usePlaybackType,
     useSettingsStoreActions,
 } from '/@/renderer/store';
+import { logFn } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { PlayerType } from '/@/shared/types/types';
@@ -80,6 +81,8 @@ function detectBrowserProfile() {
         }
     }
 
+    logFn.info('DIRECT_PLAY_PROFILES', { meta: DIRECT_PLAY_PROFILES });
+
     return DIRECT_PLAY_PROFILES;
 }
 
@@ -96,7 +99,6 @@ export const AudioPlayers = () => {
     const { setWebAudio, webAudio: audioContext } = useWebAudio();
 
     useEffect(() => {
-        console.log('getDirectPlayProfiles');
         detectBrowserProfile();
     }, []);
 
