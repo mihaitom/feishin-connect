@@ -1,5 +1,6 @@
 import merge from 'lodash/merge';
 import { nanoid } from 'nanoid';
+import { useMemo } from 'react';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
@@ -1636,10 +1637,13 @@ export const usePlayerActions = () => {
         })),
     );
 
-    return {
-        ...actions,
-        setTimestamp: setTimestampStore,
-    };
+    return useMemo(
+        () => ({
+            ...actions,
+            setTimestamp: setTimestampStore,
+        }),
+        [actions],
+    );
 };
 
 export type AddToQueueByPlayType = Play;
