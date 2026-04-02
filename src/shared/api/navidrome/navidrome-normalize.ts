@@ -490,6 +490,8 @@ const normalizePlaylist = (
     item: z.infer<typeof ndType._response.playlist>,
     server?: null | ServerListItem,
 ): Playlist => {
+    const imageId = !item.uploadedImage ? item.id : `pl-${item.id}&square=true&_=${item.updatedAt}`;
+
     return {
         _itemType: LibraryItem.PLAYLIST,
         _serverId: server?.id || 'unknown',
@@ -498,7 +500,7 @@ const normalizePlaylist = (
         duration: item.duration * 1000,
         genres: [],
         id: item.id,
-        imageId: item.id,
+        imageId,
         imageUrl: null,
         name: item.name,
         owner: item.ownerName,
@@ -508,6 +510,7 @@ const normalizePlaylist = (
         size: item.size,
         songCount: item.songCount,
         sync: item.sync,
+        uploadedImage: item.uploadedImage,
     };
 };
 

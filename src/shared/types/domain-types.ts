@@ -344,6 +344,7 @@ export type Playlist = {
     size: null | number;
     songCount: null | number;
     sync?: boolean | null;
+    uploadedImage?: string;
 };
 
 export type RelatedAlbumArtist = {
@@ -968,6 +969,16 @@ export type DeletePlaylistArgs = BaseEndpointArgs & {
     query: DeletePlaylistQuery;
 };
 
+export type DeletePlaylistImageArgs = BaseEndpointArgs & {
+    query: DeletePlaylistImageQuery;
+};
+
+export type DeletePlaylistImageQuery = {
+    id: string;
+};
+
+export type DeletePlaylistImageResponse = boolean;
+
 export type DeletePlaylistQuery = { id: string };
 
 // Delete Playlist
@@ -1105,6 +1116,21 @@ export type UpdatePlaylistQuery = {
 
 // Update Playlist
 export type UpdatePlaylistResponse = null | undefined;
+
+export type UploadPlaylistImageArgs = BaseEndpointArgs & {
+    body: UploadPlaylistImageBody;
+    query: UploadPlaylistImageQuery;
+};
+
+export type UploadPlaylistImageBody = {
+    image: Uint8Array;
+};
+
+export type UploadPlaylistImageQuery = {
+    id: string;
+};
+
+export type UploadPlaylistImageResponse = boolean;
 
 type PlaylistListSortMap = {
     jellyfin: Record<PlaylistListSort, JFPlaylistListSort | undefined>;
@@ -1390,6 +1416,7 @@ export type ControllerEndpoint = {
         args: DeleteInternetRadioStationArgs,
     ) => Promise<DeleteInternetRadioStationResponse>;
     deletePlaylist: (args: DeletePlaylistArgs) => Promise<DeletePlaylistResponse>;
+    deletePlaylistImage?: (args: DeletePlaylistImageArgs) => Promise<DeletePlaylistImageResponse>;
     getAlbumArtistDetail: (args: AlbumArtistDetailArgs) => Promise<AlbumArtistDetailResponse>;
     getAlbumArtistInfo?: (args: AlbumArtistInfoArgs) => Promise<AlbumArtistInfoResponse | null>;
     getAlbumArtistList: (args: AlbumArtistListArgs) => Promise<AlbumArtistListResponse>;
@@ -1443,6 +1470,7 @@ export type ControllerEndpoint = {
         args: UpdateInternetRadioStationArgs,
     ) => Promise<UpdateInternetRadioStationResponse>;
     updatePlaylist: (args: UpdatePlaylistArgs) => Promise<UpdatePlaylistResponse>;
+    uploadPlaylistImage?: (args: UploadPlaylistImageArgs) => Promise<UploadPlaylistImageResponse>;
 };
 
 export type DownloadArgs = BaseEndpointArgs & {
@@ -1515,6 +1543,9 @@ export type InternalControllerEndpoint = {
     deletePlaylist: (
         args: ReplaceApiClientProps<DeletePlaylistArgs>,
     ) => Promise<DeletePlaylistResponse>;
+    deletePlaylistImage?: (
+        args: ReplaceApiClientProps<DeletePlaylistImageArgs>,
+    ) => Promise<DeletePlaylistImageResponse>;
     getAlbumArtistDetail: (
         args: ReplaceApiClientProps<AlbumArtistDetailArgs>,
     ) => Promise<AlbumArtistDetailResponse>;
@@ -1599,6 +1630,9 @@ export type InternalControllerEndpoint = {
     updatePlaylist: (
         args: ReplaceApiClientProps<UpdatePlaylistArgs>,
     ) => Promise<UpdatePlaylistResponse>;
+    uploadPlaylistImage?: (
+        args: ReplaceApiClientProps<UploadPlaylistImageArgs>,
+    ) => Promise<UploadPlaylistImageResponse>;
 };
 
 export type LyricGetQuery = {

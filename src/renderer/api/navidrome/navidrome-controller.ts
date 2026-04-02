@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { set } from 'idb-keyval';
 import orderBy from 'lodash/orderBy';
 
@@ -12,6 +13,8 @@ import {
     albumArtistListSortMap,
     albumListSortMap,
     AuthenticationResponse,
+    DeletePlaylistImageArgs,
+    DeletePlaylistImageResponse,
     genreListSortMap,
     InternalControllerEndpoint,
     playlistListSortMap,
@@ -23,6 +26,8 @@ import {
     SortOrder,
     sortOrderMap,
     tagListSortMap,
+    UploadPlaylistImageArgs,
+    UploadPlaylistImageResponse,
     userListSortMap,
 } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
@@ -30,6 +35,7 @@ import { ServerFeature } from '/@/shared/types/features-types';
 const VERSION_INFO: VersionInfo = [
     // Why 2? Subsonic controller will return 1 for its own implementation
     // Use 2 to denote that Navidrome's own API has a different endpoint
+    ['0.61.0', { [ServerFeature.PLAYLIST_IMAGE_UPLOAD]: [1] }],
     ['0.60.4', { [ServerFeature.TRACK_YES_NO_RATING_FILTER]: [1] }],
     ['0.57.0', { [ServerFeature.SERVER_PLAY_QUEUE]: [2] }],
     ['0.56.0', { [ServerFeature.TRACK_ALBUM_ARTIST_SEARCH]: [1] }],
@@ -186,6 +192,23 @@ export const NavidromeController: InternalControllerEndpoint = {
         }
 
         return null;
+    },
+    deletePlaylistImage: async (
+        args: DeletePlaylistImageArgs,
+    ): Promise<DeletePlaylistImageResponse> => {
+        const { apiClientProps, query } = args;
+
+        const res = await ndApiClient(apiClientProps as any).deletePlaylistImage({
+            params: {
+                id: query.id,
+            },
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to delete playlist image');
+        }
+
+        return res.body.data.status === 'ok';
     },
     getAlbumArtistDetail: async (args) => {
         const { apiClientProps, query } = args;
@@ -1169,5 +1192,41 @@ export const NavidromeController: InternalControllerEndpoint = {
         }
 
         return null;
+    },
+    uploadPlaylistImage: async (
+        args: UploadPlaylistImageArgs,
+    ): Promise<UploadPlaylistImageResponse> => {
+        const { apiClientProps, body, query } = args;
+
+        const server = apiClientProps.server;
+        const serverUrl = server?.url?.replace(/\/$/, '');
+
+        if (!serverUrl) {
+            throw new Error('Server is required');
+        }
+
+        const form = new FormData();
+        const bytes = body.image as Uint8Array<ArrayBuffer>;
+        const fileLike =
+            typeof File !== 'undefined'
+                ? new File([bytes], 'image', { type: 'application/octet-stream' })
+                : new Blob([bytes], { type: 'application/octet-stream' });
+        form.append('image', fileLike as any);
+
+        const res = await axios.post(`${serverUrl}/api/playlist/${query.id}/image`, form, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                ...(server?.ndCredential && {
+                    'x-nd-authorization': `Bearer ${server.ndCredential}`,
+                }),
+            },
+            signal: apiClientProps.signal,
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to upload playlist image');
+        }
+
+        return res.data?.status === 'ok';
     },
 };

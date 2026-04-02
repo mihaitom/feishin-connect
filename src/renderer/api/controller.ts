@@ -189,6 +189,20 @@ export const controller: GeneralController = {
             server.type,
         )?.(addContext({ ...args, apiClientProps: { ...args.apiClientProps, server } }));
     },
+    deletePlaylistImage(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            throw new Error(
+                `${i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' })}: deletePlaylistImage`,
+            );
+        }
+
+        return apiController(
+            'deletePlaylistImage',
+            server.type,
+        )?.(addContext({ ...args, apiClientProps: { ...args.apiClientProps, server } }));
+    },
     getAlbumArtistDetail(args) {
         const server = getServerById(args.apiClientProps.serverId);
 
@@ -957,6 +971,20 @@ export const controller: GeneralController = {
 
         return apiController(
             'updatePlaylist',
+            server.type,
+        )?.(addContext({ ...args, apiClientProps: { ...args.apiClientProps, server } }));
+    },
+    uploadPlaylistImage(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            throw new Error(
+                `${i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' })}: uploadPlaylistImage`,
+            );
+        }
+
+        return apiController(
+            'uploadPlaylistImage',
             server.type,
         )?.(addContext({ ...args, apiClientProps: { ...args.apiClientProps, server } }));
     },

@@ -8,6 +8,7 @@ export enum ServerFeature {
     MUSIC_FOLDER_MULTISELECT = 'musicFolderMultiselect',
     OS_FORM_POST = 'osFormPost',
     OS_TRANSCODE_DECISION = 'osTranscodeDecision',
+    PLAYLIST_IMAGE_UPLOAD = 'playlistImageUpload',
     PLAYLISTS_SMART = 'playlistsSmart',
     PUBLIC_PLAYLIST = 'publicPlaylist',
     SERVER_PLAY_QUEUE = 'serverPlayQueue',

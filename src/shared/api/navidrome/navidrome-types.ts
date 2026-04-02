@@ -624,6 +624,7 @@ const playlist = z.object({
     songCount: z.number(),
     sync: z.boolean(),
     updatedAt: z.string(),
+    uploadedImage: z.string().optional(),
 });
 
 const playlistList = z.array(playlist);
@@ -658,6 +659,18 @@ const createPlaylistParameters = z.object({
 const updatePlaylist = playlist;
 
 const updatePlaylistParameters = createPlaylistParameters.partial();
+
+const uploadPlaylistImage = z.object({
+    status: z.string(),
+});
+
+const uploadPlaylistImageParameters = z.object({
+    image: z.instanceof(Uint8Array),
+});
+
+const deletePlaylistImage = z.object({
+    status: z.string(),
+});
 
 const deletePlaylist = z.null();
 
@@ -760,6 +773,7 @@ export const ndType = {
         songList: songListParameters,
         tagList: tagListParameters,
         updatePlaylist: updatePlaylistParameters,
+        uploadPlaylistImage: uploadPlaylistImageParameters,
         userList: userListParameters,
     },
     _response: {
@@ -771,6 +785,7 @@ export const ndType = {
         authenticate,
         createPlaylist,
         deletePlaylist,
+        deletePlaylistImage,
         error,
         genre,
         genreList,
@@ -787,6 +802,7 @@ export const ndType = {
         songList,
         tagList,
         updatePlaylist,
+        uploadPlaylistImage,
         user,
         userList,
     },
