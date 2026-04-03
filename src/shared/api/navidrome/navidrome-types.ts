@@ -660,6 +660,12 @@ const updatePlaylist = playlist;
 
 const updatePlaylistParameters = createPlaylistParameters.partial();
 
+const updateInternetRadioStationParameters = z.object({
+    homePageUrl: z.string().optional(),
+    name: z.string(),
+    streamUrl: z.string(),
+});
+
 const uploadPlaylistImage = z.object({
     status: z.string(),
 });
@@ -672,7 +678,13 @@ const deletePlaylistImage = z.object({
     status: z.string(),
 });
 
+const uploadInternetRadioStationImage = uploadPlaylistImage;
+const uploadInternetRadioStationImageParameters = uploadPlaylistImageParameters;
+const deleteInternetRadioStationImage = deletePlaylistImage;
+
 const deletePlaylist = z.null();
+
+const deleteInternetRadioStation = deletePlaylist;
 
 const addToPlaylist = z.object({
     added: z.number(),
@@ -748,12 +760,35 @@ const queue = z.object({
     userId: z.string(),
 });
 
+export enum NDRadioListSort {
+    NAME = 'name',
+}
+
+const radioStation = z.object({
+    createdAt: z.string(),
+    homePageUrl: z.string().optional(),
+    id: z.string(),
+    name: z.string(),
+    streamUrl: z.string(),
+    updatedAt: z.string(),
+    uploadedImage: z.string().optional(),
+});
+
+const radioList = z.array(radioStation);
+
+const updateInternetRadioStation = radioStation;
+
+const radioListParameters = optionalPaginationParameters.extend({
+    _sort: z.nativeEnum(NDRadioListSort).optional(),
+});
+
 export const ndType = {
     _enum: {
         albumArtistList: NDAlbumArtistListSort,
         albumList: NDAlbumListSort,
         genreList: genreListSort,
         playlistList: NDPlaylistListSort,
+        radioList: NDRadioListSort,
         songList: NDSongListSort,
         tagList: NDTagListSort,
         userList: ndUserListSort,
@@ -767,12 +802,15 @@ export const ndType = {
         genreList: genreListParameters,
         moveItem: moveItemParameters,
         playlistList: playlistListParameters,
+        radioList: radioListParameters,
         removeFromPlaylist: removeFromPlaylistParameters,
         saveQueue: saveQueueParameters,
         shareItem: shareItemParameters,
         songList: songListParameters,
         tagList: tagListParameters,
+        updateInternetRadioStation: updateInternetRadioStationParameters,
         updatePlaylist: updatePlaylistParameters,
+        uploadInternetRadioStationImage: uploadInternetRadioStationImageParameters,
         uploadPlaylistImage: uploadPlaylistImageParameters,
         userList: userListParameters,
     },
@@ -784,6 +822,8 @@ export const ndType = {
         albumList,
         authenticate,
         createPlaylist,
+        deleteInternetRadioStation,
+        deleteInternetRadioStationImage,
         deletePlaylist,
         deletePlaylistImage,
         error,
@@ -795,13 +835,17 @@ export const ndType = {
         playlistSong,
         playlistSongList,
         queue,
+        radioList,
+        radioStation,
         removeFromPlaylist,
         saveQueue,
         shareItem,
         song,
         songList,
         tagList,
+        updateInternetRadioStation,
         updatePlaylist,
+        uploadInternetRadioStationImage,
         uploadPlaylistImage,
         user,
         userList,

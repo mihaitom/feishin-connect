@@ -432,6 +432,8 @@ const normalizeInternetRadioStation = (
     return {
         homepageUrl: item.homepageUrl || null,
         id: item.id,
+        imageId: item.coverArt?.toString() || null,
+        imageUrl: null,
         name: item.name,
         streamUrl: item.streamUrl,
     };

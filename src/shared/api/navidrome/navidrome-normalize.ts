@@ -8,6 +8,7 @@ import {
     AlbumArtist,
     ExplicitStatus,
     Genre,
+    InternetRadioStation,
     LibraryItem,
     Playlist,
     RelatedArtist,
@@ -543,10 +544,28 @@ const normalizeUser = (item: z.infer<typeof ndType._response.user>): User => {
     };
 };
 
+const normalizeInternetRadioStation = (
+    item: z.infer<typeof ndType._response.radioStation>,
+): InternetRadioStation => {
+    const homepageUrl = item.homePageUrl?.trim() ? item.homePageUrl : null;
+    const imageId = item.uploadedImage ? `ra-${item.id}&square=true&_=${item.updatedAt}` : item.id;
+
+    return {
+        homepageUrl,
+        id: item.id,
+        imageId,
+        imageUrl: null,
+        name: item.name,
+        streamUrl: item.streamUrl,
+        uploadedImage: item.uploadedImage || null,
+    };
+};
+
 export const ndNormalize = {
     album: normalizeAlbum,
     albumArtist: normalizeAlbumArtist,
     genre: normalizeGenre,
+    internetRadioStation: normalizeInternetRadioStation,
     playlist: normalizePlaylist,
     song: normalizeSong,
     user: normalizeUser,
