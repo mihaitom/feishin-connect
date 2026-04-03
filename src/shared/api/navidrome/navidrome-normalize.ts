@@ -460,7 +460,7 @@ const normalizePlaylist = (
     item: z.infer<typeof ndType._response.playlist>,
     server?: null | ServerListItem,
 ): Playlist => {
-    const imageId = !item.uploadedImage ? item.id : `pl-${item.id}&square=true&_=${item.updatedAt}`;
+    const imageId = !item.uploadedImage ? item.id : `${item.id}&_=${item.updatedAt}`;
 
     return {
         _itemType: LibraryItem.PLAYLIST,
@@ -517,7 +517,7 @@ const normalizeInternetRadioStation = (
     item: z.infer<typeof ndType._response.radioStation>,
 ): InternetRadioStation => {
     const homepageUrl = item.homePageUrl?.trim() ? item.homePageUrl : null;
-    const imageId = item.uploadedImage ? `ra-${item.id}&square=true&_=${item.updatedAt}` : item.id;
+    const imageId = item.uploadedImage ? `${item.id}&_=${item.updatedAt}` : item.id;
 
     return {
         homepageUrl,
