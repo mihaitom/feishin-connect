@@ -1,6 +1,7 @@
 import z from 'zod';
 
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
+import { coerceYear, parsePartialIsoDate } from '/@/shared/api/partial-iso-date';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
 import { replacePathPrefix } from '/@/shared/api/utils';
 import {
@@ -34,95 +35,57 @@ const normalizePlayDate = (item: WithDate): null | string => {
     return !item.playDate || item.playDate.includes('0001-') ? null : item.playDate;
 };
 
-const matchesFullDate = (date: string) => {
-    return Boolean(date.match(/^\d{4}-\d{2}-\d{2}$/));
-};
-
-const matchesYearOnly = (date: string) => {
-    return Boolean(date.match(/^\d{4}$/));
-};
-
-const normalizeReleaseDate = (item: {
+const normalizeNavidromeReleaseDate = (item: {
     date?: string;
     minYear?: number;
     releaseDate?: string;
-}): { date: null | string; year: null | number } => {
-    if (item.releaseDate && matchesFullDate(item.releaseDate)) {
-        return {
-            date: item.releaseDate,
-            year: parseInt(item.releaseDate.split('-')[0]),
-        };
-    } else if (item.releaseDate && matchesYearOnly(item.releaseDate)) {
-        return {
-            date: null,
-            year: parseInt(item.releaseDate),
-        };
+}): { date: null | string; year: number } => {
+    const fromRelease = parsePartialIsoDate(item.releaseDate);
+    if (fromRelease.date) {
+        return fromRelease;
     }
 
-    if (item.date && matchesFullDate(item.date)) {
-        return {
-            date: item.date,
-            year: parseInt(item.date.split('-')[0]),
-        };
-    } else if (item.date && matchesYearOnly(item.date)) {
-        return {
-            date: null,
-            year: parseInt(item.date),
-        };
+    const fromDateField = parsePartialIsoDate(item.date);
+    if (fromDateField.date) {
+        return fromDateField;
     }
 
-    return {
-        date: null,
-        year: item.minYear ?? null,
-    };
+    const y = coerceYear(item.minYear);
+    if (y > 0) {
+        return { date: String(y), year: y };
+    }
+
+    return { date: null, year: 0 };
 };
 
-const normalizeOriginalDate = (item: {
+const normalizeNavidromeOriginalDate = (item: {
     date?: string;
+    minOriginalYear?: number;
     minYear?: number;
     originalDate?: string;
     releaseDate?: string;
-}): { date: null | string; year: null | number } => {
-    if (item.originalDate && matchesFullDate(item.originalDate)) {
-        return {
-            date: item.originalDate,
-            year: parseInt(item.originalDate.split('-')[0]),
-        };
-    } else if (item.originalDate && matchesYearOnly(item.originalDate)) {
-        return {
-            date: null,
-            year: parseInt(item.originalDate),
-        };
+}): { date: null | string; year: number } => {
+    const fromOriginal = parsePartialIsoDate(item.originalDate);
+    if (fromOriginal.date) {
+        return fromOriginal;
     }
 
-    if (item.releaseDate && matchesFullDate(item.releaseDate)) {
-        return {
-            date: item.releaseDate,
-            year: parseInt(item.releaseDate.split('-')[0]),
-        };
-    } else if (item.releaseDate && matchesYearOnly(item.releaseDate)) {
-        return {
-            date: null,
-            year: parseInt(item.releaseDate),
-        };
+    const fromRelease = parsePartialIsoDate(item.releaseDate);
+    if (fromRelease.date) {
+        return fromRelease;
     }
 
-    if (item.date && matchesFullDate(item.date)) {
-        return {
-            date: item.date,
-            year: parseInt(item.date.split('-')[0]),
-        };
-    } else if (item.date && matchesYearOnly(item.date)) {
-        return {
-            date: null,
-            year: parseInt(item.date),
-        };
+    const fromDateField = parsePartialIsoDate(item.date);
+    if (fromDateField.date) {
+        return fromDateField;
     }
 
-    return {
-        date: null,
-        year: item.minYear ?? null,
-    };
+    const y = coerceYear(item.minOriginalYear ?? item.minYear);
+    if (y > 0) {
+        return { date: String(y), year: y };
+    }
+
+    return { date: null, year: 0 };
 };
 
 const getArtists = (
@@ -244,6 +207,12 @@ const normalizeSong = (
         id = item.id;
     }
 
+    const fromSongRelease = parsePartialIsoDate(item.releaseDate);
+    const songApiYear = coerceYear(item.year);
+    const releaseYear: null | number =
+        fromSongRelease.year > 0 ? fromSongRelease.year : songApiYear > 0 ? songApiYear : null;
+    const releaseDate = fromSongRelease.date ?? (songApiYear > 0 ? String(songApiYear) : null);
+
     return {
         album: item.album,
         albumId: item.albumId,
@@ -302,8 +271,8 @@ const normalizeSong = (
                 : null,
         playCount: item.playCount || 0,
         playlistItemId,
-        releaseDate: normalizeReleaseDate(item).date,
-        releaseYear: item.year || null,
+        releaseDate,
+        releaseYear,
         sampleRate: item.sampleRate || null,
         size: item.size,
         sortName: item.orderTitle,
@@ -365,8 +334,8 @@ const normalizeAlbum = (
     pathReplace?: string,
     pathReplaceWith?: string,
 ): Album => {
-    const releaseDate = normalizeReleaseDate(item);
-    const originalDate = normalizeOriginalDate(item);
+    const releaseDate = normalizeNavidromeReleaseDate(item);
+    const originalDate = normalizeNavidromeOriginalDate(item);
 
     return {
         ...parseAlbumTags(item),
@@ -408,7 +377,7 @@ const normalizeAlbum = (
         playCount: item.playCount || 0,
         releaseDate: releaseDate.date,
         releaseType: item.mbzAlbumType || null,
-        releaseYear: releaseDate.year,
+        releaseYear: releaseDate.year > 0 ? releaseDate.year : null,
         size: item.size,
         songCount: item.songCount,
         songs: item.songs

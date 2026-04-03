@@ -188,12 +188,12 @@ export type Album = {
     mbzId: null | string;
     mbzReleaseGroupId: null | string;
     name: string;
-    originalDate: null | string;
-    originalYear: null | number;
+    originalDate: null | PartialIsoDateString;
+    originalYear: number;
     participants: null | Record<string, RelatedArtist[]>;
     playCount: null | number;
     recordLabels: string[];
-    releaseDate: null | string;
+    releaseDate: null | PartialIsoDateString;
     releaseType: null | string;
     releaseTypes: string[];
     releaseYear: null | number;
@@ -326,6 +326,8 @@ export type MusicFolder = {
 
 export type MusicFoldersResponse = MusicFolder[];
 
+export type PartialIsoDateString = string;
+
 export type Playlist = {
     _itemType: LibraryItem.PLAYLIST;
     _serverId: string;
@@ -398,7 +400,7 @@ export type Song = {
     peak: GainInfo | null;
     playCount: number;
     playlistItemId?: string;
-    releaseDate: null | string;
+    releaseDate: null | PartialIsoDateString;
     releaseYear: null | number;
     sampleRate: null | number;
     size: number;
