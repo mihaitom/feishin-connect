@@ -216,6 +216,10 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             return;
         }
 
+        if (playerStatus !== PlayerStatus.PLAYING) {
+            return;
+        }
+
         const updateProgress = async () => {
             if (!mpvPlayer || !isMountedRef.current) {
                 return;
@@ -245,7 +249,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                 progressIntervalRef.current = null;
             }
         };
-    }, [hasCurrentSong, isTransitioning, onProgress]);
+    }, [hasCurrentSong, isTransitioning, onProgress, playerStatus]);
 
     const { mediaAutoNext } = usePlayerActions();
 
