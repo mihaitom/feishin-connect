@@ -341,5 +341,5 @@ export const AppRouter = () => {
         </HashRouter>
     );
 
-    return <Suspense fallback={<></>}>{router}</Suspense>;
+    return <Suspense fallback={<Spinner container />}>{router}</Suspense>;
 };
