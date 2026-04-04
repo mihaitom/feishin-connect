@@ -59,7 +59,11 @@ interface Actions {
     mediaSeekToTimestamp: (timestamp: number) => void;
     mediaSkipBackward: (offset?: number) => void;
     mediaSkipForward: (offset?: number) => void;
-    mediaStop: () => void;
+    /**
+     * @param options.reset - When true (default), sets seekToTimestamp(0) so the engine seeks to start.
+     * Timestamp display is always cleared to 0. Use false when the engine is already idle (e.g. mpv `stopped`) to skip that seek.
+     */
+    mediaStop: (options?: { reset?: boolean }) => void;
     mediaToggleMute: () => void;
     mediaTogglePlayPause: () => void;
     moveSelectedTo: (items: QueueSong[], uniqueId: string, edge: 'bottom' | 'top') => void;
@@ -1164,11 +1168,14 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         state.player.seekToTimestamp = uniqueSeekToTimestamp(newTimestamp);
                     });
                 },
-                mediaStop: () => {
+                mediaStop: (options?: { reset?: boolean }) => {
+                    const reset = options?.reset !== false;
                     set((state) => {
                         state.player.status = PlayerStatus.PAUSED;
-                        state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
                         setTimestampStore(0);
+                        if (reset) {
+                            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
+                        }
                     });
                 },
                 mediaToggleMute: () => {
