@@ -1717,6 +1717,8 @@ export const subscribeNextSongInsertion = (onChange: (song: QueueSong | undefine
                 queueIndex = mapShuffledToQueueIndex(queueIndex, state.queue.shuffled);
             }
 
+            const currentSong = queue.items[queueIndex];
+
             // Calculate next song based on shuffle and repeat settings
             let nextSong: QueueSong | undefined;
             if (isShuffleEnabled(state)) {
@@ -1734,20 +1736,25 @@ export const subscribeNextSongInsertion = (onChange: (song: QueueSong | undefine
                 nextSong = calculateNextSong(queueIndex, queue.items, repeat);
             }
 
-            return { index: queueIndex, song: nextSong };
+            return {
+                currentUniqueId: currentSong?._uniqueId,
+                nextSong,
+            };
         },
         (current, prev) => {
-            // Only trigger if:
-            // 1. We have a previous value (not the first call)
-            // 2. Index hasn't changed (not a natural advance)
-            // 3. Next song has changed (song was inserted)
-            if (
-                prev &&
-                current.index === prev.index &&
-                current.song?._uniqueId !== prev.song?._uniqueId
-            ) {
-                // Index stayed the same but next song changed = insertion at next position
-                onChange(current.song);
+            if (!prev) {
+                return;
+            }
+
+            // Still on the same track, but the upcoming song changed (queue edit: insert, reorder, etc.).
+            // Do not require the current track's queue index to stay fixed — e.g. inserting *before* the
+            // current item shifts its index in `queue.default`, and the old check missed that case.
+            const sameTrackStillPlaying =
+                current.currentUniqueId !== undefined &&
+                current.currentUniqueId === prev.currentUniqueId;
+
+            if (sameTrackStillPlaying && current.nextSong?._uniqueId !== prev.nextSong?._uniqueId) {
+                onChange(current.nextSong);
             }
         },
         {
