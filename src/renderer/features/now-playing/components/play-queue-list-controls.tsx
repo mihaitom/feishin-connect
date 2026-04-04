@@ -16,6 +16,8 @@ import { SearchInput } from '/@/renderer/features/shared/components/search-input
 import { useCurrentServer, usePlayerStoreBase } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { Box } from '/@/shared/components/box/box';
+import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { ServerFeature } from '/@/shared/types/features-types';
 import { ItemListKey, ListDisplayType } from '/@/shared/types/types';
@@ -33,6 +35,52 @@ export const PlayQueueListControls = ({
     tableRef,
     type,
 }: PlayQueueListOptionsProps) => {
+    return (
+        <Group
+            align="center"
+            gap="sm"
+            justify="flex-start"
+            px="md"
+            py="xs"
+            style={{ borderBottom: '1px solid var(--theme-colors-border)' }}
+            w="100%"
+            wrap="nowrap"
+        >
+            <Group gap="xs" style={{ flexShrink: 0 }} wrap="nowrap">
+                <QueueRestoreActions />
+                <QueuePlaybackIcons tableRef={tableRef} />
+            </Group>
+            <Divider h="60%" orientation="vertical" style={{ alignSelf: 'center' }} />
+            <Box style={{ display: 'flex', flex: 1, minWidth: 0 }}>
+                <SearchInput
+                    enableHotkey={false}
+                    fillContainer
+                    onChange={(e) => handleSearch(e.target.value)}
+                    value={searchTerm}
+                />
+            </Box>
+            <Divider h="60%" orientation="vertical" style={{ alignSelf: 'center' }} />
+            <Box style={{ flexShrink: 0 }}>
+                <ListConfigMenu
+                    displayTypes={[
+                        { hidden: true, value: ListDisplayType.GRID },
+                        ...SONG_DISPLAY_TYPES,
+                    ]}
+                    listKey={type}
+                    optionsConfig={{
+                        table: {
+                            itemsPerPage: { hidden: true },
+                            pagination: { hidden: true },
+                        },
+                    }}
+                    tableColumnsData={SONG_TABLE_COLUMNS}
+                />
+            </Box>
+        </Group>
+    );
+};
+
+const QueuePlaybackIcons = ({ tableRef }: { tableRef: RefObject<ItemListHandle | null> }) => {
     const { t } = useTranslation();
     const player = usePlayer();
 
@@ -52,53 +100,29 @@ export const PlayQueueListControls = ({
     };
 
     return (
-        <Group h="65px" justify="space-between" px="1rem" py="1rem" w="100%">
-            <Group gap="xs">
-                <QueueRestoreActions />
-                <ActionIcon
-                    icon="mediaShuffle"
-                    iconProps={{ size: 'lg' }}
-                    onClick={handleShuffleQueue}
-                    tooltip={{ label: t('player.shuffle', { postProcess: 'sentenceCase' }) }}
-                    variant="subtle"
-                />
-                <ActionIcon
-                    icon="x"
-                    iconProps={{ size: 'lg' }}
-                    onClick={handleClearQueue}
-                    tooltip={{ label: t('action.clearQueue', { postProcess: 'sentenceCase' }) }}
-                    variant="subtle"
-                />
-                <ActionIcon
-                    icon="goToItem"
-                    iconProps={{ size: 'lg' }}
-                    onClick={handleJumpToCurrent}
-                    tooltip={{ label: t('action.goToCurrent', { postProcess: 'sentenceCase' }) }}
-                    variant="subtle"
-                />
-            </Group>
-            <Group gap="xs">
-                <SearchInput
-                    enableHotkey={false}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    value={searchTerm}
-                />
-                <ListConfigMenu
-                    displayTypes={[
-                        { hidden: true, value: ListDisplayType.GRID },
-                        ...SONG_DISPLAY_TYPES,
-                    ]}
-                    listKey={type}
-                    optionsConfig={{
-                        table: {
-                            itemsPerPage: { hidden: true },
-                            pagination: { hidden: true },
-                        },
-                    }}
-                    tableColumnsData={SONG_TABLE_COLUMNS}
-                />
-            </Group>
-        </Group>
+        <>
+            <ActionIcon
+                icon="mediaShuffle"
+                iconProps={{ size: 'lg' }}
+                onClick={handleShuffleQueue}
+                tooltip={{ label: t('player.shuffle', { postProcess: 'sentenceCase' }) }}
+                variant="subtle"
+            />
+            <ActionIcon
+                icon="x"
+                iconProps={{ size: 'lg' }}
+                onClick={handleClearQueue}
+                tooltip={{ label: t('action.clearQueue', { postProcess: 'sentenceCase' }) }}
+                variant="subtle"
+            />
+            <ActionIcon
+                icon="goToItem"
+                iconProps={{ size: 'lg' }}
+                onClick={handleJumpToCurrent}
+                tooltip={{ label: t('action.goToCurrent', { postProcess: 'sentenceCase' }) }}
+                variant="subtle"
+            />
+        </>
     );
 };
 
