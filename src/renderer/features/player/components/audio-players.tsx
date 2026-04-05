@@ -60,9 +60,11 @@ const CODEC_PROBES = [
 ];
 
 const DEFAULT_TRANSCODING_PROFILES = [
-    { audioCodec: 'mp3', container: 'mp3', protocol: 'http' },
     { audioCodec: 'opus', container: 'ogg', protocol: 'http' },
+    { audioCodec: 'mp3', container: 'mp3', protocol: 'http' },
 ];
+
+const SAFARI_TRANSCODING_PROFILES = [{ audioCodec: 'mp3', container: 'mp3', protocol: 'http' }];
 
 const DIRECT_PLAY_PROFILES: {
     audioCodecs: string[];
@@ -71,7 +73,7 @@ const DIRECT_PLAY_PROFILES: {
 }[] = [];
 
 export function getDefaultTranscodingProfiles() {
-    return DEFAULT_TRANSCODING_PROFILES;
+    return isSafari() ? SAFARI_TRANSCODING_PROFILES : DEFAULT_TRANSCODING_PROFILES;
 }
 
 export function getDirectPlayProfiles() {
@@ -95,6 +97,11 @@ function detectBrowserProfile() {
     logFn.info('DIRECT_PLAY_PROFILES', { meta: DIRECT_PLAY_PROFILES });
 
     return DIRECT_PLAY_PROFILES;
+}
+
+function isSafari() {
+    const ua = navigator.userAgent;
+    return ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Chromium');
 }
 
 export const AudioPlayers = () => {
