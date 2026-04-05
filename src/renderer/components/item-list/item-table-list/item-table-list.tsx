@@ -45,9 +45,11 @@ import { useTableRowModel } from '/@/renderer/components/item-list/item-table-li
 import { useTableScrollToIndex } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-scroll-to-index';
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import {
+    ItemTableListColumnResizeLiveProvider,
     type ItemTableListConfig,
     ItemTableListConfigProvider,
     ItemTableListStoreProvider,
+    useItemTableListColumnResizeLiveState,
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-context';
 import {
     MemoizedCellRouter,
@@ -541,7 +543,7 @@ const VirtualizedTableGrid = ({
                         })}
                         style={{
                             minHeight: `${pinnedRowsMinHeightPx}px`,
-                            overflow: 'hidden',
+                            overflow: 'visible',
                         }}
                     >
                         <Grid
@@ -659,7 +661,7 @@ const VirtualizedTableGrid = ({
                             })}
                             style={{
                                 minHeight: `${pinnedRowsMinHeightPx}px`,
-                                overflow: 'hidden',
+                                overflow: 'visible',
                             }}
                         >
                             <Grid
@@ -968,7 +970,7 @@ const ItemTableListStickyUI = memo(
                                 style={{
                                     flex: '0 1 auto',
                                     minWidth: `${pinnedLeftWidth}px`,
-                                    overflow: 'hidden',
+                                    overflow: 'visible',
                                 }}
                             >
                                 {parsedColumns
@@ -1052,7 +1054,7 @@ const ItemTableListStickyUI = memo(
                                 style={{
                                     flex: '0 1 auto',
                                     minWidth: `${pinnedRightWidth}px`,
-                                    overflow: 'hidden',
+                                    overflow: 'visible',
                                 }}
                             >
                                 {parsedColumns
@@ -1288,6 +1290,30 @@ const BaseItemTableList = ({
         columns,
         totalContainerWidth,
     });
+
+    const { clearColumnResizePreview, columnResizePreview, scheduleColumnResizePreview } =
+        useItemTableListColumnResizeLiveState();
+
+    const columnResizeLiveValue = useMemo(
+        () => ({
+            clearColumnResizePreview,
+            scheduleColumnResizePreview,
+        }),
+        [clearColumnResizePreview, scheduleColumnResizePreview],
+    );
+
+    const displayColumnWidths = useMemo(() => {
+        if (!columnResizePreview) {
+            return calculatedColumnWidths;
+        }
+        const next = calculatedColumnWidths.slice();
+        const { columnIndex, width } = columnResizePreview;
+        if (columnIndex >= 0 && columnIndex < next.length) {
+            next[columnIndex] = width;
+        }
+        return next;
+    }, [calculatedColumnWidths, columnResizePreview]);
+
     const playerContext = usePlayer();
 
     const {
@@ -1505,7 +1531,7 @@ const BaseItemTableList = ({
     // Create itemProps for sticky header
     const stickyHeaderItemProps: TableItemProps = useMemo(
         () => ({
-            calculatedColumnWidths,
+            calculatedColumnWidths: displayColumnWidths,
             cellPadding,
             columns: parsedColumns,
             controls,
@@ -1525,9 +1551,9 @@ const BaseItemTableList = ({
             internalState,
             itemType,
             pinnedLeftColumnCount,
-            pinnedLeftColumnWidths: calculatedColumnWidths.slice(0, pinnedLeftColumnCount),
+            pinnedLeftColumnWidths: displayColumnWidths.slice(0, pinnedLeftColumnCount),
             pinnedRightColumnCount,
-            pinnedRightColumnWidths: calculatedColumnWidths.slice(
+            pinnedRightColumnWidths: displayColumnWidths.slice(
                 pinnedLeftColumnCount + totalColumnCount,
             ),
             playerContext,
@@ -1536,7 +1562,7 @@ const BaseItemTableList = ({
             tableId,
         }),
         [
-            calculatedColumnWidths,
+            displayColumnWidths,
             cellPadding,
             controls,
             parsedColumns,
@@ -1641,71 +1667,81 @@ const BaseItemTableList = ({
         };
     }, [CellComponent, columnCellComponents]);
 
+    const tableMotion = (
+        <motion.div
+            className={styles.itemTableListContainer}
+            onKeyDown={handleKeyDown}
+            onMouseDown={(e) => {
+                const element = e.currentTarget as HTMLDivElement;
+                // Focus without scrolling into view
+                if (element.focus) {
+                    element.focus({ preventScroll: true });
+                }
+            }}
+            ref={mergedContainerRef}
+            tabIndex={0}
+            {...animationProps.fadeIn}
+            transition={{ duration: enableEntranceAnimation ? 0.3 : 0, ease: 'anticipate' }}
+        >
+            <ItemTableListStickyUI
+                calculatedColumnWidths={displayColumnWidths}
+                CellComponent={optimizedCellComponent}
+                containerRef={containerRef}
+                data={data}
+                enableHeader={!!enableHeader}
+                enableStickyGroupRows={!!enableStickyGroupRows}
+                enableStickyHeader={!!enableStickyHeader}
+                getRowHeightWrapper={getRowHeightWrapper}
+                groups={groups}
+                headerHeight={headerHeight}
+                internalState={internalState}
+                parsedColumns={parsedColumns}
+                pinnedLeftColumnCount={pinnedLeftColumnCount}
+                pinnedLeftColumnRef={pinnedLeftColumnRef}
+                pinnedRightColumnCount={pinnedRightColumnCount}
+                pinnedRightColumnRef={pinnedRightColumnRef}
+                pinnedRowRef={pinnedRowRef}
+                rowHeight={rowHeight}
+                rowRef={rowRef}
+                size={size}
+                stickyHeaderItemProps={stickyHeaderItemProps}
+                totalColumnCount={totalColumnCount}
+            />
+            <MemoizedVirtualizedTableGrid
+                calculatedColumnWidths={displayColumnWidths}
+                CellComponent={optimizedCellComponent}
+                data={data}
+                dataWithGroups={dataWithGroups}
+                enableScrollShadow={enableScrollShadow}
+                getItem={getItem}
+                headerHeight={headerHeight}
+                mergedRowRef={mergedRowRef}
+                onRangeChanged={onRangeChanged}
+                parsedColumns={parsedColumns}
+                pinnedLeftColumnCount={pinnedLeftColumnCount}
+                pinnedLeftColumnRef={pinnedLeftColumnRef}
+                pinnedRightColumnCount={pinnedRightColumnCount}
+                pinnedRightColumnRef={pinnedRightColumnRef}
+                pinnedRowCount={pinnedRowCount}
+                pinnedRowRef={pinnedRowRef}
+                scrollShadowStore={scrollShadowStore}
+                tableConfig={tableConfigValue}
+                totalColumnCount={totalColumnCount}
+                totalRowCount={totalRowCount}
+            />
+        </motion.div>
+    );
+
     return (
         <ItemTableListStoreProvider activeRowId={activeRowId}>
             <ItemTableListConfigProvider value={tableConfigValue}>
-                <motion.div
-                    className={styles.itemTableListContainer}
-                    onKeyDown={handleKeyDown}
-                    onMouseDown={(e) => {
-                        const element = e.currentTarget as HTMLDivElement;
-                        // Focus without scrolling into view
-                        if (element.focus) {
-                            element.focus({ preventScroll: true });
-                        }
-                    }}
-                    ref={mergedContainerRef}
-                    tabIndex={0}
-                    {...animationProps.fadeIn}
-                    transition={{ duration: enableEntranceAnimation ? 0.3 : 0, ease: 'anticipate' }}
-                >
-                    <ItemTableListStickyUI
-                        calculatedColumnWidths={calculatedColumnWidths}
-                        CellComponent={optimizedCellComponent}
-                        containerRef={containerRef}
-                        data={data}
-                        enableHeader={!!enableHeader}
-                        enableStickyGroupRows={!!enableStickyGroupRows}
-                        enableStickyHeader={!!enableStickyHeader}
-                        getRowHeightWrapper={getRowHeightWrapper}
-                        groups={groups}
-                        headerHeight={headerHeight}
-                        internalState={internalState}
-                        parsedColumns={parsedColumns}
-                        pinnedLeftColumnCount={pinnedLeftColumnCount}
-                        pinnedLeftColumnRef={pinnedLeftColumnRef}
-                        pinnedRightColumnCount={pinnedRightColumnCount}
-                        pinnedRightColumnRef={pinnedRightColumnRef}
-                        pinnedRowRef={pinnedRowRef}
-                        rowHeight={rowHeight}
-                        rowRef={rowRef}
-                        size={size}
-                        stickyHeaderItemProps={stickyHeaderItemProps}
-                        totalColumnCount={totalColumnCount}
-                    />
-                    <MemoizedVirtualizedTableGrid
-                        calculatedColumnWidths={calculatedColumnWidths}
-                        CellComponent={optimizedCellComponent}
-                        data={data}
-                        dataWithGroups={dataWithGroups}
-                        enableScrollShadow={enableScrollShadow}
-                        getItem={getItem}
-                        headerHeight={headerHeight}
-                        mergedRowRef={mergedRowRef}
-                        onRangeChanged={onRangeChanged}
-                        parsedColumns={parsedColumns}
-                        pinnedLeftColumnCount={pinnedLeftColumnCount}
-                        pinnedLeftColumnRef={pinnedLeftColumnRef}
-                        pinnedRightColumnCount={pinnedRightColumnCount}
-                        pinnedRightColumnRef={pinnedRightColumnRef}
-                        pinnedRowCount={pinnedRowCount}
-                        pinnedRowRef={pinnedRowRef}
-                        scrollShadowStore={scrollShadowStore}
-                        tableConfig={tableConfigValue}
-                        totalColumnCount={totalColumnCount}
-                        totalRowCount={totalRowCount}
-                    />
-                </motion.div>
+                {onColumnResized ? (
+                    <ItemTableListColumnResizeLiveProvider value={columnResizeLiveValue}>
+                        {tableMotion}
+                    </ItemTableListColumnResizeLiveProvider>
+                ) : (
+                    tableMotion
+                )}
             </ItemTableListConfigProvider>
         </ItemTableListStoreProvider>
     );
