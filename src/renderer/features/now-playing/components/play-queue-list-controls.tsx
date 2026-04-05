@@ -3,6 +3,8 @@ import { t } from 'i18next';
 import { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import styles from './play-queue-list-controls.module.css';
+
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { ItemListHandle } from '/@/renderer/components/item-list/types';
@@ -38,6 +40,7 @@ export const PlayQueueListControls = ({
     return (
         <Group
             align="center"
+            className={styles.toolbar}
             gap="sm"
             justify="flex-start"
             px="md"
@@ -141,7 +144,7 @@ const QueueRestoreActions = () => {
     }
 
     return (
-        <>
+        <span className={styles.restoreSection}>
             <ActionIcon
                 disabled={Boolean(isFetching)}
                 icon="upload"
@@ -168,6 +171,6 @@ const QueueRestoreActions = () => {
                 }}
                 variant="subtle"
             />
-        </>
+        </span>
     );
 };
