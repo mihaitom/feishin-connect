@@ -487,7 +487,7 @@ export const SubsonicController: InternalControllerEndpoint = {
             similarArtists:
                 artistInfo?.similarArtist?.map((artist) => ({
                     id: artist.id,
-                    imageId: null,
+                    imageId: artist.coverArt ?? artist.id,
                     imageUrl: null,
                     name: artist.name,
                     userFavorite: Boolean(artist.starred) || false,

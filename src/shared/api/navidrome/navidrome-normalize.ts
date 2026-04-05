@@ -444,8 +444,8 @@ const normalizeAlbumArtist = (
         similarArtists:
             item.similarArtists?.map((artist) => ({
                 id: artist.id,
-                imageId: null,
-                imageUrl: artist?.artistImageUrl?.replace(/\?size=\d+/, '') || null,
+                imageId: artist.id,
+                imageUrl: null,
                 name: artist.name,
                 userFavorite: Boolean(artist.starred) || false,
                 userRating: artist.userRating || null,
