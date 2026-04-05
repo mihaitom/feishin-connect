@@ -194,6 +194,14 @@ const ItemTableListColumnBase = (props: ItemTableListColumn) => {
         );
     }
 
+    if (type === TableColumn.LAYOUT_FILL) {
+        return (
+            <TableColumnContainer {...props} {...dragProps} controls={controls} type={type}>
+                {null}
+            </TableColumnContainer>
+        );
+    }
+
     if (itemType !== LibraryItem.FOLDER) {
         switch (type) {
             case TableColumn.ACTIONS:
@@ -829,7 +837,11 @@ export const TableColumnHeaderContainer = (
     const [isDraggedOver, setIsDraggedOver] = useState<Edge | null>(null);
 
     useEffect(() => {
-        if (!containerRef.current || !props.enableColumnReorder) {
+        if (
+            !containerRef.current ||
+            !props.enableColumnReorder ||
+            props.type === TableColumn.LAYOUT_FILL
+        ) {
             return;
         }
 
@@ -1011,6 +1023,7 @@ export const columnLabelMap: Record<TableColumn, ReactNode | string> = {
     [TableColumn.LAST_PLAYED]: i18n.t('table.column.lastPlayed', {
         postProcess: 'upperCase',
     }) as string,
+    [TableColumn.LAYOUT_FILL]: '',
     [TableColumn.OWNER]: i18n.t('table.column.owner', { postProcess: 'upperCase' }) as string,
     [TableColumn.PATH]: i18n.t('table.column.path', { postProcess: 'upperCase' }) as string,
     [TableColumn.PLAY_COUNT]: i18n.t('table.column.playCount', {

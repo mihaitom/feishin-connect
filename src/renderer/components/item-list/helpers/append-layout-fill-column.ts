@@ -1,8 +1,16 @@
 import { ItemTableListColumnConfig } from '/@/renderer/components/item-list/types';
+import { TableColumn } from '/@/shared/types/types';
 
-// Automatically set autoSize for all unpinned columns when auto-fit is off
-// This is a view-only helper and does not persist to settings
-export const autoSizeUnpinnedColumns = (
+const LAYOUT_FILL_COLUMN: ItemTableListColumnConfig = {
+    align: 'start',
+    autoSize: true,
+    id: TableColumn.LAYOUT_FILL,
+    isEnabled: true,
+    pinned: null,
+    width: 0,
+};
+
+export const appendLayoutFillColumn = (
     columns: ItemTableListColumnConfig[],
     autoFitColumns: boolean,
 ): ItemTableListColumnConfig[] => {
@@ -18,6 +26,5 @@ export const autoSizeUnpinnedColumns = (
         return columns;
     }
 
-    const idSet = new Set(unpinnedEnabled.map((c) => c.id));
-    return columns.map((c) => (idSet.has(c.id) ? { ...c, autoSize: true } : c));
+    return [...columns, LAYOUT_FILL_COLUMN];
 };
