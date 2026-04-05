@@ -21,6 +21,7 @@ import { type CellComponentProps, Grid } from 'react-window-v2';
 
 import styles from './item-table-list.module.css';
 
+import { autoSizeUnpinnedColumns } from '/@/renderer/components/item-list/helpers/autosize-unpinned-columns';
 import { createExtractRowId } from '/@/renderer/components/item-list/helpers/extract-row-id';
 import { useDefaultItemListControls } from '/@/renderer/components/item-list/helpers/item-list-controls';
 import {
@@ -1278,6 +1279,11 @@ const BaseItemTableList = ({
     const [centerContainerWidth, setCenterContainerWidth] = useState(0);
     const [totalContainerWidth, setTotalContainerWidth] = useState(0);
 
+    const columnsForLayout = useMemo(
+        () => autoSizeUnpinnedColumns(columns, autoFitColumns),
+        [autoFitColumns, columns],
+    );
+
     const {
         calculatedColumnWidths,
         parsedColumns,
@@ -1287,7 +1293,7 @@ const BaseItemTableList = ({
     } = useTableColumnModel({
         autoFitColumns,
         centerContainerWidth,
-        columns,
+        columns: columnsForLayout,
         totalContainerWidth,
     });
 
