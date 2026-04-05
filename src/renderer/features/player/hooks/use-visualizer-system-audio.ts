@@ -70,7 +70,7 @@ export function useVisualizerSystemAudio() {
         try {
             const stream = await navigator.mediaDevices.getDisplayMedia({
                 audio: true,
-                video: true,
+                video: false,
             });
 
             const audioTracks = stream.getAudioTracks();
