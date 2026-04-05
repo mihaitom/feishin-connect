@@ -173,11 +173,11 @@ const ShareItemContextModal = (props: any) => (
 );
 
 const LazyVisualizerSettingsContextModal = lazy(() =>
-    import(
-        '/@/renderer/features/visualizer/components/audiomotionanalyzer/visualizer-settings-modal'
-    ).then((module) => ({
-        default: module.VisualizerSettingsContextModal,
-    })),
+    import('/@/renderer/features/visualizer/components/audiomotionanalyzer/visualizer-settings-modal').then(
+        (module) => ({
+            default: module.VisualizerSettingsContextModal,
+        }),
+    ),
 );
 
 const VisualizerSettingsContextModal = (props: any) => (
@@ -200,7 +200,7 @@ const appRouterModals = {
 
 export const AppRouter = () => {
     const router = (
-        <HashRouter>
+        <HashRouter unstable_useTransitions={false}>
             <ModalsProvider modals={appRouterModals}>
                 <RouterErrorBoundary>
                     <Routes>
@@ -341,5 +341,5 @@ export const AppRouter = () => {
         </HashRouter>
     );
 
-    return <Suspense fallback={null}>{router}</Suspense>;
+    return router;
 };
