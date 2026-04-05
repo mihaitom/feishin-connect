@@ -11,6 +11,7 @@ import { lazy, memo, Suspense, useEffect, useMemo, useRef, useState } from 'reac
 
 import i18n from '/@/i18n/i18n';
 import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
+import { VisualizerSystemAudioBridge } from '/@/renderer/features/visualizer/components/visualizer-system-audio-bridge';
 import { useCheckForUpdates } from '/@/renderer/hooks/use-check-for-updates';
 import { useNativeMenuSync } from '/@/renderer/hooks/use-native-menu-sync';
 import { useSyncSettingsToMain } from '/@/renderer/hooks/use-sync-settings-to-main';
@@ -79,6 +80,7 @@ const AppShell = memo(function AppShell() {
             <WebAudioContext.Provider value={webAudioProvider}>
                 <PlayerProvider>
                     <AudioPlayers />
+                    <VisualizerSystemAudioBridge />
                     <AppRouter />
                 </PlayerProvider>
             </WebAudioContext.Provider>

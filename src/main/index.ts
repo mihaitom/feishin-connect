@@ -5,6 +5,7 @@ import {
     app,
     BrowserWindow,
     BrowserWindowConstructorOptions,
+    desktopCapturer,
     globalShortcut,
     ipcMain,
     Menu,
@@ -730,6 +731,22 @@ async function createWindow(first = true): Promise<void> {
     mainWindow.webContents.setWindowOpenHandler((edata) => {
         shell.openExternal(edata.url);
         return { action: 'deny' };
+    });
+
+    mainWindow.webContents.session.setDisplayMediaRequestHandler((_request, callback) => {
+        desktopCapturer
+            .getSources({ types: ['screen'] })
+            .then((sources) => {
+                if (sources.length > 0) {
+                    callback({ audio: 'loopback', video: sources[0] });
+                } else {
+                    callback({});
+                }
+            })
+            .catch((err) => {
+                log.warn('desktopCapturer.getSources failed', err);
+                callback({});
+            });
     });
 
     if (!disableAutoUpdates() && store.get('disable_auto_updates') !== true) {

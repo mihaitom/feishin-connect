@@ -1214,6 +1214,8 @@
         "mainText": "drop a file here"
     },
     "visualizer": {
+        "systemAudioCaptureFailed": "Could not start capture: {{message}}",
+        "systemAudioNoAudioTrack": "No audio track was returned. Ensure audio capture is enabled when prompted.",
         "visualizerType": "Visualizer Type",
         "cyclePresets": "Cycle Presets",
         "cycleTime": "Cycle Time (seconds)",
