@@ -53,8 +53,7 @@ const CODEC_PROBES = [
 
     { codec: 'flac', container: 'flac', mime: 'audio/flac' },
 
-    { codec: 'pcm', container: 'wav', mime: 'audio/x-wav' },
-    { codec: 'wav', container: 'wav', mime: 'audio/wav' },
+    { codec: ['pcm', 'wav'], container: 'wav', mime: 'audio/wav' },
 
     { codec: 'alac', container: 'mp4', mime: 'audio/mp4; codecs="alac"' },
 ];
