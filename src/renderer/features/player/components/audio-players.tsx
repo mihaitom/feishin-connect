@@ -25,6 +25,7 @@ import {
     useIsRadioActive,
 } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { RemoteHook } from '/@/renderer/features/remote/hooks/use-remote';
+import { VisualizerSystemAudioBridgeHook } from '/@/renderer/features/visualizer/components/visualizer-system-audio-bridge';
 import {
     updateQueueFavorites,
     updateQueueRatings,
@@ -135,6 +136,7 @@ export const AudioPlayers = () => {
             <UpdateCurrentSongHook />
             <RadioAudioInstanceHook />
             <RadioMetadataHook />
+            <VisualizerSystemAudioBridgeHook />
             <AutosaveHook />
             <AudioPlayersContent
                 audioContext={audioContext}

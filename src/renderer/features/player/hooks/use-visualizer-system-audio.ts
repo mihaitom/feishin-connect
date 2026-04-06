@@ -7,7 +7,17 @@ import { usePlaybackType } from '/@/renderer/store/settings.store';
 import { toast } from '/@/shared/components/toast/toast';
 import { PlayerType } from '/@/shared/types/types';
 
-export function useVisualizerSystemAudio() {
+export function useVisualizerSystemAudio(options: {
+    onSystemAudioCaptureDenied?: () => void;
+    onSystemAudioCaptureSuccess?: () => void;
+    shouldAttemptConnection: boolean;
+}) {
+    const { onSystemAudioCaptureDenied, onSystemAudioCaptureSuccess, shouldAttemptConnection } =
+        options;
+    const onDeniedRef = useRef(onSystemAudioCaptureDenied);
+    const onSuccessRef = useRef(onSystemAudioCaptureSuccess);
+    onDeniedRef.current = onSystemAudioCaptureDenied;
+    onSuccessRef.current = onSystemAudioCaptureSuccess;
     const playbackType = usePlaybackType();
     const { setWebAudio, webAudio } = useWebAudio();
     const webAudioRef = useRef(webAudio);
@@ -41,10 +51,10 @@ export function useVisualizerSystemAudio() {
     }, [setWebAudio]);
 
     useEffect(() => {
-        if (playbackType === PlayerType.WEB) {
+        if (playbackType === PlayerType.WEB || !shouldAttemptConnection) {
             disconnect();
         }
-    }, [playbackType, disconnect]);
+    }, [playbackType, shouldAttemptConnection, disconnect]);
 
     const connect = useCallback(async () => {
         if (!isElectron()) {
@@ -76,7 +86,7 @@ export function useVisualizerSystemAudio() {
             const audioTracks = stream.getAudioTracks();
             if (audioTracks.length === 0) {
                 stream.getTracks().forEach((t) => t.stop());
-                toast.error({ message: i18n.t('visualizer.systemAudioNoAudioTrack') });
+                onDeniedRef.current?.();
                 return;
             }
 
@@ -99,9 +109,11 @@ export function useVisualizerSystemAudio() {
             const next = { ...latest, visualizerInputs: [source] };
             setWebAudio(next);
             webAudioRef.current = next;
+            onSuccessRef.current?.();
         } catch (e) {
             const name = (e as DOMException)?.name;
             if (name === 'NotAllowedError' || name === 'AbortError') {
+                onDeniedRef.current?.();
                 return;
             }
             toast.error({
@@ -118,7 +130,7 @@ export function useVisualizerSystemAudio() {
     connectRef.current = connect;
 
     useEffect(() => {
-        if (playbackType !== PlayerType.LOCAL || !isElectron()) {
+        if (playbackType !== PlayerType.LOCAL || !isElectron() || !shouldAttemptConnection) {
             return;
         }
 
@@ -134,5 +146,10 @@ export function useVisualizerSystemAudio() {
         }
 
         void connectRef.current();
-    }, [playbackType, webAudio?.context, webAudio?.visualizerInputs?.length]);
+    }, [
+        playbackType,
+        shouldAttemptConnection,
+        webAudio?.context,
+        webAudio?.visualizerInputs?.length,
+    ]);
 }
