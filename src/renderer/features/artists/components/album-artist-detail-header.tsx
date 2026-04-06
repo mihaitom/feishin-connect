@@ -41,8 +41,13 @@ interface AlbumArtistDetailHeaderProps {
     albumsQuery: UseSuspenseQueryResult<AlbumListResponse, Error>;
 }
 
-function ArtistImageUploadOverlay({ data }: { data?: AlbumArtistDetailResponse }) {
-    const uploadArtistImageMutation = useUploadArtistImage({});
+function ArtistImageUploadOverlay({
+    data,
+    onUploadFile,
+}: {
+    data?: AlbumArtistDetailResponse;
+    onUploadFile: (file: File) => Promise<void>;
+}) {
     const deleteArtistImageMutation = useDeleteArtistImage({});
     const server = useCurrentServer();
 
@@ -54,16 +59,8 @@ function ArtistImageUploadOverlay({ data }: { data?: AlbumArtistDetailResponse }
             <FileButton
                 accept="image/*"
                 onChange={async (file) => {
-                    if (!file || !data?._serverId) return;
-
-                    const buffer = await file.arrayBuffer();
-                    uploadArtistImageMutation.mutate({
-                        apiClientProps: {
-                            serverId: data._serverId,
-                        },
-                        body: { image: new Uint8Array(buffer) },
-                        query: { id: data.id },
-                    });
+                    if (!file) return;
+                    await onUploadFile(file);
                 }}
             >
                 {(props) => (
@@ -146,6 +143,7 @@ export const AlbumArtistDetailHeader = forwardRef<HTMLDivElement, AlbumArtistDet
         const playButtonBehavior = usePlayButtonBehavior();
         const setFavorite = useSetFavorite();
         const setRating = useSetRating();
+        const uploadArtistImageMutation = useUploadArtistImage({});
 
         const albumArtistDetailSort = useAppStore((state) => state.albumArtistDetailSort);
         const sortBy = albumArtistDetailSort.sortBy;
@@ -244,10 +242,35 @@ export const AlbumArtistDetailHeader = forwardRef<HTMLDivElement, AlbumArtistDet
 
         const showRating = showRatings && detailQuery?.data?._serverType === ServerType.NAVIDROME;
 
+        const canUploadArtistImage =
+            hasFeature(server, ServerFeature.ARTIST_IMAGE_UPLOAD) &&
+            Boolean(detailQuery.data?._serverId);
+
+        const handleArtistImageUpload = useCallback(
+            async (file: File) => {
+                const artist = detailQuery.data;
+                if (!artist?._serverId) return;
+
+                const buffer = await file.arrayBuffer();
+                uploadArtistImageMutation.mutate({
+                    apiClientProps: {
+                        serverId: artist._serverId,
+                    },
+                    body: { image: new Uint8Array(buffer) },
+                    query: { id: artist.id },
+                });
+            },
+            [detailQuery.data, uploadArtistImageMutation],
+        );
+
         return (
             <LibraryHeader
-                compact
-                imageOverlay={<ArtistImageUploadOverlay data={detailQuery.data} />}
+                imageOverlay={
+                    <ArtistImageUploadOverlay
+                        data={detailQuery.data}
+                        onUploadFile={handleArtistImageUpload}
+                    />
+                }
                 imageUrl={headerImageUrl}
                 item={{
                     imageId: detailQuery.data?.imageId,
@@ -255,6 +278,7 @@ export const AlbumArtistDetailHeader = forwardRef<HTMLDivElement, AlbumArtistDet
                     route: AppRoute.LIBRARY_ALBUM_ARTISTS,
                     type: LibraryItem.ALBUM_ARTIST,
                 }}
+                onImageFileDrop={canUploadArtistImage ? handleArtistImageUpload : undefined}
                 ref={ref}
                 title={detailQuery.data?.name || ''}
             >
