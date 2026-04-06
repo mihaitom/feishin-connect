@@ -126,7 +126,8 @@ export const PlaylistDetailSongListHeader = ({
     };
 
     const canUploadPlaylistImage =
-        hasFeature(server, ServerFeature.PLAYLIST_IMAGE_UPLOAD) && Boolean(detailQuery?.data?._serverId);
+        hasFeature(server, ServerFeature.PLAYLIST_IMAGE_UPLOAD) &&
+        Boolean(detailQuery?.data?._serverId);
 
     const handlePlaylistImageUpload = useCallback(
         async (file: File) => {
