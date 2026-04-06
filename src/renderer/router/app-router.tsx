@@ -200,7 +200,7 @@ const appRouterModals = {
 
 export const AppRouter = () => {
     const router = (
-        <HashRouter unstable_useTransitions={false}>
+        <HashRouter unstable_useTransitions>
             <ModalsProvider modals={appRouterModals}>
                 <RouterErrorBoundary>
                     <Routes>
