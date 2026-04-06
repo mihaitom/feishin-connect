@@ -1335,6 +1335,8 @@
                 "d": "D",
                 "z": "Z"
             }
-        }
+        },
+        "systemAudioCaptureFailed": "無法開始擷取：{{message}}",
+        "systemAudioNoAudioTrack": "沒有回傳任何音軌。確保在提示時啟用音訊擷取。"
     }
 }
