@@ -1008,6 +1008,8 @@
         "audioFadeOnStatusChange_description": "enables fade out and fade in when play/pause status changes",
         "preventSleepOnPlayback_description": "prevent the display from sleeping while music is playing",
         "preventSleepOnPlayback": "prevent sleep on playback",
+        "preventSuspendOnPlayback_description": "prevent the application from suspending while music is playing",
+        "preventSuspendOnPlayback": "prevent suspend on playback",
         "remotePassword_description": "sets the password for the remote control server. These credentials are by default transferred insecurely, so you should use a unique password that you do not care about",
         "remotePassword": "remote control server password",
         "remotePort_description": "sets the port for the remote control server",
