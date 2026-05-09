@@ -10,7 +10,9 @@ Konfiguration in .env:
 """
 
 import asyncio
+import io
 import logging
+import os
 from abc import ABC, abstractmethod
 
 logger = logging.getLogger("delivery")
@@ -153,26 +155,37 @@ class AirPlayDelivery(BaseDelivery):
             f"Verfügbar: {available}"
         )
 
+    @staticmethod
+    async def _close_atv(atv) -> None:
+        """Await all tasks returned by atv.close() so the aiohttp session is
+        properly torn down before the next connect() call."""
+        tasks = atv.close()
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+
     async def play(self, stream_url: str, title: str = "Connect") -> None:
         import pyatv
 
         await self.stop()
 
         conf = await self._find_device()
-        self._atv = await pyatv.connect(conf, asyncio.get_event_loop())
+        loop = asyncio.get_event_loop()
+        self._atv = await pyatv.connect(conf, loop)
 
         logger.info(f"[AirPlay:{self.target}] → stream: {stream_url}")
 
         async def _stream():
+            pipe_r, pipe_w = os.pipe()
             proc = None
             try:
-                # ffmpeg transcodes the live HTTP stream to 16-bit PCM WAV.
-                # Direct MP3 URLs cause miniaudio decoder init failures, so we
-                # transcode here. proc.stdout is passed directly to stream_file as
-                # an asyncio.StreamReader — pyatv reads it via run_coroutine_threadsafe,
-                # avoiding the blocking-pipe deadlock of the old os.pipe() approach.
-                # -err_detect ignore_err prevents ffmpeg from aborting on malformed
-                # MP3 frames (e.g. at track boundaries in the /stream feed).
+                # ffmpeg transcodes the HTTP MP3 stream → 16-bit PCM WAV.
+                # OS pipe (not proc.stdout/asyncio.StreamReader): pyatv calls
+                # readframes() synchronously from the event loop thread via
+                # next(miniaudio_generator), which would deadlock with
+                # StreamReader's run_coroutine_threadsafe. An OS pipe read is
+                # kernel-level and independent of the asyncio event loop.
+                # -err_detect ignore_err suppresses MP3 frame errors from the
+                # /stream feed during encoder warm-up / track boundaries.
                 proc = await asyncio.create_subprocess_exec(
                     "ffmpeg", "-hide_banner", "-loglevel", "error",
                     "-err_detect", "ignore_err",
@@ -182,28 +195,47 @@ class AirPlayDelivery(BaseDelivery):
                     "-ar", "44100",
                     "-ac", "2",
                     "-f", "wav",
-                    "pipe:1",
-                    stdout=asyncio.subprocess.PIPE,
+                    f"pipe:{pipe_w}",
+                    pass_fds=(pipe_w,),
                 )
+                os.close(pipe_w)
 
-                await self._atv.stream.stream_file(proc.stdout)
+                with open(pipe_r, "rb") as raw:
+                    await self._atv.stream.stream_file(io.BufferedReader(raw))
+
+                await proc.wait()
                 logger.info(f"[AirPlay:{self.target}] Stream beendet")
 
             except asyncio.CancelledError:
                 logger.info(f"[AirPlay:{self.target}] Stream abgebrochen")
-
-            except Exception as e:
-                logger.error(f"[AirPlay:{self.target}] Fehler: {e}")
-
-            finally:
-                if proc and proc.returncode is None:
+                if proc:
                     try:
                         proc.kill()
                     except Exception:
                         pass
-                if self._atv:
-                    self._atv.close()
-                    self._atv = None
+                try:
+                    os.close(pipe_r)
+                except Exception:
+                    pass
+
+            except Exception as e:
+                logger.error(f"[AirPlay:{self.target}] Fehler: {e}")
+                if proc:
+                    try:
+                        proc.kill()
+                    except Exception:
+                        pass
+
+            finally:
+                atv, self._atv = self._atv, None
+                if atv:
+                    # asyncio.shield keeps the close tasks alive even when this
+                    # task is in a cancelled state (CancelledError is still
+                    # propagated, but the cleanup completes first).
+                    try:
+                        await asyncio.shield(self._close_atv(atv))
+                    except asyncio.CancelledError:
+                        pass
 
         self._stream_task = asyncio.create_task(_stream())
         logger.info(f"[AirPlay:{self.target}] ✓ Stream-Task gestartet")
@@ -215,9 +247,12 @@ class AirPlayDelivery(BaseDelivery):
                 await self._stream_task
             except asyncio.CancelledError:
                 pass
-        if self._atv:
-            self._atv.close()
-            self._atv = None
+        # _stream()'s finally already closes _atv when the task exits normally
+        # or on cancellation. This handles the edge case where stop() is called
+        # without an active stream task (e.g. connect failed after _atv was set).
+        atv, self._atv = self._atv, None
+        if atv:
+            await self._close_atv(atv)
         logger.info(f"[AirPlay:{self.target}] gestoppt")
 
 
