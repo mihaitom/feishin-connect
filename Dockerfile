@@ -1,27 +1,44 @@
-# --- Builder stage
+# --- Build frontend
 FROM node:23-alpine AS builder
+
 WORKDIR /app
 
-# Copy package.json first to cache node_modules
-COPY package.json pnpm-lock.yaml .
+COPY package.json package-lock.json ./
 
-RUN npm install -g pnpm
+RUN npm install
 
-RUN pnpm install
-
-# Copy code and build with cached modules
 COPY . .
-RUN pnpm run build:web
 
-# --- Production stage
-FROM nginxinc/nginx-unprivileged:alpine-slim
+RUN npm run build:web
 
-COPY --chown=nginx:nginx --from=builder /app/out/web /usr/share/nginx/html
-COPY --chown=nginx:nginx ./settings.js.template /etc/nginx/templates/settings.js.template
+
+# --- Final image
+FROM ghcr.io/astral-sh/uv:python3.14-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache nginx
+COPY --chown=nginx:nginx --from=builder /app/out/web /usr/share/nginx/html 
+COPY --chown=nginx:nginx ./settings.js.template /etc/nginx/templates/settings.js.template 
 COPY --chown=nginx:nginx ng.conf.template /etc/nginx/templates/default.conf.template
 
-ENV SERVER_LOCK=false SERVER_NAME="" SERVER_TYPE="" SERVER_URL="" REMOTE_URL=""
-ENV LEGACY_AUTHENTICATION="" ANALYTICS_DISABLED="" PUBLIC_PATH="/"
+RUN apk add --no-cache \
+    build-base \
+    zlib-dev \
+    jpeg-dev \
+    freetype-dev \
+    libpng-dev \
+    musl-dev
+
+COPY connect/pyproject.toml ./
+COPY connect/uv.lock ./
+RUN uv sync --locked
+COPY connect/. .
+
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 9180
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8000
+
+CMD ["/start.sh"]

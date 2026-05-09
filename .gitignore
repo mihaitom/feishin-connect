@@ -5,3 +5,5 @@ out
 .eslintcache
 *.log*
 release
+connect/.venv
+connect/.env

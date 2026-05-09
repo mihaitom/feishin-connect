@@ -2,6 +2,8 @@ import { t } from 'i18next';
 import { useCallback, useEffect, useState, WheelEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ConnectButton } from './connect-button';
+
 import { PopoverPlayQueue } from '/@/renderer/features/now-playing/components/popover-play-queue';
 import { PlayerConfig } from '/@/renderer/features/player/components/player-config';
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
@@ -78,6 +80,7 @@ export const RightControls = () => {
                 <LyricsButton />
                 <FavoriteButton />
                 <QueueButton />
+                <ConnectButton />
                 <VolumeButton />
             </Group>
             <Group h="calc(100% / 3)" />
