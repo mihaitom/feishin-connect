@@ -95,19 +95,24 @@ services:
 
 ### Electron (desktop app)
 
-Connect also works in the Electron desktop build — the backend runs locally alongside the app.
+The Connect backend starts and stops automatically alongside the Electron app — no separate Python installation required in the packaged build.
 
-**Start the backend** (once, before or after launching Feishin):
+**Development** (Python + uv required):
 
 ```bash
-cd connect
-uv sync          # first time only
-uv run python main.py
+npm run dev        # Electron starts and spawns the backend via `uv run python main.py`
 ```
 
-Then launch Feishin normally (`npm run dev` in dev mode, or via the packaged app). The cast button appears in the player bar and connects to `http://localhost:8765` automatically.
+**Packaging** (build once per platform before `npm run package`):
 
-When you quit the Electron app, it sends a stop command to the backend so all connected devices stop playing.
+```bash
+npm run build:connect   # compiles the Python backend to a standalone binary via PyInstaller
+npm run package:linux   # builds the Electron app; the binary is bundled automatically
+```
+
+The binary lives in `connect/dist/connect-server/` and is picked up by `electron-builder` via `extraResources`. Users need **ffmpeg** installed on their system (`apt install ffmpeg` / `brew install ffmpeg`) — it is not bundled.
+
+When you quit the app, it sends a stop command to the backend and kills the process so all connected devices stop playing.
 
 ### Building locally (Docker image)
 
@@ -220,9 +225,28 @@ Feishin supports any music server implementing [Navidrome](https://www.navidrome
 - [Jellyfin](https://github.com/jellyfin/jellyfin)
 - OpenSubsonic compatible: Airsonic-Advanced, Ampache, Astiga, Funkwhale, Gonic, LMS, Nextcloud Music, Supysonic, Qm-Music, and more
 
+### Feishin Connect: ffmpeg required
+
+Feishin Connect uses **ffmpeg** to transcode Navidrome streams into a continuous MP3 stream for Sonos, and into PCM WAV for AirPlay. ffmpeg is **not bundled** with the app and must be installed separately.
+
+| Platform | Install |
+|----------|---------|
+| Linux (Debian/Ubuntu) | `sudo apt install ffmpeg` |
+| Linux (Arch) | `sudo pacman -S ffmpeg` |
+| macOS | `brew install ffmpeg` |
+| Windows | Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH |
+
+In the Docker image (`ghcr.io/mihaitom/feishin-connect`) ffmpeg is already included.
+
+If ffmpeg is missing, the Connect backend logs `❌ ffmpeg NICHT GEFUNDEN` on startup and all play requests will silently fail.
+
 ### Feishin Connect: no devices found
 
 Ensure the container is running with `network_mode: host`. Without host networking, mDNS/SSDP multicast packets cannot reach the container and no devices will be discovered.
+
+### Feishin Connect: nothing plays (device found but no audio)
+
+Check the container or Electron logs for `❌ ffmpeg NICHT GEFUNDEN`. See the ffmpeg install instructions above.
 
 ### Feishin Connect: nothing plays (device found but no audio)
 

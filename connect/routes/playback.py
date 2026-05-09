@@ -6,7 +6,7 @@ import time
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from state import ctx, resolve_target, stream_url
+from state import compute_position, ctx, resolve_target, stream_url
 from subsonic import Track
 
 logger = logging.getLogger("connect.playback")

@@ -24,6 +24,7 @@
         "build": "pnpm run build:electron && pnpm run build:remote",
         "build:electron": "electron-vite build",
         "build:remote": "vite build --config remote.vite.config.ts",
+        "build:connect": "bash connect/build-binary.sh",
         "build:web": "vite build --config web.vite.config.ts",
         "dev": "electron-vite dev",
         "dev:remote": "vite dev --config remote.vite.config.ts",

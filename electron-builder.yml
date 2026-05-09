@@ -9,6 +9,10 @@ files:
     - 'package.json'
 extraResources:
     - assets/**
+    - from: connect/dist/connect-server
+      to: connect-server
+      filter:
+          - '**/*'
 asarUnpack:
     - resources/**
 win:
