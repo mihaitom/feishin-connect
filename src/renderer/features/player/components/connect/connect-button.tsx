@@ -34,6 +34,8 @@ export const ConnectButton = () => {
     const feishinPlaying = playerStatus === PlayerStatus.PLAYING;
 
     const prevConnectIndexRef = useRef(-1);
+    // Tracks the last auto-forwarded "index:uid" so queue-tail changes don't re-trigger
+    const lastAutoSentRef = useRef<string>('');
 
     const handleTrackAdvance = useCallback(
         (delta: number) => {
@@ -103,6 +105,57 @@ export const ConnectButton = () => {
     const isRadioActive = useIsRadioActive();
     const radioStreamUrl = useRadioStore((s) => s.currentStreamUrl);
     const radioStationName = useRadioStore((s) => s.stationName);
+
+    // ── Auto-forward: Track-Wechsel während Connect aktiv ist ─────────────────
+    // Wenn der lokale Player startet (PLAYING) und Connect aktiv ist, sofort
+    // pausieren und die neue Queue an das Gerät schicken.
+    useEffect(() => {
+        if (!isActive || isRadioActive) return;
+        if (playerStatus !== PlayerStatus.PLAYING) return;
+
+        const uid = queueDefault?.[playerIndex] ?? '';
+        const sig = `${playerIndex}:${uid}`;
+        if (sig === lastAutoSentRef.current) return; // gleicher Track, nichts tun
+        lastAutoSentRef.current = sig;
+
+        mediaPause();
+
+        const ids = (queueDefault ?? [])
+            .slice(Math.max(0, playerIndex))
+            .map((u) => queueSongs?.[u]?.id)
+            .filter((id): id is string => !!id);
+        if (ids.length === 0) return;
+
+        prevConnectIndexRef.current = -1;
+        fetch(`${CONNECT_URL}/play`, {
+            body: JSON.stringify({
+                targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
+                track_ids: ids,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        }).catch(() => {});
+    }, [isActive, isRadioActive, playerStatus, playerIndex, queueDefault, queueSongs, activeTargets, mediaPause]);
+
+    // ── Auto-forward: Radio-Wechsel während Connect aktiv ist ────────────────
+    // Wenn der User auf Radio umschaltet während ein Gerät aktiv ist,
+    // Radio lokal stoppen und an das Gerät weiterleiten.
+    useEffect(() => {
+        if (!isActive || !isRadioActive || !radioStreamUrl) return;
+
+        stopRadio();
+        lastAutoSentRef.current = '';
+        prevConnectIndexRef.current = -1;
+        fetch(`${CONNECT_URL}/play-url`, {
+            body: JSON.stringify({
+                targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
+                title: radioStationName ?? 'Radio',
+                url: radioStreamUrl,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        }).catch(() => {});
+    }, [isActive, isRadioActive, radioStreamUrl, radioStationName, activeTargets, stopRadio]);
 
     const trackIds = (queueDefault ?? [])
         .slice(Math.max(0, playerIndex))
@@ -227,6 +280,7 @@ export const ConnectButton = () => {
         setSelectedForSend([]);
         setOpen(false);
         prevConnectIndexRef.current = -1;
+        lastAutoSentRef.current = '';
     };
 
     const stopSingleDevice = async (device: ConnectDevice) => {
