@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-05-09
+
+### Added
+
+- **Playback intercept** — selecting a track in Feishin while a device is active now automatically forwards it to the connected device instead of playing locally. Switching to a radio station while casting also routes it to the device.
+- **About dialog** — Help menu now has an "About Feishin Connect" entry that shows version info and credits the upstream [Feishin](https://github.com/jeffvli/feishin) project.
+
+### Fixed
+
+- Release notes and update links now point to this fork instead of the upstream project.
+- Devices in the cast popover are now sorted: Sonos first, AirPlay second, alphabetically within each group.
+
+### Known issues
+
+- **AirPlay is currently broken** — audio does not play despite the connection appearing successful. Investigation ongoing.
+
+---
+
 ## [0.1.0] - 2026-05-09
 
 This is the initial release of **Feishin Connect**, a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin) that adds Spotify Connect-like casting to Sonos speakers and AirPlay devices — directly from the Feishin player bar.
