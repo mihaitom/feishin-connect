@@ -194,6 +194,18 @@ curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/i
 
 7. _Optional_ — Override app defaults with `FS_`-prefixed environment variables on first run. See [the settings environment variable documentation](docs/ENV_SETTINGS.md).
 
+## Differences from upstream
+
+| Feature | This fork | Upstream |
+|---------|-----------|----------|
+| Feishin Connect (Sonos / AirPlay) | ✅ | ❌ |
+| Auto-updater | ❌ disabled | ✅ GitHub Releases |
+| Docker image | `ghcr.io/mihaitom/feishin-connect` | `ghcr.io/jeffvli/feishin` |
+
+The auto-updater is disabled in this fork. It would otherwise pull releases from `jeffvli/feishin` and overwrite the Connect feature. Update by pulling the latest image (`docker pull`) or rebuilding from source.
+
+---
+
 ## FAQ
 
 ### MPV is either not working or is rapidly switching between pause/play states

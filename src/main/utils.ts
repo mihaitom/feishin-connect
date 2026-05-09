@@ -19,7 +19,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export const disableAutoUpdates = () => {
-    return process.env['DISABLE_AUTO_UPDATES'];
+    // Auto-updates disabled in this fork — updates are delivered via Docker image.
+    return true;
 };
 
 export const isMacOS = () => {
