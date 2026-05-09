@@ -7,6 +7,7 @@ import packageJson from '../../../package.json';
 
 import { ServerList } from '/@/renderer/features/servers/components/server-list';
 import { openSettingsModal } from '/@/renderer/features/settings/utils/open-settings-modal';
+import { openAboutModal } from '/@/renderer/about-modal';
 import { openReleaseNotesModal } from '/@/renderer/release-notes-modal';
 import {
     useAppStore,
@@ -150,4 +151,18 @@ export const useNativeMenuSync = () => {
             ipc?.removeAllListeners('renderer-open-release-notes');
         };
     }, [t]);
+
+    useEffect(() => {
+        if (!isElectron()) {
+            return undefined;
+        }
+
+        window.api.utils.rendererOpenAbout(() => {
+            openAboutModal();
+        });
+
+        return () => {
+            ipc?.removeAllListeners('renderer-open-about');
+        };
+    }, []);
 };

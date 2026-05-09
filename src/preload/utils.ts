@@ -85,6 +85,10 @@ const rendererOpenReleaseNotes = (cb: (event: IpcRendererEvent) => void) => {
     ipcRenderer.on('renderer-open-release-notes', cb);
 };
 
+const rendererOpenAbout = (cb: (event: IpcRendererEvent) => void) => {
+    ipcRenderer.on('renderer-open-about', cb);
+};
+
 export const utils = {
     checkForUpdates,
     disableAutoUpdates,
@@ -100,6 +104,7 @@ export const utils = {
     playerErrorListener,
     rendererOpenCommandPalette,
     rendererOpenManageServers,
+    rendererOpenAbout,
     rendererOpenReleaseNotes,
     rendererOpenSettings,
     rendererTogglePrivateMode,

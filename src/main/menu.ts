@@ -288,30 +288,23 @@ export default class MenuBuilder {
             label: 'Help',
             submenu: [
                 {
-                    click() {
-                        shell.openExternal('https://github.com/jeffvli/feishin');
+                    click: () => {
+                        this.mainWindow.webContents.send('renderer-open-about');
                     },
-                    label: 'Learn More',
+                    label: 'About Feishin Connect',
+                },
+                { type: 'separator' },
+                {
+                    click() {
+                        shell.openExternal('https://github.com/mihaitom/feishin-connect');
+                    },
+                    label: 'GitHub',
                 },
                 {
                     click() {
-                        shell.openExternal(
-                            'https://github.com/jeffvli/feishin?tab=readme-ov-file#getting-started',
-                        );
+                        shell.openExternal('https://github.com/mihaitom/feishin-connect/issues');
                     },
-                    label: 'Documentation',
-                },
-                {
-                    click() {
-                        shell.openExternal('https://github.com/jeffvli/feishin/discussions');
-                    },
-                    label: 'Community Discussions',
-                },
-                {
-                    click() {
-                        shell.openExternal('https://github.com/jeffvli/feishin/issues');
-                    },
-                    label: 'Search Issues',
+                    label: 'Report an Issue',
                 },
                 { type: 'separator' },
                 {
@@ -409,30 +402,25 @@ export default class MenuBuilder {
                 label: 'Help',
                 submenu: [
                     {
-                        click() {
-                            shell.openExternal('https://github.com/jeffvli/feishin');
+                        click: () => {
+                            this.mainWindow.webContents.send('renderer-open-about');
                         },
-                        label: 'Learn More',
+                        label: 'About Feishin Connect',
+                    },
+                    { type: 'separator' },
+                    {
+                        click() {
+                            shell.openExternal('https://github.com/mihaitom/feishin-connect');
+                        },
+                        label: 'GitHub',
                     },
                     {
                         click() {
                             shell.openExternal(
-                                'https://github.com/jeffvli/feishin?tab=readme-ov-file#getting-started',
+                                'https://github.com/mihaitom/feishin-connect/issues',
                             );
                         },
-                        label: 'Documentation',
-                    },
-                    {
-                        click() {
-                            shell.openExternal('https://github.com/jeffvli/feishin/discussions');
-                        },
-                        label: 'Community Discussions',
-                    },
-                    {
-                        click() {
-                            shell.openExternal('https://github.com/jeffvli/feishin/issues');
-                        },
-                        label: 'Search Issues',
+                        label: 'Report an Issue',
                     },
                 ],
             },

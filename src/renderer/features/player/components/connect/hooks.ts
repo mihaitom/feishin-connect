@@ -25,7 +25,9 @@ export const useConnectDevices = () => {
                     name: x.name,
                     type: 'airplay' as const,
                 }));
-                setDevices([...sonos, ...airplay]);
+                const sort = (a: ConnectDevice, b: ConnectDevice) =>
+                    a.name.localeCompare(b.name);
+                setDevices([...sonos.sort(sort), ...airplay.sort(sort)]);
                 setHealth({ apiReachable: true, ffmpegFound: healthData.ffmpeg ?? false });
             })
             .catch(() => {

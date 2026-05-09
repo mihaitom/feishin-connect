@@ -3,13 +3,22 @@
 import logging
 
 from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 
 from state import compute_position, ctx
 from streamer import stream_tracks
 
 logger = logging.getLogger("connect.stream")
 router = APIRouter()
+
+
+@router.head("/stream")
+async def audio_stream_head():
+    """ffmpeg probes the URL with HEAD before streaming — answer without starting ffmpeg."""
+    return Response(
+        media_type="audio/mpeg",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get("/stream")
