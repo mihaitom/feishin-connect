@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { LuAirplay, LuCheck, LuSpeaker, LuVolume1, LuVolumeX } from 'react-icons/lu';
+import { LuAirplay, LuSpeaker, LuVolume1, LuVolumeX } from 'react-icons/lu';
 
 import { CONNECT_URL, ConnectDevice } from './types';
 
+import { Switch } from '/@/shared/components/switch/switch';
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 
 interface DeviceItemProps {
@@ -27,7 +28,6 @@ export const DeviceItem = ({
 
     const canShowVolume = isActive && device.type === 'sonos';
 
-    // Fetch volume when row is hovered and active Sonos
     useEffect(() => {
         if (!hovered || !canShowVolume || volume !== null) return;
         fetch(
@@ -64,51 +64,31 @@ export const DeviceItem = ({
     };
 
     const checked = isActive || isSelected;
-    const checkColor = isActive
-        ? 'var(--theme-colors-primary)'
-        : 'var(--theme-colors-text-secondary)';
 
     return (
-        <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+        <div
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{ marginBottom: '6px' }}
+        >
             {/* Header row */}
             <div
                 style={{
                     alignItems: 'center',
                     background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent',
+                    borderRadius: '4px',
                     display: 'flex',
-                    gap: '8px',
+                    gap: '10px',
                     padding: '10px 12px',
                     transition: 'background 0.1s',
                 }}
             >
-                {/* Checkbox — click stops device when active, toggles selection when inactive */}
-                <div
-                    onClick={isActive ? onStop : onToggleSelect}
-                    style={{
-                        alignItems: 'center',
-                        background: isActive ? 'var(--theme-colors-primary)' : 'transparent',
-                        border: `1.5px solid ${checked ? 'var(--theme-colors-primary)' : 'rgba(255,255,255,0.25)'}`,
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        flexShrink: 0,
-                        height: '15px',
-                        justifyContent: 'center',
-                        width: '15px',
-                    }}
-                    title={isActive ? `${device.name} stoppen` : undefined}
-                >
-                    {checked && (
-                        <LuCheck
-                            size={10}
-                            style={{
-                                color: isActive ? 'var(--theme-colors-background)' : checkColor,
-                            }}
-                        />
-                    )}
-                </div>
+                <Switch
+                    checked={checked}
+                    onChange={() => (isActive ? onStop() : onToggleSelect())}
+                    size="xs"
+                />
 
-                {/* Device type icon */}
                 <span
                     style={{
                         color: isActive
@@ -121,7 +101,6 @@ export const DeviceItem = ({
                     {device.type === 'sonos' ? <LuSpeaker size={18} /> : <LuAirplay size={18} />}
                 </span>
 
-                {/* Device name */}
                 <span
                     onClick={isActive ? undefined : onToggleSelect}
                     style={{
@@ -143,14 +122,21 @@ export const DeviceItem = ({
                 </span>
             </div>
 
-            {/* Volume — shown on hover for active Sonos */}
-            {canShowVolume && hovered && (
+            {/* Volume — smooth slide-in on hover for active Sonos */}
+            <div
+                style={{
+                    maxHeight: canShowVolume && hovered ? '44px' : '0px',
+                    opacity: canShowVolume && hovered ? 1 : 0,
+                    overflow: 'hidden',
+                    transition: 'max-height 0.2s ease, opacity 0.15s ease',
+                }}
+            >
                 <div
                     style={{
                         alignItems: 'center',
                         display: 'flex',
                         gap: '8px',
-                        padding: '2px 12px 10px 36px',
+                        padding: '2px 12px 10px 40px',
                     }}
                 >
                     <button
@@ -189,7 +175,7 @@ export const DeviceItem = ({
                         {muted ? 0 : (volume ?? '–')}
                     </span>
                 </div>
-            )}
+            </div>
         </div>
     );
 };

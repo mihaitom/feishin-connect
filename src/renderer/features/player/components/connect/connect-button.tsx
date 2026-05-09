@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LuCast, LuSquare } from 'react-icons/lu';
 
-import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
-import { useCurrentServerWithCredential } from '/@/renderer/store/auth.store';
-import { usePlayerStatus, usePlayerStoreBase } from '/@/renderer/store/player.store';
-import { PlayerStatus } from '/@/shared/types/types';
-
 import { DeviceItem } from './device-item';
 import { useConnectDevices, useConnectStatus, useConnectVolume } from './hooks';
 import { NowPlayingSection } from './now-playing';
 import { CONNECT_URL, ConnectDevice, ConnectStatus, SendStatus } from './types';
 import { PopButton, PopSection } from './ui';
+
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
+import { useCurrentServerWithCredential } from '/@/renderer/store/auth.store';
+import { usePlayerStatus, usePlayerStoreBase } from '/@/renderer/store/player.store';
+import { PlayerStatus } from '/@/shared/types/types';
 
 export const ConnectButton = () => {
     const [open, setOpen] = useState(false);
@@ -116,7 +116,7 @@ export const ConnectButton = () => {
             const rect = btnRef.current.getBoundingClientRect();
             setPopPos({
                 bottom: window.innerHeight - rect.top + 40,
-                right: window.innerWidth - rect.right,
+                right: window.innerWidth - rect.right - 120,
             });
             refresh();
         }
@@ -275,7 +275,7 @@ export const ConnectButton = () => {
         }
     };
 
-    if (!ready || devices.length === 0) return null;
+    if (!ready) return null;
 
     // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -284,7 +284,7 @@ export const ConnectButton = () => {
             ? 'var(--danger-color, #f55)'
             : isActive
               ? 'var(--theme-colors-primary)'
-              : 'var(--icon-color, rgba(255,255,255,0.55))';
+              : 'var(--theme-colors-text-secondary)';
 
     const isRadioMode = isActive && !!connectStatus?.radio;
     const isPlaying = isActive ? connectPlaying : feishinPlaying;
@@ -355,6 +355,33 @@ export const ConnectButton = () => {
 
                     {/* Device list — accordion for active, toggle for inactive */}
                     <PopSection label={`${trackLabel} senden an`}>
+                        {devices.length === 0 && (
+                            <div
+                                style={{
+                                    color: 'var(--theme-colors-text-secondary)',
+                                    fontSize: '13px',
+                                    padding: '8px 12px 12px',
+                                    textAlign: 'center',
+                                }}
+                            >
+                                Keine Geräte gefunden
+                                <br />
+                                <button
+                                    onClick={refresh}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: 'var(--theme-colors-primary)',
+                                        cursor: 'pointer',
+                                        fontSize: '12px',
+                                        marginTop: '6px',
+                                        padding: 0,
+                                    }}
+                                >
+                                    Neu suchen
+                                </button>
+                            </div>
+                        )}
                         {devices.map((d) => {
                             const key = `${d.type}:${d.name}`;
                             const isDeviceActive = activeTargets.some(
