@@ -33,6 +33,15 @@ async def configure(req: ConfigRequest):
     return {"status": "ok"}
 
 
+@router.get("/health")
+async def health():
+    import shutil
+    return {
+        "ffmpeg": bool(shutil.which("ffmpeg")),
+        "navidrome_configured": bool(ctx.navidrome.base_url),
+    }
+
+
 @router.get("/discover")
 async def discover():
     logger.info("[discover] Suche Sonos- und AirPlay-Geräte …")

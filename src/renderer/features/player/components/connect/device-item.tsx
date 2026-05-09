@@ -4,8 +4,8 @@ import { LuAirplay, LuSpeaker, LuVolume1, LuVolumeX } from 'react-icons/lu';
 
 import { CONNECT_URL, ConnectDevice } from './types';
 
-import { Switch } from '/@/shared/components/switch/switch';
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
+import { Switch } from '/@/shared/components/switch/switch';
 
 interface DeviceItemProps {
     device: ConnectDevice;
