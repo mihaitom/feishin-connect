@@ -10,3 +10,4 @@ connect/.env
 /**/__pycache__/
 connect/build
 connect/.pytest_cache
+.vscode

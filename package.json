@@ -1,6 +1,6 @@
 {
     "name": "feishin-connect",
-    "version": "0.1.0-dev.0",
+    "version": "0.1.0",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -9,9 +9,9 @@
         "react",
         "electron"
     ],
-    "homepage": "https://github.com/jeffvli/feishin",
+    "homepage": "https://github.com/mihaitom/feishin-connect",
     "bugs": {
-        "url": "https://github.com/jeffvli/feishin/issues"
+        "url": "https://github.com/mihaitom/feishin-connect/issues"
     },
     "license": "GPL-3.0",
     "author": {
@@ -19,6 +19,12 @@
         "email": "feishin@users.noreply.github.com",
         "url": "https://github.com/jeffvli/"
     },
+    "contributors": [
+        {
+            "name": "mihaitom",
+            "url": "https://github.com/mihaitom/"
+        }
+    ],
     "main": "./out/main/index.js",
     "scripts": {
         "build": "pnpm run build:connect && pnpm run build:electron && pnpm run build:remote",

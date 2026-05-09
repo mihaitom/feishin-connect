@@ -8,16 +8,17 @@ Startup:
 import logging
 import shutil
 import traceback
+from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from state import PORT, ctx, get_local_ip
 from routes.devices import router as devices_router
 from routes.playback import router as playback_router
 from routes.stream import router as stream_router
+from state import PORT, ctx, get_local_ip
 
 load_dotenv()
 logging.basicConfig(
@@ -27,22 +28,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger("connect")
 
-app = FastAPI(title="Feishin Connect")
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_headers=["*"],
-    allow_methods=["*"],
-    allow_origins=["*"],
-)
 
-app.include_router(stream_router)
-app.include_router(playback_router)
-app.include_router(devices_router)
-
-
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(_: FastAPI):
     local_ip = get_local_ip()
     logger.info(f"🎵 Stream: http://{local_ip}:{PORT}/stream")
     logger.info(f"🔌 API:    http://{local_ip}:{PORT}/")
@@ -59,10 +47,27 @@ async def startup():
         logger.info("ℹ️  Keine TARGETS env — Steuerung über Feishin /play")
 
     logger.info("⏳ Warte auf Feishin /config (Navidrome-Zugangsdaten)")
+    yield
+
+
+app = FastAPI(title="Feishin Connect", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_headers=["*"],
+    allow_methods=["*"],
+    allow_origins=["*"],
+)
+
+app.include_router(stream_router)
+app.include_router(playback_router)
+app.include_router(devices_router)
 
 
 if __name__ == "__main__":
     try:
-        uvicorn.run("main:app", host="0.0.0.0", port=PORT, log_level="info", reload=False)
+        # Pass the app object directly — string-based import ("main:app") breaks
+        # in PyInstaller bundles because the module loader works differently.
+        uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info", reload=False)
     except Exception:
         traceback.print_exc()
