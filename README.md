@@ -23,6 +23,8 @@
 
 Feishin Connect adds a cast button (🔗) to the player bar. Click it to stream the current Navidrome queue — or a radio stream — to any Sonos speaker or AirPlay device on your network, without touching the local player.
 
+<img src="assets/feishin-connect-screenshot.png" width="350px">
+
 ### How it works
 
 - A **Python / FastAPI** backend runs alongside nginx in the same Docker container.
