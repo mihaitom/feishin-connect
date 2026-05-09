@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LuCast, LuSquare } from 'react-icons/lu';
+import { LuCast, LuSquare, LuTriangleAlert } from 'react-icons/lu';
 
 import { DeviceItem } from './device-item';
 import { useConnectDevices, useConnectStatus, useConnectVolume } from './hooks';
@@ -25,7 +25,7 @@ export const ConnectButton = () => {
     const [popPos, setPopPos] = useState({ bottom: 0, right: 0 });
     const btnRef = useRef<HTMLButtonElement>(null);
 
-    const { devices, ready, refresh } = useConnectDevices();
+    const { devices, health, refresh } = useConnectDevices();
     const { fetchVolume } = useConnectVolume();
     const { mediaNext, mediaPause, mediaPrevious, mediaTogglePlayPause } = usePlayer();
     const stopRadio = useRadioStore((s) => s.actions.stop);
@@ -112,7 +112,9 @@ export const ConnectButton = () => {
     const isEmpty = trackIds.length === 0 && !radioStreamUrl;
 
     const handleOpen = () => {
-        if (isEmpty) return;
+        // Always allow opening when there's an API/ffmpeg problem so the user sees the error.
+        const hasError = !health?.apiReachable || health?.ffmpegFound === false;
+        if (isEmpty && !hasError) return;
         if (!open && btnRef.current) {
             if (activeDevice?.type === 'sonos') fetchVolume();
             const rect = btnRef.current.getBoundingClientRect();
@@ -277,13 +279,14 @@ export const ConnectButton = () => {
         }
     };
 
-    if (!ready) return null;
-
     // ── Render ─────────────────────────────────────────────────────────────────
 
+    const hasApiError = health !== null && !health.apiReachable;
+    const hasFfmpegError = health?.apiReachable && health.ffmpegFound === false;
+
     const iconColor =
-        status === 'error'
-            ? 'var(--danger-color, #f55)'
+        status === 'error' || hasApiError || hasFfmpegError
+            ? 'var(--theme-colors-warning, #f5a623)'
             : isActive
               ? 'var(--theme-colors-primary)'
               : 'var(--theme-colors-text-secondary)';
@@ -355,57 +358,156 @@ export const ConnectButton = () => {
                         />
                     )}
 
-                    {/* Device list — accordion for active, toggle for inactive */}
-                    <PopSection
-                        label={`${trackLabel} ${t('player.connect_sendTo', { postProcess: 'sentenceCase' })}`}
-                    >
-                        {devices.length === 0 && (
-                            <div
-                                style={{
-                                    color: 'var(--theme-colors-text-secondary)',
-                                    fontSize: '13px',
-                                    padding: '8px 12px 12px',
-                                    textAlign: 'center',
-                                }}
-                            >
-                                {t('player.connect_noDevices', { postProcess: 'sentenceCase' })}
-                                <br />
+                    {/* Error banners */}
+                    {hasApiError && (
+                        <div
+                            style={{
+                                alignItems: 'flex-start',
+                                background: 'rgba(245,166,35,0.1)',
+                                borderBottom: '1px solid rgba(245,166,35,0.2)',
+                                display: 'flex',
+                                gap: '8px',
+                                padding: '10px 12px',
+                            }}
+                        >
+                            <LuTriangleAlert
+                                size={15}
+                                style={{ color: '#f5a623', flexShrink: 0, marginTop: '2px' }}
+                            />
+                            <div>
+                                <div
+                                    style={{
+                                        color: '#f5a623',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    {t('player.connect_apiUnreachable', {
+                                        postProcess: 'sentenceCase',
+                                    })}
+                                </div>
+                                <div
+                                    style={{
+                                        color: 'var(--theme-colors-text-secondary)',
+                                        fontSize: '11px',
+                                        marginTop: '2px',
+                                        wordBreak: 'break-all',
+                                    }}
+                                >
+                                    {t('player.connect_apiUnreachableHint', { url: CONNECT_URL })}
+                                </div>
                                 <button
                                     onClick={refresh}
                                     style={{
                                         background: 'transparent',
                                         border: 'none',
-                                        color: 'var(--theme-colors-primary)',
+                                        color: '#f5a623',
                                         cursor: 'pointer',
-                                        fontSize: '12px',
-                                        marginTop: '6px',
+                                        fontSize: '11px',
+                                        marginTop: '4px',
                                         padding: 0,
                                     }}
                                 >
                                     {t('player.connect_scan', { postProcess: 'sentenceCase' })}
                                 </button>
                             </div>
-                        )}
-                        {devices.map((d) => {
-                            const key = `${d.type}:${d.name}`;
-                            const isDeviceActive = activeTargets.some(
-                                (t) => t.type === d.type && t.name === d.name,
-                            );
-                            const isDeviceSelected = selectedForSend.some(
-                                (s) => `${s.type}:${s.name}` === key,
-                            );
-                            return (
-                                <DeviceItem
-                                    device={d}
-                                    isActive={isDeviceActive}
-                                    isSelected={isDeviceSelected}
-                                    key={key}
-                                    onStop={() => stopSingleDevice(d)}
-                                    onToggleSelect={() => toggleSelectForSend(d)}
-                                />
-                            );
-                        })}
-                    </PopSection>
+                        </div>
+                    )}
+                    {hasFfmpegError && (
+                        <div
+                            style={{
+                                alignItems: 'flex-start',
+                                background: 'rgba(245,166,35,0.1)',
+                                borderBottom: '1px solid rgba(245,166,35,0.2)',
+                                display: 'flex',
+                                gap: '8px',
+                                padding: '10px 12px',
+                            }}
+                        >
+                            <LuTriangleAlert
+                                size={15}
+                                style={{ color: '#f5a623', flexShrink: 0, marginTop: '2px' }}
+                            />
+                            <div>
+                                <div
+                                    style={{
+                                        color: '#f5a623',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    {t('player.connect_ffmpegMissing', {
+                                        postProcess: 'sentenceCase',
+                                    })}
+                                </div>
+                                <div
+                                    style={{
+                                        color: 'var(--theme-colors-text-secondary)',
+                                        fontSize: '11px',
+                                        marginTop: '2px',
+                                    }}
+                                >
+                                    {t('player.connect_ffmpegMissingHint', {
+                                        postProcess: 'sentenceCase',
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Device list — hidden when API is unreachable */}
+                    {!hasApiError && (
+                        <PopSection
+                            label={`${trackLabel} ${t('player.connect_sendTo', { postProcess: 'sentenceCase' })}`}
+                        >
+                            {devices.length === 0 && (
+                                <div
+                                    style={{
+                                        color: 'var(--theme-colors-text-secondary)',
+                                        fontSize: '13px',
+                                        padding: '8px 12px 12px',
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    {t('player.connect_noDevices', { postProcess: 'sentenceCase' })}
+                                    <br />
+                                    <button
+                                        onClick={refresh}
+                                        style={{
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: 'var(--theme-colors-primary)',
+                                            cursor: 'pointer',
+                                            fontSize: '12px',
+                                            marginTop: '6px',
+                                            padding: 0,
+                                        }}
+                                    >
+                                        {t('player.connect_scan', { postProcess: 'sentenceCase' })}
+                                    </button>
+                                </div>
+                            )}
+                            {devices.map((d) => {
+                                const key = `${d.type}:${d.name}`;
+                                const isDeviceActive = activeTargets.some(
+                                    (tgt) => tgt.type === d.type && tgt.name === d.name,
+                                );
+                                const isDeviceSelected = selectedForSend.some(
+                                    (s) => `${s.type}:${s.name}` === key,
+                                );
+                                return (
+                                    <DeviceItem
+                                        device={d}
+                                        isActive={isDeviceActive}
+                                        isSelected={isDeviceSelected}
+                                        key={key}
+                                        onStop={() => stopSingleDevice(d)}
+                                        onToggleSelect={() => toggleSelectForSend(d)}
+                                    />
+                                );
+                            })}
+                        </PopSection>
+                    )}
 
                     {/* Send button — appears when inactive devices are selected */}
                     {selectedForSend.length > 0 && (

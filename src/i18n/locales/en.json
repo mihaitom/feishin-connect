@@ -706,7 +706,11 @@
     "connect_playOnDevice": "play on device",
     "connect_device_one": "device",
     "connect_device_other": "devices",
-    "connect_unmute": "unmute"
+    "connect_unmute": "unmute",
+    "connect_apiUnreachable": "Connect API not reachable",
+    "connect_apiUnreachableHint": "Make sure the backend is running at {{url}}",
+    "connect_ffmpegMissing": "ffmpeg not found",
+    "connect_ffmpegMissingHint": "Install ffmpeg to enable audio streaming"
   },
   "queryBuilder": {
     "standardTags": "standard tags",

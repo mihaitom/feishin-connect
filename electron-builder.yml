@@ -73,7 +73,7 @@ npmRebuild: false
 afterAllArtifactBuild: scripts/after-all-artifact-build.mjs
 publish:
     provider: github
-    owner: jeffvli
-    repo: feishin
+    owner: mihaitom
+    repo: feishin-connect
     channel: latest
     releaseType: draft

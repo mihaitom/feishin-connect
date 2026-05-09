@@ -782,7 +782,11 @@
     "connect_playOnDevice": "Auf Gerät spielen",
     "connect_device_one": "Gerät",
     "connect_device_other": "Geräte",
-    "connect_unmute": "Ton einschalten"
+    "connect_unmute": "Ton einschalten",
+    "connect_apiUnreachable": "Connect API nicht erreichbar",
+    "connect_apiUnreachableHint": "Backend muss unter {{url}} erreichbar sein",
+    "connect_ffmpegMissing": "ffmpeg nicht gefunden",
+    "connect_ffmpegMissingHint": "ffmpeg installieren um Audio-Streaming zu aktivieren"
   },
   "setting": {
     "audioDevice_description": "das für die Wiedergabe zu verwendende Audiogerät auswählen",

@@ -2,33 +2,42 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CONNECT_URL, ConnectDevice, ConnectStatus } from './types';
 
+export interface ConnectHealth {
+    apiReachable: boolean;
+    ffmpegFound: boolean;
+}
+
 export const useConnectDevices = () => {
     const [devices, setDevices] = useState<ConnectDevice[]>([]);
-    const [ready, setReady] = useState(false);
+    const [health, setHealth] = useState<ConnectHealth | null>(null);
 
     const refresh = () => {
-        fetch(`${CONNECT_URL}/discover`)
-            .then((r) => r.json())
-            .then((d) => {
-                const sonos: ConnectDevice[] = (d.sonos ?? []).map((x: any) => ({
+        Promise.all([
+            fetch(`${CONNECT_URL}/discover`).then((r) => r.json()),
+            fetch(`${CONNECT_URL}/health`).then((r) => r.json()),
+        ])
+            .then(([discoverData, healthData]) => {
+                const sonos: ConnectDevice[] = (discoverData.sonos ?? []).map((x: any) => ({
                     name: x.name,
                     type: 'sonos' as const,
                 }));
-                const airplay: ConnectDevice[] = (d.airplay ?? []).map((x: any) => ({
+                const airplay: ConnectDevice[] = (discoverData.airplay ?? []).map((x: any) => ({
                     name: x.name,
                     type: 'airplay' as const,
                 }));
                 setDevices([...sonos, ...airplay]);
-                setReady(true);
+                setHealth({ apiReachable: true, ffmpegFound: healthData.ffmpeg ?? false });
             })
-            .catch(() => setReady(true));
+            .catch(() => {
+                setHealth({ apiReachable: false, ffmpegFound: false });
+            });
     };
 
     useEffect(() => {
         refresh();
     }, []);
 
-    return { devices, ready, refresh };
+    return { devices, health, refresh };
 };
 
 // Polls /status every 2 s while the popover is open.
