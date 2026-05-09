@@ -47,6 +47,6 @@
     <category>Music</category>
   </categories>
   <releases>
-    <release date="2026-05-09" type="development" version="0.1.0-dev.0"></release>
+    <release date="2026-05-09" type="stable" version="0.1.0"></release>
   </releases>
 </component>
