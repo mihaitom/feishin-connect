@@ -1,7 +1,7 @@
 services:
     feishin:
         container_name: feishin
-        image: "ghcr.io/jeffvli/feishin:latest"
+        image: "ghcr.io/mihaitom/feishin-connect:latest"
         restart: unless-stopped
         environment:
             - SERVER_NAME=jellyfin # pre-defined server name
@@ -11,6 +11,10 @@ services:
             # - REMOTE_URL=http://share.localhost # Used for compatibility with external functionality, such as custom sharing URLs on Navidrome
             - LEGACY_AUTHENTICATION=false # When SERVER_LOCK is true, sets the legacyauth flag for server authentication (true or false)
             - ANALYTICS_DISABLED=false # Set to true to disable Umami analytics tracking
-        ports:
-            - 9180:9180
-            # Alternatively, to restrict to only localhost, - 127.0.0.1:9180:8190
+        # host networking is required for Sonos/AirPlay mDNS discovery
+        network_mode: host
+        # with host networking the ports below are bound directly — no mapping needed,
+        # but kept here for documentation: nginx on 9180, connect API on 8765
+        # ports:
+        #     - 9180:9180
+        #     - 8765:8765

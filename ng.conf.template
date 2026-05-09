@@ -27,4 +27,12 @@ server {
     alias /etc/nginx/conf.d/settings.js;
     add_header Cache-Control "no-store";
   }
+
+  location /api/ {
+    proxy_pass http://127.0.0.1:8765/;
+  }
+
+  location /stream {
+      proxy_pass http://127.0.0.1:8765/stream;
+  }
 }

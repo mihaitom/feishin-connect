@@ -1,5 +1,7 @@
 "use strict";
 
+window.__CONNECT_URL__ = "${CONNECT_URL}";
+
 window.SERVER_URL = "${SERVER_URL}";
 window.REMOTE_URL = "${REMOTE_URL}";
 window.SERVER_NAME = "${SERVER_NAME}";

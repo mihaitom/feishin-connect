@@ -17,7 +17,7 @@ FROM ghcr.io/astral-sh/uv:python3.14-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache nginx
+RUN apk add --no-cache nginx gettext ffmpeg
 COPY --chown=nginx:nginx --from=builder /app/out/web /usr/share/nginx/html 
 COPY --chown=nginx:nginx ./settings.js.template /etc/nginx/templates/settings.js.template 
 COPY --chown=nginx:nginx ng.conf.template /etc/nginx/templates/default.conf.template
@@ -37,6 +37,9 @@ COPY connect/. .
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
+
+ENV SERVER_LOCK=false SERVER_NAME="" SERVER_TYPE="" SERVER_URL="" REMOTE_URL=""
+ENV LEGACY_AUTHENTICATION="" ANALYTICS_DISABLED="" PUBLIC_PATH="/"
 
 EXPOSE 9180
 EXPOSE 8000
