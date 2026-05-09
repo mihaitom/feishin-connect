@@ -23,6 +23,7 @@ import electronLocalShortcut from 'electron-localshortcut';
 import log from 'electron-log/main';
 import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
 import { access, constants } from 'fs';
+import { request as httpRequest } from 'http';
 import path, { join } from 'path';
 import semver from 'semver';
 
@@ -258,6 +259,19 @@ function createAlphaUpdaterInstance(): AppImageUpdater | MacUpdater | NsisUpdate
 }
 
 protocol.registerSchemesAsPrivileged([{ privileges: { bypassCSP: true }, scheme: 'feishin' }]);
+
+// Fire-and-forget: ask the Connect backend to stop all playback before the app exits.
+// Uses a plain http.request so it doesn't block shutdown.
+const stopConnect = () => {
+    const port = Number(process.env.CONNECT_PORT ?? 8765);
+    try {
+        const req = httpRequest({ host: '127.0.0.1', method: 'POST', path: '/stop', port, timeout: 800 });
+        req.on('error', () => {});
+        req.end();
+    } catch {
+        // ignore — backend may not be running
+    }
+};
 
 process.on('uncaughtException', (error: any) => {
     console.error('Error in main process', error);
@@ -571,6 +585,7 @@ async function createWindow(first = true): Promise<void> {
     });
 
     ipcMain.on('window-quit', () => {
+        stopConnect();
         shutdownServer();
         mainWindow?.close();
         app.exit();
@@ -720,6 +735,7 @@ async function createWindow(first = true): Promise<void> {
 
     if (isMacOS()) {
         app.on('before-quit', () => {
+            stopConnect();
             forceQuit = true;
         });
     }
@@ -962,6 +978,7 @@ app.on('window-all-closed', () => {
     if (isMacOS()) {
         mainWindow = null;
     } else {
+        stopConnect();
         app.quit();
     }
 });

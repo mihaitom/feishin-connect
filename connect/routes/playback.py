@@ -115,39 +115,47 @@ async def play_url(req: PlayUrlRequest):
 @router.post("/next")
 async def next_track():
     st = ctx.state
-    if st.current_track_index >= len(st.current_tracks) - 1:
+    # Use compute_position() so we skip from the actual playing track, not the
+    # last manually-set index (which lags behind when tracks advance naturally).
+    current_idx, _ = compute_position()
+
+    if current_idx >= len(st.current_tracks) - 1:
         return {"error": "Bereits letzter Track"}
 
-    st.current_track_index += 1
-    st.play_start_index = st.current_track_index
+    new_idx = current_idx + 1
+    st.current_track_index = new_idx
+    st.play_start_index = new_idx
     st.play_start_time = time.time()
     st.paused_elapsed = 0.0
     st.is_paused = False
 
-    logger.info(f"[next] → Track {st.current_track_index + 1}/{len(st.current_tracks)}")
+    logger.info(f"[next] {current_idx} → {new_idx} / {len(st.current_tracks)}")
     if st.active_delivery:
         await st.active_delivery.play(stream_url())
 
-    return {"current_track_index": st.current_track_index}
+    return {"current_track_index": new_idx}
 
 
 @router.post("/previous")
 async def previous_track():
     st = ctx.state
-    if st.current_track_index <= 0:
+    current_idx, _ = compute_position()
+
+    if current_idx <= 0:
         return {"error": "Bereits erster Track"}
 
-    st.current_track_index -= 1
-    st.play_start_index = st.current_track_index
+    new_idx = current_idx - 1
+    st.current_track_index = new_idx
+    st.play_start_index = new_idx
     st.play_start_time = time.time()
     st.paused_elapsed = 0.0
     st.is_paused = False
 
-    logger.info(f"[previous] → Track {st.current_track_index + 1}/{len(st.current_tracks)}")
+    logger.info(f"[previous] {current_idx} → {new_idx} / {len(st.current_tracks)}")
     if st.active_delivery:
         await st.active_delivery.play(stream_url())
 
-    return {"current_track_index": st.current_track_index}
+    return {"current_track_index": new_idx}
 
 
 @router.post("/pause")

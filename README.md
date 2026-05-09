@@ -21,9 +21,14 @@
 
 ## Feishin Connect
 
-Feishin Connect adds a cast button (🔗) to the player bar. Click it to stream the current Navidrome queue — or a radio stream — to any Sonos speaker or AirPlay device on your network, without touching the local player.
+Feishin Connect adds a cast button to the player bar. Click it to stream the current Navidrome queue — or a radio stream — to any Sonos speaker or AirPlay device on your network, without touching the local player.
 
 <img src="assets/feishin-connect-screenshot.png" width="350px">
+
+## Development Notes
+
+This fork was developed heavily with AI assistance, especially the Connect backend and streaming integration.
+Please expect rough edges and report issues if you encounter them.
 
 ### How it works
 
@@ -88,7 +93,23 @@ services:
 - Sonos and/or AirPlay devices on the same network as the Docker host
 - Docker host on Linux (host networking is Linux-only; Mac/Windows users need to run the backend natively)
 
-### Building locally
+### Electron (desktop app)
+
+Connect also works in the Electron desktop build — the backend runs locally alongside the app.
+
+**Start the backend** (once, before or after launching Feishin):
+
+```bash
+cd connect
+uv sync          # first time only
+uv run python main.py
+```
+
+Then launch Feishin normally (`npm run dev` in dev mode, or via the packaged app). The cast button appears in the player bar and connects to `http://localhost:8765` automatically.
+
+When you quit the Electron app, it sends a stop command to the backend so all connected devices stop playing.
+
+### Building locally (Docker image)
 
 ```bash
 ./build.sh <registry> <namespace> <image-name>
@@ -96,14 +117,14 @@ services:
 ./build.sh ghcr.io myuser feishin-connect
 ```
 
-Or for development:
+Or for web development:
 
 ```bash
 # Frontend
 npm install
 npm run dev:web
 
-# Backend (separate terminal, from connect/)
+# Backend (separate terminal)
 cd connect
 uv sync
 uv run python main.py
