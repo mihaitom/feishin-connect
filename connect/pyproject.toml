@@ -1,6 +1,6 @@
 [project]
-name = "navidrome-connect"
-version = "0.1.0-dev.0"
+name = "feishin-connect"
+version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"

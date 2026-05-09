@@ -10,9 +10,7 @@ Konfiguration in .env:
 """
 
 import asyncio
-import io
 import logging
-import os
 from abc import ABC, abstractmethod
 
 logger = logging.getLogger("delivery")
@@ -166,51 +164,43 @@ class AirPlayDelivery(BaseDelivery):
         logger.info(f"[AirPlay:{self.target}] → stream: {stream_url}")
 
         async def _stream():
-            pipe_r, pipe_w = os.pipe()
             proc = None
             try:
-                # ffmpeg transcodes the live HTTP stream to 16-bit PCM WAV which
-                # pyatv/RAOP can reliably decode (direct MP3 URLs cause decoder init failures)
+                # ffmpeg transcodes the live HTTP stream to 16-bit PCM WAV.
+                # Direct MP3 URLs cause miniaudio decoder init failures, so we
+                # transcode here. proc.stdout is passed directly to stream_file as
+                # an asyncio.StreamReader — pyatv reads it via run_coroutine_threadsafe,
+                # avoiding the blocking-pipe deadlock of the old os.pipe() approach.
+                # -err_detect ignore_err prevents ffmpeg from aborting on malformed
+                # MP3 frames (e.g. at track boundaries in the /stream feed).
                 proc = await asyncio.create_subprocess_exec(
                     "ffmpeg", "-hide_banner", "-loglevel", "error",
+                    "-err_detect", "ignore_err",
                     "-i", stream_url,
                     "-vn",
                     "-acodec", "pcm_s16le",
                     "-ar", "44100",
                     "-ac", "2",
                     "-f", "wav",
-                    f"pipe:{pipe_w}",
-                    pass_fds=(pipe_w,),
+                    "pipe:1",
+                    stdout=asyncio.subprocess.PIPE,
                 )
-                os.close(pipe_w)  # parent closes write end; ffmpeg owns it
 
-                with open(pipe_r, "rb") as raw:
-                    await self._atv.stream.stream_file(io.BufferedReader(raw))
-
-                await proc.wait()
+                await self._atv.stream.stream_file(proc.stdout)
                 logger.info(f"[AirPlay:{self.target}] Stream beendet")
 
             except asyncio.CancelledError:
                 logger.info(f"[AirPlay:{self.target}] Stream abgebrochen")
-                if proc:
-                    try:
-                        proc.kill()
-                    except Exception:
-                        pass
-                try:
-                    os.close(pipe_r)
-                except Exception:
-                    pass
 
             except Exception as e:
                 logger.error(f"[AirPlay:{self.target}] Fehler: {e}")
-                if proc:
+
+            finally:
+                if proc and proc.returncode is None:
                     try:
                         proc.kill()
                     except Exception:
                         pass
-
-            finally:
                 if self._atv:
                     self._atv.close()
                     self._atv = None
