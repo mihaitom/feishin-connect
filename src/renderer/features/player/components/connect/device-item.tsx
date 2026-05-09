@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LuAirplay, LuSpeaker, LuVolume1, LuVolumeX } from 'react-icons/lu';
 
 import { CONNECT_URL, ConnectDevice } from './types';
@@ -21,6 +22,7 @@ export const DeviceItem = ({
     onStop,
     onToggleSelect,
 }: DeviceItemProps) => {
+    const { t } = useTranslation();
     const [hovered, setHovered] = useState(false);
     const [volume, setVolume] = useState<null | number>(null);
     const [muted, setMuted] = useState(false);
@@ -152,7 +154,11 @@ export const DeviceItem = ({
                             flexShrink: 0,
                             padding: 0,
                         }}
-                        title={muted ? 'Ton einschalten' : 'Stummschalten'}
+                        title={
+                            muted
+                                ? t('player.connect_unmute', { postProcess: 'sentenceCase' })
+                                : t('player.mute', { postProcess: 'sentenceCase' })
+                        }
                     >
                         {muted ? <LuVolumeX size={15} /> : <LuVolume1 size={15} />}
                     </button>
