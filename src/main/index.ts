@@ -22,7 +22,8 @@ import {
 import electronLocalShortcut from 'electron-localshortcut';
 import log from 'electron-log/main';
 import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
-import { access, constants } from 'fs';
+import { ChildProcess, spawn } from 'child_process';
+import { access, constants, existsSync } from 'fs';
 import { request as httpRequest } from 'http';
 import path, { join } from 'path';
 import semver from 'semver';
@@ -260,8 +261,62 @@ function createAlphaUpdaterInstance(): AppImageUpdater | MacUpdater | NsisUpdate
 
 protocol.registerSchemesAsPrivileged([{ privileges: { bypassCSP: true }, scheme: 'feishin' }]);
 
-// Fire-and-forget: ask the Connect backend to stop all playback before the app exits.
-// Uses a plain http.request so it doesn't block shutdown.
+// ── Connect backend process ───────────────────────────────────────────────────
+
+let connectProcess: ChildProcess | null = null;
+
+const startConnectServer = () => {
+    const connectPort = process.env.CONNECT_PORT ?? '8765';
+
+    if (app.isPackaged) {
+        // Production: use the PyInstaller binary bundled in extraResources
+        const binaryName = isWindows() ? 'connect-server.exe' : 'connect-server';
+        const binaryPath = join(process.resourcesPath, 'connect-server', binaryName);
+
+        if (!existsSync(binaryPath)) {
+            log.warn(`[Connect] Binary nicht gefunden: ${binaryPath}`);
+            return;
+        }
+
+        connectProcess = spawn(binaryPath, [], {
+            env: { ...process.env, PORT: connectPort },
+            stdio: ['ignore', 'pipe', 'pipe'],
+        });
+    } else {
+        // Development: run via uv from the connect/ source directory
+        const connectDir = join(app.getAppPath(), 'connect');
+        connectProcess = spawn('uv', ['run', 'python', 'main.py'], {
+            cwd: connectDir,
+            env: { ...process.env, PORT: connectPort },
+            stdio: ['ignore', 'pipe', 'pipe'],
+        });
+    }
+
+    connectProcess.stdout?.on('data', (data: Buffer) => {
+        log.info(`[Connect] ${data.toString().trimEnd()}`);
+    });
+    connectProcess.stderr?.on('data', (data: Buffer) => {
+        log.warn(`[Connect] ${data.toString().trimEnd()}`);
+    });
+    connectProcess.on('error', (err) => {
+        log.error(`[Connect] Fehler beim Starten: ${err.message}`);
+    });
+    connectProcess.on('exit', (code, signal) => {
+        log.info(`[Connect] Prozess beendet (code=${code}, signal=${signal})`);
+        connectProcess = null;
+    });
+
+    log.info(`[Connect] Backend gestartet (port=${connectPort})`);
+};
+
+const killConnectServer = () => {
+    if (connectProcess) {
+        connectProcess.kill();
+        connectProcess = null;
+    }
+};
+
+// Fire-and-forget HTTP stop + process kill before the app exits.
 const stopConnect = () => {
     const port = Number(process.env.CONNECT_PORT ?? 8765);
     try {
@@ -271,6 +326,7 @@ const stopConnect = () => {
     } catch {
         // ignore — backend may not be running
     }
+    killConnectServer();
 };
 
 process.on('uncaughtException', (error: any) => {
@@ -1011,6 +1067,8 @@ if (!singleInstance) {
 
     app.whenReady()
         .then(() => {
+            startConnectServer();
+
             protocol.handle('feishin', async (request) => {
                 const filePath = `file:${request.url.slice('feishin:'.length)}`;
                 const response = await net.fetch(filePath);

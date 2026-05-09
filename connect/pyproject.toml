@@ -15,3 +15,8 @@ dependencies = [
     "tqdm>=4.67.3",
     "tunesynctool>=1.2.1",
 ]
+
+[tool.uv]
+dev-dependencies = [
+    "pyinstaller>=6.11",
+]
