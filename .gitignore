@@ -7,6 +7,7 @@ out
 release
 connect/.venv
 connect/.env
+.env
 /**/__pycache__/
 connect/build
 connect/.pytest_cache
