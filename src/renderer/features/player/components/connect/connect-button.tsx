@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LuCast, LuSquare } from 'react-icons/lu';
 
 import { DeviceItem } from './device-item';
@@ -14,6 +15,7 @@ import { usePlayerStatus, usePlayerStoreBase } from '/@/renderer/store/player.st
 import { PlayerStatus } from '/@/shared/types/types';
 
 export const ConnectButton = () => {
+    const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [status, setStatus] = useState<SendStatus>('idle');
     const [activeDevice, setActive] = useState<ConnectDevice | null>(null);
@@ -231,7 +233,7 @@ export const ConnectButton = () => {
             `&name=${encodeURIComponent(device.name)}`;
         await fetch(url, { method: 'POST' }).catch(() => {});
         const remaining = activeTargets.filter(
-            (t) => !(t.type === device.type && t.name === device.name),
+            (tgt) => !(tgt.type === device.type && tgt.name === device.name),
         );
         setActiveTargets(remaining);
         if (remaining.length === 0) {
@@ -293,7 +295,7 @@ export const ConnectButton = () => {
 
     const trackLabel = isRadioActive
         ? `Radio · ${radioStationName ?? ''}`
-        : `${trackIds.length} Track${trackIds.length !== 1 ? 's' : ''}`;
+        : t('entity.trackWithCount', { count: trackIds.length });
 
     return (
         <>
@@ -316,10 +318,10 @@ export const ConnectButton = () => {
                 }}
                 title={
                     isEmpty
-                        ? 'Queue leer'
+                        ? t('player.connect_emptyQueue', { postProcess: 'sentenceCase' })
                         : isActive
                           ? `▶ ${activeDevice!.name} · ${nowPlayingTitle}`
-                          : 'Auf Gerät spielen'
+                          : t('player.connect_playOnDevice', { postProcess: 'sentenceCase' })
                 }
             >
                 <LuCast size={20} style={{ opacity: isActive ? 1 : 0.7 }} />
@@ -354,7 +356,9 @@ export const ConnectButton = () => {
                     )}
 
                     {/* Device list — accordion for active, toggle for inactive */}
-                    <PopSection label={`${trackLabel} senden an`}>
+                    <PopSection
+                        label={`${trackLabel} ${t('player.connect_sendTo', { postProcess: 'sentenceCase' })}`}
+                    >
                         {devices.length === 0 && (
                             <div
                                 style={{
@@ -364,7 +368,7 @@ export const ConnectButton = () => {
                                     textAlign: 'center',
                                 }}
                             >
-                                Keine Geräte gefunden
+                                {t('player.connect_noDevices', { postProcess: 'sentenceCase' })}
                                 <br />
                                 <button
                                     onClick={refresh}
@@ -378,7 +382,7 @@ export const ConnectButton = () => {
                                         padding: 0,
                                     }}
                                 >
-                                    Neu suchen
+                                    {t('player.connect_scan', { postProcess: 'sentenceCase' })}
                                 </button>
                             </div>
                         )}
@@ -421,8 +425,8 @@ export const ConnectButton = () => {
                                 }}
                             >
                                 {isActive
-                                    ? `Hinzufügen (${selectedForSend.length})`
-                                    : `${trackLabel} → ${selectedForSend.length} ${selectedForSend.length === 1 ? 'Gerät' : 'Geräte'}`}
+                                    ? t('player.connect_add', { count: selectedForSend.length })
+                                    : `${trackLabel} → ${t('player.connect_device', { count: selectedForSend.length })}`}
                             </button>
                         </div>
                     )}
@@ -434,7 +438,7 @@ export const ConnectButton = () => {
                             <PopButton
                                 danger
                                 icon={<LuSquare size={14} />}
-                                label="Alle stoppen"
+                                label={t('player.connect_stopAll', { postProcess: 'sentenceCase' })}
                                 onClick={stopAllPlayback}
                             />
                         </>

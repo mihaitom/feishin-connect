@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LuMusic2, LuRadio } from 'react-icons/lu';
 
 import { ConnectStatus } from './types';
@@ -53,6 +54,7 @@ export const NowPlayingSection = ({
     onPrevious,
     onTogglePlayPause,
 }: NowPlayingProps) => {
+    const { t } = useTranslation();
     const track = connectStatus?.current_track ?? null;
     const radio = connectStatus?.radio ?? null;
 
@@ -157,7 +159,10 @@ export const NowPlayingSection = ({
                         onPrevious();
                     }}
                     size="md"
-                    tooltip={{ label: 'Vorheriger Titel', openDelay: 500 }}
+                    tooltip={{
+                        label: t('player.previous', { postProcess: 'sentenceCase' }),
+                        openDelay: 500,
+                    }}
                     variant="subtle"
                 />
                 <MainPlayButton isPaused={!isPlaying} onClick={onTogglePlayPause} />
@@ -170,7 +175,10 @@ export const NowPlayingSection = ({
                         onNext();
                     }}
                     size="md"
-                    tooltip={{ label: 'Nächster Titel', openDelay: 500 }}
+                    tooltip={{
+                        label: t('player.next', { postProcess: 'sentenceCase' }),
+                        openDelay: 500,
+                    }}
                     variant="subtle"
                 />
             </div>
