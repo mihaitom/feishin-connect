@@ -3,6 +3,13 @@ export const CONNECT_URL =
     import.meta.env.VITE_CONNECT_URL ||
     'http://localhost:8765';
 
+export interface PairingStartResult {
+    device_provides_pin: boolean;
+    name: string;
+}
+
+export type PairingStep = 'idle' | 'started' | 'needs_pin' | 'success' | 'error';
+
 export interface ConnectDevice {
     name: string;
     type: 'airplay' | 'sonos';

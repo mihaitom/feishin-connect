@@ -82,6 +82,31 @@ export const useConnectStatus = (
     return status;
 };
 
+export const usePairedDevices = () => {
+    const [paired, setPaired] = useState<string[]>([]);
+
+    const refresh = useCallback(() => {
+        fetch(`${CONNECT_URL}/pair/airplay`)
+            .then((r) => r.json())
+            .then((d) => setPaired(d.paired ?? []))
+            .catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        refresh();
+    }, [refresh]);
+
+    const unpair = useCallback(
+        (name: string) =>
+            fetch(`${CONNECT_URL}/pair/airplay/${encodeURIComponent(name)}`, { method: 'DELETE' })
+                .then(() => refresh())
+                .catch(() => {}),
+        [refresh],
+    );
+
+    return { paired, refresh, unpair };
+};
+
 export const useConnectVolume = () => {
     const [volume, setVolume] = useState<null | number>(null);
     const [muted, setMuted] = useState(false);

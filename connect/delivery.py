@@ -12,8 +12,9 @@ Konfiguration in .env:
 import asyncio
 import io
 import logging
-import os
 from abc import ABC, abstractmethod
+
+import httpx
 
 logger = logging.getLogger("delivery")
 
@@ -140,20 +141,41 @@ class AirPlayDelivery(BaseDelivery):
         super().__init__(target)
         self._stream_task: asyncio.Task | None = None
         self._atv = None
+        self._play_lock = asyncio.Lock()
 
     async def _find_device(self):
         import pyatv
-        logger.info(f"[AirPlay:{self.target}] Suche Gerät...")
-        devices = await pyatv.scan(asyncio.get_event_loop(), timeout=10)
-        for d in devices:
-            if d.name.lower() == self.target.lower():
-                logger.info(f"[AirPlay:{self.target}] Gefunden: {d.address}")
-                return d
-        available = [d.name for d in devices]
-        raise RuntimeError(
-            f"AirPlay '{self.target}' nicht gefunden. "
-            f"Verfügbar: {available}"
-        )
+        from pyatv.const import Protocol
+        import credentials as creds_store
+
+        stored_creds = creds_store.get(self.target)
+
+        if stored_creds:
+            # AirPlay 2: vollständiger Scan, HAP-Credentials setzen (Protocol.AirPlay)
+            logger.info(f"[AirPlay:{self.target}] Suche Gerät (AirPlay 2, gepaired)...")
+            devices = await pyatv.scan(asyncio.get_event_loop(), timeout=10)
+            for d in devices:
+                if d.name.lower() == self.target.lower():
+                    d.set_credentials(Protocol.AirPlay, stored_creds)
+                    logger.info(f"[AirPlay:{self.target}] Gefunden: {d.address} (AirPlay 2)")
+                    return d
+            available = [d.name for d in devices]
+            raise RuntimeError(
+                f"AirPlay '{self.target}' nicht gefunden. Verfügbar: {available}"
+            )
+        else:
+            # AirPlay 1 / RAOP: kein Pairing nötig
+            logger.info(f"[AirPlay:{self.target}] Suche Gerät (RAOP, ungepaired)...")
+            devices = await pyatv.scan(asyncio.get_event_loop(), protocol=Protocol.RAOP, timeout=10)
+            for d in devices:
+                if d.name.lower() == self.target.lower():
+                    logger.info(f"[AirPlay:{self.target}] Gefunden: {d.address} (RAOP)")
+                    return d
+            available = [d.name for d in devices]
+            raise RuntimeError(
+                f"AirPlay '{self.target}' nicht via RAOP gefunden. "
+                f"Verfügbar: {available}"
+            )
 
     @staticmethod
     async def _close_atv(atv) -> None:
@@ -166,76 +188,77 @@ class AirPlayDelivery(BaseDelivery):
     async def play(self, stream_url: str, title: str = "Connect") -> None:
         import pyatv
 
-        await self.stop()
+        async with self._play_lock:
+            await self.stop()
 
-        conf = await self._find_device()
-        loop = asyncio.get_event_loop()
-        self._atv = await pyatv.connect(conf, loop)
+            conf = await self._find_device()
+            loop = asyncio.get_event_loop()
+            self._atv = await pyatv.connect(conf, loop)
 
-        logger.info(f"[AirPlay:{self.target}] → stream: {stream_url}")
+        logger.info(f"[AirPlay:{self.target}] verbunden — '{title}' (backend: {stream_url})")
+
+        # Verbindung zum Zeitpunkt der Task-Erstellung sichern, damit der
+        # finally-Block genau diese Instanz schließt, auch wenn self._atv
+        # in der Zwischenzeit durch einen weiteren play()-Aufruf ersetzt wird.
+        captured_atv = self._atv
 
         async def _stream():
-            pipe_r, pipe_w = os.pipe()
-            proc = None
+            # Lazy import — state.py importiert delivery.py, daher kein Top-Level-Import
+            from state import ctx
+
             try:
-                # ffmpeg transcodes the HTTP MP3 stream → 16-bit PCM WAV.
-                # OS pipe (not proc.stdout/asyncio.StreamReader): pyatv calls
-                # readframes() synchronously from the event loop thread via
-                # next(miniaudio_generator), which would deadlock with
-                # StreamReader's run_coroutine_threadsafe. An OS pipe read is
-                # kernel-level and independent of the asyncio event loop.
-                # -err_detect ignore_err suppresses MP3 frame errors from the
-                # /stream feed during encoder warm-up / track boundaries.
-                proc = await asyncio.create_subprocess_exec(
-                    "ffmpeg", "-hide_banner", "-loglevel", "error",
-                    "-err_detect", "ignore_err",
-                    "-i", stream_url,
-                    "-vn",
-                    "-acodec", "pcm_s16le",
-                    "-ar", "44100",
-                    "-ac", "2",
-                    "-f", "wav",
-                    f"pipe:{pipe_w}",
-                    pass_fds=(pipe_w,),
-                )
-                os.close(pipe_w)
+                tracks = list(ctx.state.current_tracks)
+                if not tracks or not ctx.navidrome:
+                    logger.warning(f"[AirPlay:{self.target}] Keine Tracks oder Navidrome nicht konfiguriert")
+                    return
 
-                with open(pipe_r, "rb") as raw:
-                    await self._atv.stream.stream_file(io.BufferedReader(raw))
+                # miniaudio (intern in pyatv) braucht vollständige Audio-Daten
+                # bevor der Decoder starten kann. Prefetch: nächsten Track im
+                # Hintergrund laden während der aktuelle spielt → keine Stille
+                # zwischen Tracks.
+                async with httpx.AsyncClient(follow_redirects=True, timeout=600.0) as http:
 
-                await proc.wait()
-                logger.info(f"[AirPlay:{self.target}] Stream beendet")
+                    async def fetch(url: str) -> io.BytesIO:
+                        resp = await http.get(url)
+                        resp.raise_for_status()
+                        logger.info(f"[AirPlay:{self.target}] ↓ {len(resp.content):,} bytes: {url.split('id=')[1][:8]}…")
+                        return io.BytesIO(resp.content)
+
+                    # Ersten Track vorabladen
+                    prefetched = await fetch(ctx.navidrome.get_stream_url(tracks[0].id))
+                    next_task: asyncio.Task | None = None
+
+                    for idx, track in enumerate(tracks):
+                        # Nächsten Track schon im Hintergrund laden während dieser spielt
+                        next_task = None
+                        if idx + 1 < len(tracks):
+                            next_url = ctx.navidrome.get_stream_url(tracks[idx + 1].id)
+                            next_task = asyncio.create_task(fetch(next_url))
+
+                        logger.info(f"[AirPlay:{self.target}] ▶ [{idx+1}/{len(tracks)}] {track.title}")
+                        await captured_atv.stream.stream_file(prefetched)
+                        logger.info(f"[AirPlay:{self.target}] ✓ gesendet")
+
+                        if next_task:
+                            prefetched = await next_task
+
+                logger.info(f"[AirPlay:{self.target}] Queue beendet")
 
             except asyncio.CancelledError:
+                if next_task and not next_task.done():
+                    next_task.cancel()
                 logger.info(f"[AirPlay:{self.target}] Stream abgebrochen")
-                if proc:
-                    try:
-                        proc.kill()
-                    except Exception:
-                        pass
-                try:
-                    os.close(pipe_r)
-                except Exception:
-                    pass
 
             except Exception as e:
-                logger.error(f"[AirPlay:{self.target}] Fehler: {e}")
-                if proc:
-                    try:
-                        proc.kill()
-                    except Exception:
-                        pass
+                logger.error(f"[AirPlay:{self.target}] Fehler: {e}", exc_info=True)
 
             finally:
-                atv, self._atv = self._atv, None
-                if atv:
-                    # asyncio.shield keeps the close tasks alive even when this
-                    # task is in a cancelled state (CancelledError is still
-                    # propagated, but the cleanup completes first).
-                    try:
-                        await asyncio.shield(self._close_atv(atv))
-                    except asyncio.CancelledError:
-                        pass
+                if self._atv is captured_atv:
+                    self._atv = None
+                try:
+                    await asyncio.shield(self._close_atv(captured_atv))
+                except asyncio.CancelledError:
+                    pass
 
         self._stream_task = asyncio.create_task(_stream())
         logger.info(f"[AirPlay:{self.target}] ✓ Stream-Task gestartet")
