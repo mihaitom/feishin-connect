@@ -32,6 +32,20 @@ server {
     proxy_pass http://127.0.0.1:8765/;
   }
 
+  location /rest/ {
+    proxy_pass http://127.0.0.1:8765/rest/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_buffering off;
+    proxy_read_timeout 300s;
+  }
+
+  location /auth/ {
+    proxy_pass http://127.0.0.1:8765/auth/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+  }
+
   location /stream {
       proxy_pass http://127.0.0.1:8765/stream;
   }
