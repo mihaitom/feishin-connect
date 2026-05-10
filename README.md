@@ -140,6 +140,35 @@ uv run python main.py
 
 ---
 
+## Navidrome behind SSO (Authentik etc.)
+
+If Navidrome is protected by an SSO layer (e.g. Authentik forward auth via Traefik/nginx), the browser cannot reach Navidrome's API directly — every request is intercepted and redirected to the SSO login page.
+
+Feishin Connect solves this with a built-in **backend proxy**: all Navidrome API calls (`/rest/`, `/auth/`, `/api/`) are routed through the Connect backend, which reaches Navidrome on the internal network, bypassing the SSO middleware entirely.
+
+**Setup:**
+
+1. Set `NAVIDROME_INTERNAL_URL` to the internal address where Navidrome is reachable without SSO:
+   ```yaml
+   - NAVIDROME_INTERNAL_URL=http://10.x.x.x:4533
+   ```
+   With `network_mode: host`, use the actual IP — Docker container names don't resolve in host network mode.
+
+2. Set `SERVER_URL` to the **Feishin Connect** URL (not Navidrome's URL):
+   ```yaml
+   - SERVER_URL=https://feishin.example.com
+   ```
+   Feishin will now call `feishin.example.com/rest/`, `feishin.example.com/auth/login`, etc., which nginx proxies to the Connect backend, which forwards internally to Navidrome.
+
+3. Navidrome itself no longer needs to be reachable from the browser at all — Feishin Connect acts as the only entry point to the Navidrome API.
+
+**Security:** The Connect API is protected by whatever sits in front of Feishin (e.g. Authentik). All Navidrome traffic is authenticated via Subsonic token/password auth as usual — the proxy is transparent.
+
+**Note:** This proxy is not needed if Navidrome is publicly reachable or on the same network as the browser. In that case, set `SERVER_URL` directly to the Navidrome URL and leave `NAVIDROME_INTERNAL_URL` unset.
+
+---
+
+
 ## Upstream: Feishin
 
 Rewrite of [Sonixd](https://github.com/jeffvli/sonixd). Original project by [@jeffvli](https://github.com/jeffvli).
@@ -211,34 +240,6 @@ curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/i
 | Docker image | `ghcr.io/mihaitom/feishin-connect` | `ghcr.io/jeffvli/feishin` |
 
 The auto-updater is disabled in this fork. It would otherwise pull releases from `jeffvli/feishin` and overwrite the Connect feature. Update by pulling the latest image (`docker pull`) or rebuilding from source.
-
----
-
-## Navidrome behind SSO (Authentik etc.)
-
-If Navidrome is protected by an SSO layer (e.g. Authentik forward auth via Traefik/nginx), the browser cannot reach Navidrome's API directly — every request is intercepted and redirected to the SSO login page.
-
-Feishin Connect solves this with a built-in **backend proxy**: all Navidrome API calls (`/rest/`, `/auth/`, `/api/`) are routed through the Connect backend, which reaches Navidrome on the internal network, bypassing the SSO middleware entirely.
-
-**Setup:**
-
-1. Set `NAVIDROME_INTERNAL_URL` to the internal address where Navidrome is reachable without SSO:
-   ```yaml
-   - NAVIDROME_INTERNAL_URL=http://10.x.x.x:4533
-   ```
-   With `network_mode: host`, use the actual IP — Docker container names don't resolve in host network mode.
-
-2. Set `SERVER_URL` to the **Feishin Connect** URL (not Navidrome's URL):
-   ```yaml
-   - SERVER_URL=https://feishin.example.com
-   ```
-   Feishin will now call `feishin.example.com/rest/`, `feishin.example.com/auth/login`, etc., which nginx proxies to the Connect backend, which forwards internally to Navidrome.
-
-3. Navidrome itself no longer needs to be reachable from the browser at all — Feishin Connect acts as the only entry point to the Navidrome API.
-
-**Security:** The Connect API is protected by whatever sits in front of Feishin (e.g. Authentik). All Navidrome traffic is authenticated via Subsonic token/password auth as usual — the proxy is transparent.
-
-**Note:** This proxy is not needed if Navidrome is publicly reachable or on the same network as the browser. In that case, set `SERVER_URL` directly to the Navidrome URL and leave `NAVIDROME_INTERNAL_URL` unset.
 
 ---
 
