@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-05-10
+
+### Added
+
+- **AirPlay 2 Pairing** — AirPlay devices that require authentication (HomePod, Apple TV) can now be paired via a one-time flow. A "Pair" button appears on hover next to unpaired AirPlay devices in the Connect popover. After pairing, credentials are stored persistently in `airplay_credentials.json` next to the backend and reused on every subsequent connection. Devices can be unpaired via `DELETE /pair/airplay/{name}`.
+- **AirPlay track prefetch** — While a track is playing on an AirPlay device, the next track is downloaded in the background. This eliminates the silence gap between tracks that occurred when downloads happened sequentially.
+
+### Fixed
+
+- AirPlay: fixed `failed to init decoder` error caused by pyatv's `InternetSource` timing out after ~10 seconds when downloading audio from Navidrome. The backend now downloads each track via httpx (with a proper timeout) and passes complete audio data to pyatv as `BytesIO`.
+- AirPlay: fixed `Response content longer than Content-Length` proxy error by stripping `Content-Length` and `Content-Encoding` headers and forcing `Accept-Encoding: identity` on proxied requests.
+- AirPlay: fixed race condition when two `POST /play` requests arrived simultaneously — an `asyncio.Lock` now serializes `play()` setup, preventing both tasks from sharing or closing each other's device connection.
+- AirPlay: captured device connection at task-creation time so the `finally` block always closes the correct connection even if `self._atv` is replaced by a subsequent `play()` call.
+
+### Known issues
+
+- **AirPlay 1 (RAOP) verified** on AirPort Express hardware. **Sonos devices with AirPlay 2** require MFi hardware authentication (proprietary implementation) which pyatv cannot provide — the backend returns HTTP 470 with a clear message. Use Sonos speakers via the Sonos protocol instead.
+
+---
+
 ## [0.1.2] - 2026-05-10
 
 ### Added
@@ -18,6 +38,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Notes
 
 - **Electron version unaffected** — The Electron app talks to Navidrome directly and never routes through the Connect backend proxy. `NAVIDROME_INTERNAL_URL` is irrelevant for Electron; leaving it unset makes the backend behave exactly as before.
+
+### Known issues
+
+- **AirPlay 1 (RAOP) verified** on AirPort Express hardware. AirPlay 2 pairing is implemented but has device-specific limitations: Apple devices (HomePod, Apple TV) support HAP pairing via pyatv; **Sonos devices require MFi hardware authentication** (proprietary Sonos AirPlay 2 implementation) which pyatv cannot provide — Sonos speakers must be used via the Sonos protocol instead. The backend returns a clear error message (HTTP 470) when MFi auth is required.
 
 ---
 
@@ -35,7 +59,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Known issues
 
-- **AirPlay is currently broken** — audio does not play despite the connection appearing successful. Investigation ongoing.
+- **AirPlay 2 requires pairing** — see 0.1.2 Known issues above.
 
 ---
 

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { LuCast, LuSquare, LuTriangleAlert } from 'react-icons/lu';
 
 import { DeviceItem } from './device-item';
-import { useConnectDevices, useConnectStatus, useConnectVolume } from './hooks';
+import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
 import { NowPlayingSection } from './now-playing';
 import { CONNECT_URL, ConnectDevice, ConnectStatus, SendStatus } from './types';
 import { PopButton, PopSection } from './ui';
@@ -26,6 +26,7 @@ export const ConnectButton = () => {
     const btnRef = useRef<HTMLButtonElement>(null);
 
     const { devices, health, refresh } = useConnectDevices();
+    const { paired, refresh: refreshPaired } = usePairedDevices();
     const { fetchVolume } = useConnectVolume();
     const { mediaNext, mediaPause, mediaPrevious, mediaTogglePlayPause } = usePlayer();
     const stopRadio = useRadioStore((s) => s.actions.stop);
@@ -553,8 +554,10 @@ export const ConnectButton = () => {
                                     <DeviceItem
                                         device={d}
                                         isActive={isDeviceActive}
+                                        isPaired={d.type === 'airplay' && paired.includes(d.name)}
                                         isSelected={isDeviceSelected}
                                         key={key}
+                                        onPaired={refreshPaired}
                                         onStop={() => stopSingleDevice(d)}
                                         onToggleSelect={() => toggleSelectForSend(d)}
                                     />

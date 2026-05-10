@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LuAirplay, LuSpeaker, LuVolume1, LuVolumeX } from 'react-icons/lu';
+import { LuAirplay, LuKeyRound, LuSpeaker, LuVolume1, LuVolumeX } from 'react-icons/lu';
 
+import { PairingModal } from './pairing-modal';
 import { CONNECT_URL, ConnectDevice } from './types';
 
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
@@ -10,7 +11,9 @@ import { Switch } from '/@/shared/components/switch/switch';
 interface DeviceItemProps {
     device: ConnectDevice;
     isActive: boolean;
+    isPaired?: boolean;
     isSelected: boolean;
+    onPaired?: () => void;
     onStop: () => void;
     onToggleSelect: () => void;
 }
@@ -18,7 +21,9 @@ interface DeviceItemProps {
 export const DeviceItem = ({
     device,
     isActive,
+    isPaired,
     isSelected,
+    onPaired,
     onStop,
     onToggleSelect,
 }: DeviceItemProps) => {
@@ -26,6 +31,7 @@ export const DeviceItem = ({
     const [hovered, setHovered] = useState(false);
     const [volume, setVolume] = useState<null | number>(null);
     const [muted, setMuted] = useState(false);
+    const [showPairingModal, setShowPairingModal] = useState(false);
     const preMute = useRef(30);
 
     const canShowVolume = isActive && device.type === 'sonos';
@@ -66,8 +72,17 @@ export const DeviceItem = ({
     };
 
     const checked = isActive || isSelected;
+    const showPairButton = device.type === 'airplay' && !isPaired && hovered;
 
     return (
+        <>
+        {showPairingModal && (
+            <PairingModal
+                deviceName={device.name}
+                onClose={() => setShowPairingModal(false)}
+                onSuccess={() => onPaired?.()}
+            />
+        )}
         <div
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
@@ -122,6 +137,32 @@ export const DeviceItem = ({
                 >
                     {device.name}
                 </span>
+
+                {/* AirPlay 2 Pair-Button — erscheint beim Hover wenn noch nicht gepaired */}
+                {showPairButton && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowPairingModal(true);
+                        }}
+                        style={{
+                            alignItems: 'center',
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: '4px',
+                            color: 'var(--theme-colors-text-secondary)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexShrink: 0,
+                            gap: '4px',
+                            padding: '3px 7px',
+                        }}
+                        title="AirPlay 2 Pairing"
+                    >
+                        <LuKeyRound size={12} />
+                        <span style={{ fontSize: '11px' }}>Pair</span>
+                    </button>
+                )}
             </div>
 
             {/* Volume — smooth slide-in on hover for active Sonos */}
@@ -183,5 +224,6 @@ export const DeviceItem = ({
                 </div>
             </div>
         </div>
+        </>
     );
 };

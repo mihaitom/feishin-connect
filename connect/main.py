@@ -16,6 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.devices import router as devices_router
+from routes.pairing import router as pairing_router
 from routes.playback import router as playback_router
 from routes.proxy import router as proxy_router
 from routes.stream import router as stream_router
@@ -63,6 +64,7 @@ app.add_middleware(
 app.include_router(stream_router)
 app.include_router(playback_router)
 app.include_router(devices_router)
+app.include_router(pairing_router)
 app.include_router(proxy_router)
 
 
