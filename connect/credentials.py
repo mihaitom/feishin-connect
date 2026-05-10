@@ -1,4 +1,4 @@
-"""credentials.py — persistente AirPlay-Pairing-Credentials pro Gerät"""
+"""credentials.py — persistent AirPlay pairing credentials per device"""
 
 import json
 import logging
@@ -16,7 +16,7 @@ def _load() -> dict[str, str]:
     except FileNotFoundError:
         return {}
     except Exception as e:
-        logger.warning(f"[credentials] Laden fehlgeschlagen: {e}")
+        logger.warning(f"[credentials] Load failed: {e}")
         return {}
 
 
@@ -25,7 +25,7 @@ def _save(data: dict[str, str]) -> None:
         with open(_PATH, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
     except Exception as e:
-        logger.error(f"[credentials] Speichern fehlgeschlagen: {e}")
+        logger.error(f"[credentials] Save failed: {e}")
 
 
 def get(device_name: str) -> str | None:
@@ -36,7 +36,7 @@ def save(device_name: str, credentials: str) -> None:
     data = _load()
     data[device_name] = credentials
     _save(data)
-    logger.info(f"[credentials] Gespeichert: {device_name}")
+    logger.info(f"[credentials] Saved: {device_name}")
 
 
 def delete(device_name: str) -> bool:
@@ -45,7 +45,7 @@ def delete(device_name: str) -> bool:
         return False
     del data[device_name]
     _save(data)
-    logger.info(f"[credentials] Gelöscht: {device_name}")
+    logger.info(f"[credentials] Deleted: {device_name}")
     return True
 
 

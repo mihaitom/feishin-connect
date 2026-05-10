@@ -38,17 +38,17 @@ async def lifespan(_: FastAPI):
     logger.info(f"🔌 API:    http://{local_ip}:{PORT}/")
 
     if shutil.which("ffmpeg"):
-        logger.info("✅ ffmpeg gefunden")
+        logger.info("✅ ffmpeg found")
     else:
-        logger.error("❌ ffmpeg NICHT GEFUNDEN — Streaming wird fehlschlagen!")
+        logger.error("❌ ffmpeg NOT FOUND — streaming will fail!")
 
     if ctx.delivery.deliveries:
         for t in ctx.delivery.list_targets():
             logger.info(f"🔊 Target: {t['type']}:{t['name']}")
     else:
-        logger.info("ℹ️  Keine TARGETS env — Steuerung über Feishin /play")
+        logger.info("ℹ️  No TARGETS env — controlled via Feishin /play")
 
-    logger.info("⏳ Warte auf Feishin /config (Navidrome-Zugangsdaten)")
+    logger.info("⏳ Waiting for Feishin /config (Navidrome credentials)")
     yield
 
 

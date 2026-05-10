@@ -1,7 +1,7 @@
 """Tests for playback endpoints: /play, /stop, /pause, /resume, /next, /previous, /status."""
 
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import state
 from subsonic import Track

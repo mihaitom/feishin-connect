@@ -1,6 +1,4 @@
-"""
-sonos_ctrl.py — Sonos Steuerung via SoCo
-"""
+"""sonos_ctrl.py — Sonos control via SoCo"""
 
 import logging
 
@@ -8,12 +6,12 @@ logger = logging.getLogger("sonos")
 
 
 def get_device(room_name: str):
-    """Sucht ein Sonos-Gerät nach Raumname."""
+    """Find a Sonos device by room name."""
     import soco
 
     devices = list(soco.discover() or [])
     if not devices:
-        raise RuntimeError("Keine Sonos-Geräte im Netzwerk gefunden.")
+        raise RuntimeError("No Sonos devices found on the network.")
 
     for d in devices:
         try:
@@ -24,34 +22,34 @@ def get_device(room_name: str):
 
     available = [d.player_name for d in devices]
     raise RuntimeError(
-        f"Raum '{room_name}' nicht gefunden. Verfügbar: {available}"
+        f"Room '{room_name}' not found. Available: {available}"
     )
 
 
 def play_stream(stream_url: str, room_name: str, title: str = "Navispot") -> None:
-    """Weist Sonos an, den Stream zu spielen."""
+    """Tell Sonos to play the stream."""
     device = get_device(room_name)
 
-    # Wenn Gerät in einer Gruppe ist, brauchen wir den Coordinator
+    # If device is in a group, we need the coordinator
     if not device.is_coordinator:
         coordinator = device.group.coordinator
         logger.info(
-            f"[{device.player_name}] ist Gruppenmitglied → "
-            f"nutze Coordinator [{coordinator.player_name}]"
+            f"[{device.player_name}] is a group member → "
+            f"using coordinator [{coordinator.player_name}]"
         )
         device = coordinator
 
-    # Aktuellen Zustand loggen
+    # Log current transport state
     transport_info = device.get_current_transport_info()
     current_state = transport_info.get("current_transport_state", "UNKNOWN")
-    logger.info(f"Sonos [{device.player_name}] Zustand: {current_state}")
+    logger.info(f"Sonos [{device.player_name}] state: {current_state}")
 
-    # Erst stoppen
+    # Stop first
     if current_state in ("PLAYING", "PAUSED_PLAYBACK", "TRANSITIONING"):
-        logger.info("Stoppe laufende Wiedergabe...")
+        logger.info("Stopping current playback...")
         device.stop()
 
-    # DIDL-Lite Metadata — Sonos braucht das um den Stream-Typ zu verstehen
+    # DIDL-Lite Metadata — Sonos needs this to understand the stream type
     # type=object.item.audioItem.audioBroadcast = Radio/Stream
     metadata = (
         '<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" '
@@ -67,24 +65,24 @@ def play_stream(stream_url: str, room_name: str, title: str = "Navispot") -> Non
 
     logger.info(f"Sonos [{device.player_name}] → SetAVTransportURI: {stream_url}")
 
-    # Direkt über AVTransport (mehr Kontrolle als play_uri)
+    # Direct AVTransport call (more control than play_uri)
     device.avTransport.SetAVTransportURI(
         [("InstanceID", 0), ("CurrentURI", stream_url), ("CurrentURIMetaData", metadata)]
     )
     device.avTransport.Play([("InstanceID", 0), ("Speed", 1)])
 
-    logger.info("Play gesendet ✓")
+    logger.info("Play sent ✓")
 
 
 def stop(room_name: str) -> None:
-    """Stoppt Sonos."""
+    """Stop Sonos."""
     device = get_device(room_name)
     device.stop()
-    logger.info(f"Sonos [{device.player_name}] gestoppt.")
+    logger.info(f"Sonos [{device.player_name}] stopped.")
 
 
 def list_devices() -> list[dict]:
-    """Gibt alle Sonos-Geräte zurück."""
+    """Return all Sonos devices."""
     import soco
 
     devices = list(soco.discover() or [])

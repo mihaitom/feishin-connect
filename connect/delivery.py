@@ -1,11 +1,11 @@
 """
 delivery.py — Audio Delivery Abstraction
 
-Unterstützt mehrere Renderer gleichzeitig:
+Supports multiple renderers simultaneously:
   - Sonos   (via SoCo / UPnP)
   - AirPlay (via pyatv)
 
-Konfiguration in .env:
+Configuration in .env:
   TARGETS=sonos:Arbeitszimmer,airplay:HomePod Küche
 """
 
@@ -29,17 +29,17 @@ class BaseDelivery(ABC):
 
     @abstractmethod
     async def play(self, stream_url: str, title: str = "Connect") -> None:
-        """Startet Wiedergabe des Streams."""
+        """Start stream playback."""
 
     @abstractmethod
     async def stop(self) -> None:
-        """Stoppt Wiedergabe."""
+        """Stop playback."""
 
     async def pause(self) -> None:
-        """Pausiert Wiedergabe (optional, Standard: no-op)."""
+        """Pause playback (optional, default: no-op)."""
 
     async def resume(self) -> None:
-        """Setzt Wiedergabe fort (optional, Standard: no-op)."""
+        """Resume playback (optional, default: no-op)."""
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.target})"
@@ -50,13 +50,13 @@ class BaseDelivery(ABC):
 # ──────────────────────────────────────────────
 
 class SonosDelivery(BaseDelivery):
-    """Steuert einen Sonos-Lautsprecher via SoCo."""
+    """Controls a Sonos speaker via SoCo."""
 
     def _get_device(self):
         import soco
         devices = list(soco.discover() or [])
         if not devices:
-            raise RuntimeError("Keine Sonos-Geräte gefunden.")
+            raise RuntimeError("No Sonos devices found.")
         for d in devices:
             try:
                 if d.player_name.lower() == self.target.lower():
@@ -64,7 +64,7 @@ class SonosDelivery(BaseDelivery):
             except Exception:
                 pass
         available = [d.player_name for d in devices]
-        raise RuntimeError(f"Sonos '{self.target}' nicht gefunden. Verfügbar: {available}")
+        raise RuntimeError(f"Sonos '{self.target}' not found. Available: {available}")
 
     async def play(self, stream_url: str, title: str = "Connect") -> None:
         device = await asyncio.to_thread(self._get_device)
@@ -105,22 +105,22 @@ class SonosDelivery(BaseDelivery):
             device.avTransport.Play,
             [("InstanceID", 0), ("Speed", 1)]
         )
-        logger.info(f"[Sonos:{self.target}] ✓ spielt")
+        logger.info(f"[Sonos:{self.target}] ✓ playing")
 
     async def pause(self) -> None:
         device = await asyncio.to_thread(self._get_device)
         await asyncio.to_thread(device.pause)
-        logger.info(f"[Sonos:{self.target}] pausiert")
+        logger.info(f"[Sonos:{self.target}] paused")
 
     async def resume(self) -> None:
         device = await asyncio.to_thread(self._get_device)
         await asyncio.to_thread(device.play)
-        logger.info(f"[Sonos:{self.target}] fortgesetzt")
+        logger.info(f"[Sonos:{self.target}] resumed")
 
     async def stop(self) -> None:
         device = await asyncio.to_thread(self._get_device)
         await asyncio.to_thread(device.stop)
-        logger.info(f"[Sonos:{self.target}] gestoppt")
+        logger.info(f"[Sonos:{self.target}] stopped")
 
 
 # ──────────────────────────────────────────────
@@ -129,12 +129,12 @@ class SonosDelivery(BaseDelivery):
 
 class AirPlayDelivery(BaseDelivery):
     """
-    Streamt Audio zu einem AirPlay-Gerät via pyatv.
+    Streams audio to an AirPlay device via pyatv.
 
     pip install pyatv
 
-    Wichtig: pyatv pushed den Stream aktiv (anders als Sonos der pulled).
-    Der Stream-Task läuft im Hintergrund bis stop() aufgerufen wird.
+    Important: pyatv pushes the stream actively (unlike Sonos which pulls).
+    The stream task runs in the background until stop() is called.
     """
 
     def __init__(self, target: str):
@@ -151,30 +151,30 @@ class AirPlayDelivery(BaseDelivery):
         stored_creds = creds_store.get(self.target)
 
         if stored_creds:
-            # AirPlay 2: vollständiger Scan, HAP-Credentials setzen (Protocol.AirPlay)
-            logger.info(f"[AirPlay:{self.target}] Suche Gerät (AirPlay 2, gepaired)...")
+            # AirPlay 2: full scan, set HAP credentials (Protocol.AirPlay)
+            logger.info(f"[AirPlay:{self.target}] Scanning for device (AirPlay 2, paired)...")
             devices = await pyatv.scan(asyncio.get_event_loop(), timeout=10)
             for d in devices:
                 if d.name.lower() == self.target.lower():
                     d.set_credentials(Protocol.AirPlay, stored_creds)
-                    logger.info(f"[AirPlay:{self.target}] Gefunden: {d.address} (AirPlay 2)")
+                    logger.info(f"[AirPlay:{self.target}] Found: {d.address} (AirPlay 2)")
                     return d
             available = [d.name for d in devices]
             raise RuntimeError(
-                f"AirPlay '{self.target}' nicht gefunden. Verfügbar: {available}"
+                f"AirPlay '{self.target}' not found. Available: {available}"
             )
         else:
-            # AirPlay 1 / RAOP: kein Pairing nötig
-            logger.info(f"[AirPlay:{self.target}] Suche Gerät (RAOP, ungepaired)...")
+            # AirPlay 1 / RAOP: no pairing needed
+            logger.info(f"[AirPlay:{self.target}] Scanning for device (RAOP, unpaired)...")
             devices = await pyatv.scan(asyncio.get_event_loop(), protocol=Protocol.RAOP, timeout=10)
             for d in devices:
                 if d.name.lower() == self.target.lower():
-                    logger.info(f"[AirPlay:{self.target}] Gefunden: {d.address} (RAOP)")
+                    logger.info(f"[AirPlay:{self.target}] Found: {d.address} (RAOP)")
                     return d
             available = [d.name for d in devices]
             raise RuntimeError(
-                f"AirPlay '{self.target}' nicht via RAOP gefunden. "
-                f"Verfügbar: {available}"
+                f"AirPlay '{self.target}' not found via RAOP. "
+                f"Available: {available}"
             )
 
     @staticmethod
@@ -195,27 +195,25 @@ class AirPlayDelivery(BaseDelivery):
             loop = asyncio.get_event_loop()
             self._atv = await pyatv.connect(conf, loop)
 
-        logger.info(f"[AirPlay:{self.target}] verbunden — '{title}' (backend: {stream_url})")
+        logger.info(f"[AirPlay:{self.target}] connected — '{title}' (backend: {stream_url})")
 
-        # Verbindung zum Zeitpunkt der Task-Erstellung sichern, damit der
-        # finally-Block genau diese Instanz schließt, auch wenn self._atv
-        # in der Zwischenzeit durch einen weiteren play()-Aufruf ersetzt wird.
+        # Capture connection at task-creation time so the finally block closes
+        # exactly this instance, even if self._atv is replaced by a concurrent play() call.
         captured_atv = self._atv
 
         async def _stream():
-            # Lazy import — state.py importiert delivery.py, daher kein Top-Level-Import
+            # Lazy import — state.py imports delivery.py, so no top-level import possible
             from state import ctx
 
             try:
                 tracks = list(ctx.state.current_tracks)
                 if not tracks or not ctx.navidrome:
-                    logger.warning(f"[AirPlay:{self.target}] Keine Tracks oder Navidrome nicht konfiguriert")
+                    logger.warning(f"[AirPlay:{self.target}] No tracks or Navidrome not configured")
                     return
 
-                # miniaudio (intern in pyatv) braucht vollständige Audio-Daten
-                # bevor der Decoder starten kann. Prefetch: nächsten Track im
-                # Hintergrund laden während der aktuelle spielt → keine Stille
-                # zwischen Tracks.
+                # miniaudio (internal to pyatv) needs complete audio data before the
+                # decoder can start. Prefetch: download the next track in the background
+                # while the current one plays → no silence between tracks.
                 async with httpx.AsyncClient(follow_redirects=True, timeout=600.0) as http:
 
                     async def fetch(url: str) -> io.BytesIO:
@@ -224,12 +222,12 @@ class AirPlayDelivery(BaseDelivery):
                         logger.info(f"[AirPlay:{self.target}] ↓ {len(resp.content):,} bytes: {url.split('id=')[1][:8]}…")
                         return io.BytesIO(resp.content)
 
-                    # Ersten Track vorabladen
+                    # Preload first track
                     prefetched = await fetch(ctx.navidrome.get_stream_url(tracks[0].id))
                     next_task: asyncio.Task | None = None
 
                     for idx, track in enumerate(tracks):
-                        # Nächsten Track schon im Hintergrund laden während dieser spielt
+                        # Start prefetching next track in background while current plays
                         next_task = None
                         if idx + 1 < len(tracks):
                             next_url = ctx.navidrome.get_stream_url(tracks[idx + 1].id)
@@ -237,20 +235,20 @@ class AirPlayDelivery(BaseDelivery):
 
                         logger.info(f"[AirPlay:{self.target}] ▶ [{idx+1}/{len(tracks)}] {track.title}")
                         await captured_atv.stream.stream_file(prefetched)
-                        logger.info(f"[AirPlay:{self.target}] ✓ gesendet")
+                        logger.info(f"[AirPlay:{self.target}] ✓ sent")
 
                         if next_task:
                             prefetched = await next_task
 
-                logger.info(f"[AirPlay:{self.target}] Queue beendet")
+                logger.info(f"[AirPlay:{self.target}] Queue finished")
 
             except asyncio.CancelledError:
                 if next_task and not next_task.done():
                     next_task.cancel()
-                logger.info(f"[AirPlay:{self.target}] Stream abgebrochen")
+                logger.info(f"[AirPlay:{self.target}] Stream cancelled")
 
             except Exception as e:
-                logger.error(f"[AirPlay:{self.target}] Fehler: {e}", exc_info=True)
+                logger.error(f"[AirPlay:{self.target}] Error: {e}", exc_info=True)
 
             finally:
                 if self._atv is captured_atv:
@@ -261,7 +259,7 @@ class AirPlayDelivery(BaseDelivery):
                     pass
 
         self._stream_task = asyncio.create_task(_stream())
-        logger.info(f"[AirPlay:{self.target}] ✓ Stream-Task gestartet")
+        logger.info(f"[AirPlay:{self.target}] ✓ stream task started")
 
     async def stop(self) -> None:
         if self._stream_task and not self._stream_task.done():
@@ -276,7 +274,7 @@ class AirPlayDelivery(BaseDelivery):
         atv, self._atv = self._atv, None
         if atv:
             await self._close_atv(atv)
-        logger.info(f"[AirPlay:{self.target}] gestoppt")
+        logger.info(f"[AirPlay:{self.target}] stopped")
 
 
 # ──────────────────────────────────────────────
@@ -285,9 +283,9 @@ class AirPlayDelivery(BaseDelivery):
 
 class DeliveryManager:
     """
-    Verwaltet mehrere Delivery-Targets gleichzeitig.
+    Manages multiple delivery targets simultaneously.
 
-    Konfiguration via TARGETS env var:
+    Configuration via TARGETS env var:
       TARGETS=sonos:Arbeitszimmer,airplay:HomePod Küche,sonos:Wohnzimmer
     """
 
@@ -296,7 +294,7 @@ class DeliveryManager:
         if self.deliveries:
             logger.info(f"Delivery Targets: {self.deliveries}")
         else:
-            logger.warning("Keine TARGETS konfiguriert — nur /stream endpoint verfügbar")
+            logger.warning("No TARGETS configured — only /stream endpoint available")
 
     @classmethod
     def from_deliveries(cls, deliveries: list[BaseDelivery]) -> "DeliveryManager":
@@ -312,7 +310,7 @@ class DeliveryManager:
         for entry in config.split(","):
             entry = entry.strip()
             if ":" not in entry:
-                logger.warning(f"Ungültiger Target-Eintrag (Format: 'typ:name'): {entry}")
+                logger.warning(f"Invalid target entry (format: 'type:name'): {entry}")
                 continue
             typ, name = entry.split(":", 1)
             typ = typ.strip().lower()
@@ -322,7 +320,7 @@ class DeliveryManager:
             elif typ == "airplay":
                 result.append(AirPlayDelivery(name))
             else:
-                logger.warning(f"Unbekannter Delivery-Typ: '{typ}' (bekannt: sonos, airplay)")
+                logger.warning(f"Unknown delivery type: '{typ}' (known: sonos, airplay)")
         return result
 
     async def play(self, stream_url: str, title: str = "Connect") -> None:
@@ -341,7 +339,7 @@ class DeliveryManager:
         results = await asyncio.gather(*tasks, return_exceptions=True)
         for result in results:
             if isinstance(result, Exception):
-                logger.error(f"Delivery Fehler: {result}")
+                logger.error(f"Delivery error: {result}")
 
     async def _play_grouped_sonos(
         self, deliveries: list[SonosDelivery], stream_url: str, title: str
@@ -395,14 +393,14 @@ class DeliveryManager:
 # ──────────────────────────────────────────────
 
 async def discover_sonos() -> list[dict]:
-    """Findet alle Sonos-Geräte im Netzwerk."""
+    """Discovers all Sonos devices on the network."""
     import soco
     devices = await asyncio.to_thread(lambda: list(soco.discover() or []))
     return [{"name": d.player_name, "ip": d.ip_address} for d in devices]
 
 
 async def discover_airplay() -> list[dict]:
-    """Findet alle AirPlay-Geräte im Netzwerk."""
+    """Discovers all AirPlay devices on the network."""
     import pyatv
     devices = await pyatv.scan(asyncio.get_event_loop(), timeout=10)
     return [

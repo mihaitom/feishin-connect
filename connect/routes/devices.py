@@ -31,7 +31,7 @@ class ConfigRequest(BaseModel):
 async def configure(req: ConfigRequest):
     internal_url = os.getenv("NAVIDROME_INTERNAL_URL", "")
     ctx.navidrome = SubsonicClient(req.url, credential=req.credential, internal_url=internal_url)
-    logger.info(f"[config] Navidrome konfiguriert: {req.url} (intern: {internal_url or 'gleich'})")
+    logger.info(f"[config] Navidrome configured: {req.url} (internal: {internal_url or 'same'})")
     return {"status": "ok"}
 
 
@@ -46,7 +46,7 @@ async def health():
 
 @router.get("/discover")
 async def discover():
-    logger.info("[discover] Suche Sonos- und AirPlay-Geräte …")
+    logger.info("[discover] Scanning for Sonos and AirPlay devices …")
     sonos_res, airplay_res = await asyncio.gather(
         discover_sonos(),
         discover_airplay(),
@@ -57,11 +57,11 @@ async def discover():
     airplay = airplay_res if isinstance(airplay_res, list) else []
 
     if isinstance(sonos_res, Exception):
-        logger.warning(f"[discover] Sonos Fehler: {sonos_res}")
+        logger.warning(f"[discover] Sonos error: {sonos_res}")
     if isinstance(airplay_res, Exception):
-        logger.warning(f"[discover] AirPlay Fehler: {airplay_res}")
+        logger.warning(f"[discover] AirPlay error: {airplay_res}")
 
-    logger.info(f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay gefunden")
+    logger.info(f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay found")
     for d in sonos:
         logger.debug(f"[discover]   Sonos: {d['name']} ({d.get('ip', '?')})")
     for d in airplay:
@@ -78,12 +78,12 @@ class VolumeRequest(BaseModel):
 async def get_volume():
     sonos_targets = find_sonos(ctx.state.active_delivery)
     if not sonos_targets:
-        return {"error": "Kein Sonos-Target aktiv"}
+        return {"error": "No active Sonos target"}
     try:
         device = await asyncio.to_thread(sonos_targets[0]._get_device)
         return {"volume": device.volume}
     except Exception as e:
-        logger.warning(f"[volume] get Fehler: {e}")
+        logger.warning(f"[volume] get error: {e}")
         return {"error": str(e)}
 
 
@@ -92,7 +92,7 @@ async def set_volume(req: VolumeRequest):
     volume = max(0, min(100, req.volume))
     sonos_targets = find_sonos(ctx.state.active_delivery)
     if not sonos_targets:
-        return {"error": "Kein Sonos-Target aktiv"}
+        return {"error": "No active Sonos target"}
 
     async def _set(d: SonosDelivery):
         device = await asyncio.to_thread(d._get_device)
@@ -105,7 +105,7 @@ async def set_volume(req: VolumeRequest):
 @router.get("/device-volume")
 async def get_device_volume(device_type: str, name: str):
     if device_type != "sonos":
-        return {"error": "Lautstärke nur für Sonos verfügbar"}
+        return {"error": "Volume control only available for Sonos"}
     try:
         device = await asyncio.to_thread(SonosDelivery(name)._get_device)
         return {"volume": device.volume}
@@ -117,7 +117,7 @@ async def get_device_volume(device_type: str, name: str):
 @router.post("/device-volume")
 async def set_device_volume(device_type: str, name: str, req: VolumeRequest):
     if device_type != "sonos":
-        return {"error": "Lautstärke nur für Sonos verfügbar"}
+        return {"error": "Volume control only available for Sonos"}
     volume = max(0, min(100, req.volume))
     try:
         device = await asyncio.to_thread(SonosDelivery(name)._get_device)
@@ -148,8 +148,8 @@ async def stop_device(device_type: str, name: str):
         remaining = [active]
 
     logger.info(
-        f"[device-stop] {device_type}:{name} — verbleibend: "
-        f"{[d.target for d in remaining] or 'keins'}"
+        f"[device-stop] {device_type}:{name} — remaining: "
+        f"{[d.target for d in remaining] or 'none'}"
     )
 
     need_restart = False
@@ -165,7 +165,7 @@ async def stop_device(device_type: str, name: str):
                 logger.debug(f"[device-stop] {name} ist_koordinator={is_coord}")
 
                 if is_coord and remaining:
-                    logger.info(f"[device-stop] Entgruppiere {len(remaining)} Follower …")
+                    logger.info(f"[device-stop] Ungrouping {len(remaining)} follower(s) …")
                     for rem in remaining:
                         if isinstance(rem, SonosDelivery):
                             rem_dev = next(
@@ -176,7 +176,7 @@ async def stop_device(device_type: str, name: str):
                             if rem_dev:
                                 try:
                                     await asyncio.to_thread(rem_dev.unjoin)
-                                    logger.debug(f"[device-stop] {rem.target} entgruppt")
+                                    logger.debug(f"[device-stop] {rem.target} ungrouped")
                                 except Exception as ex:
                                     logger.warning(f"[device-stop] unjoin {rem.target}: {ex}")
                     await asyncio.sleep(0.3)
@@ -186,9 +186,9 @@ async def stop_device(device_type: str, name: str):
                     await asyncio.sleep(0.1)
 
                 await asyncio.to_thread(target_dev.stop)
-                logger.info(f"[device-stop] {name} gestoppt")
+                logger.info(f"[device-stop] {name} stopped")
             else:
-                logger.warning(f"[device-stop] Sonos '{name}' nicht im Netzwerk gefunden")
+                logger.warning(f"[device-stop] Sonos '{name}' not found on network")
         else:
             await AirPlayDelivery(name).stop()
 
@@ -210,11 +210,11 @@ async def stop_device(device_type: str, name: str):
         if need_restart and st.is_streaming:
             url = st.radio_info["url"] if st.radio_info else stream_url()
             title = st.radio_info["title"] if st.radio_info else "Connect"
-            logger.info(f"[device-stop] Starte Stream neu: {url}")
+            logger.info(f"[device-stop] Restarting stream: {url}")
             try:
                 await new_delivery.play(url, title)
             except Exception as e:
-                logger.error(f"[device-stop] Restart Fehler: {e}", exc_info=True)
+                logger.error(f"[device-stop] Restart error: {e}", exc_info=True)
 
     return {"status": "stopped", "device": name}
 
@@ -228,7 +228,7 @@ class JoinRequest(BaseModel):
 async def join_stream(req: JoinRequest):
     st = ctx.state
     if not st.is_streaming:
-        return {"error": "Kein aktiver Stream"}
+        return {"error": "No active stream"}
 
     url = stream_url()
     type_cls = SonosDelivery if req.target_type == "sonos" else AirPlayDelivery
@@ -243,9 +243,9 @@ async def join_stream(req: JoinRequest):
                 coordinator = await asyncio.to_thread(existing_sonos[0]._get_device)
                 joiner = await asyncio.to_thread(new_d._get_device)
                 await asyncio.to_thread(joiner.join, coordinator)
-                logger.info(f"[join] {req.target_name} tritt Gruppe von {existing_sonos[0].target} bei")
+                logger.info(f"[join] {req.target_name} joining group of {existing_sonos[0].target}")
             except Exception as e:
-                logger.warning(f"[join] Gruppen-Join fehlgeschlagen ({e}), Fallback auf eigenen Stream")
+                logger.warning(f"[join] Group join failed ({e}), falling back to individual stream")
                 await new_d.play(url)
         else:
             await new_d.play(url)

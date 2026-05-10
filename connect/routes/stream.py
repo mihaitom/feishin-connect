@@ -24,7 +24,7 @@ async def audio_stream_head():
 @router.get("/stream")
 async def audio_stream():
     if not ctx.state.current_tracks:
-        logger.warning("[stream] Kein Track geladen — sende leere Antwort (204)")
+        logger.warning("[stream] No track loaded — send an empty response (204)")
         return StreamingResponse(iter([b""]), media_type="audio/mpeg", status_code=204)
 
     start_idx = ctx.state.current_track_index
@@ -32,8 +32,8 @@ async def audio_stream():
     track_urls = [ctx.navidrome.get_stream_url(t.id) for t in tracks[start_idx:]]
 
     logger.info(
-        f"[stream] Client verbunden — Track {start_idx + 1}/{len(tracks)}, "
-        f"{len(track_urls)} URL(s) in Warteschlange"
+        f"[stream] Client connected — Track {start_idx + 1}/{len(tracks)}, "
+        f"{len(track_urls)} URL(s) in queue"
     )
     for i, url in enumerate(track_urls[:3]):
         logger.debug(f"[stream]   [{start_idx + i + 1}] {url[:100]}")
@@ -68,7 +68,7 @@ async def status():
             "title": t.title,
         }
 
-    from delivery import DeliveryManager, SonosDelivery  # noqa: PLC0415
+    from delivery import DeliveryManager
     if isinstance(st.active_delivery, DeliveryManager):
         active_targets = st.active_delivery.list_targets()
     elif st.active_delivery is not None:

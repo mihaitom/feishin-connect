@@ -1,15 +1,13 @@
-"""Tests für routes/proxy.py — Navidrome-Proxy-Endpunkte."""
+"""Tests for routes/proxy.py — Navidrome proxy endpoints."""
 
 import importlib
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
+from unittest.mock import AsyncMock, patch
 
 
-# ── Hilfsfunktion: Proxy-Modul mit gegebener Env-Var neu laden ───────────────
+# ── Utility function: Reload proxy module with a given environment variable ───────────────
 
 def _reload_proxy(internal_url: str):
-    """Proxy-Modul mit gesetzter NAVIDROME_INTERNAL_URL neu importieren."""
+    """Proxy module with a given environment variable."""
     import routes.proxy as proxy_mod
     with patch.dict("os.environ", {"NAVIDROME_INTERNAL_URL": internal_url}):
         importlib.reload(proxy_mod)
@@ -46,7 +44,7 @@ def test_proxy_navidrome_api_returns_503_when_no_url_configured(client, monkeypa
     assert r.status_code == 503
 
 
-# ── Pairing-Liste (kein Hardware nötig) ──────────────────────────────────────
+# ── Pairing-Liste (no hardware required) ──────────────────────────────────────
 
 def test_pair_list_returns_empty_initially(client):
     import tempfile
@@ -60,7 +58,7 @@ def test_pair_list_returns_empty_initially(client):
 
 
 def test_pair_start_returns_404_for_unknown_device(client):
-    """Start schlägt fehl wenn Gerät im Netz nicht gefunden wird."""
+    """Start fails when device is not found on the network."""
     async def fake_scan(*args, **kwargs):
         return []
 

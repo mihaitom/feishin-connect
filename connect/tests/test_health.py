@@ -2,9 +2,6 @@
 
 from unittest.mock import patch
 
-import state
-
-
 def test_ffmpeg_found(client):
     with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
         r = client.get("/health")

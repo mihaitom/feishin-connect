@@ -1,10 +1,10 @@
-"""routes/proxy.py — transparenter Proxy für Navidrome API-Calls
+"""routes/proxy.py — transparent proxy for Navidrome API calls
 
-Proxied paths (alle gehen intern an NAVIDROME_INTERNAL_URL):
+Proxied paths (all routed internally to NAVIDROME_INTERNAL_URL):
   /rest/{path}   → Subsonic API  (navidrome/rest/{path})
   /auth/{path}   → Navidrome Auth (navidrome/auth/{path})
-  /{path}        → Navidrome REST API via /api/ nginx-prefix (navidrome/api/{path})
-                   (nginx strippt /api/ vor dem Weiterleiten ans Backend)
+  /{path}        → Navidrome REST API via /api/ nginx prefix (navidrome/api/{path})
+                   (nginx strips /api/ before forwarding to the backend)
 """
 
 import os
@@ -18,8 +18,8 @@ router = APIRouter()
 _INTERNAL_URL = os.getenv("NAVIDROME_INTERNAL_URL", "").rstrip("/")
 
 _SKIP_REQ = {"host", "connection", "transfer-encoding"}
-# content-length weglassen: httpx dekomprimiert gzip automatisch, dadurch
-# stimmt die originale Content-Length nicht mehr mit den tatsächlichen Bytes überein.
+# Strip content-length: httpx decompresses gzip automatically, so the original
+# Content-Length no longer matches the actual byte count.
 _SKIP_RESP = {"transfer-encoding", "connection", "content-length", "content-encoding"}
 
 _ALL_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"]
@@ -34,8 +34,8 @@ async def _proxy(request: Request, target: str) -> StreamingResponse | JSONRespo
     fwd_headers = {
         k: v for k, v in request.headers.items() if k.lower() not in _SKIP_REQ
     }
-    # Kein gzip von Navidrome: httpx würde dekomprimieren, aber den originalen
-    # Content-Length weiterleiten → Mismatch. Identity verhindert das Problem.
+    # No gzip from Navidrome: httpx would decompress but forward the original
+    # Content-Length → mismatch. Identity prevents this issue.
     fwd_headers["accept-encoding"] = "identity"
     client = httpx.AsyncClient(follow_redirects=True, timeout=60)
     try:
@@ -49,7 +49,7 @@ async def _proxy(request: Request, target: str) -> StreamingResponse | JSONRespo
         response = await client.send(req, stream=True)
     except httpx.ConnectError as e:
         await client.aclose()
-        return JSONResponse({"error": f"Navidrome nicht erreichbar: {e}"}, status_code=502)
+        return JSONResponse({"error": f"Navidrome not reachable: {e}"}, status_code=502)
     except httpx.TimeoutException as e:
         await client.aclose()
         return JSONResponse({"error": f"Navidrome Timeout: {e}"}, status_code=504)
@@ -84,9 +84,9 @@ async def proxy_auth(path: str, request: Request):
     return await _proxy(request, f"{_INTERNAL_URL}/auth/{path}")
 
 
-# Catch-all: nginx strippt /api/ vor dem Weiterleiten, also kommt z.B.
-# /api/album als /album ans Backend → hier weiterleiten an navidrome/api/album.
-# Registriert ZULETZT damit spezifische Connect-Routen Vorrang haben.
+# Catch-all: nginx strips "/api/" before forwarding, so, for example,
+# "/api/album" is sent to the backend as "/album" → forward it here to navidrome/api/album.
+# Register LAST so that specific Connect routes take precedence.
 @router.api_route("/{path:path}", methods=_ALL_METHODS)
 async def proxy_navidrome_api(path: str, request: Request):
     return await _proxy(request, f"{_INTERNAL_URL}/api/{path}")

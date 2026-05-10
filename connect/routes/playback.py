@@ -23,10 +23,10 @@ class PlayRequest(BaseModel):
 @router.post("/play")
 async def play_tracks(req: PlayRequest):
     if not ctx.navidrome.base_url:
-        logger.warning("[play] Abgelehnt: Navidrome nicht konfiguriert (warte auf /config)")
-        return {"error": "Navidrome nicht konfiguriert — warte auf /config von Feishin"}
+        logger.warning("[play] Rejected: Navidrome not configured (waiting for /config)")
+        return {"error": "Navidrome not configured — waiting for /config from Feishin"}
     if not req.track_ids:
-        return {"error": "Keine Track-IDs angegeben"}
+        return {"error": "No track IDs provided"}
 
     tracks: list[Track] = []
     for track_id in req.track_ids:
@@ -41,10 +41,10 @@ async def play_tracks(req: PlayRequest):
                 cover_art_id=song.get("coverArt", ""),
             ))
         except Exception as e:
-            logger.warning(f"[play] Track {track_id} nicht gefunden: {e}")
+            logger.warning(f"[play] Track {track_id} not found: {e}")
 
     if not tracks:
-        return {"error": "Keine Tracks gefunden"}
+        return {"error": "No tracks found"}
 
     target = resolve_target(req.targets, req.target_name, req.target_type)
     url = stream_url()
@@ -65,7 +65,7 @@ async def play_tracks(req: PlayRequest):
     st.paused_elapsed = 0.0
 
     if not target:
-        logger.info(f"[play] Kein Target — Stream nur unter {url} verfügbar")
+        logger.info(f"[play] No target — stream available at {url}")
         st.active_delivery = None
         return {"status": "playing", "stream_url": url, "tracks": len(tracks)}
 
@@ -91,7 +91,7 @@ class PlayUrlRequest(BaseModel):
 async def play_url(req: PlayUrlRequest):
     target = resolve_target(req.targets, req.target_name, req.target_type)
     if not target:
-        return {"error": "Kein Target konfiguriert"}
+        return {"error": "No target configured"}
 
     logger.info(f"[play-url] '{req.title}' → {req.url[:80]}, target={target}")
 
@@ -120,7 +120,7 @@ async def next_track():
     current_idx, _ = compute_position()
 
     if current_idx >= len(st.current_tracks) - 1:
-        return {"error": "Bereits letzter Track"}
+        return {"error": "Already on last track"}
 
     new_idx = current_idx + 1
     st.current_track_index = new_idx
@@ -142,7 +142,7 @@ async def previous_track():
     current_idx, _ = compute_position()
 
     if current_idx <= 0:
-        return {"error": "Bereits erster Track"}
+        return {"error": "Already on first track"}
 
     new_idx = current_idx - 1
     st.current_track_index = new_idx
@@ -165,7 +165,7 @@ async def pause_playback():
         await st.active_delivery.pause()
     st.paused_elapsed = time.time() - st.play_start_time
     st.is_paused = True
-    logger.info("[pause] ⏸ Wiedergabe pausiert")
+    logger.info("[pause] ⏸ Playback paused")
     return {"paused": True}
 
 
@@ -177,7 +177,7 @@ async def resume_playback():
     # Shift play_start_time forward so elapsed stays correct after the pause gap
     st.play_start_time = time.time() - st.paused_elapsed
     st.is_paused = False
-    logger.info("[resume] ▶ Wiedergabe fortgesetzt")
+    logger.info("[resume] ▶ Playback resumed")
     return {"paused": False}
 
 
@@ -192,5 +192,5 @@ async def stop_playback():
     st.current_track_index = 0
     st.radio_info = None
     st.active_delivery = None
-    logger.info("[stop] ⏹ Wiedergabe gestoppt")
+    logger.info("[stop] ⏹ Playback stopped")
     return {"status": "stopped"}

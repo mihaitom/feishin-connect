@@ -1,7 +1,6 @@
 """Tests for state helpers: compute_position, resolve_target, find_sonos."""
 
 import time
-from unittest.mock import MagicMock
 
 import state
 from state import compute_position, find_sonos, resolve_target
