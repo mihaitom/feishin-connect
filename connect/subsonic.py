@@ -20,8 +20,9 @@ class Track:
 
 
 class SubsonicClient:
-    def __init__(self, url: str, user: str = "", password: str = "", credential: str = ""):
+    def __init__(self, url: str, user: str = "", password: str = "", credential: str = "", internal_url: str = ""):
         self.base_url = url.rstrip("/")
+        self.internal_url = (internal_url or url).rstrip("/")
         self.user = user
         self.password = password
         self._credential = credential  # pre-built Subsonic auth query string from Feishin
@@ -48,7 +49,7 @@ class SubsonicClient:
         }
 
     def _get(self, endpoint: str, **params) -> dict:
-        url = f"{self.base_url}/rest/{endpoint}"
+        url = f"{self.internal_url}/rest/{endpoint}"
         response = httpx.get(url, params={**self._auth_params(), **params}, timeout=10)
         response.raise_for_status()
         data = response.json()
@@ -62,7 +63,7 @@ class SubsonicClient:
 
     def get_stream_url(self, track_id: str) -> str:
         params = "&".join(f"{k}={v}" for k, v in self._auth_params().items())
-        return f"{self.base_url}/rest/stream.view?id={track_id}&{params}"
+        return f"{self.internal_url}/rest/stream.view?id={track_id}&{params}"
 
     def get_cover_art_url(self, cover_art_id: str) -> str | None:
         if not cover_art_id or not self.base_url:

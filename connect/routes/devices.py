@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -28,8 +29,9 @@ class ConfigRequest(BaseModel):
 
 @router.post("/config")
 async def configure(req: ConfigRequest):
-    ctx.navidrome = SubsonicClient(req.url, credential=req.credential)
-    logger.info(f"[config] Navidrome konfiguriert: {req.url}")
+    internal_url = os.getenv("NAVIDROME_INTERNAL_URL", "")
+    ctx.navidrome = SubsonicClient(req.url, credential=req.credential, internal_url=internal_url)
+    logger.info(f"[config] Navidrome konfiguriert: {req.url} (intern: {internal_url or 'gleich'})")
     return {"status": "ok"}
 
 
