@@ -65,13 +65,16 @@ declare global {
         FS_LYRICS_TRANSLATION_API_KEY?: string;
         FS_LYRICS_TRANSLATION_TARGET_LANGUAGE?: string;
         FS_PLAYBACK_AUDIO_FADE_ON_STATUS_CHANGE?: string;
+        FS_PLAYBACK_FILTERS?: string;
         FS_PLAYBACK_MEDIA_SESSION?: string;
         FS_PLAYBACK_PRESERVE_PITCH?: string;
         FS_PLAYBACK_SCROBBLE_AT_DURATION?: string;
         FS_PLAYBACK_SCROBBLE_AT_PERCENTAGE?: string;
         FS_PLAYBACK_SCROBBLE_ENABLED?: string;
         FS_PLAYBACK_SCROBBLE_NOTIFY?: string;
+        FS_PLAYBACK_TRANSCODE_BITRATE?: string;
         FS_PLAYBACK_TRANSCODE_ENABLED?: string;
+        FS_PLAYBACK_TRANSCODE_FORMAT?: string;
         FS_PLAYBACK_WEB_AUDIO?: string;
         LEGACY_AUTHENTICATION?: boolean | string;
         REMOTE_URL?: string;

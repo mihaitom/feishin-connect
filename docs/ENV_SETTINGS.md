@@ -66,6 +66,9 @@ These variables override app settings **on first run** when no persisted setting
 | `playback.scrobble.scrobbleAtDuration` | `240` | `FS_PLAYBACK_SCROBBLE_AT_DURATION` | Seconds of playback before scrobble. |
 | `playback.scrobble.scrobbleAtPercentage` | `75` | `FS_PLAYBACK_SCROBBLE_AT_PERCENTAGE` | Percentage of track before scrobble. |
 | `playback.transcode.enabled` | `false` | `FS_PLAYBACK_TRANSCODE_ENABLED` | `true` / `false` — Enable transcoding. |
+| `playback.transcode.format` | *(unset)* | `FS_PLAYBACK_TRANSCODE_FORMAT` | Transcode format string (codec/container), e.g. server-specific value. Empty = use default. |
+| `playback.transcode.bitrate` | *(unset)* | `FS_PLAYBACK_TRANSCODE_BITRATE` | Transcode bitrate (number, kbps or as defined by server). |
+| `playback.filters` | `[]` | `FS_PLAYBACK_FILTERS` | JSON array of player filters: each object needs `id`, `field`, `operator`, `value`; optional `isEnabled`. Invalid JSON or shape is ignored. |
 
 ---
 

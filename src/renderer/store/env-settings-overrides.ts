@@ -1,6 +1,72 @@
-import type { SettingsState } from './settings.store';
+import type { PlayerFilter, SettingsState } from './settings.store';
 
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
+
+const PLAYER_FILTER_FIELDS = new Set([
+    'albumArtist',
+    'artist',
+    'duration',
+    'favorite',
+    'genre',
+    'name',
+    'note',
+    'path',
+    'playCount',
+    'rating',
+    'year',
+]);
+
+const PLAYER_FILTER_OPERATORS = new Set([
+    'after',
+    'afterDate',
+    'before',
+    'beforeDate',
+    'contains',
+    'endsWith',
+    'gt',
+    'inTheLast',
+    'inTheRange',
+    'inTheRangeDate',
+    'is',
+    'isNot',
+    'lt',
+    'notContains',
+    'notInTheLast',
+    'regex',
+    'startsWith',
+]);
+
+function isValidPlayerFilter(item: unknown): item is PlayerFilter {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
+    const o = item as Record<string, unknown>;
+    if (typeof o.id !== 'string') return false;
+    if (typeof o.field !== 'string' || !PLAYER_FILTER_FIELDS.has(o.field)) return false;
+    if (typeof o.operator !== 'string' || !PLAYER_FILTER_OPERATORS.has(o.operator)) return false;
+    if (!isValidPlayerFilterValue(o.value)) return false;
+    if (o.isEnabled !== undefined && typeof o.isEnabled !== 'boolean') return false;
+    return true;
+}
+
+function isValidPlayerFilterValue(value: unknown): boolean {
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        return true;
+    }
+    if (!Array.isArray(value)) return false;
+    return value.every((v) => typeof v === 'string' || typeof v === 'number');
+}
+
+function parsePlaybackFiltersJson(raw: string): unknown {
+    const t = raw.trim();
+    if (t === '') return undefined;
+    try {
+        const v = JSON.parse(t) as unknown;
+        if (!Array.isArray(v)) return undefined;
+        if (!v.every(isValidPlayerFilter)) return undefined;
+        return v;
+    } catch {
+        return undefined;
+    }
+}
 
 const APP_THEMES = new Set([
     'ayuDark',
@@ -55,28 +121,29 @@ type DeepPartial<T> = {
 interface EnvSettingSpec {
     enumSet?: Set<string>;
     key: string;
-    path: [string, string, string] | [string, string];
+    path: readonly string[];
     skipIfEmpty?: boolean;
     transform?: (raw: string) => unknown;
     type: 'bool' | 'enum' | 'num' | 'string';
 }
 
-function setAtPath(
-    obj: EnvSettingsOverrides,
-    path: [string, string, string] | [string, string],
-    value: unknown,
-): void {
-    const [a, b, c] = path;
-    const root = (obj as Record<string, unknown>)[a] ?? {};
-    (obj as Record<string, unknown>)[a] = root;
-    const branch = root as Record<string, unknown>;
-    if (c === undefined) {
-        branch[b] = value;
-    } else {
-        const nested = branch[b] ?? {};
-        branch[b] = nested;
-        (nested as Record<string, unknown>)[c] = value;
+function setAtPath(obj: EnvSettingsOverrides, path: readonly string[], value: unknown): void {
+    if (path.length < 2) return;
+    let cur: Record<string, unknown> = obj as Record<string, unknown>;
+    for (let i = 0; i < path.length - 1; i++) {
+        const key = path[i]!;
+        const existing = cur[key];
+        const next: Record<string, unknown> =
+            existing !== null &&
+            existing !== undefined &&
+            typeof existing === 'object' &&
+            !Array.isArray(existing)
+                ? { ...(existing as Record<string, unknown>) }
+                : {};
+        cur[key] = next;
+        cur = next;
     }
+    cur[path[path.length - 1]!] = value;
 }
 
 const RGB_ACCENT_REGEX = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
@@ -251,6 +318,23 @@ const ENV_SETTING_SPECS: EnvSettingSpec[] = [
         key: 'FS_PLAYBACK_TRANSCODE_ENABLED',
         path: ['playback', 'transcode', 'enabled'],
         type: 'bool',
+    },
+    {
+        key: 'FS_PLAYBACK_TRANSCODE_FORMAT',
+        path: ['playback', 'transcode', 'format'],
+        skipIfEmpty: true,
+        type: 'string',
+    },
+    {
+        key: 'FS_PLAYBACK_TRANSCODE_BITRATE',
+        path: ['playback', 'transcode', 'bitrate'],
+        type: 'num',
+    },
+    {
+        key: 'FS_PLAYBACK_FILTERS',
+        path: ['playback', 'filters'],
+        transform: parsePlaybackFiltersJson,
+        type: 'string',
     },
     { key: 'FS_DISCORD_ENABLED', path: ['discord', 'enabled'], type: 'bool' },
     {
