@@ -696,7 +696,8 @@
         "sleepTimer_off": "Off",
         "sleepTimer_timeRemaining": "{{time}} remaining",
         "sleepTimer_setCustom": "Set timer",
-        "sleepTimer_cancel": "Cancel timer"
+        "sleepTimer_cancel": "Cancel timer",
+        "scrobbleForceSubmit": "Force scrobble"
     },
     "queryBuilder": {
         "standardTags": "Standard tags",
