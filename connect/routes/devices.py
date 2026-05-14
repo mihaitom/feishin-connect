@@ -10,9 +10,11 @@ from pydantic import BaseModel
 from delivery import (
     AirPlayDelivery,
     BaseDelivery,
+    ChromecastDelivery,
     DeliveryManager,
     SonosDelivery,
     discover_airplay,
+    discover_chromecast,
     discover_sonos,
 )
 from state import ctx, event_bus, find_sonos, stream_url
@@ -52,23 +54,36 @@ async def health():
 @router.get("/discover")
 async def discover():
     cached = ctx.state.discovered
-    has_cache = bool(cached["sonos"] or cached["airplay"])
+    has_cache = bool(cached["sonos"] or cached["airplay"] or cached["chromecast"])
 
     async def _scan():
-        logger.info("[discover] Scanning for Sonos and AirPlay devices …")
-        sonos_res, airplay_res = await asyncio.gather(
+        logger.info("[discover] Scanning for Sonos, AirPlay and Chromecast devices …")
+        sonos_res, airplay_res, chromecast_res = await asyncio.gather(
             discover_sonos(),
             discover_airplay(),
+            discover_chromecast(),
             return_exceptions=True,
         )
         sonos = sonos_res if isinstance(sonos_res, list) else cached["sonos"]
         airplay = airplay_res if isinstance(airplay_res, list) else cached["airplay"]
+        chromecast = (
+            chromecast_res if isinstance(chromecast_res, list) else cached["chromecast"]
+        )
         if isinstance(sonos_res, Exception):
             logger.warning(f"[discover] Sonos error: {sonos_res}")
         if isinstance(airplay_res, Exception):
             logger.warning(f"[discover] AirPlay error: {airplay_res}")
-        logger.info(f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay found")
-        ctx.state.discovered = {"airplay": airplay, "sonos": sonos}
+        if isinstance(chromecast_res, Exception):
+            logger.warning(f"[discover] Chromecast error: {chromecast_res}")
+        logger.info(
+            f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay, "
+            f"{len(chromecast)} Chromecast found"
+        )
+        ctx.state.discovered = {
+            "airplay": airplay,
+            "chromecast": chromecast,
+            "sonos": sonos,
+        }
         return ctx.state.discovered
 
     if has_cache:
@@ -113,11 +128,14 @@ async def set_volume(req: VolumeRequest):
 
 @router.get("/device-volume")
 async def get_device_volume(device_type: str, name: str):
-    if device_type != "sonos":
-        return {"error": "Volume control only available for Sonos"}
     try:
-        device = await asyncio.to_thread(SonosDelivery(name)._get_device)
-        return {"volume": device.volume}
+        if device_type == "sonos":
+            device = await asyncio.to_thread(SonosDelivery(name)._get_device)
+            return {"volume": device.volume}
+        if device_type == "chromecast":
+            cast = await asyncio.to_thread(ChromecastDelivery(name)._get_device)
+            return {"volume": int(round(cast.status.volume_level * 100))}
+        return {"error": f"Volume control not supported for {device_type}"}
     except Exception as e:
         logger.warning(f"[device-volume] get '{name}': {e}")
         return {"error": str(e)}
@@ -125,13 +143,17 @@ async def get_device_volume(device_type: str, name: str):
 
 @router.post("/device-volume")
 async def set_device_volume(device_type: str, name: str, req: VolumeRequest):
-    if device_type != "sonos":
-        return {"error": "Volume control only available for Sonos"}
     volume = max(0, min(100, req.volume))
     try:
-        device = await asyncio.to_thread(SonosDelivery(name)._get_device)
-        await asyncio.to_thread(setattr, device, "volume", volume)
-        return {"volume": volume}
+        if device_type == "sonos":
+            device = await asyncio.to_thread(SonosDelivery(name)._get_device)
+            await asyncio.to_thread(setattr, device, "volume", volume)
+            return {"volume": volume}
+        if device_type == "chromecast":
+            cast = await asyncio.to_thread(ChromecastDelivery(name)._get_device)
+            await asyncio.to_thread(cast.set_volume, volume / 100.0)
+            return {"volume": volume}
+        return {"error": f"Volume control not supported for {device_type}"}
     except Exception as e:
         logger.warning(f"[device-volume] set '{name}': {e}")
         return {"error": str(e)}
@@ -144,7 +166,13 @@ async def stop_device(device_type: str, name: str):
     For Sonos coordinators: unjoins remaining followers first so the coordinator's
     stop command doesn't kill the whole group, then restarts the stream on them.
     """
-    type_cls = SonosDelivery if device_type == "sonos" else AirPlayDelivery
+    type_cls: type[BaseDelivery]
+    if device_type == "sonos":
+        type_cls = SonosDelivery
+    elif device_type == "chromecast":
+        type_cls = ChromecastDelivery
+    else:
+        type_cls = AirPlayDelivery
     active = ctx.state.active_delivery
 
     remaining: list[BaseDelivery] = []
@@ -209,6 +237,8 @@ async def stop_device(device_type: str, name: str):
                 logger.info(f"[device-stop] {name} stopped")
             else:
                 logger.warning(f"[device-stop] Sonos '{name}' not found on network")
+        elif device_type == "chromecast":
+            await ChromecastDelivery(name).stop()
         else:
             await AirPlayDelivery(name).stop()
 
@@ -253,7 +283,13 @@ async def join_stream(req: JoinRequest):
         return {"error": "No active stream"}
 
     url = stream_url()
-    type_cls = SonosDelivery if req.target_type == "sonos" else AirPlayDelivery
+    type_cls: type[BaseDelivery]
+    if req.target_type == "sonos":
+        type_cls = SonosDelivery
+    elif req.target_type == "chromecast":
+        type_cls = ChromecastDelivery
+    else:
+        type_cls = AirPlayDelivery
     new_d: BaseDelivery = type_cls(req.target_name)
 
     logger.info(f"[join] {req.target_type}:{req.target_name} → {url}")

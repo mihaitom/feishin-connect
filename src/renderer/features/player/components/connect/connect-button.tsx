@@ -39,7 +39,8 @@ export const ConnectButton = () => {
         const hasError = hasApiError || hasFfmpegError;
         if (isEmpty && !hasError) return;
         if (!open && btnRef.current) {
-            if (activeDevice?.type === 'sonos') fetchVolume();
+            if (activeDevice?.type === 'sonos' || activeDevice?.type === 'chromecast')
+                fetchVolume();
             const rect = btnRef.current.getBoundingClientRect();
             setPopPos({
                 bottom: window.innerHeight - rect.top + 40,

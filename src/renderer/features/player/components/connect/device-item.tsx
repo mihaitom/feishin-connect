@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LuAirplay, LuKeyRound, LuSpeaker, LuVolume1, LuVolumeX } from 'react-icons/lu';
+import { LuAirplay, LuKeyRound, LuSpeaker, LuTv, LuVolume1, LuVolumeX } from 'react-icons/lu';
 
 import { PairingModal } from './pairing-modal';
 import { CONNECT_URL, ConnectDevice } from './types';
@@ -36,7 +36,7 @@ export const DeviceItem = ({
     const [showPairingModal, setShowPairingModal] = useState(false);
     const preMute = useRef(30);
 
-    const canShowVolume = isActive && device.type === 'sonos';
+    const canShowVolume = isActive && (device.type === 'sonos' || device.type === 'chromecast');
     // Single active device: always open. Multiple: accordion on hover.
     const showVolume = canShowVolume && (alwaysShowVolume || hovered);
 
@@ -123,6 +123,8 @@ export const DeviceItem = ({
                     >
                         {device.type === 'sonos' ? (
                             <LuSpeaker size={18} />
+                        ) : device.type === 'chromecast' ? (
+                            <LuTv size={18} />
                         ) : (
                             <LuAirplay size={18} />
                         )}

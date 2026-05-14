@@ -5,7 +5,13 @@ import os
 import socket
 import time
 
-from delivery import AirPlayDelivery, BaseDelivery, DeliveryManager, SonosDelivery
+from delivery import (
+    AirPlayDelivery,
+    BaseDelivery,
+    ChromecastDelivery,
+    DeliveryManager,
+    SonosDelivery,
+)
 from subsonic import SubsonicClient, Track
 
 PORT = int(os.getenv("PORT", "8765"))
@@ -31,7 +37,7 @@ class AppState:
         # Lets the frontend detect track-end even after SSE reconnect or page reload.
         self.track_ended: bool = False
         # Last successful discovery results — returned immediately on subsequent calls.
-        self.discovered: dict = {"airplay": [], "sonos": []}
+        self.discovered: dict = {"airplay": [], "chromecast": [], "sonos": []}
 
 
 class Context:
@@ -147,6 +153,13 @@ class EventBus:
 event_bus = EventBus()
 
 
+_DELIVERY_TYPES: dict[str, type[BaseDelivery]] = {
+    "airplay": AirPlayDelivery,
+    "chromecast": ChromecastDelivery,
+    "sonos": SonosDelivery,
+}
+
+
 def resolve_target(
     targets: list[dict] | None = None,
     target_name: str | None = None,
@@ -156,15 +169,12 @@ def resolve_target(
     if targets:
         deliveries: list[BaseDelivery] = []
         for t in targets:
-            cls = SonosDelivery if t.get("type") == "sonos" else AirPlayDelivery
+            cls = _DELIVERY_TYPES.get(t.get("type"), AirPlayDelivery)
             deliveries.append(cls(t["name"]))
         return DeliveryManager.from_deliveries(deliveries)
     if target_type and target_name:
-        return (
-            SonosDelivery(target_name)
-            if target_type == "sonos"
-            else AirPlayDelivery(target_name)
-        )
+        cls = _DELIVERY_TYPES.get(target_type, AirPlayDelivery)
+        return cls(target_name)
     if ctx.delivery.deliveries:
         return ctx.delivery
     return None

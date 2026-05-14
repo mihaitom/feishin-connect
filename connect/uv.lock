@@ -153,6 +153,18 @@ wheels = [
 ]
 
 [[package]]
+name = "casttube"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/78/54/f7e80d701c587940cf1c871fb6327b4a2682df4287896fbf9400cd0bbf21/casttube-0.2.1.tar.gz", hash = "sha256:54d2af8c7949aa9c5db87fb11ef0a478a5d3e7ac6d2d2ac8dd1711e3a516fc82", size = 5182, upload-time = "2020-04-08T12:54:07.745Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0a/d2/0f5006892e07ea342d57dbeda46027e99a097ffb6218bee1e37f9776ed95/casttube-0.2.1-py3-none-any.whl", hash = "sha256:36f118007f9eead3959cf30de03c1640b53a263569ff2a3971c0521826c835b2", size = 6513, upload-time = "2020-04-08T12:54:06.107Z" },
+]
+
+[[package]]
 name = "certifi"
 version = "2026.4.22"
 source = { registry = "https://pypi.org/simple" }
@@ -504,6 +516,7 @@ dependencies = [
     { name = "fastapi", extra = ["all"] },
     { name = "httpx" },
     { name = "pyatv" },
+    { name = "pychromecast" },
     { name = "python-dotenv" },
     { name = "soco" },
 ]
@@ -522,6 +535,7 @@ requires-dist = [
     { name = "fastapi", extras = ["all"], specifier = ">=0.136.1" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pyatv", specifier = ">=0.17.0" },
+    { name = "pychromecast", specifier = ">=14.0.0" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "soco", specifier = ">=0.31.0" },
 ]
@@ -1098,6 +1112,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/51/98/cbe72f386c0dcfa1d815aef12216315d59870bbb349925cf89ed64efa4e8/pyatv-0.17.0.tar.gz", hash = "sha256:3408bfb442d1676ee4cde4d71d7715d3083e577a088be2ce9d96b86d0e0adec5", size = 1692508, upload-time = "2026-01-21T19:23:06.686Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/89/5d/fd555dab9405c9238c5c01335d2ea70f12887d41273057355fe1c509e13d/pyatv-0.17.0-py3-none-any.whl", hash = "sha256:39d4000f19ab402808a7a098d4bc1d0f92959542b2d4c40a138be5b5832f4f8f", size = 462629, upload-time = "2026-01-21T19:23:05.454Z" },
+]
+
+[[package]]
+name = "pychromecast"
+version = "14.0.10"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "casttube" },
+    { name = "protobuf" },
+    { name = "zeroconf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3a/1f/d78497441334d24740cce0a92394c33972a9d6a17b607d0ec976f0f48a35/pychromecast-14.0.10.tar.gz", hash = "sha256:f05a1c8d727d4f104c8c731688053033e05157f2ab81bc8eef50ec0c62f9373c", size = 61588, upload-time = "2026-03-07T16:37:42.833Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1f/61/f0f176622e2b4df06318a3abb2a27cc4c2fee8d40d7a0db8d60034785c09/pychromecast-14.0.10-py2.py3-none-any.whl", hash = "sha256:f5ea52b1db0edc3019ec72c9f5354c7e77c2564ecd44f809a6d2f4f518a02e67", size = 77467, upload-time = "2026-03-07T16:37:41.527Z" },
 ]
 
 [[package]]

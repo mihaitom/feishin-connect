@@ -22,13 +22,19 @@ export const useConnectDevices = () => {
                     name: x.name,
                     type: 'sonos' as const,
                 }));
+                const chromecast: ConnectDevice[] = (discoverData.chromecast ?? []).map(
+                    (x: any) => ({
+                        name: x.name,
+                        type: 'chromecast' as const,
+                    }),
+                );
                 const airplay: ConnectDevice[] = (discoverData.airplay ?? []).map((x: any) => ({
                     name: x.name,
                     needsPairing: x.needs_pairing ?? false,
                     type: 'airplay' as const,
                 }));
                 const sort = (a: ConnectDevice, b: ConnectDevice) => a.name.localeCompare(b.name);
-                setDevices([...sonos.sort(sort), ...airplay.sort(sort)]);
+                setDevices([...sonos.sort(sort), ...chromecast.sort(sort), ...airplay.sort(sort)]);
                 setHealth({ apiReachable: true, ffmpegFound: healthData.ffmpeg ?? false });
             })
             .catch(() => {

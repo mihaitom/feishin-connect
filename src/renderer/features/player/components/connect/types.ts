@@ -4,7 +4,7 @@ export const CONNECT_URL =
 export interface ConnectDevice {
     name: string;
     needsPairing?: boolean;
-    type: 'airplay' | 'sonos';
+    type: 'airplay' | 'chromecast' | 'sonos';
 }
 
 export interface ConnectSession {
