@@ -109,6 +109,8 @@ const FONT_TYPES = new Set(['builtIn', 'custom', 'system']);
 const HOME_FEATURE_STYLES = new Set(['multiple', 'single']);
 const SIDE_QUEUE_TYPES = new Set(['sideDrawerQueue', 'sideQueue']);
 const SIDE_QUEUE_LAYOUTS = new Set(['horizontal', 'vertical']);
+const SIDEBAR_PLAYLIST_FOLDER_VIEWS = new Set(['navigation', 'single', 'tree']);
+const SIDEBAR_PLAYLIST_MODES = new Set(['compact', 'expanded']);
 
 export type EnvSettingsOverrides = DeepPartial<
     Pick<SettingsState, 'autoDJ' | 'css' | 'discord' | 'font' | 'general' | 'lyrics' | 'playback'>
@@ -257,9 +259,46 @@ const ENV_SETTING_SPECS: EnvSettingSpec[] = [
         type: 'bool',
     },
     {
+        key: 'FS_GENERAL_SIDEBAR_PLAYLIST_FOLDERS',
+        path: ['general', 'sidebarPlaylistFolders'],
+        type: 'bool',
+    },
+    {
+        key: 'FS_GENERAL_SIDEBAR_PLAYLIST_FOLDER_SEPARATOR',
+        path: ['general', 'sidebarPlaylistFolderSeparator'],
+        skipIfEmpty: true,
+        type: 'string',
+    },
+    {
+        key: 'FS_GENERAL_SIDEBAR_PLAYLIST_FOLDER_TREE_INDENT',
+        path: ['general', 'sidebarPlaylistFolderTreeIndent'],
+        transform: (s) => {
+            const n = parseNum(s);
+            return n !== undefined ? Math.min(64, Math.max(0, Math.round(n))) : undefined;
+        },
+        type: 'num',
+    },
+    {
+        key: 'FS_GENERAL_SIDEBAR_PLAYLIST_FOLDER_TREE_LINE_COLOR',
+        path: ['general', 'sidebarPlaylistFolderTreeLineColor'],
+        type: 'string',
+    },
+    {
+        enumSet: SIDEBAR_PLAYLIST_FOLDER_VIEWS,
+        key: 'FS_GENERAL_SIDEBAR_PLAYLIST_FOLDER_VIEW',
+        path: ['general', 'sidebarPlaylistFolderView'],
+        type: 'enum',
+    },
+    {
         key: 'FS_GENERAL_SIDEBAR_PLAYLIST_LIST',
         path: ['general', 'sidebarPlaylistList'],
         type: 'bool',
+    },
+    {
+        enumSet: SIDEBAR_PLAYLIST_MODES,
+        key: 'FS_GENERAL_SIDEBAR_PLAYLIST_MODE',
+        path: ['general', 'sidebarPlaylistMode'],
+        type: 'enum',
     },
     {
         key: 'FS_GENERAL_SIDEBAR_PLAYLIST_SORTING',

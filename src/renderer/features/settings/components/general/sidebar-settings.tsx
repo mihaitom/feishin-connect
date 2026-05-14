@@ -15,6 +15,7 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
 
 type FolderView = 'navigation' | 'single' | 'tree';
+type PlaylistMode = 'compact' | 'expanded';
 
 export const SidebarSettings = memo(() => {
     const { t } = useTranslation();
@@ -84,9 +85,6 @@ export const SidebarSettings = memo(() => {
         });
     }, 500);
 
-    const foldersEnabled = settings.sidebarPlaylistFolders;
-    const isTreeView = settings.sidebarPlaylistFolderView === 'tree';
-
     const folderViewOptions: Array<{ label: string; value: FolderView }> = [
         {
             label: t('setting.sidebarPlaylistFolderView_optionSingle', {
@@ -107,6 +105,24 @@ export const SidebarSettings = memo(() => {
             value: 'navigation',
         },
     ];
+
+    const playlistModeOptions: Array<{ label: string; value: PlaylistMode }> = [
+        {
+            label: t('setting.sidebarPlaylistMode_optionCompact', {
+                postProcess: 'sentenceCase',
+            }),
+            value: 'compact',
+        },
+        {
+            label: t('setting.sidebarPlaylistMode_optionExpanded', {
+                postProcess: 'sentenceCase',
+            }),
+            value: 'expanded',
+        },
+    ];
+
+    const foldersEnabled = settings.sidebarPlaylistFolders;
+    const isTreeView = settings.sidebarPlaylistFolderView === 'tree';
 
     const options: SettingOption[] = [
         {
@@ -149,6 +165,28 @@ export const SidebarSettings = memo(() => {
                 context: 'description',
             }),
             title: t('setting.sidebarPlaylistSorting'),
+        },
+        {
+            control: (
+                <Select
+                    data={playlistModeOptions}
+                    onChange={(value) => {
+                        if (!value) return;
+                        setSettings({
+                            general: {
+                                sidebarPlaylistMode: value as PlaylistMode,
+                            },
+                        });
+                    }}
+                    value={settings.sidebarPlaylistMode}
+                    width={200}
+                />
+            ),
+            description: t('setting.sidebarPlaylistMode', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            title: t('setting.sidebarPlaylistMode', { postProcess: 'sentenceCase' }),
         },
         {
             control: (

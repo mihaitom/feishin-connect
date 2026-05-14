@@ -31,6 +31,7 @@ import {
     useCurrentServerId,
     usePermissions,
     useSidebarPlaylistListFilterRegex,
+    useSidebarPlaylistMode,
     useSidebarPlaylistSorting,
 } from '/@/renderer/store';
 import { formatDurationString } from '/@/renderer/utils';
@@ -73,6 +74,8 @@ export const PlaylistRowButton = memo(
         };
         const { t } = useTranslation();
         const sidebarPlaylistSorting = useSidebarPlaylistSorting();
+        const sidebarPlaylistMode = useSidebarPlaylistMode();
+        const isCompact = sidebarPlaylistMode === 'compact';
 
         const [isHovered, setIsHovered] = useState(false);
 
@@ -220,6 +223,7 @@ export const PlaylistRowButton = memo(
         return (
             <Link
                 className={clsx(styles.row, {
+                    [styles.rowCompact]: isCompact,
                     [styles.rowDraggedOver]: isDraggedOver,
                     [styles.rowHover]: isHovered,
                 })}
@@ -235,50 +239,62 @@ export const PlaylistRowButton = memo(
                 }}
                 to={url}
             >
-                <div className={styles.rowGroup}>
-                    <Image containerClassName={styles.imageContainer} src={imageUrl} />
-                    <div className={styles.metadata}>
-                        <Text className={styles.name} fw={500} size="md">
+                {isCompact ? (
+                    <>
+                        <Text className={styles.compactName} fw={500} size="md">
                             {name}
                         </Text>
-                        <div className={styles.metadataGroup}>
-                            <div
-                                className={clsx(
-                                    styles.metadataGroupItem,
-                                    styles.metadataGroupItemNoShrink,
-                                )}
-                            >
-                                <Icon color="muted" icon="itemSong" size="sm" />
-                                <Text isMuted size="sm">
-                                    {item.songCount || 0}
+                        {isHovered && <RowControls id={to} onPlay={handlePlay} variant="compact" />}
+                    </>
+                ) : (
+                    <>
+                        <div className={styles.rowGroup}>
+                            <Image containerClassName={styles.imageContainer} src={imageUrl} />
+                            <div className={styles.metadata}>
+                                <Text className={styles.name} fw={500} size="md">
+                                    {name}
                                 </Text>
-                            </div>
-                            <div className={styles.metadataGroupItem}>
-                                <Icon color="muted" icon="duration" size="sm" />
-                                <Text isMuted size="sm">
-                                    {formatDurationString(item.duration ?? 0)}
-                                </Text>
-                            </div>
-                            {item.ownerId === permissions.userId && Boolean(item.public) && (
-                                <div className={styles.metadataGroupItem}>
-                                    <Text isMuted size="sm">
-                                        {t('common.public')}
-                                    </Text>
+                                <div className={styles.metadataGroup}>
+                                    <div
+                                        className={clsx(
+                                            styles.metadataGroupItem,
+                                            styles.metadataGroupItemNoShrink,
+                                        )}
+                                    >
+                                        <Icon color="muted" icon="itemSong" size="sm" />
+                                        <Text isMuted size="sm">
+                                            {item.songCount || 0}
+                                        </Text>
+                                    </div>
+                                    <div className={styles.metadataGroupItem}>
+                                        <Icon color="muted" icon="duration" size="sm" />
+                                        <Text isMuted size="sm">
+                                            {formatDurationString(item.duration ?? 0)}
+                                        </Text>
+                                    </div>
+                                    {item.ownerId === permissions.userId &&
+                                        Boolean(item.public) && (
+                                            <div className={styles.metadataGroupItem}>
+                                                <Text isMuted size="sm">
+                                                    {t('common.public')}
+                                                </Text>
+                                            </div>
+                                        )}
+                                    {item.ownerId !== permissions.userId && (
+                                        <div className={styles.metadataGroupItem}>
+                                            <Icon color="muted" icon="user" size="sm" />
+                                            <Text isMuted size="sm">
+                                                {item.owner}
+                                            </Text>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                            {item.ownerId !== permissions.userId && (
-                                <div className={styles.metadataGroupItem}>
-                                    <Icon color="muted" icon="user" size="sm" />
-                                    <Text isMuted size="sm">
-                                        {item.owner}
-                                    </Text>
-                                </div>
-                            )}
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                {isHovered && <RowControls id={to} onPlay={handlePlay} />}
+                        {isHovered && <RowControls id={to} onPlay={handlePlay} />}
+                    </>
+                )}
             </Link>
         );
     },
@@ -287,9 +303,11 @@ export const PlaylistRowButton = memo(
 const RowControls = ({
     id,
     onPlay,
+    variant = 'expanded',
 }: {
     id: string;
     onPlay: (id: string, playType: Play) => void;
+    variant?: 'compact' | 'expanded';
 }) => {
     const handlePlayNext = usePlayButtonClick({
         onClick: () => {
@@ -319,7 +337,11 @@ const RowControls = ({
     });
 
     return (
-        <ActionIconGroup className={styles.controls}>
+        <ActionIconGroup
+            className={clsx(styles.controls, {
+                [styles.controlsCompact]: variant === 'compact',
+            })}
+        >
             <PlayTooltip type={Play.NOW}>
                 <ActionIcon
                     icon="mediaPlay"

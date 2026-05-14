@@ -178,6 +178,8 @@ const SidebarPanelTypeSchema = z.enum(['queue', 'lyrics', 'visualizer']);
 
 const SidebarPlaylistFolderViewSchema = z.enum(['single', 'tree', 'navigation']);
 
+const SidebarPlaylistModeSchema = z.enum(['compact', 'expanded']);
+
 const CollectionSchema = z.object({
     filterQueryString: z.string(),
     id: z.string(),
@@ -510,6 +512,7 @@ export const GeneralSettingsSchema = z.object({
     sidebarPlaylistFolderView: SidebarPlaylistFolderViewSchema,
     sidebarPlaylistList: z.boolean(),
     sidebarPlaylistListFilterRegex: z.string(),
+    sidebarPlaylistMode: SidebarPlaylistModeSchema,
     sidebarPlaylistSorting: z.boolean(),
     sideQueueLayout: SideQueueLayoutSchema,
     sideQueueType: SideQueueTypeSchema,
@@ -1182,9 +1185,10 @@ const initialState: SettingsState = {
         sidebarPlaylistFolderSeparator: '/',
         sidebarPlaylistFolderTreeIndent: 16,
         sidebarPlaylistFolderTreeLineColor: '',
-        sidebarPlaylistFolderView: 'single',
+        sidebarPlaylistFolderView: 'tree',
         sidebarPlaylistList: true,
         sidebarPlaylistListFilterRegex: '',
+        sidebarPlaylistMode: 'expanded',
         sidebarPlaylistSorting: false,
         sideQueueLayout: 'horizontal',
         sideQueueType: 'sideQueue',
@@ -2584,6 +2588,9 @@ export const useSidebarPlaylistFolderTreeLineColor = () =>
 
 export const useSidebarPlaylistList = () =>
     useSettingsStore((state) => state.general.sidebarPlaylistList, shallow);
+
+export const useSidebarPlaylistMode = () =>
+    useSettingsStore((state) => state.general.sidebarPlaylistMode, shallow);
 
 export const useSidebarPlaylistSorting = () =>
     useSettingsStore((state) => state.general.sidebarPlaylistSorting, shallow);
