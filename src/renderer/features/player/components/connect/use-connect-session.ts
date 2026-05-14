@@ -265,6 +265,21 @@ export const useConnectSession = (): ConnectSession => {
         });
     }, [isActive]);
 
+    // ── Safety net: keep local Feishin player paused whenever Connect is active ─
+    // Zustand subscribers fire synchronously on state change. If something flips
+    // the local player to PLAYING (e.g. mediaNext() during auto-advance, which
+    // sometimes wins over our same-task mediaPause() ~20% of the time in Docker
+    // due to React timing), we immediately call mediaPause(). The PLAYING state
+    // is overridden before Feishin's audio component renders and starts playback.
+    useEffect(() => {
+        if (!isActive) return;
+        return usePlayerStoreBase.subscribe((state) => {
+            if (state.player.status === PlayerStatus.PLAYING) {
+                mediaPause();
+            }
+        });
+    }, [isActive, mediaPause]);
+
     return {
         activeDevice,
         activeTargets,
