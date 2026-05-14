@@ -29,8 +29,7 @@ export const DragPreview = memo(({ data }: DragPreviewProps) => {
     const { t } = useTranslation();
     const itemCount = items.length;
     const firstItem = items[0];
-    const folderName =
-        data.type === DragTarget.SIDEBAR_PLAYLIST_FOLDER ? data.id[0] : undefined;
+    const folderName = data.type === DragTarget.SIDEBAR_PLAYLIST_FOLDER ? data.id[0] : undefined;
     const itemName = folderName || (firstItem ? getItemName(firstItem) : 'Item');
 
     const itemImage = useItemImageUrl({
