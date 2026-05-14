@@ -4,6 +4,10 @@ import { lazy, Suspense } from 'react';
 import { PlayerbarSeekSlider } from './playerbar-seek-slider';
 import styles from './playerbar-slider.module.css';
 
+import {
+    useConnectElapsed,
+    useConnectPlayerStore,
+} from '/@/renderer/features/player/components/connect/connect.store';
 import { ScrobbleStatus } from '/@/renderer/features/player/components/scrobble-status';
 import {
     useAppStore,
@@ -26,13 +30,18 @@ const PlayerbarWaveform = lazy(() =>
 export const PlayerbarSlider = () => {
     const currentSong = usePlayerSong();
     const playerbarSlider = usePlayerbarSlider();
+    const { duration: connectDuration, isActive: connectActive } = useConnectPlayerStore();
+    const connectElapsed = useConnectElapsed();
 
     const songDuration = currentSong?.duration ? currentSong.duration / 1000 : 0;
     const currentTime = usePlayerTimestamp();
 
-    const formattedDuration = formatDuration(songDuration * 1000 || 0);
-    const formattedTimeRemaining = formatDuration((currentTime - songDuration) * 1000 || 0);
-    const formattedTime = formatDuration(currentTime * 1000 || 0);
+    const effectiveDuration = connectActive ? connectDuration : songDuration;
+    const effectiveTime = connectActive ? connectElapsed : currentTime;
+
+    const formattedDuration = formatDuration(effectiveDuration * 1000 || 0);
+    const formattedTimeRemaining = formatDuration((effectiveTime - effectiveDuration) * 1000 || 0);
+    const formattedTime = formatDuration(effectiveTime * 1000 || 0);
 
     const showTimeRemaining = useAppStore((state) => state.showTimeRemaining);
     const { setShowTimeRemaining } = useAppStoreActions();
@@ -46,7 +55,28 @@ export const PlayerbarSlider = () => {
                     <ScrobbleStatus formattedTime={formattedTime} />
                 </div>
                 <div className={styles.sliderWrapper}>
-                    {isWaveform ? (
+                    {connectActive ? (
+                        // Read-only progress bar — seeking on the Connect stream is not supported
+                        <div
+                            style={{
+                                background: 'var(--slider-track, rgba(255,255,255,0.15))',
+                                borderRadius: '3px',
+                                height: '6px',
+                                overflow: 'hidden',
+                                width: '100%',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    background: 'var(--primary-color, var(--theme-colors-primary))',
+                                    borderRadius: '3px',
+                                    height: '100%',
+                                    transition: 'width 0.5s linear',
+                                    width: `${effectiveDuration > 0 ? Math.min((connectElapsed / effectiveDuration) * 100, 100) : 0}%`,
+                                }}
+                            />
+                        </div>
+                    ) : isWaveform ? (
                         <Suspense fallback={<Spinner />}>
                             <PlayerbarWaveform />
                         </Suspense>

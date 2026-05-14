@@ -2,6 +2,8 @@ import clsx from 'clsx';
 import { lazy, MouseEvent, Suspense } from 'react';
 
 import styles from './playerbar.module.css';
+import { ConnectSessionContext } from './connect/connect-session-context';
+import { useConnectSession } from './connect/use-connect-session';
 
 import { CenterControls } from '/@/renderer/features/player/components/center-controls';
 import { LeftControls } from '/@/renderer/features/player/components/left-controls';
@@ -23,6 +25,8 @@ export const Playerbar = () => {
     const { expanded: isFullScreenPlayerExpanded } = useFullScreenPlayerStore();
     const setFullScreenPlayerStore = useSetFullScreenPlayerStore();
     const isMobile = useIsMobile();
+    // Session lives here so it survives the mobile/desktop branch switch.
+    const session = useConnectSession();
 
     const handleToggleFullScreenPlayer = (e?: KeyboardEvent | MouseEvent<HTMLDivElement>) => {
         e?.stopPropagation();
@@ -31,28 +35,32 @@ export const Playerbar = () => {
 
     if (isMobile) {
         return (
-            <Suspense fallback={<Spinner />}>
-                <MobilePlayerbar />
-            </Suspense>
+            <ConnectSessionContext.Provider value={session}>
+                <Suspense fallback={<Spinner />}>
+                    <MobilePlayerbar />
+                </Suspense>
+            </ConnectSessionContext.Provider>
         );
     }
 
     return (
-        <div
-            className={clsx(styles.container, PlaybackSelectors.mediaPlayer)}
-            onClick={playerbarOpenDrawer ? handleToggleFullScreenPlayer : undefined}
-        >
-            <div className={styles.controlsGrid}>
-                <div className={styles.leftGridItem}>
-                    <LeftControls />
-                </div>
-                <div className={styles.centerGridItem}>
-                    <CenterControls />
-                </div>
-                <div className={styles.rightGridItem}>
-                    <RightControls />
+        <ConnectSessionContext.Provider value={session}>
+            <div
+                className={clsx(styles.container, PlaybackSelectors.mediaPlayer)}
+                onClick={playerbarOpenDrawer ? handleToggleFullScreenPlayer : undefined}
+            >
+                <div className={styles.controlsGrid}>
+                    <div className={styles.leftGridItem}>
+                        <LeftControls />
+                    </div>
+                    <div className={styles.centerGridItem}>
+                        <CenterControls />
+                    </div>
+                    <div className={styles.rightGridItem}>
+                        <RightControls />
+                    </div>
                 </div>
             </div>
-        </div>
+        </ConnectSessionContext.Provider>
     );
 };

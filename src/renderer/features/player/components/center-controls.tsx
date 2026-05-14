@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import styles from './center-controls.module.css';
 
+import { useConnectPlayerStore } from '/@/renderer/features/player/components/connect/connect.store';
 import { MainPlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
 import { PlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 import { openShuffleAllModal } from '/@/renderer/features/player/components/shuffle-all-modal';
@@ -107,12 +108,13 @@ const StopButton = ({ disabled }: { disabled?: boolean }) => {
     const { t } = useTranslation();
     const buttonSize = useButtonSize();
     const { mediaStop } = usePlayer();
+    const { handlers: connectHandlers, isActive: connectActive } = useConnectPlayerStore();
 
     return (
         <PlayerButton
             disabled={disabled}
             icon={<Icon fill="default" icon="mediaStop" size={buttonSize - 2} />}
-            onClick={() => mediaStop()}
+            onClick={connectActive && connectHandlers ? connectHandlers.onStop : () => mediaStop()}
             tooltip={{
                 label: t('player.stop'),
                 openDelay: 0,
@@ -199,12 +201,16 @@ const CenterPlayButton = ({ disabled }: { disabled?: boolean }) => {
 
     const status = usePlayerStatus();
     const { mediaTogglePlayPause } = usePlayer();
+    const { handlers: connectHandlers, isActive: connectActive, isPlaying: connectPlaying } =
+        useConnectPlayerStore();
 
     return (
         <MainPlayButton
-            disabled={disabled || currentSongId === undefined}
-            isPaused={status === PlayerStatus.PAUSED}
-            onClick={mediaTogglePlayPause}
+            disabled={disabled || (!connectActive && currentSongId === undefined)}
+            isPaused={connectActive ? !connectPlaying : status === PlayerStatus.PAUSED}
+            onClick={
+                connectActive && connectHandlers ? connectHandlers.onPlayPause : mediaTogglePlayPause
+            }
         />
     );
 };

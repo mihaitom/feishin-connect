@@ -3,11 +3,14 @@
 from subsonic import SubsonicClient
 
 
-def _client(url="http://proxy:9180", internal_url="", credential="u=usr&s=salt&t=tok") -> SubsonicClient:
+def _client(
+    url="http://proxy:9180", internal_url="", credential="u=usr&s=salt&t=tok"
+) -> SubsonicClient:
     return SubsonicClient(url, credential=credential, internal_url=internal_url)
 
 
 # ── internal_url Fallback ─────────────────────────────────────────────────────
+
 
 def test_internal_url_defaults_to_base_url():
     c = _client(url="http://nav:4533", internal_url="")
@@ -29,6 +32,7 @@ def test_trailing_slash_stripped():
 
 # ── get_stream_url verwendet internal_url ────────────────────────────────────
 
+
 def test_stream_url_uses_internal_url():
     c = _client(url="http://proxy:9180", internal_url="http://nav:4533")
     url = c.get_stream_url("track-123")
@@ -43,6 +47,7 @@ def test_stream_url_uses_base_when_no_internal():
 
 
 # ── get_cover_art_url verwendet base_url (Browser-URL) ───────────────────────
+
 
 def test_cover_art_uses_base_url():
     c = _client(url="http://proxy:9180", internal_url="http://nav:4533")
@@ -59,6 +64,7 @@ def test_cover_art_none_when_no_id():
 
 
 # ── Auth-Parameter ────────────────────────────────────────────────────────────
+
 
 def test_auth_params_from_credential_string():
     c = SubsonicClient("http://nav:4533", credential="u=alice&s=salt1&t=abc123")
@@ -93,7 +99,9 @@ def test_ping_uses_internal_url(monkeypatch):
 
     def fake_get(url, **kwargs):
         captured["url"] = url
-        mock = httpx.Response(200, json={"subsonic-response": {"status": "ok", "version": "1.16.1"}})
+        mock = httpx.Response(
+            200, json={"subsonic-response": {"status": "ok", "version": "1.16.1"}}
+        )
         return mock
 
     monkeypatch.setattr(httpx, "get", fake_get)
@@ -101,5 +109,6 @@ def test_ping_uses_internal_url(monkeypatch):
     c = _client(url="http://proxy:9180", internal_url="http://nav:4533")
     c.ping()
 
-    assert captured["url"].startswith("http://nav:4533"), \
+    assert captured["url"].startswith("http://nav:4533"), (
         f"_get() sollte internal_url nutzen, nutzte aber: {captured['url']}"
+    )

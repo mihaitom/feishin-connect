@@ -1,4 +1,4 @@
-"""routes/playback.py — /play, /play-url, /next, /previous, /pause, /resume, /stop"""
+"""routes/playback.py — /play, /play-url, /pause, /resume, /stop"""
 
 import logging
 import time
@@ -6,7 +6,7 @@ import time
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from state import compute_position, ctx, resolve_target, stream_url
+from state import compute_position, ctx, event_bus, resolve_target, stream_url
 from subsonic import Track
 
 logger = logging.getLogger("connect.playback")
@@ -23,51 +23,50 @@ class PlayRequest(BaseModel):
 @router.post("/play")
 async def play_tracks(req: PlayRequest):
     if not ctx.navidrome.base_url:
-        logger.warning("[play] Rejected: Navidrome not configured (waiting for /config)")
+        logger.warning(
+            "[play] Rejected: Navidrome not configured (waiting for /config)"
+        )
         return {"error": "Navidrome not configured — waiting for /config from Feishin"}
     if not req.track_ids:
-        return {"error": "No track IDs provided"}
+        return {"error": "No track ID provided"}
 
-    tracks: list[Track] = []
-    for track_id in req.track_ids:
-        try:
-            data = ctx.navidrome._get("getSong.view", id=track_id)
-            song = data.get("song", {})
-            tracks.append(Track(
-                id=song["id"],
-                title=song.get("title", "Unknown"),
-                artist=song.get("artist", "Unknown"),
-                duration=song.get("duration", 0),
-                cover_art_id=song.get("coverArt", ""),
-            ))
-        except Exception as e:
-            logger.warning(f"[play] Track {track_id} not found: {e}")
-
-    if not tracks:
-        return {"error": "No tracks found"}
+    track_id = req.track_ids[0]
+    try:
+        data = ctx.navidrome._get("getSong.view", id=track_id)
+        song = data.get("song", {})
+        track = Track(
+            id=song["id"],
+            title=song.get("title", "Unknown"),
+            artist=song.get("artist", "Unknown"),
+            duration=song.get("duration", 0),
+            cover_art_id=song.get("coverArt", ""),
+        )
+    except Exception as e:
+        logger.warning(f"[play] Track {track_id} not found: {e}")
+        return {"error": f"Track not found: {e}"}
 
     target = resolve_target(req.targets, req.target_name, req.target_type)
     url = stream_url()
-    logger.info(f"[play] {len(tracks)} Tracks → target={target}, stream={url}")
-    for t in tracks[:5]:
-        logger.info(f"[play]   • {t.artist} — {t.title} ({t.duration}s)")
-    if len(tracks) > 5:
-        logger.info(f"[play]   … and {len(tracks) - 5} more")
+    logger.info(
+        f"[play] {track.artist} — {track.title} ({track.duration}s) → target={target}"
+    )
 
     st = ctx.state
-    st.current_tracks = tracks
+    st.current_track = track
     st.is_streaming = True
     st.is_paused = False
-    st.current_track_index = 0
     st.radio_info = None
     st.play_start_time = time.time()
-    st.play_start_index = 0
     st.paused_elapsed = 0.0
+    st.resume_offset = 0.0
+    st.play_generation += 1
+    st.track_ended = False
 
     if not target:
         logger.info(f"[play] No target — stream available at {url}")
         st.active_delivery = None
-        return {"status": "playing", "stream_url": url, "tracks": len(tracks)}
+        await event_bus.broadcast()
+        return {"status": "playing", "stream_url": url}
 
     st.active_delivery = target
     try:
@@ -76,7 +75,8 @@ async def play_tracks(req: PlayRequest):
         logger.error(f"[play] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
-    return {"status": "playing", "stream_url": url, "tracks": len(tracks)}
+    await event_bus.broadcast()
+    return {"status": "playing", "stream_url": url}
 
 
 class PlayUrlRequest(BaseModel):
@@ -96,11 +96,15 @@ async def play_url(req: PlayUrlRequest):
     logger.info(f"[play-url] '{req.title}' → {req.url[:80]}, target={target}")
 
     st = ctx.state
-    st.current_tracks = []
-    st.current_track_index = 0
+    st.current_track = None
     st.is_streaming = True
     st.is_paused = False
     st.radio_info = {"title": req.title, "url": req.url}
+    st.play_start_time = time.time()
+    st.paused_elapsed = 0.0
+    st.resume_offset = 0.0
+    st.play_generation += 1
+    st.track_ended = False
     st.active_delivery = target
 
     try:
@@ -109,53 +113,8 @@ async def play_url(req: PlayUrlRequest):
         logger.error(f"[play-url] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
+    await event_bus.broadcast()
     return {"status": "playing", "url": req.url}
-
-
-@router.post("/next")
-async def next_track():
-    st = ctx.state
-    # Use compute_position() so we skip from the actual playing track, not the
-    # last manually-set index (which lags behind when tracks advance naturally).
-    current_idx, _ = compute_position()
-
-    if current_idx >= len(st.current_tracks) - 1:
-        return {"error": "Already on last track"}
-
-    new_idx = current_idx + 1
-    st.current_track_index = new_idx
-    st.play_start_index = new_idx
-    st.play_start_time = time.time()
-    st.paused_elapsed = 0.0
-    st.is_paused = False
-
-    logger.info(f"[next] {current_idx} → {new_idx} / {len(st.current_tracks)}")
-    if st.active_delivery:
-        await st.active_delivery.play(stream_url())
-
-    return {"current_track_index": new_idx}
-
-
-@router.post("/previous")
-async def previous_track():
-    st = ctx.state
-    current_idx, _ = compute_position()
-
-    if current_idx <= 0:
-        return {"error": "Already on first track"}
-
-    new_idx = current_idx - 1
-    st.current_track_index = new_idx
-    st.play_start_index = new_idx
-    st.play_start_time = time.time()
-    st.paused_elapsed = 0.0
-    st.is_paused = False
-
-    logger.info(f"[previous] {current_idx} → {new_idx} / {len(st.current_tracks)}")
-    if st.active_delivery:
-        await st.active_delivery.play(stream_url())
-
-    return {"current_track_index": new_idx}
 
 
 @router.post("/pause")
@@ -163,21 +122,31 @@ async def pause_playback():
     st = ctx.state
     if st.active_delivery:
         await st.active_delivery.pause()
-    st.paused_elapsed = time.time() - st.play_start_time
+    elapsed = compute_position()
+    st.resume_offset = elapsed
+    st.paused_elapsed = elapsed
     st.is_paused = True
-    logger.info("[pause] ⏸ Playback paused")
+    logger.info(f"[pause] ⏸ {elapsed:.1f}s into track")
+    await event_bus.broadcast()
     return {"paused": True}
 
 
 @router.post("/resume")
 async def resume_playback():
     st = ctx.state
-    if st.active_delivery:
-        await st.active_delivery.resume()
-    # Shift play_start_time forward so elapsed stays correct after the pause gap
-    st.play_start_time = time.time() - st.paused_elapsed
+    # Recalibrate so compute_position() immediately returns resume_offset
+    st.play_start_time = time.time() - st.resume_offset
+    st.paused_elapsed = 0.0
     st.is_paused = False
-    logger.info("[resume] ▶ Playback resumed")
+    st.play_generation += 1
+
+    logger.info(f"[resume] ▶ Seeking to {st.resume_offset:.1f}s")
+
+    if st.active_delivery:
+        # Force a fresh /stream connection so FFmpeg applies the seek offset
+        await st.active_delivery.play(stream_url())
+
+    await event_bus.broadcast()
     return {"paused": False}
 
 
@@ -188,9 +157,10 @@ async def stop_playback():
         await st.active_delivery.stop()
     st.is_streaming = False
     st.is_paused = False
-    st.current_tracks = []
-    st.current_track_index = 0
+    st.track_ended = False
+    st.current_track = None
     st.radio_info = None
     st.active_delivery = None
     logger.info("[stop] ⏹ Playback stopped")
+    await event_bus.broadcast()
     return {"status": "stopped"}

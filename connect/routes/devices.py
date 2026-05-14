@@ -15,7 +15,7 @@ from delivery import (
     discover_airplay,
     discover_sonos,
 )
-from state import ctx, find_sonos, stream_url
+from state import ctx, event_bus, find_sonos, stream_url
 from subsonic import SubsonicClient
 
 logger = logging.getLogger("connect.devices")
@@ -30,14 +30,19 @@ class ConfigRequest(BaseModel):
 @router.post("/config")
 async def configure(req: ConfigRequest):
     internal_url = os.getenv("NAVIDROME_INTERNAL_URL", "")
-    ctx.navidrome = SubsonicClient(req.url, credential=req.credential, internal_url=internal_url)
-    logger.info(f"[config] Navidrome configured: {req.url} (internal: {internal_url or 'same'})")
+    ctx.navidrome = SubsonicClient(
+        req.url, credential=req.credential, internal_url=internal_url
+    )
+    logger.info(
+        f"[config] Navidrome configured: {req.url} (internal: {internal_url or 'same'})"
+    )
     return {"status": "ok"}
 
 
 @router.get("/health")
 async def health():
     import shutil
+
     return {
         "ffmpeg": bool(shutil.which("ffmpeg")),
         "navidrome_configured": bool(ctx.navidrome.base_url),
@@ -46,28 +51,32 @@ async def health():
 
 @router.get("/discover")
 async def discover():
-    logger.info("[discover] Scanning for Sonos and AirPlay devices …")
-    sonos_res, airplay_res = await asyncio.gather(
-        discover_sonos(),
-        discover_airplay(),
-        return_exceptions=True,
-    )
+    cached = ctx.state.discovered
+    has_cache = bool(cached["sonos"] or cached["airplay"])
 
-    sonos = sonos_res if isinstance(sonos_res, list) else []
-    airplay = airplay_res if isinstance(airplay_res, list) else []
+    async def _scan():
+        logger.info("[discover] Scanning for Sonos and AirPlay devices …")
+        sonos_res, airplay_res = await asyncio.gather(
+            discover_sonos(),
+            discover_airplay(),
+            return_exceptions=True,
+        )
+        sonos = sonos_res if isinstance(sonos_res, list) else cached["sonos"]
+        airplay = airplay_res if isinstance(airplay_res, list) else cached["airplay"]
+        if isinstance(sonos_res, Exception):
+            logger.warning(f"[discover] Sonos error: {sonos_res}")
+        if isinstance(airplay_res, Exception):
+            logger.warning(f"[discover] AirPlay error: {airplay_res}")
+        logger.info(f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay found")
+        ctx.state.discovered = {"airplay": airplay, "sonos": sonos}
+        return ctx.state.discovered
 
-    if isinstance(sonos_res, Exception):
-        logger.warning(f"[discover] Sonos error: {sonos_res}")
-    if isinstance(airplay_res, Exception):
-        logger.warning(f"[discover] AirPlay error: {airplay_res}")
+    if has_cache:
+        # Return cached results immediately; rescan in background
+        asyncio.create_task(_scan())
+        return cached
 
-    logger.info(f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay found")
-    for d in sonos:
-        logger.debug(f"[discover]   Sonos: {d['name']} ({d.get('ip', '?')})")
-    for d in airplay:
-        logger.debug(f"[discover]   AirPlay: {d['name']} ({d.get('address', '?')})")
-
-    return {"airplay": airplay, "sonos": sonos}
+    return await _scan()
 
 
 class VolumeRequest(BaseModel):
@@ -141,7 +150,8 @@ async def stop_device(device_type: str, name: str):
     remaining: list[BaseDelivery] = []
     if isinstance(active, DeliveryManager):
         remaining = [
-            d for d in active.deliveries
+            d
+            for d in active.deliveries
             if not (isinstance(d, type_cls) and d.target == name)
         ]
     elif active and not (isinstance(active, type_cls) and active.target == name):
@@ -156,6 +166,7 @@ async def stop_device(device_type: str, name: str):
     try:
         if device_type == "sonos":
             import soco as _soco
+
             all_soco = await asyncio.to_thread(lambda: list(_soco.discover() or []))
             target_dev = next(
                 (d for d in all_soco if d.player_name.lower() == name.lower()), None
@@ -165,20 +176,29 @@ async def stop_device(device_type: str, name: str):
                 logger.debug(f"[device-stop] {name} ist_koordinator={is_coord}")
 
                 if is_coord and remaining:
-                    logger.info(f"[device-stop] Ungrouping {len(remaining)} follower(s) …")
+                    logger.info(
+                        f"[device-stop] Ungrouping {len(remaining)} follower(s) …"
+                    )
                     for rem in remaining:
                         if isinstance(rem, SonosDelivery):
                             rem_dev = next(
-                                (d for d in all_soco
-                                 if d.player_name.lower() == rem.target.lower()),
+                                (
+                                    d
+                                    for d in all_soco
+                                    if d.player_name.lower() == rem.target.lower()
+                                ),
                                 None,
                             )
                             if rem_dev:
                                 try:
                                     await asyncio.to_thread(rem_dev.unjoin)
-                                    logger.debug(f"[device-stop] {rem.target} ungrouped")
+                                    logger.debug(
+                                        f"[device-stop] {rem.target} ungrouped"
+                                    )
                                 except Exception as ex:
-                                    logger.warning(f"[device-stop] unjoin {rem.target}: {ex}")
+                                    logger.warning(
+                                        f"[device-stop] unjoin {rem.target}: {ex}"
+                                    )
                     await asyncio.sleep(0.3)
                     need_restart = True
                 elif not is_coord:
@@ -202,7 +222,8 @@ async def stop_device(device_type: str, name: str):
         st.active_delivery = None
     else:
         new_delivery: BaseDelivery | DeliveryManager = (
-            remaining[0] if len(remaining) == 1
+            remaining[0]
+            if len(remaining) == 1
             else DeliveryManager.from_deliveries(remaining)
         )
         st.active_delivery = new_delivery
@@ -216,6 +237,7 @@ async def stop_device(device_type: str, name: str):
             except Exception as e:
                 logger.error(f"[device-stop] Restart error: {e}", exc_info=True)
 
+    await event_bus.broadcast()
     return {"status": "stopped", "device": name}
 
 
@@ -243,9 +265,13 @@ async def join_stream(req: JoinRequest):
                 coordinator = await asyncio.to_thread(existing_sonos[0]._get_device)
                 joiner = await asyncio.to_thread(new_d._get_device)
                 await asyncio.to_thread(joiner.join, coordinator)
-                logger.info(f"[join] {req.target_name} joining group of {existing_sonos[0].target}")
+                logger.info(
+                    f"[join] {req.target_name} joining group of {existing_sonos[0].target}"
+                )
             except Exception as e:
-                logger.warning(f"[join] Group join failed ({e}), falling back to individual stream")
+                logger.warning(
+                    f"[join] Group join failed ({e}), falling back to individual stream"
+                )
                 await new_d.play(url)
         else:
             await new_d.play(url)
@@ -257,8 +283,11 @@ async def join_stream(req: JoinRequest):
         if req.target_name not in existing:
             st.active_delivery.deliveries.append(new_d)
     elif st.active_delivery:
-        st.active_delivery = DeliveryManager.from_deliveries([st.active_delivery, new_d])
+        st.active_delivery = DeliveryManager.from_deliveries(
+            [st.active_delivery, new_d]
+        )
     else:
         st.active_delivery = new_d
 
+    await event_bus.broadcast()
     return {"status": "joined", "device": req.target_name}

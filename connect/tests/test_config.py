@@ -4,7 +4,9 @@ import state
 
 
 def test_config_sets_navidrome_url(client):
-    r = client.post("/config", json={"url": "http://nav:4533", "credential": "token=abc"})
+    r = client.post(
+        "/config", json={"url": "http://nav:4533", "credential": "token=abc"}
+    )
     assert r.status_code == 200
     assert r.json() == {"status": "ok"}
     assert state.ctx.navidrome.base_url == "http://nav:4533"

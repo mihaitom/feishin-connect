@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useConnectPlayerStore } from './connect.store';
 import { CONNECT_URL, ConnectDevice, ConnectStatus } from './types';
 
 export interface ConnectHealth {
@@ -23,10 +24,10 @@ export const useConnectDevices = () => {
                 }));
                 const airplay: ConnectDevice[] = (discoverData.airplay ?? []).map((x: any) => ({
                     name: x.name,
+                    needsPairing: x.needs_pairing ?? false,
                     type: 'airplay' as const,
                 }));
-                const sort = (a: ConnectDevice, b: ConnectDevice) =>
-                    a.name.localeCompare(b.name);
+                const sort = (a: ConnectDevice, b: ConnectDevice) => a.name.localeCompare(b.name);
                 setDevices([...sonos.sort(sort), ...airplay.sort(sort)]);
                 setHealth({ apiReachable: true, ffmpegFound: healthData.ffmpeg ?? false });
             })
@@ -42,42 +43,28 @@ export const useConnectDevices = () => {
     return { devices, health, refresh };
 };
 
-// Polls /status every 2 s while the popover is open.
-// prevIndexRef is owned by the parent — reset to -1 when a new play session starts.
-// On first poll after a reset, advances Feishin to Connect's current position (initial sync).
-// On subsequent polls, advances only by the delta.
-export const useConnectStatus = (
-    active: boolean,
-    open: boolean,
-    prevIndexRef: { current: number },
-    onTrackAdvance: (delta: number) => void,
-) => {
+// Subscribes to SSE /events whenever Connect is active.
+// Updates the connect player store for the playerbar progress display.
+export const useConnectStatus = (active: boolean) => {
     const [status, setStatus] = useState<ConnectStatus | null>(null);
 
     useEffect(() => {
-        if (!active || !open) return;
+        if (!active) return;
 
-        const poll = () => {
-            fetch(`${CONNECT_URL}/status`)
-                .then((r) => r.json())
-                .then((d: ConnectStatus) => {
-                    setStatus(d);
-                    if (d.radio) return; // no track-index sync for radio
-                    const newIdx = d.current_track_index ?? 0;
-                    if (prevIndexRef.current === -1) {
-                        if (newIdx > 0) onTrackAdvance(newIdx);
-                    } else if (newIdx !== prevIndexRef.current) {
-                        onTrackAdvance(newIdx - prevIndexRef.current);
-                    }
-                    prevIndexRef.current = newIdx;
-                })
-                .catch(() => {});
+        const es = new EventSource(`${CONNECT_URL}/events`);
+        es.onmessage = (e: MessageEvent) => {
+            const d: ConnectStatus = JSON.parse(e.data);
+            setStatus(d);
+            useConnectPlayerStore.getState().set({
+                duration: d.current_track?.duration ?? 0,
+                elapsed: d.elapsed ?? 0,
+                isPlaying: d.streaming && !d.paused,
+                isStreaming: d.streaming,
+                syncTime: Date.now(),
+            });
         };
-
-        poll();
-        const id = setInterval(poll, 2000);
-        return () => clearInterval(id);
-    }, [active, open, onTrackAdvance, prevIndexRef]);
+        return () => es.close();
+    }, [active]);
 
     return status;
 };

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { CONNECT_URL, PairingStep } from './types';
 
@@ -9,21 +10,48 @@ interface PairingModalProps {
 }
 
 export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalProps) => {
+    const { t } = useTranslation();
     const [step, setStep] = useState<PairingStep>('idle');
-    const [deviceProvidesPin, setDeviceProvidesPin] = useState(false);
     const [pin, setPin] = useState('');
     const [error, setError] = useState('');
     const pinRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        startPairing();
-    }, []);
+    const finishPairing = useCallback(
+        async (pinValue: null | number) => {
+            setStep('started');
+            try {
+                const res = await fetch(`${CONNECT_URL}/pair/airplay/finish`, {
+                    body: JSON.stringify({ name: deviceName, pin: pinValue }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    setError(
+                        data.error ??
+                            t('player.connect_pairing_error_failed', {
+                                postProcess: 'sentenceCase',
+                            }),
+                    );
+                    setStep('error');
+                    return;
+                }
+                setStep('success');
+                setTimeout(() => {
+                    onSuccess();
+                    onClose();
+                }, 1200);
+            } catch {
+                setError(
+                    t('player.connect_pairing_error_backend', { postProcess: 'sentenceCase' }),
+                );
+                setStep('error');
+            }
+        },
+        [deviceName, onClose, onSuccess, t],
+    );
 
-    useEffect(() => {
-        if (step === 'needs_pin') pinRef.current?.focus();
-    }, [step]);
-
-    const startPairing = async () => {
+    const startPairing = useCallback(async () => {
         setStep('started');
         setError('');
         try {
@@ -34,46 +62,31 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
             });
             const data = await res.json();
             if (!res.ok) {
-                setError(data.error ?? 'Unbekannter Fehler');
+                setError(
+                    data.error ??
+                        t('player.connect_pairing_error_failed', { postProcess: 'sentenceCase' }),
+                );
                 setStep('error');
                 return;
             }
-            setDeviceProvidesPin(data.device_provides_pin);
             if (data.device_provides_pin) {
                 setStep('needs_pin');
             } else {
                 await finishPairing(null);
             }
         } catch {
-            setError('Backend nicht erreichbar');
+            setError(t('player.connect_pairing_error_backend', { postProcess: 'sentenceCase' }));
             setStep('error');
         }
-    };
+    }, [deviceName, finishPairing, t]);
 
-    const finishPairing = async (pinValue: number | null) => {
-        setStep('started');
-        try {
-            const res = await fetch(`${CONNECT_URL}/pair/airplay/finish`, {
-                body: JSON.stringify({ name: deviceName, pin: pinValue }),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error ?? 'Pairing fehlgeschlagen');
-                setStep('error');
-                return;
-            }
-            setStep('success');
-            setTimeout(() => {
-                onSuccess();
-                onClose();
-            }, 1200);
-        } catch {
-            setError('Backend nicht erreichbar');
-            setStep('error');
-        }
-    };
+    useEffect(() => {
+        startPairing();
+    }, [startPairing]);
+
+    useEffect(() => {
+        if (step === 'needs_pin') pinRef.current?.focus();
+    }, [step]);
 
     const overlay: React.CSSProperties = {
         alignItems: 'center',
@@ -108,7 +121,7 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
                         margin: '0 0 8px',
                     }}
                 >
-                    AirPlay Pairing
+                    {t('player.connect_pairing_title', { postProcess: 'sentenceCase' })}
                 </h3>
                 <p
                     style={{
@@ -122,7 +135,7 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
 
                 {step === 'started' && (
                     <p style={{ color: 'var(--theme-colors-text-secondary)', fontSize: '14px' }}>
-                        Verbinde…
+                        {t('player.connect_pairing_connecting', { postProcess: 'sentenceCase' })}
                     </p>
                 )}
 
@@ -135,7 +148,7 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
                                 marginBottom: '14px',
                             }}
                         >
-                            Schau auf das Gerät und gib den angezeigten PIN ein.
+                            {t('player.connect_pairing_pin_hint', { postProcess: 'sentenceCase' })}
                         </p>
                         <input
                             inputMode="numeric"
@@ -173,14 +186,14 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
                                 width: '100%',
                             }}
                         >
-                            Pairen
+                            {t('player.connect_pairing_confirm', { postProcess: 'sentenceCase' })}
                         </button>
                     </>
                 )}
 
                 {step === 'success' && (
                     <p style={{ color: '#4caf50', fontSize: '14px' }}>
-                        ✓ Erfolgreich gepaired!
+                        ✓ {t('player.connect_pairing_success', { postProcess: 'sentenceCase' })}
                     </p>
                 )}
 
@@ -201,7 +214,7 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
                                 padding: '8px 16px',
                             }}
                         >
-                            Nochmal versuchen
+                            {t('player.connect_pairing_retry', { postProcess: 'sentenceCase' })}
                         </button>
                     </>
                 )}
@@ -221,7 +234,7 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
                         width: '100%',
                     }}
                 >
-                    Schließen
+                    {t('player.connect_pairing_close', { postProcess: 'sentenceCase' })}
                 </button>
             </div>
         </div>

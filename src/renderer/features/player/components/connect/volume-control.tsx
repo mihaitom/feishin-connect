@@ -1,8 +1,8 @@
 import { LuVolume1, LuVolumeX } from 'react-icons/lu';
 
-import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
-
 import { PopSection } from './ui';
+
+import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 
 interface VolumeControlProps {
     deviceName: string;

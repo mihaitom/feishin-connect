@@ -1,5 +1,6 @@
 """state.py — Shared runtime state and helper functions for Feishin Connect."""
 
+import asyncio
 import os
 import socket
 import time
@@ -13,24 +14,28 @@ TARGETS = os.getenv("TARGETS", "")
 
 class AppState:
     def __init__(self):
-        self.current_tracks: list[Track] = []
+        self.current_track: Track | None = None
         self.is_streaming: bool = False
         self.is_paused: bool = False
-        self.current_track_index: int = 0
         self.radio_info: dict | None = None
         self.active_delivery: BaseDelivery | DeliveryManager | None = None
-        # Wall-clock progress tracking (unaffected by FFmpeg buffering)
+        # Wall-clock progress tracking
         self.play_start_time: float = 0.0
-        self.play_start_index: int = 0
         self.paused_elapsed: float = 0.0
+        # Seek offset for next /stream reconnect (set by /pause, consumed by /stream)
+        self.resume_offset: float = 0.0
+        # Incremented on every /play, /play-url, /resume so old stream_with_completion
+        # handlers don't fire after a new play has already started.
+        self.play_generation: int = 0
+        # Set True when a track finishes naturally; cleared by /play, /play-url, /stop.
+        # Lets the frontend detect track-end even after SSE reconnect or page reload.
+        self.track_ended: bool = False
+        # Last successful discovery results — returned immediately on subsequent calls.
+        self.discovered: dict = {"airplay": [], "sonos": []}
 
 
 class Context:
-    """Mutable singleton holding all shared runtime objects.
-
-    Routes import `ctx` and mutate its attributes directly (e.g. ctx.navidrome = ...).
-    This avoids the rebinding problem that comes with plain module-level globals.
-    """
+    """Mutable singleton holding all shared runtime objects."""
 
     def __init__(self):
         self.state = AppState()
@@ -42,6 +47,7 @@ ctx = Context()
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 def get_local_ip() -> str:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -56,28 +62,89 @@ def stream_url() -> str:
     return f"http://{get_local_ip()}:{PORT}/stream"
 
 
-def compute_position() -> tuple[int, float]:
-    """Return (track_index, elapsed_seconds) from wall-clock time.
-
-    Wall-clock tracking avoids the FFmpeg-buffering distortion that fires
-    on_track_start early while the previous track is still buffered.
-    """
+def compute_position() -> float:
+    """Return elapsed seconds into the current track, clamped to track duration."""
     st = ctx.state
-    if not st.current_tracks or not st.play_start_time:
-        return st.current_track_index, 0.0
+    if not st.is_streaming or not st.play_start_time:
+        return 0.0
+    if st.is_paused:
+        return st.paused_elapsed
+    elapsed = time.time() - st.play_start_time
+    if st.current_track:
+        return min(elapsed, float(st.current_track.duration))
+    return elapsed
 
-    elapsed_total = (
-        st.paused_elapsed if st.is_paused else time.time() - st.play_start_time
-    )
 
-    cum = 0.0
-    for i, t in enumerate(st.current_tracks[st.play_start_index:]):
-        if elapsed_total < cum + t.duration:
-            return st.play_start_index + i, elapsed_total - cum
-        cum += t.duration
+def build_status_dict() -> dict:
+    """Build the full status payload shared by /status and SSE /events."""
+    elapsed = compute_position()
+    st = ctx.state
 
-    last = len(st.current_tracks) - 1
-    return last, float(st.current_tracks[last].duration)
+    current_track = None
+    if st.current_track:
+        t = st.current_track
+        current_track = {
+            "artist": t.artist,
+            "cover_art_url": ctx.navidrome.get_cover_art_url(t.cover_art_id),
+            "duration": t.duration,
+            "title": t.title,
+        }
+
+    if isinstance(st.active_delivery, DeliveryManager):
+        targets = st.active_delivery.list_targets()
+    elif st.active_delivery is not None:
+        targets = [
+            {
+                "name": st.active_delivery.target,
+                "type": type(st.active_delivery)
+                .__name__.replace("Delivery", "")
+                .lower(),
+            }
+        ]
+    else:
+        targets = []
+
+    return {
+        "current_track": current_track,
+        "current_track_index": 0,
+        "elapsed": elapsed,
+        "ended": st.track_ended,
+        "paused": st.is_paused,
+        "radio": st.radio_info,
+        "streaming": st.is_streaming,
+        "targets": targets,
+        "total_tracks": 1 if st.current_track else 0,
+    }
+
+
+class EventBus:
+    """Broadcasts state changes to all connected SSE clients."""
+
+    def __init__(self):
+        self._queues: list[asyncio.Queue] = []
+
+    def subscribe(self) -> asyncio.Queue:
+        q: asyncio.Queue = asyncio.Queue(maxsize=10)
+        self._queues.append(q)
+        return q
+
+    def unsubscribe(self, q: asyncio.Queue) -> None:
+        if q in self._queues:
+            self._queues.remove(q)
+
+    async def broadcast(self) -> None:
+        """Push current status to all connected SSE clients."""
+        if not self._queues:
+            return
+        payload = build_status_dict()
+        for q in self._queues:
+            try:
+                q.put_nowait(payload)
+            except asyncio.QueueFull:
+                pass  # slow consumer — drop update rather than block
+
+
+event_bus = EventBus()
 
 
 def resolve_target(
@@ -93,7 +160,11 @@ def resolve_target(
             deliveries.append(cls(t["name"]))
         return DeliveryManager.from_deliveries(deliveries)
     if target_type and target_name:
-        return SonosDelivery(target_name) if target_type == "sonos" else AirPlayDelivery(target_name)
+        return (
+            SonosDelivery(target_name)
+            if target_type == "sonos"
+            else AirPlayDelivery(target_name)
+        )
     if ctx.delivery.deliveries:
         return ctx.delivery
     return None

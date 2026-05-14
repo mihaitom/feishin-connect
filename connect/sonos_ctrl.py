@@ -21,9 +21,7 @@ def get_device(room_name: str):
             pass
 
     available = [d.player_name for d in devices]
-    raise RuntimeError(
-        f"Room '{room_name}' not found. Available: {available}"
-    )
+    raise RuntimeError(f"Room '{room_name}' not found. Available: {available}")
 
 
 def play_stream(stream_url: str, room_name: str, title: str = "Navispot") -> None:
@@ -56,18 +54,22 @@ def play_stream(stream_url: str, room_name: str, title: str = "Navispot") -> Non
         'xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" '
         'xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">'
         '<item id="1" parentID="0" restricted="1">'
-        f'<dc:title>{title}</dc:title>'
-        '<upnp:class>object.item.audioItem.audioBroadcast</upnp:class>'
+        f"<dc:title>{title}</dc:title>"
+        "<upnp:class>object.item.audioItem.audioBroadcast</upnp:class>"
         f'<res protocolInfo="http-get:*:audio/mpeg:*">{stream_url}</res>'
-        '</item>'
-        '</DIDL-Lite>'
+        "</item>"
+        "</DIDL-Lite>"
     )
 
     logger.info(f"Sonos [{device.player_name}] → SetAVTransportURI: {stream_url}")
 
     # Direct AVTransport call (more control than play_uri)
     device.avTransport.SetAVTransportURI(
-        [("InstanceID", 0), ("CurrentURI", stream_url), ("CurrentURIMetaData", metadata)]
+        [
+            ("InstanceID", 0),
+            ("CurrentURI", stream_url),
+            ("CurrentURIMetaData", metadata),
+        ]
     )
     device.avTransport.Play([("InstanceID", 0), ("Speed", 1)])
 
@@ -86,7 +88,4 @@ def list_devices() -> list[dict]:
     import soco
 
     devices = list(soco.discover() or [])
-    return [
-        {"name": d.player_name, "ip": d.ip_address}
-        for d in devices
-    ]
+    return [{"name": d.player_name, "ip": d.ip_address} for d in devices]

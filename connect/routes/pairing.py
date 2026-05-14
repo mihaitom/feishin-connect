@@ -83,7 +83,9 @@ async def finish_pairing(req: FinishRequest):
     pairing = _sessions.get(req.name)
     if not pairing:
         return JSONResponse(
-            {"error": f"No active pairing session for '{req.name}'. Call /start first."},
+            {
+                "error": f"No active pairing session for '{req.name}'. Call /start first."
+            },
             status_code=400,
         )
 

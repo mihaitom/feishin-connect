@@ -20,12 +20,21 @@ class Track:
 
 
 class SubsonicClient:
-    def __init__(self, url: str, user: str = "", password: str = "", credential: str = "", internal_url: str = ""):
+    def __init__(
+        self,
+        url: str,
+        user: str = "",
+        password: str = "",
+        credential: str = "",
+        internal_url: str = "",
+    ):
         self.base_url = url.rstrip("/")
         self.internal_url = (internal_url or url).rstrip("/")
         self.user = user
         self.password = password
-        self._credential = credential  # pre-built Subsonic auth query string from Feishin
+        self._credential = (
+            credential  # pre-built Subsonic auth query string from Feishin
+        )
         self.app_name = "navispot"
         self.api_version = "1.16.1"
 
@@ -57,7 +66,9 @@ class SubsonicClient:
         subsonic = data.get("subsonic-response", {})
         if subsonic.get("status") != "ok":
             error = subsonic.get("error", {})
-            raise RuntimeError(f"Subsonic Error {error.get('code')}: {error.get('message')}")
+            raise RuntimeError(
+                f"Subsonic Error {error.get('code')}: {error.get('message')}"
+            )
 
         return subsonic
 
@@ -69,7 +80,9 @@ class SubsonicClient:
         if not cover_art_id or not self.base_url:
             return None
         params = "&".join(f"{k}={v}" for k, v in self._auth_params().items())
-        return f"{self.base_url}/rest/getCoverArt.view?id={cover_art_id}&size=300&{params}"
+        return (
+            f"{self.base_url}/rest/getCoverArt.view?id={cover_art_id}&size=300&{params}"
+        )
 
     def ping(self) -> bool:
         try:
