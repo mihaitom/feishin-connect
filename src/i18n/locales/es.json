@@ -48,7 +48,8 @@
         "sleepTimer_off": "Apagado",
         "sleepTimer_endOfSong": "Fin de la canción actual",
         "sleepTimer": "Temporizador de apagado",
-        "albumRadio": "Radio del álbum"
+        "albumRadio": "Radio del álbum",
+        "scrobbleForceSubmit": "Forzar scrobble"
     },
     "setting": {
         "crossfadeStyle_description": "Selecciona el estilo de crossfade a usar por el reproductor de audio",
@@ -1175,9 +1176,9 @@
         "song_one": "Canción",
         "song_many": "Canciones",
         "song_other": "Canciones",
-        "radioStation_one": "Estación de radio",
-        "radioStation_many": "Estaciones de radio",
-        "radioStation_other": "Estaciones de radio",
+        "radioStation_one": "Estación de Radio",
+        "radioStation_many": "Estaciones de Radio",
+        "radioStation_other": "Estaciones de Radio",
         "radioStationWithCount_one": "{{count}} estación de radio",
         "radioStationWithCount_many": "{{count}} estaciones de radio",
         "radioStationWithCount_other": "{{count}} estaciones de radio"
