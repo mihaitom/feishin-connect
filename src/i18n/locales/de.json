@@ -724,6 +724,16 @@
         }
     },
     "player": {
+        "connect_noDevices": "Keine Geräte gefunden",
+        "connect_scan": "Erneut suchen",
+        "connect_sendTo": "Senden an",
+        "connect_add": "Hinzufügen ({{count}})",
+        "connect_stopAll": "Alle stoppen",
+        "connect_emptyQueue": "Warteschlange leer",
+        "connect_playOnDevice": "Auf Gerät abspielen",
+        "connect_device_one": "Gerät",
+        "connect_device_other": "Geräte",
+        "connect_unmute": "Ton an",
         "next": "Nächster",
         "addNext": "Als Nächstes",
         "play": "Abspielen",
