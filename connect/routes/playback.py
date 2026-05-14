@@ -52,7 +52,7 @@ async def play_tracks(req: PlayRequest):
     for t in tracks[:5]:
         logger.info(f"[play]   • {t.artist} — {t.title} ({t.duration}s)")
     if len(tracks) > 5:
-        logger.info(f"[play]   … und {len(tracks) - 5} weitere")
+        logger.info(f"[play]   … and {len(tracks) - 5} more")
 
     st = ctx.state
     st.current_tracks = tracks
@@ -73,7 +73,7 @@ async def play_tracks(req: PlayRequest):
     try:
         await target.play(url)
     except Exception as e:
-        logger.error(f"[play] Delivery Fehler: {e}", exc_info=True)
+        logger.error(f"[play] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
     return {"status": "playing", "stream_url": url, "tracks": len(tracks)}
@@ -106,7 +106,7 @@ async def play_url(req: PlayUrlRequest):
     try:
         await target.play(req.url, req.title)
     except Exception as e:
-        logger.error(f"[play-url] Delivery Fehler: {e}", exc_info=True)
+        logger.error(f"[play-url] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
     return {"status": "playing", "url": req.url}

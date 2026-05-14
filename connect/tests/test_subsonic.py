@@ -1,4 +1,4 @@
-"""Tests für SubsonicClient — insb. internal_url-Logik."""
+"""Tests for SubsonicClient — especially the internal_url logic."""
 
 from subsonic import SubsonicClient
 
@@ -47,7 +47,7 @@ def test_stream_url_uses_base_when_no_internal():
 def test_cover_art_uses_base_url():
     c = _client(url="http://proxy:9180", internal_url="http://nav:4533")
     url = c.get_cover_art_url("cover-1")
-    # Cover Art geht über den Proxy (base_url), damit der Browser sie laden kann
+    # Cover art goes through the proxy (base_url) so the browser can fetch it
     assert url.startswith("http://proxy:9180/rest/getCoverArt.view")
     assert "id=cover-1" in url
 

@@ -37,7 +37,7 @@ async def stream_tracks(
 
         cmd = [arg if arg != "{url}" else url for arg in _FFMPEG_CMD]
         logger.info(f"[ffmpeg] Track {i + 1}/{len(track_urls)}: {url[:80]}")
-        logger.debug(f"[ffmpeg] Befehl: {' '.join(cmd)}")
+        logger.debug(f"[ffmpeg] Command: {' '.join(cmd)}")
 
         proc = None
         try:
@@ -68,11 +68,11 @@ async def stream_tracks(
                 logger.debug(f"[ffmpeg] Track {i + 1} stderr: {stderr.decode(errors='replace')[:200]}")
 
         except FileNotFoundError:
-            logger.error("[ffmpeg] ❌ ffmpeg nicht gefunden — bitte installieren (apk add ffmpeg)")
+            logger.error("[ffmpeg] ❌ ffmpeg not found — please install (apk add ffmpeg)")
             return
 
         except asyncio.CancelledError:
-            logger.info(f"[ffmpeg] Stream abgebrochen (Track {i + 1})")
+            logger.info(f"[ffmpeg] Stream cancelled (Track {i + 1})")
             if proc:
                 try:
                     proc.kill()
@@ -81,7 +81,7 @@ async def stream_tracks(
             return
 
         except Exception as e:
-            logger.error(f"[ffmpeg] Fehler Track {i + 1}: {e}", exc_info=True)
+            logger.error(f"[ffmpeg] Error on track {i + 1}: {e}", exc_info=True)
             if proc:
                 try:
                     proc.kill()
@@ -89,4 +89,4 @@ async def stream_tracks(
                     pass
             continue
 
-    logger.info("[ffmpeg] Alle Tracks gestreamt")
+    logger.info("[ffmpeg] All tracks streamed")

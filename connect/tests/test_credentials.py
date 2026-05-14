@@ -1,4 +1,4 @@
-"""Tests für credentials.py — persistente AirPlay-Credential-Speicherung."""
+"""Tests for credentials.py — persistent AirPlay credential storage."""
 
 import json
 import tempfile
