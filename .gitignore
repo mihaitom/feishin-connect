@@ -12,3 +12,5 @@ connect/.env
 connect/build
 connect/.pytest_cache
 .vscode
+__pycache__/
+*.pyc
