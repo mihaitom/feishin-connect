@@ -11,6 +11,7 @@ import {
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { useSongUrl } from '/@/renderer/features/player/audio-player/hooks/use-stream-url';
 import { PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
+import { useConnectPlayerStore } from '/@/renderer/features/player/components/connect/connect.store';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import {
@@ -533,6 +534,16 @@ function crossfadeHandler(args: {
     } = args;
     const player = `player${playerNum}`;
 
+    // Connect-Modus: lokales Crossfade würde audio.play() imperativ aufrufen
+    // und unser status-basiertes Safety-Net umgehen → Doppel-Audio mit dem Remote.
+    if (useConnectPlayerStore.getState().isActive) {
+        currentPlayer.setVolume(0);
+        nextPlayer.setVolume(0);
+        nextPlayer.ref?.getInternalPlayer()?.pause();
+        if (isTransitioning) setIsTransitioning(false);
+        return;
+    }
+
     // If there is no next song to transition to, ensure we don't enter or stay in a transition
     if (!hasNextSong) {
         currentPlayer.setVolume(volume);
@@ -630,6 +641,13 @@ function gaplessHandler(args: {
     setIsTransitioning: Dispatch<boolean | string>;
 }) {
     const { currentTime, duration, isFlac, isTransitioning, nextPlayer, setIsTransitioning } = args;
+
+    // Connect-Modus: gapless würde nextPlayer.play() imperativ aufrufen und
+    // unser status-basiertes Safety-Net umgehen → Doppel-Audio mit dem Remote.
+    if (useConnectPlayerStore.getState().isActive) {
+        if (isTransitioning) setIsTransitioning(false);
+        return null;
+    }
 
     if (!isTransitioning) {
         if (currentTime > duration - 2) {
