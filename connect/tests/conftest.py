@@ -28,6 +28,7 @@ def reset_state():
     st.play_start_time = 0.0
     st.play_start_index = 0
     st.paused_elapsed = 0.0
+    st.discovered = {"airplay": [], "chromecast": [], "sonos": []}
 
     state.ctx.navidrome = SubsonicClient("")
     yield

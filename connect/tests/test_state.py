@@ -105,6 +105,36 @@ def test_resolve_target_single_airplay():
     assert result.target == "HomePod"
 
 
+def test_resolve_target_single_chromecast():
+    from delivery import ChromecastDelivery
+
+    result = resolve_target(target_type="chromecast", target_name="LivingRoom TV")
+    assert isinstance(result, ChromecastDelivery)
+    assert result.target == "LivingRoom TV"
+
+
+def test_resolve_target_mixed_targets_list():
+    from delivery import (
+        AirPlayDelivery,
+        ChromecastDelivery,
+        DeliveryManager,
+        SonosDelivery,
+    )
+
+    result = resolve_target(
+        targets=[
+            {"type": "sonos", "name": "Küche"},
+            {"type": "airplay", "name": "HomePod"},
+            {"type": "chromecast", "name": "LivingRoom TV"},
+        ]
+    )
+    assert isinstance(result, DeliveryManager)
+    assert len(result.deliveries) == 3
+    assert isinstance(result.deliveries[0], SonosDelivery)
+    assert isinstance(result.deliveries[1], AirPlayDelivery)
+    assert isinstance(result.deliveries[2], ChromecastDelivery)
+
+
 def test_resolve_target_returns_none_when_no_config():
     result = resolve_target()
     assert result is None
@@ -136,6 +166,28 @@ def test_find_sonos_returns_empty_for_airplay_only():
 
     result = find_sonos(AirPlayDelivery("HomePod"))
     assert result == []
+
+
+def test_find_sonos_returns_empty_for_chromecast_only():
+    from delivery import ChromecastDelivery
+
+    result = find_sonos(ChromecastDelivery("LivingRoom TV"))
+    assert result == []
+
+
+def test_find_sonos_picks_sonos_from_mixed_manager():
+    from delivery import (
+        AirPlayDelivery,
+        ChromecastDelivery,
+        DeliveryManager,
+        SonosDelivery,
+    )
+
+    s = SonosDelivery("Küche")
+    manager = DeliveryManager.from_deliveries(
+        [AirPlayDelivery("HomePod"), s, ChromecastDelivery("TV")]
+    )
+    assert find_sonos(manager) == [s]
 
 
 def test_find_sonos_returns_none_from_empty():
