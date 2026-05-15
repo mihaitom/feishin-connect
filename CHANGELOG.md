@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-05-15
+
+### Changed
+
+- **Single-track streaming instead of playlist streaming** — Connect no longer pushes the whole queue to the backend at once. Each track is streamed individually, and the next one is sent automatically when the previous finishes. This makes shuffle / repeat / manual skips behave correctly on the remote and removes the need to re-sync the queue when it changes locally.
+- **Upstream player UI reused for transport controls** — play, pause, next, previous, shuffle, repeat and stop now go through Feishin's existing playerbar controls. When Connect is active, the same buttons drive the remote stream instead of local playback (via `useConnectPlayback` and the `connect.store` handlers wired through `useConnectSession`). No more parallel control surface inside the Connect popover.
+
+### Added
+
+- **Chromecast (Google Cast) support** — stream to any Chromecast device on the network alongside Sonos and AirPlay. Discovery, playback, per-device volume, mid-stream join, and selective stop all work the same way as the other backends. A long-lived `CastBrowser` keeps zeroconf alive for the process lifetime so reconnects after network blips don't fail.
+- **Connect popover refactor** — `connect-button.tsx` was split into focused modules: `connect-popover.tsx`, `connect-session-context.ts`, `use-connect-session.ts`, `use-connect-playback.ts`, and a dedicated Zustand `connect.store.ts`. The pairing modal is now i18n-aware and shows user-friendly error messages.
+- **Backend test suite** — ~115 pytest tests covering `DeliveryManager` parsing and fan-out, all three delivery classes (Sonos, AirPlay, Chromecast), `/discover`, `/device-volume`, `/device-stop`, `/join`, credentials persistence and the Navidrome proxy. Runs in under a second without any real devices.
+
+### Fixed
+
+- **Local + remote double audio during auto track switch** (~20% of the time, Docker only) when **Crossfade** or **Gapless** transitions were enabled in playback settings. The crossfade and gapless handlers in the web player called `audio.play()` imperatively on the next player element, bypassing the status-based safety net. Both handlers now bail out early when Connect is active, eliminating any path for the local player to emit audio while a remote stream is running.
+- **Local player runaway after Connect's track-end advance** — added a safety net that subscribes to the player store and pauses immediately if anything flips local status to `PLAYING` while Connect is active. Catches edge cases (MediaSession API calls, hotkeys, queue mutations) that the explicit `mediaPause()` calls miss.
+- Connect i18n keys restored after upstream locale restructuring.
+
+### Internal
+
+- All remaining German log messages and code comments in the Python backend translated to English for consistency.
+- `__pycache__` and `.pyc` files now gitignored.
+
+### Known issues
+
+- **AirPlay 1 (RAOP) verified** on AirPort Express hardware. **Sonos devices with AirPlay 2** require MFi hardware authentication (proprietary implementation) which pyatv cannot provide — the backend returns HTTP 470 with a clear message. Use Sonos speakers via the Sonos protocol instead.
+
+---
+
 ## [0.1.3] - 2026-05-10
 
 ### Added

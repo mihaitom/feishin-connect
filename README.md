@@ -3,7 +3,7 @@
 # Feishin — Connect Fork
 
 > **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).**
-> It adds **Feishin Connect** — a Spotify Connect-like feature that streams your Navidrome queue to Sonos speakers and AirPlay devices directly from the player bar.
+> It adds **Feishin Connect** — a Spotify Connect-like feature that streams your Navidrome queue to Sonos, AirPlay and Chromecast devices directly from the player bar.
 > All upstream features are preserved.
 
   <p align="center">
@@ -21,7 +21,7 @@
 
 ## Feishin Connect
 
-Feishin Connect adds a cast button to the player bar. Click it to stream the current Navidrome queue — or a radio stream — to any Sonos speaker or AirPlay device on your network, without touching the local player.
+Feishin Connect adds a cast button to the player bar. Click it to stream the current Navidrome queue — or a radio stream — to any Sonos speaker, AirPlay or Chromecast device on your network, without touching the local player.
 
 <img src="assets/feishin-connect-screenshot.png" width="350px">
 
@@ -37,20 +37,21 @@ Please expect rough edges and report issues if you encounter them.
 - Feishin fetches the stream from Navidrome and re-encodes it via **FFmpeg** into a continuous MP3 stream.
 - **Sonos** devices are controlled via UPnP (SoCo) and pull the stream over HTTP.
 - **AirPlay** devices receive the stream pushed via pyatv / RAOP.
+- **Chromecast** devices are controlled via pychromecast and pull the stream over HTTP.
 
 ### Features
 
-- Stream the current queue to one or multiple Sonos / AirPlay devices simultaneously
+- Stream the current queue to one or multiple Sonos / AirPlay / Chromecast devices simultaneously
 - Sonos multiroom grouping (devices play in sync)
-- Per-device volume control with a hover slider
+- Per-device volume control with a hover slider (Sonos and Chromecast)
 - Play/pause/previous/next controls in the popover (operated on the remote device)
 - Radio stream support (sends the live URL directly to the device)
 - Persistent state — Connect continues if you reload Feishin in the browser
-- Local playback pauses automatically when handing off to a device
+- Local playback pauses automatically when handing off to a device (Crossfade and Gapless transitions are also disabled locally while Connect is active to prevent double-audio)
 
 ### Docker (recommended)
 
-Host networking is required so the backend can discover Sonos and AirPlay devices via mDNS/SSDP multicast.
+Host networking is required so the backend can discover Sonos, AirPlay and Chromecast devices via mDNS/SSDP multicast.
 
 ```yaml
 services:
@@ -93,7 +94,7 @@ services:
 ### Requirements
 
 - Navidrome (or compatible Subsonic/OpenSubsonic server)
-- Sonos and/or AirPlay devices on the same network as the Docker host
+- Sonos, AirPlay and/or Chromecast devices on the same network as the Docker host
 - Docker host on Linux (host networking is Linux-only; Mac/Windows users need to run the backend natively)
 
 ### Electron (desktop app)
@@ -181,7 +182,7 @@ Rewrite of [Sonixd](https://github.com/jeffvli/sonixd). Original project by [@je
 - [x] Scrobble playback to your server
 - [x] Smart playlist editor (Navidrome)
 - [x] Synchronized and unsynchronized lyrics support
-- [x] **Stream to Sonos / AirPlay via Feishin Connect** *(this fork)*
+- [x] **Stream to Sonos / AirPlay / Chromecast via Feishin Connect** *(this fork)*
 - [ ] [Request a feature](https://github.com/jeffvli/feishin/issues) or [view taskboard](https://github.com/users/jeffvli/projects/5/views/1)
 
 ### Screenshots
@@ -235,7 +236,7 @@ curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/i
 
 | Feature | This fork | Upstream |
 |---------|-----------|----------|
-| Feishin Connect (Sonos / AirPlay) | ✅ | ❌ |
+| Feishin Connect (Sonos / AirPlay / Chromecast) | ✅ | ❌ |
 | Auto-updater | ❌ disabled | ✅ GitHub Releases |
 | Docker image | `ghcr.io/mihaitom/feishin-connect` | `ghcr.io/jeffvli/feishin` |
 
@@ -270,7 +271,7 @@ Feishin Connect uses **ffmpeg** to transcode Navidrome streams into a continuous
 
 In the Docker image (`ghcr.io/mihaitom/feishin-connect`) ffmpeg is already included.
 
-If ffmpeg is missing, the Connect backend logs `❌ ffmpeg NICHT GEFUNDEN` on startup and all play requests will silently fail.
+If ffmpeg is missing, the Connect backend logs `ffmpeg not found` on startup and all play requests will silently fail.
 
 ### Feishin Connect: no devices found
 
@@ -278,11 +279,7 @@ Ensure the container is running with `network_mode: host`. Without host networki
 
 ### Feishin Connect: nothing plays (device found but no audio)
 
-Check the container or Electron logs for `❌ ffmpeg NICHT GEFUNDEN`. See the ffmpeg install instructions above.
-
-### Feishin Connect: nothing plays (device found but no audio)
-
-Check the container logs for `❌ ffmpeg NICHT GEFUNDEN`. FFmpeg is required for audio transcoding and is included in the Docker image. If you're running the backend natively, install FFmpeg via your package manager.
+Check the container or Electron logs for `ffmpeg not found`. FFmpeg is required for audio transcoding and is included in the Docker image. If you're running the backend natively, install FFmpeg via your package manager — see the ffmpeg install instructions above.
 
 ### I have the issue "The SUID sandbox helper binary was found, but is not configured correctly" on Linux
 
