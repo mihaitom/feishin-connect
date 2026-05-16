@@ -8,11 +8,11 @@
 
   <p align="center">
     <a href="https://github.com/jeffvli/feishin/blob/main/LICENSE">
-      <img src="https://img.shields.io/github/license/jeffvli/feishin?style=flat-square&color=brightgreen"
+      <img src="https://img.shields.io/github/license/mihaitom/feishin-connect?style=flat-square&color=brightgreen"
       alt="License">
     </a>
       <a href="https://github.com/jeffvli/feishin/releases">
-      <img src="https://img.shields.io/github/v/release/jeffvli/feishin?style=flat-square&color=blue"
+      <img src="https://img.shields.io/github/v/release/mihaitom/feishin-connect?style=flat-square&color=blue"
       alt="Release">
     </a>
   </p>
