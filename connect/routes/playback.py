@@ -7,7 +7,6 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from state import compute_position, ctx, event_bus, resolve_target, stream_url
-from subsonic import Track
 
 logger = logging.getLogger("connect.playback")
 router = APIRouter()
@@ -22,25 +21,17 @@ class PlayRequest(BaseModel):
 
 @router.post("/play")
 async def play_tracks(req: PlayRequest):
-    if not ctx.navidrome.base_url:
+    if not ctx.media.base_url:
         logger.warning(
-            "[play] Rejected: Navidrome not configured (waiting for /config)"
+            "[play] Rejected: media server not configured (waiting for /config)"
         )
-        return {"error": "Navidrome not configured — waiting for /config from Feishin"}
+        return {"error": "Media server not configured — waiting for /config from Feishin"}
     if not req.track_ids:
         return {"error": "No track ID provided"}
 
     track_id = req.track_ids[0]
     try:
-        data = ctx.navidrome._get("getSong.view", id=track_id)
-        song = data.get("song", {})
-        track = Track(
-            id=song["id"],
-            title=song.get("title", "Unknown"),
-            artist=song.get("artist", "Unknown"),
-            duration=song.get("duration", 0),
-            cover_art_id=song.get("coverArt", ""),
-        )
+        track = ctx.media.get_track(track_id)
     except Exception as e:
         logger.warning(f"[play] Track {track_id} not found: {e}")
         return {"error": f"Track not found: {e}"}

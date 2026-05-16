@@ -12,7 +12,8 @@ from delivery import (
     DeliveryManager,
     SonosDelivery,
 )
-from subsonic import SubsonicClient, Track
+from media import MediaClient, Track
+from subsonic import SubsonicClient
 
 PORT = int(os.getenv("PORT", "8765"))
 TARGETS = os.getenv("TARGETS", "")
@@ -45,7 +46,9 @@ class Context:
 
     def __init__(self):
         self.state = AppState()
-        self.navidrome = SubsonicClient("")
+        # Default is an unconfigured Subsonic client — overwritten by /config
+        # with either a Subsonic or Jellyfin client.
+        self.media: MediaClient = SubsonicClient("")
         self.delivery = DeliveryManager(TARGETS)
 
 
@@ -91,7 +94,7 @@ def build_status_dict() -> dict:
         t = st.current_track
         current_track = {
             "artist": t.artist,
-            "cover_art_url": ctx.navidrome.get_cover_art_url(t.cover_art_id),
+            "cover_art_url": ctx.media.get_cover_art_url(t.cover_art_id),
             "duration": t.duration,
             "title": t.title,
         }

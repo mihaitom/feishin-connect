@@ -17,6 +17,7 @@ from delivery import (
     discover_chromecast,
     discover_sonos,
 )
+from jellyfin import JellyfinClient
 from state import ctx, event_bus, find_sonos, stream_url
 from subsonic import SubsonicClient
 
@@ -27,17 +28,38 @@ router = APIRouter()
 class ConfigRequest(BaseModel):
     credential: str
     url: str
+    # "subsonic" (covers Navidrome) or "jellyfin". Defaults to subsonic for
+    # backwards compatibility with older Feishin builds that don't send a type.
+    server_type: str = "subsonic"
+    # Jellyfin requires the user GUID for item lookups; ignored for Subsonic.
+    user_id: str = ""
 
 
 @router.post("/config")
 async def configure(req: ConfigRequest):
+    # NAVIDROME_INTERNAL_URL is reused for Jellyfin so the same Docker
+    # deployment pattern (proxy on host, server on internal IP) works for both.
     internal_url = os.getenv("NAVIDROME_INTERNAL_URL", "")
-    ctx.navidrome = SubsonicClient(
-        req.url, credential=req.credential, internal_url=internal_url
-    )
-    logger.info(
-        f"[config] Navidrome configured: {req.url} (internal: {internal_url or 'same'})"
-    )
+    server_type = req.server_type.lower()
+
+    if server_type == "jellyfin":
+        ctx.media = JellyfinClient(
+            req.url,
+            token=req.credential,
+            user_id=req.user_id,
+            internal_url=internal_url,
+        )
+        logger.info(
+            f"[config] Jellyfin configured: {req.url} "
+            f"(internal: {internal_url or 'same'}, user_id: {req.user_id or 'missing'})"
+        )
+    else:
+        ctx.media = SubsonicClient(
+            req.url, credential=req.credential, internal_url=internal_url
+        )
+        logger.info(
+            f"[config] Subsonic configured: {req.url} (internal: {internal_url or 'same'})"
+        )
     return {"status": "ok"}
 
 
@@ -47,7 +69,7 @@ async def health():
 
     return {
         "ffmpeg": bool(shutil.which("ffmpeg")),
-        "navidrome_configured": bool(ctx.navidrome.base_url),
+        "navidrome_configured": bool(ctx.media.base_url),
     }
 
 

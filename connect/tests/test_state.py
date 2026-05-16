@@ -4,7 +4,7 @@ import time
 
 import state
 from state import compute_position, find_sonos, resolve_target
-from subsonic import Track
+from media import Track
 
 
 # ── compute_position ──────────────────────────────────────────────────────────

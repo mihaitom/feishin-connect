@@ -4,7 +4,7 @@ import time
 from unittest.mock import patch
 
 import state
-from subsonic import Track
+from media import Track
 
 
 # ── /status ──────────────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ def test_status_reflects_state(client):
 # ── /play ─────────────────────────────────────────────────────────────────────
 
 
-def test_play_rejects_when_navidrome_not_configured(client):
+def test_play_rejects_when_media_not_configured(client):
     r = client.post("/play", json={"track_ids": ["abc"]})
     assert r.status_code == 200
     assert "error" in r.json()
@@ -48,14 +48,8 @@ def test_play_rejects_empty_track_list(client):
 def test_play_fetches_track_and_sets_state(client):
     client.post("/config", json={"url": "http://nav:4533", "credential": "x"})
 
-    mock_track = {
-        "id": "1",
-        "title": "Test Song",
-        "artist": "Test Artist",
-        "duration": 180,
-        "coverArt": "cover-1",
-    }
-    with patch.object(state.ctx.navidrome, "_get", return_value={"song": mock_track}):
+    track = Track(id="1", title="Test Song", artist="Test Artist", duration=180, cover_art_id="cover-1")
+    with patch.object(state.ctx.media, "get_track", return_value=track):
         r = client.post("/play", json={"track_ids": ["1"]})
 
     assert r.status_code == 200
@@ -70,7 +64,7 @@ def test_play_returns_error_for_unfetchable_track(client):
     client.post("/config", json={"url": "http://nav:4533", "credential": "x"})
 
     with patch.object(
-        state.ctx.navidrome, "_get", side_effect=RuntimeError("not found")
+        state.ctx.media, "get_track", side_effect=RuntimeError("not found")
     ):
         r = client.post("/play", json={"track_ids": ["bad"]})
 

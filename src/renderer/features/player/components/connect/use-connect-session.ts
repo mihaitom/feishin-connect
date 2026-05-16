@@ -9,7 +9,19 @@ import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { useCurrentServerWithCredential } from '/@/renderer/store/auth.store';
 import { usePlayerSong, usePlayerStoreBase } from '/@/renderer/store/player.store';
-import { PlayerStatus } from '/@/shared/types/types';
+import { PlayerStatus, ServerType } from '/@/shared/types/types';
+
+const buildConfigBody = (server: {
+    credential?: string;
+    type?: ServerType;
+    url?: string;
+    userId?: null | string;
+}) => ({
+    credential: server.credential ?? '',
+    server_type: server.type === ServerType.JELLYFIN ? 'jellyfin' : 'subsonic',
+    url: server.url ?? '',
+    user_id: server.userId ?? '',
+});
 
 export const useConnectSession = (): ConnectSession => {
     const [status, setStatus] = useState<SendStatus>('idle');
@@ -59,7 +71,7 @@ export const useConnectSession = (): ConnectSession => {
     useEffect(() => {
         if (!server?.url || !server?.credential) return;
         fetch(`${CONNECT_URL}/config`, {
-            body: JSON.stringify({ credential: server.credential, url: server.url }),
+            body: JSON.stringify(buildConfigBody(server)),
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',
         })
@@ -67,7 +79,7 @@ export const useConnectSession = (): ConnectSession => {
                 configuredRef.current = true;
             })
             .catch(() => {});
-    }, [server?.url, server?.credential]);
+    }, [server]);
 
     // ── Restore from backend on mount ─────────────────────────────────────────
     useEffect(() => {
@@ -112,7 +124,7 @@ export const useConnectSession = (): ConnectSession => {
     const ensureConfigured = async () => {
         if (!configuredRef.current && server?.url && server?.credential) {
             await fetch(`${CONNECT_URL}/config`, {
-                body: JSON.stringify({ credential: server.credential, url: server.url }),
+                body: JSON.stringify(buildConfigBody(server)),
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST',
             });

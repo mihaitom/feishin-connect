@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-05-16
+
+### Added
+
+- **Jellyfin support for Feishin Connect** — Connect now works with Jellyfin servers in addition to Navidrome / Subsonic / OpenSubsonic. The backend picks the right client based on the new `server_type` field in `/config`; the frontend forwards the server type and Jellyfin user ID automatically. Tracks are streamed via Jellyfin's `/Items/{id}/Download` endpoint (raw file, FFmpeg handles transcoding downstream to Sonos / AirPlay / Chromecast).
+- **`JellyfinClient` + `MediaClient` protocol** — common interface (`get_track`, `get_stream_url`, `get_cover_art_url`, `ping`) shared by `SubsonicClient` and the new `JellyfinClient` so the rest of the backend stays server-agnostic. `Track` moved to `media.py`.
+- **12 new pytest tests** covering the Jellyfin client (URL building, track parsing, auth header, ping, user-id validation) and the `/config` server-type switching.
+
+---
+
 ## [0.2.0] - 2026-05-15
 
 ### Changed

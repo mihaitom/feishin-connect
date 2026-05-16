@@ -225,9 +225,9 @@ class AirPlayDelivery(BaseDelivery):
 
             try:
                 tracks = list(ctx.state.current_tracks)
-                if not tracks or not ctx.navidrome:
+                if not tracks or not ctx.media:
                     logger.warning(
-                        f"[AirPlay:{self.target}] No tracks or Navidrome not configured"
+                        f"[AirPlay:{self.target}] No tracks or media server not configured"
                     )
                     return
 
@@ -247,14 +247,14 @@ class AirPlayDelivery(BaseDelivery):
                         return io.BytesIO(resp.content)
 
                     # Preload first track
-                    prefetched = await fetch(ctx.navidrome.get_stream_url(tracks[0].id))
+                    prefetched = await fetch(ctx.media.get_stream_url(tracks[0].id))
                     next_task: asyncio.Task | None = None
 
                     for idx, track in enumerate(tracks):
                         # Start prefetching next track in background while current plays
                         next_task = None
                         if idx + 1 < len(tracks):
-                            next_url = ctx.navidrome.get_stream_url(tracks[idx + 1].id)
+                            next_url = ctx.media.get_stream_url(tracks[idx + 1].id)
                             next_task = asyncio.create_task(fetch(next_url))
 
                         logger.info(

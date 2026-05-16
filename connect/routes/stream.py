@@ -31,7 +31,7 @@ async def audio_stream():
         return StreamingResponse(iter([b""]), media_type="audio/mpeg", status_code=204)
 
     track = ctx.state.current_track
-    track_url = ctx.navidrome.get_stream_url(track.id)
+    track_url = ctx.media.get_stream_url(track.id)
 
     # Consume the resume offset (set by /pause, applied once on reconnect via FFmpeg -ss)
     offset = ctx.state.resume_offset

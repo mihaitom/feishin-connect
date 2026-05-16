@@ -4,19 +4,11 @@ subsonic.py — Navidrome / Subsonic API Client
 
 import hashlib
 import secrets
-from dataclasses import dataclass, field
 from urllib.parse import parse_qs
 
 import httpx
 
-
-@dataclass
-class Track:
-    id: str
-    title: str
-    artist: str
-    duration: int  # Sekunden
-    cover_art_id: str = field(default="")
+from media import Track
 
 
 class SubsonicClient:
@@ -71,6 +63,17 @@ class SubsonicClient:
             )
 
         return subsonic
+
+    def get_track(self, track_id: str) -> Track:
+        data = self._get("getSong.view", id=track_id)
+        song = data.get("song", {})
+        return Track(
+            id=song["id"],
+            title=song.get("title", "Unknown"),
+            artist=song.get("artist", "Unknown"),
+            duration=song.get("duration", 0),
+            cover_art_id=song.get("coverArt", ""),
+        )
 
     def get_stream_url(self, track_id: str) -> str:
         params = "&".join(f"{k}={v}" for k, v in self._auth_params().items())

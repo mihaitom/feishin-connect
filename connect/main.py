@@ -48,7 +48,7 @@ async def lifespan(_: FastAPI):
     else:
         logger.info("ℹ️  No TARGETS env — controlled via Feishin /play")
 
-    logger.info("⏳ Waiting for Feishin /config (Navidrome credentials)")
+    logger.info("⏳ Waiting for Feishin /config (media server credentials)")
     yield
 
 

@@ -3,7 +3,7 @@
 # Feishin — Connect Fork
 
 > **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).**
-> It adds **Feishin Connect** — a Spotify Connect-like feature that streams your Navidrome queue to Sonos, AirPlay and Chromecast devices directly from the player bar.
+> It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay and Chromecast devices directly from the player bar.
 > All upstream features are preserved.
 
   <p align="center">
@@ -21,7 +21,7 @@
 
 ## Feishin Connect
 
-Feishin Connect adds a cast button to the player bar. Click it to stream the current Navidrome queue — or a radio stream — to any Sonos speaker, AirPlay or Chromecast device on your network, without touching the local player.
+Feishin Connect adds a cast button to the player bar. Click it to stream the current queue — from Navidrome, Subsonic / OpenSubsonic, or Jellyfin — or a radio stream to any Sonos speaker, AirPlay or Chromecast device on your network, without touching the local player.
 
 <img src="assets/feishin-connect-screenshot.png" width="350px">
 
@@ -33,8 +33,8 @@ Please expect rough edges and report issues if you encounter them.
 ### How it works
 
 - A **Python / FastAPI** backend runs alongside nginx in the same Docker container.
-- It receives Navidrome credentials automatically from Feishin on startup (no manual config).
-- Feishin fetches the stream from Navidrome and re-encodes it via **FFmpeg** into a continuous MP3 stream.
+- It receives media server credentials (Navidrome / Subsonic / Jellyfin) automatically from Feishin on startup — no manual config.
+- Feishin fetches the stream from the media server and re-encodes it via **FFmpeg** into a continuous MP3 stream.
 - **Sonos** devices are controlled via UPnP (SoCo) and pull the stream over HTTP.
 - **AirPlay** devices receive the stream pushed via pyatv / RAOP.
 - **Chromecast** devices are controlled via pychromecast and pull the stream over HTTP.
@@ -93,7 +93,7 @@ services:
 
 ### Requirements
 
-- Navidrome (or compatible Subsonic/OpenSubsonic server)
+- Navidrome, Subsonic / OpenSubsonic-compatible server, or Jellyfin
 - Sonos, AirPlay and/or Chromecast devices on the same network as the Docker host
 - Docker host on Linux (host networking is Linux-only; Mac/Windows users need to run the backend natively)
 
@@ -260,7 +260,7 @@ Feishin supports any music server implementing [Navidrome](https://www.navidrome
 
 ### Feishin Connect: ffmpeg required
 
-Feishin Connect uses **ffmpeg** to transcode Navidrome streams into a continuous MP3 stream for Sonos, and into PCM WAV for AirPlay. ffmpeg is **not bundled** with the app and must be installed separately.
+Feishin Connect uses **ffmpeg** to transcode the audio stream (from Navidrome, Subsonic or Jellyfin) into a continuous MP3 stream for Sonos, and into PCM WAV for AirPlay. ffmpeg is **not bundled** with the app and must be installed separately.
 
 | Platform | Install |
 |----------|---------|
