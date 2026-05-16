@@ -29,7 +29,7 @@ importers:
         version: 4.0.0(electron@39.8.6)
       '@mantine/colors-generator':
         specifier: ^9.1.1
-        version: 9.1.1(chroma-js@3.1.2)
+        version: 9.1.1(chroma-js@3.2.0)
       '@mantine/core':
         specifier: ^9.1.1
         version: 9.1.1(@mantine/hooks@9.1.1(react@19.2.4))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -84,6 +84,9 @@ importers:
       cheerio:
         specifier: ^1.2.0
         version: 1.2.0
+      chroma-js:
+        specifier: ^3.2.0
+        version: 3.2.0
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2598,8 +2601,8 @@ packages:
     resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
     engines: {node: '>=18'}
 
-  chroma-js@3.1.2:
-    resolution: {integrity: sha512-IJnETTalXbsLx1eKEgx19d5L6SRM7cH4vINw/99p/M11HCuXGRWL+6YmCm7FWFGIo6dtWuQoQi1dc5yQ7ESIHg==}
+  chroma-js@3.2.0:
+    resolution: {integrity: sha512-os/OippSlX1RlWWr+QDPcGUZs0uoqr32urfxESG9U93lhUfbnlyckte84Q8P1UQY/qth983AS1JONKmLS4T0nw==}
 
   chromium-pickle-js@0.2.0:
     resolution: {integrity: sha512-1R5Fho+jBq0DDydt+/vHWj5KJNJCKdARKOCwZUen84I5BreWoLqRLANH1U87eJy1tiASPtMnGqJJq0ZsLoRPOw==}
@@ -7098,9 +7101,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mantine/colors-generator@9.1.1(chroma-js@3.1.2)':
+  '@mantine/colors-generator@9.1.1(chroma-js@3.2.0)':
     dependencies:
-      chroma-js: 3.1.2
+      chroma-js: 3.2.0
 
   '@mantine/core@9.1.1(@mantine/hooks@9.1.1(react@19.2.4))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -8333,7 +8336,7 @@ snapshots:
 
   chownr@3.0.0: {}
 
-  chroma-js@3.1.2: {}
+  chroma-js@3.2.0: {}
 
   chromium-pickle-js@0.2.0: {}
 
