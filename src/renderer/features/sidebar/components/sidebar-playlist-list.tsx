@@ -1,7 +1,8 @@
 import { openContextModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { memo, MouseEvent, useCallback, useMemo, useState } from 'react';
+import { motion } from 'motion/react';
+import { createContext, memo, MouseEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
 
@@ -27,6 +28,7 @@ import {
     usePlaylistNavigationState,
 } from '/@/renderer/features/sidebar/components/playlist-folder-tree';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
+import { useDragMonitor } from '/@/renderer/hooks/use-drag-monitor';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
     useCurrentServer,
@@ -39,6 +41,8 @@ import {
 import { formatDurationString } from '/@/renderer/utils';
 import { Accordion } from '/@/shared/components/accordion/accordion';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
+import { animationProps } from '/@/shared/components/animations/animation-props';
+import { animationVariants } from '/@/shared/components/animations/animation-variants';
 import { ButtonProps } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
@@ -52,12 +56,48 @@ import {
     Song,
     SortOrder,
 } from '/@/shared/types/domain-types';
-import { DragOperation, DragTarget } from '/@/shared/types/drag-and-drop';
+import { DragData, DragOperation, DragTarget } from '/@/shared/types/drag-and-drop';
 import { Play } from '/@/shared/types/types';
+
+const MotionLink = motion.create(Link);
+
+const playlistRowDimVariants = animationVariants.combine(animationVariants.fadeIn, {
+    hidden: { opacity: 0.5 },
+});
 
 const getPlaylistOrderKey = (serverId: string | undefined, scope: 'owned' | 'shared') => {
     const sid = serverId || 'local';
     return `playlist_order:${sid}:${scope}`;
+};
+
+export const SidebarPlaylistAddDragContext = createContext(false);
+
+const isAddToPlaylistDragSource = (source: DragData) => {
+    return (
+        source.itemType !== undefined &&
+        source.type !== DragTarget.PLAYLIST &&
+        (source.operation?.includes(DragOperation.ADD) ?? false)
+    );
+};
+
+export const useSidebarPlaylistAddDragMonitor = () => {
+    const [isAddDragActive, setIsAddDragActive] = useState(false);
+
+    const handleAddDragStart = useCallback(() => {
+        setIsAddDragActive(true);
+    }, []);
+
+    const handleAddDragDrop = useCallback(() => {
+        setIsAddDragActive(false);
+    }, []);
+
+    useDragMonitor({
+        canMonitor: isAddToPlaylistDragSource,
+        onDragStart: handleAddDragStart,
+        onDrop: handleAddDragDrop,
+    });
+
+    return isAddDragActive;
 };
 
 export interface PlaylistRowButtonProps extends Omit<ButtonProps, 'onContextMenu' | 'onPlay'> {
@@ -80,6 +120,8 @@ export const PlaylistRowButton = memo(
         const isCompact = sidebarPlaylistMode === 'compact';
 
         const [isHovered, setIsHovered] = useState(false);
+        const isSmartPlaylist = Boolean(item.rules);
+        const isAddDragActive = useContext(SidebarPlaylistAddDragContext);
 
         const { isDraggedOver, isDragging, ref } = useDragDrop<HTMLAnchorElement>({
             drag: {
@@ -97,6 +139,7 @@ export const PlaylistRowButton = memo(
                 canDrop: (args) => {
                     // Allow dropping items into a playlist (ADD)
                     const canAdd =
+                        !isSmartPlaylist &&
                         args.source.itemType !== undefined &&
                         args.source.type !== DragTarget.PLAYLIST &&
                         (args.source.operation?.includes(DragOperation.ADD) ?? false);
@@ -118,6 +161,7 @@ export const PlaylistRowButton = memo(
                     };
                 },
                 onDrag: () => {
+                    console.log('started drag');
                     return;
                 },
                 onDragLeave: () => {
@@ -147,6 +191,10 @@ export const PlaylistRowButton = memo(
                         }
 
                         onReorder(sourceIds, to, args.edge);
+                        return;
+                    }
+
+                    if (isSmartPlaylist) {
                         return;
                     }
 
@@ -222,13 +270,18 @@ export const PlaylistRowButton = memo(
             type: 'table',
         });
 
+        const isDimmed = isDragging || (isSmartPlaylist && isAddDragActive);
+
         return (
-            <Link
+            <MotionLink
+                {...animationProps.fadeIn}
+                animate={isDimmed ? 'hidden' : 'show'}
                 className={clsx(styles.row, {
                     [styles.rowCompact]: isCompact,
-                    [styles.rowDraggedOver]: isDraggedOver,
+                    [styles.rowDraggedOver]: isDraggedOver && !isSmartPlaylist,
                     [styles.rowHover]: isHovered,
                 })}
+                initial={false}
                 onContextMenu={(e: MouseEvent<HTMLAnchorElement>) => {
                     e.preventDefault();
                     onContextMenu(e, item);
@@ -236,10 +289,8 @@ export const PlaylistRowButton = memo(
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 ref={ref}
-                style={{
-                    opacity: isDragging ? 0.5 : 1,
-                }}
                 to={url}
+                variants={playlistRowDimVariants}
             >
                 {isCompact ? (
                     <>
@@ -297,7 +348,7 @@ export const PlaylistRowButton = memo(
                         {isHovered && <RowControls id={to} onPlay={handlePlay} />}
                     </>
                 )}
-            </Link>
+            </MotionLink>
         );
     },
 );
