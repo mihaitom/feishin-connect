@@ -123,6 +123,32 @@ export const remapPlaylistToRoot = (playlistName: string, separator: string): st
     return getPlaylistLeafName(playlistName, separator).trim();
 };
 
+export const isRootLevelFolder = (folderPath: string, separator: string): boolean => {
+    const segments = folderPath.split(separator).filter((segment) => segment.length > 0);
+    return segments.length === 1;
+};
+
+export const remapPlaylistFolderToRoot = (
+    playlistName: string,
+    sourceFolderPath: string,
+    separator: string,
+): null | string => {
+    const sourcePrefix = `${sourceFolderPath}${separator}`;
+    if (!playlistName.startsWith(sourcePrefix)) return null;
+
+    const remainder = playlistName.slice(sourcePrefix.length);
+    if (!remainder) return null;
+
+    // Root-level folder on root: flatten playlists to root (Rock/x -> x).
+    if (isRootLevelFolder(sourceFolderPath, separator)) {
+        return remapPlaylistToRoot(playlistName, separator);
+    }
+
+    // Nested folder on root: promote one level (Auto/Test/x -> Test/x).
+    const folderName = getFolderName(sourceFolderPath, separator);
+    return `${folderName}${separator}${remainder}`;
+};
+
 const updatePlaylistName = async (
     updateMutation: ReturnType<typeof useUpdatePlaylist>,
     serverId: string,
@@ -169,12 +195,14 @@ export const usePlaylistRootDrop = (allPlaylists: Playlist[]) => {
                     );
 
                     for (const playlist of affected) {
-                        await updatePlaylistName(
-                            updateMutation,
-                            serverId,
-                            playlist,
-                            remapPlaylistToRoot(playlist.name, separator),
+                        const newName = remapPlaylistFolderToRoot(
+                            playlist.name,
+                            sourceFolderPath,
+                            separator,
                         );
+                        if (!newName) continue;
+
+                        await updatePlaylistName(updateMutation, serverId, playlist, newName);
                     }
 
                     return;
