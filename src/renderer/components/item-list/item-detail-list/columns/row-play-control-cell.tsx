@@ -21,7 +21,12 @@ export const ItemDetailRowPlayControlCell = ({
 
     return (
         <div className={styles.cellWrapper}>
-            <HoverCard openDelay={300} position="top" withArrow>
+            <HoverCard
+                offset={{ crossAxis: 32, mainAxis: 16 }}
+                openDelay={300}
+                position="top"
+                withArrow
+            >
                 <HoverCard.Target>
                     <div className={styles.playTarget}>{indexContent}</div>
                 </HoverCard.Target>
