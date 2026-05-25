@@ -4,6 +4,7 @@ import { useConnectPlayerStore } from './connect.store';
 import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
 import { CONNECT_URL, ConnectDevice, ConnectSession, ConnectStatus, SendStatus } from './types';
 import { useConnectPlayback } from './use-connect-playback';
+import { useConnectScrobble } from './use-connect-scrobble';
 
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
@@ -117,6 +118,14 @@ export const useConnectSession = (): ConnectSession => {
         radioStationName,
         radioStreamUrl,
         stopRadio,
+    });
+
+    // ── Scrobble effects (start + submission via Connect events) ──────────────
+    useConnectScrobble({
+        connectStatus,
+        currentSong,
+        isActive,
+        isRadioActive,
     });
 
     // ── Actions ───────────────────────────────────────────────────────────────
