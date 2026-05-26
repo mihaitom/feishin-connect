@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-05-26
+
+### Fixed
+
+- **Scrobble tracks played via Feishin Connect** — the local scrobble flow in `use-scrobble.ts` was gated on `PlayerStatus.PLAYING`, but Connect force-pauses the local player, so listen time never accumulated and no `scrobble.view` call ever reached the server. New `use-connect-scrobble.ts` hook fires `submission: false` (now-playing) on track start and `submission: true` when the Connect backend signals `ended=true` (track played to completion). Mid-track skips are intentionally not scrobbled, matching Last.fm conventions.
+
+### Changed
+
+- **Merged upstream Feishin v1.12.0** — 49 upstream commits since the previous base, including React 19.2, React Router 7.14, React Query 5.96, MPV settings improvements, and a long tail of bug fixes and translations.
+- **Track upstream version explicitly** — new `feishinUpstreamVersion` field in `package.json` records which upstream Feishin release we're built on, updated each time we merge upstream.
+
+---
+
 ## [0.2.1] - 2026-05-16
 
 ### Added

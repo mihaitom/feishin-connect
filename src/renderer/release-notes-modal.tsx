@@ -5,6 +5,7 @@ import DOMPurify from 'dompurify';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import changelogRaw from '../../CHANGELOG.md?raw';
 import packageJson from '../../package.json';
 
 import { formatHrDateTime } from '/@/renderer/utils/format';
@@ -48,6 +49,21 @@ interface GitHubRelease {
 interface ReleaseNotesContentProps {
     onDismiss: () => void;
     version: string;
+}
+
+/**
+ * Extract a single version's section from the bundled CHANGELOG.md.
+ * Used as a fallback while the GitHub release for a freshly-bumped version
+ * is not yet published.
+ */
+function getLocalChangelogSection(version: string): null | string {
+    const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(
+        `## \\[${escaped}\\][^\\n]*\\n([\\s\\S]*?)(?=\\n## \\[|\\n---\\s*\\n## \\[|$)`,
+    );
+    const match = changelogRaw.match(re);
+    const body = match?.[1]?.replace(/\n---\s*$/, '').trim();
+    return body || null;
 }
 
 function isAlphaVersion(version: string): boolean {
@@ -136,15 +152,23 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         retry: 2,
     });
 
+    // Fall back to the bundled CHANGELOG.md when the GitHub release for this
+    // version isn't published yet (e.g. immediately after a version bump).
+    const localChangelogBody = useMemo(
+        () => (isAlpha ? null : getLocalChangelogSection(selectedVersion)),
+        [isAlpha, selectedVersion],
+    );
+    const effectiveBody = releaseData?.body || localChangelogBody;
+
     // Convert markdown to HTML using GitHub's markdown API
     const { data: htmlContent, isLoading: isConverting } = useQuery({
-        enabled: !isAlpha && !!releaseData?.body,
+        enabled: !isAlpha && !!effectiveBody,
         queryFn: async () => {
             const response = await axios.post(
                 'https://api.github.com/markdown',
                 {
                     mode: 'gfm',
-                    text: releaseData?.body ?? '',
+                    text: effectiveBody ?? '',
                 },
                 {
                     headers: {
@@ -155,7 +179,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
             );
             return response.data;
         },
-        queryKey: ['github-markdown', releaseData?.body],
+        queryKey: ['github-markdown', effectiveBody],
         retry: 2,
     });
 
@@ -188,7 +212,11 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
     }, [htmlContent]);
 
     const isLoadingState = isAlpha ? isCompareLoading : isLoading || isConverting;
-    const isErrorState = isAlpha ? isCompareError : isError || !releaseData;
+    // Only show the error fallback if there's nothing to render — i.e. GitHub
+    // failed AND we don't have a local CHANGELOG section to display.
+    const isErrorState = isAlpha
+        ? isCompareError
+        : (isError || !releaseData) && !localChangelogBody;
 
     if (isLoadingState) {
         return (

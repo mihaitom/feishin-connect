@@ -2,7 +2,7 @@
 
 # Feishin — Connect Fork
 
-> **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).**
+> **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).** Currently built on upstream **v1.12.0**.
 > It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay and Chromecast devices directly from the player bar.
 > All upstream features are preserved.
 
