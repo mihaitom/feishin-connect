@@ -1,8 +1,8 @@
+import type { QueueSong } from '/@/shared/types/domain-types';
+
 import { MutableRefObject, useEffect, useRef } from 'react';
 
 import { CONNECT_URL, ConnectDevice, ConnectStatus } from './types';
-
-import type { QueueSong } from '/@/shared/types/types';
 
 interface ConnectPlaybackArgs {
     activeTargets: ConnectDevice[];
@@ -72,7 +72,15 @@ export const useConnectPlayback = ({
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',
         }).catch(() => {});
-    }, [isActive, isRadioActive, radioStreamUrl, radioStationName, activeTargets, stopRadio, lastAutoSentRef]);
+    }, [
+        isActive,
+        isRadioActive,
+        radioStreamUrl,
+        radioStationName,
+        activeTargets,
+        stopRadio,
+        lastAutoSentRef,
+    ]);
 
     // ── Track-ended detection ─────────────────────────────────────────────────
     // Level-triggered on backend `ended` flag — survives SSE reconnects and
@@ -91,5 +99,13 @@ export const useConnectPlayback = ({
             // immediately after in the same task so pause() wins before audio is heard.
             mediaPause();
         }
-    }, [connectStatus?.streaming, connectStatus?.ended, isActive, connectStatus?.radio, mediaNext, mediaPause, lastAutoSentRef]);
+    }, [
+        connectStatus?.streaming,
+        connectStatus?.ended,
+        isActive,
+        connectStatus?.radio,
+        mediaNext,
+        mediaPause,
+        lastAutoSentRef,
+    ]);
 };

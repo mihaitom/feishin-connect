@@ -41,7 +41,9 @@
         "selectRangeOfItems": "Wybierz zakres elementów",
         "selectAll": "Wybierz wszystkie",
         "openApplicationDirectory": "Otwórz katalog aplikacji",
-        "goToCurrent": "Przejdź do aktualnego elementu"
+        "goToCurrent": "Przejdź do aktualnego elementu",
+        "collapseAllFolders": "Zwiń wszystkie foldery",
+        "expandAllFolders": "Rozwiń wszystkie foldery"
     },
     "common": {
         "increase": "Zwiększ",
@@ -170,7 +172,9 @@
         "rename": "Zmień nazwę",
         "newVersionAvailable": "Nowa wersja jest dostępna",
         "numberOfResults": "{{numberOfResults}} wyników",
-        "grouping": "Grupowanie"
+        "grouping": "Grupowanie",
+        "back": "Wstecz",
+        "openFolder": "Otwórz folder"
     },
     "entity": {
         "genre_one": "Gatunek",
@@ -880,7 +884,7 @@
         "customCssEnable": "Włącz niestandardowy CSS",
         "customCssEnable_description": "Pozwalaj na pisanie niestandardowego CSS",
         "customCssNotice": "Ostrzeżenie: chociaż istnieje pewne filtrowanie (uniemożliwia używanie URL() i content:), używanie niestandardowego CSS-a może stwarzać ryzyko przez zmiany w interfejsie",
-        "customCss_description": "Zawartość niestandardowego CSS. Uwaga: content i zdalne URL są niedozwolonymi właściwościami. Podgląd twojej zawartości jest pokazana poniżej. Dodatkowe pola których nie ustawiłeś, są obecne z powodu sanityzacji",
+        "customCss_description": "Zawartość niestandardowego CSS. Uwaga: content i zdalne URL są niedozwolonymi właściwościami. Podgląd twojej zawartości jest pokazany poniżej. Dodatkowe pola których nie ustawiłeś są obecne z powodu sanityzacji. Aplikacja komputerowa: feishin odczytuje i zapisuje custom.css w katalogu ustawień aplikacji i przeładowuje go gdy plik się zmieni",
         "customCss": "Niestandardowy css",
         "trayEnabled_description": "Pokaż/ukryj ikonę/menu w zasobniku. jeżeli wyłączone, wyłącza też minimalizowanie.wyjście do zasobnika",
         "webAudio_description": "Używaj web audio. Włącza to zaawansowane funkcje takie jak ReplayGain. Wyłącz jeżeli nie działa poprawnie",
@@ -986,7 +990,6 @@
         "audioFadeOnStatusChange": "Przenikanie dźwięku przy zmianie statusu",
         "audioFadeOnStatusChange_description": "Umożliwia zanikanie lub pojawianie się dźwięku gdy zmieni się status play/pauza",
         "autoDJ": "Automatyczny DJ",
-        "autoDJ_description": "Automatycznie dodawaj podobne piosenki do kolejki",
         "autoDJ_itemCount": "Liczba elementów",
         "autoDJ_itemCount_description": "Liczba elementów, które będzie próbować dodać do kolejki kiedy automatyczny DJ jest włączony",
         "autoDJ_timing": "Czas dodawania",
@@ -1072,7 +1075,25 @@
         "playerbarWaveformStretch": "Rozciąganie przebiegu",
         "playerbarWaveformStretch_description": "Rozciąga przebieg aby wypełnić dostępną przestrzeń",
         "preventSuspendOnPlayback_description": "Powstrzymuj wstrzymanie podczas odtwarzania muzyki",
-        "preventSuspendOnPlayback": "Powstrzymuje wstrzymanie przy odtwarzaniu"
+        "preventSuspendOnPlayback": "Powstrzymuje wstrzymanie przy odtwarzaniu",
+        "hotkey_listShowPlayingSong": "Pokaż odtwarzaną piosenkę w liście",
+        "sidebarPlaylistFolders_description": "Utwórz widok folderu dla playlist który zawiera skonfigurowany separator w nazwie",
+        "sidebarPlaylistFolders": "Włącz foldery",
+        "sidebarPlaylistFolderSeparator_description": "Znak (lub ciąg) który oddziela poziomy folderów w nazwie playlisty",
+        "sidebarPlaylistFolderSeparator": "Separator folderów",
+        "sidebarPlaylistFolderView_description": "Jak foldery są wyświetlane w pasku bocznym",
+        "sidebarPlaylistFolderView": "Widok folderów",
+        "sidebarPlaylistFolderView_optionSingle": "Pojedynczy folder",
+        "sidebarPlaylistFolderView_optionTree": "Widok drzewa",
+        "sidebarPlaylistFolderView_optionNavigation": "Widok nawigacji",
+        "sidebarPlaylistFolderTreeIndent_description": "Piksele na każdym poziomie drzewa mają wcięcie",
+        "sidebarPlaylistFolderTreeIndent": "Wcięcie drzewa",
+        "sidebarPlaylistFolderTreeLineColor_description": "Kolor linii łączących drzewo (pozostaw pusty dla domyślnego dla motywu)",
+        "sidebarPlaylistFolderTreeLineColor": "Kolor linii drzewa",
+        "sidebarPlaylistMode_description": "Jak każda z playlist jest wyświetlana w liście w pasku bocznym",
+        "sidebarPlaylistMode": "Tryb playlist bocznego paska",
+        "sidebarPlaylistMode_optionCompact": "Kompaktowy",
+        "sidebarPlaylistMode_optionExpanded": "Rozszerzony"
     },
     "table": {
         "config": {
@@ -1090,7 +1111,7 @@
                 "size": "$t(common.size)",
                 "itemSize": "Rozmiar elementu (px)",
                 "itemGap": "Odstęp między elementami (px)",
-                "followCurrentSong": "ŚLEDź aktualną piosenkę",
+                "followCurrentSong": "Śledź aktualną piosenkę",
                 "advancedSettings": "Zaawansowane ustawienia",
                 "autosize": "Rozmiar automatyczny",
                 "moveUp": "Przesuń w górę",

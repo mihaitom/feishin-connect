@@ -118,7 +118,9 @@
         "filter_multiple": "複選",
         "newVersionAvailable": "有新的版本可供使用",
         "numberOfResults": "{{numberOfResults}} 項結果",
-        "grouping": "分組"
+        "grouping": "分組",
+        "back": "返回",
+        "openFolder": "開啟資料夾"
     },
     "error": {
         "endpointNotImplementedError": "{{serverType}} 尚未實現端點 {{endpoint}}",
@@ -593,7 +595,7 @@
         "customCssEnable_description": "允許撰寫自訂CSS",
         "customCssNotice": "警告：即使已限制某些用法（不允許 URL() 和 content:），但使用自訂 CSS 仍然會透過更改介面帶來風險",
         "customCss": "自訂CSS",
-        "customCss_description": "自訂 CSS 內容。注意：內容和遠端 URL 是不允許使用的屬性。您的內容預覽如下所示。由於需要進行清理，因此存在一些您未設定的其他欄位",
+        "customCss_description": "自訂 CSS 內容。注意：內容和遠端 URL 是不允許使用的屬性。您的內容預覽如下所示。由於需要進行清理，因此存在一些您未設定的其他欄位。桌面端：feishin在應用程式配置目錄中讀取和寫入custom.css，並在檔案更改時重新載入",
         "discordPausedStatus": "暫停時顯示 Rich Presence",
         "discordPausedStatus_description": "啟用後，播放器暫停時將顯示狀態",
         "discordListening": "將狀態設為\"正在聽\"",
@@ -713,7 +715,6 @@
         "playerFilters": "從佇列中過濾歌曲",
         "playerFilters_description": "根據以下條件，排除要新增至佇列中的歌曲",
         "autoDJ": "Auto DJ",
-        "autoDJ_description": "自動將相似的歌曲加入到播放佇列",
         "autoDJ_itemCount": "歌曲數量",
         "autoDJ_itemCount_description": "在啟用Auto DJ時嘗試加入佇列的歌曲數量",
         "autoDJ_timing_description": "佇列中剩餘多少歌曲時啟動 Auto DJ",
@@ -800,7 +801,24 @@
         "playerbarWaveformStretch_description": "拉伸波形來填補可用空間",
         "preventSuspendOnPlayback_description": "音樂播放時防止應用程式進入休眠",
         "preventSuspendOnPlayback": "在播放時防止應用程式暫停",
-        "hotkey_listShowPlayingSong": "在清單中顯示正在播放的歌曲"
+        "hotkey_listShowPlayingSong": "在清單中顯示正在播放的歌曲",
+        "sidebarPlaylistFolders_description": "為名稱中包含配置分隔符的播放清單建立資料夾檢視",
+        "sidebarPlaylistFolders": "啟用資料夾",
+        "sidebarPlaylistFolderSeparator_description": "在播放清單名稱中分隔資料夾級別的字元（或字串）",
+        "sidebarPlaylistFolderSeparator": "資料夾分隔符",
+        "sidebarPlaylistFolderView_description": "資料夾在側邊欄中顯示的方式",
+        "sidebarPlaylistFolderView": "資料夾檢視",
+        "sidebarPlaylistFolderView_optionSingle": "單一資料夾",
+        "sidebarPlaylistFolderView_optionTree": "樹狀顯示",
+        "sidebarPlaylistFolderView_optionNavigation": "導覽視圖",
+        "sidebarPlaylistFolderTreeIndent_description": "每個樹狀層級縮排的像素",
+        "sidebarPlaylistFolderTreeIndent": "樹狀縮排",
+        "sidebarPlaylistFolderTreeLineColor_description": "樹狀連接線的顏色（留空則使用佈景主題預設值）",
+        "sidebarPlaylistFolderTreeLineColor": "樹狀線條顏色",
+        "sidebarPlaylistMode_description": "各播放清單在側邊欄列表中的顯示方式",
+        "sidebarPlaylistMode": "側邊欄播放清單模式",
+        "sidebarPlaylistMode_optionCompact": "緊湊",
+        "sidebarPlaylistMode_optionExpanded": "展開"
     },
     "table": {
         "config": {
@@ -1156,7 +1174,7 @@
             "fieldRecording": "現場錄音",
             "demo": "Demo",
             "interview": "訪談",
-            "live": "Live",
+            "live": "現場演出",
             "mixtape": "混音帶",
             "remix": "Remix",
             "soundtrack": "原聲帶",

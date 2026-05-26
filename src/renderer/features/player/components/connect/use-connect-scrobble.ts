@@ -4,6 +4,7 @@ import { ConnectStatus } from './types';
 
 import { useSendScrobble } from '/@/renderer/features/player/mutations/scrobble-mutation';
 import { useAppStore } from '/@/renderer/store/app.store';
+import { usePlayerSpeed } from '/@/renderer/store/player.store';
 import { usePlaybackSettings } from '/@/renderer/store/settings.store';
 import { QueueSong, ServerType } from '/@/shared/types/domain-types';
 
@@ -31,6 +32,7 @@ export const useConnectScrobble = ({
 }: ConnectScrobbleArgs): void => {
     const scrobbleEnabled = usePlaybackSettings().scrobble?.enabled;
     const isPrivateMode = useAppStore((s) => s.privateMode);
+    const playbackRate = usePlayerSpeed();
     const sendScrobble = useSendScrobble();
 
     // Holds the song that's currently playing via Connect. Read in the
@@ -60,6 +62,8 @@ export const useConnectScrobble = ({
                 albumId: currentSong.albumId,
                 event: 'start',
                 id: currentSong.id,
+                mediaType: currentSong._itemType?.includes('song') ? 'song' : 'podcast',
+                playbackRate,
                 position: 0,
                 submission: false,
             },
@@ -71,6 +75,7 @@ export const useConnectScrobble = ({
         isPrivateMode,
         connectStatus?.streaming,
         currentSong,
+        playbackRate,
         sendScrobble,
     ]);
 
@@ -94,6 +99,8 @@ export const useConnectScrobble = ({
             query: {
                 albumId: song.albumId,
                 id: song.id,
+                mediaType: song._itemType?.includes('song') ? 'song' : 'podcast',
+                playbackRate,
                 position,
                 submission: true,
             },
@@ -104,6 +111,7 @@ export const useConnectScrobble = ({
         isRadioActive,
         scrobbleEnabled,
         isPrivateMode,
+        playbackRate,
         sendScrobble,
     ]);
 };

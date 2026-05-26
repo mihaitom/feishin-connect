@@ -18,23 +18,6 @@ if (process.env.NODE_ENV === 'development') {
     };
 }
 
-export const disableAutoUpdates = () => {
-    // Auto-updates disabled in this fork — updates are delivered via Docker image.
-    return true;
-};
-
-export const isMacOS = () => {
-    return process.platform === 'darwin';
-};
-
-export const isWindows = () => {
-    return process.platform === 'win32';
-};
-
-export const isLinux = () => {
-    return process.platform === 'linux';
-};
-
 export const hotkeyToElectronAccelerator = (hotkey: string) => {
     let accelerator = hotkey;
 

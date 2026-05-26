@@ -51,7 +51,7 @@ export const PlayerbarSlider = () => {
     return (
         <>
             <div className={styles.sliderContainer}>
-                <div className={styles.sliderValueWrapperElapsed}>
+                <div className={styles.sliderValueWrapper}>
                     <ScrobbleStatus formattedTime={formattedTime} />
                 </div>
                 <div className={styles.sliderWrapper}>
@@ -111,7 +111,6 @@ export const CustomPlayerbarSlider = ({ ...props }: SliderProps) => {
                 label: styles.label,
                 root: styles.root,
                 thumb: styles.thumb,
-                track: styles.track,
             }}
             {...props}
             size={6}
