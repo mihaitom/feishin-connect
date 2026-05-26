@@ -173,7 +173,8 @@
         "newVersionAvailable": "Nowa wersja jest dostępna",
         "numberOfResults": "{{numberOfResults}} wyników",
         "grouping": "Grupowanie",
-        "back": "Wstecz"
+        "back": "Wstecz",
+        "openFolder": "Otwórz folder"
     },
     "entity": {
         "genre_one": "Gatunek",
@@ -883,7 +884,7 @@
         "customCssEnable": "Włącz niestandardowy CSS",
         "customCssEnable_description": "Pozwalaj na pisanie niestandardowego CSS",
         "customCssNotice": "Ostrzeżenie: chociaż istnieje pewne filtrowanie (uniemożliwia używanie URL() i content:), używanie niestandardowego CSS-a może stwarzać ryzyko przez zmiany w interfejsie",
-        "customCss_description": "Zawartość niestandardowego CSS. Uwaga: content i zdalne URL są niedozwolonymi właściwościami. Podgląd twojej zawartości jest pokazana poniżej. Dodatkowe pola których nie ustawiłeś, są obecne z powodu sanityzacji",
+        "customCss_description": "Zawartość niestandardowego CSS. Uwaga: content i zdalne URL są niedozwolonymi właściwościami. Podgląd twojej zawartości jest pokazany poniżej. Dodatkowe pola których nie ustawiłeś są obecne z powodu sanityzacji. Aplikacja komputerowa: feishin odczytuje i zapisuje custom.css w katalogu ustawień aplikacji i przeładowuje go gdy plik się zmieni",
         "customCss": "Niestandardowy css",
         "trayEnabled_description": "Pokaż/ukryj ikonę/menu w zasobniku. jeżeli wyłączone, wyłącza też minimalizowanie.wyjście do zasobnika",
         "webAudio_description": "Używaj web audio. Włącza to zaawansowane funkcje takie jak ReplayGain. Wyłącz jeżeli nie działa poprawnie",
@@ -989,7 +990,6 @@
         "audioFadeOnStatusChange": "Przenikanie dźwięku przy zmianie statusu",
         "audioFadeOnStatusChange_description": "Umożliwia zanikanie lub pojawianie się dźwięku gdy zmieni się status play/pauza",
         "autoDJ": "Automatyczny DJ",
-        "autoDJ_description": "Automatycznie dodawaj podobne piosenki do kolejki",
         "autoDJ_itemCount": "Liczba elementów",
         "autoDJ_itemCount_description": "Liczba elementów, które będzie próbować dodać do kolejki kiedy automatyczny DJ jest włączony",
         "autoDJ_timing": "Czas dodawania",

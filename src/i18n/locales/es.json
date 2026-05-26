@@ -344,7 +344,6 @@
         "playerFilters_description": "Omite la adición de canciones a la cola basado en los siguientes criterios",
         "playerbarSlider_description": "La forma de onda no es recomendable en una conexión a Internet lenta o medida",
         "autoDJ": "DJ Automático",
-        "autoDJ_description": "Añade canciones similares a las de la cola automáticamente",
         "autoDJ_itemCount": "Recuento de elementos",
         "autoDJ_itemCount_description": "El número de elementos que se ha intentado añadir a la cola cuando DJ automático está activado",
         "autoDJ_timing_description": "El número de canciones restantes en la cola antes de que DJ automático se dispare",

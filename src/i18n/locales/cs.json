@@ -344,7 +344,6 @@
         "playerFilters_description": "Vynechat skladby z přidání do fronty na základě následujících kritérií",
         "playerbarSlider_description": "Vlnová křivka není doporučena, pokud se nacházíte na pomalém nebo měřeném internetovém připojení",
         "autoDJ": "Automatický DJ",
-        "autoDJ_description": "Automaticky přidávat podobné skladby do fronty",
         "autoDJ_itemCount": "Počet položek",
         "autoDJ_itemCount_description": "Počet položek, které se pokusíme přidat do fronty po povolení automatického DJ",
         "autoDJ_timing": "Časování",
