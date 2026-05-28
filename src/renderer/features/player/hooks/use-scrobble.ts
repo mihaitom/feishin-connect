@@ -180,9 +180,6 @@ export const useScrobble = () => {
 
             const currentSong = usePlayerStore.getState().getCurrentSong();
             const mediaType = currentSong?._itemType.includes('song') ? 'song' : 'podcast';
-            const serverId = currentSong?._serverId;
-            const server = getServerById(serverId);
-            const hasPlaybackReport = hasFeature(server, ServerFeature.REPORT_PLAYBACK);
             const useTicks = currentSong?._serverType === ServerType.JELLYFIN;
             const currentStatus = usePlayerStore.getState().player.status;
             const currentTime = properties.timestamp;
@@ -239,36 +236,36 @@ export const useScrobble = () => {
             }
 
             // Send progress events every 10 seconds
-            if (hasPlaybackReport) {
-                const timeSinceLastProgress = currentTime - lastProgressEventRef.current;
-                if (timeSinceLastProgress >= 10) {
-                    sendScrobble.mutate(
-                        {
-                            apiClientProps: { serverId: serverId || '' },
-                            query: {
-                                albumId: currentSong.albumId,
-                                event: 'timeupdate',
-                                id: currentSong.id,
-                                mediaType: mediaType,
-                                playbackRate,
-                                position: getPositionValue(currentTime, useTicks),
-                                submission: false,
-                            },
-                        },
-                        {
-                            onSuccess: () => {
-                                logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledTimeupdate, {
-                                    category: LogCategory.SCROBBLE,
-                                    meta: {
-                                        id: currentSong.id,
-                                    },
-                                });
-                            },
-                        },
-                    );
-                    lastProgressEventRef.current = currentTime;
-                }
-            }
+            // if (hasPlaybackReport) {
+            //     const timeSinceLastProgress = currentTime - lastProgressEventRef.current;
+            //     if (timeSinceLastProgress >= 10) {
+            //         sendScrobble.mutate(
+            //             {
+            //                 apiClientProps: { serverId: serverId || '' },
+            //                 query: {
+            //                     albumId: currentSong.albumId,
+            //                     event: 'timeupdate',
+            //                     id: currentSong.id,
+            //                     mediaType: mediaType,
+            //                     playbackRate,
+            //                     position: getPositionValue(currentTime, useTicks),
+            //                     submission: false,
+            //                 },
+            //             },
+            //             {
+            //                 onSuccess: () => {
+            //                     logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledTimeupdate, {
+            //                         category: LogCategory.SCROBBLE,
+            //                         meta: {
+            //                             id: currentSong.id,
+            //                         },
+            //                     });
+            //                 },
+            //             },
+            //         );
+            //         lastProgressEventRef.current = currentTime;
+            //     }
+            // }
 
             // Check if we should submit scrobble based on listened time
             if (!isCurrentSongScrobbledRef.current) {
