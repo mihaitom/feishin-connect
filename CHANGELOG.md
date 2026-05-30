@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- **Scan Library button for Navidrome / Subsonic** — new button in server settings (Settings → Manage Servers) that triggers an immediate library scan via the `startScan` Subsonic API endpoint. Shows a loading indicator while the request is in flight and a toast on success or failure. Not shown for Jellyfin servers.
+- **Scan Library button for Navidrome / Subsonic** — accessible via the server selector dropdown in the sidebar (bottom-left). Triggers an immediate library scan via the `startScan` Subsonic API endpoint. Also available in Settings → Manage Servers for the desktop app. Shows a loading indicator while in flight and a toast on success or failure. Not shown for Jellyfin servers.
 
 ### Fixed
 

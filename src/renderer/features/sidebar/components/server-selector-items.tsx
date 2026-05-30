@@ -8,12 +8,14 @@ import JellyfinLogo from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeLogo from '/@/renderer/features/servers/assets/navidrome.png';
 import OpenSubsonicLogo from '/@/renderer/features/servers/assets/opensubsonic.png';
 import { ServerList } from '/@/renderer/features/servers/components/server-list';
+import { useStartScan } from '/@/renderer/features/servers/mutations/start-scan-mutation';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAuthStoreActions, useCurrentServer, useServerList } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
 import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Icon } from '/@/shared/components/icon/icon';
+import { toast } from '/@/shared/components/toast/toast';
 import { ServerListItemWithCredential, ServerType } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
@@ -23,6 +25,26 @@ export const ServerSelectorItems = () => {
     const currentServer = useCurrentServer();
     const serverList = useServerList();
     const { setCurrentServer, setMusicFolderId } = useAuthStoreActions();
+    const startScanMutation = useStartScan();
+
+    const canScan =
+        currentServer?.type === ServerType.NAVIDROME ||
+        currentServer?.type === ServerType.SUBSONIC;
+
+    const handleStartScan = () => {
+        if (!currentServer) return;
+        startScanMutation.mutate(
+            { apiClientProps: { serverId: currentServer.id } },
+            {
+                onError: () => {
+                    toast.error({ message: t('page.manageServers.scanLibraryFailed') });
+                },
+                onSuccess: () => {
+                    toast.success({ message: t('page.manageServers.scanLibraryStarted') });
+                },
+            },
+        );
+    };
 
     const { data: musicFolders } = useQuery(
         currentServer
@@ -127,6 +149,20 @@ export const ServerSelectorItems = () => {
                 >
                     {t('page.appMenu.manageServers')}
                 </DropdownMenu.Item>
+            )}
+            {canScan && (
+                <>
+                    <DropdownMenu.Divider />
+                    <DropdownMenu.Item
+                        disabled={startScanMutation.isPending}
+                        leftSection={<Icon icon="refresh" />}
+                        onClick={handleStartScan}
+                    >
+                        {startScanMutation.isPending
+                            ? t('common.loading')
+                            : t('page.manageServers.scanLibrary')}
+                    </DropdownMenu.Item>
+                </>
             )}
             {musicFolders && musicFolders.items.length > 0 && (
                 <>
