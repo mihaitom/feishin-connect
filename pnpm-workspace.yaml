@@ -1,5 +1,5 @@
 allowBuilds:
-  abstract-socket: set this to true or false
-  electron: set this to true or false
-  electron-winstaller: set this to true or false
-  esbuild: set this to true or false
+  abstract-socket: true
+  electron: true
+  electron-winstaller: true
+  esbuild: true
