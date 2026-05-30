@@ -14,3 +14,4 @@ connect/.pytest_cache
 .vscode
 __pycache__/
 *.pyc
+merge-upstream.md
