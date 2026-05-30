@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-05-30
+
+### Added
+
+- **Scan Library button for Navidrome / Subsonic** — new button in server settings (Settings → Manage Servers) that triggers an immediate library scan via the `startScan` Subsonic API endpoint. Shows a loading indicator while the request is in flight and a toast on success or failure. Not shown for Jellyfin servers.
+
+### Fixed
+
+- **Favoriting / unfavoriting songs in playlists (Subsonic)** — starring a track from the playlist view sent the wrong item ID, so the favorite never registered on the server.
+
+### Changed
+
+- **Merged upstream Feishin v1.12.1** — 15 upstream commits since v1.12.0, including:
+  - Fix queue end handling to prevent unintended repeat
+  - Disable interval-based timeupdate scrobbles (reduces server noise)
+  - Allow transcoding on waveform stream URLs
+  - Fix queue height when using the web window bar style
+  - Fix `RESOURCES_PATH` resolution relative to `app.getAppPath()`
+  - Workaround for identical Jellyfin release name bug
+  - Physical key mapping for `useHotkeys` (fixes alt keyboard layouts)
+  - Validate MPV extra parameters to prevent empty-string injection
+  - Fix regression on numeric column sort designation
+  - Add open delay to scrobble status HoverCard
+
+---
+
 ## [0.2.2] - 2026-05-26
 
 ### Fixed
