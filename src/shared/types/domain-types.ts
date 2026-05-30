@@ -1374,6 +1374,10 @@ export type ScrobbleQuery = {
 // Scrobble
 export type ScrobbleResponse = null;
 
+export type StartScanArgs = BaseEndpointArgs;
+
+export type StartScanResponse = null;
+
 export type SearchAlbumArtistsQuery = {
     albumArtistLimit?: number;
     albumArtistStartIndex?: number;
@@ -1529,6 +1533,7 @@ export type ControllerEndpoint = {
     setPlaylistSongs: (args: SetPlaylistSongsArgs) => Promise<SetPlaylistSongsResponse>;
     setRating?: (args: SetRatingArgs) => Promise<RatingResponse>;
     shareItem?: (args: ShareItemArgs) => Promise<ShareItemResponse>;
+    startScan?: (args: StartScanArgs) => Promise<StartScanResponse>;
     updateInternetRadioStation: (
         args: UpdateInternetRadioStationArgs,
     ) => Promise<UpdateInternetRadioStationResponse>;
@@ -1697,6 +1702,7 @@ export type InternalControllerEndpoint = {
     ) => Promise<SetPlaylistSongsResponse>;
     setRating?: (args: ReplaceApiClientProps<SetRatingArgs>) => Promise<RatingResponse>;
     shareItem?: (args: ReplaceApiClientProps<ShareItemArgs>) => Promise<ShareItemResponse>;
+    startScan?: (args: ReplaceApiClientProps<StartScanArgs>) => Promise<StartScanResponse>;
     updateInternetRadioStation: (
         args: ReplaceApiClientProps<UpdateInternetRadioStationArgs>,
     ) => Promise<UpdateInternetRadioStationResponse>;

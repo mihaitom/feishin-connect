@@ -2,6 +2,7 @@ import isElectron from 'is-electron';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useStartScan } from '/@/renderer/features/servers/mutations/start-scan-mutation';
 import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
 import { ServerSection } from '/@/renderer/features/servers/components/server-section';
 import { useAuthStoreActions } from '/@/renderer/store';
@@ -11,8 +12,9 @@ import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Table } from '/@/shared/components/table/table';
+import { toast } from '/@/shared/components/toast/toast';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
-import { ServerListItem as ServerItem } from '/@/shared/types/domain-types';
+import { ServerListItem as ServerItem, ServerType } from '/@/shared/types/domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 
@@ -25,6 +27,23 @@ export const ServerListItem = ({ server }: ServerListItemProps) => {
     const [edit, editHandlers] = useDisclosure(false);
     const [savedPassword, setSavedPassword] = useState('');
     const { deleteServer } = useAuthStoreActions();
+    const startScanMutation = useStartScan();
+
+    const canScan = server.type === ServerType.NAVIDROME || server.type === ServerType.SUBSONIC;
+
+    const handleStartScan = () => {
+        startScanMutation.mutate(
+            { apiClientProps: { serverId: server.id } },
+            {
+                onError: () => {
+                    toast.error({ message: t('page.manageServers.scanLibraryFailed') });
+                },
+                onSuccess: () => {
+                    toast.success({ message: t('page.manageServers.scanLibraryStarted') });
+                },
+            },
+        );
+    };
 
     const handleDeleteServer = () => {
         deleteServer(server.id);
@@ -88,6 +107,15 @@ export const ServerListItem = ({ server }: ServerListItemProps) => {
                             >
                                 {t('common.edit')}
                             </Button>
+                            {canScan && (
+                                <Button
+                                    leftSection={<Icon icon="refresh" />}
+                                    loading={startScanMutation.isPending}
+                                    onClick={handleStartScan}
+                                >
+                                    {t('page.manageServers.scanLibrary')}
+                                </Button>
+                            )}
                         </Group>
                     </Stack>
                 )}

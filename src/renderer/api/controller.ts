@@ -12,6 +12,7 @@ import {
     ServerType,
     SetPlaylistSongsArgs,
     SetPlaylistSongsResponse,
+    StartScanArgs,
 } from '/@/shared/types/domain-types';
 
 type ApiController = {
@@ -861,6 +862,18 @@ export const controller: GeneralController = {
 
         return apiController(
             'shareItem',
+            server.type,
+        )?.(addContext({ ...args, apiClientProps: { ...args.apiClientProps, server } }));
+    },
+    startScan(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            throw new Error(`${i18n.t('error.apiRouteError')}: startScan`);
+        }
+
+        return apiController(
+            'startScan',
             server.type,
         )?.(addContext({ ...args, apiClientProps: { ...args.apiClientProps, server } }));
     },

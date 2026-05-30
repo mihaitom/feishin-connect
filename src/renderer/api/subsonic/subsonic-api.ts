@@ -337,6 +337,14 @@ export const contract = c.router({
             200: ssType._response.setRating,
         },
     },
+    startScan: {
+        method: 'GET',
+        path: 'startScan.view',
+        query: ssType._parameters.startScan,
+        responses: {
+            200: ssType._response.startScan,
+        },
+    },
     updateInternetRadioStation: {
         method: 'GET',
         path: 'updateInternetRadioStation.view',

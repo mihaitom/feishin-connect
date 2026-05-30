@@ -35,6 +35,8 @@ import {
     Song,
     SongListSort,
     SortOrder,
+    StartScanArgs,
+    StartScanResponse,
 } from '/@/shared/types/domain-types';
 import { ServerFeature, ServerFeatures } from '/@/shared/types/features-types';
 
@@ -2436,6 +2438,17 @@ export const SubsonicController: InternalControllerEndpoint = {
                     rating: query.rating,
                 },
             });
+        }
+
+        return null;
+    },
+    startScan: async (args: ReplaceApiClientProps<StartScanArgs>): Promise<StartScanResponse> => {
+        const { apiClientProps } = args;
+
+        const res = await ssApiClient(apiClientProps).startScan({ query: {} });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to start library scan');
         }
 
         return null;

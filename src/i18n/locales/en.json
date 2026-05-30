@@ -510,7 +510,10 @@
             "url": "URL",
             "username": "Username",
             "editServerDetailsTooltip": "Edit server details",
-            "removeServer": "Remove server"
+            "removeServer": "Remove server",
+            "scanLibrary": "Scan library",
+            "scanLibraryStarted": "Library scan started",
+            "scanLibraryFailed": "Failed to start library scan"
         },
         "contextMenu": {
             "addFavorite": "$t(action.addToFavorites)",

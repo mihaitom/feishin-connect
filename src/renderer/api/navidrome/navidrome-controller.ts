@@ -1240,6 +1240,7 @@ export const NavidromeController: InternalControllerEndpoint = {
     search: SubsonicController.search,
     setPlaylistSongs: SubsonicController.setPlaylistSongs,
     setRating: SubsonicController.setRating,
+    startScan: SubsonicController.startScan,
     shareItem: async (args) => {
         const { apiClientProps, body } = args;
 

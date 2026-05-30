@@ -805,6 +805,21 @@ const reportPlaybackParameters = z.object({
 
 const reportPlayback = z.null();
 
+const startScanParameters = z.object({});
+
+const startScan = baseResponse.extend({
+    'subsonic-response': z.object({
+        scanStatus: z
+            .object({
+                count: z.number(),
+                scanning: z.boolean(),
+            })
+            .optional(),
+        status: z.string(),
+        version: z.string(),
+    }),
+});
+
 export const ssType = {
     _body: {
         getTranscodeDecision: transcodeDecisionRequestBody,
@@ -842,6 +857,7 @@ export const ssType = {
         scrobble: scrobbleParameters,
         search3: search3Parameters,
         setRating: setRatingParameters,
+        startScan: startScanParameters,
         similarSongs: similarSongsParameters,
         similarSongs2: similarSongs2Parameters,
         structuredLyrics: structuredLyricsParameters,
@@ -899,6 +915,7 @@ export const ssType = {
         similarSongs,
         similarSongs2,
         song,
+        startScan,
         structuredLyrics,
         topSongsList,
         updateInternetRadioStation,
