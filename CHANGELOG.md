@@ -16,17 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- **Merged upstream Feishin v1.12.1** — 15 upstream commits since v1.12.0, including:
-  - Fix queue end handling to prevent unintended repeat
-  - Disable interval-based timeupdate scrobbles (reduces server noise)
-  - Allow transcoding on waveform stream URLs
-  - Fix queue height when using the web window bar style
-  - Fix `RESOURCES_PATH` resolution relative to `app.getAppPath()`
-  - Workaround for identical Jellyfin release name bug
-  - Physical key mapping for `useHotkeys` (fixes alt keyboard layouts)
-  - Validate MPV extra parameters to prevent empty-string injection
-  - Fix regression on numeric column sort designation
-  - Add open delay to scrobble status HoverCard
+- **Merged upstream Feishin v1.12.1**
 
 ---
 
