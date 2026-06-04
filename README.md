@@ -2,7 +2,7 @@
 
 # Feishin — Connect Fork
 
-> **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).** Currently built on upstream **v1.12.0**.
+> **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).** Currently built on upstream **v1.13.0**.
 > It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay and Chromecast devices directly from the player bar.
 > All upstream features are preserved.
 
@@ -34,9 +34,9 @@ Please expect rough edges and report issues if you encounter them.
 
 - A **Python / FastAPI** backend runs alongside nginx in the same Docker container.
 - It receives media server credentials (Navidrome / Subsonic / Jellyfin) automatically from Feishin on startup — no manual config.
-- Feishin fetches the stream from the media server and re-encodes it via **FFmpeg** into a continuous MP3 stream.
+- For Sonos and Chromecast, the backend re-encodes the media server stream via **FFmpeg** into a continuous MP3 stream the devices pull over HTTP.
 - **Sonos** devices are controlled via UPnP (SoCo) and pull the stream over HTTP.
-- **AirPlay** devices receive the stream pushed via pyatv / RAOP.
+- **AirPlay** devices are fed via pyatv / RAOP — the track is downloaded directly from the media server and pushed to the device (no FFmpeg involved).
 - **Chromecast** devices are controlled via pychromecast and pull the stream over HTTP.
 
 ### Features
@@ -260,7 +260,7 @@ Feishin supports any music server implementing [Navidrome](https://www.navidrome
 
 ### Feishin Connect: ffmpeg required
 
-Feishin Connect uses **ffmpeg** to transcode the audio stream (from Navidrome, Subsonic or Jellyfin) into a continuous MP3 stream for Sonos, and into PCM WAV for AirPlay. ffmpeg is **not bundled** with the app and must be installed separately.
+Feishin Connect uses **ffmpeg** to transcode the audio stream (from Navidrome, Subsonic or Jellyfin) into a continuous MP3 stream for **Sonos and Chromecast**, which pull it over HTTP. (AirPlay does not use ffmpeg — the track is downloaded directly from the media server and streamed via pyatv.) ffmpeg is **not bundled** with the app and must be installed separately.
 
 | Platform | Install |
 |----------|---------|
@@ -280,6 +280,14 @@ Ensure the container is running with `network_mode: host`. Without host networki
 ### Feishin Connect: nothing plays (device found but no audio)
 
 Check the container or Electron logs for `ffmpeg not found`. FFmpeg is required for audio transcoding and is included in the Docker image. If you're running the backend natively, install FFmpeg via your package manager — see the ffmpeg install instructions above.
+
+### Feishin Connect: my Sonos speaker doesn't appear under AirPlay
+
+That's intentional. Sonos speakers advertise AirPlay 2 but require MFi hardware authentication that the AirPlay backend (pyatv) cannot perform, so streaming to them via AirPlay fails. They are filtered out of the AirPlay list and should be used via the dedicated **Sonos** output instead, where they appear with full volume and grouping support.
+
+### Feishin Connect: AirPlay troubleshooting
+
+Set the `PYATV_DEBUG=1` environment variable to log the full AirPlay protocol negotiation (device discovery, encryption, RTSP exchange). This is the quickest way to diagnose why a specific receiver won't play. Note that a `not connected to remote` line in the log is usually just the connection teardown masking the real error, which appears on the line above it.
 
 ### I have the issue "The SUID sandbox helper binary was found, but is not configured correctly" on Linux
 

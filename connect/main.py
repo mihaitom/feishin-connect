@@ -6,6 +6,7 @@ Startup:
 """
 
 import logging
+import os
 import shutil
 import traceback
 from contextlib import asynccontextmanager
@@ -29,6 +30,12 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("connect")
+
+# Set PYATV_DEBUG=1 to surface pyatv's full protocol negotiation (AirPlay
+# version, encryption types, RTSP SETUP exchange, ports) for diagnosing
+# AirPlay streaming issues.
+if os.getenv("PYATV_DEBUG"):
+    logging.getLogger("pyatv").setLevel(logging.DEBUG)
 
 
 @asynccontextmanager

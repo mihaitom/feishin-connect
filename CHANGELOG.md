@@ -9,6 +9,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 - **AirPlay playback (Feishin Connect)** — devices paired and connected but no audio played. The AirPlay stream task referenced `ctx.state.current_tracks`, a leftover from before the playback state was simplified to a single `current_track`, raising `AttributeError: 'AppState' object has no attribute 'current_tracks'` right after the stream task started. Now reads `current_track`.
+- **Sonos speakers no longer offered as AirPlay targets** — Sonos devices advertise AirPlay 2 but require MFi hardware authentication that pyatv cannot perform, so streaming to them via AirPlay failed (device refused the audio port). They are now filtered out of AirPlay discovery and must be used via the native Sonos output, where they already appear.
+- **AirPlay startup delay** — playback to an AirPlay device took ~20s to start because every play did a full ~10s mDNS network scan to locate the device. It now does a targeted unicast scan to the IP from the last discovery, returning as soon as the device replies (~ms), with a full-scan fallback if the cached IP is missing or stale.
+- **AirPlay 2 credentials applied to RAOP** — paired-device credentials were only set on the AirPlay (HAP) protocol, not on RAOP which carries the actual audio. Both are now set, so encrypted receivers (HomePod, Apple TV) don't refuse the audio connection.
+
+### Added
+
+- **`PYATV_DEBUG` environment variable** — when set, surfaces pyatv's full protocol negotiation (AirPlay version, encryption, RTSP exchange, ports) to aid diagnosing AirPlay issues.
 
 ### Changed
 

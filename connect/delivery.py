@@ -156,42 +156,65 @@ class AirPlayDelivery(BaseDelivery):
         import pyatv
         from pyatv.const import Protocol
         import credentials as creds_store
+        from state import ctx
 
         stored_creds = creds_store.get(self.target)
+        loop = asyncio.get_event_loop()
+        # Unpaired devices must be scanned via RAOP; paired AirPlay 2 devices
+        # need a full-protocol scan so the AirPlay (HAP) service is exposed.
+        protocol = None if stored_creds else Protocol.RAOP
+        kind = "AirPlay 2, paired" if stored_creds else "RAOP, unpaired"
 
-        if stored_creds:
-            # AirPlay 2: full scan, set HAP credentials (Protocol.AirPlay)
+        # Fast path: a targeted unicast scan to the IP from the last discovery
+        # returns as soon as the device replies (~ms), avoiding the full ~10s
+        # mDNS sweep on every play. Falls back to a full scan if the cached IP
+        # is missing or stale.
+        cached = next(
+            (
+                d
+                for d in ctx.state.discovered.get("airplay", [])
+                if d.get("name", "").lower() == self.target.lower() and d.get("address")
+            ),
+            None,
+        )
+        host = cached["address"] if cached else None
+
+        async def _scan(hosts, timeout):
             logger.info(
-                f"[AirPlay:{self.target}] Scanning for device (AirPlay 2, paired)..."
+                f"[AirPlay:{self.target}] Scanning ({kind}"
+                f"{f', {hosts[0]}' if hosts else ', full'})..."
             )
-            devices = await pyatv.scan(asyncio.get_event_loop(), timeout=10)
-            for d in devices:
-                if d.name.lower() == self.target.lower():
-                    d.set_credentials(Protocol.AirPlay, stored_creds)
-                    logger.info(
-                        f"[AirPlay:{self.target}] Found: {d.address} (AirPlay 2)"
-                    )
-                    return d
+            devices = await pyatv.scan(
+                loop, timeout=timeout, protocol=protocol, hosts=hosts
+            )
+            return next(
+                (d for d in devices if d.name.lower() == self.target.lower()), None
+            ), devices
+
+        match, devices = (await _scan([host], 5)) if host else (None, [])
+        if match is None:
+            match, devices = await _scan(None, 10)
+
+        if match is None:
             available = [d.name for d in devices]
             raise RuntimeError(
                 f"AirPlay '{self.target}' not found. Available: {available}"
             )
-        else:
-            # AirPlay 1 / RAOP: no pairing needed
+
+        if stored_creds:
+            # AirPlay 2 pairing yields HAP credentials valid for both protocols.
+            # The audio is streamed via RAOP, so the RAOP service needs the
+            # credentials too — otherwise pyatv sets up an unencrypted session
+            # and the device refuses the audio data port (Connection refused).
+            match.set_credentials(Protocol.AirPlay, stored_creds)
+            has_raop = match.set_credentials(Protocol.RAOP, stored_creds)
             logger.info(
-                f"[AirPlay:{self.target}] Scanning for device (RAOP, unpaired)..."
+                f"[AirPlay:{self.target}] Found: {match.address} "
+                f"({kind}, raop_creds={has_raop})"
             )
-            devices = await pyatv.scan(
-                asyncio.get_event_loop(), protocol=Protocol.RAOP, timeout=10
-            )
-            for d in devices:
-                if d.name.lower() == self.target.lower():
-                    logger.info(f"[AirPlay:{self.target}] Found: {d.address} (RAOP)")
-                    return d
-            available = [d.name for d in devices]
-            raise RuntimeError(
-                f"AirPlay '{self.target}' not found via RAOP. Available: {available}"
-            )
+        else:
+            logger.info(f"[AirPlay:{self.target}] Found: {match.address} ({kind})")
+        return match
 
     @staticmethod
     async def _close_atv(atv) -> None:
@@ -550,6 +573,21 @@ async def discover_sonos() -> list[dict]:
     return [{"name": d.player_name, "ip": d.ip_address} for d in devices]
 
 
+def _is_sonos(device) -> bool:
+    """True if the AirPlay device is actually a Sonos speaker.
+
+    Sonos exposes AirPlay 2 but requires MFi hardware authentication, which
+    pyatv cannot do — streaming to it via AirPlay fails with the device
+    refusing the audio port. Such devices must use the native Sonos (UPnP)
+    delivery instead, so we hide them from the AirPlay list.
+    """
+    for service in device.services:
+        props = getattr(service, "properties", None) or {}
+        if "sonos" in props.get("manufacturer", "").lower():
+            return True
+    return False
+
+
 async def discover_airplay() -> list[dict]:
     """Discovers all AirPlay devices on the network."""
     import pyatv
@@ -558,6 +596,12 @@ async def discover_airplay() -> list[dict]:
     devices = await pyatv.scan(asyncio.get_event_loop(), timeout=10)
     result = []
     for d in devices:
+        if _is_sonos(d):
+            logger.info(
+                f"[discover] Skipping AirPlay for Sonos device '{d.name}' "
+                f"(use Sonos output instead)"
+            )
+            continue
         protocols = {s.protocol for s in d.services}
         result.append(
             {
