@@ -224,12 +224,13 @@ class AirPlayDelivery(BaseDelivery):
             from state import ctx
 
             try:
-                tracks = list(ctx.state.current_tracks)
-                if not tracks or not ctx.media:
+                track = ctx.state.current_track
+                if not track or not ctx.media:
                     logger.warning(
-                        f"[AirPlay:{self.target}] No tracks or media server not configured"
+                        f"[AirPlay:{self.target}] No track or media server not configured"
                     )
                     return
+                tracks = [track]
 
                 # miniaudio (internal to pyatv) needs complete audio data before the
                 # decoder can start. Prefetch: download the next track in the background

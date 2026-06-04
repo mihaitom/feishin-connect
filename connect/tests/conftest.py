@@ -19,14 +19,12 @@ def client():
 def reset_state():
     """Wipe all runtime state before each test so tests are isolated."""
     st = state.ctx.state
-    st.current_tracks = []
+    st.current_track = None
     st.is_streaming = False
     st.is_paused = False
-    st.current_track_index = 0
     st.radio_info = None
     st.active_delivery = None
     st.play_start_time = 0.0
-    st.play_start_index = 0
     st.paused_elapsed = 0.0
     st.discovered = {"airplay": [], "chromecast": [], "sonos": []}
 
