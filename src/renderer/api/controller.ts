@@ -12,7 +12,6 @@ import {
     ServerType,
     SetPlaylistSongsArgs,
     SetPlaylistSongsResponse,
-    StartScanArgs,
 } from '/@/shared/types/domain-types';
 
 type ApiController = {

@@ -1,4 +1,4 @@
-import { ipcRenderer, webFrame } from 'electron';
+import { type IpcRendererEvent, ipcRenderer, webFrame } from 'electron';
 
 import { disableAutoUpdates, isLinux, isMacOS, isWindows } from '../main/env';
 
@@ -144,6 +144,7 @@ export const utils = {
     rendererToggleSidebar,
     rendererUpdateAvailable,
     saveCustomCss,
+    separator: isWindows() ? '\\' : '/',
     setInputFocused,
     startPowerSaveBlocker,
     stopPowerSaveBlocker,

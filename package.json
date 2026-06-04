@@ -1,7 +1,7 @@
 {
     "name": "feishin-connect",
-    "version": "0.2.3",
-    "feishinUpstreamVersion": "1.12.1",
+    "version": "0.2.4",
+    "feishinUpstreamVersion": "1.13.0",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
