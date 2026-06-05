@@ -2,6 +2,7 @@
     "name": "feishin-connect",
     "version": "0.2.4",
     "feishinUpstreamVersion": "1.13.0",
+    "packageManager": "pnpm@11.5.0",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
