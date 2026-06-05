@@ -6,6 +6,10 @@ jobs:
     publish:
         runs-on: ${{ matrix.os }}
 
+        # Required so electron-builder's `--publish always` can create the release
+        permissions:
+            contents: write
+
         strategy:
             matrix:
                 os: [ubuntu-latest]
@@ -19,9 +23,17 @@ jobs:
               with:
                   version: 10
 
+            # Required for build:connect (`uv run connect/build-binary.py`).
+            # uv installs the required Python version itself.
+            - name: Install uv
+              uses: astral-sh/setup-uv@v6
+
             - name: Install dependencies
               run: pnpm install
 
+            # x64 only: the bundled Connect backend binary is built by PyInstaller
+            # on the x64 runner and cannot cross-compile to arm64 (and arm64 Linux
+            # has no built-in x64 emulation, so a mismatched binary won't run).
             - name: Build and Publish releases
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,16 +44,4 @@ jobs:
                   retry_on: error
                   command: |
                       pnpm run publish:linux
-                  on_retry_command: pnpm cache delete
-
-            - name: Build and Publish releases (arm64)
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              uses: nick-invision/retry@v3.0.2
-              with:
-                  timeout_minutes: 30
-                  max_attempts: 3
-                  retry_on: error
-                  command: |
-                      pnpm run publish:linux-arm64
                   on_retry_command: pnpm cache delete

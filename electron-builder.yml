@@ -36,14 +36,14 @@ nsis:
 
 mac:
     target:
+        # arm64 only: the bundled Connect backend binary is built by PyInstaller
+        # on the (Apple Silicon) CI runner and cannot cross-compile to x64.
         - target: dmg
           arch:
               - arm64
-              - x64
         - target: zip
           arch:
               - arm64
-              - x64
     icon: media/feishin.icon
     type: distribution
     hardenedRuntime: false

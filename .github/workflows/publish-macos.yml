@@ -6,6 +6,10 @@ jobs:
     publish:
         runs-on: ${{ matrix.os }}
 
+        # Required so electron-builder's `--publish always` can create the release
+        permissions:
+            contents: write
+
         strategy:
             matrix:
                 os: [macos-26]
@@ -18,6 +22,11 @@ jobs:
               uses: pnpm/action-setup@v4
               with:
                   version: 10
+
+            # Required for build:connect (`uv run connect/build-binary.py`).
+            # uv installs the required Python version itself.
+            - name: Install uv
+              uses: astral-sh/setup-uv@v6
 
             - name: Install dependencies
               run: pnpm install
