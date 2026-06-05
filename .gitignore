@@ -15,3 +15,5 @@ connect/.pytest_cache
 __pycache__/
 *.pyc
 merge-upstream.md
+connect/tone.wav
+connect/airplay_credentials.json

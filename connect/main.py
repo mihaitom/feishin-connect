@@ -31,11 +31,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger("connect")
 
-# Set PYATV_DEBUG=1 to surface pyatv's full protocol negotiation (AirPlay
-# version, encryption types, RTSP SETUP exchange, ports) for diagnosing
-# AirPlay streaming issues.
-if os.getenv("PYATV_DEBUG"):
-    logging.getLogger("pyatv").setLevel(logging.DEBUG)
+# Verbose playback diagnostics. Set DEBUG=true to surface full protocol/playback
+# logs across every renderer at once: AirPlay (pyatv), Sonos (SoCo) and the
+# app's own delivery/streamer/playback loggers.
+#   connect → also covers children connect.streamer / connect.playback
+_DEBUG_LOGGERS = ("connect", "delivery", "sonos", "pyatv", "soco")
+
+if os.getenv("DEBUG", "").strip().lower() in ("1", "true", "yes", "on"):
+    for _name in _DEBUG_LOGGERS:
+        logging.getLogger(_name).setLevel(logging.DEBUG)
 
 
 @asynccontextmanager
