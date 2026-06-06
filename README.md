@@ -73,6 +73,8 @@ services:
             # - CONNECT_URL=/api
             # Optional: internal Navidrome URL for the proxy (see below)
             # - NAVIDROME_INTERNAL_URL=http://10.x.x.x:4533
+            # Optional: debug mode for playback logs
+            # - DEBUG: false
 ```
 
 | Port | Service |
@@ -90,6 +92,7 @@ services:
 | `SERVER_NAME` | — | Pre-configured server name shown in Feishin |
 | `SERVER_TYPE` | — | `navidrome`, `jellyfin`, or `subsonic` |
 | `SERVER_LOCK` | `false` | When `true`, only username/password can be changed |
+| `DEBUG` | `false` | When `true`, prints playback logs across every renderer |
 
 ### Requirements
 
