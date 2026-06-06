@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { LuSquare, LuTriangleAlert } from 'react-icons/lu';
+import { LuRefreshCw, LuSquare, LuTriangleAlert } from 'react-icons/lu';
 
 import { DeviceItem } from './device-item';
 import { NowPlayingSection } from './now-playing';
 import { CONNECT_URL, ConnectSession } from './types';
-import { PopButton, PopSection } from './ui';
+import { PopButton, PopSection, Spinner } from './ui';
 
 interface ConnectPopoverProps {
     popPos: { bottom: number; right: number };
@@ -21,6 +21,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
         hasApiError,
         hasFfmpegError,
         isActive,
+        isScanning,
         paired,
         refresh,
         refreshPaired,
@@ -82,7 +83,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                             {t('player.connect_apiUnreachableHint', { url: CONNECT_URL })}
                         </div>
                         <button
-                            onClick={refresh}
+                            onClick={() => refresh(true)}
                             style={{
                                 background: 'transparent',
                                 border: 'none',
@@ -136,7 +137,10 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
             {!hasApiError && (
                 <PopSection
                     label={
-                        trackLabel ?? t('player.connect_sendTo', { postProcess: 'sentenceCase' })
+                        devices.length === 0
+                            ? ''
+                            : (trackLabel ??
+                              t('player.connect_sendTo', { postProcess: 'sentenceCase' }))
                     }
                 >
                     {devices.length === 0 && (
@@ -148,22 +152,9 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                                 textAlign: 'center',
                             }}
                         >
-                            {t('player.connect_noDevices', { postProcess: 'sentenceCase' })}
-                            <br />
-                            <button
-                                onClick={refresh}
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: 'var(--theme-colors-primary)',
-                                    cursor: 'pointer',
-                                    fontSize: '12px',
-                                    marginTop: '6px',
-                                    padding: 0,
-                                }}
-                            >
-                                {t('player.connect_scan', { postProcess: 'sentenceCase' })}
-                            </button>
+                            {isScanning
+                                ? t('player.connect_scanning', { postProcess: 'sentenceCase' })
+                                : t('player.connect_noDevices', { postProcess: 'sentenceCase' })}
                         </div>
                     )}
                     {devices.map((d) => {
@@ -188,6 +179,27 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                             />
                         );
                     })}
+                    <button
+                        disabled={isScanning}
+                        onClick={() => refresh(true)}
+                        style={{
+                            alignItems: 'center',
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--theme-colors-primary)',
+                            cursor: isScanning ? 'default' : 'pointer',
+                            display: 'flex',
+                            fontSize: '12px',
+                            gap: '6px',
+                            justifyContent: 'center',
+                            opacity: isScanning ? 0.6 : 1,
+                            padding: '8px 12px',
+                            width: '100%',
+                        }}
+                    >
+                        {isScanning ? <Spinner size={12} /> : <LuRefreshCw size={13} />}
+                        {t('player.connect_scan', { postProcess: 'sentenceCase' })}
+                    </button>
                 </PopSection>
             )}
 

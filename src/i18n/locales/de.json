@@ -730,6 +730,7 @@
     "player": {
         "connect_noDevices": "Keine Geräte gefunden",
         "connect_scan": "Erneut suchen",
+        "connect_scanning": "Suche nach Geräten…",
         "connect_sendTo": "Senden an",
         "connect_add": "Hinzufügen ({{count}})",
         "connect_stopAll": "Alle trennen",

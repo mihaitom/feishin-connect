@@ -11,10 +11,12 @@ export interface ConnectHealth {
 export const useConnectDevices = () => {
     const [devices, setDevices] = useState<ConnectDevice[]>([]);
     const [health, setHealth] = useState<ConnectHealth | null>(null);
+    const [isScanning, setIsScanning] = useState(false);
 
-    const refresh = () => {
+    const refresh = (fresh = false) => {
+        setIsScanning(true);
         Promise.all([
-            fetch(`${CONNECT_URL}/discover`).then((r) => r.json()),
+            fetch(`${CONNECT_URL}/discover${fresh ? '?fresh=true' : ''}`).then((r) => r.json()),
             fetch(`${CONNECT_URL}/health`).then((r) => r.json()),
         ])
             .then(([discoverData, healthData]) => {
@@ -39,14 +41,15 @@ export const useConnectDevices = () => {
             })
             .catch(() => {
                 setHealth({ apiReachable: false, ffmpegFound: false });
-            });
+            })
+            .finally(() => setIsScanning(false));
     };
 
     useEffect(() => {
         refresh();
     }, []);
 
-    return { devices, health, refresh };
+    return { devices, health, isScanning, refresh };
 };
 
 // Subscribes to SSE /events whenever Connect is active.

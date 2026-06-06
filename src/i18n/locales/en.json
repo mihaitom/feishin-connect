@@ -666,6 +666,7 @@
         "artistRadio": "Artist radio",
         "connect_noDevices": "No devices found",
         "connect_scan": "Scan again",
+        "connect_scanning": "Scanning for devices…",
         "connect_sendTo": "Send to",
         "connect_add": "Add ({{count}})",
         "connect_stopAll": "Disconnect all",

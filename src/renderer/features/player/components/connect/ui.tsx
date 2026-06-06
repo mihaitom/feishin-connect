@@ -1,18 +1,23 @@
+import { Loader } from '@mantine/core';
 import { useState } from 'react';
 
-export const PopSection = ({ children, label }: { children: React.ReactNode; label: string }) => (
+export const Spinner = ({ size = 14 }: { size?: number }) => <Loader size={size} />;
+
+export const PopSection = ({ children, label }: { children: React.ReactNode; label?: string }) => (
     <div>
-        <div
-            style={{
-                color: 'var(--theme-colors-text-secondary)',
-                fontSize: '11px',
-                letterSpacing: '0.06em',
-                padding: '10px 12px 4px',
-                textTransform: 'uppercase',
-            }}
-        >
-            {label}
-        </div>
+        {label && (
+            <div
+                style={{
+                    color: 'var(--theme-colors-text-secondary)',
+                    fontSize: '11px',
+                    letterSpacing: '0.06em',
+                    padding: '10px 12px 4px',
+                    textTransform: 'uppercase',
+                }}
+            >
+                {label}
+            </div>
+        )}
         {children}
     </div>
 );

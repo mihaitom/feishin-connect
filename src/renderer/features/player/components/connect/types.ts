@@ -21,8 +21,9 @@ export interface ConnectSession {
     hasFfmpegError: boolean;
     isActive: boolean;
     isEmpty: boolean;
+    isScanning: boolean;
     paired: string[];
-    refresh: () => void;
+    refresh: (fresh?: boolean) => void;
     refreshPaired: () => void;
     selectedForSend: ConnectDevice[];
     sendToSelected: () => Promise<void>;

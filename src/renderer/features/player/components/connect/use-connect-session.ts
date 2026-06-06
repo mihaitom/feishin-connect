@@ -30,7 +30,7 @@ export const useConnectSession = (): ConnectSession => {
     const [activeTargets, setActiveTargets] = useState<ConnectDevice[]>([]);
     const [selectedForSend, setSelectedForSend] = useState<ConnectDevice[]>([]);
 
-    const { devices, health, refresh } = useConnectDevices();
+    const { devices, health, isScanning, refresh } = useConnectDevices();
     const { paired, refresh: refreshPaired } = usePairedDevices();
     const { fetchVolume } = useConnectVolume();
     const { mediaNext, mediaPause, mediaTogglePlayPause } = usePlayer();
@@ -315,6 +315,7 @@ export const useConnectSession = (): ConnectSession => {
         hasFfmpegError: !!(health?.apiReachable && health.ffmpegFound === false),
         isActive,
         isEmpty,
+        isScanning,
         paired,
         refresh,
         refreshPaired,

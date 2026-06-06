@@ -74,7 +74,7 @@ async def health():
 
 
 @router.get("/discover")
-async def discover():
+async def discover(fresh: bool = False):
     cached = ctx.state.discovered
     has_cache = bool(cached["sonos"] or cached["airplay"] or cached["chromecast"])
 
@@ -108,8 +108,10 @@ async def discover():
         }
         return ctx.state.discovered
 
-    if has_cache:
-        # Return cached results immediately; rescan in background
+    # fresh=true (explicit "Scan again") awaits a full rescan so the client can
+    # show real progress. Otherwise serve cache instantly and rescan in the
+    # background for snappy popover opens.
+    if has_cache and not fresh:
         asyncio.create_task(_scan())
         return cached
 
