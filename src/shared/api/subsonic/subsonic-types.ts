@@ -820,6 +820,17 @@ const startScan = baseResponse.extend({
     }),
 });
 
+const getScanStatusParameters = z.object({});
+
+const getScanStatus = z.object({
+    scanStatus: z
+        .object({
+            count: z.number(),
+            scanning: z.boolean(),
+        })
+        .optional(),
+});
+
 export const ssType = {
     _body: {
         getTranscodeDecision: transcodeDecisionRequestBody,
@@ -844,6 +855,7 @@ export const ssType = {
         getMusicDirectory: getMusicDirectoryParameters,
         getPlaylist: getPlaylistParameters,
         getPlaylists: getPlaylistsParameters,
+        getScanStatus: getScanStatusParameters,
         getSong: getSongParameters,
         getSongsByGenre: getSongsByGenreParameters,
         getStarred: getStarredParameters,
@@ -857,9 +869,9 @@ export const ssType = {
         scrobble: scrobbleParameters,
         search3: search3Parameters,
         setRating: setRatingParameters,
-        startScan: startScanParameters,
         similarSongs: similarSongsParameters,
         similarSongs2: similarSongs2Parameters,
+        startScan: startScanParameters,
         structuredLyrics: structuredLyricsParameters,
         topSongsList: topSongsListParameters,
         updateInternetRadioStation: updateInternetRadioStationParameters,
@@ -893,6 +905,7 @@ export const ssType = {
         getMusicDirectory,
         getPlaylist,
         getPlaylists,
+        getScanStatus,
         getSong,
         getSongsByGenre,
         getStarred,

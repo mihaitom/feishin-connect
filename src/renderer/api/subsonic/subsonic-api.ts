@@ -186,6 +186,14 @@ export const contract = c.router({
             200: ssType._response.randomSongList,
         },
     },
+    getScanStatus: {
+        method: 'GET',
+        path: 'getScanStatus.view',
+        query: ssType._parameters.getScanStatus,
+        responses: {
+            200: ssType._response.getScanStatus,
+        },
+    },
     getServerInfo: {
         method: 'GET',
         path: 'getOpenSubsonicExtensions.view',

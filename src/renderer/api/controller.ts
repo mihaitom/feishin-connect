@@ -600,6 +600,18 @@ export const controller: GeneralController = {
             server.type,
         )?.(addContext({ ...args, apiClientProps: { ...args.apiClientProps, server } }));
     },
+    getScanStatus(args) {
+        const server = getServerById(args.apiClientProps.serverId);
+
+        if (!server) {
+            throw new Error(`${i18n.t('error.apiRouteError')}: getScanStatus`);
+        }
+
+        return apiController(
+            'getScanStatus',
+            server.type,
+        )?.(addContext({ ...args, apiClientProps: { ...args.apiClientProps, server } }));
+    },
     getServerInfo(args) {
         const server = getServerById(args.apiClientProps.serverId);
 

@@ -513,6 +513,8 @@
             "removeServer": "Remove server",
             "scanLibrary": "Scan library",
             "scanLibraryStarted": "Library scan started",
+            "scanLibraryScanning": "Scanning library…",
+            "scanLibraryComplete": "Library scan complete",
             "scanLibraryFailed": "Failed to start library scan"
         },
         "contextMenu": {

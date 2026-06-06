@@ -771,6 +771,7 @@ export const NavidromeController: InternalControllerEndpoint = {
     getRandomSongList: SubsonicController.getRandomSongList,
     getRoles: async ({ apiClientProps }) =>
         hasFeature(apiClientProps.server, ServerFeature.BFR) ? NAVIDROME_ROLES : [],
+    getScanStatus: SubsonicController.getScanStatus,
     getServerInfo: async (args) => {
         const { apiClientProps } = args;
 
@@ -860,6 +861,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             args.context?.pathReplaceWith,
         );
     },
+
     getSongList: async (args) => {
         const { apiClientProps, query } = args;
 
@@ -933,7 +935,6 @@ export const NavidromeController: InternalControllerEndpoint = {
             totalRecordCount: albums.totalRecordCount,
         };
     },
-
     getSongListCount: async ({ apiClientProps, query }) =>
         NavidromeController.getSongList({
             apiClientProps,
@@ -1240,7 +1241,6 @@ export const NavidromeController: InternalControllerEndpoint = {
     search: SubsonicController.search,
     setPlaylistSongs: SubsonicController.setPlaylistSongs,
     setRating: SubsonicController.setRating,
-    startScan: SubsonicController.startScan,
     shareItem: async (args) => {
         const { apiClientProps, body } = args;
 
@@ -1262,6 +1262,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             id: res.body.data.id,
         };
     },
+    startScan: SubsonicController.startScan,
     updateInternetRadioStation: async (args) => {
         const { apiClientProps, body, query } = args;
 

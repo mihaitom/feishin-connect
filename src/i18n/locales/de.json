@@ -692,6 +692,11 @@
             "title": "Servers verwalten",
             "editServerDetailsTooltip": "Serverdetails editieren",
             "removeServer": "Server entfernen",
+            "scanLibrary": "Bibliothek scannen",
+            "scanLibraryStarted": "Bibliotheksscan gestartet",
+            "scanLibraryScanning": "Bibliothek wird gescannt…",
+            "scanLibraryComplete": "Bibliotheksscan abgeschlossen",
+            "scanLibraryFailed": "Bibliotheksscan konnte nicht gestartet werden",
             "url": "URL",
             "serverDetails": "Serverdetails",
             "username": "Benutzername"

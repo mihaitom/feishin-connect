@@ -31,6 +31,8 @@ import {
     LibraryItem,
     PlaylistListSort,
     ReplaceApiClientProps,
+    ScanStatusArgs,
+    ScanStatusResponse,
     ServerType,
     Song,
     SongListSort,
@@ -1423,6 +1425,20 @@ export const SubsonicController: InternalControllerEndpoint = {
         // no roles.
         final.splice(0, 0, { label: 'all artists', value: '' });
         return final;
+    },
+    getScanStatus: async (
+        args: ReplaceApiClientProps<ScanStatusArgs>,
+    ): Promise<ScanStatusResponse> => {
+        const { apiClientProps } = args;
+
+        const res = await ssApiClient(apiClientProps).getScanStatus({ query: {} });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to get scan status');
+        }
+
+        const status = res.body.scanStatus;
+        return status ? { count: status.count, scanning: status.scanning } : null;
     },
     getServerInfo: async (args) => {
         const { apiClientProps } = args;

@@ -1357,6 +1357,15 @@ export type RandomSongListQuery = {
 
 export type RandomSongListResponse = SongListResponse;
 
+export type ScanStatus = {
+    count: number;
+    scanning: boolean;
+};
+
+export type ScanStatusArgs = BaseEndpointArgs;
+
+export type ScanStatusResponse = null | ScanStatus;
+
 export type ScrobbleArgs = BaseEndpointArgs & {
     query: ScrobbleQuery;
 };
@@ -1373,10 +1382,6 @@ export type ScrobbleQuery = {
 
 // Scrobble
 export type ScrobbleResponse = null;
-
-export type StartScanArgs = BaseEndpointArgs;
-
-export type StartScanResponse = null;
 
 export type SearchAlbumArtistsQuery = {
     albumArtistLimit?: number;
@@ -1419,6 +1424,10 @@ export type SearchSongsQuery = {
     songLimit?: number;
     songStartIndex?: number;
 };
+
+export type StartScanArgs = BaseEndpointArgs;
+
+export type StartScanResponse = null;
 
 export type SynchronizedLyricsArray = Array<[number, string]>;
 
@@ -1513,6 +1522,7 @@ export type ControllerEndpoint = {
     getPlayQueue: (args: GetQueueArgs) => Promise<GetQueueResponse>;
     getRandomSongList: (args: RandomSongListArgs) => Promise<SongListResponse>;
     getRoles: (args: BaseEndpointArgs) => Promise<Array<string | { label: string; value: string }>>;
+    getScanStatus?: (args: ScanStatusArgs) => Promise<ScanStatusResponse>;
     getServerInfo: (args: ServerInfoArgs) => Promise<ServerInfo>;
     getSimilarSongs: (args: SimilarSongsArgs) => Promise<Song[]>;
     getSongDetail: (args: SongDetailArgs) => Promise<SongDetailResponse>;
@@ -1674,6 +1684,7 @@ export type InternalControllerEndpoint = {
     getRoles: (
         args: ReplaceApiClientProps<BaseEndpointArgs>,
     ) => Promise<Array<string | { label: string; value: string }>>;
+    getScanStatus?: (args: ReplaceApiClientProps<ScanStatusArgs>) => Promise<ScanStatusResponse>;
     getServerInfo: (args: ReplaceApiClientProps<ServerInfoArgs>) => Promise<ServerInfo>;
     getSimilarSongs: (args: ReplaceApiClientProps<SimilarSongsArgs>) => Promise<Song[]>;
     getSongDetail: (args: ReplaceApiClientProps<SongDetailArgs>) => Promise<SongDetailResponse>;
