@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-06-06
+
+### Added
+
+- **Library scan progress & completion feedback (Navidrome / Subsonic)** — the Scan Library action now polls the server via a new `getScanStatus` endpoint. The menu entry shows a spinner labelled "Scanning library…" for the entire scan (previously the loading state only covered the brief start request), and a toast reports when the scan finishes. The scan state lives in a global store, so the spinner and the completion toast survive the server-selector menu being closed and reopened mid-scan.
+- **Always-available device rescan in Connect** — the "Scan again" control in the Connect (cast) popover is now always visible (not only when no devices were found) and shows a spinner while a fresh scan runs. The empty state shows "Scanning for devices…" and the "Send to" header is hidden until devices are present.
+- **`airplay_probe.py`** — a standalone scan / pair / stream diagnostic script that mirrors the Connect delivery path, for reproducing AirPlay streaming issues without running the full app.
+
+### Changed
+
+- **`DEBUG` environment variable replaces `PYATV_DEBUG`** — set `DEBUG=true` (parsed as a boolean: `true`/`1`/`yes`/`on`) to surface verbose protocol/playback logs across every renderer at once — AirPlay (pyatv), Sonos (SoCo) and the app's own delivery/streamer/playback loggers — instead of AirPlay only. `PYATV_DEBUG` has been removed.
+- **Connect "Scan again" forces a fresh scan** — the discovery endpoint now awaits a full rescan when explicitly requested instead of immediately returning cached results, so the spinner reflects the real scan duration and devices that have gone offline drop out of the list.
+
+---
+
 ## [0.2.4] - 2026-06-05
 
 ### Fixed
