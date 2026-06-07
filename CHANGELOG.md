@@ -12,7 +12,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **CORS restricted to known origins** — browser access to the Connect API is limited to `localhost` (development) and Electron's `file://` origin. Set `ALLOWED_ORIGINS` to a comma-separated list for custom deployments.
 - **`/stream` deliberately left open** — `GET` and `HEAD /stream` require no token so Sonos, AirPlay and Chromecast devices can always pull audio. CORS does not apply to hardware devices.
 - **13 new auth tests** — `tests/test_auth.py` covers open vs. protected endpoints, missing/wrong token (header and `?token=` query param), and the SSE rejection path.
-- **In-track seeking in Connect mode** — the progress slider in the player bar is now interactive when a Connect device is active. Dragging and releasing sends a `POST /seek` request to the backend, which restarts playback from the chosen position. The slider freezes during the seek and unlocks automatically once the backend confirms the new position.
+- **In-track seeking in Connect mode** — the progress slider in the player bar is now interactive when a Connect device is active. Dragging and releasing sends a `POST /seek` request to the backend, which restarts playback from the chosen position. The slider freezes during the seek and unlocks automatically once the backend confirms. Sonos and Chromecast seek via FFmpeg `-ss` on the stream endpoint; AirPlay re-downloads from the seek position using `ffmpeg -ss` before passing the audio to pyatv.
+- **AirPlay: radio stream support** — AirPlay can now stream radio stations. Previously the delivery always required a track from the media server and silently ignored radio URLs; they are now passed directly to pyatv's `stream_file`.
+
+### Fixed
+
+- **Radio via Connect: switching to a radio station played a queue track instead** — when `stopRadio()` was called inside the auto-forward effect to silence local playback, it synchronously cleared `isRadioActive`. On the next render the track effect saw `isRadioActive = false` and, with `lastAutoSentRef` empty, immediately sent the queue track to `/play` on top of the radio URL already dispatched to `/play-url`. The ref is now set to the current song ID so the track effect treats it as already-sent and skips.
+- **AirPlay: "not connected to remote" no longer logged as ERROR** — when the Apple TV drops the audio connection, pyatv already logs the real cause (`Connection refused`) itself. The subsequent `RuntimeError: not connected to remote` thrown during RTSP teardown is now caught and downgraded to a warning.
 
 ### Changed
 

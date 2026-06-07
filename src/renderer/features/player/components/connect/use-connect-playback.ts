@@ -2,7 +2,7 @@ import type { QueueSong } from '/@/shared/types/domain-types';
 
 import { MutableRefObject, useEffect, useRef } from 'react';
 
-import { connectFetch, ConnectDevice, ConnectStatus } from './types';
+import { ConnectDevice, connectFetch, ConnectStatus } from './types';
 
 interface ConnectPlaybackArgs {
     activeTargets: ConnectDevice[];
@@ -62,7 +62,12 @@ export const useConnectPlayback = ({
     useEffect(() => {
         if (!isActive || !isRadioActive || !radioStreamUrl) return;
         stopRadio();
-        lastAutoSentRef.current = '';
+        // stopRadio() clears isRadioActive synchronously. On the next render the
+        // track effect would see isRadioActive=false and, if lastAutoSentRef was
+        // empty, immediately send the current queue track to /play on top of the
+        // radio we just started. Preserve the current song ID so the track effect
+        // treats it as already-sent and skips.
+        lastAutoSentRef.current = currentSong?._uniqueId ?? 'radio';
         connectFetch(`/play-url`, {
             body: JSON.stringify({
                 targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
@@ -80,6 +85,7 @@ export const useConnectPlayback = ({
         activeTargets,
         stopRadio,
         lastAutoSentRef,
+        currentSong,
     ]);
 
     // ── Track-ended detection ─────────────────────────────────────────────────
