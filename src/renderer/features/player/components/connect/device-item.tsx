@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { LuAirplay, LuKeyRound, LuSpeaker, LuTv, LuVolume1, LuVolumeX } from 'react-icons/lu';
 
 import { PairingModal } from './pairing-modal';
-import { CONNECT_URL, ConnectDevice } from './types';
+import { connectFetch, ConnectDevice } from './types';
 
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 import { Switch } from '/@/shared/components/switch/switch';
@@ -42,8 +42,8 @@ export const DeviceItem = ({
 
     useEffect(() => {
         if (!showVolume || volume !== null) return;
-        fetch(
-            `${CONNECT_URL}/device-volume?device_type=${device.type}&name=${encodeURIComponent(device.name)}`,
+        connectFetch(
+            `/device-volume?device_type=${device.type}&name=${encodeURIComponent(device.name)}`,
         )
             .then((r) => r.json())
             .then((d) => {
@@ -54,8 +54,8 @@ export const DeviceItem = ({
 
     const setDeviceVolume = (v: number) => {
         setVolume(v);
-        fetch(
-            `${CONNECT_URL}/device-volume?device_type=${device.type}&name=${encodeURIComponent(device.name)}`,
+        connectFetch(
+            `/device-volume?device_type=${device.type}&name=${encodeURIComponent(device.name)}`,
             {
                 body: JSON.stringify({ volume: v }),
                 headers: { 'Content-Type': 'application/json' },

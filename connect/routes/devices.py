@@ -4,8 +4,10 @@ import asyncio
 import logging
 import os
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+
+from auth import require_token
 
 from delivery import (
     AirPlayDelivery,
@@ -17,12 +19,11 @@ from delivery import (
     discover_chromecast,
     discover_sonos,
 )
-from jellyfin import JellyfinClient
+from media import JellyfinClient, SubsonicClient
 from state import ctx, event_bus, find_sonos, stream_url
-from subsonic import SubsonicClient
 
 logger = logging.getLogger("connect.devices")
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_token)])
 
 
 class ConfigRequest(BaseModel):
@@ -37,9 +38,7 @@ class ConfigRequest(BaseModel):
 
 @router.post("/config")
 async def configure(req: ConfigRequest):
-    # NAVIDROME_INTERNAL_URL is reused for Jellyfin so the same Docker
-    # deployment pattern (proxy on host, server on internal IP) works for both.
-    internal_url = os.getenv("NAVIDROME_INTERNAL_URL", "")
+    internal_url = os.getenv("SERVER_INTERNAL_URL") or os.getenv("NAVIDROME_INTERNAL_URL", "")
     server_type = req.server_type.lower()
 
     if server_type == "jellyfin":

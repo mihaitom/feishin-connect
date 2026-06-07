@@ -3,15 +3,22 @@
 import pytest
 from fastapi.testclient import TestClient
 
+import auth
 import state
 from main import app
-from subsonic import SubsonicClient
+from media import SubsonicClient
 
 
 @pytest.fixture
 def client():
-    """Synchronous TestClient — no network, no real devices needed."""
+    """Synchronous TestClient — no network, no real devices needed.
+
+    Automatically includes X-Connect-Token when CONNECT_TOKEN is set so tests
+    pass regardless of whether token auth is enabled in the environment.
+    """
     with TestClient(app) as c:
+        if auth.TOKEN:
+            c.headers.update({"X-Connect-Token": auth.TOKEN})
         yield c
 
 

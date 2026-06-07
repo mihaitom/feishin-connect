@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import delivery
+import delivery.chromecast as _chromecast_mod
 from delivery import AirPlayDelivery, ChromecastDelivery, SonosDelivery
 
 
@@ -92,24 +92,24 @@ def test_airplay_stop_closes_atv_when_no_task():
 
 @pytest.fixture(autouse=True)
 def _clear_chromecast_cache():
-    delivery._chromecast_cache.clear()
+    _chromecast_mod._chromecast_cache.clear()
     yield
-    delivery._chromecast_cache.clear()
+    _chromecast_mod._chromecast_cache.clear()
 
 
 def test_chromecast_cache_returns_connected_device():
     cast = MagicMock()
     cast.socket_client.is_connected = True
-    delivery._chromecast_cache["tv"] = cast
-    assert delivery._get_cached_chromecast("TV") is cast
+    _chromecast_mod._chromecast_cache["tv"] = cast
+    assert _chromecast_mod._get_cached_chromecast("TV") is cast
 
 
 def test_chromecast_cache_evicts_disconnected_device():
     cast = MagicMock()
     cast.socket_client.is_connected = False
-    delivery._chromecast_cache["tv"] = cast
-    assert delivery._get_cached_chromecast("TV") is None
-    assert "tv" not in delivery._chromecast_cache
+    _chromecast_mod._chromecast_cache["tv"] = cast
+    assert _chromecast_mod._get_cached_chromecast("TV") is None
+    assert "tv" not in _chromecast_mod._chromecast_cache
 
 
 def test_chromecast_cache_evicts_on_socket_exception():
@@ -117,13 +117,13 @@ def test_chromecast_cache_evicts_on_socket_exception():
     type(cast.socket_client).is_connected = property(
         lambda self: (_ for _ in ()).throw(RuntimeError("dead"))
     )
-    delivery._chromecast_cache["tv"] = cast
-    assert delivery._get_cached_chromecast("TV") is None
-    assert "tv" not in delivery._chromecast_cache
+    _chromecast_mod._chromecast_cache["tv"] = cast
+    assert _chromecast_mod._get_cached_chromecast("TV") is None
+    assert "tv" not in _chromecast_mod._chromecast_cache
 
 
 def test_chromecast_cache_miss_returns_none():
-    assert delivery._get_cached_chromecast("nope") is None
+    assert _chromecast_mod._get_cached_chromecast("nope") is None
 
 
 # ── ChromecastDelivery playback ───────────────────────────────────────────────

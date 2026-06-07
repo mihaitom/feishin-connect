@@ -1,8 +1,7 @@
 """Tests for POST /config."""
 
 import state
-from jellyfin import JellyfinClient
-from subsonic import SubsonicClient
+from media import JellyfinClient, SubsonicClient
 
 
 def test_config_sets_subsonic_url(client):

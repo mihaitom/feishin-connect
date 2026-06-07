@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useConnectPlayerStore } from './connect.store';
 import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
-import { CONNECT_URL, ConnectDevice, ConnectSession, ConnectStatus, SendStatus } from './types';
+import { connectFetch, CONNECT_URL, ConnectDevice, ConnectSession, ConnectStatus, SendStatus } from './types';
 import { useConnectPlayback } from './use-connect-playback';
 import { useConnectScrobble } from './use-connect-scrobble';
 
@@ -71,7 +71,7 @@ export const useConnectSession = (): ConnectSession => {
     // ── Server config ─────────────────────────────────────────────────────────
     useEffect(() => {
         if (!server?.url || !server?.credential) return;
-        fetch(`${CONNECT_URL}/config`, {
+        connectFetch(`/config`, {
             body: JSON.stringify(buildConfigBody(server)),
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',
@@ -84,7 +84,7 @@ export const useConnectSession = (): ConnectSession => {
 
     // ── Restore from backend on mount ─────────────────────────────────────────
     useEffect(() => {
-        fetch(`${CONNECT_URL}/status`)
+        connectFetch(`/status`)
             .then((r) => r.json())
             .then((d: ConnectStatus) => {
                 // Restore if actively streaming, or if a track just ended (ended=true).
@@ -132,7 +132,7 @@ export const useConnectSession = (): ConnectSession => {
 
     const ensureConfigured = async () => {
         if (!configuredRef.current && server?.url && server?.credential) {
-            await fetch(`${CONNECT_URL}/config`, {
+            await connectFetch(`/config`, {
                 body: JSON.stringify(buildConfigBody(server)),
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST',
@@ -153,7 +153,7 @@ export const useConnectSession = (): ConnectSession => {
             const targets = selectedForSend.map((d) => ({ name: d.name, type: d.type }));
             if (isRadioActive && radioStreamUrl) {
                 stopRadio();
-                const res = await fetch(`${CONNECT_URL}/play-url`, {
+                const res = await connectFetch(`/play-url`, {
                     body: JSON.stringify({
                         targets,
                         title: radioStationName ?? 'Radio',
@@ -169,7 +169,7 @@ export const useConnectSession = (): ConnectSession => {
                     usePlayerStoreBase.getState().player.status === PlayerStatus.PLAYING;
                 if (isCurrentlyPlaying) {
                     mediaPause();
-                    const res = await fetch(`${CONNECT_URL}/play`, {
+                    const res = await connectFetch(`/play`, {
                         body: JSON.stringify({ targets, track_ids: [currentTrackId] }),
                         headers: { 'Content-Type': 'application/json' },
                         method: 'POST',
@@ -192,7 +192,7 @@ export const useConnectSession = (): ConnectSession => {
     const addToStream = async () => {
         if (selectedForSend.length === 0) return;
         for (const device of selectedForSend) {
-            await fetch(`${CONNECT_URL}/join`, {
+            await connectFetch(`/join`, {
                 body: JSON.stringify({ target_name: device.name, target_type: device.type }),
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST',
@@ -207,7 +207,7 @@ export const useConnectSession = (): ConnectSession => {
     };
 
     const stopAllPlayback = async () => {
-        await fetch(`${CONNECT_URL}/stop`, { method: 'POST' }).catch(() => {});
+        await connectFetch(`/stop`, { method: 'POST' }).catch(() => {});
         setStatus('idle');
         setActive(null);
         setActiveTargets([]);
@@ -216,8 +216,10 @@ export const useConnectSession = (): ConnectSession => {
     };
 
     const stopSingleDevice = async (device: ConnectDevice) => {
-        const url = `${CONNECT_URL}/device-stop?device_type=${device.type}&name=${encodeURIComponent(device.name)}`;
-        await fetch(url, { method: 'POST' }).catch(() => {});
+        await connectFetch(
+            `/device-stop?device_type=${device.type}&name=${encodeURIComponent(device.name)}`,
+            { method: 'POST' },
+        ).catch(() => {});
         const remaining = activeTargets.filter(
             (tgt) => !(tgt.type === device.type && tgt.name === device.name),
         );
@@ -246,15 +248,15 @@ export const useConnectSession = (): ConnectSession => {
         const { isPlaying, isStreaming } = useConnectPlayerStore.getState();
         if (isPlaying) {
             useConnectPlayerStore.getState().set({ isPlaying: false });
-            fetch(`${CONNECT_URL}/pause`, { method: 'POST' }).catch(() => {});
+            connectFetch(`/pause`, { method: 'POST' }).catch(() => {});
         } else if (isStreaming) {
             useConnectPlayerStore.getState().set({ isPlaying: true });
-            fetch(`${CONNECT_URL}/resume`, { method: 'POST' }).catch(() => {});
+            connectFetch(`/resume`, { method: 'POST' }).catch(() => {});
         } else {
             if (!currentTrackId) return;
             useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
             lastAutoSentRef.current = currentSong?._uniqueId ?? '';
-            fetch(`${CONNECT_URL}/play`, {
+            connectFetch(`/play`, {
                 body: JSON.stringify({
                     targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
                     track_ids: [currentTrackId],
@@ -268,7 +270,7 @@ export const useConnectSession = (): ConnectSession => {
     function handleStop() {
         useConnectPlayerStore.getState().set({ isPlaying: false, isStreaming: false });
         lastAutoSentRef.current = '';
-        fetch(`${CONNECT_URL}/stop`, { method: 'POST' }).catch(() => {});
+        connectFetch(`/stop`, { method: 'POST' }).catch(() => {});
     }
 
     // ── Store sync ────────────────────────────────────────────────────────────

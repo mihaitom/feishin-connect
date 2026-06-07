@@ -12,8 +12,7 @@ from delivery import (
     DeliveryManager,
     SonosDelivery,
 )
-from media import MediaClient, Track
-from subsonic import SubsonicClient
+from media import MediaClient, SubsonicClient, Track
 
 PORT = int(os.getenv("PORT", "8765"))
 TARGETS = os.getenv("TARGETS", "")

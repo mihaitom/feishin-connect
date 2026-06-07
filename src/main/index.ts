@@ -24,6 +24,7 @@ import electronLocalShortcut from 'electron-localshortcut';
 import log from 'electron-log/main';
 import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
 import { ChildProcess, spawn } from 'child_process';
+import { randomBytes } from 'crypto';
 import { access, constants, existsSync } from 'fs';
 import { request as httpRequest } from 'http';
 import path, { join } from 'path';
@@ -260,6 +261,11 @@ protocol.registerSchemesAsPrivileged([
 
 // ── Connect backend process ───────────────────────────────────────────────────
 
+// Generated once at startup. Passed to the Python process via CONNECT_TOKEN env var
+// and exposed to the renderer via the preload script (window.__CONNECT_TOKEN__).
+const connectToken = randomBytes(32).toString('hex');
+process.env['CONNECT_TOKEN'] = connectToken;
+
 let connectProcess: ChildProcess | null = null;
 
 const startConnectServer = () => {
@@ -317,7 +323,14 @@ const killConnectServer = () => {
 const stopConnect = () => {
     const port = Number(process.env.CONNECT_PORT ?? 8765);
     try {
-        const req = httpRequest({ host: '127.0.0.1', method: 'POST', path: '/stop', port, timeout: 800 });
+        const req = httpRequest({
+            headers: { 'X-Connect-Token': connectToken },
+            host: '127.0.0.1',
+            method: 'POST',
+            path: '/stop',
+            port,
+            timeout: 800,
+        });
         req.on('error', () => {});
         req.end();
     } catch {

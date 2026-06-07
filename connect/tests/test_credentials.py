@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-import credentials
+from delivery import credentials
 
 
 def _tmp_path(tmp_dir: str) -> str:

@@ -37,10 +37,12 @@ export type PreloadApi = typeof api;
 if (process.contextIsolated) {
     try {
         contextBridge.exposeInMainWorld('api', api);
+        contextBridge.exposeInMainWorld('__CONNECT_TOKEN__', process.env['CONNECT_TOKEN'] || '');
     } catch (error) {
         console.error(error);
     }
 } else {
     // @ts-ignore (define in dts)
     window.api = api;
+    (window as any).__CONNECT_TOKEN__ = process.env['CONNECT_TOKEN'] || '';
 }

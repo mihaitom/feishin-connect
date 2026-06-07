@@ -2,6 +2,7 @@ import { PreloadApi } from './index';
 
 declare global {
     interface Window {
+        __CONNECT_TOKEN__: string;
         api: PreloadApi;
         LEGACY_AUTHENTICATION?: boolean;
         queryLocalFonts?: () => Promise<Font[]>;

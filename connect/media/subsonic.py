@@ -1,6 +1,4 @@
-"""
-subsonic.py — Navidrome / Subsonic API Client
-"""
+"""media/subsonic.py — Navidrome / Subsonic API Client"""
 
 import hashlib
 import secrets
@@ -8,7 +6,7 @@ from urllib.parse import parse_qs
 
 import httpx
 
-from media import Track
+from .base import Track
 
 
 class SubsonicClient:

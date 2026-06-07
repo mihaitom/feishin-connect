@@ -5,9 +5,10 @@ import json
 import logging
 import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import Response, StreamingResponse
 
+from auth import require_token
 from state import build_status_dict, ctx, event_bus
 from streamer import stream_tracks
 
@@ -88,12 +89,12 @@ async def audio_stream():
     )
 
 
-@router.get("/status")
+@router.get("/status", dependencies=[Depends(require_token)])
 async def status():
     return build_status_dict()
 
 
-@router.get("/events")
+@router.get("/events", dependencies=[Depends(require_token)])
 async def status_events():
     queue = event_bus.subscribe()
 

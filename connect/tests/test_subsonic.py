@@ -1,6 +1,6 @@
 """Tests for SubsonicClient — especially the internal_url logic."""
 
-from subsonic import SubsonicClient
+from media import SubsonicClient
 
 
 def _client(

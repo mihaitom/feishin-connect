@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Token-based auth for the Connect API** — the Connect API is now always protected by a secret token. In Electron, a random token is generated at startup and injected into the renderer automatically — secure by default, no config required. In Docker, nginx forwards the token transparently so the browser never handles it directly. Set `CONNECT_TOKEN` in `docker-compose.yaml` to a custom secret; without it, a publicly known default is used (blocks anonymous scanners but not targeted attacks — change it).
+- **CORS restricted to known origins** — browser access to the Connect API is limited to `localhost` (development) and Electron's `file://` origin. Set `ALLOWED_ORIGINS` to a comma-separated list for custom deployments.
+- **`/stream` deliberately left open** — `GET` and `HEAD /stream` require no token so Sonos, AirPlay and Chromecast devices can always pull audio. CORS does not apply to hardware devices.
+- **13 new auth tests** — `tests/test_auth.py` covers open vs. protected endpoints, missing/wrong token (header and `?token=` query param), and the SSE rejection path.
+
+### Changed
+
+- **Connect backend restructured into packages** — `delivery.py` split into a `delivery/` package (`airplay`, `sonos`, `chromecast`, `manager`, `credentials`, `base`); `media.py`, `subsonic.py` and `jellyfin.py` merged into a `media/` package. All existing imports remain backwards-compatible via `__init__.py` re-exports.
+- **`NAVIDROME_INTERNAL_URL` renamed to `SERVER_INTERNAL_URL`** — the proxy works for Navidrome, Subsonic and Jellyfin alike, so the variable name no longer made sense. The old name is still accepted as a fallback — existing deployments need no changes.
+
+### Removed
+
+- `connect/sonos_ctrl.py` — legacy file not imported anywhere; replaced by `SonosDelivery` in `delivery/sonos.py` since v0.2.0.
+
+---
+
 ## [0.2.5] - 2026-06-06
 
 ### Added
@@ -131,7 +151,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- **Navidrome-Proxy** — The Connect backend now proxies all Navidrome API calls (`/rest/`, `/auth/`, `/api/`). This allows Feishin to work when Navidrome is behind an SSO layer (e.g. Authentik forward auth via Traefik) that would otherwise block direct browser-to-Navidrome requests. Set `NAVIDROME_INTERNAL_URL` to the internal Navidrome address (e.g. `http://10.x.x.x:4533`) to enable the proxy; the backend then reaches Navidrome directly on the internal network, bypassing the SSO middleware entirely. See the Docker section in the README for details.
+- **Navidrome-Proxy** — The Connect backend now proxies all Navidrome API calls (`/rest/`, `/auth/`, `/api/`). This allows Feishin to work when Navidrome is behind an SSO layer (e.g. Authentik forward auth via Traefik) that would otherwise block direct browser-to-Navidrome requests. Set `SERVER_INTERNAL_URL` to the internal Navidrome address (e.g. `http://10.x.x.x:4533`) to enable the proxy; the backend then reaches Navidrome directly on the internal network, bypassing the SSO middleware entirely. See the Docker section in the README for details.
 - **`CONNECT_URL` Docker default** — `CONNECT_URL` now defaults to `/api` in the Docker image. Previously it fell back to `http://localhost:8765`, which caused CORS errors when accessing Feishin remotely (the browser tried to reach the backend on the user's local machine instead of the server).
 
 ### Fixed
@@ -140,7 +160,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Notes
 
-- **Electron version unaffected** — The Electron app talks to Navidrome directly and never routes through the Connect backend proxy. `NAVIDROME_INTERNAL_URL` is irrelevant for Electron; leaving it unset makes the backend behave exactly as before.
+- **Electron version unaffected** — The Electron app talks to Navidrome directly and never routes through the Connect backend proxy. `SERVER_INTERNAL_URL` is irrelevant for Electron; leaving it unset makes the backend behave exactly as before.
 
 ### Known issues
 

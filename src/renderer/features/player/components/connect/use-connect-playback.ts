@@ -2,7 +2,7 @@ import type { QueueSong } from '/@/shared/types/domain-types';
 
 import { MutableRefObject, useEffect, useRef } from 'react';
 
-import { CONNECT_URL, ConnectDevice, ConnectStatus } from './types';
+import { connectFetch, ConnectDevice, ConnectStatus } from './types';
 
 interface ConnectPlaybackArgs {
     activeTargets: ConnectDevice[];
@@ -48,7 +48,7 @@ export const useConnectPlayback = ({
         const trackId = currentSong?.id;
         if (!trackId) return;
         mediaPause();
-        fetch(`${CONNECT_URL}/play`, {
+        connectFetch(`/play`, {
             body: JSON.stringify({
                 targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
                 track_ids: [trackId],
@@ -63,7 +63,7 @@ export const useConnectPlayback = ({
         if (!isActive || !isRadioActive || !radioStreamUrl) return;
         stopRadio();
         lastAutoSentRef.current = '';
-        fetch(`${CONNECT_URL}/play-url`, {
+        connectFetch(`/play-url`, {
             body: JSON.stringify({
                 targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
                 title: radioStationName ?? 'Radio',

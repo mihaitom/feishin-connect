@@ -3,14 +3,15 @@
 import asyncio
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-import credentials
+from auth import require_token
+from delivery import credentials
 
 logger = logging.getLogger("connect.pairing")
-router = APIRouter(prefix="/pair/airplay")
+router = APIRouter(prefix="/pair/airplay", dependencies=[Depends(require_token)])
 
 # Active pairing sessions: device_name → pyatv pairing object
 _sessions: dict[str, object] = {}

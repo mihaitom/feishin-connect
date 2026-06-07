@@ -1,6 +1,6 @@
 """routes/proxy.py — transparent proxy for Navidrome API calls
 
-Proxied paths (all routed internally to NAVIDROME_INTERNAL_URL):
+Proxied paths (all routed internally to SERVER_INTERNAL_URL):
   /rest/{path}   → Subsonic API  (navidrome/rest/{path})
   /auth/{path}   → Navidrome Auth (navidrome/auth/{path})
   /{path}        → Navidrome REST API via /api/ nginx prefix (navidrome/api/{path})
@@ -10,12 +10,14 @@ Proxied paths (all routed internally to NAVIDROME_INTERNAL_URL):
 import os
 
 import httpx
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
-router = APIRouter()
+from auth import require_token
 
-_INTERNAL_URL = os.getenv("NAVIDROME_INTERNAL_URL", "").rstrip("/")
+router = APIRouter(dependencies=[Depends(require_token)])
+
+_INTERNAL_URL = (os.getenv("SERVER_INTERNAL_URL") or os.getenv("NAVIDROME_INTERNAL_URL", "")).rstrip("/")
 
 _SKIP_REQ = {"host", "connection", "transfer-encoding"}
 # Strip content-length: httpx decompresses gzip automatically, so the original
@@ -28,7 +30,7 @@ _ALL_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"]
 async def _proxy(request: Request, target: str) -> StreamingResponse | JSONResponse:
     if not _INTERNAL_URL:
         return JSONResponse(
-            {"error": "NAVIDROME_INTERNAL_URL not configured"}, status_code=503
+            {"error": "SERVER_INTERNAL_URL not configured"}, status_code=503
         )
 
     fwd_headers = {

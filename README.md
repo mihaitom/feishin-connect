@@ -51,7 +51,7 @@ Please expect rough edges and report issues if you encounter them.
 
 ### Docker (recommended)
 
-Host networking is required so the backend can discover Sonos, AirPlay and Chromecast devices via mDNS/SSDP multicast.
+> **`network_mode: host` is required.** The Connect backend discovers Sonos, AirPlay and Chromecast devices via mDNS/SSDP multicast, which only works when the container shares the host's network stack. Without it, no devices will be found. Host networking is Linux-only — on Mac or Windows, run the backend natively.
 
 ```yaml
 services:
@@ -59,22 +59,16 @@ services:
         container_name: feishin
         image: "ghcr.io/mihaitom/feishin-connect:latest"
         restart: unless-stopped
-        # host networking required for Sonos/AirPlay mDNS discovery
         network_mode: host
         environment:
-            # Feishin / Navidrome server (pre-configured)
             - SERVER_NAME=navidrome
             - SERVER_TYPE=navidrome
             - SERVER_URL=http://your-navidrome:4533
             - SERVER_LOCK=false
             - ANALYTICS_DISABLED=true
-            # Optional: override the Connect API URL seen by the browser
-            # Default is /api (proxied through nginx). Change only if needed.
-            # - CONNECT_URL=/api
-            # Optional: internal Navidrome URL for the proxy (see below)
-            # - NAVIDROME_INTERNAL_URL=http://10.x.x.x:4533
-            # Optional: debug mode for playback logs
-            # - DEBUG: false
+            - CONNECT_TOKEN=change-me-to-a-random-secret
+            # - SERVER_INTERNAL_URL=http://10.x.x.x:4533
+            # - DEBUG=false
 ```
 
 | Port | Service |
@@ -86,13 +80,15 @@ services:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CONNECT_URL` | `/api` | URL the browser uses to reach the Connect API. The default routes through nginx; set to `http://host:8765` only if you need direct access. |
-| `NAVIDROME_INTERNAL_URL` | — | Internal Navidrome URL for the backend proxy (e.g. `http://10.x.x.x:4533`). Required when Navidrome is behind SSO. See [Navidrome behind SSO](#navidrome-behind-sso-authentik-etc) below. |
-| `SERVER_URL` | — | Navidrome / Jellyfin server URL |
+| `CONNECT_TOKEN` | *(public default)* | Secret token protecting the Connect API on port 8765. **Change this** to a random string — the built-in default is publicly known (open source) and only blocks anonymous scanners. nginx adds the token to every internal request automatically; the browser never handles it directly. In Electron, a random token is generated at startup instead. |
+| `CONNECT_URL` | `/api` | URL the browser uses to reach the Connect API. The default (`/api`) routes through nginx on the same domain — no CORS issues, no extra config needed. Change to `http://host:8765` only if you need direct access to the backend, bypassing nginx. |
+| `SERVER_INTERNAL_URL` | — | Internal media server address for the backend proxy (e.g. `http://10.x.x.x:4533`). Only needed when the media server sits behind an SSO layer that the browser cannot bypass. See [Media server behind SSO](#media-server-behind-sso-authentik-etc) below. With `network_mode: host`, use the actual IP — Docker container names do not resolve in host network mode. The old name `NAVIDROME_INTERNAL_URL` is still accepted as a fallback. |
+| `ALLOWED_ORIGINS` | — | Extra CORS origins for the Connect API, comma-separated. **Not needed in standard Docker deployments**: when the browser and the API share the same domain via nginx, all requests are same-origin and CORS never applies. Only relevant if the backend is accessed from a different origin than the page (e.g. backend running standalone, frontend on a separate domain). |
+| `SERVER_URL` | — | Media server URL (Navidrome / Subsonic / Jellyfin) shown to the browser |
 | `SERVER_NAME` | — | Pre-configured server name shown in Feishin |
 | `SERVER_TYPE` | — | `navidrome`, `jellyfin`, or `subsonic` |
-| `SERVER_LOCK` | `false` | When `true`, only username/password can be changed |
-| `DEBUG` | `false` | When `true`, prints playback logs across every renderer |
+| `SERVER_LOCK` | `false` | When `true`, only username and password can be changed in the UI — server name, type and URL are fixed |
+| `DEBUG` | `false` | When `true`, enables verbose playback logs across all renderers (AirPlay via pyatv, Sonos via SoCo, internal streamer) |
 
 ### Requirements
 
@@ -144,31 +140,31 @@ uv run python main.py
 
 ---
 
-## Navidrome behind SSO (Authentik etc.)
+## Media server behind SSO (Authentik etc.)
 
-If Navidrome is protected by an SSO layer (e.g. Authentik forward auth via Traefik/nginx), the browser cannot reach Navidrome's API directly — every request is intercepted and redirected to the SSO login page.
+If your media server (Navidrome, Subsonic, or Jellyfin) is protected by an SSO layer (e.g. Authentik forward auth via Traefik/nginx), the browser cannot reach its API directly — every request is intercepted and redirected to the SSO login page.
 
-Feishin Connect solves this with a built-in **backend proxy**: all Navidrome API calls (`/rest/`, `/auth/`, `/api/`) are routed through the Connect backend, which reaches Navidrome on the internal network, bypassing the SSO middleware entirely.
+Feishin Connect solves this with a built-in **backend proxy**: all media server API calls are routed through the Connect backend, which reaches the server on the internal network, bypassing the SSO middleware entirely.
 
 **Setup:**
 
-1. Set `NAVIDROME_INTERNAL_URL` to the internal address where Navidrome is reachable without SSO:
+1. Set `SERVER_INTERNAL_URL` to the internal address where the media server is reachable without SSO:
    ```yaml
-   - NAVIDROME_INTERNAL_URL=http://10.x.x.x:4533
+   - SERVER_INTERNAL_URL=http://10.x.x.x:4533
    ```
    With `network_mode: host`, use the actual IP — Docker container names don't resolve in host network mode.
 
-2. Set `SERVER_URL` to the **Feishin Connect** URL (not Navidrome's URL):
+2. Set `SERVER_URL` to the **Feishin Connect** URL (not the media server's URL):
    ```yaml
    - SERVER_URL=https://feishin.example.com
    ```
-   Feishin will now call `feishin.example.com/rest/`, `feishin.example.com/auth/login`, etc., which nginx proxies to the Connect backend, which forwards internally to Navidrome.
+   Feishin will now call `feishin.example.com/rest/`, `feishin.example.com/auth/login`, etc., which nginx proxies to the Connect backend, which forwards internally to the media server.
 
-3. Navidrome itself no longer needs to be reachable from the browser at all — Feishin Connect acts as the only entry point to the Navidrome API.
+3. The media server itself no longer needs to be reachable from the browser at all — Feishin Connect acts as the only entry point to its API.
 
-**Security:** The Connect API is protected by whatever sits in front of Feishin (e.g. Authentik). All Navidrome traffic is authenticated via Subsonic token/password auth as usual — the proxy is transparent.
+**Security:** The Connect API (port 8765) is protected by `CONNECT_TOKEN`. nginx forwards it automatically, so the browser never handles it. Media server traffic is authenticated via Subsonic token/password or Jellyfin API key as usual — the proxy is transparent. How port 9180 is secured (firewall, SSO, etc.) is up to the deployment.
 
-**Note:** This proxy is not needed if Navidrome is publicly reachable or on the same network as the browser. In that case, set `SERVER_URL` directly to the Navidrome URL and leave `NAVIDROME_INTERNAL_URL` unset.
+**Note:** This proxy is not needed if the media server is publicly reachable or on the same network as the browser. In that case, set `SERVER_URL` directly to the media server URL and leave `SERVER_INTERNAL_URL` unset.
 
 ---
 

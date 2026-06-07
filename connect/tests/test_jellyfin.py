@@ -3,7 +3,7 @@
 import httpx
 import pytest
 
-from jellyfin import JellyfinClient
+from media import JellyfinClient
 
 
 def _client(

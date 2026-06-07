@@ -1,4 +1,4 @@
-"""media.py — Common Track type and MediaClient protocol.
+"""media/base.py — Common Track type and MediaClient protocol.
 
 Both SubsonicClient and JellyfinClient implement MediaClient so the rest of the
 backend can stay agnostic about which music server is behind /config.

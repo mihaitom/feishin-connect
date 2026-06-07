@@ -1,5 +1,4 @@
-"""
-jellyfin.py — Jellyfin API Client
+"""media/jellyfin.py — Jellyfin API Client
 
 Uses the simple `/Items/{id}/Download` endpoint for streaming (raw file, no
 transcoding) — robust for FFmpeg re-streaming to Sonos / AirPlay / Chromecast.
@@ -7,7 +6,7 @@ transcoding) — robust for FFmpeg re-streaming to Sonos / AirPlay / Chromecast.
 
 import httpx
 
-from media import Track
+from .base import Track
 
 # Jellyfin reports RunTimeTicks in units of 100 ns.
 TICKS_PER_SECOND = 10_000_000

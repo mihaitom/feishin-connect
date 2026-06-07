@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { CONNECT_URL, PairingStep } from './types';
+import { connectFetch, PairingStep } from './types';
 
 interface PairingModalProps {
     deviceName: string;
@@ -20,7 +20,7 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
         async (pinValue: null | number) => {
             setStep('started');
             try {
-                const res = await fetch(`${CONNECT_URL}/pair/airplay/finish`, {
+                const res = await connectFetch(`/pair/airplay/finish`, {
                     body: JSON.stringify({ name: deviceName, pin: pinValue }),
                     headers: { 'Content-Type': 'application/json' },
                     method: 'POST',
@@ -55,7 +55,7 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
         setStep('started');
         setError('');
         try {
-            const res = await fetch(`${CONNECT_URL}/pair/airplay/start`, {
+            const res = await connectFetch(`/pair/airplay/start`, {
                 body: JSON.stringify({ name: deviceName }),
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST',

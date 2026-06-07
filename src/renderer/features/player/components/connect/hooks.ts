@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useConnectPlayerStore } from './connect.store';
-import { CONNECT_URL, ConnectDevice, ConnectStatus } from './types';
+import { connectEventSource, connectFetch, ConnectDevice, ConnectStatus } from './types';
 
 export interface ConnectHealth {
     apiReachable: boolean;
@@ -16,8 +16,8 @@ export const useConnectDevices = () => {
     const refresh = (fresh = false) => {
         setIsScanning(true);
         Promise.all([
-            fetch(`${CONNECT_URL}/discover${fresh ? '?fresh=true' : ''}`).then((r) => r.json()),
-            fetch(`${CONNECT_URL}/health`).then((r) => r.json()),
+            connectFetch(`/discover${fresh ? '?fresh=true' : ''}`).then((r) => r.json()),
+            connectFetch(`/health`).then((r) => r.json()),
         ])
             .then(([discoverData, healthData]) => {
                 const sonos: ConnectDevice[] = (discoverData.sonos ?? []).map((x: any) => ({
@@ -60,7 +60,7 @@ export const useConnectStatus = (active: boolean) => {
     useEffect(() => {
         if (!active) return;
 
-        const es = new EventSource(`${CONNECT_URL}/events`);
+        const es = connectEventSource(`/events`);
         es.onmessage = (e: MessageEvent) => {
             const d: ConnectStatus = JSON.parse(e.data);
             setStatus(d);
@@ -82,7 +82,7 @@ export const usePairedDevices = () => {
     const [paired, setPaired] = useState<string[]>([]);
 
     const refresh = useCallback(() => {
-        fetch(`${CONNECT_URL}/pair/airplay`)
+        connectFetch(`/pair/airplay`)
             .then((r) => r.json())
             .then((d) => setPaired(d.paired ?? []))
             .catch(() => {});
@@ -94,7 +94,7 @@ export const usePairedDevices = () => {
 
     const unpair = useCallback(
         (name: string) =>
-            fetch(`${CONNECT_URL}/pair/airplay/${encodeURIComponent(name)}`, { method: 'DELETE' })
+            connectFetch(`/pair/airplay/${encodeURIComponent(name)}`, { method: 'DELETE' })
                 .then(() => refresh())
                 .catch(() => {}),
         [refresh],
@@ -109,7 +109,7 @@ export const useConnectVolume = () => {
     const preMuteVolume = useRef(30);
 
     const fetchVolume = useCallback(() => {
-        fetch(`${CONNECT_URL}/volume`)
+        connectFetch(`/volume`)
             .then((r) => r.json())
             .then((d) => {
                 if (d.volume !== undefined) setVolume(d.volume);
@@ -119,7 +119,7 @@ export const useConnectVolume = () => {
 
     const setRemoteVolume = (v: number) => {
         setVolume(v);
-        fetch(`${CONNECT_URL}/volume`, {
+        connectFetch(`/volume`, {
             body: JSON.stringify({ volume: v }),
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',

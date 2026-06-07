@@ -20,10 +20,10 @@ import logging
 import os
 import sys
 
-# Allow `import credentials` regardless of cwd (scripts/ lives under connect/).
+# Allow `from delivery import credentials` regardless of cwd (scripts/ lives under connect/).
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import credentials as creds_store  # noqa: E402
+from delivery import credentials as creds_store  # noqa: E402
 
 logging.basicConfig(
     level=logging.DEBUG,

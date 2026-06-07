@@ -3,13 +3,15 @@
 import logging
 import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+
+from auth import require_token
 
 from state import compute_position, ctx, event_bus, resolve_target, stream_url
 
 logger = logging.getLogger("connect.playback")
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_token)])
 
 
 class PlayRequest(BaseModel):

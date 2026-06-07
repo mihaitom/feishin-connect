@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
+from auth import TOKEN as _CONNECT_TOKEN
 from routes.devices import router as devices_router
 from routes.pairing import router as pairing_router
 from routes.playback import router as playback_router
@@ -59,17 +61,28 @@ async def lifespan(_: FastAPI):
     else:
         logger.info("ℹ️  No TARGETS env — controlled via Feishin /play")
 
+    if _CONNECT_TOKEN == _DEFAULT_TOKEN:
+        logger.warning("⚠️  Using default CONNECT_TOKEN — set a custom value in docker-compose for real security")
+    else:
+        logger.info("🔒 Token auth enabled (custom CONNECT_TOKEN set)")
     logger.info("⏳ Waiting for Feishin /config (media server credentials)")
     yield
 
 
 app = FastAPI(title="Feishin Connect", lifespan=lifespan)
+_ALLOWED_ORIGINS_ENV = os.getenv("ALLOWED_ORIGINS", "")
+_ALLOWED_ORIGINS: list[str] = (
+    [o.strip() for o in _ALLOWED_ORIGINS_ENV.split(",") if o.strip()]
+    if _ALLOWED_ORIGINS_ENV
+    else ["null"]  # Electron file:// origin appears as "null"
+)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_headers=["*"],
     allow_methods=["*"],
-    allow_origins=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
+    allow_origin_regex=r"http://localhost(:[0-9]+)?",
 )
 
 app.include_router(stream_router)

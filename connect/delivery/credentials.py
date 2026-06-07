@@ -1,4 +1,4 @@
-"""credentials.py — persistent AirPlay pairing credentials per device"""
+"""delivery/credentials.py — persistent AirPlay pairing credentials per device"""
 
 import json
 import logging
@@ -6,7 +6,11 @@ import os
 
 logger = logging.getLogger("connect.credentials")
 
-_PATH = os.path.join(os.path.dirname(__file__), "airplay_credentials.json")
+# credentials file lives in connect/ (parent of this delivery/ package)
+_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "airplay_credentials.json",
+)
 
 
 def _load() -> dict[str, str]:
