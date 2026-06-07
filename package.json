@@ -1,8 +1,6 @@
 {
     "name": "feishin-connect",
-    "version": "0.2.5",
-    "feishinUpstreamVersion": "1.13.0",
-    "packageManager": "pnpm@11.5.0",
+    "version": "0.3.0-dev.0",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -30,9 +28,9 @@
     "main": "./out/main/index.js",
     "scripts": {
         "build": "pnpm run build:connect && pnpm run build:electron && pnpm run build:remote",
+        "build:connect": "uv run connect/build-binary.py",
         "build:electron": "electron-vite build",
         "build:remote": "vite build --config remote.vite.config.ts",
-        "build:connect": "uv run connect/build-binary.py",
         "build:web": "vite build --config web.vite.config.ts",
         "dev": "electron-vite dev",
         "dev:remote": "vite dev --config remote.vite.config.ts",
@@ -196,6 +194,7 @@
         "vite-plugin-ejs": "^1.7.0",
         "vite-plugin-pwa": "^1.2.0"
     },
+    "packageManager": "pnpm@11.5.0",
     "pnpm": {
         "onlyBuiltDependencies": [
             "electron",
@@ -203,5 +202,6 @@
             "esbuild"
         ]
     },
+    "feishinUpstreamVersion": "1.13.0",
     "productName": "feishin"
 }
