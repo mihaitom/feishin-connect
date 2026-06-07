@@ -14,7 +14,7 @@ from delivery import (
 )
 from media import MediaClient, SubsonicClient, Track
 
-PORT = int(os.getenv("PORT", "8765"))
+PORT = int(os.getenv("PORT", "9181"))
 TARGETS = os.getenv("TARGETS", "")
 
 

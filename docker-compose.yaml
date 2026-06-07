@@ -17,7 +17,7 @@ services:
         # host networking is required for Sonos/AirPlay mDNS discovery
         network_mode: host
         # with host networking the ports below are bound directly — no mapping needed,
-        # but kept here for documentation: nginx on 9180, connect API on 8765
+        # but kept here for documentation: nginx on 9180, connect API on 9181
         # ports:
         #     - 9180:9180
-        #     - 8765:8765
+        #     - 9181:9181

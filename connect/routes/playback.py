@@ -143,6 +143,32 @@ async def resume_playback():
     return {"paused": False}
 
 
+class SeekRequest(BaseModel):
+    position: float
+
+
+@router.post("/seek")
+async def seek_playback(body: SeekRequest):
+    st = ctx.state
+    position = max(0.0, body.position)
+    if st.current_track:
+        position = min(position, st.current_track.duration)
+
+    st.resume_offset = position
+    st.play_start_time = time.time() - position
+
+    if st.is_paused:
+        st.paused_elapsed = position
+    else:
+        st.play_generation += 1
+        if st.active_delivery:
+            await st.active_delivery.play(stream_url())
+
+    logger.info(f"[seek] ⏩ {position:.1f}s")
+    await event_bus.broadcast()
+    return {"position": position}
+
+
 @router.post("/stop")
 async def stop_playback():
     st = ctx.state

@@ -103,6 +103,13 @@ export const usePairedDevices = () => {
     return { paired, refresh, unpair };
 };
 
+export const useConnectSeek = () => (position: number) =>
+    connectFetch('/seek', {
+        body: JSON.stringify({ position }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+    }).catch(() => {});
+
 export const useConnectVolume = () => {
     const [volume, setVolume] = useState<null | number>(null);
     const [muted, setMuted] = useState(false);

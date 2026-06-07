@@ -1,5 +1,5 @@
 import formatDuration from 'format-duration';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 
 import { PlayerbarSeekSlider } from './playerbar-seek-slider';
 import styles from './playerbar-slider.module.css';
@@ -8,6 +8,7 @@ import {
     useConnectElapsed,
     useConnectPlayerStore,
 } from '/@/renderer/features/player/components/connect/connect.store';
+import { useConnectSeek } from '/@/renderer/features/player/components/connect/hooks';
 import { ScrobbleStatus } from '/@/renderer/features/player/components/scrobble-status';
 import {
     useAppStore,
@@ -56,26 +57,10 @@ export const PlayerbarSlider = () => {
                 </div>
                 <div className={styles.sliderWrapper}>
                     {connectActive ? (
-                        // Read-only progress bar — seeking on the Connect stream is not supported
-                        <div
-                            style={{
-                                background: 'var(--slider-track, rgba(255,255,255,0.15))',
-                                borderRadius: '3px',
-                                height: '6px',
-                                overflow: 'hidden',
-                                width: '100%',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    background: 'var(--primary-color, var(--theme-colors-primary))',
-                                    borderRadius: '3px',
-                                    height: '100%',
-                                    transition: 'width 0.5s linear',
-                                    width: `${effectiveDuration > 0 ? Math.min((connectElapsed / effectiveDuration) * 100, 100) : 0}%`,
-                                }}
-                            />
-                        </div>
+                        <ConnectSeekSlider
+                            duration={effectiveDuration}
+                            elapsed={connectElapsed}
+                        />
                     ) : isWaveform ? (
                         <Suspense fallback={<Spinner />}>
                             <PlayerbarWaveform />
@@ -100,6 +85,46 @@ export const PlayerbarSlider = () => {
                 </div>
             </div>
         </>
+    );
+};
+
+const ConnectSeekSlider = ({ duration, elapsed }: { duration: number; elapsed: number }) => {
+    const [isSeeking, setIsSeeking] = useState(false);
+    const [seekValue, setSeekValue] = useState(0);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const seek = useConnectSeek();
+
+    const clearTimeout_ = () => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
+    };
+
+    return (
+        <CustomPlayerbarSlider
+            disabled={duration === 0}
+            label={(v) => formatDuration(v * 1000)}
+            max={duration}
+            min={0}
+            onChange={(v) => {
+                clearTimeout_();
+                setIsSeeking(true);
+                setSeekValue(v);
+            }}
+            onChangeEnd={(v) => {
+                setSeekValue(v);
+                seek(v);
+                clearTimeout_();
+                // Keep slider frozen for 2s while FFmpeg restarts; clear on timeout
+                timeoutRef.current = setTimeout(() => {
+                    setIsSeeking(false);
+                    timeoutRef.current = null;
+                }, 2000);
+            }}
+            value={isSeeking ? seekValue : elapsed}
+            w="100%"
+        />
     );
 };
 

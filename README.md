@@ -45,6 +45,7 @@ Please expect rough edges and report issues if you encounter them.
 - Sonos multiroom grouping (devices play in sync)
 - Per-device volume control with a hover slider (Sonos and Chromecast)
 - Play/pause/previous/next controls in the popover (operated on the remote device)
+- In-track seeking — drag the progress slider to seek within the current track on the remote device
 - Radio stream support (sends the live URL directly to the device)
 - Persistent state — Connect continues if you reload Feishin in the browser
 - Local playback pauses automatically when handing off to a device (Crossfade and Gapless transitions are also disabled locally while Connect is active to prevent double-audio)
@@ -74,14 +75,14 @@ services:
 | Port | Service |
 |------|---------|
 | 9180 | Feishin web UI (nginx) |
-| 8765 | Connect API (FastAPI, also reachable via `/api/` through nginx) |
+| 9181 | Connect API (FastAPI, also reachable via `/api/` through nginx) |
 
 ### Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CONNECT_TOKEN` | *(public default)* | Secret token protecting the Connect API on port 8765. **Change this** to a random string — the built-in default is publicly known (open source) and only blocks anonymous scanners. nginx adds the token to every internal request automatically; the browser never handles it directly. In Electron, a random token is generated at startup instead. |
-| `CONNECT_URL` | `/api` | URL the browser uses to reach the Connect API. The default (`/api`) routes through nginx on the same domain — no CORS issues, no extra config needed. Change to `http://host:8765` only if you need direct access to the backend, bypassing nginx. |
+| `CONNECT_TOKEN` | *(public default)* | Secret token protecting the Connect API on port 9181. **Change this** to a random string — the built-in default is publicly known (open source) and only blocks anonymous scanners. nginx adds the token to every internal request automatically; the browser never handles it directly. In Electron, a random token is generated at startup instead. |
+| `CONNECT_URL` | `/api` | URL the browser uses to reach the Connect API. The default (`/api`) routes through nginx on the same domain — no CORS issues, no extra config needed. Change to `http://host:9181` only if you need direct access to the backend, bypassing nginx. |
 | `SERVER_INTERNAL_URL` | — | Internal media server address for the backend proxy (e.g. `http://10.x.x.x:4533`). Only needed when the media server sits behind an SSO layer that the browser cannot bypass. See [Media server behind SSO](#media-server-behind-sso-authentik-etc) below. With `network_mode: host`, use the actual IP — Docker container names do not resolve in host network mode. The old name `NAVIDROME_INTERNAL_URL` is still accepted as a fallback. |
 | `ALLOWED_ORIGINS` | — | Extra CORS origins for the Connect API, comma-separated. **Not needed in standard Docker deployments**: when the browser and the API share the same domain via nginx, all requests are same-origin and CORS never applies. Only relevant if the backend is accessed from a different origin than the page (e.g. backend running standalone, frontend on a separate domain). |
 | `SERVER_URL` | — | Media server URL (Navidrome / Subsonic / Jellyfin) shown to the browser |
@@ -98,7 +99,7 @@ services:
 
 ### Electron (desktop app)
 
-The Connect backend starts and stops automatically alongside the Electron app — no separate Python installation required in the packaged build.
+The Connect backend starts and stops automatically alongside the Electron app — no separate Python installation required in the packaged build. The backend port is selected dynamically at startup (starting from 9181), so it never conflicts with other services already using that port.
 
 **Development** (Python + uv required):
 
@@ -162,7 +163,7 @@ Feishin Connect solves this with a built-in **backend proxy**: all media server 
 
 3. The media server itself no longer needs to be reachable from the browser at all — Feishin Connect acts as the only entry point to its API.
 
-**Security:** The Connect API (port 8765) is protected by `CONNECT_TOKEN`. nginx forwards it automatically, so the browser never handles it. Media server traffic is authenticated via Subsonic token/password or Jellyfin API key as usual — the proxy is transparent. How port 9180 is secured (firewall, SSO, etc.) is up to the deployment.
+**Security:** The Connect API (port 9181) is protected by `CONNECT_TOKEN`. nginx forwards it automatically, so the browser never handles it. Media server traffic is authenticated via Subsonic token/password or Jellyfin API key as usual — the proxy is transparent. How port 9180 is secured (firewall, SSO, etc.) is up to the deployment.
 
 **Note:** This proxy is not needed if the media server is publicly reachable or on the same network as the browser. In that case, set `SERVER_URL` directly to the media server URL and leave `SERVER_INTERNAL_URL` unset.
 

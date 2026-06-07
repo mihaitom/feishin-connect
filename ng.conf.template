@@ -29,12 +29,12 @@ server {
   }
 
   location /api/ {
-    proxy_pass http://127.0.0.1:8765/;
+    proxy_pass http://127.0.0.1:9181/;
     proxy_set_header X-Connect-Token "${CONNECT_TOKEN}";
   }
 
   location /rest/ {
-    proxy_pass http://127.0.0.1:8765/rest/;
+    proxy_pass http://127.0.0.1:9181/rest/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Connect-Token "${CONNECT_TOKEN}";
@@ -43,14 +43,14 @@ server {
   }
 
   location /auth/ {
-    proxy_pass http://127.0.0.1:8765/auth/;
+    proxy_pass http://127.0.0.1:9181/auth/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Connect-Token "${CONNECT_TOKEN}";
   }
 
   location /stream {
-      proxy_pass http://127.0.0.1:8765/stream;
+      proxy_pass http://127.0.0.1:9181/stream;
       proxy_set_header X-Connect-Token "${CONNECT_TOKEN}";
   }
 }

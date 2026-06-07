@@ -1,5 +1,5 @@
 export const CONNECT_URL =
-    (window as any).__CONNECT_URL__ || import.meta.env.VITE_CONNECT_URL || 'http://localhost:8765';
+    (window as any).__CONNECT_URL__ || import.meta.env.VITE_CONNECT_URL || 'http://localhost:9181';
 
 export const CONNECT_TOKEN: string = (window as any).__CONNECT_TOKEN__ ?? '';
 

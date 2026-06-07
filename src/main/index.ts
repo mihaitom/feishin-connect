@@ -27,6 +27,7 @@ import { ChildProcess, spawn } from 'child_process';
 import { randomBytes } from 'crypto';
 import { access, constants, existsSync } from 'fs';
 import { request as httpRequest } from 'http';
+import { createServer } from 'net';
 import path, { join } from 'path';
 import semver from 'semver';
 
@@ -267,9 +268,21 @@ const connectToken = randomBytes(32).toString('hex');
 process.env['CONNECT_TOKEN'] = connectToken;
 
 let connectProcess: ChildProcess | null = null;
+let connectPort = 9181;
+
+const findFreePort = (): Promise<number> =>
+    new Promise((resolve, reject) => {
+        const srv = createServer();
+        srv.unref();
+        srv.on('error', reject);
+        srv.listen(0, '127.0.0.1', () => {
+            const { port } = srv.address() as { port: number };
+            srv.close(() => resolve(port));
+        });
+    });
 
 const startConnectServer = () => {
-    const connectPort = process.env.CONNECT_PORT ?? '8765';
+    const portStr = String(connectPort);
 
     if (app.isPackaged) {
         // Production: use the PyInstaller binary bundled in extraResources
@@ -282,7 +295,7 @@ const startConnectServer = () => {
         }
 
         connectProcess = spawn(binaryPath, [], {
-            env: { ...process.env, PORT: connectPort },
+            env: { ...process.env, PORT: portStr },
             stdio: ['ignore', 'pipe', 'pipe'],
         });
     } else {
@@ -290,7 +303,7 @@ const startConnectServer = () => {
         const connectDir = join(app.getAppPath(), 'connect');
         connectProcess = spawn('uv', ['run', 'python', 'main.py'], {
             cwd: connectDir,
-            env: { ...process.env, PORT: connectPort },
+            env: { ...process.env, PORT: portStr },
             stdio: ['ignore', 'pipe', 'pipe'],
         });
     }
@@ -309,7 +322,7 @@ const startConnectServer = () => {
         connectProcess = null;
     });
 
-    log.info(`[Connect] Backend gestartet (port=${connectPort})`);
+    log.info(`[Connect] Backend gestartet (port=${portStr})`);
 };
 
 const killConnectServer = () => {
@@ -321,14 +334,13 @@ const killConnectServer = () => {
 
 // Fire-and-forget HTTP stop + process kill before the app exits.
 const stopConnect = () => {
-    const port = Number(process.env.CONNECT_PORT ?? 8765);
     try {
         const req = httpRequest({
             headers: { 'X-Connect-Token': connectToken },
             host: '127.0.0.1',
             method: 'POST',
             path: '/stop',
-            port,
+            port: connectPort,
             timeout: 800,
         });
         req.on('error', () => {});
@@ -1123,7 +1135,9 @@ if (!singleInstance) {
     });
 
     app.whenReady()
-        .then(() => {
+        .then(async () => {
+            connectPort = await findFreePort();
+            process.env['CONNECT_PORT'] = String(connectPort);
             startConnectServer();
 
             protocol.handle('feishin', async () => {

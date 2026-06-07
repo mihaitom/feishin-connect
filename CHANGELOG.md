@@ -12,11 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **CORS restricted to known origins** — browser access to the Connect API is limited to `localhost` (development) and Electron's `file://` origin. Set `ALLOWED_ORIGINS` to a comma-separated list for custom deployments.
 - **`/stream` deliberately left open** — `GET` and `HEAD /stream` require no token so Sonos, AirPlay and Chromecast devices can always pull audio. CORS does not apply to hardware devices.
 - **13 new auth tests** — `tests/test_auth.py` covers open vs. protected endpoints, missing/wrong token (header and `?token=` query param), and the SSE rejection path.
+- **In-track seeking in Connect mode** — the progress slider in the player bar is now interactive when a Connect device is active. Dragging and releasing sends a `POST /seek` request to the backend, which restarts playback from the chosen position. The slider freezes during the seek and unlocks automatically once the backend confirms the new position.
 
 ### Changed
 
 - **Connect backend restructured into packages** — `delivery.py` split into a `delivery/` package (`airplay`, `sonos`, `chromecast`, `manager`, `credentials`, `base`); `media.py`, `subsonic.py` and `jellyfin.py` merged into a `media/` package. All existing imports remain backwards-compatible via `__init__.py` re-exports.
 - **`NAVIDROME_INTERNAL_URL` renamed to `SERVER_INTERNAL_URL`** — the proxy works for Navidrome, Subsonic and Jellyfin alike, so the variable name no longer made sense. The old name is still accepted as a fallback — existing deployments need no changes.
+- **Default Connect API port changed from 8765 to 9181** — places it adjacent to Feishin's nginx port (9180) for easier firewall rules. Update any custom port mappings in `docker-compose.yaml` if you pinned the old port.
+- **Electron: dynamic port selection** — instead of always binding to port 9181, the Electron app now picks a free port automatically at startup. This avoids conflicts if 9181 is already in use on the host. The port is injected into the renderer via `window.__CONNECT_URL__` — no manual configuration is needed.
 
 ### Removed
 
@@ -152,7 +155,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - **Navidrome-Proxy** — The Connect backend now proxies all Navidrome API calls (`/rest/`, `/auth/`, `/api/`). This allows Feishin to work when Navidrome is behind an SSO layer (e.g. Authentik forward auth via Traefik) that would otherwise block direct browser-to-Navidrome requests. Set `SERVER_INTERNAL_URL` to the internal Navidrome address (e.g. `http://10.x.x.x:4533`) to enable the proxy; the backend then reaches Navidrome directly on the internal network, bypassing the SSO middleware entirely. See the Docker section in the README for details.
-- **`CONNECT_URL` Docker default** — `CONNECT_URL` now defaults to `/api` in the Docker image. Previously it fell back to `http://localhost:8765`, which caused CORS errors when accessing Feishin remotely (the browser tried to reach the backend on the user's local machine instead of the server).
+- **`CONNECT_URL` Docker default** — `CONNECT_URL` now defaults to `/api` in the Docker image. Previously it fell back to `http://localhost:9181`, which caused CORS errors when accessing Feishin remotely (the browser tried to reach the backend on the user's local machine instead of the server).
 
 ### Fixed
 

@@ -2,7 +2,7 @@
 
 Startup:
   uv run python main.py
-  uvicorn main:app --host 0.0.0.0 --port 8765
+  uvicorn main:app --host 0.0.0.0 --port 9181
 """
 
 import logging

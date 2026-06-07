@@ -34,10 +34,13 @@ export type PreloadApi = typeof api;
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
+const connectUrl = `http://localhost:${process.env['CONNECT_PORT'] || '9181'}`;
+
 if (process.contextIsolated) {
     try {
         contextBridge.exposeInMainWorld('api', api);
         contextBridge.exposeInMainWorld('__CONNECT_TOKEN__', process.env['CONNECT_TOKEN'] || '');
+        contextBridge.exposeInMainWorld('__CONNECT_URL__', connectUrl);
     } catch (error) {
         console.error(error);
     }
@@ -45,4 +48,5 @@ if (process.contextIsolated) {
     // @ts-ignore (define in dts)
     window.api = api;
     (window as any).__CONNECT_TOKEN__ = process.env['CONNECT_TOKEN'] || '';
+    (window as any).__CONNECT_URL__ = connectUrl;
 }
