@@ -20,9 +20,7 @@ router = APIRouter(dependencies=[Depends(require_token)])
 _INTERNAL_URL = (os.getenv("SERVER_INTERNAL_URL") or os.getenv("NAVIDROME_INTERNAL_URL", "")).rstrip("/")
 
 _SKIP_REQ = {"host", "connection", "transfer-encoding"}
-# Strip content-length: httpx decompresses gzip automatically, so the original
-# Content-Length no longer matches the actual byte count.
-_SKIP_RESP = {"transfer-encoding", "connection", "content-length", "content-encoding"}
+_SKIP_RESP = {"transfer-encoding", "connection", "content-encoding"}
 
 _ALL_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"]
 
@@ -56,8 +54,15 @@ async def _proxy(request: Request, target: str) -> StreamingResponse | JSONRespo
         await client.aclose()
         return JSONResponse({"error": f"Navidrome Timeout: {e}"}, status_code=504)
 
+    # If the origin sent a compressed body, httpx already decompressed it, so the
+    # original Content-Length no longer matches — drop it. Otherwise (e.g. audio
+    # streams), keep it so the browser gets accurate length / Range support.
+    skip_resp = set(_SKIP_RESP)
+    if "content-encoding" in response.headers:
+        skip_resp.add("content-length")
+
     resp_headers = {
-        k: v for k, v in response.headers.items() if k.lower() not in _SKIP_RESP
+        k: v for k, v in response.headers.items() if k.lower() not in skip_resp
     }
 
     async def streamed():
