@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.1] - unreleased
+
+### Fixed
+- **Long tracks restarted from the beginning during remote playback** — the Connect proxy stripped `Content-Length` from every proxied response, including `/rest/stream.view`. Without a known length, the browser couldn't resume the audio stream via `Range` requests after the underlying connection was interrupted (e.g. an idle timeout somewhere in the reverse-proxy chain on long tracks), so it restarted the `<audio>` element from byte 0 instead. `Content-Length` (and `Accept-Ranges`/`Content-Range`) are now only stripped when the origin response was actually compressed.
+
+---
+
+## [0.3.0] - 2026-06-07
 
 ### Added
 
@@ -17,7 +24,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- **Long tracks restarted from the beginning during remote playback** — the Connect proxy stripped `Content-Length` from every proxied response, including `/rest/stream.view`. Without a known length, the browser couldn't resume the audio stream via `Range` requests after the underlying connection was interrupted (e.g. an idle timeout somewhere in the reverse-proxy chain on long tracks), so it restarted the `<audio>` element from byte 0 instead. `Content-Length` (and `Accept-Ranges`/`Content-Range`) are now only stripped when the origin response was actually compressed.
 - **Radio via Connect: switching to a radio station played a queue track instead** — when `stopRadio()` was called inside the auto-forward effect to silence local playback, it synchronously cleared `isRadioActive`. On the next render the track effect saw `isRadioActive = false` and, with `lastAutoSentRef` empty, immediately sent the queue track to `/play` on top of the radio URL already dispatched to `/play-url`. The ref is now set to the current song ID so the track effect treats it as already-sent and skips.
 - **AirPlay: "not connected to remote" no longer logged as ERROR** — when the Apple TV drops the audio connection, pyatv already logs the real cause (`Connection refused`) itself. The subsequent `RuntimeError: not connected to remote` thrown during RTSP teardown is now caught and downgraded to a warning.
 
