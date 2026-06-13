@@ -1,5 +1,6 @@
 """routes/playback.py — /play, /play-url, /pause, /resume, /stop"""
 
+import asyncio
 import logging
 import time
 
@@ -12,6 +13,64 @@ from state import compute_position, ctx, event_bus, resolve_target, stream_url
 
 logger = logging.getLogger("connect.playback")
 router = APIRouter(dependencies=[Depends(require_token)])
+
+
+async def _apply_position_offset(target, generation: int) -> None:
+    """Set `position_offset` for the track that just started playing.
+
+    `compute_position()` returns `wall_elapsed + position_offset`. A device
+    that's buffering lags behind the wall clock, so `position_offset` is
+    normally negative (e.g. -2s for AirPlay's startup buffer). This is what
+    keeps the lyrics view in sync with what's actually audible.
+
+    AirPlay has no position feedback, so it gets a fixed startup-buffering
+    estimate (FIXED_OFFSET, a positive "delay" magnitude). Sonos/Chromecast
+    expose real device position — poll briefly once to measure the actual
+    delay, then keep it constant for the rest of the track (re-buffering
+    mid-track is not accounted for).
+    """
+    st = ctx.state
+    deliveries = getattr(target, "deliveries", [target])
+
+    fixed = max((d.FIXED_OFFSET for d in deliveries), default=0.0)
+    if fixed:
+        st.position_offset = -fixed
+        logger.info(f"[lyrics-sync] fixed position_offset={st.position_offset:.2f}s")
+        await event_bus.broadcast()
+        return
+
+    candidate = next((d for d in deliveries if d.SUPPORTS_POSITION), None)
+    if candidate is None:
+        return
+
+    deadline = time.time() + 10.0
+    while time.time() < deadline:
+        await asyncio.sleep(0.5)
+        if st.play_generation != generation or not st.is_streaming:
+            return
+        try:
+            device_pos = await candidate.get_position()
+        except Exception:
+            continue
+        if not device_pos:
+            continue
+        wall_elapsed = time.time() - st.play_start_time
+        st.position_offset = device_pos - wall_elapsed
+        logger.info(
+            f"[lyrics-sync] {candidate.target}: calibrated position_offset="
+            f"{st.position_offset:.2f}s (device {device_pos:.2f}s vs. wall {wall_elapsed:.2f}s)"
+        )
+        await event_bus.broadcast()
+        return
+
+
+def _current_track_play_args() -> tuple[str, str, str | None]:
+    """Return (title, artist, album_art_url) for the current track, used when
+    restarting the stream (resume/seek) so Now-Playing metadata isn't lost."""
+    track = ctx.state.current_track
+    if not track:
+        return "Connect", "", None
+    return track.title, track.artist, ctx.media.get_cover_art_url(track.cover_art_id)
 
 
 class PlayRequest(BaseModel):
@@ -27,7 +86,9 @@ async def play_tracks(req: PlayRequest):
         logger.warning(
             "[play] Rejected: media server not configured (waiting for /config)"
         )
-        return {"error": "Media server not configured — waiting for /config from Feishin"}
+        return {
+            "error": "Media server not configured — waiting for /config from Feishin"
+        }
     if not req.track_ids:
         return {"error": "No track ID provided"}
 
@@ -52,6 +113,7 @@ async def play_tracks(req: PlayRequest):
     st.play_start_time = time.time()
     st.paused_elapsed = 0.0
     st.resume_offset = 0.0
+    st.position_offset = 0.0
     st.play_generation += 1
     st.track_ended = False
 
@@ -62,12 +124,14 @@ async def play_tracks(req: PlayRequest):
         return {"status": "playing", "stream_url": url}
 
     st.active_delivery = target
+    album_art_url = ctx.media.get_cover_art_url(track.cover_art_id)
     try:
-        await target.play(url)
+        await target.play(url, track.title, track.artist, album_art_url)
     except Exception as e:
         logger.error(f"[play] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
+    asyncio.create_task(_apply_position_offset(target, st.play_generation))
     await event_bus.broadcast()
     return {"status": "playing", "stream_url": url}
 
@@ -96,6 +160,7 @@ async def play_url(req: PlayUrlRequest):
     st.play_start_time = time.time()
     st.paused_elapsed = 0.0
     st.resume_offset = 0.0
+    st.position_offset = 0.0
     st.play_generation += 1
     st.track_ended = False
     st.active_delivery = target
@@ -106,6 +171,7 @@ async def play_url(req: PlayUrlRequest):
         logger.error(f"[play-url] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
+    asyncio.create_task(_apply_position_offset(target, st.play_generation))
     await event_bus.broadcast()
     return {"status": "playing", "url": req.url}
 
@@ -116,7 +182,9 @@ async def pause_playback():
     if st.active_delivery:
         await st.active_delivery.pause()
     elapsed = compute_position()
-    st.resume_offset = elapsed
+    # resume_offset is the raw wall-clock position (without position_offset),
+    # so resuming doesn't double-apply the device's startup-buffering delay.
+    st.resume_offset = max(0.0, elapsed - st.position_offset)
     st.paused_elapsed = elapsed
     st.is_paused = True
     logger.info(f"[pause] ⏸ {elapsed:.1f}s into track")
@@ -137,7 +205,7 @@ async def resume_playback():
 
     if st.active_delivery:
         # Force a fresh /stream connection so FFmpeg applies the seek offset
-        await st.active_delivery.play(stream_url())
+        await st.active_delivery.play(stream_url(), *_current_track_play_args())
 
     await event_bus.broadcast()
     return {"paused": False}
@@ -154,15 +222,18 @@ async def seek_playback(body: SeekRequest):
     if st.current_track:
         position = min(position, st.current_track.duration)
 
-    st.resume_offset = position
-    st.play_start_time = time.time() - position
+    # position is the displayed (offset-adjusted) target; play_start_time
+    # tracks the raw wall-clock position, so subtract position_offset back out.
+    raw_position = max(0.0, position - st.position_offset)
+    st.resume_offset = raw_position
+    st.play_start_time = time.time() - raw_position
 
     if st.is_paused:
         st.paused_elapsed = position
     else:
         st.play_generation += 1
         if st.active_delivery:
-            await st.active_delivery.play(stream_url())
+            await st.active_delivery.play(stream_url(), *_current_track_play_args())
 
     logger.info(f"[seek] ⏩ {position:.1f}s")
     await event_bus.broadcast()

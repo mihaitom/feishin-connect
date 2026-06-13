@@ -4,11 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.1] - unreleased
+## [0.3.1] - 2026-06-13
 
 ### Added
 - **Nicer AirPlay pairing dialog** — the pairing window now matches Feishin's look and feel, with clear status icons and a "Try again" button that lets you re-enter the PIN if it was wrong.
 - **Unpair AirPlay devices** — paired AirPlay 2 devices now show an "Unpair" button (with a confirmation prompt) so you can remove a pairing without digging into config files.
+- **Synced lyrics in Connect mode** — the lyrics view now follows along during remote playback, using the Connect device's playback position. Clicking a line seeks the Connect device to that point.
+- **Lyrics sync accounts for device buffering delay** — Sonos and Chromecast now report their real playback position, measured once shortly after a track starts, so the reported elapsed time matches what's actually audible. AirPlay has no such feedback, so a fixed 2-second offset is applied instead.
+- **Now-Playing metadata for Sonos and Chromecast** — Sonos and Chromecast now show the track title, artist and album art on the device itself (e.g. on a TV screen or the Sonos app), not just a generic "Connect" label.
+
+### Known limitations
+- **No audio visualizer in Connect mode** — the visualizer needs a live audio signal from the Web Audio API to analyze. In Connect mode, audio is streamed directly from the Connect backend to the target device (AirPlay/Sonos/Chromecast) and never passes through the app's audio engine, so there's no signal to visualize. Lyrics work because they only need playback position, not the audio itself.
 
 ### Fixed
 - **Long tracks restarted from the beginning during remote playback** — on long tracks, the audio player sometimes jumped back to the very start instead of continuing. This is fixed now.

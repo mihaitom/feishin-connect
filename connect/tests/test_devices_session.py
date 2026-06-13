@@ -135,9 +135,12 @@ def test_join_sonos_falls_back_to_individual_play_when_group_fails(client, _stre
     state.ctx.state.active_delivery = existing_sonos
 
     fallback = AsyncMock()
-    with patch.object(
-        SonosDelivery, "_get_device", side_effect=RuntimeError("group failed")
-    ), patch.object(SonosDelivery, "play", new=fallback):
+    with (
+        patch.object(
+            SonosDelivery, "_get_device", side_effect=RuntimeError("group failed")
+        ),
+        patch.object(SonosDelivery, "play", new=fallback),
+    ):
         r = client.post(
             "/join", json={"target_type": "sonos", "target_name": "Wohnzimmer"}
         )

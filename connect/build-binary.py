@@ -8,6 +8,7 @@ Usage:
     OR from the connect directory:
     python build-binary.py
 """
+
 from __future__ import annotations
 
 import os
@@ -28,7 +29,10 @@ def main() -> int:
 
     uv = shutil.which("uv")
     if uv is None:
-        print("[connect] ERROR: 'uv' not found on PATH. Install from https://docs.astral.sh/uv/", file=sys.stderr)
+        print(
+            "[connect] ERROR: 'uv' not found on PATH. Install from https://docs.astral.sh/uv/",
+            file=sys.stderr,
+        )
         return 1
 
     print("[connect] Installing dev dependencies (pyinstaller)...")
@@ -45,5 +49,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except subprocess.CalledProcessError as e:
-        print(f"[connect] Command failed with exit code {e.returncode}", file=sys.stderr)
+        print(
+            f"[connect] Command failed with exit code {e.returncode}", file=sys.stderr
+        )
         sys.exit(e.returncode)

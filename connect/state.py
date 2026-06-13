@@ -28,6 +28,9 @@ class AppState:
         # Wall-clock progress tracking
         self.play_start_time: float = 0.0
         self.paused_elapsed: float = 0.0
+        # Constant per-track correction added to the wall-clock position to
+        # account for the device's startup buffering delay (see playback.py).
+        self.position_offset: float = 0.0
         # Seek offset for next /stream reconnect (set by /pause, consumed by /stream)
         self.resume_offset: float = 0.0
         # Incremented on every /play, /play-url, /resume so old stream_with_completion
@@ -71,13 +74,18 @@ def stream_url() -> str:
 
 
 def compute_position() -> float:
-    """Return elapsed seconds into the current track, clamped to track duration."""
+    """Return elapsed seconds into the current track, clamped to track duration.
+
+    Includes `position_offset`, a constant per-track correction for the
+    device's startup buffering delay (see playback.py:_calibrate_position_offset).
+    """
     st = ctx.state
     if not st.is_streaming or not st.play_start_time:
         return 0.0
     if st.is_paused:
         return st.paused_elapsed
-    elapsed = time.time() - st.play_start_time
+    elapsed = time.time() - st.play_start_time + st.position_offset
+    elapsed = max(0.0, elapsed)
     if st.current_track:
         return min(elapsed, float(st.current_track.duration))
     return elapsed

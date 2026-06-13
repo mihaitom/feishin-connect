@@ -141,7 +141,11 @@ def test_chromecast_play_calls_media_controller():
     with patch.object(ChromecastDelivery, "_get_device", return_value=cast):
         asyncio.run(d.play("http://stream", "Title"))
     cast.media_controller.play_media.assert_called_once_with(
-        "http://stream", "audio/mpeg"
+        "http://stream",
+        "audio/mpeg",
+        title="Title",
+        thumb=None,
+        metadata={"metadataType": 3, "title": "Title", "artist": ""},
     )
     cast.media_controller.block_until_active.assert_called_once_with(10)
 

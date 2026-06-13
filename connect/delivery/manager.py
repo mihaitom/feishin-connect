@@ -57,7 +57,13 @@ class DeliveryManager:
                 )
         return result
 
-    async def play(self, stream_url: str, title: str = "Connect") -> None:
+    async def play(
+        self,
+        stream_url: str,
+        title: str = "Connect",
+        artist: str = "",
+        album_art_url: str | None = None,
+    ) -> None:
         if not self.deliveries:
             return
         sonos = [d for d in self.deliveries if isinstance(d, SonosDelivery)]
@@ -65,10 +71,14 @@ class DeliveryManager:
 
         tasks = []
         if len(sonos) > 1:
-            tasks.append(self._play_grouped_sonos(sonos, stream_url, title))
+            tasks.append(
+                self._play_grouped_sonos(
+                    sonos, stream_url, title, artist, album_art_url
+                )
+            )
         elif sonos:
-            tasks.append(sonos[0].play(stream_url, title))
-        tasks.extend(d.play(stream_url, title) for d in others)
+            tasks.append(sonos[0].play(stream_url, title, artist, album_art_url))
+        tasks.extend(d.play(stream_url, title, artist, album_art_url) for d in others)
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
         for result in results:
@@ -76,7 +86,12 @@ class DeliveryManager:
                 logger.error(f"Delivery error: {result}")
 
     async def _play_grouped_sonos(
-        self, deliveries: list[SonosDelivery], stream_url: str, title: str
+        self,
+        deliveries: list[SonosDelivery],
+        stream_url: str,
+        title: str,
+        artist: str = "",
+        album_art_url: str | None = None,
     ) -> None:
         """Group Sonos devices so they play in sync (coordinator + followers)."""
         devices = await asyncio.gather(
@@ -100,7 +115,7 @@ class DeliveryManager:
 
         await asyncio.sleep(0.5)
 
-        await deliveries[0].play(stream_url, title)
+        await deliveries[0].play(stream_url, title, artist, album_art_url)
 
     async def pause(self) -> None:
         await asyncio.gather(

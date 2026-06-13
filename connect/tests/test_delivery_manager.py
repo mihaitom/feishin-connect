@@ -100,8 +100,8 @@ def test_manager_play_calls_every_delivery():
 
     asyncio.run(m.play("http://stream", "Title"))
 
-    a.play.assert_awaited_once_with("http://stream", "Title")
-    c.play.assert_awaited_once_with("http://stream", "Title")
+    a.play.assert_awaited_once_with("http://stream", "Title", "", None)
+    c.play.assert_awaited_once_with("http://stream", "Title", "", None)
 
 
 def test_manager_stop_swallows_exceptions():

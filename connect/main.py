@@ -62,7 +62,9 @@ async def lifespan(_: FastAPI):
         logger.info("ℹ️  No TARGETS env — controlled via Feishin /play")
 
     if _CONNECT_TOKEN == _DEFAULT_TOKEN:
-        logger.warning("⚠️  Using default CONNECT_TOKEN — set a custom value in docker-compose for real security")
+        logger.warning(
+            "⚠️  Using default CONNECT_TOKEN — set a custom value in docker-compose for real security"
+        )
     else:
         logger.info("🔒 Token auth enabled (custom CONNECT_TOKEN set)")
     logger.info("⏳ Waiting for Feishin /config (media server credentials)")

@@ -11,12 +11,18 @@ from delivery import ChromecastDelivery, SonosDelivery
 
 def test_discover_returns_all_three_device_types(client):
     sonos = [{"name": "Küche", "ip": "10.0.0.1"}]
-    airplay = [{"name": "HomePod", "address": "10.0.0.2", "model": "X", "needs_pairing": True}]
+    airplay = [
+        {"name": "HomePod", "address": "10.0.0.2", "model": "X", "needs_pairing": True}
+    ]
     chromecast = [{"name": "TV", "host": "10.0.0.3", "model": "Chromecast"}]
 
-    with patch("routes.devices.discover_sonos", new=AsyncMock(return_value=sonos)), \
-         patch("routes.devices.discover_airplay", new=AsyncMock(return_value=airplay)), \
-         patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=chromecast)):
+    with (
+        patch("routes.devices.discover_sonos", new=AsyncMock(return_value=sonos)),
+        patch("routes.devices.discover_airplay", new=AsyncMock(return_value=airplay)),
+        patch(
+            "routes.devices.discover_chromecast", new=AsyncMock(return_value=chromecast)
+        ),
+    ):
         r = client.get("/discover")
 
     assert r.status_code == 200
@@ -33,9 +39,11 @@ def test_discover_returns_cached_results_immediately(client):
         "chromecast": [],
     }
 
-    with patch("routes.devices.discover_sonos", new=AsyncMock(return_value=[])), \
-         patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])), \
-         patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])):
+    with (
+        patch("routes.devices.discover_sonos", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])),
+    ):
         r = client.get("/discover")
 
     assert r.status_code == 200
@@ -49,9 +57,14 @@ def test_discover_keeps_cached_branch_when_scanner_raises(client):
         "chromecast": [],
     }
 
-    with patch("routes.devices.discover_sonos", new=AsyncMock(side_effect=RuntimeError("net"))), \
-         patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])), \
-         patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])):
+    with (
+        patch(
+            "routes.devices.discover_sonos",
+            new=AsyncMock(side_effect=RuntimeError("net")),
+        ),
+        patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])),
+    ):
         r = client.get("/discover")
 
     assert r.status_code == 200
@@ -59,9 +72,14 @@ def test_discover_keeps_cached_branch_when_scanner_raises(client):
 
 
 def test_discover_fresh_scan_when_cache_empty(client):
-    with patch("routes.devices.discover_sonos", new=AsyncMock(return_value=[])), \
-         patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])), \
-         patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[{"name": "TV"}])):
+    with (
+        patch("routes.devices.discover_sonos", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
+        patch(
+            "routes.devices.discover_chromecast",
+            new=AsyncMock(return_value=[{"name": "TV"}]),
+        ),
+    ):
         r = client.get("/discover")
 
     assert r.status_code == 200

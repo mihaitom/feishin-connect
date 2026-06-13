@@ -33,6 +33,8 @@ def reset_state():
     st.active_delivery = None
     st.play_start_time = 0.0
     st.paused_elapsed = 0.0
+    st.resume_offset = 0.0
+    st.position_offset = 0.0
     st.discovered = {"airplay": [], "chromecast": [], "sonos": []}
 
     state.ctx.media = SubsonicClient("")

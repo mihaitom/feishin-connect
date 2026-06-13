@@ -17,7 +17,9 @@ from auth import require_token
 
 router = APIRouter(dependencies=[Depends(require_token)])
 
-_INTERNAL_URL = (os.getenv("SERVER_INTERNAL_URL") or os.getenv("NAVIDROME_INTERNAL_URL", "")).rstrip("/")
+_INTERNAL_URL = (
+    os.getenv("SERVER_INTERNAL_URL") or os.getenv("NAVIDROME_INTERNAL_URL", "")
+).rstrip("/")
 
 _SKIP_REQ = {"host", "connection", "transfer-encoding"}
 _SKIP_RESP = {"transfer-encoding", "connection", "content-encoding"}

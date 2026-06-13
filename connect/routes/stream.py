@@ -53,7 +53,9 @@ async def audio_stream():
         cancel it (that CancelledError would only affect stream_with_completion).
         """
         if wait > 0.5:
-            logger.info(f"[stream] FFmpeg done early — waiting {wait:.1f}s for playback to finish")
+            logger.info(
+                f"[stream] FFmpeg done early — waiting {wait:.1f}s for playback to finish"
+            )
             await asyncio.sleep(wait)
         st = ctx.state
         if st.is_streaming and not st.is_paused and st.play_generation == my_generation:
@@ -79,7 +81,9 @@ async def audio_stream():
         if st.is_streaming and not st.is_paused and st.play_generation == my_generation:
             wait = 0.0
             if st.current_track and st.play_start_time:
-                wait = max(0.0, (st.play_start_time + st.current_track.duration) - time.time())
+                wait = max(
+                    0.0, (st.play_start_time + st.current_track.duration) - time.time()
+                )
             asyncio.create_task(_fire_track_end(my_generation, wait))
 
     return StreamingResponse(
