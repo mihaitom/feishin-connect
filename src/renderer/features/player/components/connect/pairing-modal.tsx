@@ -3,11 +3,22 @@ import { useTranslation } from 'react-i18next';
 
 import { connectFetch, PairingStep } from './types';
 
+import { Button } from '/@/shared/components/button/button';
+import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
+import { Modal } from '/@/shared/components/modal/modal';
+import { Spinner } from '/@/shared/components/spinner/spinner';
+import { Stack } from '/@/shared/components/stack/stack';
+import { TextInput } from '/@/shared/components/text-input/text-input';
+import { Text } from '/@/shared/components/text/text';
+
 interface PairingModalProps {
     deviceName: string;
     onClose: () => void;
     onSuccess: () => void;
 }
+
+const noop = () => {};
 
 export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalProps) => {
     const { t } = useTranslation();
@@ -27,12 +38,7 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    setError(
-                        data.error ??
-                            t('player.connect_pairing_error_failed', {
-                                postProcess: 'sentenceCase',
-                            }),
-                    );
+                    setError(data.error ?? t('player.connect_pairing_error_failed'));
                     setStep('error');
                     return;
                 }
@@ -42,43 +48,42 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
                     onClose();
                 }, 1200);
             } catch {
-                setError(
-                    t('player.connect_pairing_error_backend', { postProcess: 'sentenceCase' }),
-                );
+                setError(t('player.connect_pairing_error_backend'));
                 setStep('error');
             }
         },
         [deviceName, onClose, onSuccess, t],
     );
 
-    const startPairing = useCallback(async () => {
-        setStep('started');
-        setError('');
-        try {
-            const res = await connectFetch(`/pair/airplay/start`, {
-                body: JSON.stringify({ name: deviceName }),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setError(
-                    data.error ??
-                        t('player.connect_pairing_error_failed', { postProcess: 'sentenceCase' }),
-                );
+    const startPairing = useCallback(
+        async (force = false) => {
+            setStep('started');
+            setError('');
+            setPin('');
+            try {
+                const res = await connectFetch(`/pair/airplay/start`, {
+                    body: JSON.stringify({ force, name: deviceName }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    setError(data.error ?? t('player.connect_pairing_error_failed'));
+                    setStep('error');
+                    return;
+                }
+                if (data.device_provides_pin) {
+                    setStep('needs_pin');
+                } else {
+                    await finishPairing(null);
+                }
+            } catch {
+                setError(t('player.connect_pairing_error_backend'));
                 setStep('error');
-                return;
             }
-            if (data.device_provides_pin) {
-                setStep('needs_pin');
-            } else {
-                await finishPairing(null);
-            }
-        } catch {
-            setError(t('player.connect_pairing_error_backend', { postProcess: 'sentenceCase' }));
-            setStep('error');
-        }
-    }, [deviceName, finishPairing, t]);
+        },
+        [deviceName, finishPairing, t],
+    );
 
     useEffect(() => {
         startPairing();
@@ -88,155 +93,92 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
         if (step === 'needs_pin') pinRef.current?.focus();
     }, [step]);
 
-    const overlay: React.CSSProperties = {
-        alignItems: 'center',
-        background: 'rgba(0,0,0,0.65)',
-        bottom: 0,
-        display: 'flex',
-        justifyContent: 'center',
-        left: 0,
-        position: 'fixed',
-        right: 0,
-        top: 0,
-        zIndex: 9999,
-    };
-
-    const box: React.CSSProperties = {
-        background: 'var(--theme-colors-background-2, #1e1e1e)',
-        borderRadius: '10px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        maxWidth: '340px',
-        padding: '28px 28px 22px',
-        width: '100%',
-    };
-
     return (
-        <div onClick={onClose} style={overlay}>
-            <div onClick={(e) => e.stopPropagation()} style={box}>
-                <h3
-                    style={{
-                        color: 'var(--theme-colors-text-primary)',
-                        fontSize: '16px',
-                        fontWeight: 600,
-                        margin: '0 0 8px',
-                    }}
-                >
-                    {t('player.connect_pairing_title', { postProcess: 'sentenceCase' })}
-                </h3>
-                <p
-                    style={{
-                        color: 'var(--theme-colors-text-secondary)',
-                        fontSize: '13px',
-                        margin: '0 0 20px',
-                    }}
-                >
+        <Modal
+            closeOnClickOutside={false}
+            handlers={{ close: onClose, open: noop, toggle: noop }}
+            opened
+            size="sm"
+            title={t('player.connect_pairing_title')}
+        >
+            <Stack gap="md">
+                <Text isMuted size="sm">
                     {deviceName}
-                </p>
+                </Text>
 
-                {step === 'started' && (
-                    <p style={{ color: 'var(--theme-colors-text-secondary)', fontSize: '14px' }}>
-                        {t('player.connect_pairing_connecting', { postProcess: 'sentenceCase' })}
-                    </p>
+                {(step === 'idle' || step === 'started') && (
+                    <Group gap="sm" justify="center" py="md" wrap="nowrap">
+                        <Spinner size={18} />
+                        <Text size="sm">{t('player.connect_pairing_connecting')}</Text>
+                    </Group>
                 )}
 
                 {step === 'needs_pin' && (
-                    <>
-                        <p
-                            style={{
-                                color: 'var(--theme-colors-text-secondary)',
-                                fontSize: '13px',
-                                marginBottom: '14px',
-                            }}
-                        >
-                            {t('player.connect_pairing_pin_hint', { postProcess: 'sentenceCase' })}
-                        </p>
-                        <input
+                    <Stack gap="sm">
+                        <Text isMuted size="sm">
+                            {t('player.connect_pairing_pin_hint')}
+                        </Text>
+                        <TextInput
                             inputMode="numeric"
                             maxLength={8}
                             onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                             pattern="[0-9]*"
-                            placeholder="PIN"
+                            placeholder="••••"
                             ref={pinRef}
-                            style={{
-                                background: 'rgba(255,255,255,0.07)',
-                                border: '1px solid rgba(255,255,255,0.15)',
-                                borderRadius: '6px',
-                                color: 'var(--theme-colors-text-primary)',
-                                fontSize: '20px',
-                                letterSpacing: '6px',
-                                marginBottom: '16px',
-                                padding: '10px 14px',
-                                textAlign: 'center',
-                                width: '100%',
+                            size="lg"
+                            styles={{
+                                input: {
+                                    fontSize: 'var(--mantine-font-size-xl)',
+                                    letterSpacing: '0.5em',
+                                    textAlign: 'center',
+                                },
                             }}
                             value={pin}
                         />
-                        <button
+                        <Button
                             disabled={pin.length < 4}
+                            fullWidth
                             onClick={() => finishPairing(parseInt(pin, 10))}
-                            style={{
-                                background: 'var(--theme-colors-primary)',
-                                border: 'none',
-                                borderRadius: '6px',
-                                color: '#fff',
-                                cursor: pin.length >= 4 ? 'pointer' : 'not-allowed',
-                                fontSize: '14px',
-                                opacity: pin.length >= 4 ? 1 : 0.5,
-                                padding: '10px 0',
-                                width: '100%',
-                            }}
+                            variant="filled"
                         >
-                            {t('player.connect_pairing_confirm', { postProcess: 'sentenceCase' })}
-                        </button>
-                    </>
+                            {t('player.connect_pairing_confirm')}
+                        </Button>
+                    </Stack>
                 )}
 
                 {step === 'success' && (
-                    <p style={{ color: '#4caf50', fontSize: '14px' }}>
-                        ✓ {t('player.connect_pairing_success', { postProcess: 'sentenceCase' })}
-                    </p>
+                    <Group gap="sm" py="md" wrap="nowrap">
+                        <Icon color="success" icon="success" />
+                        <Text size="sm">{t('player.connect_pairing_success')}</Text>
+                    </Group>
                 )}
 
                 {step === 'error' && (
-                    <>
-                        <p style={{ color: '#f44336', fontSize: '13px', marginBottom: '14px' }}>
-                            {error}
-                        </p>
-                        <button
-                            onClick={startPairing}
+                    <Stack gap="sm">
+                        <Group gap="sm" py="sm" wrap="nowrap">
+                            <Icon color="error" icon="xCircle" />
+                            <Text size="sm" weight={600}>
+                                {t('player.connect_pairing_error_title')}
+                            </Text>
+                        </Group>
+                        <Text
+                            isMuted
+                            py="sm"
+                            size="xs"
                             style={{
-                                background: 'rgba(255,255,255,0.08)',
-                                border: 'none',
-                                borderRadius: '6px',
-                                color: 'var(--theme-colors-text-primary)',
-                                cursor: 'pointer',
-                                fontSize: '13px',
-                                padding: '8px 16px',
+                                maxHeight: '120px',
+                                overflowY: 'auto',
+                                wordBreak: 'break-word',
                             }}
                         >
-                            {t('player.connect_pairing_retry', { postProcess: 'sentenceCase' })}
-                        </button>
-                    </>
+                            {error}
+                        </Text>
+                        <Button fullWidth onClick={() => startPairing(true)} variant="default">
+                            {t('player.connect_pairing_retry')}
+                        </Button>
+                    </Stack>
                 )}
-
-                <button
-                    onClick={onClose}
-                    style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'var(--theme-colors-text-secondary)',
-                        cursor: 'pointer',
-                        display: 'block',
-                        fontSize: '12px',
-                        marginTop: '16px',
-                        padding: '4px 0',
-                        textAlign: 'center',
-                        width: '100%',
-                    }}
-                >
-                    {t('player.connect_pairing_close', { postProcess: 'sentenceCase' })}
-                </button>
-            </div>
-        </div>
+            </Stack>
+        </Modal>
     );
 };

@@ -6,8 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [0.3.1] - unreleased
 
+### Added
+- **Nicer AirPlay pairing dialog** — the pairing window now matches Feishin's look and feel, with clear status icons and a "Try again" button that lets you re-enter the PIN if it was wrong.
+- **Unpair AirPlay devices** — paired AirPlay 2 devices now show an "Unpair" button (with a confirmation prompt) so you can remove a pairing without digging into config files.
+
 ### Fixed
-- **Long tracks restarted from the beginning during remote playback** — the Connect proxy stripped `Content-Length` from every proxied response, including `/rest/stream.view`. Without a known length, the browser couldn't resume the audio stream via `Range` requests after the underlying connection was interrupted (e.g. an idle timeout somewhere in the reverse-proxy chain on long tracks), so it restarted the `<audio>` element from byte 0 instead. `Content-Length` (and `Accept-Ranges`/`Content-Range`) are now only stripped when the origin response was actually compressed.
+- **Long tracks restarted from the beginning during remote playback** — on long tracks, the audio player sometimes jumped back to the very start instead of continuing. This is fixed now.
+- **Confusing AirPlay pairing errors** — entering a wrong PIN used to show a generic error mentioning Sonos and MFi devices, which made no sense if you were pairing a HomePod or AirPort Express. It now simply says the PIN was incorrect and lets you try again.
+- **AirPlay pairing got stuck after reopening the dialog** — closing and reopening the pairing window (or reloading the app) while a pairing was in progress could make the device refuse all further attempts until it was power-cycled. This no longer happens.
+- **German UI text was only capitalized on the first letter** — some translated texts (e.g. in the AirPlay pairing and device list) ignored German capitalization rules for nouns. Affected texts are now shown exactly as translated.
 
 ---
 

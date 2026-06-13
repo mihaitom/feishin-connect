@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import time
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
@@ -13,11 +14,20 @@ from delivery import credentials
 logger = logging.getLogger("connect.pairing")
 router = APIRouter(prefix="/pair/airplay", dependencies=[Depends(require_token)])
 
-# Active pairing sessions: device_name → pyatv pairing object
-_sessions: dict[str, object] = {}
+# Active pairing sessions: device_name → (pyatv pairing object, started_at)
+_sessions: dict[str, tuple[object, float]] = {}
+
+# How long a started-but-unfinished pairing session is considered reusable.
+# Re-sending M1 (pair-setup start) to a device that's still waiting for M3
+# (the PIN) tends to make it reject the new attempt entirely (it then needs
+# a power-cycle). Reusing the existing session avoids that — but only while
+# it's reasonably fresh, since AirPlay devices time out pending pairings on
+# their own after a while anyway.
+_SESSION_TTL = 90
 
 
 class StartRequest(BaseModel):
+    force: bool = False
     name: str
 
 
@@ -36,11 +46,23 @@ async def start_pairing(req: StartRequest):
     import pyatv
     from pyatv.const import Protocol
 
+    # If a recent, unfinished session already exists, reuse it instead of
+    # sending a fresh pair-setup start (M1) — see _SESSION_TTL comment above.
+    existing = _sessions.get(req.name)
+    if existing and not req.force:
+        pairing, started_at = existing
+        if time.monotonic() - started_at < _SESSION_TTL:
+            logger.info(f"[pairing] Reusing existing session for '{req.name}'")
+            return {
+                "device_provides_pin": pairing.device_provides_pin,
+                "name": req.name,
+            }
+
     # Clean up any previous session for this device
-    old = _sessions.pop(req.name, None)
+    old, _ = _sessions.pop(req.name, (None, None))
     if old:
         try:
-            await old.finish()
+            await old.close()
         except Exception:
             pass
 
@@ -66,9 +88,32 @@ async def start_pairing(req: StartRequest):
             await pairing.close()
         except Exception:
             pass
-        return JSONResponse({"error": str(e)}, status_code=500)
 
-    _sessions[req.name] = pairing
+        # pyatv raises a bare KeyError (e.g. "<TlvValue.Salt: 2>") when the device's
+        # pair-setup response is missing fields. This happens when the device still
+        # considers an earlier (e.g. cancelled or wrong-PIN) pairing attempt pending
+        # and refuses to start a new handshake — usually fixed by power-cycling it.
+        err_str = str(e)
+        if err_str.startswith("<TlvValue."):
+            msg = (
+                f"'{req.name}' rejected the pairing request. It may still consider a "
+                f"previous pairing attempt pending — power-cycle the device and try again."
+            )
+        elif "470" in err_str:
+            # 470 = Connection Authorization Required. At this stage (before any PIN was
+            # entered) this means the device doesn't support pyatv's HAP pairing at all —
+            # typically Sonos-style proprietary AirPlay 2 (MFi hardware auth).
+            msg = (
+                f"'{req.name}' does not support pyatv pairing (HTTP 470 — MFi authentication "
+                f"required). Sonos speakers should be added as 'Sonos' devices, not AirPlay. "
+                f"HomePod and Apple TV work here."
+            )
+        else:
+            msg = err_str
+
+        return JSONResponse({"error": msg}, status_code=500)
+
+    _sessions[req.name] = (pairing, time.monotonic())
     logger.info(
         f"[pairing] Started: '{req.name}' — "
         f"device_provides_pin={pairing.device_provides_pin}"
@@ -81,8 +126,8 @@ async def start_pairing(req: StartRequest):
 
 @router.post("/finish")
 async def finish_pairing(req: FinishRequest):
-    pairing = _sessions.get(req.name)
-    if not pairing:
+    session = _sessions.get(req.name)
+    if not session:
         return JSONResponse(
             {
                 "error": f"No active pairing session for '{req.name}'. Call /start first."
@@ -90,6 +135,7 @@ async def finish_pairing(req: FinishRequest):
             status_code=400,
         )
 
+    pairing, _ = session
     try:
         if req.pin is not None:
             pairing.pin(req.pin)  # synchronous method, no await
@@ -102,13 +148,10 @@ async def finish_pairing(req: FinishRequest):
         except Exception:
             pass
 
-        # 470 = Device requires MFi hardware auth (Sonos-proprietary AirPlay 2 implementation)
+        # 470 = Connection Authorization Required. At this stage (after /start already
+        # succeeded), this means the device rejected the entered PIN.
         if "470" in err_str:
-            msg = (
-                f"'{req.name}' does not support pyatv pairing (HTTP 470 — MFi authentication "
-                f"required). Sonos speakers should be added as 'Sonos' devices, not AirPlay. "
-                f"HomePod and Apple TV work here."
-            )
+            msg = f"Incorrect PIN for '{req.name}'. Please try again."
         else:
             msg = err_str
 
