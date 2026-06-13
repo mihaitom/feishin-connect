@@ -11,9 +11,17 @@
       <img src="https://img.shields.io/github/license/mihaitom/feishin-connect?style=flat-square&color=brightgreen"
       alt="License">
     </a>
-      <a href="https://github.com/jeffvli/feishin/releases">
+      <a href="https://github.com/mihaitom/feishin-connect/releases">
       <img src="https://img.shields.io/github/v/release/mihaitom/feishin-connect?style=flat-square&color=blue"
       alt="Release">
+    </a>
+    <a href="https://github.com/mihaitom/feishin-connect/actions/workflows/test-python.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/mihaitom/feishin-connect/test-python.yml?style=flat-square&label=tests"
+      alt="Tests">
+    </a>
+    <a href="https://github.com/mihaitom/feishin-connect/commits/development">
+      <img src="https://img.shields.io/github/last-commit/mihaitom/feishin-connect?style=flat-square&color=blue"
+      alt="Last commit">
     </a>
   </p>
 
@@ -91,7 +99,7 @@ services:
 | `SERVER_NAME` | — | Pre-configured server name shown in Feishin |
 | `SERVER_TYPE` | — | `navidrome`, `jellyfin`, or `subsonic` |
 | `SERVER_LOCK` | `false` | When `true`, only username and password can be changed in the UI — server name, type and URL are fixed |
-| `DEBUG` | `false` | When `true`, enables verbose playback logs across all renderers (AirPlay via pyatv, Sonos via SoCo, internal streamer) |
+| `DEBUG` | `false` | When `true`, enables verbose playback logs across all renderers (AirPlay via pyatv, Sonos via SoCo, internal streamer), plus `httpx`/`uvicorn.access` request logs and nginx's access log. Leave `false` for normal operation — these are spammy and only useful for troubleshooting. |
 
 ### Requirements
 
@@ -106,14 +114,14 @@ The Connect backend starts and stops automatically alongside the Electron app �
 **Development** (Python + uv required):
 
 ```bash
-npm run dev        # Electron starts and spawns the backend via `uv run python main.py`
+pnpm run dev        # Electron starts and spawns the backend via `uv run python main.py`
 ```
 
-**Packaging** (build once per platform before `npm run package`):
+**Packaging** (build once per platform before `pnpm run package`):
 
 ```bash
-npm run build:connect   # compiles the Python backend to a standalone binary via PyInstaller
-npm run package:linux   # builds the Electron app; the binary is bundled automatically
+pnpm run build:connect   # compiles the Python backend to a standalone binary via PyInstaller
+pnpm run package:linux   # builds the Electron app; the binary is bundled automatically
 ```
 
 The binary lives in `connect/dist/connect-server/` and is picked up by `electron-builder` via `extraResources`. Users need **ffmpeg** installed on their system (`apt install ffmpeg` / `brew install ffmpeg`) — it is not bundled.
@@ -132,8 +140,8 @@ Or for web development:
 
 ```bash
 # Frontend
-npm install
-npm run dev:web
+pnpm install
+pnpm run dev:web
 
 # Backend (separate terminal)
 cd connect
@@ -302,12 +310,12 @@ sudo chown root:root chrome-sandbox
 
 ## Development
 
-Built and tested using Node `v23.11.0`. This project is built off of [electron-vite](https://github.com/alex8088/electron-vite).
+Built and tested using Node `v23.11.0` and pnpm. This project is built off of [electron-vite](https://github.com/alex8088/electron-vite).
 
-- `npm run dev` — Start the development server
-- `npm run build:web` — Build the standalone web app
-- `npm run typecheck` — Type check the project
-- `npm run lint` — Lint the project
+- `pnpm run dev` — Start the development server
+- `pnpm run build:web` — Build the standalone web app
+- `pnpm run typecheck` — Type check the project
+- `pnpm run lint` — Lint the project
 
 ## Translation
 

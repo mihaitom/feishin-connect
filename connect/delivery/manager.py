@@ -144,6 +144,11 @@ class DeliveryManager:
             for d in self.deliveries
         ]
 
+    def __repr__(self) -> str:
+        if not self.deliveries:
+            return "<no targets>"
+        return ", ".join(f"{t['type']}:{t['name']}" for t in self.list_targets())
+
 
 # ── Discovery Helpers ─────────────────────────────────────────────────────────
 

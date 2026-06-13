@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - Unreleased
+
+### Added
+- **Remote lyrics lookup in the web/Docker build** — fetching lyrics from the internet (lrclib.net, SimpMusic) has so far only worked via IPC in the Electron app, in both upstream and this fork; the web/Docker build (this fork only) could so far only show lyrics already stored on the media server. A new Connect backend lyrics module (`/lyrics/search`, `/lyrics/auto`, `/lyrics/by-remote-id`) now brings remote lyrics lookup to the web build too.
+- **Manual lyrics search, clear/refresh and translation now available in the web/Docker build** — these actions, and the related lyrics settings, were hidden outside of Electron because they depended on IPC. They now use the new Connect backend endpoints above and behave the same as in the desktop app.
+- **Loading indicator for background lyrics lookups** — with "prefer local lyrics" enabled, a remote lyrics search now still runs in the background when local lyrics exist. A small spinner now shows while that lookup is in progress.
+
+### Fixed
+- **Lyrics not found on lrclib.net were never retried** — "not found" results were cached indefinitely, including across reloads and restarts (persisted query cache), so a track without lyrics on first try would never be looked up again — even after lrclib.net added them later. Such results are now retried automatically after 24 hours, and previously cached "not found" results from before this fix are invalidated once.
+
+### Changed
+- **Cleaner, unified backend logs** — log lines from the Python backend, uvicorn and nginx now share one consistent, column-aligned format (`HH:MM:SS LEVEL  logger    message`), and the redundant `connect.` prefix is dropped from logger names.
+- **`httpx`/`httpcore` and `uvicorn.access` request logs now gated behind `DEBUG=true`** — these were pure spam at the default log level. nginx's access log is now gated behind `DEBUG=true` too, for consistency.
+- **Docker: nginx now stops if the Python backend crashes** — previously the container could stay up with a non-functional UI if the backend process died. Now the container exits with the backend's exit code, so `restart: unless-stopped` actually restarts it.
+
+### Removed
+- Internal `publish.py` script and `package-lock.json` — the project is now fully on pnpm.
+
+---
+
 ## [0.3.1] - 2026-06-13
 
 ### Added

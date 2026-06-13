@@ -1,8 +1,17 @@
+# Mirrors the "%(asctime)s [%(name)s] %(levelname)s %(message)s" format used
+# by the Connect backend's Python loggers, so nginx and backend log lines
+# look consistent in `docker logs`.
+log_format connect '$time_iso8601 [nginx] INFO $remote_addr - "$request" $status $body_bytes_sent';
+
 server {
   listen 9180;
   listen [::]:9180;
   sendfile on;
   default_type application/octet-stream;
+
+  # Gated behind DEBUG=true (see start.sh) — access logs are noisy and
+  # usually not needed outside of troubleshooting.
+  ${NGINX_ACCESS_LOG}
 
   gzip on;
   gzip_http_version 1.1;

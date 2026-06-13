@@ -254,7 +254,6 @@ export const LyricsSettingsForm = ({ settingsKey }: LyricsSettingsFormProps) => 
             description: t('setting.preferLocalLyrics', {
                 context: 'description',
             }),
-            isHidden: !isElectron(),
             title: t('setting.preferLocalLyrics'),
         },
         {
@@ -268,7 +267,6 @@ export const LyricsSettingsForm = ({ settingsKey }: LyricsSettingsFormProps) => 
             description: t('setting.lyricFetch', {
                 context: 'description',
             }),
-            isHidden: !isElectron(),
             title: t('setting.lyricFetch'),
         },
         {
@@ -288,7 +286,6 @@ export const LyricsSettingsForm = ({ settingsKey }: LyricsSettingsFormProps) => 
             description: t('setting.lyricFetchProvider', {
                 context: 'description',
             }),
-            isHidden: !isElectron(),
             title: t('setting.lyricFetchProvider'),
         },
         {
@@ -324,7 +321,6 @@ export const LyricsSettingsForm = ({ settingsKey }: LyricsSettingsFormProps) => 
             description: t('setting.lyricOffset', {
                 context: 'description',
             }),
-            isHidden: !isElectron(),
             title: t('setting.lyricOffset'),
         },
         {
@@ -340,7 +336,6 @@ export const LyricsSettingsForm = ({ settingsKey }: LyricsSettingsFormProps) => 
             description: t('setting.translationTargetLanguage', {
                 context: 'description',
             }),
-            isHidden: !isElectron(),
             title: t('setting.translationTargetLanguage'),
         },
         {
@@ -357,7 +352,6 @@ export const LyricsSettingsForm = ({ settingsKey }: LyricsSettingsFormProps) => 
             description: t('setting.translationApiProvider', {
                 context: 'description',
             }),
-            isHidden: !isElectron(),
             title: t('setting.translationApiProvider'),
         },
         {
@@ -372,7 +366,6 @@ export const LyricsSettingsForm = ({ settingsKey }: LyricsSettingsFormProps) => 
             description: t('setting.translationApiKey', {
                 context: 'description',
             }),
-            isHidden: !isElectron(),
             title: t('setting.translationApiKey'),
         },
         {
@@ -388,7 +381,6 @@ export const LyricsSettingsForm = ({ settingsKey }: LyricsSettingsFormProps) => 
             description: t('setting.enableAutoTranslation', {
                 context: 'description',
             }),
-            isHidden: !isElectron(),
             title: t('setting.enableAutoTranslation'),
         },
     ];

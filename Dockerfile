@@ -3,13 +3,15 @@ FROM node:23-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+RUN corepack enable && corepack prepare pnpm@11.5.0 --activate
 
-RUN npm install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN pnpm i
 
 COPY . .
 
-RUN npm run build:web
+RUN pnpm run build:web
 
 
 # --- Final image
