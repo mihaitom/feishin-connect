@@ -22,6 +22,10 @@ class AirPlayDelivery(BaseDelivery):
     The stream task runs in the background until stop() is called.
     """
 
+    # AirPlay/RAOP gives no position feedback. Empirically the device's
+    # buffering adds roughly this much delay before audio is audible.
+    FIXED_OFFSET: float = 2.0
+
     def __init__(self, target: str):
         super().__init__(target)
         self._stream_task: asyncio.Task | None = None
@@ -31,6 +35,7 @@ class AirPlayDelivery(BaseDelivery):
     async def _find_device(self):
         import pyatv
         from pyatv.const import Protocol
+
         # Lazy import: state.py imports delivery, so top-level import would be circular
         from state import ctx
 
@@ -106,10 +111,18 @@ class AirPlayDelivery(BaseDelivery):
         passing the bytes to pyatv — otherwise download the file directly."""
         if offset > 0:
             proc = await asyncio.create_subprocess_exec(
-                "ffmpeg", "-y",
-                "-ss", str(offset),
-                "-i", src_url,
-                "-vn", "-acodec", "mp3", "-f", "mp3", "pipe:1",
+                "ffmpeg",
+                "-y",
+                "-ss",
+                str(offset),
+                "-i",
+                src_url,
+                "-vn",
+                "-acodec",
+                "mp3",
+                "-f",
+                "mp3",
+                "pipe:1",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.DEVNULL,
             )
@@ -123,7 +136,13 @@ class AirPlayDelivery(BaseDelivery):
             resp.raise_for_status()
             return io.BytesIO(resp.content)
 
-    async def play(self, stream_url: str, title: str = "Connect") -> None:
+    async def play(
+        self,
+        stream_url: str,
+        title: str = "Connect",
+        artist: str = "",
+        album_art_url: str | None = None,
+    ) -> None:
         import pyatv
 
         async with self._play_lock:
@@ -150,7 +169,9 @@ class AirPlayDelivery(BaseDelivery):
                 if not track:
                     # Radio / live URL — pass directly to pyatv (no BytesIO needed)
                     if not stream_url:
-                        logger.warning(f"[AirPlay:{self.target}] No track and no stream URL")
+                        logger.warning(
+                            f"[AirPlay:{self.target}] No track and no stream URL"
+                        )
                         return
                     logger.info(f"[AirPlay:{self.target}] ▶ radio: {stream_url[:80]}")
                     await captured_atv.stream.stream_file(stream_url)
@@ -158,7 +179,9 @@ class AirPlayDelivery(BaseDelivery):
                     return
 
                 if not ctx.media:
-                    logger.warning(f"[AirPlay:{self.target}] No media server configured")
+                    logger.warning(
+                        f"[AirPlay:{self.target}] No media server configured"
+                    )
                     return
 
                 offset = ctx.state.resume_offset
@@ -169,9 +192,7 @@ class AirPlayDelivery(BaseDelivery):
                         f"[AirPlay:{self.target}] ↓ seeking to {offset:.1f}s: {track.title}"
                     )
                 else:
-                    logger.info(
-                        f"[AirPlay:{self.target}] ↓ downloading: {track.title}"
-                    )
+                    logger.info(f"[AirPlay:{self.target}] ↓ downloading: {track.title}")
 
                 audio = await AirPlayDelivery._fetch_audio(src_url, offset)
                 logger.info(f"[AirPlay:{self.target}] ▶ {track.title}")
@@ -185,7 +206,9 @@ class AirPlayDelivery(BaseDelivery):
                 if "not connected to remote" in str(e):
                     # Teardown noise: Apple TV dropped the connection; the actual
                     # cause (e.g. "Connection refused") is already logged by pyatv above.
-                    logger.warning(f"[AirPlay:{self.target}] Device disconnected during stream")
+                    logger.warning(
+                        f"[AirPlay:{self.target}] Device disconnected during stream"
+                    )
                 else:
                     logger.error(f"[AirPlay:{self.target}] Error: {e}", exc_info=True)
 

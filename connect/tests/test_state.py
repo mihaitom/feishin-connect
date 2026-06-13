@@ -18,6 +18,7 @@ def _reset():
     st.play_start_time = 0.0
     st.paused_elapsed = 0.0
     st.resume_offset = 0.0
+    st.position_offset = 0.0
 
 
 def test_compute_position_no_track():
@@ -69,6 +70,41 @@ def test_compute_position_clamps_to_duration():
     state.ctx.state.is_paused = False
 
     assert compute_position() == 60.0
+
+
+def test_compute_position_applies_position_offset():
+    """A device lagging behind the wall clock yields a negative offset,
+    which compute_position subtracts back out."""
+    _reset()
+    state.ctx.state.current_track = Track("1", "T", "A", 180, "")
+    state.ctx.state.is_streaming = True
+    state.ctx.state.play_start_time = time.time() - 30
+    state.ctx.state.is_paused = False
+    state.ctx.state.position_offset = -4.0
+
+    assert abs(compute_position() - 26.0) < 1.0
+
+
+def test_compute_position_offset_clamps_to_zero():
+    _reset()
+    state.ctx.state.current_track = Track("1", "T", "A", 180, "")
+    state.ctx.state.is_streaming = True
+    state.ctx.state.play_start_time = time.time() - 1
+    state.ctx.state.is_paused = False
+    state.ctx.state.position_offset = -10.0
+
+    assert compute_position() == 0.0
+
+
+def test_compute_position_offset_clamps_to_duration():
+    _reset()
+    state.ctx.state.current_track = Track("1", "T", "A", 30, "")
+    state.ctx.state.is_streaming = True
+    state.ctx.state.play_start_time = time.time() - 28
+    state.ctx.state.is_paused = False
+    state.ctx.state.position_offset = 4.0
+
+    assert compute_position() == 30.0
 
 
 # ── resolve_target ────────────────────────────────────────────────────────────

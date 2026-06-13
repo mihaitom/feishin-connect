@@ -47,6 +47,8 @@ Please expect rough edges and report issues if you encounter them.
 - Play/pause/previous/next controls in the popover (operated on the remote device)
 - In-track seeking — drag the progress slider to seek within the current track on the remote device
 - Radio stream support (sends the live URL directly to the device)
+- Synchronized lyrics follow along during remote playback, compensating for each device's buffering delay
+- Now-Playing metadata (title, artist, album art) shown on Sonos and Chromecast devices
 - Persistent state — Connect continues if you reload Feishin in the browser
 - Local playback pauses automatically when handing off to a device (Crossfade and Gapless transitions are also disabled locally while Connect is active to prevent double-audio)
 

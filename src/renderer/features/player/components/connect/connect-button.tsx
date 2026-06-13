@@ -55,11 +55,15 @@ export const ConnectButton = () => {
         if (!open) return;
         const handler = (e: MouseEvent) => {
             const pop = document.getElementById('connect-popover');
+            const target = e.target as Element;
             if (
                 pop &&
-                !pop.contains(e.target as Node) &&
+                !pop.contains(target) &&
                 btnRef.current &&
-                !btnRef.current.contains(e.target as Node)
+                !btnRef.current.contains(target) &&
+                // Mantine modals/dialogs (e.g. AirPlay pairing) render via a portal
+                // outside #connect-popover — don't treat clicks inside them as "outside".
+                !target.closest?.('[role="dialog"], .mantine-Overlay-root')
             ) {
                 setOpen(false);
             }
@@ -99,10 +103,10 @@ export const ConnectButton = () => {
                 }}
                 title={
                     isEmpty
-                        ? t('player.connect_emptyQueue', { postProcess: 'sentenceCase' })
+                        ? t('player.connect_emptyQueue')
                         : isActive
                           ? `▶ ${activeDevice!.name} · ${nowPlayingTitle}`
-                          : t('player.connect_playOnDevice', { postProcess: 'sentenceCase' })
+                          : t('player.connect_playOnDevice')
                 }
             >
                 <LuCast size={20} style={{ opacity: isActive ? 1 : 0.7 }} />

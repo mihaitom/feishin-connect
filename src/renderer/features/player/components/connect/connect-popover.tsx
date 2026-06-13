@@ -70,7 +70,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                     />
                     <div>
                         <div style={{ color: '#f5a623', fontSize: '13px', fontWeight: 600 }}>
-                            {t('player.connect_apiUnreachable', { postProcess: 'sentenceCase' })}
+                            {t('player.connect_apiUnreachable')}
                         </div>
                         <div
                             style={{
@@ -94,7 +94,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                                 padding: 0,
                             }}
                         >
-                            {t('player.connect_scan', { postProcess: 'sentenceCase' })}
+                            {t('player.connect_scan')}
                         </button>
                     </div>
                 </div>
@@ -116,7 +116,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                     />
                     <div>
                         <div style={{ color: '#f5a623', fontSize: '13px', fontWeight: 600 }}>
-                            {t('player.connect_ffmpegMissing', { postProcess: 'sentenceCase' })}
+                            {t('player.connect_ffmpegMissing')}
                         </div>
                         <div
                             style={{
@@ -125,9 +125,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                                 marginTop: '2px',
                             }}
                         >
-                            {t('player.connect_ffmpegMissingHint', {
-                                postProcess: 'sentenceCase',
-                            })}
+                            {t('player.connect_ffmpegMissingHint')}
                         </div>
                     </div>
                 </div>
@@ -140,7 +138,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                         devices.length === 0
                             ? ''
                             : (trackLabel ??
-                              t('player.connect_sendTo', { postProcess: 'sentenceCase' }))
+                              t('player.connect_sendTo'))
                     }
                 >
                     {devices.length === 0 && (
@@ -153,8 +151,8 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                             }}
                         >
                             {isScanning
-                                ? t('player.connect_scanning', { postProcess: 'sentenceCase' })
-                                : t('player.connect_noDevices', { postProcess: 'sentenceCase' })}
+                                ? t('player.connect_scanning')
+                                : t('player.connect_noDevices')}
                         </div>
                     )}
                     {devices.map((d) => {
@@ -198,7 +196,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                         }}
                     >
                         {isScanning ? <Spinner size={12} /> : <LuRefreshCw size={13} />}
-                        {t('player.connect_scan', { postProcess: 'sentenceCase' })}
+                        {t('player.connect_scan')}
                     </button>
                 </PopSection>
             )}
@@ -222,7 +220,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                     >
                         {isActive
                             ? t('player.connect_add', { count: selectedForSend.length })
-                            : t('player.connect_connect', { postProcess: 'sentenceCase' })}
+                            : t('player.connect_connect')}
                     </button>
                 </div>
             )}
@@ -234,7 +232,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                     <PopButton
                         danger
                         icon={<LuSquare size={14} />}
-                        label={t('player.connect_stopAll', { postProcess: 'sentenceCase' })}
+                        label={t('player.connect_stopAll')}
                         onClick={stopAllPlayback}
                     />
                 </>

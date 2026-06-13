@@ -16,15 +16,15 @@ jobs:
 
         steps:
             - name: Checkout git repo
-              uses: actions/checkout@v6
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
             - name: Install Node and PNPM
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
 
             # Required for build:connect (`uv run connect/build-binary.py`).
             # uv installs the required Python version itself.
             - name: Install uv
-              uses: astral-sh/setup-uv@v6
+              uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
 
             - name: Install dependencies
               run: pnpm install
@@ -32,7 +32,7 @@ jobs:
             - name: Build and Publish releases
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              uses: nick-invision/retry@v3.0.2
+              uses: nick-invision/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
               with:
                   timeout_minutes: 30
                   max_attempts: 3

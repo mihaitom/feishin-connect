@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from xml.sax.saxutils import escape
 
 from .base import BaseDelivery
 
@@ -10,6 +11,8 @@ logger = logging.getLogger("delivery")
 
 class SonosDelivery(BaseDelivery):
     """Controls a Sonos speaker via SoCo."""
+
+    SUPPORTS_POSITION: bool = True
 
     def _get_device(self):
         import soco
@@ -26,7 +29,13 @@ class SonosDelivery(BaseDelivery):
         available = [d.player_name for d in devices]
         raise RuntimeError(f"Sonos '{self.target}' not found. Available: {available}")
 
-    async def play(self, stream_url: str, title: str = "Connect") -> None:
+    async def play(
+        self,
+        stream_url: str,
+        title: str = "Connect",
+        artist: str = "",
+        album_art_url: str | None = None,
+    ) -> None:
         device = await asyncio.to_thread(self._get_device)
 
         # Leave any existing group so we play on this specific device
@@ -44,14 +53,22 @@ class SonosDelivery(BaseDelivery):
             await asyncio.to_thread(device.stop)
 
         # DIDL-Lite Metadata
+        album_art_tag = (
+            f"<upnp:albumArtURI>{escape(album_art_url)}</upnp:albumArtURI>"
+            if album_art_url
+            else ""
+        )
         metadata = (
             '<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" '
             'xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" '
             'xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">'
             '<item id="1" parentID="0" restricted="1">'
-            f"<dc:title>{title}</dc:title>"
+            f"<dc:title>{escape(title)}</dc:title>"
+            f"<dc:creator>{escape(artist)}</dc:creator>"
+            f"<upnp:artist>{escape(artist)}</upnp:artist>"
+            f"{album_art_tag}"
             "<upnp:class>object.item.audioItem.audioBroadcast</upnp:class>"
-            f'<res protocolInfo="http-get:*:audio/mpeg:*">{stream_url}</res>'
+            f'<res protocolInfo="http-get:*:audio/mpeg:*">{escape(stream_url)}</res>'
             "</item>"
             "</DIDL-Lite>"
         )
@@ -84,3 +101,21 @@ class SonosDelivery(BaseDelivery):
         device = await asyncio.to_thread(self._get_device)
         await asyncio.to_thread(device.stop)
         logger.info(f"[Sonos:{self.target}] stopped")
+
+    async def get_position(self) -> float | None:
+        device = await asyncio.to_thread(self._get_device)
+        info = await asyncio.to_thread(device.get_current_track_info)
+        position = info.get("position", "0:00:00")
+        try:
+            h, m, s = (int(p) for p in position.split(":"))
+            return h * 3600 + m * 60 + s
+        except (ValueError, AttributeError):
+            return None
+
+    async def get_volume(self) -> float | None:
+        device = await asyncio.to_thread(self._get_device)
+        return await asyncio.to_thread(lambda: device.volume)
+
+    async def set_volume(self, volume: float) -> None:
+        device = await asyncio.to_thread(self._get_device)
+        await asyncio.to_thread(setattr, device, "volume", int(volume))

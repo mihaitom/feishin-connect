@@ -46,7 +46,9 @@ class JellyfinClient:
         return Track(
             id=item["Id"],
             title=item.get("Name", "Unknown"),
-            artist=", ".join(artists) if artists else item.get("AlbumArtist", "Unknown"),
+            artist=", ".join(artists)
+            if artists
+            else item.get("AlbumArtist", "Unknown"),
             duration=int((item.get("RunTimeTicks") or 0) / TICKS_PER_SECOND),
             # For Jellyfin the cover art id IS the item id (Primary image endpoint).
             cover_art_id=item["Id"],

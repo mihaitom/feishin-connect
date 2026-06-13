@@ -13,7 +13,12 @@ from . import credentials
 from .airplay import AirPlayDelivery
 from .base import BaseDelivery
 from .chromecast import ChromecastDelivery
-from .manager import DeliveryManager, discover_airplay, discover_chromecast, discover_sonos
+from .manager import (
+    DeliveryManager,
+    discover_airplay,
+    discover_chromecast,
+    discover_sonos,
+)
 from .sonos import SonosDelivery
 
 __all__ = [

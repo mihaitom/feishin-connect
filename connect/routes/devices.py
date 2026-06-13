@@ -38,7 +38,9 @@ class ConfigRequest(BaseModel):
 
 @router.post("/config")
 async def configure(req: ConfigRequest):
-    internal_url = os.getenv("SERVER_INTERNAL_URL") or os.getenv("NAVIDROME_INTERNAL_URL", "")
+    internal_url = os.getenv("SERVER_INTERNAL_URL") or os.getenv(
+        "NAVIDROME_INTERNAL_URL", ""
+    )
     server_type = req.server_type.lower()
 
     if server_type == "jellyfin":

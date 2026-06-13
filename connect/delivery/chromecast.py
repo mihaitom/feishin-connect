@@ -66,6 +66,8 @@ def _get_cached_chromecast(target: str):
 class ChromecastDelivery(BaseDelivery):
     """Controls a Chromecast (Google Cast) device via pychromecast."""
 
+    SUPPORTS_POSITION: bool = True
+
     def _get_device(self):
         import pychromecast
 
@@ -89,11 +91,27 @@ class ChromecastDelivery(BaseDelivery):
             f"Chromecast '{self.target}' not found. Available: {available}"
         )
 
-    async def play(self, stream_url: str, title: str = "Connect") -> None:
+    async def play(
+        self,
+        stream_url: str,
+        title: str = "Connect",
+        artist: str = "",
+        album_art_url: str | None = None,
+    ) -> None:
         cast = await asyncio.to_thread(self._get_device)
         mc = cast.media_controller
+        metadata = {"metadataType": 3, "title": title, "artist": artist}
+        if album_art_url:
+            metadata["images"] = [{"url": album_art_url}]
         logger.info(f"[Chromecast:{self.target}] → play: {stream_url}")
-        await asyncio.to_thread(mc.play_media, stream_url, "audio/mpeg")
+        await asyncio.to_thread(
+            mc.play_media,
+            stream_url,
+            "audio/mpeg",
+            title=title,
+            thumb=album_art_url,
+            metadata=metadata,
+        )
         await asyncio.to_thread(mc.block_until_active, 10)
         logger.info(f"[Chromecast:{self.target}] ✓ playing")
 
@@ -111,3 +129,10 @@ class ChromecastDelivery(BaseDelivery):
         cast = await asyncio.to_thread(self._get_device)
         await asyncio.to_thread(cast.media_controller.stop)
         logger.info(f"[Chromecast:{self.target}] stopped")
+
+    async def get_position(self) -> float | None:
+        cast = await asyncio.to_thread(self._get_device)
+        status = cast.media_controller.status
+        if status.player_state not in ("PLAYING", "PAUSED"):
+            return None
+        return status.adjusted_current_time

@@ -116,7 +116,9 @@ def test_ping_hits_public_info(monkeypatch):
 
     def fake_get(url, **kwargs):
         captured["url"] = url
-        return httpx.Response(200, json={"Id": "server"}, request=httpx.Request("GET", url))
+        return httpx.Response(
+            200, json={"Id": "server"}, request=httpx.Request("GET", url)
+        )
 
     monkeypatch.setattr(httpx, "get", fake_get)
     c = _client(url="http://proxy:9180", internal_url="http://jf:8096")

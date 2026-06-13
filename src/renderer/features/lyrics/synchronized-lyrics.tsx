@@ -6,6 +6,11 @@ import styles from './synchronized-lyrics.module.css';
 
 import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
 import {
+    useConnectElapsed,
+    useConnectPlayerStore,
+} from '/@/renderer/features/player/components/connect/connect.store';
+import { useConnectSeek } from '/@/renderer/features/player/components/connect/hooks';
+import {
     useLyricsDisplaySettings,
     useLyricsSettings,
     usePlaybackType,
@@ -56,21 +61,33 @@ export const SynchronizedLyrics = ({
                 : 0.95,
     };
     const { mediaSeekToTimestamp } = usePlayerActions();
-    const status = usePlayerStatus();
-    const timestamp = usePlayerTimestamp();
+    const localStatus = usePlayerStatus();
+    const localTimestamp = usePlayerTimestamp();
+    const { isActive: connectActive, isPlaying: connectPlaying } = useConnectPlayerStore();
+    const connectElapsed = useConnectElapsed();
+    const connectSeek = useConnectSeek();
+
+    const status = connectActive
+        ? connectPlaying
+            ? PlayerStatus.PLAYING
+            : PlayerStatus.PAUSED
+        : localStatus;
+    const timestamp = connectActive ? connectElapsed : localTimestamp;
 
     const effectiveOffsetMs = offsetMs ?? 0;
 
     const handleSeek = useCallback(
         (time: number) => {
-            if (playbackType === PlayerType.LOCAL && mpvPlayer) {
+            if (connectActive) {
+                connectSeek(time);
+            } else if (playbackType === PlayerType.LOCAL && mpvPlayer) {
                 mpvPlayer.seekTo(time);
             } else {
                 mpris?.updateSeek(time);
                 mediaSeekToTimestamp(time);
             }
         },
-        [mediaSeekToTimestamp, playbackType],
+        [connectActive, connectSeek, mediaSeekToTimestamp, playbackType],
     );
 
     // const seeked = useSeeked();

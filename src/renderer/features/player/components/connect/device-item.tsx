@@ -1,12 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
+import { closeAllModals, openModal } from '@mantine/modals';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LuAirplay, LuKeyRound, LuSpeaker, LuTv, LuVolume1, LuVolumeX } from 'react-icons/lu';
+import {
+    LuAirplay,
+    LuKeyRound,
+    LuSpeaker,
+    LuTv,
+    LuUnlink2,
+    LuVolume1,
+    LuVolumeX,
+} from 'react-icons/lu';
 
 import { PairingModal } from './pairing-modal';
-import { connectFetch, ConnectDevice } from './types';
+import { ConnectDevice, connectFetch } from './types';
 
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
+import { ConfirmModal } from '/@/shared/components/modal/modal';
 import { Switch } from '/@/shared/components/switch/switch';
+import { Text } from '/@/shared/components/text/text';
+import { toast } from '/@/shared/components/toast/toast';
 
 interface DeviceItemProps {
     alwaysShowVolume?: boolean;
@@ -75,10 +87,36 @@ export const DeviceItem = ({
         }
     };
 
+    const handleUnpair = useCallback(async () => {
+        try {
+            const res = await connectFetch(`/pair/airplay/${encodeURIComponent(device.name)}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            onPaired?.();
+        } catch {
+            toast.error({ message: t('player.connect_unpair_error', { name: device.name }) });
+        } finally {
+            closeAllModals();
+        }
+    }, [device.name, onPaired, t]);
+
+    const openUnpairModal = useCallback(() => {
+        openModal({
+            children: (
+                <ConfirmModal onConfirm={handleUnpair}>
+                    <Text>{t('player.connect_unpair_confirm_body', { name: device.name })}</Text>
+                </ConfirmModal>
+            ),
+            title: t('player.connect_unpair_confirm_title'),
+        });
+    }, [device.name, handleUnpair, t]);
+
     const checked = isActive || isSelected;
     // Show pair button only for AirPlay 2 devices that haven't been paired yet.
     // Always rendered (visibility:hidden when not hovering) to prevent row-height jumps.
     const showPairButton = device.type === 'airplay' && device.needsPairing && !isPaired;
+    const showUnpairButton = device.type === 'airplay' && isPaired;
 
     return (
         <>
@@ -172,11 +210,42 @@ export const DeviceItem = ({
                                 pointerEvents: hovered ? 'auto' : 'none',
                                 visibility: hovered ? 'visible' : 'hidden',
                             }}
-                            title={t('player.connect_pair', { postProcess: 'sentenceCase' })}
+                            title={t('player.connect_pair')}
                         >
                             <LuKeyRound size={12} />
                             <span style={{ fontSize: '11px' }}>
-                                {t('player.connect_pair', { postProcess: 'sentenceCase' })}
+                                {t('player.connect_pair')}
+                            </span>
+                        </button>
+                    )}
+
+                    {/* AirPlay 2 Unpair-Button — space always reserved to prevent height jumps */}
+                    {showUnpairButton && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openUnpairModal();
+                            }}
+                            style={{
+                                alignItems: 'center',
+                                background: 'rgba(255,255,255,0.06)',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                borderRadius: '4px',
+                                color: 'var(--theme-colors-text-secondary)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexShrink: 0,
+                                gap: '4px',
+                                padding: '3px 7px',
+                                // Visible only on hover — space always reserved, no height jump
+                                pointerEvents: hovered ? 'auto' : 'none',
+                                visibility: hovered ? 'visible' : 'hidden',
+                            }}
+                            title={t('player.connect_unpair')}
+                        >
+                            <LuUnlink2 size={12} />
+                            <span style={{ fontSize: '11px' }}>
+                                {t('player.connect_unpair')}
                             </span>
                         </button>
                     )}
@@ -216,8 +285,8 @@ export const DeviceItem = ({
                             }}
                             title={
                                 muted
-                                    ? t('player.connect_unmute', { postProcess: 'sentenceCase' })
-                                    : t('player.mute', { postProcess: 'sentenceCase' })
+                                    ? t('player.connect_unmute')
+                                    : t('player.mute')
                             }
                         >
                             {muted ? <LuVolumeX size={15} /> : <LuVolume1 size={15} />}
