@@ -22,6 +22,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Removed
 - Internal `publish.py` script and `package-lock.json` — the project is now fully on pnpm.
 
+### Internal
+- **Added a frontend test suite (Vitest)** covering the Connect player components — token/URL handling, the elapsed-time animation, auto-forward on track/radio changes, track-ended detection, scrobble triggers and server config mapping — plus the fork's other changes to upstream code: the Connect-backend lyrics fallback (`lyrics-api.ts`) and the library-scan store. A new CI workflow runs these tests on every push and PR, giving a quick signal on what still works after future upstream merges.
+
 ---
 
 ## [0.3.1] - 2026-06-13

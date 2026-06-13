@@ -53,6 +53,8 @@
         "package:win": "pnpm run build && electron-builder --win",
         "package:win:pr": "pnpm run build && electron-builder --win --publish never",
         "package:win-arm64:pr": "pnpm run build && electron-builder --win --arm64 --publish never",
+        "test": "vitest run",
+        "test:watch": "vitest",
         "publish:linux": "pnpm run build && electron-builder --publish always --linux",
         "publish:linux:alpha": "pnpm run build && electron-builder --config electron-builder-alpha.yml --publish always --linux",
         "publish:linux:beta": "pnpm run build && electron-builder --config electron-builder-beta.yml --publish always --linux",
@@ -155,6 +157,9 @@
         "@electron-toolkit/eslint-config-prettier": "^3.0.0",
         "@electron-toolkit/eslint-config-ts": "^3.1.0",
         "@electron-toolkit/tsconfig": "^2.0.0",
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.2",
         "@types/electron-localshortcut": "^3.1.3",
         "@types/lodash": "^4.17.24",
         "@types/md5": "^2.3.6",
@@ -179,6 +184,7 @@
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.26",
         "i18next-parser": "^9.4.0",
+        "jsdom": "^29.1.1",
         "postcss-preset-mantine": "^1.18.0",
         "postcss-simple-vars": "^7.0.1",
         "prettier": "^3.8.1",
@@ -192,7 +198,8 @@
         "vite-plugin-conditional-import": "^0.1.7",
         "vite-plugin-dynamic-import": "^1.6.0",
         "vite-plugin-ejs": "^1.7.0",
-        "vite-plugin-pwa": "^1.2.0"
+        "vite-plugin-pwa": "^1.2.0",
+        "vitest": "^4.1.8"
     },
     "packageManager": "pnpm@11.5.0",
     "pnpm": {

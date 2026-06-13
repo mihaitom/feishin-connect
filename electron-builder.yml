@@ -1,4 +1,4 @@
-appId: org.jeffvli.feishin
+appId: io.github.mihaitom.feishin-connect
 productName: Feishin-Connect
 artifactName: ${productName}-${version}-${os}-${arch}.${ext}
 electronVersion: 41.7.0

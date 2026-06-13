@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { buildConfigBody } from './connect-config';
 import { useConnectPlayerStore } from './connect.store';
 import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
-import { connectFetch, CONNECT_URL, ConnectDevice, ConnectSession, ConnectStatus, SendStatus } from './types';
+import { ConnectDevice, connectFetch, ConnectSession, ConnectStatus, SendStatus } from './types';
 import { useConnectPlayback } from './use-connect-playback';
 import { useConnectScrobble } from './use-connect-scrobble';
 
@@ -10,19 +11,7 @@ import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { useCurrentServerWithCredential } from '/@/renderer/store/auth.store';
 import { usePlayerSong, usePlayerStoreBase } from '/@/renderer/store/player.store';
-import { PlayerStatus, ServerType } from '/@/shared/types/types';
-
-const buildConfigBody = (server: {
-    credential?: string;
-    type?: ServerType;
-    url?: string;
-    userId?: null | string;
-}) => ({
-    credential: server.credential ?? '',
-    server_type: server.type === ServerType.JELLYFIN ? 'jellyfin' : 'subsonic',
-    url: server.url ?? '',
-    user_id: server.userId ?? '',
-});
+import { PlayerStatus } from '/@/shared/types/types';
 
 export const useConnectSession = (): ConnectSession => {
     const [status, setStatus] = useState<SendStatus>('idle');

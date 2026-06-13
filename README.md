@@ -16,8 +16,12 @@
       alt="Release">
     </a>
     <a href="https://github.com/mihaitom/feishin-connect/actions/workflows/test-python.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/mihaitom/feishin-connect/test-python.yml?style=flat-square&label=tests"
-      alt="Tests">
+      <img src="https://img.shields.io/github/actions/workflow/status/mihaitom/feishin-connect/test-python.yml?style=flat-square&label=backend%20tests"
+      alt="Backend tests">
+    </a>
+    <a href="https://github.com/mihaitom/feishin-connect/actions/workflows/test-frontend.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/mihaitom/feishin-connect/test-frontend.yml?style=flat-square&label=frontend%20tests"
+      alt="Frontend tests">
     </a>
     <a href="https://github.com/mihaitom/feishin-connect/commits/development">
       <img src="https://img.shields.io/github/last-commit/mihaitom/feishin-connect?style=flat-square&color=blue"
