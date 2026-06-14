@@ -1,4 +1,8 @@
 import '@testing-library/jest-dom/vitest';
+// jsdom does not implement IndexedDB. The player store persists the queue via
+// idb-keyval, so without this polyfill any test that touches the store
+// triggers an unhandled "indexedDB is not defined" error.
+import 'fake-indexeddb/auto';
 
 // jsdom does not implement EventSource. Provide a minimal stub so code that
 // constructs one (e.g. connectEventSource) can be tested without a real
