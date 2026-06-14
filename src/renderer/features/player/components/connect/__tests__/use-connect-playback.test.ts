@@ -66,6 +66,7 @@ describe('useConnectPlayback', () => {
             const [path, options] = connectFetchMock.mock.calls[0];
             expect(path).toBe('/play');
             expect(JSON.parse(options.body)).toEqual({
+                gain: 1,
                 targets: [{ name: 'Living Room', type: 'sonos' }],
                 track_ids: ['track-1'],
             });
@@ -115,6 +116,7 @@ describe('useConnectPlayback', () => {
             expect(connectFetchMock).toHaveBeenCalledTimes(2);
             const [, options] = connectFetchMock.mock.calls[1];
             expect(JSON.parse(options.body)).toEqual({
+                gain: 1,
                 targets: [{ name: 'Living Room', type: 'sonos' }],
                 track_ids: ['track-2'],
             });
