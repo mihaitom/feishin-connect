@@ -5,6 +5,7 @@ Startup:
   uvicorn main:app --host 0.0.0.0 --port 9181
 """
 
+import asyncio
 import logging
 import os
 import shutil
@@ -18,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
 from auth import TOKEN as _CONNECT_TOKEN
+from routes.devices import discover_all
 from routes.devices import router as devices_router
 from routes.lyrics import router as lyrics_router
 from routes.pairing import router as pairing_router
@@ -41,6 +43,11 @@ class _ShortNameFilter(logging.Filter):
             record.name = record.name.removeprefix("connect.")
         elif record.name == "connect":
             record.name = "main"
+        elif record.name == "uvicorn.error":
+            # "uvicorn.error" is just uvicorn's logger for general
+            # startup/shutdown messages (not actual errors) — rename to
+            # avoid the misleading "error" in the name.
+            record.name = "uvicorn"
         return True
 
 
@@ -112,8 +119,33 @@ else:
         logging.getLogger(_name).setLevel(logging.WARNING)
 
 
+def _asyncio_exception_handler(loop, context):
+    """Quiet down pyatv's "Unclosed client session"/"Unclosed connector"
+    noise (logged by asyncio's default handler as an ERROR with a multi-line
+    object repr) into a single readable debug line. Everything else still
+    goes through the default handler."""
+    message = context.get("message", "")
+    if message in ("Unclosed client session", "Unclosed connector"):
+        logger.debug(f"asyncio: {message} (stale pyatv session, harmless)")
+        return
+    loop.default_exception_handler(context)
+
+
+_DISCOVERY_INTERVAL = 60 * 60  # rescan for new Sonos/AirPlay/Chromecast devices hourly
+
+
+async def _periodic_discovery() -> None:
+    while True:
+        await asyncio.sleep(_DISCOVERY_INTERVAL)
+        try:
+            await discover_all()
+        except Exception:
+            logger.exception("[discover] Periodic scan failed")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    asyncio.get_event_loop().set_exception_handler(_asyncio_exception_handler)
     local_ip = get_local_ip()
     logger.info(f"🎵 Stream: http://{local_ip}:{PORT}/stream")
     logger.info(f"🔌 API:    http://{local_ip}:{PORT}/")
@@ -136,7 +168,12 @@ async def lifespan(_: FastAPI):
     else:
         logger.info("🔒 Token auth enabled (custom CONNECT_TOKEN set)")
     logger.info("⏳ Waiting for Feishin /config (media server credentials)")
-    yield
+
+    discovery_task = asyncio.create_task(_periodic_discovery())
+    try:
+        yield
+    finally:
+        discovery_task.cancel()
 
 
 app = FastAPI(title="Feishin Connect", lifespan=lifespan)

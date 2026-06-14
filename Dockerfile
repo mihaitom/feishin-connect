@@ -46,4 +46,9 @@ ENV LEGACY_AUTHENTICATION="" ANALYTICS_DISABLED="" PUBLIC_PATH="/" SERVER_INTERN
 EXPOSE 9180
 EXPOSE 8000
 
+# Goes through nginx to /api/health, so it fails if either nginx or the
+# Python backend is down/unresponsive — independent of PUBLIC_PATH.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD wget -q -O /dev/null http://127.0.0.1:9180/api/health || exit 1
+
 CMD ["/start.sh"]

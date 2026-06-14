@@ -39,9 +39,9 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectPlayback>[0]> =
         lastAutoSentRef,
         mediaNext: vi.fn(),
         mediaPause: vi.fn(),
+        pauseRadio: vi.fn(),
         radioStationName: null,
         radioStreamUrl: null,
-        stopRadio: vi.fn(),
         ...overrides,
     };
 };
@@ -132,7 +132,7 @@ describe('useConnectPlayback', () => {
     });
 
     describe('auto-forward on radio switch', () => {
-        it('stops the local radio and starts streaming the radio URL on the Connect targets', () => {
+        it('pauses the local radio and starts streaming the radio URL on the Connect targets', () => {
             const args = baseArgs({
                 isRadioActive: true,
                 radioStationName: 'Cool FM',
@@ -141,7 +141,7 @@ describe('useConnectPlayback', () => {
 
             renderHook(() => useConnectPlayback(args));
 
-            expect(args.stopRadio).toHaveBeenCalledTimes(1);
+            expect(args.pauseRadio).toHaveBeenCalledTimes(1);
             expect(connectFetchMock).toHaveBeenCalledTimes(1);
             const [path, options] = connectFetchMock.mock.calls[0];
             expect(path).toBe('/play-url');
@@ -174,7 +174,7 @@ describe('useConnectPlayback', () => {
             renderHook(() => useConnectPlayback(args));
 
             expect(connectFetchMock).not.toHaveBeenCalled();
-            expect(args.stopRadio).not.toHaveBeenCalled();
+            expect(args.pauseRadio).not.toHaveBeenCalled();
         });
     });
 

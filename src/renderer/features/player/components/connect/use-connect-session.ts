@@ -23,7 +23,7 @@ export const useConnectSession = (): ConnectSession => {
     const { paired, refresh: refreshPaired } = usePairedDevices();
     const { fetchVolume } = useConnectVolume();
     const { mediaNext, mediaPause, mediaTogglePlayPause } = usePlayer();
-    const stopRadio = useRadioStore((s) => s.actions.stop);
+    const pauseRadio = useRadioStore((s) => s.actions.pause);
     const server = useCurrentServerWithCredential();
 
     const lastAutoSentRef = useRef<string>('');
@@ -46,14 +46,20 @@ export const useConnectSession = (): ConnectSession => {
     useEffect(() => {
         if (!connectStatus) return;
         if (connectStatus.streaming && connectStatus.targets.length > 0) {
-            setActiveTargets(
-                connectStatus.targets.map((t) => ({
+            setActiveTargets((prev) => {
+                const next = connectStatus.targets.map((t) => ({
                     name: t.name,
                     type: t.type as ConnectDevice['type'],
-                })),
-            );
+                }));
+                const unchanged =
+                    prev.length === next.length &&
+                    prev.every((t, i) => t.name === next[i].name && t.type === next[i].type);
+                // Keep the existing array reference when unchanged so effects
+                // depending on activeTargets don't re-run on every status poll.
+                return unchanged ? prev : next;
+            });
         } else if (!connectStatus.streaming && !isActive) {
-            setActiveTargets([]);
+            setActiveTargets((prev) => (prev.length === 0 ? prev : []));
         }
     }, [connectStatus, isActive]);
 
@@ -104,9 +110,9 @@ export const useConnectSession = (): ConnectSession => {
         lastAutoSentRef,
         mediaNext,
         mediaPause,
+        pauseRadio,
         radioStationName,
         radioStreamUrl,
-        stopRadio,
     });
 
     // ── Scrobble effects (start + submission via Connect events) ──────────────
@@ -141,7 +147,7 @@ export const useConnectSession = (): ConnectSession => {
             await ensureConfigured();
             const targets = selectedForSend.map((d) => ({ name: d.name, type: d.type }));
             if (isRadioActive && radioStreamUrl) {
-                stopRadio();
+                pauseRadio();
                 const res = await connectFetch(`/play-url`, {
                     body: JSON.stringify({
                         targets,

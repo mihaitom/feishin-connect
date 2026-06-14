@@ -29,14 +29,29 @@ envsubst \
 (cd /app && .venv/bin/python main.py) &
 API_PID=$!
 
-# nginx (keep in background so we can monitor backend process)
+# nginx (keep in background so we can monitor both processes)
 nginx -g "daemon off;" &
 NGINX_PID=$!
 
-# If backend exits, stop nginx and fail container with backend exit code.
-wait "$API_PID"
-API_EXIT=$?
-echo "Backend process exited with code ${API_EXIT}. Stopping nginx..."
-kill "$NGINX_PID" 2>/dev/null || true
-wait "$NGINX_PID" 2>/dev/null || true
-exit "$API_EXIT"
+# Whichever of the two processes exits first, stop the other and exit the
+# container with that process's exit code, so `restart: unless-stopped`
+# actually restarts on a crash of either one.
+while true; do
+    if ! kill -0 "$API_PID" 2>/dev/null; then
+        wait "$API_PID"
+        EXIT_CODE=$?
+        echo "Backend process exited with code ${EXIT_CODE}. Stopping nginx..."
+        kill "$NGINX_PID" 2>/dev/null || true
+        wait "$NGINX_PID" 2>/dev/null || true
+        exit "$EXIT_CODE"
+    fi
+    if ! kill -0 "$NGINX_PID" 2>/dev/null; then
+        wait "$NGINX_PID"
+        EXIT_CODE=$?
+        echo "nginx exited with code ${EXIT_CODE}. Stopping backend..."
+        kill "$API_PID" 2>/dev/null || true
+        wait "$API_PID" 2>/dev/null || true
+        exit "$EXIT_CODE"
+    fi
+    sleep 1
+done

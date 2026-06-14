@@ -13,9 +13,9 @@ interface ConnectPlaybackArgs {
     lastAutoSentRef: MutableRefObject<string>;
     mediaNext: () => void;
     mediaPause: () => void;
+    pauseRadio: () => void;
     radioStationName: null | string | undefined;
     radioStreamUrl: null | string | undefined;
-    stopRadio: () => void;
 }
 
 /**
@@ -34,9 +34,9 @@ export const useConnectPlayback = ({
     lastAutoSentRef,
     mediaNext,
     mediaPause,
+    pauseRadio,
     radioStationName,
     radioStreamUrl,
-    stopRadio,
 }: ConnectPlaybackArgs): void => {
     const advancingRef = useRef(false);
     // ── Auto-forward: track change ────────────────────────────────────────────
@@ -61,12 +61,12 @@ export const useConnectPlayback = ({
     // ── Auto-forward: radio switch ────────────────────────────────────────────
     useEffect(() => {
         if (!isActive || !isRadioActive || !radioStreamUrl) return;
-        stopRadio();
-        // stopRadio() clears isRadioActive synchronously. On the next render the
-        // track effect would see isRadioActive=false and, if lastAutoSentRef was
-        // empty, immediately send the current queue track to /play on top of the
-        // radio we just started. Preserve the current song ID so the track effect
-        // treats it as already-sent and skips.
+        // Pause (don't stop) the local radio — stopping would clear
+        // currentStreamUrl, flip isRadioActive back to false, and make the
+        // playerbar/lyrics fall back to showing the previous track. Pausing keeps
+        // the radio station "active" so the UI keeps showing it while the Connect
+        // target streams the URL directly.
+        pauseRadio();
         lastAutoSentRef.current = currentSong?._uniqueId ?? 'radio';
         connectFetch(`/play-url`, {
             body: JSON.stringify({
@@ -83,7 +83,7 @@ export const useConnectPlayback = ({
         radioStreamUrl,
         radioStationName,
         activeTargets,
-        stopRadio,
+        pauseRadio,
         lastAutoSentRef,
         currentSong,
     ]);

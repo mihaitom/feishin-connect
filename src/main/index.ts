@@ -309,10 +309,14 @@ const startConnectServer = () => {
     }
 
     connectProcess.stdout?.on('data', (data: Buffer) => {
-        log.info(`[Connect] ${data.toString().trimEnd()}`);
+        for (const line of data.toString().split('\n')) {
+            if (line.trim()) log.info(`[Connect] ${line.trimEnd()}`);
+        }
     });
     connectProcess.stderr?.on('data', (data: Buffer) => {
-        log.warn(`[Connect] ${data.toString().trimEnd()}`);
+        for (const line of data.toString().split('\n')) {
+            if (line.trim()) log.warn(`[Connect] ${line.trimEnd()}`);
+        }
     });
     connectProcess.on('error', (err) => {
         log.error(`[Connect] Fehler beim Starten: ${err.message}`);

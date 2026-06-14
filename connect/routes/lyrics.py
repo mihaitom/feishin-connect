@@ -108,8 +108,8 @@ async def auto(
     if best["score"] > MATCH_THRESHOLD:
         logger.info(
             f"[auto] name={name!r} artist={artist!r} -> best match "
-            f"{best['name']!r}/{best['artist']!r} score={best['score']:.2f} "
-            f"above threshold {MATCH_THRESHOLD}, discarding"
+            f"{best['name']!r}/{best['artist']!r} match={(1 - best['score']) * 100:.0f}% "
+            f"below threshold {(1 - MATCH_THRESHOLD) * 100:.0f}%, discarding"
         )
         return None
 
@@ -127,7 +127,8 @@ async def auto(
         return None
 
     logger.info(
-        f"[auto] name={name!r} artist={artist!r} -> found via {source} (score={best['score']:.2f})"
+        f"[auto] name={name!r} artist={artist!r} -> found via {source} "
+        f"(match={(1 - best['score']) * 100:.0f}%)"
     )
     return {
         "artist": best["artist"],

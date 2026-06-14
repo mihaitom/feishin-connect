@@ -130,24 +130,30 @@ export const DeviceItem = ({
             <div
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
-                style={{ marginBottom: alwaysShowVolume && canShowVolume ? '0' : '6px' }}
+                style={{
+                    background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent',
+                    borderRadius: '4px',
+                    marginBottom: alwaysShowVolume && canShowVolume ? '0' : '6px',
+                    transition: 'background 0.1s',
+                }}
             >
                 {/* Header row */}
                 <div
                     style={{
                         alignItems: 'center',
-                        background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent',
-                        borderRadius: '4px',
                         display: 'flex',
                         gap: '10px',
+                        // minHeight reserves space for the (taller) pair/unpair button so
+                        // the row doesn't grow/jump when it appears on hover.
+                        minHeight: '46px',
                         padding: '10px 12px',
-                        transition: 'background 0.1s',
                     }}
                 >
                     <Switch
                         checked={checked}
                         onChange={() => (isActive ? onStop() : onToggleSelect())}
                         size="xs"
+                        style={{ paddingInline: '5px' }}
                     />
 
                     <span
@@ -188,8 +194,8 @@ export const DeviceItem = ({
                         {device.name}
                     </span>
 
-                    {/* AirPlay 2 Pair-Button — space always reserved to prevent height jumps */}
-                    {showPairButton && (
+                    {/* AirPlay 2 Pair-Button — only shown on hover so the label can use the full width otherwise */}
+                    {showPairButton && hovered && (
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -206,21 +212,16 @@ export const DeviceItem = ({
                                 flexShrink: 0,
                                 gap: '4px',
                                 padding: '3px 7px',
-                                // Visible only on hover — space always reserved, no height jump
-                                pointerEvents: hovered ? 'auto' : 'none',
-                                visibility: hovered ? 'visible' : 'hidden',
                             }}
                             title={t('player.connect_pair')}
                         >
                             <LuKeyRound size={12} />
-                            <span style={{ fontSize: '11px' }}>
-                                {t('player.connect_pair')}
-                            </span>
+                            <span style={{ fontSize: '11px' }}>{t('player.connect_pair')}</span>
                         </button>
                     )}
 
-                    {/* AirPlay 2 Unpair-Button — space always reserved to prevent height jumps */}
-                    {showUnpairButton && (
+                    {/* AirPlay 2 Unpair-Button — only shown on hover so the label can use the full width otherwise */}
+                    {showUnpairButton && hovered && (
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -237,16 +238,11 @@ export const DeviceItem = ({
                                 flexShrink: 0,
                                 gap: '4px',
                                 padding: '3px 7px',
-                                // Visible only on hover — space always reserved, no height jump
-                                pointerEvents: hovered ? 'auto' : 'none',
-                                visibility: hovered ? 'visible' : 'hidden',
                             }}
                             title={t('player.connect_unpair')}
                         >
                             <LuUnlink2 size={12} />
-                            <span style={{ fontSize: '11px' }}>
-                                {t('player.connect_unpair')}
-                            </span>
+                            <span style={{ fontSize: '11px' }}>{t('player.connect_unpair')}</span>
                         </button>
                     )}
                 </div>
@@ -283,11 +279,7 @@ export const DeviceItem = ({
                                 flexShrink: 0,
                                 padding: 0,
                             }}
-                            title={
-                                muted
-                                    ? t('player.connect_unmute')
-                                    : t('player.mute')
-                            }
+                            title={muted ? t('player.connect_unmute') : t('player.mute')}
                         >
                             {muted ? <LuVolumeX size={15} /> : <LuVolume1 size={15} />}
                         </button>

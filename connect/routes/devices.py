@@ -74,49 +74,52 @@ async def health():
     }
 
 
+async def discover_all() -> dict:
+    """Scan for Sonos, AirPlay and Chromecast devices and update the cache."""
+    cached = ctx.state.discovered
+    logger.info("[discover] Scanning for Sonos, AirPlay and Chromecast devices …")
+    sonos_res, airplay_res, chromecast_res = await asyncio.gather(
+        discover_sonos(),
+        discover_airplay(),
+        discover_chromecast(),
+        return_exceptions=True,
+    )
+    sonos = sonos_res if isinstance(sonos_res, list) else cached["sonos"]
+    airplay = airplay_res if isinstance(airplay_res, list) else cached["airplay"]
+    chromecast = (
+        chromecast_res if isinstance(chromecast_res, list) else cached["chromecast"]
+    )
+    if isinstance(sonos_res, Exception):
+        logger.warning(f"[discover] Sonos error: {sonos_res}")
+    if isinstance(airplay_res, Exception):
+        logger.warning(f"[discover] AirPlay error: {airplay_res}")
+    if isinstance(chromecast_res, Exception):
+        logger.warning(f"[discover] Chromecast error: {chromecast_res}")
+    logger.info(
+        f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay, "
+        f"{len(chromecast)} Chromecast found"
+    )
+    ctx.state.discovered = {
+        "airplay": airplay,
+        "chromecast": chromecast,
+        "sonos": sonos,
+    }
+    return ctx.state.discovered
+
+
 @router.get("/discover")
 async def discover(fresh: bool = False):
     cached = ctx.state.discovered
     has_cache = bool(cached["sonos"] or cached["airplay"] or cached["chromecast"])
 
-    async def _scan():
-        logger.info("[discover] Scanning for Sonos, AirPlay and Chromecast devices …")
-        sonos_res, airplay_res, chromecast_res = await asyncio.gather(
-            discover_sonos(),
-            discover_airplay(),
-            discover_chromecast(),
-            return_exceptions=True,
-        )
-        sonos = sonos_res if isinstance(sonos_res, list) else cached["sonos"]
-        airplay = airplay_res if isinstance(airplay_res, list) else cached["airplay"]
-        chromecast = (
-            chromecast_res if isinstance(chromecast_res, list) else cached["chromecast"]
-        )
-        if isinstance(sonos_res, Exception):
-            logger.warning(f"[discover] Sonos error: {sonos_res}")
-        if isinstance(airplay_res, Exception):
-            logger.warning(f"[discover] AirPlay error: {airplay_res}")
-        if isinstance(chromecast_res, Exception):
-            logger.warning(f"[discover] Chromecast error: {chromecast_res}")
-        logger.info(
-            f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay, "
-            f"{len(chromecast)} Chromecast found"
-        )
-        ctx.state.discovered = {
-            "airplay": airplay,
-            "chromecast": chromecast,
-            "sonos": sonos,
-        }
-        return ctx.state.discovered
-
     # fresh=true (explicit "Scan again") awaits a full rescan so the client can
     # show real progress. Otherwise serve cache instantly and rescan in the
     # background for snappy popover opens.
     if has_cache and not fresh:
-        asyncio.create_task(_scan())
+        asyncio.create_task(discover_all())
         return cached
 
-    return await _scan()
+    return await discover_all()
 
 
 class VolumeRequest(BaseModel):

@@ -7,17 +7,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [0.3.2] - Unreleased
 
 ### Added
+- **Hourly device rescan** — Connect now automatically rescans for Sonos, AirPlay and Chromecast devices once an hour in the background. Newly available devices show up without having to manually hit "Scan again", and devices that are no longer reachable drop out of the list.
 - **Remote lyrics lookup in the web/Docker build** — fetching lyrics from the internet (lrclib.net, SimpMusic) has so far only worked via IPC in the Electron app, in both upstream and this fork; the web/Docker build (this fork only) could so far only show lyrics already stored on the media server. A new Connect backend lyrics module (`/lyrics/search`, `/lyrics/auto`, `/lyrics/by-remote-id`) now brings remote lyrics lookup to the web build too.
 - **Manual lyrics search, clear/refresh and translation now available in the web/Docker build** — these actions, and the related lyrics settings, were hidden outside of Electron because they depended on IPC. They now use the new Connect backend endpoints above and behave the same as in the desktop app.
 - **Loading indicator for background lyrics lookups** — with "prefer local lyrics" enabled, a remote lyrics search now still runs in the background when local lyrics exist. A small spinner now shows while that lookup is in progress.
 
 ### Fixed
+- **Switching to a radio station while streaming to a Connect device left the playerbar and lyrics showing the previous track** — the radio switch used to fully stop local radio playback, which made the app think radio mode had ended, so the UI fell back to the last queued track (and re-enabled lyrics for it). The radio is now only paused locally, so the playerbar keeps showing the radio station and lyrics stay hidden while it plays on the Connect device.
+- **Connect popover polish** — on AirPlay devices, the "Pair"/"Unpair" button is now only shown on hover (the device name uses the full row width otherwise) without the row jumping in height; the hover highlight now also covers the volume slider; and the "Connect"/"Add" button animates in/out instead of appearing abruptly.
 - **Lyrics not found on lrclib.net were never retried** — "not found" results were cached indefinitely, including across reloads and restarts (persisted query cache), so a track without lyrics on first try would never be looked up again — even after lrclib.net added them later. Such results are now retried automatically after 24 hours, and previously cached "not found" results from before this fix are invalidated once.
 
 ### Changed
-- **Cleaner, unified backend logs** — log lines from the Python backend, uvicorn and nginx now share one consistent, column-aligned format (`HH:MM:SS LEVEL  logger    message`), and the redundant `connect.` prefix is dropped from logger names.
-- **`httpx`/`httpcore` and `uvicorn.access` request logs now gated behind `DEBUG=true`** — these were pure spam at the default log level. nginx's access log is now gated behind `DEBUG=true` too, for consistency.
-- **Docker: nginx now stops if the Python backend crashes** — previously the container could stay up with a non-functional UI if the backend process died. Now the container exits with the backend's exit code, so `restart: unless-stopped` actually restarts it.
+- **Easier to read backend logs** — log output is now more consistent and less cluttered with noise that wasn't useful day-to-day, making it easier to spot real problems when something goes wrong.
+- **Docker: container now restarts if nginx or the backend crashes** — previously the container could stay up in a broken state if either process died unexpectedly. Now the container exits as soon as one of them crashes, so `restart: unless-stopped` actually restarts it.
+- **Docker: added a health check** — the container now reports its health status (visible in `docker ps`), so it's easier to spot when the app is unresponsive even if it hasn't crashed.
 
 ### Removed
 - Internal `publish.py` script and `package-lock.json` — the project is now fully on pnpm.
