@@ -57,7 +57,10 @@ interface ReleaseNotesContentProps {
  * is not yet published.
  */
 function getLocalChangelogSection(version: string): null | string {
-    const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // CHANGELOG.md entries use the base version (e.g. "0.3.2"), not the
+    // pre-release suffix (e.g. "-dev.1"), so strip it before matching.
+    const baseVersion = version.split('-')[0];
+    const escaped = baseVersion.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const re = new RegExp(
         `## \\[${escaped}\\][^\\n]*\\n([\\s\\S]*?)(?=\\n## \\[|\\n---\\s*\\n## \\[|$)`,
     );
