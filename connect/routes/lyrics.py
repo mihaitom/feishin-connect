@@ -11,22 +11,24 @@ from typing import Any
 from fastapi import APIRouter, Depends
 
 from auth import require_token
-from lyrics import LyricSource, lrclib, order_search_results, simpmusic
+from lyrics import LyricSource, lrclib, netease, order_search_results, simpmusic
 
 logger = logging.getLogger("connect.lyrics")
 router = APIRouter(prefix="/lyrics", dependencies=[Depends(require_token)])
 
-# Mirrors src/shared/types/domain-types.ts LyricSource — Genius/NetEase are
-# not implemented here (HTML scraping needs extra deps in the PyInstaller
-# build), but the response shape stays compatible with the frontend, which
-# just iterates over whatever keys are present.
+# Mirrors src/shared/types/domain-types.ts LyricSource — Genius is not
+# implemented here (HTML scraping needs extra deps in the PyInstaller build),
+# but the response shape stays compatible with the frontend, which just
+# iterates over whatever keys are present.
 SEARCH_FETCHERS = {
     LyricSource.LRCLIB: lrclib.get_search_results,
     LyricSource.SIMPMUSIC: simpmusic.get_search_results,
+    LyricSource.NETEASE: netease.get_search_results,
 }
 GET_FETCHERS = {
     LyricSource.LRCLIB: lrclib.get_lyrics_by_song_id,
     LyricSource.SIMPMUSIC: simpmusic.get_lyrics_by_song_id,
+    LyricSource.NETEASE: netease.get_lyrics_by_song_id,
 }
 
 # Same as getRemoteLyrics' matchThreshold in index.ts.

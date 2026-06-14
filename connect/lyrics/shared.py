@@ -9,6 +9,13 @@ match, 1 = worst), so the existing MATCH_THRESHOLD = 0.55 behaves the same.
 from difflib import SequenceMatcher
 from typing import Any
 
+# Kept in sync with package.json by scripts/sync-connect-version.mjs
+# (runs via the `postversion` hook on `pnpm version`).
+CONNECT_VERSION = "0.3.2-dev.0"
+
+# Shared across providers — some (e.g. SimpMusic) reject requests without one.
+USER_AGENT = f"Feishin Connect/{CONNECT_VERSION} (https://github.com/mihaitom/feishin-connect)"
+
 
 def _distance(a: str | None, b: str | None) -> float:
     """0 = identical (ignoring case), 1 = completely different."""

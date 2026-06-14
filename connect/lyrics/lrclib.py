@@ -10,7 +10,7 @@ from typing import Any
 
 import httpx
 
-from .shared import order_search_results
+from .shared import USER_AGENT, order_search_results
 
 logger = logging.getLogger("connect.lyrics.lrclib")
 
@@ -20,8 +20,6 @@ SEARCH_URL = "https://lrclib.net/api/search"
 # lrclib.net's API has been observed taking 6-12s to respond on some
 # networks, so a short timeout causes spurious failures.
 TIMEOUT = 20.0
-
-USER_AGENT = "Feishin Connect (https://github.com/mihaitom/feishin-connect)"
 
 # Shared client so repeated requests reuse the same TCP/TLS connection
 # instead of paying a new handshake every time.

@@ -75,7 +75,7 @@
         "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
         "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
         "version": "pnpm version --no-git-tag-version",
-        "postversion": "node ./scripts/update-app-stream.mjs"
+        "postversion": "node ./scripts/update-app-stream.mjs && node ./scripts/sync-connect-version.mjs"
     },
     "resolutions": {
         "react-router": "7.14.0",
