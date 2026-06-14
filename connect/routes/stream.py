@@ -44,7 +44,11 @@ async def audio_stream():
     )
 
     def on_track_start(_: int) -> None:
-        logger.info(f"[stream] ▶ {track.artist} — {track.title} ({track.duration}s)")
+        gain = ctx.state.current_track_gain
+        gain_str = f", gain={gain:.2f}" if gain != 1.0 else ""
+        logger.info(
+            f"[stream] ▶ {track.artist} — {track.title} ({track.duration}s{gain_str})"
+        )
 
     async def _fire_track_end(my_generation: int, wait: float) -> None:
         """Fires track-end signal after waiting for Sonos to finish playback.
@@ -68,7 +72,10 @@ async def audio_stream():
         my_generation = ctx.state.play_generation
         try:
             async for chunk in stream_tracks(
-                [track_url], on_track_start=on_track_start, start_offset=offset
+                [track_url],
+                on_track_start=on_track_start,
+                start_offset=offset,
+                gain=ctx.state.current_track_gain,
             ):
                 yield chunk
         except asyncio.CancelledError:

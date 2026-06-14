@@ -4,6 +4,9 @@ import { MutableRefObject, useEffect, useRef } from 'react';
 
 import { ConnectDevice, connectFetch, ConnectStatus } from './types';
 
+import { useMpvSettings } from '/@/renderer/store';
+import { calculateReplayGain } from '/@/renderer/utils/replay-gain';
+
 interface ConnectPlaybackArgs {
     activeTargets: ConnectDevice[];
     connectStatus: ConnectStatus | null;
@@ -39,6 +42,8 @@ export const useConnectPlayback = ({
     radioStreamUrl,
 }: ConnectPlaybackArgs): void => {
     const advancingRef = useRef(false);
+    const replayGainSettings = useMpvSettings();
+
     // ── Auto-forward: track change ────────────────────────────────────────────
     useEffect(() => {
         if (!isActive || isRadioActive) return;
@@ -50,13 +55,22 @@ export const useConnectPlayback = ({
         mediaPause();
         connectFetch(`/play`, {
             body: JSON.stringify({
+                gain: currentSong ? calculateReplayGain(currentSong, replayGainSettings) : 1,
                 targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
                 track_ids: [trackId],
             }),
             headers: { 'Content-Type': 'application/json' },
             method: 'POST',
         }).catch(() => {});
-    }, [isActive, isRadioActive, currentSong, activeTargets, mediaPause, lastAutoSentRef]);
+    }, [
+        isActive,
+        isRadioActive,
+        currentSong,
+        activeTargets,
+        mediaPause,
+        lastAutoSentRef,
+        replayGainSettings,
+    ]);
 
     // ── Auto-forward: radio switch ────────────────────────────────────────────
     useEffect(() => {

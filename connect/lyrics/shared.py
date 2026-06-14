@@ -11,7 +11,7 @@ from typing import Any
 
 # Kept in sync with package.json by scripts/sync-connect-version.mjs
 # (runs via the `postversion` hook on `pnpm version`).
-CONNECT_VERSION = "0.3.2-dev.1"
+CONNECT_VERSION = "0.4.0-dev.0"
 
 # Shared across providers — some (e.g. SimpMusic) reject requests without one.
 USER_AGENT = f"Feishin Connect/{CONNECT_VERSION} (https://github.com/mihaitom/feishin-connect)"

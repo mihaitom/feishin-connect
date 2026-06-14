@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.2] - Unreleased
+## [0.4.0] - Unreleased
 
 ### Added
 - **Hourly device rescan** — Connect now automatically rescans for Sonos, AirPlay and Chromecast devices once an hour in the background. Newly available devices show up without having to manually hit "Scan again", and devices that are no longer reachable drop out of the list.
 - **Remote lyrics lookup in the web/Docker build** — fetching lyrics from the internet (lrclib.net, SimpMusic, NetEase) has so far only worked via IPC in the Electron app, in both upstream and this fork; the web/Docker build (this fork only) could so far only show lyrics already stored on the media server. A new Connect backend lyrics module (`/lyrics/search`, `/lyrics/auto`, `/lyrics/by-remote-id`) now brings remote lyrics lookup to the web build too. Genius is not available in the web build — it requires HTML scraping that doesn't fit the Connect backend's lightweight setup, so it remains Electron-only.
 - **Manual lyrics search, clear/refresh and translation now available in the web/Docker build** — these actions, and the related lyrics settings, were hidden outside of Electron because they depended on IPC. They now use the new Connect backend endpoints above and behave the same as in the desktop app.
 - **Loading indicator for background lyrics lookups** — with "prefer local lyrics" enabled, a remote lyrics search now still runs in the background when local lyrics exist. A small spinner now shows while that lookup is in progress.
+- **ReplayGain now applies to Connect playback on Sonos and Chromecast** — your existing ReplayGain settings (Settings → Playback) are now also applied when streaming to Sonos or Chromecast via Connect, matching the volume normalization already used for local playback. AirPlay is not covered yet, since it streams directly from the media server without going through Connect's ffmpeg pipeline.
 
 ### Fixed
 - **Switching to a radio station while streaming to a Connect device left the playerbar and lyrics showing the previous track** — the radio switch used to fully stop local radio playback, which made the app think radio mode had ended, so the UI fell back to the last queued track (and re-enabled lyrics for it). The radio is now only paused locally, so the playerbar keeps showing the radio station and lyrics stay hidden while it plays on the Connect device.
