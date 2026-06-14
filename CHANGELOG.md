@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Easier to read backend logs** — log output is now more consistent and less cluttered with noise that wasn't useful day-to-day, making it easier to spot real problems when something goes wrong.
 - **Docker: container now restarts if nginx or the backend crashes** — previously the container could stay up in a broken state if either process died unexpectedly. Now the container exits as soon as one of them crashes, so `restart: unless-stopped` actually restarts it.
 - **Docker: added a health check** — the container now reports its health status (visible in `docker ps`), so it's easier to spot when the app is unresponsive even if it hasn't crashed.
+- **Windows app identity changed** — the desktop app now identifies itself to Windows as `io.github.mihaitom.feishin-connect` instead of upstream's `org.jeffvli.feishin`, matching this fork's app ID. As a side effect, Windows treats this as a different app: the taskbar pin/grouping and notification settings from a previous install won't carry over and may need to be set up again.
 
 ### Removed
 - Internal `publish.py` script and `package-lock.json` — the project is now fully on pnpm.

@@ -22,7 +22,7 @@ export default async function afterAllArtifactBuild(buildResult) {
     if (isLinux) {
         const updateScriptPath = path.join(__dirname, 'update-app-stream.mjs');
         const projectRoot = path.resolve(__dirname, '..');
-        const metainfoFile = path.resolve(projectRoot, 'org.jeffvli.feishin.metainfo.xml');
+        const metainfoFile = path.resolve(projectRoot, 'io.github.mihaitom.feishin-connect.metainfo.xml');
 
         console.log('Running app stream update for Linux build...');
 

@@ -1,6 +1,6 @@
 {
     "name": "feishin-connect",
-    "version": "0.3.2-dev.0",
+    "version": "0.3.2-dev.1",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -32,6 +32,7 @@
         "build:electron": "electron-vite build",
         "build:remote": "vite build --config remote.vite.config.ts",
         "build:web": "vite build --config web.vite.config.ts",
+        "bump-version": "pnpm version --no-git-tag-version --no-git-checks",
         "dev": "electron-vite dev",
         "dev:remote": "vite dev --config remote.vite.config.ts",
         "dev:watch": "electron-vite dev --watch",
@@ -53,8 +54,6 @@
         "package:win": "pnpm run build && electron-builder --win",
         "package:win:pr": "pnpm run build && electron-builder --win --publish never",
         "package:win-arm64:pr": "pnpm run build && electron-builder --win --arm64 --publish never",
-        "test": "vitest run",
-        "test:watch": "vitest",
         "publish:linux": "pnpm run build && electron-builder --publish always --linux",
         "publish:linux:alpha": "pnpm run build && electron-builder --config electron-builder-alpha.yml --publish always --linux",
         "publish:linux:beta": "pnpm run build && electron-builder --config electron-builder-beta.yml --publish always --linux",
@@ -71,11 +70,12 @@
         "publish:win-arm64:alpha": "pnpm run build && electron-builder --config electron-builder-alpha.yml --publish always --win --arm64",
         "publish:win-arm64:beta": "pnpm run build && electron-builder --config electron-builder-beta.yml --publish always --win --arm64",
         "start": "electron-vite preview",
+        "test": "vitest run",
+        "test:watch": "vitest",
         "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
         "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
         "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-        "version": "pnpm version --no-git-tag-version",
-        "postversion": "node ./scripts/update-app-stream.mjs && node ./scripts/sync-connect-version.mjs"
+        "postversion": "node ./scripts/sync-connect-version.mjs"
     },
     "resolutions": {
         "react-router": "7.14.0",

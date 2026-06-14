@@ -831,7 +831,7 @@ async function createWindow(first = true): Promise<void> {
     });
 
     if (isWindows()) {
-        app.setAppUserModelId('org.jeffvli.feishin');
+        app.setAppUserModelId('io.github.mihaitom.feishin-connect');
     }
 
     if (isMacOS()) {
