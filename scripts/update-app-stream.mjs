@@ -24,7 +24,7 @@ const version = packageJson.version;
 
 const time = Math.floor((Date.parse(positionalArgs[1]) || Date.now()) / 1000);
 const metainfoFile =
-    positionalArgs[2] || path.resolve(process.cwd(), 'org.jeffvli.feishin.metainfo.xml');
+    positionalArgs[2] || path.resolve(process.cwd(), 'io.github.mihaitom.feishin-connect.metainfo.xml');
 
 const parser = new XMLParser({ ignoreAttributes: false });
 const metainfoContent = fs.readFileSync(metainfoFile, 'utf8');
@@ -40,14 +40,18 @@ if (replaceIfVersionMissing) {
     // Replace all releases with only the current version
     metainfo.component.releases.release = [newRelease];
 } else {
+    // fast-xml-parser gives us a plain object instead of an array when there's
+    // only a single <release> entry.
+    const releases = Array.isArray(metainfo.component.releases.release)
+        ? metainfo.component.releases.release
+        : [metainfo.component.releases.release];
+
     // Default behavior: add new release if it doesn't exist
-    const releaseExists =
-        metainfo.component.releases.release.findIndex(
-            (release) => release['@_version'] === version,
-        ) !== -1;
+    const releaseExists = releases.findIndex((release) => release['@_version'] === version) !== -1;
     if (!releaseExists) {
-        metainfo.component.releases.release.unshift(newRelease);
+        releases.unshift(newRelease);
     }
+    metainfo.component.releases.release = releases;
 }
 
 const builder = new XMLBuilder({ format: true, ignoreAttributes: false, indentBy: '  ' });

@@ -134,12 +134,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
             {/* Device list */}
             {!hasApiError && (
                 <PopSection
-                    label={
-                        devices.length === 0
-                            ? ''
-                            : (trackLabel ??
-                              t('player.connect_sendTo'))
-                    }
+                    label={devices.length === 0 ? '' : (trackLabel ?? t('player.connect_sendTo'))}
                 >
                     {devices.length === 0 && (
                         <div
@@ -201,8 +196,16 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                 </PopSection>
             )}
 
-            {/* Send / Add button */}
-            {selectedForSend.length > 0 && (
+            {/* Send / Add button — always rendered, animated open/closed so the
+                popover doesn't jump in height when a device gets (de)selected */}
+            <div
+                style={{
+                    maxHeight: selectedForSend.length > 0 ? '50px' : '0px',
+                    opacity: selectedForSend.length > 0 ? 1 : 0,
+                    overflow: 'hidden',
+                    transition: 'max-height 0.2s ease, opacity 0.15s ease',
+                }}
+            >
                 <div style={{ padding: '4px 12px 10px' }}>
                     <button
                         onClick={isActive ? addToStream : sendToSelected}
@@ -223,7 +226,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                             : t('player.connect_connect')}
                     </button>
                 </div>
-            )}
+            </div>
 
             {/* Disconnect all */}
             {isActive && (

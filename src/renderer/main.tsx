@@ -7,6 +7,7 @@ import { del, get, set } from 'idb-keyval';
 import { createRoot } from 'react-dom/client';
 
 import { App } from '/@/renderer/app';
+import type { LyricsQueryResult } from '/@/renderer/features/lyrics/api/lyrics-api';
 import { queryClient } from '/@/renderer/lib/react-query';
 
 function createIDBPersister(idbValidKey: IDBValidKey = 'reactQuery') {
@@ -29,7 +30,10 @@ createRoot(document.getElementById('root')!).render(
     <PersistQueryClientProvider
         client={queryClient}
         persistOptions={{
-            buster: 'feishin',
+            // Bumped to invalidate previously persisted lyrics queries that
+            // were cached as "nothing found" due to remote-provider timeouts
+            // (lrclib.net) before those timeouts were fixed.
+            buster: 'feishin-v2',
             dehydrateOptions: {
                 shouldDehydrateQuery: (query) => {
                     const isSuccess = query.state.status === 'success';
@@ -38,7 +42,13 @@ createRoot(document.getElementById('root')!).render(
                         query.queryKey.includes('lyrics') &&
                         query.queryKey.includes('select');
 
-                    return isSuccess && isLyricsQueryKey;
+                    if (!isSuccess || !isLyricsQueryKey) return false;
+
+                    // Don't persist "nothing found" results forever — a transient
+                    // remote-lyrics failure (e.g. provider timeout) would
+                    // otherwise permanently block retries on next load.
+                    const data = query.state.data as LyricsQueryResult | undefined;
+                    return !!data?.selected;
                 },
             },
             hydrateOptions: {

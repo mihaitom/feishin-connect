@@ -11,11 +11,37 @@
       <img src="https://img.shields.io/github/license/mihaitom/feishin-connect?style=flat-square&color=brightgreen"
       alt="License">
     </a>
-      <a href="https://github.com/jeffvli/feishin/releases">
+      <a href="https://github.com/mihaitom/feishin-connect/releases">
       <img src="https://img.shields.io/github/v/release/mihaitom/feishin-connect?style=flat-square&color=blue"
       alt="Release">
     </a>
+    <a href="https://github.com/mihaitom/feishin-connect/actions/workflows/test-python.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/mihaitom/feishin-connect/test-python.yml?style=flat-square&label=backend%20tests"
+      alt="Backend tests">
+    </a>
+    <a href="https://github.com/mihaitom/feishin-connect/actions/workflows/test-frontend.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/mihaitom/feishin-connect/test-frontend.yml?style=flat-square&label=frontend%20tests"
+      alt="Frontend tests">
+    </a>
+    <a href="https://github.com/mihaitom/feishin-connect/commits/development">
+      <img src="https://img.shields.io/github/last-commit/mihaitom/feishin-connect?style=flat-square&color=blue"
+      alt="Last commit">
+    </a>
   </p>
+
+---
+
+## Differences from upstream
+
+| Feature | This fork | Upstream |
+|---------|-----------|----------|
+| Feishin Connect (Sonos / AirPlay / Chromecast) | ✅ | ❌ |
+| Manual library scan button (Navidrome/Subsonic) | ✅ | ❌ |
+| Remote lyrics lookup (lrclib.net, SimpMusic, NetEase) in the web/Docker build | ✅ | ⚠️ Electron only |
+| Auto-updater | ❌ disabled | ✅ GitHub Releases |
+| Docker image | `ghcr.io/mihaitom/feishin-connect` | `ghcr.io/jeffvli/feishin` |
+
+The auto-updater is disabled in this fork. It would otherwise pull releases from `jeffvli/feishin` and overwrite the Connect feature. Update by pulling the latest image (`docker pull`) or rebuilding from source.
 
 ---
 
@@ -25,32 +51,24 @@ Feishin Connect adds a cast button to the player bar. Click it to stream the cur
 
 <img src="assets/feishin-connect-screenshot.png" width="350px">
 
-## Development Notes
-
-This fork was developed heavily with AI assistance, especially the Connect backend and streaming integration.
-Please expect rough edges and report issues if you encounter them.
+> **Development note:** This fork was developed heavily with AI assistance, especially the Connect backend and streaming integration. Please expect rough edges and report issues if you encounter them.
 
 ### How it works
 
 - A **Python / FastAPI** backend runs alongside nginx in the same Docker container.
 - It receives media server credentials (Navidrome / Subsonic / Jellyfin) automatically from Feishin on startup — no manual config.
-- For Sonos and Chromecast, the backend re-encodes the media server stream via **FFmpeg** into a continuous MP3 stream the devices pull over HTTP.
+- For Sonos and Chromecast, the backend re-encodes the media server stream via **FFmpeg** into a continuous MP3 stream the devices pull over HTTP, applying ReplayGain volume normalization if enabled.
 - **Sonos** devices are controlled via UPnP (SoCo) and pull the stream over HTTP.
 - **AirPlay** devices are fed via pyatv / RAOP — the track is downloaded directly from the media server and pushed to the device (no FFmpeg involved).
 - **Chromecast** devices are controlled via pychromecast and pull the stream over HTTP.
 
 ### Features
 
-- Stream the current queue to one or multiple Sonos / AirPlay / Chromecast devices simultaneously
+- Stream the current queue or a radio stream to one or multiple Sonos / AirPlay / Chromecast devices simultaneously, with automatic device discovery and AirPlay 2 pairing for devices that require it
 - Sonos multiroom grouping (devices play in sync)
-- Per-device volume control with a hover slider (Sonos and Chromecast)
-- Play/pause/previous/next controls in the popover (operated on the remote device)
-- In-track seeking — drag the progress slider to seek within the current track on the remote device
-- Radio stream support (sends the live URL directly to the device)
-- Synchronized lyrics follow along during remote playback, compensating for each device's buffering delay
-- Now-Playing metadata (title, artist, album art) shown on Sonos and Chromecast devices
-- Persistent state — Connect continues if you reload Feishin in the browser
-- Local playback pauses automatically when handing off to a device (Crossfade and Gapless transitions are also disabled locally while Connect is active to prevent double-audio)
+- Transport control via Feishin's normal playerbar — play/pause/previous/next and in-track seeking drive the remote device instead of local playback; per-device volume with ReplayGain normalization is available from the popover (Sonos and Chromecast)
+- Synchronized lyrics and Now-Playing metadata (title, artist, album art) follow along during remote playback
+- Persistent state that survives page reloads — local playback pauses automatically when handing off to a device
 
 ### Docker (recommended)
 
@@ -91,7 +109,7 @@ services:
 | `SERVER_NAME` | — | Pre-configured server name shown in Feishin |
 | `SERVER_TYPE` | — | `navidrome`, `jellyfin`, or `subsonic` |
 | `SERVER_LOCK` | `false` | When `true`, only username and password can be changed in the UI — server name, type and URL are fixed |
-| `DEBUG` | `false` | When `true`, enables verbose playback logs across all renderers (AirPlay via pyatv, Sonos via SoCo, internal streamer) |
+| `DEBUG` | `false` | When `true`, enables verbose playback logs across all renderers (AirPlay via pyatv, Sonos via SoCo, internal streamer), plus `httpx`/`uvicorn.access` request logs and nginx's access log. Leave `false` for normal operation — these are spammy and only useful for troubleshooting. |
 
 ### Requirements
 
@@ -106,14 +124,14 @@ The Connect backend starts and stops automatically alongside the Electron app �
 **Development** (Python + uv required):
 
 ```bash
-npm run dev        # Electron starts and spawns the backend via `uv run python main.py`
+pnpm run dev        # Electron starts and spawns the backend via `uv run python main.py`
 ```
 
-**Packaging** (build once per platform before `npm run package`):
+**Packaging** (build once per platform before `pnpm run package`):
 
 ```bash
-npm run build:connect   # compiles the Python backend to a standalone binary via PyInstaller
-npm run package:linux   # builds the Electron app; the binary is bundled automatically
+pnpm run build:connect   # compiles the Python backend to a standalone binary via PyInstaller
+pnpm run package:linux   # builds the Electron app; the binary is bundled automatically
 ```
 
 The binary lives in `connect/dist/connect-server/` and is picked up by `electron-builder` via `extraResources`. Users need **ffmpeg** installed on their system (`apt install ffmpeg` / `brew install ffmpeg`) — it is not bundled.
@@ -123,17 +141,17 @@ When you quit the app, it sends a stop command to the backend and kills the proc
 ### Building locally (Docker image)
 
 ```bash
-./build.sh <registry> <namespace> <image-name>
-# example:
-./build.sh ghcr.io myuser feishin-connect
+docker build -t feishin-connect .
 ```
+
+`build.sh` is also in the repo, but it's geared towards pushing tagged releases to a registry (used via the maintainer's own release tasks) rather than a plain local build.
 
 Or for web development:
 
 ```bash
 # Frontend
-npm install
-npm run dev:web
+pnpm install
+pnpm run dev:web
 
 # Backend (separate terminal)
 cd connect
@@ -171,6 +189,61 @@ Feishin Connect solves this with a built-in **backend proxy**: all media server 
 
 ---
 
+## FAQ
+
+### Feishin Connect: ffmpeg required
+
+Feishin Connect uses **ffmpeg** to transcode the audio stream (from Navidrome, Subsonic or Jellyfin) into a continuous MP3 stream for **Sonos and Chromecast**, which pull it over HTTP. (AirPlay does not use ffmpeg — the track is downloaded directly from the media server and streamed via pyatv.) ffmpeg is **not bundled** with the app and must be installed separately.
+
+| Platform | Install |
+|----------|---------|
+| Linux (Debian/Ubuntu) | `sudo apt install ffmpeg` |
+| Linux (Arch) | `sudo pacman -S ffmpeg` |
+| macOS | `brew install ffmpeg` |
+| Windows | Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH |
+
+In the Docker image (`ghcr.io/mihaitom/feishin-connect`) ffmpeg is already included.
+
+If ffmpeg is missing, the Connect popover shows a warning banner and the Connect backend logs `ffmpeg not found` on startup — but play requests to Sonos/Chromecast will still fail silently if you start playback anyway.
+
+### Feishin Connect: no devices found
+
+Ensure the container is running with `network_mode: host`. Without host networking, mDNS/SSDP multicast packets cannot reach the container and no devices will be discovered.
+
+### Feishin Connect: nothing plays (device found but no audio)
+
+Check the container or Electron logs for `ffmpeg not found`. FFmpeg is required for audio transcoding and is included in the Docker image. If you're running the backend natively, install FFmpeg via your package manager — see the ffmpeg install instructions above.
+
+### Feishin Connect: my Sonos speaker doesn't appear under AirPlay
+
+That's intentional. Sonos speakers advertise AirPlay 2 but require MFi hardware authentication that the AirPlay backend (pyatv) cannot perform, so streaming to them via AirPlay fails. They are filtered out of the AirPlay list and should be used via the dedicated **Sonos** output instead, where they appear with full volume and grouping support.
+
+### Feishin Connect: AirPlay troubleshooting
+
+Set `DEBUG=true` (see the environment variables table above) to log the full AirPlay protocol negotiation (device discovery, encryption, RTSP exchange), along with verbose Sonos and internal streamer logs. This is the quickest way to diagnose why a specific receiver won't play. Note that a `not connected to remote` line in the log is usually just the connection teardown masking the real error, which appears on the line above it.
+
+### MPV is either not working or is rapidly switching between pause/play states
+
+Check that your MPV binary path is correct in Settings. Known working versions: `v0.35.x` and `v0.36.x`. `v0.34.x` is broken.
+
+### What music servers does Feishin support?
+
+Feishin supports any music server implementing [Navidrome](https://www.navidrome.org/), [Jellyfin](https://jellyfin.org/), or an [OpenSubsonic compatible](https://opensubsonic.netlify.app/) API.
+
+- [Navidrome](https://github.com/navidrome/navidrome)
+- [Jellyfin](https://github.com/jellyfin/jellyfin)
+- OpenSubsonic compatible: Airsonic-Advanced, Ampache, Astiga, Funkwhale, Gonic, LMS, Nextcloud Music, Supysonic, Qm-Music, and more
+
+### I have the issue "The SUID sandbox helper binary was found, but is not configured correctly" on Linux
+
+Enable unprivileged namespaces or set the `chrome-sandbox` binary to Setuid:
+
+```bash
+chmod 4755 chrome-sandbox
+sudo chown root:root chrome-sandbox
+```
+
+---
 
 ## Upstream: Feishin
 
@@ -234,80 +307,16 @@ curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/i
 
 7. _Optional_ — Override app defaults with `FS_`-prefixed environment variables on first run. See [the settings environment variable documentation](docs/ENV_SETTINGS.md).
 
-## Differences from upstream
-
-| Feature | This fork | Upstream |
-|---------|-----------|----------|
-| Feishin Connect (Sonos / AirPlay / Chromecast) | ✅ | ❌ |
-| Auto-updater | ❌ disabled | ✅ GitHub Releases |
-| Docker image | `ghcr.io/mihaitom/feishin-connect` | `ghcr.io/jeffvli/feishin` |
-
-The auto-updater is disabled in this fork. It would otherwise pull releases from `jeffvli/feishin` and overwrite the Connect feature. Update by pulling the latest image (`docker pull`) or rebuilding from source.
-
 ---
-
-## FAQ
-
-### MPV is either not working or is rapidly switching between pause/play states
-
-Check that your MPV binary path is correct in Settings. Known working versions: `v0.35.x` and `v0.36.x`. `v0.34.x` is broken.
-
-### What music servers does Feishin support?
-
-Feishin supports any music server implementing [Navidrome](https://www.navidrome.org/), [Jellyfin](https://jellyfin.org/), or an [OpenSubsonic compatible](https://opensubsonic.netlify.app/) API.
-
-- [Navidrome](https://github.com/navidrome/navidrome)
-- [Jellyfin](https://github.com/jellyfin/jellyfin)
-- OpenSubsonic compatible: Airsonic-Advanced, Ampache, Astiga, Funkwhale, Gonic, LMS, Nextcloud Music, Supysonic, Qm-Music, and more
-
-### Feishin Connect: ffmpeg required
-
-Feishin Connect uses **ffmpeg** to transcode the audio stream (from Navidrome, Subsonic or Jellyfin) into a continuous MP3 stream for **Sonos and Chromecast**, which pull it over HTTP. (AirPlay does not use ffmpeg — the track is downloaded directly from the media server and streamed via pyatv.) ffmpeg is **not bundled** with the app and must be installed separately.
-
-| Platform | Install |
-|----------|---------|
-| Linux (Debian/Ubuntu) | `sudo apt install ffmpeg` |
-| Linux (Arch) | `sudo pacman -S ffmpeg` |
-| macOS | `brew install ffmpeg` |
-| Windows | Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH |
-
-In the Docker image (`ghcr.io/mihaitom/feishin-connect`) ffmpeg is already included.
-
-If ffmpeg is missing, the Connect backend logs `ffmpeg not found` on startup and all play requests will silently fail.
-
-### Feishin Connect: no devices found
-
-Ensure the container is running with `network_mode: host`. Without host networking, mDNS/SSDP multicast packets cannot reach the container and no devices will be discovered.
-
-### Feishin Connect: nothing plays (device found but no audio)
-
-Check the container or Electron logs for `ffmpeg not found`. FFmpeg is required for audio transcoding and is included in the Docker image. If you're running the backend natively, install FFmpeg via your package manager — see the ffmpeg install instructions above.
-
-### Feishin Connect: my Sonos speaker doesn't appear under AirPlay
-
-That's intentional. Sonos speakers advertise AirPlay 2 but require MFi hardware authentication that the AirPlay backend (pyatv) cannot perform, so streaming to them via AirPlay fails. They are filtered out of the AirPlay list and should be used via the dedicated **Sonos** output instead, where they appear with full volume and grouping support.
-
-### Feishin Connect: AirPlay troubleshooting
-
-Set the `PYATV_DEBUG=1` environment variable to log the full AirPlay protocol negotiation (device discovery, encryption, RTSP exchange). This is the quickest way to diagnose why a specific receiver won't play. Note that a `not connected to remote` line in the log is usually just the connection teardown masking the real error, which appears on the line above it.
-
-### I have the issue "The SUID sandbox helper binary was found, but is not configured correctly" on Linux
-
-Enable unprivileged namespaces or set the `chrome-sandbox` binary to Setuid:
-
-```bash
-chmod 4755 chrome-sandbox
-sudo chown root:root chrome-sandbox
-```
 
 ## Development
 
-Built and tested using Node `v23.11.0`. This project is built off of [electron-vite](https://github.com/alex8088/electron-vite).
+Built and tested using Node `v23.11.0` and pnpm. This project is built off of [electron-vite](https://github.com/alex8088/electron-vite).
 
-- `npm run dev` — Start the development server
-- `npm run build:web` — Build the standalone web app
-- `npm run typecheck` — Type check the project
-- `npm run lint` — Lint the project
+- `pnpm run dev` — Start the development server
+- `pnpm run build:web` — Build the standalone web app
+- `pnpm run typecheck` — Type check the project
+- `pnpm run lint` — Lint the project
 
 ## Translation
 

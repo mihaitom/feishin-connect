@@ -30,11 +30,14 @@ async def stream_tracks(
     track_urls: list[str],
     on_track_start: Callable[[int], None] | None = None,
     start_offset: float = 0.0,
+    gain: float = 1.0,
 ) -> AsyncGenerator[bytes, None]:
     """Yield continuous MP3 bytes for all tracks in sequence.
 
     Calls on_track_start(relative_index) before each track begins.
     start_offset seeks the first track to that many seconds in (e.g. after pause/resume).
+    gain is a linear amplitude multiplier (ReplayGain), applied via ffmpeg's
+    `volume` filter — 1.0 (the default) leaves the audio unchanged.
     """
     if not track_urls:
         return
@@ -48,6 +51,9 @@ async def stream_tracks(
             # Insert -ss before -i for fast input-side seeking on the resumed track
             i_pos = cmd.index("-i")
             cmd = cmd[:i_pos] + ["-ss", f"{start_offset:.3f}"] + cmd[i_pos:]
+        if gain != 1.0:
+            i_pos = cmd.index("-vn")
+            cmd = cmd[:i_pos] + ["-af", f"volume={gain}"] + cmd[i_pos:]
         logger.info(f"[ffmpeg] Track {i + 1}/{len(track_urls)}: {url[:80]}")
         logger.debug(f"[ffmpeg] Command: {' '.join(cmd)}")
 

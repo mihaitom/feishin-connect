@@ -26,6 +26,7 @@ import {
     usePlayerStoreBase,
     usePlayerVolume,
 } from '/@/renderer/store';
+import { calculateReplayGain as calculateReplayGainFor } from '/@/renderer/utils/replay-gain';
 import { toast } from '/@/shared/components/toast/toast';
 import { QueueSong } from '/@/shared/types/domain-types';
 import { CrossfadeStyle, PlayerRepeat, PlayerStatus, PlayerStyle } from '/@/shared/types/types';
@@ -397,51 +398,13 @@ export function WebPlayer() {
     }, [localPlayerStatus, num, setTimestamp, transitionType]);
 
     const calculateReplayGain = useCallback(
-        (song: QueueSong): number => {
-            if (playback.replayGainMode === 'no') {
-                return 1;
-            }
-
-            let gain: number | undefined;
-            let peak: number | undefined;
-
-            if (playback.replayGainMode === 'track') {
-                gain = song.gain?.track ?? song.gain?.album;
-                peak = song.peak?.track ?? song.peak?.album;
-            } else {
-                gain = song.gain?.album ?? song.gain?.track;
-                peak = song.peak?.album ?? song.peak?.track;
-            }
-
-            if (gain === undefined) {
-                gain = playback.replayGainFallbackDB;
-
-                if (!gain) {
-                    return 1;
-                }
-            }
-
-            if (peak === undefined) {
-                peak = 1;
-            }
-
-            const preAmp = playback.replayGainPreampDB ?? 0;
-
-            // https://wiki.hydrogenaud.io/index.php?title=ReplayGain_1.0_specification&section=19
-            // Normalized to max gain
-            let expectedGain = 10 ** ((gain + preAmp) / 20);
-
-            // Nothing in the system should allow this. But, in the case that preAmp is a
-            // bad value (not a number, for example), a NaN gain will cause the entire system to panic
-            if (isNaN(expectedGain)) {
-                expectedGain = 1;
-            }
-
-            if (playback.replayGainClip) {
-                return Math.min(expectedGain, 1 / peak);
-            }
-            return expectedGain;
-        },
+        (song: QueueSong): number =>
+            calculateReplayGainFor(song, {
+                replayGainClip: playback.replayGainClip,
+                replayGainFallbackDB: playback.replayGainFallbackDB,
+                replayGainMode: playback.replayGainMode,
+                replayGainPreampDB: playback.replayGainPreampDB,
+            }),
         [
             playback.replayGainClip,
             playback.replayGainFallbackDB,

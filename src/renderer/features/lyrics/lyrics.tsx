@@ -295,6 +295,14 @@ export const Lyrics = ({ fadeOutNoLyricsMessage = true, settingsKey = 'default' 
     return (
         <ComponentErrorBoundary>
             <div className={styles.lyricsContainer}>
+                {data?.remoteAutoLoading && (
+                    <div
+                        className={styles.remoteAutoSpinner}
+                        title={t('page.fullscreenPlayer.checkingForLyrics')}
+                    >
+                        <Spinner size={16} />
+                    </div>
+                )}
                 <ActionIcon
                     className={styles.settingsIcon}
                     icon="settings2"

@@ -21,6 +21,9 @@ TARGETS = os.getenv("TARGETS", "")
 class AppState:
     def __init__(self):
         self.current_track: Track | None = None
+        # Linear amplitude multiplier (ffmpeg `volume` filter convention) derived
+        # from the frontend's ReplayGain settings for current_track. 1 = no change.
+        self.current_track_gain: float = 1.0
         self.is_streaming: bool = False
         self.is_paused: bool = False
         self.radio_info: dict | None = None

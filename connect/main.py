@@ -5,6 +5,7 @@ Startup:
   uvicorn main:app --host 0.0.0.0 --port 9181
 """
 
+import asyncio
 import logging
 import os
 import shutil
@@ -18,7 +19,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
 from auth import TOKEN as _CONNECT_TOKEN
+from routes.devices import discover_all
 from routes.devices import router as devices_router
+from routes.lyrics import router as lyrics_router
 from routes.pairing import router as pairing_router
 from routes.playback import router as playback_router
 from routes.proxy import router as proxy_router
@@ -26,12 +29,75 @@ from routes.stream import router as stream_router
 from state import PORT, ctx, get_local_ip
 
 load_dotenv()
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(name)s] %(levelname)s %(message)s",
-    datefmt="%H:%M:%S",
-)
+
+
+class _ShortNameFilter(logging.Filter):
+    """Strip the redundant "connect." prefix from logger names (and rename
+    the bare "connect" root logger to "main"), so log lines read e.g.
+    "lyrics" / "playback" instead of "connect.lyrics" / "connect.playback" —
+    shorter and lines up with the other loggers (delivery, sonos, pyatv, ...).
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.name.startswith("connect."):
+            record.name = record.name.removeprefix("connect.")
+        elif record.name == "connect":
+            record.name = "main"
+        elif record.name == "uvicorn.error":
+            # "uvicorn.error" is just uvicorn's logger for general
+            # startup/shutdown messages (not actual errors) — rename to
+            # avoid the misleading "error" in the name.
+            record.name = "uvicorn"
+        return True
+
+
+_LOG_FORMAT = "%(asctime)s %(levelname)-7s %(name)-9s %(message)s"
+_LOG_DATEFMT = "%H:%M:%S"
+logging.basicConfig(level=logging.INFO, format=_LOG_FORMAT, datefmt=_LOG_DATEFMT)
+for _handler in logging.root.handlers:
+    _handler.addFilter(_ShortNameFilter())
 logger = logging.getLogger("connect")
+
+_DEBUG = os.getenv("DEBUG", "").strip().lower() in ("1", "true", "yes", "on")
+
+# Reformat uvicorn's own loggers (startup/error/access) to match the format
+# used above, so every log line — ours and uvicorn's — looks the same.
+# uvicorn.access logs every incoming request and is only useful for
+# DEBUG=true troubleshooting.
+UVICORN_LOG_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {"format": _LOG_FORMAT, "datefmt": _LOG_DATEFMT},
+        "access": {"format": _LOG_FORMAT, "datefmt": _LOG_DATEFMT},
+    },
+    "filters": {
+        "short_name": {"()": _ShortNameFilter},
+    },
+    "handlers": {
+        "default": {
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+            "filters": ["short_name"],
+            "stream": "ext://sys.stdout",
+        },
+        "access": {
+            "class": "logging.StreamHandler",
+            "formatter": "access",
+            "filters": ["short_name"],
+            "stream": "ext://sys.stdout",
+        },
+    },
+    "loggers": {
+        "uvicorn": {"handlers": ["default"], "level": "INFO", "propagate": False},
+        "uvicorn.error": {"level": "INFO"},
+        "uvicorn.access": {
+            "handlers": ["access"],
+            "level": "INFO" if _DEBUG else "WARNING",
+            "propagate": False,
+        },
+    },
+}
 
 # Verbose playback diagnostics. Set DEBUG=true to surface full protocol/playback
 # logs across every renderer at once: AirPlay (pyatv), Sonos (SoCo) and the
@@ -39,13 +105,47 @@ logger = logging.getLogger("connect")
 #   connect → also covers children connect.streamer / connect.playback
 _DEBUG_LOGGERS = ("connect", "delivery", "sonos", "pyatv", "soco")
 
-if os.getenv("DEBUG", "").strip().lower() in ("1", "true", "yes", "on"):
+# httpx/httpcore log every outgoing request at INFO, which is only useful for
+# DEBUG=true troubleshooting — keep them quiet otherwise.
+_HTTP_CLIENT_LOGGERS = ("httpx", "httpcore")
+
+if _DEBUG:
     for _name in _DEBUG_LOGGERS:
         logging.getLogger(_name).setLevel(logging.DEBUG)
+    for _name in _HTTP_CLIENT_LOGGERS:
+        logging.getLogger(_name).setLevel(logging.DEBUG)
+else:
+    for _name in _HTTP_CLIENT_LOGGERS:
+        logging.getLogger(_name).setLevel(logging.WARNING)
+
+
+def _asyncio_exception_handler(loop, context):
+    """Quiet down pyatv's "Unclosed client session"/"Unclosed connector"
+    noise (logged by asyncio's default handler as an ERROR with a multi-line
+    object repr) into a single readable debug line. Everything else still
+    goes through the default handler."""
+    message = context.get("message", "")
+    if message in ("Unclosed client session", "Unclosed connector"):
+        logger.debug(f"asyncio: {message} (stale pyatv session, harmless)")
+        return
+    loop.default_exception_handler(context)
+
+
+_DISCOVERY_INTERVAL = 60 * 60  # rescan for new Sonos/AirPlay/Chromecast devices hourly
+
+
+async def _periodic_discovery() -> None:
+    while True:
+        await asyncio.sleep(_DISCOVERY_INTERVAL)
+        try:
+            await discover_all()
+        except Exception:
+            logger.exception("[discover] Periodic scan failed")
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    asyncio.get_event_loop().set_exception_handler(_asyncio_exception_handler)
     local_ip = get_local_ip()
     logger.info(f"🎵 Stream: http://{local_ip}:{PORT}/stream")
     logger.info(f"🔌 API:    http://{local_ip}:{PORT}/")
@@ -68,7 +168,12 @@ async def lifespan(_: FastAPI):
     else:
         logger.info("🔒 Token auth enabled (custom CONNECT_TOKEN set)")
     logger.info("⏳ Waiting for Feishin /config (media server credentials)")
-    yield
+
+    discovery_task = asyncio.create_task(_periodic_discovery())
+    try:
+        yield
+    finally:
+        discovery_task.cancel()
 
 
 app = FastAPI(title="Feishin Connect", lifespan=lifespan)
@@ -91,6 +196,7 @@ app.include_router(stream_router)
 app.include_router(playback_router)
 app.include_router(devices_router)
 app.include_router(pairing_router)
+app.include_router(lyrics_router)
 app.include_router(proxy_router)
 
 
@@ -98,6 +204,8 @@ if __name__ == "__main__":
     try:
         # Pass the app object directly — string-based import ("main:app") breaks
         # in PyInstaller bundles because the module loader works differently.
-        uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info", reload=False)
+        uvicorn.run(
+            app, host="0.0.0.0", port=PORT, log_config=UVICORN_LOG_CONFIG, reload=False
+        )
     except Exception:
         traceback.print_exc()

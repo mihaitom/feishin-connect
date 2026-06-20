@@ -1,6 +1,6 @@
 {
     "name": "feishin-connect",
-    "version": "0.3.1",
+    "version": "0.4.0",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -32,6 +32,7 @@
         "build:electron": "electron-vite build",
         "build:remote": "vite build --config remote.vite.config.ts",
         "build:web": "vite build --config web.vite.config.ts",
+        "bump-version": "pnpm version --no-git-tag-version --no-git-checks",
         "dev": "electron-vite dev",
         "dev:remote": "vite dev --config remote.vite.config.ts",
         "dev:watch": "electron-vite dev --watch",
@@ -69,11 +70,12 @@
         "publish:win-arm64:alpha": "pnpm run build && electron-builder --config electron-builder-alpha.yml --publish always --win --arm64",
         "publish:win-arm64:beta": "pnpm run build && electron-builder --config electron-builder-beta.yml --publish always --win --arm64",
         "start": "electron-vite preview",
+        "test": "vitest run",
+        "test:watch": "vitest",
         "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
         "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
         "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-        "version": "pnpm version --no-git-tag-version",
-        "postversion": "node ./scripts/update-app-stream.mjs"
+        "postversion": "node ./scripts/sync-connect-version.mjs"
     },
     "resolutions": {
         "react-router": "7.14.0",
@@ -155,6 +157,9 @@
         "@electron-toolkit/eslint-config-prettier": "^3.0.0",
         "@electron-toolkit/eslint-config-ts": "^3.1.0",
         "@electron-toolkit/tsconfig": "^2.0.0",
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.2",
         "@types/electron-localshortcut": "^3.1.3",
         "@types/lodash": "^4.17.24",
         "@types/md5": "^2.3.6",
@@ -178,7 +183,9 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.26",
+        "fake-indexeddb": "^6.2.5",
         "i18next-parser": "^9.4.0",
+        "jsdom": "^29.1.1",
         "postcss-preset-mantine": "^1.18.0",
         "postcss-simple-vars": "^7.0.1",
         "prettier": "^3.8.1",
@@ -192,7 +199,8 @@
         "vite-plugin-conditional-import": "^0.1.7",
         "vite-plugin-dynamic-import": "^1.6.0",
         "vite-plugin-ejs": "^1.7.0",
-        "vite-plugin-pwa": "^1.2.0"
+        "vite-plugin-pwa": "^1.2.0",
+        "vitest": "^4.1.8"
     },
     "packageManager": "pnpm@11.5.0",
     "pnpm": {

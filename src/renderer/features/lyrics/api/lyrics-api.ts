@@ -3,6 +3,7 @@ import isElectron from 'is-electron';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { connectFetch } from '/@/renderer/features/player/components/connect/types';
 import { queryClient, QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById, useSettingsStore } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
@@ -25,17 +26,50 @@ import { ServerFeature } from '/@/shared/types/features-types';
 
 const lyricsIpc = isElectron() ? window.api.lyrics : null;
 
+// How long a "nothing found" lyrics result stays fresh before a retry is
+// allowed — gives remote providers time to add lyrics for a track that
+// wasn't found on the first attempt.
+const NOT_FOUND_STALE_TIME = 1000 * 60 * 60 * 24;
+
 export type LyricsQueryResult = {
     local: FullLyricsMetadata | null | StructuredLyric[];
     overrideData: LyricsResponse | null;
     overrideSelection: LyricsOverride | null;
     remoteAuto: FullLyricsMetadata | null;
+    remoteAutoLoading: boolean;
     selected: FullLyricsMetadata | null | StructuredLyric;
     selectedOffsetMs: number;
     selectedStructuredIndex: number;
     selectedSynced: boolean;
     suppressRemoteAuto: boolean;
 };
+
+// Fallback for non-Electron builds (web/Docker), which have no main process to
+// run the IPC lyrics handlers: ask the Connect backend instead, if reachable.
+// Fails silently (returns null) if Connect isn't configured/running.
+async function connectLyricsRequest<T>(
+    path: string,
+    params: Record<string, number | string | undefined>,
+): Promise<null | T> {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== '') query.set(key, String(value));
+    }
+
+    const url = `${path}?${query.toString()}`;
+
+    try {
+        const res = await connectFetch(url);
+        if (!res.ok) {
+            console.warn(`[lyrics] ${url} -> HTTP ${res.status}`);
+            return null;
+        }
+        return (await res.json()) as T;
+    } catch (e) {
+        console.warn(`[lyrics] ${url} -> request failed:`, e);
+        return null;
+    }
+}
 
 // Match LRC lyrics format by https://github.com/ustbhuangyi/lyric-parser
 // [mm:ss.SSS] text
@@ -189,10 +223,18 @@ export async function fetchLocalLyrics(params: {
 }
 
 export async function fetchRemoteLyricsAuto(song: QueueSong): Promise<FullLyricsMetadata | null> {
-    const { fetch } = useSettingsStore.getState().lyrics;
+    const { fetch, sources } = useSettingsStore.getState().lyrics;
     if (!fetch) return null;
-    const remoteLyricsResult: InternetProviderLyricResponse | null =
-        await lyricsIpc?.getRemoteLyricsBySong(song);
+
+    const remoteLyricsResult: InternetProviderLyricResponse | null = lyricsIpc
+        ? await lyricsIpc.getRemoteLyricsBySong(song)
+        : await connectLyricsRequest<InternetProviderLyricResponse>('/lyrics/auto', {
+              album: song.album || song.name,
+              artist: song.artists?.[0]?.name,
+              duration: song.duration / 1000.0,
+              name: song.name,
+              sources: sources.join(','),
+          });
 
     if (remoteLyricsResult) {
         return {
@@ -209,7 +251,12 @@ export async function fetchRemoteLyricsById(params: {
     remoteSource: LyricSource;
     song?: QueueSong | Song;
 }): Promise<LyricsResponse | null> {
-    const result = await lyricsIpc?.getRemoteLyricsByRemoteId(params as LyricGetQuery);
+    const result = lyricsIpc
+        ? await lyricsIpc.getRemoteLyricsByRemoteId(params as LyricGetQuery)
+        : await connectLyricsRequest<string>('/lyrics/by-remote-id', {
+              id: params.remoteSongId,
+              source: params.remoteSource,
+          });
     if (result) return formatLyrics(result);
     return null;
 }
@@ -244,6 +291,7 @@ const emptyResult = (): LyricsQueryResult => ({
     overrideData: null,
     overrideSelection: null,
     remoteAuto: null,
+    remoteAutoLoading: false,
     selected: null,
     selectedOffsetMs: 0,
     selectedStructuredIndex: 0,
@@ -255,11 +303,19 @@ export const lyricsQueries = {
     search: (args: Omit<QueryHookArgs<LyricSearchQuery>, 'serverId'>) => {
         return queryOptions({
             gcTime: 1000 * 60 * 1,
-            queryFn: () => {
+            queryFn: async () => {
                 if (lyricsIpc) {
                     return lyricsIpc.searchRemoteLyrics(args.query);
                 }
-                return {} as Record<LyricSource, InternetProviderLyricSearchResponse[]>;
+                const result = await connectLyricsRequest<
+                    Record<LyricSource, InternetProviderLyricSearchResponse[]>
+                >('/lyrics/search', {
+                    album: args.query.album,
+                    artist: args.query.artist,
+                    duration: args.query.duration,
+                    name: args.query.name,
+                });
+                return result ?? ({} as Record<LyricSource, InternetProviderLyricSearchResponse[]>);
             },
             queryKey: queryKeys.songs.lyricsSearch(args.query),
             staleTime: 1000 * 60 * 1,
@@ -297,6 +353,7 @@ export const lyricsQueries = {
 
                 let local: FullLyricsMetadata | null | StructuredLyric[];
                 let remoteAuto: FullLyricsMetadata | null;
+                let remoteAutoLoading = false;
                 let overrideData: LyricsResponse | null;
 
                 if (preferLocalLyrics) {
@@ -307,10 +364,17 @@ export const lyricsQueries = {
                         remoteAuto = null;
 
                         if (remoteAutoPromise) {
+                            remoteAutoLoading = true;
                             void remoteAutoPromise.then((fetchedRemoteAuto) => {
-                                if (signal.aborted || !fetchedRemoteAuto) return;
+                                if (signal.aborted) return;
                                 queryClient.setQueryData<LyricsQueryResult>(lyricsKey, (prev) =>
-                                    prev ? { ...prev, remoteAuto: fetchedRemoteAuto } : prev,
+                                    prev
+                                        ? {
+                                              ...prev,
+                                              remoteAuto: fetchedRemoteAuto ?? prev.remoteAuto,
+                                              remoteAutoLoading: false,
+                                          }
+                                        : prev,
                                 );
                             });
                         }
@@ -357,6 +421,7 @@ export const lyricsQueries = {
                 return {
                     ...emptyResult(),
                     ...partial,
+                    remoteAutoLoading,
                     selected,
                     selectedOffsetMs: resultSelectedOffsetMs,
                     selectedStructuredIndex,
@@ -365,7 +430,13 @@ export const lyricsQueries = {
                 };
             },
             queryKey: lyricsKey,
-            staleTime: Infinity,
+            // Once lyrics are found, never refetch. If nothing was found, allow
+            // a retry after NOT_FOUND_STALE_TIME — the remote provider may not
+            // have had the lyrics yet at the time of the first attempt.
+            staleTime: (query) => {
+                const data = query.state.data as LyricsQueryResult | undefined;
+                return data && !data.selected ? NOT_FOUND_STALE_TIME : Infinity;
+            },
             ...args.options,
         });
     },

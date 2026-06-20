@@ -1,4 +1,3 @@
-import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 
 import { openLyricSearchModal } from '/@/renderer/features/lyrics/components/lyrics-search-form';
@@ -48,7 +47,6 @@ export const LyricsActions = ({
     };
 
     const isActionsDisabled = !currentSong;
-    const isDesktop = isElectron();
 
     return (
         <>
@@ -76,7 +74,7 @@ export const LyricsActions = ({
                 )}
 
                 <Group justify="center">
-                    {isDesktop && sources.length ? (
+                    {sources.length ? (
                         <Button
                             disabled={isActionsDisabled}
                             onClick={() =>
@@ -121,7 +119,7 @@ export const LyricsActions = ({
                         }}
                         variant="subtle"
                     />
-                    {isDesktop && sources.length ? (
+                    {sources.length ? (
                         <Button
                             disabled={isActionsDisabled}
                             onClick={onRemoveLyric}
@@ -134,7 +132,7 @@ export const LyricsActions = ({
                 </Group>
 
                 <div style={{ position: 'absolute', right: 0, top: -50 }}>
-                    {isDesktop && sources.length && onTranslateLyric ? (
+                    {sources.length && onTranslateLyric ? (
                         <Button
                             disabled={isActionsDisabled}
                             onClick={onTranslateLyric}

@@ -1,6 +1,6 @@
 [project]
 name = "feishin-connect"
-version = "0.2.2"
+version = "0.4.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -25,3 +25,7 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = "-m 'not live'"
+markers = [
+    "live: hits real third-party lyrics provider APIs over the network; excluded by default, run with `-m live`",
+]

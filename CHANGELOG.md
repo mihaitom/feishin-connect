@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-06-20
+
+### Added
+- **Hourly device rescan** — Connect now automatically rescans for Sonos, AirPlay and Chromecast devices once an hour in the background. Newly available devices show up without having to manually hit "Scan again", and devices that are no longer reachable drop out of the list.
+- **Remote lyrics lookup in the web/Docker build** — fetching lyrics from the internet (lrclib.net, SimpMusic, NetEase) has so far only worked via IPC in the Electron app, in both upstream and this fork; the web/Docker build (this fork only) could so far only show lyrics already stored on the media server. A new Connect backend lyrics module (`/lyrics/search`, `/lyrics/auto`, `/lyrics/by-remote-id`) now brings remote lyrics lookup to the web build too. Genius is not available in the web build — it requires HTML scraping that doesn't fit the Connect backend's lightweight setup, so it remains Electron-only.
+- **Manual lyrics search, clear/refresh and translation now available in the web/Docker build** — these actions, and the related lyrics settings, were hidden outside of Electron because they depended on IPC. They now use the new Connect backend endpoints above and behave the same as in the desktop app.
+- **Loading indicator for background lyrics lookups** — with "prefer local lyrics" enabled, a remote lyrics search now still runs in the background when local lyrics exist. A small spinner now shows while that lookup is in progress.
+- **ReplayGain now applies to Connect playback on Sonos and Chromecast** — your existing ReplayGain settings (Settings → Playback) are now also applied when streaming to Sonos or Chromecast via Connect, matching the volume normalization already used for local playback. AirPlay is not covered yet, since it streams directly from the media server without going through Connect's ffmpeg pipeline.
+
+### Fixed
+- **Switching to a radio station while streaming to a Connect device left the playerbar and lyrics showing the previous track** — the radio switch used to fully stop local radio playback, which made the app think radio mode had ended, so the UI fell back to the last queued track (and re-enabled lyrics for it). The radio is now only paused locally, so the playerbar keeps showing the radio station and lyrics stay hidden while it plays on the Connect device.
+- **Connect popover polish** — on AirPlay devices, the "Pair"/"Unpair" button is now only shown on hover (the device name uses the full row width otherwise) without the row jumping in height; the hover highlight now also covers the volume slider; and the "Connect"/"Add" button animates in/out instead of appearing abruptly.
+- **Lyrics not found on lrclib.net were never retried** — "not found" results were cached indefinitely, including across reloads and restarts (persisted query cache), so a track without lyrics on first try would never be looked up again — even after lrclib.net added them later. Such results are now retried automatically after 24 hours, and previously cached "not found" results from before this fix are invalidated once.
+
+### Changed
+- **Easier to read backend logs** — log output is now more consistent and less cluttered with noise that wasn't useful day-to-day, making it easier to spot real problems when something goes wrong.
+- **Docker: container now restarts if nginx or the backend crashes** — previously the container could stay up in a broken state if either process died unexpectedly. Now the container exits as soon as one of them crashes, so `restart: unless-stopped` actually restarts it.
+- **Docker: added a health check** — the container now reports its health status (visible in `docker ps`), so it's easier to spot when the app is unresponsive even if it hasn't crashed.
+- **Windows app identity changed** — the desktop app now identifies itself to Windows as `io.github.mihaitom.feishin-connect` instead of upstream's `org.jeffvli.feishin`, matching this fork's app ID. As a side effect, Windows treats this as a different app: the taskbar pin/grouping and notification settings from a previous install won't carry over and may need to be set up again.
+
+### Removed
+- Internal `publish.py` script and `package-lock.json` — the project is now fully on pnpm.
+
+### Internal
+- **Added a frontend test suite (Vitest)** covering the Connect player components — token/URL handling, the elapsed-time animation, auto-forward on track/radio changes, track-ended detection, scrobble triggers and server config mapping — plus the fork's other changes to upstream code: the Connect-backend lyrics fallback (`lyrics-api.ts`) and the library-scan store. A new CI workflow runs these tests on every push and PR, giving a quick signal on what still works after future upstream merges.
+
+---
+
 ## [0.3.1] - 2026-06-13
 
 ### Added

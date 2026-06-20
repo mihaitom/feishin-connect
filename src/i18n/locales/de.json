@@ -537,6 +537,7 @@
             "lyrics": "Songtexte",
             "related": "Ähnliche",
             "noLyrics": "Songtext nicht gefunden",
+            "checkingForLyrics": "Suche nach Songtext im Internet…",
             "visualizer": "Visualizer"
         },
         "appMenu": {

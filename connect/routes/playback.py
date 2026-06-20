@@ -78,6 +78,10 @@ class PlayRequest(BaseModel):
     targets: list[dict] | None = None
     target_name: str | None = None
     target_type: str | None = None
+    # Linear amplitude multiplier from the frontend's ReplayGain settings (1 = no
+    # change). Passed straight to ffmpeg's `volume` filter, which uses the same
+    # convention. See streamer.py.
+    gain: float = 1.0
 
 
 @router.post("/play")
@@ -107,6 +111,7 @@ async def play_tracks(req: PlayRequest):
 
     st = ctx.state
     st.current_track = track
+    st.current_track_gain = req.gain
     st.is_streaming = True
     st.is_paused = False
     st.radio_info = None

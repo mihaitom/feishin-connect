@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component type="desktop-application">
-  <id>org.jeffvli.feishin</id>
-  <name>Feishin</name>
+  <id>io.github.mihaitom.feishin-connect</id>
+  <name>Feishin-Connect</name>
   <summary>Jellyfin, Navidrome, and OpenSubsonic Compatible Music Player</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
@@ -21,11 +21,11 @@
       <li>Synchronized and unsynchronized lyrics support</li>
     </ul>
   </description>
-  <developer id="org.jeffvli">
-    <name>jeffvli</name>
+  <developer id="io.github.mihaitom">
+    <name>mihaitom</name>
   </developer>
-  <launchable type="desktop-id">org.jeffvli.feishin.desktop</launchable>
-  <url type="homepage">https://github.com/jeffvli/feishin</url>
+  <launchable type="desktop-id">Feishin-Connect.desktop</launchable>
+  <url type="homepage">https://github.com/mihaitom/feishin-connect</url>
   <screenshots>
     <screenshot type="default">
       <caption>The main menu</caption>
@@ -47,6 +47,6 @@
     <category>Music</category>
   </categories>
   <releases>
-    <release date="2026-06-07" type="development" version="0.3.0-dev.0"></release>
+    <release date="2026-06-07" type="development" version="0.3.2-dev.1"></release>
   </releases>
 </component>

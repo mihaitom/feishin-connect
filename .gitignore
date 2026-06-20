@@ -17,3 +17,4 @@ __pycache__/
 merge-upstream.md
 connect/tone.wav
 connect/airplay_credentials.json
+docker-compose-private.yaml

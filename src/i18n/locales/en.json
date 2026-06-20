@@ -568,7 +568,8 @@
             "related": "Related",
             "upNext": "Up next",
             "visualizer": "Visualizer",
-            "noLyrics": "No lyrics found"
+            "noLyrics": "No lyrics found",
+            "checkingForLyrics": "Checking for remote lyrics…"
         },
         "genreList": {
             "showAlbums": "Show $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})",

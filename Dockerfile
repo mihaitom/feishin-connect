@@ -3,13 +3,15 @@ FROM node:23-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+RUN corepack enable && corepack prepare pnpm@11.5.0 --activate
 
-RUN npm install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN pnpm i
 
 COPY . .
 
-RUN npm run build:web
+RUN pnpm run build:web
 
 
 # --- Final image
@@ -43,5 +45,10 @@ ENV LEGACY_AUTHENTICATION="" ANALYTICS_DISABLED="" PUBLIC_PATH="/" SERVER_INTERN
 
 EXPOSE 9180
 EXPOSE 8000
+
+# Goes through nginx to /api/health, so it fails if either nginx or the
+# Python backend is down/unresponsive — independent of PUBLIC_PATH.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD wget -q -O /dev/null http://127.0.0.1:9180/api/health || exit 1
 
 CMD ["/start.sh"]
