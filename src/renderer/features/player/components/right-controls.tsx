@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useState, WheelEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ConnectButton } from './connect-button';
+import { useConnectSessionContext } from './connect/connect-session-context';
+import { useDeviceVolume } from './connect/hooks';
 
 import { PopoverPlayQueue } from '/@/renderer/features/now-playing/components/popover-play-queue';
 import { PlayerConfig } from '/@/renderer/features/player/components/player-config';
@@ -501,6 +503,69 @@ const RatingButton = () => {
 };
 
 const VolumeButton = () => {
+    const { isActive: connectActive } = useConnectSessionContext();
+
+    return connectActive ? <ConnectVolumeButton /> : <LocalVolumeButton />;
+};
+
+const ConnectVolumeButton = () => {
+    const { t } = useTranslation();
+    const { activeTargets } = useConnectSessionContext();
+    const volumeWidth = useVolumeWidth();
+    const isMinWidth = useMediaQuery('(max-width: 480px)');
+
+    const singleTarget = activeTargets.length === 1 ? activeTargets[0] : undefined;
+    const { muted, setDeviceVolume, supported, toggleMute, volume } = useDeviceVolume(
+        singleTarget?.type,
+        singleTarget?.name,
+    );
+
+    const disabled = !singleTarget || !supported;
+    const effectiveVolume = disabled || muted ? 0 : (volume ?? 0);
+
+    return (
+        <>
+            <ActionIcon
+                disabled={disabled}
+                icon={muted ? 'volumeMute' : effectiveVolume > 50 ? 'volumeMax' : 'volumeNormal'}
+                iconProps={{
+                    color: !disabled && muted ? 'muted' : undefined,
+                    size: 'xl',
+                }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMute();
+                }}
+                size="sm"
+                tooltip={{
+                    label: disabled
+                        ? t('player.connect_volumeUnavailable')
+                        : muted
+                          ? t('player.muted')
+                          : effectiveVolume,
+                    openDelay: 0,
+                }}
+                variant="subtle"
+            />
+            {!isMinWidth ? (
+                <CustomPlayerbarSlider
+                    disabled={disabled}
+                    max={100}
+                    min={0}
+                    onChange={disabled ? () => {} : setDeviceVolume}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                    }}
+                    size={6}
+                    value={effectiveVolume}
+                    w={volumeWidth}
+                />
+            ) : null}
+        </>
+    );
+};
+
+const LocalVolumeButton = () => {
     const { bindings } = useHotkeySettings();
     const volume = usePlayerVolume();
     const muted = usePlayerMuted();

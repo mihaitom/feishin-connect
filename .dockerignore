@@ -1,7 +1,9 @@
 node_modules
 Dockerfile
 docker-compose.*
-/connect/.venv
+connect/.venv
 .vscode
 .env
 **/.env
+connect/airplay_credentials.json
+connect/tone.wav

@@ -694,6 +694,7 @@
         "connect_device_one": "Device",
         "connect_device_other": "Devices",
         "connect_unmute": "Unmute",
+        "connect_volumeUnavailable": "Select a single Sonos or Chromecast device to control volume",
         "holdToShuffle": "Hold to shuffle",
         "favorite": "Favorite",
         "lyrics": "Lyrics",

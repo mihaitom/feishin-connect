@@ -6,11 +6,16 @@ import os
 
 logger = logging.getLogger("connect.credentials")
 
-# credentials file lives in connect/ (parent of this delivery/ package)
-_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "airplay_credentials.json",
+# CONNECT_DATA_DIR points this at a stable, persistent directory:
+#   - Electron sets it (main/index.ts) to the app's userData path, since the
+#     packaged PyInstaller binary's own folder gets replaced wholesale on
+#     every app update.
+#   - Docker's start.sh defaults it to /data — mount a volume there.
+# Falls back to next to this package when unset (bare source checkout).
+_DATA_DIR = os.environ.get("CONNECT_DATA_DIR") or os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))
 )
+_PATH = os.path.join(_DATA_DIR, "airplay_credentials.json")
 
 
 def _load() -> dict[str, str]:
@@ -26,6 +31,7 @@ def _load() -> dict[str, str]:
 
 def _save(data: dict[str, str]) -> None:
     try:
+        os.makedirs(os.path.dirname(_PATH), exist_ok=True)
         with open(_PATH, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
     except Exception as e:

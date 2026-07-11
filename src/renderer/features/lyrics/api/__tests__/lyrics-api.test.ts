@@ -1,7 +1,8 @@
+import type { QueueSong } from '/@/shared/types/domain-types';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LyricSource } from '/@/shared/types/domain-types';
-import type { QueueSong } from '/@/shared/types/domain-types';
 
 const mocks = vi.hoisted(() => ({
     connectFetch: vi.fn(),
@@ -160,10 +161,11 @@ describe('lyrics-api (Connect backend fallback)', () => {
     });
 
     describe('lyricsQueries.songLyrics staleTime (not-found retry)', () => {
-        const options = lyricsQueries.songLyrics({ query: {}, serverId: 'server-1' }, undefined);
-        const staleTime = options.staleTime as (query: {
-            state: { data: unknown };
-        }) => number;
+        const options = lyricsQueries.songLyrics(
+            { query: { songId: 'song-1' }, serverId: 'server-1' },
+            undefined,
+        );
+        const staleTime = options.staleTime as (query: { state: { data: unknown } }) => number;
 
         it('never goes stale once lyrics were found', () => {
             const result = staleTime({ state: { data: { selected: { lyrics: 'x' } } } });

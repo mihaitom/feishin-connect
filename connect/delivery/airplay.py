@@ -36,8 +36,8 @@ class AirPlayDelivery(BaseDelivery):
         import pyatv
         from pyatv.const import Protocol
 
-        # Lazy import: state.py imports delivery, so top-level import would be circular
-        from state import ctx
+        # Lazy import: core/state.py imports delivery, so top-level import would be circular
+        from core.state import ctx
 
         stored_creds = creds_store.get(self.target)
         loop = asyncio.get_event_loop()
@@ -161,7 +161,7 @@ class AirPlayDelivery(BaseDelivery):
         captured_atv = self._atv
 
         async def _stream():
-            from state import ctx
+            from core.state import ctx
 
             try:
                 track = ctx.state.current_track
@@ -184,7 +184,7 @@ class AirPlayDelivery(BaseDelivery):
                     )
                     return
 
-                offset = ctx.state.resume_offset
+                offset = ctx.state.clock.resume_offset
                 src_url = ctx.media.get_stream_url(track.id)
 
                 if offset > 0:

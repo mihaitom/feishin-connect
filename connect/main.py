@@ -17,8 +17,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
-from auth import TOKEN as _CONNECT_TOKEN
+from core.auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
+from core.auth import TOKEN as _CONNECT_TOKEN
+from core.state import PORT, ctx, get_local_ip
 from routes.devices import discover_all
 from routes.devices import router as devices_router
 from routes.lyrics import router as lyrics_router
@@ -26,7 +27,6 @@ from routes.pairing import router as pairing_router
 from routes.playback import router as playback_router
 from routes.proxy import router as proxy_router
 from routes.stream import router as stream_router
-from state import PORT, ctx, get_local_ip
 
 load_dotenv()
 

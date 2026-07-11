@@ -24,7 +24,8 @@ const version = packageJson.version;
 
 const time = Math.floor((Date.parse(positionalArgs[1]) || Date.now()) / 1000);
 const metainfoFile =
-    positionalArgs[2] || path.resolve(process.cwd(), 'io.github.mihaitom.feishin-connect.metainfo.xml');
+    positionalArgs[2] ||
+    path.resolve(process.cwd(), 'io.github.mihaitom.feishin-connect.metainfo.xml');
 
 const parser = new XMLParser({ ignoreAttributes: false });
 const metainfoContent = fs.readFileSync(metainfoFile, 'utf8');

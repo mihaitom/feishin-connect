@@ -1,4 +1,4 @@
-"""auth.py — Token-based auth for the Connect API.
+"""core/auth.py — Token-based auth for the Connect API.
 
 A default token is used when CONNECT_TOKEN is not set. It is hardcoded and
 publicly known (open source), so it only blocks anonymous scanners — not

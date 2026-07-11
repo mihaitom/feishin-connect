@@ -12,8 +12,11 @@ services:
             - LEGACY_AUTHENTICATION=false # When SERVER_LOCK is true, sets the legacyauth flag for server authentication (true or false)
             - ANALYTICS_DISABLED=false # Set to true to disable Umami analytics tracking
             # CHANGE THIS to a random secret for real security
-            - CONNECT_TOKEN=SzArltWiDYl44aguM2qy5qQJAD15WV3MOIzsKGnvdXeGIn4kS5JHgVBrgfiUm6y5 
+            - CONNECT_TOKEN=SzArltWiDYl44aguM2qy5qQJAD15WV3MOIzsKGnvdXeGIn4kS5JHgVBrgfiUm6y5
             # - DEBUG=true # Verbose playback logs for ALL renderers (AirPlay + Sonos)
+        # Keeps AirPlay 2 pairings across container recreations/updates (default path, no env var needed)
+        volumes:
+            - ./data:/data
         # host networking is required for Sonos/AirPlay mDNS discovery
         network_mode: host
         # with host networking the ports below are bound directly — no mapping needed,

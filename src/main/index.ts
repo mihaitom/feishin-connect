@@ -1,6 +1,6 @@
-import type { UpdateCheckResult } from 'electron-updater';
-
 import { is } from '@electron-toolkit/utils';
+import { ChildProcess, spawn } from 'child_process';
+import { randomBytes } from 'crypto';
 import {
     app,
     BrowserWindow,
@@ -22,16 +22,12 @@ import {
 } from 'electron';
 import electronLocalShortcut from 'electron-localshortcut';
 import log from 'electron-log/main';
-import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
-import { ChildProcess, spawn } from 'child_process';
-import { randomBytes } from 'crypto';
+import { autoUpdater } from 'electron-updater';
 import { access, constants, existsSync } from 'fs';
 import { request as httpRequest } from 'http';
 import { createServer } from 'net';
 import path, { join } from 'path';
-import semver from 'semver';
 
-import packageJson from '../../package.json';
 import { disableMediaKeys, enableMediaKeys } from './features/core/player/media-keys';
 import { shutdownServer } from './features/core/remote';
 import { store } from './features/core/settings';
@@ -43,49 +39,9 @@ import { autoUpdaterLogInterface, createLog, hotkeyToElectronAccelerator } from 
 import { disableAutoUpdates, isLinux, isMacOS, isWindows } from '/@/main/env';
 import { PlayerRepeat, PlayerStatus, PlayerType, TitleTheme } from '/@/shared/types/types';
 
-const ALPHA_UPDATER_CONFIG: {
-    bucket: string;
-    channel: string;
-    endpoint: string;
-    provider: 's3';
-} = {
-    bucket: '',
-    channel: 'alpha',
-    endpoint: 'https://feishin-nightly-bucket.jeffvli.org',
-    provider: 's3',
-};
-
-const GITHUB_UPDATER_CONFIG = {
-    owner: 'jeffvli',
-    provider: 'github' as const,
-    repo: 'feishin',
-};
-
-type UpdaterInstance = AppImageUpdater | MacUpdater | NsisUpdater | typeof autoUpdater;
-
 class AppUpdater {
     constructor() {
-        const effectiveChannel = store.get('release_channel') as string;
-        console.log('Effective update channel:', effectiveChannel);
-        if (effectiveChannel === 'alpha') {
-            checkAllChannelsAndGetBest().then(({ result, updater: updaterInstance }) => {
-                updaterInstance.autoInstallOnAppQuit = true;
-                updaterInstance.autoRunAppAfterInstall = true;
-                if (isMacOS()) {
-                    if (result?.isUpdateAvailable) {
-                        getMainWindow()?.webContents.send(
-                            'update-available',
-                            result.updateInfo.version,
-                        );
-                    }
-                } else {
-                    updaterInstance.checkForUpdatesAndNotify();
-                }
-            });
-            return;
-        }
-
-        configureAndGetUpdater();
+        configureUpdater();
         if (isMacOS()) {
             autoUpdater.autoDownload = false;
             autoUpdater
@@ -105,155 +61,17 @@ class AppUpdater {
     }
 }
 
-// When release channel is alpha, check alpha and latest for updates and return
-// the updater + result for the newest version found (so alpha users can receive
-// latest updates when they are newer than the current alpha).
-async function checkAllChannelsAndGetBest(): Promise<{
-    result: null | UpdateCheckResult;
-    updater: UpdaterInstance;
-}> {
-    const currentVersion = packageJson.version;
-    const candidates: Array<{
-        channel: 'alpha' | 'beta' | 'latest';
-        result: UpdateCheckResult;
-        updater: UpdaterInstance;
-    }> = [];
-
-    const alphaUpdater = createAlphaUpdaterInstance();
-    alphaUpdater.logger = autoUpdaterLogInterface;
-    alphaUpdater.channel = ALPHA_UPDATER_CONFIG.channel;
-    alphaUpdater.allowPrerelease = true;
-    alphaUpdater.disableDifferentialDownload = true;
-    alphaUpdater.allowDowngrade = true;
-
-    try {
-        console.log('Checking for updates on alpha channel');
-        const alphaResult = await alphaUpdater.checkForUpdates();
-        if (
-            alphaResult?.updateInfo?.version &&
-            alphaResult.isUpdateAvailable &&
-            semver.valid(alphaResult.updateInfo.version) &&
-            semver.gt(alphaResult.updateInfo.version, currentVersion)
-        ) {
-            candidates.push({ channel: 'alpha', result: alphaResult, updater: alphaUpdater });
-        }
-    } catch (e) {
-        log.warn('Alpha channel check failed', e);
-    }
-
-    try {
-        autoUpdater.setFeedURL(GITHUB_UPDATER_CONFIG);
-        configureAutoUpdaterForChannel('latest');
-        console.log('Checking for updates on latest channel (GitHub)');
-        const latestResult = await autoUpdater.checkForUpdates();
-        if (
-            latestResult?.updateInfo?.version &&
-            latestResult.isUpdateAvailable &&
-            semver.valid(latestResult.updateInfo.version) &&
-            semver.gt(latestResult.updateInfo.version, currentVersion)
-        ) {
-            candidates.push({ channel: 'latest', result: latestResult, updater: autoUpdater });
-        }
-    } catch (e) {
-        log.warn('Latest channel check failed', e);
-    }
-
-    if (candidates.length === 0) {
-        return { result: null, updater: alphaUpdater };
-    }
-
-    const best = candidates.reduce((a, b) =>
-        semver.gt(a.result.updateInfo.version, b.result.updateInfo.version) ? a : b,
-    );
-
-    if (best.channel === 'latest') {
-        configureAutoUpdaterForChannel('latest');
-    }
-
-    return { result: best.result, updater: best.updater };
-}
-
-function configureAndGetUpdater(): UpdaterInstance {
-    const isBetaVersion = packageJson.version.includes('-beta');
-    const isAlphaVersion = packageJson.version.includes('-alpha');
-    let releaseChannel = store.get('release_channel');
-    const isNotConfigured = !releaseChannel;
-
-    console.log('Release channel:', releaseChannel);
-    console.log('Is beta version:', isBetaVersion);
-    console.log('Is alpha version:', isAlphaVersion);
-    console.log('Is not configured:', isNotConfigured);
-
-    if (isNotConfigured) {
-        console.log('Release channel not configured, setting default channel');
-        const defaultChannel = isAlphaVersion ? 'alpha' : isBetaVersion ? 'beta' : 'latest';
-        store.set('release_channel', defaultChannel);
-        releaseChannel = defaultChannel;
-    }
-
-    const effectiveChannel = store.get('release_channel') as string;
-
-    if (effectiveChannel === 'alpha') {
-        const updater = createAlphaUpdaterInstance();
-        log.transports.file.level = 'info';
-        updater.logger = autoUpdaterLogInterface;
-        updater.channel = ALPHA_UPDATER_CONFIG.channel;
-        updater.allowPrerelease = true;
-        updater.disableDifferentialDownload = true;
-        updater.allowDowngrade = true;
-        updater.autoInstallOnAppQuit = true;
-        updater.autoRunAppAfterInstall = true;
-        return updater;
-    }
-
+// Auto-updates only ever target this fork's own GitHub releases (mihaitom/feishin-connect,
+// "latest" channel — see electron-builder.yml's `publish` config, which is what
+// electron-updater reads by default). There is no alpha/beta channel anymore —
+// upstream's nightly (S3) and beta (their own GitHub repo) channels never made
+// sense for a fork and were previously misconfigured to point at upstream's
+// infrastructure, risking silently overwriting the Connect feature.
+function configureUpdater(): void {
     log.transports.file.level = 'info';
     autoUpdater.logger = autoUpdaterLogInterface;
     autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.autoRunAppAfterInstall = true;
-
-    if (effectiveChannel === 'beta') {
-        autoUpdater.channel = 'beta';
-        autoUpdater.allowDowngrade = true;
-        autoUpdater.allowPrerelease = true;
-        autoUpdater.disableDifferentialDownload = true;
-    } else {
-        autoUpdater.channel = 'latest';
-        autoUpdater.allowPrerelease = false;
-    }
-
-    return autoUpdater;
-}
-
-/**
- * Configures the global autoUpdater for a specific GitHub channel (beta or latest).
- * Used when checking multiple channels or when the winning channel is beta/latest.
- */
-function configureAutoUpdaterForChannel(channel: 'beta' | 'latest'): void {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = autoUpdaterLogInterface;
-    autoUpdater.autoInstallOnAppQuit = true;
-    autoUpdater.autoRunAppAfterInstall = true;
-    if (channel === 'beta') {
-        autoUpdater.channel = 'beta';
-        autoUpdater.allowDowngrade = true;
-        autoUpdater.allowPrerelease = true;
-        autoUpdater.disableDifferentialDownload = true;
-    } else {
-        autoUpdater.channel = 'latest';
-        autoUpdater.allowPrerelease = false;
-    }
-}
-
-function createAlphaUpdaterInstance(): AppImageUpdater | MacUpdater | NsisUpdater {
-    if (isMacOS()) {
-        return new MacUpdater(ALPHA_UPDATER_CONFIG);
-    }
-
-    if (isLinux()) {
-        return new AppImageUpdater(ALPHA_UPDATER_CONFIG);
-    }
-
-    return new NsisUpdater(ALPHA_UPDATER_CONFIG);
 }
 
 protocol.registerSchemesAsPrivileged([
@@ -283,6 +101,10 @@ const findFreePort = (): Promise<number> =>
 
 const startConnectServer = () => {
     const portStr = String(connectPort);
+    // Passed to the backend so persistent files (e.g. AirPlay pairing credentials)
+    // are written to a stable per-user directory instead of next to the binary —
+    // the packaged binary's own folder gets replaced wholesale on every app update.
+    const connectDataDir = app.getPath('userData');
 
     if (app.isPackaged) {
         // Production: use the PyInstaller binary bundled in extraResources
@@ -295,7 +117,7 @@ const startConnectServer = () => {
         }
 
         connectProcess = spawn(binaryPath, [], {
-            env: { ...process.env, PORT: portStr },
+            env: { ...process.env, CONNECT_DATA_DIR: connectDataDir, PORT: portStr },
             stdio: ['ignore', 'pipe', 'pipe'],
         });
     } else {
@@ -303,7 +125,7 @@ const startConnectServer = () => {
         const connectDir = join(app.getAppPath(), 'connect');
         connectProcess = spawn('uv', ['run', 'python', 'main.py'], {
             cwd: connectDir,
-            env: { ...process.env, PORT: portStr },
+            env: { ...process.env, CONNECT_DATA_DIR: connectDataDir, PORT: portStr },
             stdio: ['ignore', 'pipe', 'pipe'],
         });
     }
@@ -699,29 +521,19 @@ async function createWindow(first = true): Promise<void> {
     ipcMain.handle(
         'app-check-for-updates',
         async (): Promise<{ updateAvailable: boolean; version?: string }> => {
-            if (disableAutoUpdates()) {
+            if (disableAutoUpdates() || store.get('disable_auto_updates') === true) {
                 console.log('Auto updates are disabled');
                 return { updateAvailable: false };
             }
 
             try {
                 console.log('Checking for updates');
-                const effectiveChannel = store.get('release_channel') as string;
-                let result: null | UpdateCheckResult;
-                let updater: UpdaterInstance;
-
-                if (effectiveChannel === 'alpha') {
-                    const best = await checkAllChannelsAndGetBest();
-                    result = best.result;
-                    updater = best.updater;
-                } else {
-                    updater = configureAndGetUpdater();
-                    result = await updater.checkForUpdates();
-                }
+                configureUpdater();
+                const result = await autoUpdater.checkForUpdates();
 
                 const updateAvailable = result?.isUpdateAvailable ?? false;
                 console.log('Update available:', updateAvailable);
-                if (updateAvailable && store.get('disable_auto_updates') !== true) {
+                if (updateAvailable) {
                     if (isMacOS()) {
                         getMainWindow()?.webContents.send(
                             'update-available',
@@ -729,7 +541,7 @@ async function createWindow(first = true): Promise<void> {
                         );
                     } else {
                         console.log('Downloading update');
-                        updater.downloadUpdate();
+                        autoUpdater.downloadUpdate();
                     }
                 }
 

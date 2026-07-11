@@ -761,6 +761,7 @@
         "connect_device_one": "Gerät",
         "connect_device_other": "Geräte",
         "connect_unmute": "Ton an",
+        "connect_volumeUnavailable": "Für die Lautstärkeregelung ein einzelnes Sonos- oder Chromecast-Gerät auswählen",
         "next": "Nächster",
         "addNext": "Als Nächstes",
         "play": "Abspielen",

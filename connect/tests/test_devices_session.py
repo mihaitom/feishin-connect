@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-import state
+from core import state
 from delivery import (
     AirPlayDelivery,
     ChromecastDelivery,

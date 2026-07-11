@@ -7,9 +7,8 @@ import time
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from auth import require_token
-
-from state import compute_position, ctx, event_bus, resolve_target, stream_url
+from core.auth import require_token
+from core.state import compute_position, ctx, event_bus, resolve_target, stream_url
 
 logger = logging.getLogger("connect.playback")
 router = APIRouter(dependencies=[Depends(require_token)])
@@ -34,8 +33,10 @@ async def _apply_position_offset(target, generation: int) -> None:
 
     fixed = max((d.FIXED_OFFSET for d in deliveries), default=0.0)
     if fixed:
-        st.position_offset = -fixed
-        logger.info(f"[lyrics-sync] fixed position_offset={st.position_offset:.2f}s")
+        st.clock.set_fixed_offset(-fixed)
+        logger.info(
+            f"[lyrics-sync] fixed position_offset={st.clock.position_offset:.2f}s"
+        )
         await event_bus.broadcast()
         return
 
@@ -46,7 +47,7 @@ async def _apply_position_offset(target, generation: int) -> None:
     deadline = time.time() + 10.0
     while time.time() < deadline:
         await asyncio.sleep(0.5)
-        if st.play_generation != generation or not st.is_streaming:
+        if st.clock.play_generation != generation or not st.is_streaming:
             return
         try:
             device_pos = await candidate.get_position()
@@ -54,11 +55,11 @@ async def _apply_position_offset(target, generation: int) -> None:
             continue
         if not device_pos:
             continue
-        wall_elapsed = time.time() - st.play_start_time
-        st.position_offset = device_pos - wall_elapsed
+        wall_elapsed = st.clock.elapsed_since_stream_start()
+        offset = st.clock.calibrate(device_pos)
         logger.info(
             f"[lyrics-sync] {candidate.target}: calibrated position_offset="
-            f"{st.position_offset:.2f}s (device {device_pos:.2f}s vs. wall {wall_elapsed:.2f}s)"
+            f"{offset:.2f}s (device {device_pos:.2f}s vs. wall {wall_elapsed:.2f}s)"
         )
         await event_bus.broadcast()
         return
@@ -80,8 +81,11 @@ class PlayRequest(BaseModel):
     target_type: str | None = None
     # Linear amplitude multiplier from the frontend's ReplayGain settings (1 = no
     # change). Passed straight to ffmpeg's `volume` filter, which uses the same
-    # convention. See streamer.py.
+    # convention. See core/streamer.py.
     gain: float = 1.0
+    # Seconds into the track to start at (e.g. the position local playback had
+    # reached when the user connected mid-track). 0 starts from the beginning.
+    start_position: float = 0.0
 
 
 @router.post("/play")
@@ -105,21 +109,18 @@ async def play_tracks(req: PlayRequest):
 
     target = resolve_target(req.targets, req.target_name, req.target_type)
     url = stream_url()
+    start_position = max(0.0, min(req.start_position, float(track.duration)))
     logger.info(
         f"[play] {track.artist} — {track.title} ({track.duration}s) → target={target}"
+        + (f" (start {start_position:.1f}s)" if start_position > 0.5 else "")
     )
 
     st = ctx.state
     st.current_track = track
     st.current_track_gain = req.gain
     st.is_streaming = True
-    st.is_paused = False
     st.radio_info = None
-    st.play_start_time = time.time()
-    st.paused_elapsed = 0.0
-    st.resume_offset = 0.0
-    st.position_offset = 0.0
-    st.play_generation += 1
+    st.clock.start(start_position)
     st.track_ended = False
 
     if not target:
@@ -136,7 +137,7 @@ async def play_tracks(req: PlayRequest):
         logger.error(f"[play] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
-    asyncio.create_task(_apply_position_offset(target, st.play_generation))
+    asyncio.create_task(_apply_position_offset(target, st.clock.play_generation))
     await event_bus.broadcast()
     return {"status": "playing", "stream_url": url}
 
@@ -160,13 +161,8 @@ async def play_url(req: PlayUrlRequest):
     st = ctx.state
     st.current_track = None
     st.is_streaming = True
-    st.is_paused = False
     st.radio_info = {"title": req.title, "url": req.url}
-    st.play_start_time = time.time()
-    st.paused_elapsed = 0.0
-    st.resume_offset = 0.0
-    st.position_offset = 0.0
-    st.play_generation += 1
+    st.clock.start()
     st.track_ended = False
     st.active_delivery = target
 
@@ -176,7 +172,7 @@ async def play_url(req: PlayUrlRequest):
         logger.error(f"[play-url] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
-    asyncio.create_task(_apply_position_offset(target, st.play_generation))
+    asyncio.create_task(_apply_position_offset(target, st.clock.play_generation))
     await event_bus.broadcast()
     return {"status": "playing", "url": req.url}
 
@@ -187,11 +183,7 @@ async def pause_playback():
     if st.active_delivery:
         await st.active_delivery.pause()
     elapsed = compute_position()
-    # resume_offset is the raw wall-clock position (without position_offset),
-    # so resuming doesn't double-apply the device's startup-buffering delay.
-    st.resume_offset = max(0.0, elapsed - st.position_offset)
-    st.paused_elapsed = elapsed
-    st.is_paused = True
+    st.clock.pause(elapsed)
     logger.info(f"[pause] ⏸ {elapsed:.1f}s into track")
     await event_bus.broadcast()
     return {"paused": True}
@@ -200,13 +192,9 @@ async def pause_playback():
 @router.post("/resume")
 async def resume_playback():
     st = ctx.state
-    # Recalibrate so compute_position() immediately returns resume_offset
-    st.play_start_time = time.time() - st.resume_offset
-    st.paused_elapsed = 0.0
-    st.is_paused = False
-    st.play_generation += 1
+    st.clock.resume()
 
-    logger.info(f"[resume] ▶ Seeking to {st.resume_offset:.1f}s")
+    logger.info(f"[resume] ▶ Seeking to {st.clock.resume_offset:.1f}s")
 
     if st.active_delivery:
         # Force a fresh /stream connection so FFmpeg applies the seek offset
@@ -227,18 +215,10 @@ async def seek_playback(body: SeekRequest):
     if st.current_track:
         position = min(position, st.current_track.duration)
 
-    # position is the displayed (offset-adjusted) target; play_start_time
-    # tracks the raw wall-clock position, so subtract position_offset back out.
-    raw_position = max(0.0, position - st.position_offset)
-    st.resume_offset = raw_position
-    st.play_start_time = time.time() - raw_position
+    st.clock.seek_to(position)
 
-    if st.is_paused:
-        st.paused_elapsed = position
-    else:
-        st.play_generation += 1
-        if st.active_delivery:
-            await st.active_delivery.play(stream_url(), *_current_track_play_args())
+    if not st.clock.is_paused and st.active_delivery:
+        await st.active_delivery.play(stream_url(), *_current_track_play_args())
 
     logger.info(f"[seek] ⏩ {position:.1f}s")
     await event_bus.broadcast()
@@ -251,7 +231,7 @@ async def stop_playback():
     if st.active_delivery:
         await st.active_delivery.stop()
     st.is_streaming = False
-    st.is_paused = False
+    st.clock.is_paused = False
     st.track_ended = False
     st.current_track = None
     st.radio_info = None

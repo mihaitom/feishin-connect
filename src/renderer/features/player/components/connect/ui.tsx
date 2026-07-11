@@ -25,12 +25,14 @@ export const PopSection = ({ children, label }: { children: React.ReactNode; lab
 export const PopButton = ({
     active = false,
     danger = false,
+    disabled = false,
     icon,
     label,
     onClick,
 }: {
     active?: boolean;
     danger?: boolean;
+    disabled?: boolean;
     icon: React.ReactNode;
     label: string;
     onClick: () => void;
@@ -38,22 +40,25 @@ export const PopButton = ({
     const [hover, setHover] = useState(false);
     return (
         <button
+            disabled={disabled}
             onClick={onClick}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
             style={{
                 alignItems: 'center',
-                background: hover || active ? 'rgba(255,255,255,0.07)' : 'transparent',
+                background:
+                    !disabled && (hover || active) ? 'rgba(255,255,255,0.07)' : 'transparent',
                 border: 'none',
                 color: danger
                     ? '#f55'
                     : active
                       ? 'var(--theme-colors-primary)'
                       : 'var(--theme-colors-text-primary)',
-                cursor: 'pointer',
+                cursor: disabled ? 'default' : 'pointer',
                 display: 'flex',
                 fontSize: '13px',
                 gap: '8px',
+                opacity: disabled ? 0.6 : 1,
                 padding: '7px 12px',
                 transition: 'background 0.1s',
                 width: '100%',

@@ -1,4 +1,4 @@
-"""streamer.py — FFmpeg Audio Stream Engine"""
+"""core/streamer.py — FFmpeg Audio Stream Engine"""
 
 import asyncio
 import logging

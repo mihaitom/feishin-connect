@@ -1,6 +1,8 @@
 """Tests for credentials.py — persistent AirPlay credential storage."""
 
+import importlib
 import json
+import os
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -90,3 +92,23 @@ def test_persists_as_valid_json():
         with open(path) as f:
             data = json.load(f)
         assert data == {"HomePod": "creds"}
+
+
+def test_save_creates_missing_data_dir():
+    """CONNECT_DATA_DIR may point at a directory the Electron app hasn't
+    created yet (first launch) — saving must not fail because of that."""
+    with tempfile.TemporaryDirectory() as d:
+        nested = os.path.join(d, "not-yet-created")
+        with patch.object(credentials, "_PATH", os.path.join(nested, "creds.json")):
+            credentials.save("HomePod", "creds")
+            assert credentials.get("HomePod") == "creds"
+
+
+def test_connect_data_dir_env_var_overrides_default_path():
+    with tempfile.TemporaryDirectory() as d:
+        with patch.dict(os.environ, {"CONNECT_DATA_DIR": d}):
+            reloaded = importlib.reload(credentials)
+            try:
+                assert reloaded._PATH == os.path.join(d, "airplay_credentials.json")
+            finally:
+                importlib.reload(credentials)  # restore original module state

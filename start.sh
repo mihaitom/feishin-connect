@@ -4,6 +4,10 @@
 export CONNECT_URL="${CONNECT_URL:-/api}"
 export PUBLIC_PATH="${PUBLIC_PATH:-/}"
 export CONNECT_TOKEN="${CONNECT_TOKEN:-SzArltWiDYl44aguM2qy5qQJAD15WV3MOIzsKGnvdXeGIn4kS5JHgVBrgfiUm6y5}"
+# Persistent backend files (currently just paired AirPlay 2 credentials) land
+# here by default — mount a volume at /data to keep them across container
+# recreations/updates. No compose changes needed beyond that volume mount.
+export CONNECT_DATA_DIR="${CONNECT_DATA_DIR:-/data}"
 
 # nginx access logging is off by default and only enabled with DEBUG=true,
 # matching the Python backend's DEBUG-gated verbose logging.

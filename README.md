@@ -38,10 +38,10 @@
 | Feishin Connect (Sonos / AirPlay / Chromecast) | ✅ | ❌ |
 | Manual library scan button (Navidrome/Subsonic) | ✅ | ❌ |
 | Remote lyrics lookup (lrclib.net, SimpMusic, NetEase) in the web/Docker build | ✅ | ⚠️ Electron only |
-| Auto-updater | ❌ disabled | ✅ GitHub Releases |
+| Auto-updater | ✅ GitHub Releases (this fork's own) | ✅ GitHub Releases |
 | Docker image | `ghcr.io/mihaitom/feishin-connect` | `ghcr.io/jeffvli/feishin` |
 
-The auto-updater is disabled in this fork. It would otherwise pull releases from `jeffvli/feishin` and overwrite the Connect feature. Update by pulling the latest image (`docker pull`) or rebuilding from source.
+The desktop app checks `mihaitom/feishin-connect`'s own GitHub releases for updates, not upstream's — set `DISABLE_AUTO_UPDATES=1` (or toggle "Automatic updates" off in Settings) to turn this off. The Docker image has no auto-updater; update by pulling the latest image (`docker pull`) or rebuilding from source.
 
 ---
 
@@ -51,7 +51,7 @@ Feishin Connect adds a cast button to the player bar. Click it to stream the cur
 
 <img src="assets/feishin-connect-screenshot.png" width="350px">
 
-> **Development note:** This fork was developed heavily with AI assistance, especially the Connect backend and streaming integration. Please expect rough edges and report issues if you encounter them.
+> **Development note:** This fork was developed with AI assistance. Please expect rough edges and report issues if you encounter them.
 
 ### How it works
 
@@ -90,7 +90,11 @@ services:
             - CONNECT_TOKEN=change-me-to-a-random-secret
             # - SERVER_INTERNAL_URL=http://10.x.x.x:4533
             # - DEBUG=false
+        volumes:
+            - ./data:/data
 ```
+
+> **Mount a volume at `/data`** to keep AirPlay 2 pairings across container recreations/updates — that's where persistent backend files are stored by default, no extra environment variable needed.
 
 | Port | Service |
 |------|---------|
@@ -103,6 +107,7 @@ services:
 |----------|---------|-------------|
 | `CONNECT_TOKEN` | *(public default)* | Secret token protecting the Connect API on port 9181. **Change this** to a random string — the built-in default is publicly known (open source) and only blocks anonymous scanners. nginx adds the token to every internal request automatically; the browser never handles it directly. In Electron, a random token is generated at startup instead. |
 | `CONNECT_URL` | `/api` | URL the browser uses to reach the Connect API. The default (`/api`) routes through nginx on the same domain — no CORS issues, no extra config needed. Change to `http://host:9181` only if you need direct access to the backend, bypassing nginx. |
+| `CONNECT_DATA_DIR` | `/data` in Docker | Directory the backend stores persistent files in — currently just `airplay_credentials.json` (paired AirPlay 2 devices). Docker already defaults this to `/data`; just mount a volume there (see the compose example above). Only set this yourself to use a different path. |
 | `SERVER_INTERNAL_URL` | — | Internal media server address for the backend proxy (e.g. `http://10.x.x.x:4533`). Only needed when the media server sits behind an SSO layer that the browser cannot bypass. See [Media server behind SSO](#media-server-behind-sso-authentik-etc) below. With `network_mode: host`, use the actual IP — Docker container names do not resolve in host network mode. The old name `NAVIDROME_INTERNAL_URL` is still accepted as a fallback. |
 | `ALLOWED_ORIGINS` | — | Extra CORS origins for the Connect API, comma-separated. **Not needed in standard Docker deployments**: when the browser and the API share the same domain via nginx, all requests are same-origin and CORS never applies. Only relevant if the backend is accessed from a different origin than the page (e.g. backend running standalone, frontend on a separate domain). |
 | `SERVER_URL` | — | Media server URL (Navidrome / Subsonic / Jellyfin) shown to the browser |
@@ -137,6 +142,14 @@ pnpm run package:linux   # builds the Electron app; the binary is bundled automa
 The binary lives in `connect/dist/connect-server/` and is picked up by `electron-builder` via `extraResources`. Users need **ffmpeg** installed on their system (`apt install ffmpeg` / `brew install ffmpeg`) — it is not bundled.
 
 When you quit the app, it sends a stop command to the backend and kills the process so all connected devices stop playing.
+
+**Persistent backend data** (currently just paired AirPlay 2 credentials) lives in Electron's standard per-user data directory, which survives app updates:
+
+| Platform | Path |
+|----------|------|
+| Windows | `%APPDATA%\Feishin-Connect` |
+| macOS | `~/Library/Application Support/Feishin-Connect` |
+| Linux | `~/.config/Feishin-Connect` |
 
 ### Building locally (Docker image)
 

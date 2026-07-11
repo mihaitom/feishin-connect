@@ -57,10 +57,7 @@ export const PlayerbarSlider = () => {
                 </div>
                 <div className={styles.sliderWrapper}>
                     {connectActive ? (
-                        <ConnectSeekSlider
-                            duration={effectiveDuration}
-                            elapsed={connectElapsed}
-                        />
+                        <ConnectSeekSlider duration={effectiveDuration} elapsed={connectElapsed} />
                     ) : isWaveform ? (
                         <Suspense fallback={<Spinner />}>
                             <PlayerbarWaveform />

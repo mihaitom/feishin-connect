@@ -3,8 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-import auth
-import state
+from core import auth, state
 from main import app
 from media import SubsonicClient
 
@@ -28,13 +27,9 @@ def reset_state():
     st = state.ctx.state
     st.current_track = None
     st.is_streaming = False
-    st.is_paused = False
     st.radio_info = None
     st.active_delivery = None
-    st.play_start_time = 0.0
-    st.paused_elapsed = 0.0
-    st.resume_offset = 0.0
-    st.position_offset = 0.0
+    st.clock = state.PlaybackClock()
     st.discovered = {"airplay": [], "chromecast": [], "sonos": []}
 
     state.ctx.media = SubsonicClient("")

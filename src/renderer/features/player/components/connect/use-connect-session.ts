@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { buildConfigBody } from './connect-config';
-import { useConnectPlayerStore } from './connect.store';
+import { useConnectElapsed, useConnectPlayerStore } from './connect.store';
 import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
 import { ConnectDevice, connectFetch, ConnectSession, ConnectStatus, SendStatus } from './types';
 import { useConnectPlayback } from './use-connect-playback';
@@ -11,6 +11,7 @@ import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { useCurrentServerWithCredential } from '/@/renderer/store/auth.store';
 import { usePlayerSong, usePlayerStoreBase } from '/@/renderer/store/player.store';
+import { useTimestampStoreBase } from '/@/renderer/store/timestamp.store';
 import { PlayerStatus } from '/@/shared/types/types';
 
 export const useConnectSession = (): ConnectSession => {
@@ -22,9 +23,13 @@ export const useConnectSession = (): ConnectSession => {
     const { devices, health, isScanning, refresh } = useConnectDevices();
     const { paired, refresh: refreshPaired } = usePairedDevices();
     const { fetchVolume } = useConnectVolume();
-    const { mediaNext, mediaPause, mediaTogglePlayPause } = usePlayer();
+    const { mediaNext, mediaPause, mediaPlay, mediaSeekToTimestamp, mediaTogglePlayPause } =
+        usePlayer();
     const pauseRadio = useRadioStore((s) => s.actions.pause);
+    const playRadio = useRadioStore((s) => s.actions.play);
+    const stopRadio = useRadioStore((s) => s.actions.stop);
     const server = useCurrentServerWithCredential();
+    const connectElapsed = useConnectElapsed();
 
     const lastAutoSentRef = useRef<string>('');
     const configuredRef = useRef(false);
@@ -158,18 +163,29 @@ export const useConnectSession = (): ConnectSession => {
                     method: 'POST',
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                // Backend returns HTTP 200 with { error } on logical failures
+                // (e.g. delivery error) rather than a non-2xx status.
+                const body = await res.json();
+                if (body.error) throw new Error(body.error);
                 useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
             } else if (currentTrackId) {
                 const isCurrentlyPlaying =
                     usePlayerStoreBase.getState().player.status === PlayerStatus.PLAYING;
                 if (isCurrentlyPlaying) {
+                    const startPosition = useTimestampStoreBase.getState().timestamp;
                     mediaPause();
                     const res = await connectFetch(`/play`, {
-                        body: JSON.stringify({ targets, track_ids: [currentTrackId] }),
+                        body: JSON.stringify({
+                            start_position: startPosition,
+                            targets,
+                            track_ids: [currentTrackId],
+                        }),
                         headers: { 'Content-Type': 'application/json' },
                         method: 'POST',
                     });
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const body = await res.json();
+                    if (body.error) throw new Error(body.error);
                     useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
                 }
             }
@@ -201,16 +217,54 @@ export const useConnectSession = (): ConnectSession => {
         setSelectedForSend([]);
     };
 
+    // Hands playback back to the local player at the position Connect had reached,
+    // so disconnecting mid-track doesn't lose the listener's place. `snapshot` must
+    // be captured *before* the /stop request (SSE may flip isPlaying to false while
+    // it's in flight), but the actual local play/seek must happen *after* isActive
+    // has flipped to false — the safety-net effect below force-pauses local playback
+    // while isActive is true, and its subscription only unsubscribes on the render
+    // triggered by setActive(null). Scheduling via setTimeout before that render has
+    // even been requested fires way too early and gets immediately undone.
+    const captureDisconnectSnapshot = () => ({
+        elapsed: connectElapsed,
+        wasPlaying: useConnectPlayerStore.getState().isPlaying,
+        wasRadio: isRadioActive,
+    });
+
+    const resumeLocalAfterDisconnect = (snapshot: {
+        elapsed: number;
+        wasPlaying: boolean;
+        wasRadio: boolean;
+    }) => {
+        const { elapsed, wasPlaying, wasRadio } = snapshot;
+        setTimeout(() => {
+            if (wasRadio) {
+                if (wasPlaying) playRadio();
+                return;
+            }
+            if (!currentSongRef.current) return;
+            if (elapsed > 0.5) {
+                mediaSeekToTimestamp(elapsed);
+            }
+            if (wasPlaying) mediaPlay();
+        }, 0);
+    };
+
     const stopAllPlayback = async () => {
+        const snapshot = captureDisconnectSnapshot();
         await connectFetch(`/stop`, { method: 'POST' }).catch(() => {});
         setStatus('idle');
         setActive(null);
         setActiveTargets([]);
         setSelectedForSend([]);
         lastAutoSentRef.current = '';
+        resumeLocalAfterDisconnect(snapshot);
     };
 
     const stopSingleDevice = async (device: ConnectDevice) => {
+        // This device is the last one active — disconnecting it ends the session.
+        const willBecomeInactive = activeTargets.length <= 1;
+        const snapshot = willBecomeInactive ? captureDisconnectSnapshot() : null;
         await connectFetch(
             `/device-stop?device_type=${device.type}&name=${encodeURIComponent(device.name)}`,
             { method: 'POST' },
@@ -222,6 +276,7 @@ export const useConnectSession = (): ConnectSession => {
         if (remaining.length === 0) {
             setActive(null);
             setStatus('idle');
+            if (snapshot) resumeLocalAfterDisconnect(snapshot);
         } else {
             setActive(remaining[0]);
         }
@@ -264,8 +319,18 @@ export const useConnectSession = (): ConnectSession => {
 
     function handleStop() {
         useConnectPlayerStore.getState().set({ isPlaying: false, isStreaming: false });
-        lastAutoSentRef.current = '';
         connectFetch(`/stop`, { method: 'POST' }).catch(() => {});
+
+        if (isRadioActive) {
+            // Mark the current (stale) queue track as already sent before
+            // flipping isRadioActive off, otherwise the auto-forward-on-track-change
+            // effect in useConnectPlayback fires and immediately re-sends it to the
+            // Connect target we just told to stop.
+            lastAutoSentRef.current = currentSong?._uniqueId ?? '';
+            stopRadio();
+        } else {
+            lastAutoSentRef.current = '';
+        }
     }
 
     // ── Store sync ────────────────────────────────────────────────────────────
