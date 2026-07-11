@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Internal
 - **Reorganized the Connect backend's directory layout** - `connect/` now only holds the files Python packaging tools expect at the project root (`main.py`, `pyproject.toml`, `uv.lock`, `.env.example`). Shared app infrastructure (auth, runtime state, the FFmpeg streamer) moved into `connect/core/`, and the PyInstaller build script + spec moved into `connect/packaging/`. No behavior change.
 - **Extracted playback position tracking into its own `PlaybackClock` class** (`connect/core/playback_clock.py`) - the wall-clock/seek/buffering-offset math used to be six loosely related fields on the shared app state, independently re-derived across `/play`, `/pause`, `/resume`, `/seek` and the device-buffering calibration task. Now covered by 20 focused unit tests. No behavior change.
+- **Updated backend dependencies** - routine bump of all Python packages (FastAPI, uvicorn, pyatv, SoCo, cryptography, etc.) to their latest compatible versions. Also added `httpx2` as a dev dependency, which the bumped starlette now prefers for its test client; test-only, no change to the `httpx` used for actual HTTP requests at runtime.
 
 ## [0.4.0] - 2026-06-20
 
