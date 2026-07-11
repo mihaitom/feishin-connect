@@ -4,6 +4,8 @@ import React, { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
 
+import { ConnectButton } from './connect-button';
+import { useConnectPlayerStore } from './connect/connect.store';
 import styles from './mobile-playerbar.module.css';
 
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
@@ -36,6 +38,11 @@ export const MobilePlayerbar = () => {
     const currentSong = usePlayerSong();
     const status = usePlayerStatus();
     const { mediaNext, mediaPrevious, mediaTogglePlayPause } = usePlayer();
+    const {
+        handlers: connectHandlers,
+        isActive: connectActive,
+        isPlaying: connectPlaying,
+    } = useConnectPlayerStore();
     const title = currentSong?.name;
     const artists = currentSong?.artists;
     const isSongDefined = Boolean(currentSong?.id);
@@ -212,11 +219,15 @@ export const MobilePlayerbar = () => {
                     variant="tertiary"
                 />
                 <MainPlayButton
-                    disabled={currentSong?.id === undefined}
-                    isPaused={status === PlayerStatus.PAUSED}
+                    disabled={!connectActive && currentSong?.id === undefined}
+                    isPaused={connectActive ? !connectPlaying : status === PlayerStatus.PAUSED}
                     onClick={(e) => {
                         e.stopPropagation();
-                        mediaTogglePlayPause();
+                        if (connectActive && connectHandlers) {
+                            connectHandlers.onPlayPause();
+                        } else {
+                            mediaTogglePlayPause();
+                        }
                     }}
                 />
                 <PlayerButton
@@ -231,6 +242,9 @@ export const MobilePlayerbar = () => {
                     }}
                     variant="tertiary"
                 />
+                <div onClick={stopPropagation}>
+                    <ConnectButton />
+                </div>
             </div>
         </div>
     );

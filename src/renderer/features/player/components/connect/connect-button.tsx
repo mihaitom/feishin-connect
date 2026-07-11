@@ -4,6 +4,7 @@ import { LuCast } from 'react-icons/lu';
 
 import { ConnectPopover } from './connect-popover';
 import { useConnectSessionContext } from './connect-session-context';
+import { computePopoverPosition } from './popover-position';
 
 export const ConnectButton = () => {
     const { t } = useTranslation();
@@ -42,10 +43,12 @@ export const ConnectButton = () => {
             if (activeDevice?.type === 'sonos' || activeDevice?.type === 'chromecast')
                 fetchVolume();
             const rect = btnRef.current.getBoundingClientRect();
-            setPopPos({
-                bottom: window.innerHeight - rect.top + 40,
-                right: window.innerWidth - rect.right - 120,
-            });
+            setPopPos(
+                computePopoverPosition(rect, {
+                    height: window.innerHeight,
+                    width: window.innerWidth,
+                }),
+            );
             refresh();
         }
         setOpen((o) => !o);

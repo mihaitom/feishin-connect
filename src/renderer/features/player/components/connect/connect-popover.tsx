@@ -42,10 +42,15 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                 borderRadius: '8px',
                 bottom: `${popPos.bottom}px`,
                 boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
-                overflow: 'hidden',
+                // Caps the popover at the available space above its anchor (popPos.bottom)
+                // so it can never extend above the top of the screen — on short/mobile
+                // viewports with many devices, it scrolls instead of getting clipped.
+                maxHeight: `calc(100vh - ${popPos.bottom}px - 16px)`,
+                overflowX: 'hidden',
+                overflowY: 'auto',
                 position: 'fixed',
                 right: `${popPos.right}px`,
-                width: '350px',
+                width: 'min(350px, calc(100vw - 24px))',
                 zIndex: 9999,
             }}
         >
