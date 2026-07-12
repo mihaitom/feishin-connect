@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 - **"Add"/"Connect" button in the Connect popover moved above "Scan again"** - it now sits directly under the device list, closer to the devices it acts on.
 - **The cast button is no longer greyed out when nothing is playing** - you can now select a Connect device with an empty queue or a paused/unstarted track. The device is remembered and streaming starts automatically as soon as you play something, instead of requiring a track to already be playing before you could connect at all.
+- **Merged upstream Feishin v1.14.0** — headline change is a large lyrics rewrite: a new karaoke-style word-by-word lyrics view, Japanese furigana/romaji overlays, and OpenSubsonic structured (word-level) lyrics support. Also adds a Subsonic jukebox integration and a "stopped" playback state. Synced-lyrics scroll/seek and the karaoke view now also follow a Connect device's playback position when one is active, matching the existing classic lyrics view.
 
 ### Fixed
 - **Connecting/disconnecting a Connect device reset playback to the start of the track** - connecting mid-track always started the device from 0:00 instead of the local playhead, and disconnecting left local playback stuck at the (stale) position it had before connecting. Both directions now hand off at the actual position and resume automatically if it was playing.

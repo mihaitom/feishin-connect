@@ -89,8 +89,8 @@ describe('lyrics-api (Connect backend fallback)', () => {
 
             expect(result?.remote).toBe(true);
             expect(result?.lyrics).toEqual([
-                [1000, 'Hello'],
-                [2000, 'World'],
+                { startMs: 1000, text: 'Hello' },
+                { startMs: 2000, text: 'World' },
             ]);
         });
 
@@ -117,7 +117,7 @@ describe('lyrics-api (Connect backend fallback)', () => {
             expect(url).toContain('id=abc123');
             expect(url).toContain('source=lrclib.net');
 
-            expect(result).toEqual([[5000, 'Some line']]);
+            expect(result).toEqual([{ startMs: 5000, text: 'Some line' }]);
         });
 
         it('returns null when Connect cannot find the lyrics', async () => {
