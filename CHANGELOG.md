@@ -4,16 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.1] - unreleased
+## [0.5.0] - 2026-07-12
 
 ### Added
 - **Playerbar volume slider now controls the connected device while streaming to Connect** - instead of the (inaudible) local volume, the slider and mute button now show and control the volume of the Sonos or Chromecast device you're streaming to, kept in sync with the per-device volume control in the Connect popover. When multiple devices are selected, or the active device doesn't support remote volume (AirPlay), the control is disabled instead of controlling nothing.
 - **Desktop app auto-updater (experimental)** - the app now checks `mihaitom/feishin-connect`'s own GitHub releases on startup and periodically, and can download and install updates automatically. This hasn't seen real-world use yet, so treat it as experimental for now. Turn it off via Settings → Updates, or the `DISABLE_AUTO_UPDATES` environment variable, if you'd rather update manually.
+- **Web/Docker build now shows a "new version available" notification** - A dismissible banner (top-right corner) now checks GitHub for a newer release. Only checks against tagged/stable builds, not dev or pre-release versions.
 
 ### Changed
 - **"Add"/"Connect" button in the Connect popover moved above "Scan again"** - it now sits directly under the device list, closer to the devices it acts on.
 - **The cast button is no longer greyed out when nothing is playing** - you can now select a Connect device with an empty queue or a paused/unstarted track. The device is remembered and streaming starts automatically as soon as you play something, instead of requiring a track to already be playing before you could connect at all.
-- **Merged upstream Feishin v1.14.0** — headline change is a large lyrics rewrite: a new karaoke-style word-by-word lyrics view, Japanese furigana/romaji overlays, and OpenSubsonic structured (word-level) lyrics support. Also adds a Subsonic jukebox integration and a "stopped" playback state. Synced-lyrics scroll/seek and the karaoke view now also follow a Connect device's playback position when one is active, matching the existing classic lyrics view.
+- **Merged upstream Feishin v1.14.0** — headline change is a large lyrics rewrite: a new karaoke-style word-by-word lyrics view, Japanese furigana/romaji overlays, and OpenSubsonic structured (word-level) lyrics support. Also adds a Subsonic jukebox integration and a "stopped" playback state. Synced-lyrics scroll/seek and the karaoke view now also follow a Connect device's playback position when one is active, matching the existing classic lyrics view. See <a href="https://github.com/jeffvli/feishin/releases/tag/v1.14.0">Feishin Release Notes v1.14.0</a> for more details. Furigana/romaji support for the web/Docker build (ported to the Connect backend) was built but held back on the `feature/japanese-lyrics` branch — I don't speak Japanese and can't verify the output myself, so it stays there until there's demand for it and someone can test it. Furigana/romaji already works natively in the Electron desktop app (upstream's own implementation) — use that in the meantime if you need it.
 
 ### Fixed
 - **Connecting/disconnecting a Connect device reset playback to the start of the track** - connecting mid-track always started the device from 0:00 instead of the local playhead, and disconnecting left local playback stuck at the (stale) position it had before connecting. Both directions now hand off at the actual position and resume automatically if it was playing.

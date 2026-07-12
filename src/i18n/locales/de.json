@@ -734,6 +734,10 @@
         }
     },
     "player": {
+        "connect_apiUnreachable": "Connect-Backend nicht erreichbar",
+        "connect_apiUnreachableHint": "{{url}} konnte nicht erreicht werden. Prüfe, ob das Connect-Backend läuft.",
+        "connect_ffmpegMissing": "ffmpeg nicht gefunden",
+        "connect_ffmpegMissingHint": "Das Connect-Backend benötigt ffmpeg, um zu Sonos- und Chromecast-Geräten zu streamen. Installiere es und starte das Backend neu.",
         "connect_noDevices": "Keine Geräte gefunden",
         "connect_scan": "Erneut suchen",
         "connect_scanning": "Suche nach Geräten…",

@@ -1,6 +1,6 @@
 {
     "name": "feishin-connect",
-    "version": "0.4.1-dev.2",
+    "version": "0.5.0",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -35,6 +35,7 @@
         "bump-version": "pnpm version --no-git-tag-version --no-git-checks",
         "dev": "electron-vite dev",
         "dev:remote": "vite dev --config remote.vite.config.ts",
+        "dev:web": "vite dev --config web.vite.config.ts",
         "dev:watch": "electron-vite dev --watch",
         "i18next": "i18next -c src/i18n/i18next-parser.config.js",
         "postinstall": "electron-builder install-app-deps",

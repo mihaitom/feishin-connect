@@ -62,6 +62,14 @@ export default defineConfig({
             '@tanstack/react-query-persist-client',
             'idb-keyval',
         ],
+        // @atlaskit/pragmatic-drag-and-drop is excluded above (its own ESM
+        // build must stay a single instance, or its internal symbol checks
+        // break — see the Mantine v8 migration that added this list). But it
+        // ships as plain ESM that imports its own CJS-only dependencies, and
+        // Vite's dev server can't do CJS/ESM interop for those unless they're
+        // explicitly pre-bundled. Without this, dev mode fails to boot with
+        // "does not provide an export named 'bind'".
+        include: ['bind-event-listener'],
     },
     plugins: [
         createReactPlugin(),
