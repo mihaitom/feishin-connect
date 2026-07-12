@@ -12,11 +12,12 @@ Sub-modules:
   simpmusic SimpMusic API (plain/synced lyrics)
   netease   NetEase API (plain/synced lyrics, no translation merge)
   shared    fuzzy search-result ranking
+  japanese  furigana/romaji conversion (pykakasi, port of furigana.ts)
 """
 
 from enum import Enum
 
-from . import lrclib, netease, simpmusic
+from . import japanese, lrclib, netease, simpmusic
 from .shared import order_search_results
 
 
@@ -28,6 +29,7 @@ class LyricSource(str, Enum):
 
 __all__ = [
     "LyricSource",
+    "japanese",
     "lrclib",
     "netease",
     "order_search_results",

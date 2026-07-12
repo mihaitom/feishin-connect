@@ -9,6 +9,7 @@ dependencies = [
     "httpx>=0.28.1",
     "pyatv>=0.17.0",
     "pychromecast>=14.0.0",
+    "pykakasi>=2.3.0",
     "python-dotenv>=1.2.2",
     "soco>=0.31.0",
 ]

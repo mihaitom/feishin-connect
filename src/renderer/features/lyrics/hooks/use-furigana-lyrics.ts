@@ -7,9 +7,44 @@ import {
     LyricTextToken,
     RomajiToken,
 } from '/@/renderer/features/lyrics/api/lyric-conversion';
+import { connectFetch } from '/@/renderer/features/player/components/connect/types';
 import { LyricsResponse, SyncedCueLine, SynchronizedLyrics } from '/@/shared/types/domain-types';
 
-const lyricsApi = isElectron() ? window.api.lyrics : null;
+// Fallback for non-Electron builds (web/Docker), which have no main process to
+// run the furigana/romaji IPC handlers (kuroshiro needs Node) — ask the
+// Connect backend (pykakasi) instead. Fails "gracefully" (passthrough/empty,
+// matching the IPC handlers' own catch blocks) if Connect isn't reachable.
+async function connectJapaneseRequest<T>(path: string, text: string, fallback: T): Promise<T> {
+    try {
+        const res = await connectFetch(path, {
+            body: JSON.stringify({ text }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
+        if (!res.ok) {
+            console.warn(`[lyrics] ${path} -> HTTP ${res.status}`);
+            return fallback;
+        }
+        return (await res.json()) as T;
+    } catch (e) {
+        console.warn(`[lyrics] ${path} -> request failed:`, e);
+        return fallback;
+    }
+}
+
+export const connectLyricsApi = {
+    convertFurigana: (text: string) =>
+        connectJapaneseRequest<string>('/lyrics/furigana', text, text),
+    convertFuriganaFragment: (text: string) =>
+        connectJapaneseRequest<string>('/lyrics/furigana-fragment', text, text),
+    convertRomaji: (text: string) => connectJapaneseRequest<string>('/lyrics/romaji', text, ''),
+    convertRomajiTokens: (text: string) =>
+        connectJapaneseRequest<RomajiToken[]>('/lyrics/romaji-tokens', text, []),
+    parseLyricsTextTokens: (text: string) =>
+        connectJapaneseRequest<LyricTextToken[]>('/lyrics/tokens', text, []),
+};
+
+const lyricsApi = isElectron() ? window.api.lyrics : connectLyricsApi;
 
 const convertSyncedLyricsFurigana = async (
     lyrics: SynchronizedLyrics,

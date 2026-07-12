@@ -1,4 +1,6 @@
-"""routes/lyrics.py — /lyrics/search, /lyrics/auto, /lyrics/by-remote-id
+"""routes/lyrics.py — /lyrics/search, /lyrics/auto, /lyrics/by-remote-id,
+/lyrics/furigana, /lyrics/furigana-fragment, /lyrics/romaji,
+/lyrics/romaji-tokens, /lyrics/tokens
 
 Remote-lyrics counterpart to src/main/features/core/lyrics/* (Electron main
 process IPC). The web/Docker build has no Electron main process, so the
@@ -9,9 +11,10 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 
 from core.auth import require_token
-from lyrics import LyricSource, lrclib, netease, order_search_results, simpmusic
+from lyrics import LyricSource, japanese, lrclib, netease, order_search_results, simpmusic
 
 logger = logging.getLogger("connect.lyrics")
 router = APIRouter(prefix="/lyrics", dependencies=[Depends(require_token)])
@@ -160,3 +163,34 @@ async def by_remote_id(source: str, id: str) -> str | None:
         f"[by-remote-id] source={source!r} id={id!r} -> {'found' if result else 'no lyrics'}"
     )
     return result
+
+
+class TextRequest(BaseModel):
+    # Lyrics text can be multi-line and arbitrarily long, so this is a POST
+    # body rather than a query param.
+    text: str
+
+
+@router.post("/furigana")
+async def furigana(req: TextRequest) -> str:
+    return japanese.convert_furigana(req.text)
+
+
+@router.post("/furigana-fragment")
+async def furigana_fragment(req: TextRequest) -> str:
+    return japanese.convert_furigana_fragment(req.text)
+
+
+@router.post("/romaji")
+async def romaji(req: TextRequest) -> str:
+    return japanese.convert_romaji(req.text)
+
+
+@router.post("/tokens")
+async def tokens(req: TextRequest) -> list[dict[str, Any]]:
+    return japanese.parse_lyrics_text_tokens(req.text)
+
+
+@router.post("/romaji-tokens")
+async def romaji_tokens(req: TextRequest) -> list[dict[str, Any]]:
+    return japanese.convert_romaji_tokens(req.text)

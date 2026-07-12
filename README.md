@@ -38,6 +38,7 @@
 | Feishin Connect (Sonos / AirPlay / Chromecast) | ✅ | ❌ |
 | Manual library scan button (Navidrome/Subsonic) | ✅ | ❌ |
 | Remote lyrics lookup (lrclib.net, SimpMusic, NetEase) in the web/Docker build | ✅ | ⚠️ Electron only |
+| Japanese furigana/romaji lyrics overlays in the web/Docker build | ✅ | ⚠️ Electron only |
 | Auto-updater | ✅ GitHub Releases (this fork's own) | ✅ GitHub Releases |
 | Docker image | `ghcr.io/mihaitom/feishin-connect` | `ghcr.io/jeffvli/feishin` |
 
