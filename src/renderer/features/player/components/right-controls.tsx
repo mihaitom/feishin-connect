@@ -3,12 +3,15 @@ import { useCallback, useEffect, useMemo, useState, WheelEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ConnectButton } from './connect-button';
+import { useConnectSessionContext } from './connect/connect-session-context';
+import { useDeviceVolume } from './connect/hooks';
 
 import { PopoverPlayQueue } from '/@/renderer/features/now-playing/components/popover-play-queue';
 import { PlayerConfig } from '/@/renderer/features/player/components/player-config';
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 import { SleepTimerButton } from '/@/renderer/features/player/components/sleep-timer-button';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { useAudioDevices } from '/@/renderer/features/settings/components/playback/audio-settings';
 import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
@@ -23,6 +26,8 @@ import {
     useFullScreenPlayerStore,
     useGeneralSettings,
     useHotkeySettings,
+    usePlaybackSettings,
+    usePlaybackType,
     usePlayerData,
     usePlayerMuted,
     usePlayerSong,
@@ -37,6 +42,7 @@ import {
 import { useFullScreenPlayerStoreActions } from '/@/renderer/store/full-screen-player.store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Button } from '/@/shared/components/button/button';
+import { ContextMenu } from '/@/shared/components/context-menu/context-menu';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
@@ -52,6 +58,7 @@ import { useMediaQuery } from '/@/shared/hooks/use-media-query';
 import { useThrottledCallback } from '/@/shared/hooks/use-throttled-callback';
 import { useThrottledValue } from '/@/shared/hooks/use-throttled-value';
 import { LibraryItem, QueueSong, ServerType } from '/@/shared/types/domain-types';
+import { PlayerType } from '/@/shared/types/types';
 
 const calculateVolumeUp = (volume: number, volumeWheelStep: number) => {
     let volumeToSet: number;
@@ -501,6 +508,69 @@ const RatingButton = () => {
 };
 
 const VolumeButton = () => {
+    const { isActive: connectActive } = useConnectSessionContext();
+
+    return connectActive ? <ConnectVolumeButton /> : <LocalVolumeButton />;
+};
+
+const ConnectVolumeButton = () => {
+    const { t } = useTranslation();
+    const { activeTargets } = useConnectSessionContext();
+    const volumeWidth = useVolumeWidth();
+    const isMinWidth = useMediaQuery('(max-width: 480px)');
+
+    const singleTarget = activeTargets.length === 1 ? activeTargets[0] : undefined;
+    const { muted, setDeviceVolume, supported, toggleMute, volume } = useDeviceVolume(
+        singleTarget?.type,
+        singleTarget?.name,
+    );
+
+    const disabled = !singleTarget || !supported;
+    const effectiveVolume = disabled || muted ? 0 : (volume ?? 0);
+
+    return (
+        <>
+            <ActionIcon
+                disabled={disabled}
+                icon={muted ? 'volumeMute' : effectiveVolume > 50 ? 'volumeMax' : 'volumeNormal'}
+                iconProps={{
+                    color: !disabled && muted ? 'muted' : undefined,
+                    size: 'xl',
+                }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMute();
+                }}
+                size="sm"
+                tooltip={{
+                    label: disabled
+                        ? t('player.connect_volumeUnavailable')
+                        : muted
+                          ? t('player.muted')
+                          : effectiveVolume,
+                    openDelay: 0,
+                }}
+                variant="subtle"
+            />
+            {!isMinWidth ? (
+                <CustomPlayerbarSlider
+                    disabled={disabled}
+                    max={100}
+                    min={0}
+                    onChange={disabled ? () => {} : setDeviceVolume}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                    }}
+                    size={6}
+                    value={effectiveVolume}
+                    w={volumeWidth}
+                />
+            ) : null}
+        </>
+    );
+};
+
+const LocalVolumeButton = () => {
     const { bindings } = useHotkeySettings();
     const volume = usePlayerVolume();
     const muted = usePlayerMuted();
@@ -508,6 +578,28 @@ const VolumeButton = () => {
     const volumeWidth = useVolumeWidth();
     const { decreaseVolume, increaseVolume, mediaToggleMute, setVolume } = usePlayer();
     const isMinWidth = useMediaQuery('(max-width: 480px)');
+
+    const playbackType = usePlaybackType();
+    const playbackSettings = usePlaybackSettings();
+    const { setSettings } = useSettingsStoreActions();
+    const audioDevices = useAudioDevices(playbackType);
+
+    const currentAudioDeviceId =
+        playbackType === PlayerType.LOCAL
+            ? playbackSettings.mpvAudioDeviceId
+            : playbackSettings.audioDeviceId;
+
+    const handleSelectAudioDevice = useCallback(
+        (deviceId: null | string) => {
+            setSettings({
+                playback:
+                    playbackType === PlayerType.LOCAL
+                        ? { mpvAudioDeviceId: deviceId }
+                        : { audioDeviceId: deviceId },
+            });
+        },
+        [playbackType, setSettings],
+    );
 
     const [sliderValue, setSliderValue] = useState(volume);
 
@@ -564,24 +656,54 @@ const VolumeButton = () => {
 
     return (
         <>
-            <ActionIcon
-                icon={muted ? 'volumeMute' : volume > 50 ? 'volumeMax' : 'volumeNormal'}
-                iconProps={{
-                    color: muted ? 'muted' : undefined,
-                    size: 'xl',
-                }}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleMute();
-                }}
-                onWheel={handleVolumeWheel}
-                size="sm"
-                tooltip={{
-                    label: muted ? t('player.muted') : volume,
-                    openDelay: 0,
-                }}
-                variant="subtle"
-            />
+            <ContextMenu>
+                <ContextMenu.Target>
+                    {/*
+                     * ActionIcon renders a Mantine Tooltip wrapper, which does not
+                     * forward the onContextMenu/ref that Radix injects via asChild to
+                     * the underlying button. Wrap in a real DOM node so right-click
+                     * reliably opens the menu.
+                     */}
+                    <div style={{ alignItems: 'center', display: 'flex' }}>
+                        <ActionIcon
+                            icon={muted ? 'volumeMute' : volume > 50 ? 'volumeMax' : 'volumeNormal'}
+                            iconProps={{
+                                color: muted ? 'muted' : undefined,
+                                size: 'xl',
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleMute();
+                            }}
+                            onWheel={handleVolumeWheel}
+                            size="sm"
+                            tooltip={{
+                                label: muted ? t('player.muted') : volume,
+                                openDelay: 0,
+                            }}
+                            variant="subtle"
+                        />
+                    </div>
+                </ContextMenu.Target>
+                <ContextMenu.Content>
+                    <ContextMenu.Item
+                        isSelected={!currentAudioDeviceId}
+                        onSelect={() => handleSelectAudioDevice(null)}
+                    >
+                        {t('setting.audioDeviceDefault', { defaultValue: 'System default' })}
+                    </ContextMenu.Item>
+                    {audioDevices.length > 0 && <ContextMenu.Divider />}
+                    {audioDevices.map((device) => (
+                        <ContextMenu.Item
+                            isSelected={device.value === currentAudioDeviceId}
+                            key={device.value}
+                            onSelect={() => handleSelectAudioDevice(device.value)}
+                        >
+                            {device.label || device.value}
+                        </ContextMenu.Item>
+                    ))}
+                </ContextMenu.Content>
+            </ContextMenu>
             {!isMinWidth ? (
                 <CustomPlayerbarSlider
                     max={100}

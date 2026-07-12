@@ -23,7 +23,7 @@ jobs:
             - name: Install Node and PNPM
               uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
 
-            # Required for build:connect (`uv run connect/build-binary.py`).
+            # Required for build:connect (`uv run connect/packaging/build-binary.py`).
             # uv installs the required Python version itself.
             - name: Install uv
               uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0

@@ -3,21 +3,6 @@ export const CONNECT_URL =
 
 export const CONNECT_TOKEN: string = (window as any).__CONNECT_TOKEN__ ?? '';
 
-export function connectFetch(path: string, options?: RequestInit): Promise<Response> {
-    const headers: Record<string, string> = {
-        ...(options?.headers as Record<string, string> | undefined),
-    };
-    if (CONNECT_TOKEN) headers['X-Connect-Token'] = CONNECT_TOKEN;
-    return fetch(`${CONNECT_URL}${path}`, { ...options, headers });
-}
-
-export function connectEventSource(path: string): EventSource {
-    const url = CONNECT_TOKEN
-        ? `${CONNECT_URL}${path}?token=${encodeURIComponent(CONNECT_TOKEN)}`
-        : `${CONNECT_URL}${path}`;
-    return new EventSource(url);
-}
-
 export interface ConnectDevice {
     name: string;
     needsPairing?: boolean;
@@ -37,7 +22,6 @@ export interface ConnectSession {
     hasApiError: boolean;
     hasFfmpegError: boolean;
     isActive: boolean;
-    isEmpty: boolean;
     isScanning: boolean;
     paired: string[];
     refresh: (fresh?: boolean) => void;
@@ -78,3 +62,18 @@ export interface PairingStartResult {
 export type PairingStep = 'error' | 'idle' | 'needs_pin' | 'started' | 'success';
 
 export type SendStatus = 'error' | 'idle' | 'loading' | 'success';
+
+export function connectEventSource(path: string): EventSource {
+    const url = CONNECT_TOKEN
+        ? `${CONNECT_URL}${path}?token=${encodeURIComponent(CONNECT_TOKEN)}`
+        : `${CONNECT_URL}${path}`;
+    return new EventSource(url);
+}
+
+export function connectFetch(path: string, options?: RequestInit): Promise<Response> {
+    const headers: Record<string, string> = {
+        ...(options?.headers as Record<string, string> | undefined),
+    };
+    if (CONNECT_TOKEN) headers['X-Connect-Token'] = CONNECT_TOKEN;
+    return fetch(`${CONNECT_URL}${path}`, { ...options, headers });
+}

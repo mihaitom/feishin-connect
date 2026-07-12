@@ -42,10 +42,15 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                 borderRadius: '8px',
                 bottom: `${popPos.bottom}px`,
                 boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
-                overflow: 'hidden',
+                // Caps the popover at the available space above its anchor (popPos.bottom)
+                // so it can never extend above the top of the screen — on short/mobile
+                // viewports with many devices, it scrolls instead of getting clipped.
+                maxHeight: `calc(100vh - ${popPos.bottom}px - 16px)`,
+                overflowX: 'hidden',
+                overflowY: 'auto',
                 position: 'fixed',
                 right: `${popPos.right}px`,
-                width: '350px',
+                width: 'min(350px, calc(100vw - 24px))',
                 zIndex: 9999,
             }}
         >
@@ -172,61 +177,47 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                             />
                         );
                     })}
-                    <button
-                        disabled={isScanning}
-                        onClick={() => refresh(true)}
+
+                    {/* Send / Add button — always rendered, animated open/closed so the
+                        popover doesn't jump in height when a device gets (de)selected */}
+                    <div
                         style={{
-                            alignItems: 'center',
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--theme-colors-primary)',
-                            cursor: isScanning ? 'default' : 'pointer',
-                            display: 'flex',
-                            fontSize: '12px',
-                            gap: '6px',
-                            justifyContent: 'center',
-                            opacity: isScanning ? 0.6 : 1,
-                            padding: '8px 12px',
-                            width: '100%',
+                            maxHeight: selectedForSend.length > 0 ? '50px' : '0px',
+                            opacity: selectedForSend.length > 0 ? 1 : 0,
+                            overflow: 'hidden',
+                            transition: 'max-height 0.2s ease, opacity 0.15s ease',
                         }}
                     >
-                        {isScanning ? <Spinner size={12} /> : <LuRefreshCw size={13} />}
-                        {t('player.connect_scan')}
-                    </button>
+                        <div style={{ padding: '4px 12px 10px' }}>
+                            <button
+                                onClick={isActive ? addToStream : sendToSelected}
+                                style={{
+                                    background: 'var(--theme-colors-primary)',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    color: 'var(--theme-colors-background)',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    padding: '8px 0',
+                                    width: '100%',
+                                }}
+                            >
+                                {isActive
+                                    ? t('player.connect_add', { count: selectedForSend.length })
+                                    : t('player.connect_connect')}
+                            </button>
+                        </div>
+                    </div>
+
+                    <PopButton
+                        disabled={isScanning}
+                        icon={isScanning ? <Spinner size={14} /> : <LuRefreshCw size={14} />}
+                        label={t('player.connect_scan')}
+                        onClick={() => refresh(true)}
+                    />
                 </PopSection>
             )}
-
-            {/* Send / Add button — always rendered, animated open/closed so the
-                popover doesn't jump in height when a device gets (de)selected */}
-            <div
-                style={{
-                    maxHeight: selectedForSend.length > 0 ? '50px' : '0px',
-                    opacity: selectedForSend.length > 0 ? 1 : 0,
-                    overflow: 'hidden',
-                    transition: 'max-height 0.2s ease, opacity 0.15s ease',
-                }}
-            >
-                <div style={{ padding: '4px 12px 10px' }}>
-                    <button
-                        onClick={isActive ? addToStream : sendToSelected}
-                        style={{
-                            background: 'var(--theme-colors-primary)',
-                            border: 'none',
-                            borderRadius: '6px',
-                            color: 'var(--theme-colors-background)',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            padding: '8px 0',
-                            width: '100%',
-                        }}
-                    >
-                        {isActive
-                            ? t('player.connect_add', { count: selectedForSend.length })
-                            : t('player.connect_connect')}
-                    </button>
-                </div>
-            </div>
 
             {/* Disconnect all */}
             {isActive && (

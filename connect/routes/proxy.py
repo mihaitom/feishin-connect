@@ -13,7 +13,7 @@ import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from auth import require_token
+from core.auth import require_token
 
 router = APIRouter(dependencies=[Depends(require_token)])
 

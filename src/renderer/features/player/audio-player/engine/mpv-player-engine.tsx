@@ -68,9 +68,13 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         };
 
         eventEmitter.on('MPV_RELOAD', handleMpvReload);
+        // The main process notifies us after the OS resumes from sleep, since the
+        // stream mpv had open is likely on a now-dead connection.
+        mpvPlayerListener?.rendererMpvReconnect(handleMpvReload);
 
         return () => {
             eventEmitter.off('MPV_RELOAD', handleMpvReload);
+            ipc?.removeAllListeners('renderer-mpv-reconnect');
         };
     }, []);
 
@@ -116,6 +120,15 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                 extraParameters,
                 properties,
             });
+
+            // Apply EQ and compressor filters after MPV has initialized
+            const { compressor, equalizer } = useSettingsStore.getState().playback;
+            const { buildMpvAudioFilters } =
+                await import('/@/renderer/features/settings/components/playback/mpv-audio-filters');
+            const filterStr = buildMpvAudioFilters(equalizer, compressor);
+            if (filterStr) {
+                mpvPlayer?.setProperties({ af: filterStr });
+            }
 
             // After initialization, populate the queue if currentSrc is available
             // Don't override queue if radio is active
@@ -199,7 +212,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
         if (playerStatus === PlayerStatus.PLAYING) {
             mpvPlayer.play();
-        } else if (playerStatus === PlayerStatus.PAUSED) {
+        } else {
             mpvPlayer.pause();
         }
     }, [playerStatus]);
@@ -263,10 +276,23 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             handleMpvAutoNext(transcode);
         };
 
+        const handleTrackEnded = () => {
+            const { player } = usePlayerStore.getState();
+            // mpv often emits `stopped` before this event, which already set STOPPED
+            // via mediaStop. Still run mediaAutoNext so end-of-queue seek/reset runs.
+            if (player.status !== PlayerStatus.PLAYING && player.status !== PlayerStatus.STOPPED) {
+                return;
+            }
+
+            mediaAutoNext();
+        };
+
         mpvPlayerListener.rendererAutoNext(handleOnAutoNext);
+        mpvPlayerListener.rendererTrackEnded(handleTrackEnded);
 
         return () => {
             ipc?.removeAllListeners('renderer-player-auto-next');
+            ipc?.removeAllListeners('renderer-player-track-ended');
         };
     }, [mediaAutoNext, onEnded, transcode]);
 

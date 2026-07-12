@@ -1,9 +1,8 @@
-"""state.py — Shared runtime state and helper functions for Feishin Connect."""
+"""core/state.py — Shared runtime state and helper functions for Feishin Connect."""
 
 import asyncio
 import os
 import socket
-import time
 
 from delivery import (
     AirPlayDelivery,
@@ -13,6 +12,8 @@ from delivery import (
     SonosDelivery,
 )
 from media import MediaClient, SubsonicClient, Track
+
+from .playback_clock import PlaybackClock
 
 PORT = int(os.getenv("PORT", "9181"))
 TARGETS = os.getenv("TARGETS", "")
@@ -25,20 +26,11 @@ class AppState:
         # from the frontend's ReplayGain settings for current_track. 1 = no change.
         self.current_track_gain: float = 1.0
         self.is_streaming: bool = False
-        self.is_paused: bool = False
         self.radio_info: dict | None = None
         self.active_delivery: BaseDelivery | DeliveryManager | None = None
-        # Wall-clock progress tracking
-        self.play_start_time: float = 0.0
-        self.paused_elapsed: float = 0.0
-        # Constant per-track correction added to the wall-clock position to
-        # account for the device's startup buffering delay (see playback.py).
-        self.position_offset: float = 0.0
-        # Seek offset for next /stream reconnect (set by /pause, consumed by /stream)
-        self.resume_offset: float = 0.0
-        # Incremented on every /play, /play-url, /resume so old stream_with_completion
-        # handlers don't fire after a new play has already started.
-        self.play_generation: int = 0
+        # Wall-clock position tracking for the current track/stream — see
+        # playback_clock.py for why this is its own object.
+        self.clock = PlaybackClock()
         # Set True when a track finishes naturally; cleared by /play, /play-url, /stop.
         # Lets the frontend detect track-end even after SSE reconnect or page reload.
         self.track_ended: bool = False
@@ -79,16 +71,13 @@ def stream_url() -> str:
 def compute_position() -> float:
     """Return elapsed seconds into the current track, clamped to track duration.
 
-    Includes `position_offset`, a constant per-track correction for the
-    device's startup buffering delay (see playback.py:_calibrate_position_offset).
+    See PlaybackClock.elapsed() for the buffering-delay correction — this just
+    adds the duration clamp, since the clock itself doesn't know about tracks.
     """
     st = ctx.state
-    if not st.is_streaming or not st.play_start_time:
+    if not st.is_streaming or not st.clock.play_start_time:
         return 0.0
-    if st.is_paused:
-        return st.paused_elapsed
-    elapsed = time.time() - st.play_start_time + st.position_offset
-    elapsed = max(0.0, elapsed)
+    elapsed = st.clock.elapsed()
     if st.current_track:
         return min(elapsed, float(st.current_track.duration))
     return elapsed
@@ -128,7 +117,7 @@ def build_status_dict() -> dict:
         "current_track_index": 0,
         "elapsed": elapsed,
         "ended": st.track_ended,
-        "paused": st.is_paused,
+        "paused": st.clock.is_paused,
         "radio": st.radio_info,
         "streaming": st.is_streaming,
         "targets": targets,

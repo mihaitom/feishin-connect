@@ -10,7 +10,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 
-from auth import require_token
+from core.auth import require_token
 from lyrics import LyricSource, lrclib, netease, order_search_results, simpmusic
 
 logger = logging.getLogger("connect.lyrics")

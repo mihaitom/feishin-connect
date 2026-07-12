@@ -8,9 +8,9 @@ import time
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response, StreamingResponse
 
-from auth import require_token
-from state import build_status_dict, ctx, event_bus
-from streamer import stream_tracks
+from core.auth import require_token
+from core.state import build_status_dict, ctx, event_bus
+from core.streamer import stream_tracks
 
 logger = logging.getLogger("connect.stream")
 router = APIRouter()
@@ -34,9 +34,16 @@ async def audio_stream():
     track = ctx.state.current_track
     track_url = ctx.media.get_stream_url(track.id)
 
-    # Consume the resume offset (set by /pause, applied once on reconnect via FFmpeg -ss)
-    offset = ctx.state.resume_offset
-    ctx.state.resume_offset = 0.0
+    # Captured now (for this connection's -ss), but *not* cleared yet — see
+    # stream_with_completion(), which only clears it once this connection has
+    # actually started producing audio. A device can open (and abandon) a
+    # connection to /stream before ever reading data — most commonly the very
+    # first connection of a session, while e.g. a Sonos coordinator is still
+    # settling — and clearing eagerly here would let that abandoned attempt
+    # silently discard the seek offset before the real connection arrives,
+    # making the device audibly restart from 0:00 while our own state (and
+    # thus the displayed position) still reports the correct position.
+    offset = ctx.state.clock.resume_offset
 
     logger.info(
         f"[stream] Client connected — {track.artist} — {track.title}"
@@ -62,14 +69,19 @@ async def audio_stream():
             )
             await asyncio.sleep(wait)
         st = ctx.state
-        if st.is_streaming and not st.is_paused and st.play_generation == my_generation:
+        if (
+            st.is_streaming
+            and not st.clock.is_paused
+            and st.clock.play_generation == my_generation
+        ):
             logger.info("[stream] Track finished — marking stream complete")
             st.is_streaming = False
             st.track_ended = True
             await event_bus.broadcast()
 
     async def stream_with_completion():
-        my_generation = ctx.state.play_generation
+        my_generation = ctx.state.clock.play_generation
+        offset_consumed = False
         try:
             async for chunk in stream_tracks(
                 [track_url],
@@ -77,6 +89,13 @@ async def audio_stream():
                 start_offset=offset,
                 gain=ctx.state.current_track_gain,
             ):
+                if not offset_consumed:
+                    offset_consumed = True
+                    # Only clear resume_offset once THIS connection has
+                    # actually started producing audio — and only if no newer
+                    # /play, /seek or /resume has since set a different one.
+                    if ctx.state.clock.play_generation == my_generation:
+                        ctx.state.clock.resume_offset = 0.0
                 yield chunk
         except asyncio.CancelledError:
             raise  # client disconnected mid-stream — not a natural end
@@ -85,11 +104,17 @@ async def audio_stream():
         # Schedule completion in an independent task so Sonos closing the connection
         # after receiving all data doesn't cancel the track-end signal.
         st = ctx.state
-        if st.is_streaming and not st.is_paused and st.play_generation == my_generation:
+        if (
+            st.is_streaming
+            and not st.clock.is_paused
+            and st.clock.play_generation == my_generation
+        ):
             wait = 0.0
-            if st.current_track and st.play_start_time:
+            if st.current_track and st.clock.play_start_time:
                 wait = max(
-                    0.0, (st.play_start_time + st.current_track.duration) - time.time()
+                    0.0,
+                    (st.clock.play_start_time + st.current_track.duration)
+                    - time.time(),
                 )
             asyncio.create_task(_fire_track_end(my_generation, wait))
 
@@ -118,7 +143,7 @@ async def status_events():
                     payload = await asyncio.wait_for(queue.get(), timeout=2.0)
                     yield f"data: {json.dumps(payload)}\n\n"
                 except asyncio.TimeoutError:
-                    if ctx.state.is_streaming and not ctx.state.is_paused:
+                    if ctx.state.is_streaming and not ctx.state.clock.is_paused:
                         yield f"data: {json.dumps(build_status_dict())}\n\n"
                     else:
                         yield ": heartbeat\n\n"

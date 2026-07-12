@@ -1,3 +1,5 @@
+import type { LyricsQueryResult } from '/@/renderer/features/lyrics/api/lyrics-api';
+
 import {
     PersistedClient,
     Persister,
@@ -7,7 +9,6 @@ import { del, get, set } from 'idb-keyval';
 import { createRoot } from 'react-dom/client';
 
 import { App } from '/@/renderer/app';
-import type { LyricsQueryResult } from '/@/renderer/features/lyrics/api/lyrics-api';
 import { queryClient } from '/@/renderer/lib/react-query';
 
 function createIDBPersister(idbValidKey: IDBValidKey = 'reactQuery') {

@@ -1,9 +1,9 @@
 import clsx from 'clsx';
 import { lazy, MouseEvent, Suspense } from 'react';
 
-import styles from './playerbar.module.css';
 import { ConnectSessionContext } from './connect/connect-session-context';
 import { useConnectSession } from './connect/use-connect-session';
+import styles from './playerbar.module.css';
 
 import { CenterControls } from '/@/renderer/features/player/components/center-controls';
 import { LeftControls } from '/@/renderer/features/player/components/left-controls';

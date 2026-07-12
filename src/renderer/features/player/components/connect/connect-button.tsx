@@ -4,6 +4,7 @@ import { LuCast } from 'react-icons/lu';
 
 import { ConnectPopover } from './connect-popover';
 import { useConnectSessionContext } from './connect-session-context';
+import { computePopoverPosition } from './popover-position';
 
 export const ConnectButton = () => {
     const { t } = useTranslation();
@@ -24,28 +25,20 @@ export const ConnectButton = () => {
         if (prevIsActive.current && !session.isActive) setOpen(false);
         prevIsActive.current = session.isActive;
     }, [session.isActive]);
-    const {
-        activeDevice,
-        fetchVolume,
-        hasApiError,
-        hasFfmpegError,
-        isActive,
-        isEmpty,
-        refresh,
-        status,
-    } = session;
+    const { activeDevice, fetchVolume, hasApiError, hasFfmpegError, isActive, refresh, status } =
+        session;
 
     const handleOpen = () => {
-        const hasError = hasApiError || hasFfmpegError;
-        if (isEmpty && !hasError) return;
         if (!open && btnRef.current) {
             if (activeDevice?.type === 'sonos' || activeDevice?.type === 'chromecast')
                 fetchVolume();
             const rect = btnRef.current.getBoundingClientRect();
-            setPopPos({
-                bottom: window.innerHeight - rect.top + 40,
-                right: window.innerWidth - rect.right - 120,
-            });
+            setPopPos(
+                computePopoverPosition(rect, {
+                    height: window.innerHeight,
+                    width: window.innerWidth,
+                }),
+            );
             refresh();
         }
         setOpen((o) => !o);
@@ -94,19 +87,16 @@ export const ConnectButton = () => {
                     border: 'none',
                     borderRadius: '4px',
                     color: iconColor,
-                    cursor: isEmpty ? 'not-allowed' : 'pointer',
+                    cursor: 'pointer',
                     display: 'flex',
                     justifyContent: 'center',
-                    opacity: isEmpty ? 0.3 : 1,
                     padding: '4px',
                     transition: 'color 0.2s',
                 }}
                 title={
-                    isEmpty
-                        ? t('player.connect_emptyQueue')
-                        : isActive
-                          ? `▶ ${activeDevice!.name} · ${nowPlayingTitle}`
-                          : t('player.connect_playOnDevice')
+                    isActive
+                        ? `▶ ${activeDevice!.name} · ${nowPlayingTitle}`
+                        : t('player.connect_playOnDevice')
                 }
             >
                 <LuCast size={20} style={{ opacity: isActive ? 1 : 0.7 }} />

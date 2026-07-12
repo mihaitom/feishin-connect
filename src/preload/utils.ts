@@ -1,4 +1,4 @@
-import { type IpcRendererEvent, ipcRenderer, webFrame } from 'electron';
+import { ipcRenderer, type IpcRendererEvent, webFrame } from 'electron';
 
 import { disableAutoUpdates, isLinux, isMacOS, isWindows } from '../main/env';
 
@@ -135,9 +135,9 @@ export const utils = {
     openCustomCssFolder,
     openItem,
     playerErrorListener,
+    rendererOpenAbout,
     rendererOpenCommandPalette,
     rendererOpenManageServers,
-    rendererOpenAbout,
     rendererOpenReleaseNotes,
     rendererOpenSettings,
     rendererTogglePrivateMode,

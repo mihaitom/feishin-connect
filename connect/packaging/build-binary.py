@@ -4,9 +4,9 @@
 Output: connect/dist/connect-server/  (included in Electron via extraResources)
 
 Usage:
-    python connect/build-binary.py
+    python connect/packaging/build-binary.py
     OR from the connect directory:
-    python build-binary.py
+    python packaging/build-binary.py
 """
 
 from __future__ import annotations
@@ -24,8 +24,10 @@ def run(cmd: list[str]) -> None:
 
 
 def main() -> int:
-    script_dir = Path(__file__).resolve().parent
-    os.chdir(script_dir)
+    # uv/PyInstaller run from connect/ (not packaging/) so pyproject.toml and the
+    # spec file's own relative paths (pathex=['.'], 'main.py') resolve unchanged.
+    connect_dir = Path(__file__).resolve().parent.parent
+    os.chdir(connect_dir)
 
     uv = shutil.which("uv")
     if uv is None:
@@ -39,9 +41,9 @@ def main() -> int:
     run([uv, "sync", "--dev"])
 
     print("[connect] Running PyInstaller...")
-    run([uv, "run", "pyinstaller", "connect-server.spec", "--noconfirm"])
+    run([uv, "run", "pyinstaller", "packaging/connect-server.spec", "--noconfirm"])
 
-    print(f"[connect] Done — binary at: {script_dir / 'dist' / 'connect-server'}")
+    print(f"[connect] Done — binary at: {connect_dir / 'dist' / 'connect-server'}")
     return 0
 
 

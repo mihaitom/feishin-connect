@@ -7,7 +7,6 @@ import {
     SettingsSection,
 } from '/@/renderer/features/settings/components/settings-section';
 import { useSettingsStoreActions, useWindowSettings } from '/@/renderer/store';
-import { Select } from '/@/shared/components/select/select';
 import { Switch } from '/@/shared/components/switch/switch';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
@@ -23,47 +22,6 @@ export const UpdateSettings = memo(() => {
     const { setSettings } = useSettingsStoreActions();
 
     const updateOptions: SettingOption[] = [
-        {
-            control: (
-                <Select
-                    data={[
-                        {
-                            label: t('setting.releaseChannel', {
-                                context: 'optionLatest',
-                            }),
-                            value: 'latest',
-                        },
-                        {
-                            label: t('setting.releaseChannel', {
-                                context: 'optionBeta',
-                            }),
-                            value: 'beta',
-                        },
-                        {
-                            label: t('setting.releaseChannel', {
-                                context: 'optionAlpha',
-                            }),
-                            value: 'alpha',
-                        },
-                    ]}
-                    defaultValue={settings.releaseChannel || 'latest'}
-                    onChange={(value) => {
-                        if (!value) return;
-                        localSettings?.set('release_channel', value);
-                        setSettings({
-                            window: {
-                                releaseChannel: value as 'alpha' | 'beta' | 'latest',
-                            },
-                        });
-                    }}
-                />
-            ),
-            description: t('setting.releaseChannel', {
-                context: 'description',
-            }),
-            isHidden: disableAutoUpdates(),
-            title: t('setting.releaseChannel'),
-        },
         {
             control: (
                 <Switch

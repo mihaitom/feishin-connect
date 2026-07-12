@@ -119,6 +119,10 @@ export const useConnectPlayback = ({
             // immediately after in the same task so pause() wins before audio is heard.
             mediaPause();
         }
+        // Intentionally depends on the individual connectStatus fields the effect
+        // reads, not the whole object, so it doesn't re-run on every SSE tick that
+        // changes an unrelated field (e.g. elapsed).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         connectStatus?.streaming,
         connectStatus?.ended,

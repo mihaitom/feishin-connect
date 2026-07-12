@@ -1,9 +1,9 @@
-"""Tests for token-based auth (auth.py + require_token dependency)."""
+"""Tests for token-based auth (core/auth.py + require_token dependency)."""
 
 import pytest
 from fastapi.testclient import TestClient
 
-import auth
+from core import auth
 from main import app
 
 

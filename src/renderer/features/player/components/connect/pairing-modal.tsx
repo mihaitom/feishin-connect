@@ -87,7 +87,14 @@ export const PairingModal = ({ deviceName, onClose, onSuccess }: PairingModalPro
 
     useEffect(() => {
         startPairing();
-    }, [startPairing]);
+        // Only (re)start when the target device changes — startPairing gets a new
+        // identity on every re-render where onClose/onSuccess do (e.g. the parent
+        // re-rendering for unrelated reasons), and re-running this on every one of
+        // those would fire concurrent /pair/airplay/start calls that race each
+        // other on the device side (observed as repeated "Scanning..." log spam
+        // and pyatv TlvValue.Salt errors).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [deviceName]);
 
     useEffect(() => {
         if (step === 'needs_pin') pinRef.current?.focus();

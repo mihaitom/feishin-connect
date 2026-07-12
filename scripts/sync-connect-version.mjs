@@ -10,7 +10,10 @@ const { version } = JSON.parse(fs.readFileSync(packageFile, 'utf8'));
 
 // semver pre-release (1.2.3-dev.0) -> PEP 440 (1.2.3.dev0), required by
 // connect/pyproject.toml. Stable versions (1.2.3) pass through unchanged.
-const pep440Version = version.replace(/-([a-zA-Z]+)\.?(\d+)?/, (_, tag, num) => `.${tag}${num ?? '0'}`);
+const pep440Version = version.replace(
+    /-([a-zA-Z]+)\.?(\d+)?/,
+    (_, tag, num) => `.${tag}${num ?? '0'}`,
+);
 
 const pyprojectFile = path.resolve(process.cwd(), 'connect/pyproject.toml');
 const pyproject = fs.readFileSync(pyprojectFile, 'utf8');

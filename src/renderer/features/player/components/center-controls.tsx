@@ -89,12 +89,13 @@ const RadioStopButton = ({ disabled }: { disabled?: boolean }) => {
     const { t } = useTranslation();
     const buttonSize = useButtonSize();
     const { stop } = useRadioControls();
+    const { handlers: connectHandlers, isActive: connectActive } = useConnectPlayerStore();
 
     return (
         <PlayerButton
             disabled={disabled}
             icon={<Icon fill="default" icon="mediaStop" size={buttonSize - 2} />}
-            onClick={stop}
+            onClick={connectActive && connectHandlers ? connectHandlers.onStop : stop}
             tooltip={{
                 label: t('player.stop'),
                 openDelay: 0,
@@ -201,15 +202,20 @@ const CenterPlayButton = ({ disabled }: { disabled?: boolean }) => {
 
     const status = usePlayerStatus();
     const { mediaTogglePlayPause } = usePlayer();
-    const { handlers: connectHandlers, isActive: connectActive, isPlaying: connectPlaying } =
-        useConnectPlayerStore();
+    const {
+        handlers: connectHandlers,
+        isActive: connectActive,
+        isPlaying: connectPlaying,
+    } = useConnectPlayerStore();
 
     return (
         <MainPlayButton
             disabled={disabled || (!connectActive && currentSongId === undefined)}
-            isPaused={connectActive ? !connectPlaying : status === PlayerStatus.PAUSED}
+            isPaused={connectActive ? !connectPlaying : status !== PlayerStatus.PLAYING}
             onClick={
-                connectActive && connectHandlers ? connectHandlers.onPlayPause : mediaTogglePlayPause
+                connectActive && connectHandlers
+                    ? connectHandlers.onPlayPause
+                    : mediaTogglePlayPause
             }
         />
     );

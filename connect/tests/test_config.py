@@ -1,6 +1,6 @@
 """Tests for POST /config."""
 
-import state
+from core import state
 from media import JellyfinClient, SubsonicClient
 
 

@@ -20,8 +20,7 @@ const AboutContent = () => {
                     Feishin Connect
                 </Text>
                 <Text isMuted size="sm">
-                    {t('common.version', { postProcess: 'sentenceCase' })}{' '}
-                    {packageJson.version}
+                    {t('common.version', { postProcess: 'sentenceCase' })} {packageJson.version}
                 </Text>
             </Stack>
 

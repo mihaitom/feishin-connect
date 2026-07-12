@@ -1,7 +1,8 @@
+import type { QueueSong } from '/@/shared/types/domain-types';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LyricSource } from '/@/shared/types/domain-types';
-import type { QueueSong } from '/@/shared/types/domain-types';
 
 const mocks = vi.hoisted(() => ({
     connectFetch: vi.fn(),
@@ -88,8 +89,8 @@ describe('lyrics-api (Connect backend fallback)', () => {
 
             expect(result?.remote).toBe(true);
             expect(result?.lyrics).toEqual([
-                [1000, 'Hello'],
-                [2000, 'World'],
+                { startMs: 1000, text: 'Hello' },
+                { startMs: 2000, text: 'World' },
             ]);
         });
 
@@ -116,7 +117,7 @@ describe('lyrics-api (Connect backend fallback)', () => {
             expect(url).toContain('id=abc123');
             expect(url).toContain('source=lrclib.net');
 
-            expect(result).toEqual([[5000, 'Some line']]);
+            expect(result).toEqual([{ startMs: 5000, text: 'Some line' }]);
         });
 
         it('returns null when Connect cannot find the lyrics', async () => {
@@ -160,10 +161,11 @@ describe('lyrics-api (Connect backend fallback)', () => {
     });
 
     describe('lyricsQueries.songLyrics staleTime (not-found retry)', () => {
-        const options = lyricsQueries.songLyrics({ query: {}, serverId: 'server-1' }, undefined);
-        const staleTime = options.staleTime as (query: {
-            state: { data: unknown };
-        }) => number;
+        const options = lyricsQueries.songLyrics(
+            { query: { songId: 'song-1' }, serverId: 'server-1' },
+            undefined,
+        );
+        const staleTime = options.staleTime as (query: { state: { data: unknown } }) => number;
 
         it('never goes stale once lyrics were found', () => {
             const result = staleTime({ state: { data: { selected: { lyrics: 'x' } } } });

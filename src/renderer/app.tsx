@@ -34,6 +34,11 @@ const UpdateAvailableDialog = lazy(() =>
         default: module.UpdateAvailableDialog,
     })),
 );
+const WebUpdateBanner = lazy(() =>
+    import('./web-update-banner').then((module) => ({
+        default: module.WebUpdateBanner,
+    })),
+);
 
 const ipc = isElectron() ? window.api.ipc : null;
 const utils = isElectron() ? window.api.utils : null;
@@ -86,6 +91,7 @@ const AppShell = memo(function AppShell() {
             <ReleaseNotesModal />
             <Suspense fallback={null}>
                 <UpdateAvailableDialog />
+                <WebUpdateBanner />
             </Suspense>
         </>
     );

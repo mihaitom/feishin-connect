@@ -96,6 +96,34 @@ export const LyricSettings = memo(() => {
         {
             control: (
                 <Switch
+                    aria-label="Enable furigana generation"
+                    defaultChecked={settings.enableFurigana}
+                    onChange={(e) => updateSetting({ enableFurigana: e.currentTarget.checked })}
+                />
+            ),
+            description: t('setting.enableFurigana', {
+                context: 'description',
+            }),
+            isHidden: !isElectron(),
+            title: t('setting.enableFurigana'),
+        },
+        {
+            control: (
+                <Switch
+                    aria-label="Enable romaji generation"
+                    defaultChecked={settings.enableRomaji}
+                    onChange={(e) => updateSetting({ enableRomaji: e.currentTarget.checked })}
+                />
+            ),
+            description: t('setting.enableRomaji', {
+                context: 'description',
+            }),
+            isHidden: !isElectron(),
+            title: t('setting.enableRomaji'),
+        },
+        {
+            control: (
+                <Switch
                     aria-label="Enable NetEase translations"
                     defaultChecked={settings.enableNeteaseTranslation}
                     onChange={(e) => {

@@ -17,8 +17,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
-from auth import TOKEN as _CONNECT_TOKEN
+from core.auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
+from core.auth import TOKEN as _CONNECT_TOKEN
+from core.state import PORT, ctx, get_local_ip
 from routes.devices import discover_all
 from routes.devices import router as devices_router
 from routes.lyrics import router as lyrics_router
@@ -26,7 +27,6 @@ from routes.pairing import router as pairing_router
 from routes.playback import router as playback_router
 from routes.proxy import router as proxy_router
 from routes.stream import router as stream_router
-from state import PORT, ctx, get_local_ip
 
 load_dotenv()
 
@@ -51,11 +51,48 @@ class _ShortNameFilter(logging.Filter):
         return True
 
 
-_LOG_FORMAT = "%(asctime)s %(levelname)-7s %(name)-9s %(message)s"
+_LEVEL_COLORS = {
+    logging.DEBUG: "\033[34m",  # blue
+    logging.INFO: "\033[32m",  # green
+    logging.WARNING: "\033[38;5;208m",  # orange
+    logging.ERROR: "\033[31m",  # red
+    logging.CRITICAL: "\033[1;31m",  # bold red
+}
+_COLOR_RESET = "\033[0m"
+# Always on: `docker logs`/piped output isn't a real terminal (isatty() would
+# say False), but the raw ANSI codes still render fine wherever the log is
+# actually viewed. Opt out via NO_COLOR (https://no-color.org/).
+_USE_COLOR = not os.getenv("NO_COLOR")
+
+
+class _ColorLevelFormatter(logging.Formatter):
+    """Colors just the level name by log level — the rest of the line keeps
+    the terminal's default color.
+    """
+
+    def __init__(self, format=None, datefmt=None, use_color: bool = True, **kwargs):
+        super().__init__(fmt=format, datefmt=datefmt, **kwargs)
+        self._use_color = use_color
+
+    def format(self, record: logging.LogRecord) -> str:
+        original = record.levelname
+        padded = f"{original:<7}"
+        color = _LEVEL_COLORS.get(record.levelno) if self._use_color else None
+        record.levelname = f"{color}{padded}{_COLOR_RESET}" if color else padded
+        try:
+            return super().format(record)
+        finally:
+            record.levelname = original
+
+
+_LOG_FORMAT = "%(asctime)s %(levelname)s %(name)-9s %(message)s"
 _LOG_DATEFMT = "%H:%M:%S"
-logging.basicConfig(level=logging.INFO, format=_LOG_FORMAT, datefmt=_LOG_DATEFMT)
-for _handler in logging.root.handlers:
-    _handler.addFilter(_ShortNameFilter())
+_root_handler = logging.StreamHandler()
+_root_handler.setFormatter(
+    _ColorLevelFormatter(_LOG_FORMAT, datefmt=_LOG_DATEFMT, use_color=_USE_COLOR)
+)
+_root_handler.addFilter(_ShortNameFilter())
+logging.basicConfig(level=logging.INFO, handlers=[_root_handler])
 logger = logging.getLogger("connect")
 
 _DEBUG = os.getenv("DEBUG", "").strip().lower() in ("1", "true", "yes", "on")
@@ -68,8 +105,18 @@ UVICORN_LOG_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "default": {"format": _LOG_FORMAT, "datefmt": _LOG_DATEFMT},
-        "access": {"format": _LOG_FORMAT, "datefmt": _LOG_DATEFMT},
+        "default": {
+            "()": _ColorLevelFormatter,
+            "format": _LOG_FORMAT,
+            "datefmt": _LOG_DATEFMT,
+            "use_color": _USE_COLOR,
+        },
+        "access": {
+            "()": _ColorLevelFormatter,
+            "format": _LOG_FORMAT,
+            "datefmt": _LOG_DATEFMT,
+            "use_color": _USE_COLOR,
+        },
     },
     "filters": {
         "short_name": {"()": _ShortNameFilter},
@@ -156,10 +203,13 @@ async def lifespan(_: FastAPI):
         logger.error("❌ ffmpeg NOT FOUND — streaming will fail!")
 
     if ctx.delivery.deliveries:
+        logger.info(
+            "ℹ️  Standalone mode (TARGETS env set) — streaming to fixed devices:"
+        )
         for t in ctx.delivery.list_targets():
             logger.info(f"🔊 Target: {t['type']}:{t['name']}")
     else:
-        logger.info("ℹ️  No TARGETS env — controlled via Feishin /play")
+        logger.info("ℹ️  No TARGETS env — devices are controlled via Feishin's /play")
 
     if _CONNECT_TOKEN == _DEFAULT_TOKEN:
         logger.warning(

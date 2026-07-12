@@ -7,7 +7,8 @@ import os
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from auth import require_token
+from core.auth import require_token
+from core.state import ctx, event_bus, find_sonos, stream_url
 
 from delivery import (
     AirPlayDelivery,
@@ -20,7 +21,6 @@ from delivery import (
     discover_sonos,
 )
 from media import JellyfinClient, SubsonicClient
-from state import ctx, event_bus, find_sonos, stream_url
 
 logger = logging.getLogger("connect.devices")
 router = APIRouter(dependencies=[Depends(require_token)])

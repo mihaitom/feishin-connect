@@ -2,9 +2,9 @@ import isElectron from 'is-electron';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useStartScan } from '/@/renderer/features/servers/mutations/start-scan-mutation';
 import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
 import { ServerSection } from '/@/renderer/features/servers/components/server-section';
+import { useStartScan } from '/@/renderer/features/servers/mutations/start-scan-mutation';
 import { useAuthStoreActions } from '/@/renderer/store';
 import { Button, TimeoutButton } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';

@@ -2,7 +2,7 @@
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import state
+from core import state
 from delivery import ChromecastDelivery, SonosDelivery
 
 
