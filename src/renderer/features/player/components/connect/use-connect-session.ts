@@ -45,7 +45,6 @@ export const useConnectSession = (): ConnectSession => {
     const isActive = !!activeDevice;
     const connectStatus = useConnectStatus(isActive);
     const currentTrackId = currentSong?.id ?? null;
-    const isEmpty = !currentTrackId && !radioStreamUrl;
 
     // ── Active targets sync ───────────────────────────────────────────────────
     useEffect(() => {
@@ -376,7 +375,6 @@ export const useConnectSession = (): ConnectSession => {
         hasApiError: health !== null && !health.apiReachable,
         hasFfmpegError: !!(health?.apiReachable && health.ffmpegFound === false),
         isActive,
-        isEmpty,
         isScanning,
         paired,
         refresh,

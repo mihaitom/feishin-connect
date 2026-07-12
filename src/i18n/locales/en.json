@@ -673,7 +673,6 @@
         "connect_sendTo": "Send to",
         "connect_add": "Add ({{count}})",
         "connect_stopAll": "Disconnect all",
-        "connect_emptyQueue": "Queue empty",
         "connect_playOnDevice": "Play on device",
         "connect_connect": "Connect",
         "connect_pair": "Pair",

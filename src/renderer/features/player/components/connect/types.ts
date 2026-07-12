@@ -22,7 +22,6 @@ export interface ConnectSession {
     hasApiError: boolean;
     hasFfmpegError: boolean;
     isActive: boolean;
-    isEmpty: boolean;
     isScanning: boolean;
     paired: string[];
     refresh: (fresh?: boolean) => void;
