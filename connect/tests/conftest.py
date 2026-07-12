@@ -30,7 +30,7 @@ def reset_state():
     st.radio_info = None
     st.active_delivery = None
     st.clock = state.PlaybackClock()
-    st.discovered = {"airplay": [], "chromecast": [], "sonos": []}
+    st.discovered = {"airplay": [], "chromecast": [], "dlna": [], "sonos": []}
 
     state.ctx.media = SubsonicClient("")
     yield

@@ -30,7 +30,11 @@ export const ConnectButton = () => {
 
     const handleOpen = () => {
         if (!open && btnRef.current) {
-            if (activeDevice?.type === 'sonos' || activeDevice?.type === 'chromecast')
+            if (
+                activeDevice?.type === 'sonos' ||
+                activeDevice?.type === 'chromecast' ||
+                activeDevice?.type === 'dlna'
+            )
                 fetchVolume();
             const rect = btnRef.current.getBoundingClientRect();
             setPopPos(

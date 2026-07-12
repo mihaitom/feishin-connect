@@ -1,12 +1,13 @@
 """Tests for DeliveryManager — parsing, factories and fan-out."""
 
 import asyncio
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from delivery import (
     AirPlayDelivery,
     ChromecastDelivery,
     DeliveryManager,
+    DlnaDelivery,
     SonosDelivery,
 )
 
@@ -38,12 +39,19 @@ def test_parse_single_chromecast():
     assert m.deliveries[0].target == "LivingRoom TV"
 
 
-def test_parse_mixed_all_three_types():
-    m = DeliveryManager("sonos:Küche,airplay:HomePod,chromecast:TV")
-    assert len(m.deliveries) == 3
+def test_parse_single_dlna():
+    m = DeliveryManager("dlna:Receiver")
+    assert isinstance(m.deliveries[0], DlnaDelivery)
+    assert m.deliveries[0].target == "Receiver"
+
+
+def test_parse_mixed_all_four_types():
+    m = DeliveryManager("sonos:Küche,airplay:HomePod,chromecast:TV,dlna:Receiver")
+    assert len(m.deliveries) == 4
     assert isinstance(m.deliveries[0], SonosDelivery)
     assert isinstance(m.deliveries[1], AirPlayDelivery)
     assert isinstance(m.deliveries[2], ChromecastDelivery)
+    assert isinstance(m.deliveries[3], DlnaDelivery)
 
 
 def test_parse_skips_unknown_type():
@@ -73,18 +81,25 @@ def test_from_deliveries_creates_manager_without_parsing():
     s = SonosDelivery("Küche")
     a = AirPlayDelivery("HomePod")
     c = ChromecastDelivery("TV")
-    m = DeliveryManager.from_deliveries([s, a, c])
-    assert m.deliveries == [s, a, c]
+    d = DlnaDelivery("Receiver")
+    m = DeliveryManager.from_deliveries([s, a, c, d])
+    assert m.deliveries == [s, a, c, d]
 
 
 def test_list_targets_reports_type_and_name():
     m = DeliveryManager.from_deliveries(
-        [SonosDelivery("Küche"), AirPlayDelivery("HomePod"), ChromecastDelivery("TV")]
+        [
+            SonosDelivery("Küche"),
+            AirPlayDelivery("HomePod"),
+            ChromecastDelivery("TV"),
+            DlnaDelivery("Receiver"),
+        ]
     )
     assert m.list_targets() == [
         {"type": "sonos", "name": "Küche"},
         {"type": "airplay", "name": "HomePod"},
         {"type": "chromecast", "name": "TV"},
+        {"type": "dlna", "name": "Receiver"},
     ]
 
 
@@ -127,6 +142,41 @@ def test_manager_play_single_sonos_skips_grouping():
 
     grouped.assert_not_awaited()
     s.play.assert_awaited_once()
+
+
+# ── discover_dlna ─────────────────────────────────────────────────────────────
+
+
+def test_discover_dlna_filters_out_sonos_manufactured_devices():
+    """Sonos speakers expose themselves as generic DLNA MediaRenderers too
+    (SoCo itself talks UPnP) — they should only ever show up as Sonos."""
+    from delivery.manager import discover_dlna
+
+    sonos_headers = {"location": "http://10.0.0.1/desc.xml", "usn": "uuid:sonos"}
+    receiver_headers = {"location": "http://10.0.0.2/desc.xml", "usn": "uuid:receiver"}
+
+    async def fake_async_search(async_callback, **kwargs):
+        await async_callback(sonos_headers)
+        await async_callback(receiver_headers)
+
+    sonos_device = MagicMock()
+    sonos_device.manufacturer = "Sonos, Inc."
+    sonos_device.name = "Sonos Media Renderer"
+
+    receiver_device = MagicMock()
+    receiver_device.manufacturer = "Yamaha Corporation"
+    receiver_device.name = "AV Receiver"
+
+    async def fake_create_dmr_device(location):
+        return sonos_device if location == sonos_headers["location"] else receiver_device
+
+    with (
+        patch("async_upnp_client.search.async_search", new=fake_async_search),
+        patch("delivery.manager._create_dmr_device", new=fake_create_dmr_device),
+    ):
+        result = asyncio.run(discover_dlna())
+
+    assert result == [{"location": "http://10.0.0.2/desc.xml", "name": "AV Receiver"}]
 
 
 def test_manager_play_multiple_sonos_uses_grouping():

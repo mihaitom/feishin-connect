@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
     LuAirplay,
     LuKeyRound,
+    LuRadioReceiver,
     LuSpeaker,
     LuTv,
     LuUnlink2,
@@ -46,7 +47,9 @@ export const DeviceItem = ({
     const [hovered, setHovered] = useState(false);
     const [showPairingModal, setShowPairingModal] = useState(false);
 
-    const canShowVolume = isActive && (device.type === 'sonos' || device.type === 'chromecast');
+    const canShowVolume =
+        isActive &&
+        (device.type === 'sonos' || device.type === 'chromecast' || device.type === 'dlna');
     // Single active device: always open. Multiple: accordion on hover.
     const showVolume = canShowVolume && (alwaysShowVolume || hovered);
 
@@ -138,6 +141,8 @@ export const DeviceItem = ({
                             <LuSpeaker size={18} />
                         ) : device.type === 'chromecast' ? (
                             <LuTv size={18} />
+                        ) : device.type === 'dlna' ? (
+                            <LuRadioReceiver size={18} />
                         ) : (
                             <LuAirplay size={18} />
                         )}

@@ -36,8 +36,17 @@ export const useConnectDevices = () => {
                     needsPairing: x.needs_pairing ?? false,
                     type: 'airplay' as const,
                 }));
+                const dlna: ConnectDevice[] = (discoverData.dlna ?? []).map((x: any) => ({
+                    name: x.name,
+                    type: 'dlna' as const,
+                }));
                 const sort = (a: ConnectDevice, b: ConnectDevice) => a.name.localeCompare(b.name);
-                setDevices([...sonos.sort(sort), ...chromecast.sort(sort), ...airplay.sort(sort)]);
+                setDevices([
+                    ...sonos.sort(sort),
+                    ...chromecast.sort(sort),
+                    ...airplay.sort(sort),
+                    ...dlna.sort(sort),
+                ]);
                 setHealth({ apiReachable: true, ffmpegFound: healthData.ffmpeg ?? false });
             })
             .catch(() => {
@@ -141,7 +150,8 @@ const useDeviceVolumeStore = create<{
         })),
 }));
 
-// Volume control for a single device, via /device-volume (Sonos + Chromecast only).
+// Volume control for a single device, via /device-volume (Sonos, Chromecast and
+// DLNA — AirPlay has no volume control in this backend).
 // `enabled` gates the fetch (e.g. only fetch once a device row is hovered/expanded).
 export const useDeviceVolume = (
     deviceType?: ConnectDevice['type'],
@@ -154,7 +164,8 @@ export const useDeviceVolume = (
     const volume = entry?.volume ?? null;
     const muted = entry?.muted ?? false;
 
-    const supported = deviceType === 'sonos' || deviceType === 'chromecast';
+    const supported =
+        deviceType === 'sonos' || deviceType === 'chromecast' || deviceType === 'dlna';
 
     useEffect(() => {
         if (!enabled || !supported || !key || !deviceType || !deviceName || volume !== null) {

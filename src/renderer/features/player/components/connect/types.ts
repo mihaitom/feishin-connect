@@ -6,7 +6,7 @@ export const CONNECT_TOKEN: string = (window as any).__CONNECT_TOKEN__ ?? '';
 export interface ConnectDevice {
     name: string;
     needsPairing?: boolean;
-    type: 'airplay' | 'chromecast' | 'sonos';
+    type: 'airplay' | 'chromecast' | 'dlna' | 'sonos';
 }
 
 export interface ConnectSession {

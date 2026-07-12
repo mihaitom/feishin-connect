@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - unreleased
+
+### Added
+- **DLNA/UPnP as a fourth Connect cast target**, alongside Sonos, AirPlay and Chromecast — for smart TVs, AV receivers, and other generic UPnP MediaRenderer devices with no dedicated protocol of their own. Discovered automatically via SSDP, controlled via standard AVTransport/RenderingControl SOAP calls (`async-upnp-client`), with full play/pause/resume/stop, real device-side position, and volume control — no vendor account or pairing needed. Sonos speakers also expose themselves as generic DLNA renderers; those are filtered out of the DLNA list so they only ever show up once, under Sonos.
+
 ## [0.5.0] - 2026-07-12
 
 ### Added

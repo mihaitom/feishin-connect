@@ -6,6 +6,7 @@ import logging
 from .airplay import AirPlayDelivery
 from .base import BaseDelivery
 from .chromecast import ChromecastDelivery, _ensure_cast_browser, _wait_for_discovery
+from .dlna import DlnaDelivery, _create_dmr_device, _location_cache
 from .sonos import SonosDelivery
 
 logger = logging.getLogger("delivery")
@@ -51,9 +52,11 @@ class DeliveryManager:
                 result.append(AirPlayDelivery(name))
             elif typ == "chromecast":
                 result.append(ChromecastDelivery(name))
+            elif typ == "dlna":
+                result.append(DlnaDelivery(name))
             else:
                 logger.warning(
-                    f"Unknown delivery type: '{typ}' (known: sonos, airplay, chromecast)"
+                    f"Unknown delivery type: '{typ}' (known: sonos, airplay, chromecast, dlna)"
                 )
         return result
 
@@ -220,3 +223,47 @@ async def discover_chromecast() -> list[dict]:
         ]
 
     return await asyncio.to_thread(_scan)
+
+
+async def discover_dlna() -> list[dict]:
+    """Discovers all DLNA/UPnP MediaRenderer devices on the network.
+
+    Sonos speakers also expose themselves as generic UPnP MediaRenderers (it's
+    how SoCo itself talks to them), so they'd otherwise show up twice — once
+    correctly via discover_sonos(), once again here. Filtered out by
+    manufacturer, same idea as _is_sonos() for the AirPlay list.
+    """
+    from async_upnp_client.search import async_search
+    from async_upnp_client.utils import CaseInsensitiveDict
+
+    responses: dict[str, CaseInsensitiveDict] = {}
+
+    async def _on_response(headers: CaseInsensitiveDict) -> None:
+        location = headers.get("location")
+        usn = headers.get("usn", "")
+        if location and usn not in responses:
+            responses[usn] = headers
+
+    await async_search(
+        async_callback=_on_response,
+        search_target="urn:schemas-upnp-org:device:MediaRenderer:1",
+        timeout=5,
+    )
+
+    result = []
+    for headers in responses.values():
+        location = headers["location"]
+        try:
+            device = await _create_dmr_device(location)
+        except Exception as e:
+            logger.warning(f"[discover] DLNA device at {location}: {e}")
+            continue
+        if "sonos" in (device.manufacturer or "").lower():
+            logger.info(
+                f"[discover] Skipping DLNA for Sonos device '{device.name}' "
+                f"(use Sonos output instead)"
+            )
+            continue
+        result.append({"location": location, "name": device.name})
+        _location_cache[device.name.lower()] = location
+    return result

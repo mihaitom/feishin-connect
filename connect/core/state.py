@@ -9,6 +9,7 @@ from delivery import (
     BaseDelivery,
     ChromecastDelivery,
     DeliveryManager,
+    DlnaDelivery,
     SonosDelivery,
 )
 from media import MediaClient, SubsonicClient, Track
@@ -35,7 +36,12 @@ class AppState:
         # Lets the frontend detect track-end even after SSE reconnect or page reload.
         self.track_ended: bool = False
         # Last successful discovery results — returned immediately on subsequent calls.
-        self.discovered: dict = {"airplay": [], "chromecast": [], "sonos": []}
+        self.discovered: dict = {
+            "airplay": [],
+            "chromecast": [],
+            "dlna": [],
+            "sonos": [],
+        }
 
 
 class Context:
@@ -158,6 +164,7 @@ event_bus = EventBus()
 _DELIVERY_TYPES: dict[str, type[BaseDelivery]] = {
     "airplay": AirPlayDelivery,
     "chromecast": ChromecastDelivery,
+    "dlna": DlnaDelivery,
     "sonos": SonosDelivery,
 }
 

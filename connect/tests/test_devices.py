@@ -3,18 +3,19 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from core import state
-from delivery import ChromecastDelivery, SonosDelivery
+from delivery import ChromecastDelivery, DlnaDelivery, SonosDelivery
 
 
 # ── /discover ─────────────────────────────────────────────────────────────────
 
 
-def test_discover_returns_all_three_device_types(client):
+def test_discover_returns_all_four_device_types(client):
     sonos = [{"name": "Küche", "ip": "10.0.0.1"}]
     airplay = [
         {"name": "HomePod", "address": "10.0.0.2", "model": "X", "needs_pairing": True}
     ]
     chromecast = [{"name": "TV", "host": "10.0.0.3", "model": "Chromecast"}]
+    dlna = [{"name": "Receiver", "location": "http://10.0.0.4:1400/desc.xml"}]
 
     with (
         patch("routes.devices.discover_sonos", new=AsyncMock(return_value=sonos)),
@@ -22,6 +23,7 @@ def test_discover_returns_all_three_device_types(client):
         patch(
             "routes.devices.discover_chromecast", new=AsyncMock(return_value=chromecast)
         ),
+        patch("routes.devices.discover_dlna", new=AsyncMock(return_value=dlna)),
     ):
         r = client.get("/discover")
 
@@ -30,6 +32,7 @@ def test_discover_returns_all_three_device_types(client):
     assert body["sonos"] == sonos
     assert body["airplay"] == airplay
     assert body["chromecast"] == chromecast
+    assert body["dlna"] == dlna
 
 
 def test_discover_returns_cached_results_immediately(client):
@@ -37,12 +40,14 @@ def test_discover_returns_cached_results_immediately(client):
         "sonos": [{"name": "Cached"}],
         "airplay": [],
         "chromecast": [],
+        "dlna": [],
     }
 
     with (
         patch("routes.devices.discover_sonos", new=AsyncMock(return_value=[])),
         patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
         patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_dlna", new=AsyncMock(return_value=[])),
     ):
         r = client.get("/discover")
 
@@ -55,6 +60,7 @@ def test_discover_keeps_cached_branch_when_scanner_raises(client):
         "sonos": [{"name": "Stale"}],
         "airplay": [],
         "chromecast": [],
+        "dlna": [],
     }
 
     with (
@@ -64,6 +70,7 @@ def test_discover_keeps_cached_branch_when_scanner_raises(client):
         ),
         patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
         patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_dlna", new=AsyncMock(return_value=[])),
     ):
         r = client.get("/discover")
 
@@ -79,6 +86,7 @@ def test_discover_fresh_scan_when_cache_empty(client):
             "routes.devices.discover_chromecast",
             new=AsyncMock(return_value=[{"name": "TV"}]),
         ),
+        patch("routes.devices.discover_dlna", new=AsyncMock(return_value=[])),
     ):
         r = client.get("/discover")
 
@@ -107,6 +115,18 @@ def test_device_volume_get_chromecast_maps_0_to_1_to_percent(client):
 
 def test_device_volume_get_returns_error_for_airplay(client):
     r = client.get("/device-volume?device_type=airplay&name=HomePod")
+    assert "error" in r.json()
+
+
+def test_device_volume_get_dlna(client):
+    with patch.object(DlnaDelivery, "get_volume", new=AsyncMock(return_value=64)):
+        r = client.get("/device-volume?device_type=dlna&name=Receiver")
+    assert r.json() == {"volume": 64}
+
+
+def test_device_volume_get_dlna_returns_error_when_unsupported(client):
+    with patch.object(DlnaDelivery, "get_volume", new=AsyncMock(return_value=None)):
+        r = client.get("/device-volume?device_type=dlna&name=Receiver")
     assert "error" in r.json()
 
 
@@ -166,3 +186,12 @@ def test_device_volume_set_rejects_unsupported_type(client):
         "/device-volume?device_type=airplay&name=HomePod", json={"volume": 50}
     )
     assert "error" in r.json()
+
+
+def test_device_volume_set_dlna(client):
+    with patch.object(DlnaDelivery, "set_volume", new=AsyncMock()) as set_volume:
+        r = client.post(
+            "/device-volume?device_type=dlna&name=Receiver", json={"volume": 70}
+        )
+    assert r.json() == {"volume": 70}
+    set_volume.assert_called_once_with(70)

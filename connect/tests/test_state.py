@@ -145,11 +145,20 @@ def test_resolve_target_single_chromecast():
     assert result.target == "LivingRoom TV"
 
 
+def test_resolve_target_single_dlna():
+    from delivery import DlnaDelivery
+
+    result = resolve_target(target_type="dlna", target_name="Receiver")
+    assert isinstance(result, DlnaDelivery)
+    assert result.target == "Receiver"
+
+
 def test_resolve_target_mixed_targets_list():
     from delivery import (
         AirPlayDelivery,
         ChromecastDelivery,
         DeliveryManager,
+        DlnaDelivery,
         SonosDelivery,
     )
 
@@ -158,13 +167,15 @@ def test_resolve_target_mixed_targets_list():
             {"type": "sonos", "name": "Küche"},
             {"type": "airplay", "name": "HomePod"},
             {"type": "chromecast", "name": "LivingRoom TV"},
+            {"type": "dlna", "name": "Receiver"},
         ]
     )
     assert isinstance(result, DeliveryManager)
-    assert len(result.deliveries) == 3
+    assert len(result.deliveries) == 4
     assert isinstance(result.deliveries[0], SonosDelivery)
     assert isinstance(result.deliveries[1], AirPlayDelivery)
     assert isinstance(result.deliveries[2], ChromecastDelivery)
+    assert isinstance(result.deliveries[3], DlnaDelivery)
 
 
 def test_resolve_target_returns_none_when_no_config():
@@ -204,6 +215,13 @@ def test_find_sonos_returns_empty_for_chromecast_only():
     from delivery import ChromecastDelivery
 
     result = find_sonos(ChromecastDelivery("LivingRoom TV"))
+    assert result == []
+
+
+def test_find_sonos_returns_empty_for_dlna_only():
+    from delivery import DlnaDelivery
+
+    result = find_sonos(DlnaDelivery("Receiver"))
     assert result == []
 
 
