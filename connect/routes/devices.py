@@ -8,7 +8,17 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from core.auth import require_token
-from core.state import ctx, event_bus, find_sonos, stream_url
+from core.claims import claims
+from core.session import (
+    SessionState,
+    build_status_dict,
+    check_claims,
+    displace_target,
+    get_session,
+    registry,
+    track_label,
+)
+from core.state import ctx, find_sonos, stream_url
 
 from delivery import (
     AirPlayDelivery,
@@ -36,17 +46,20 @@ class ConfigRequest(BaseModel):
     server_type: str = "subsonic"
     # Jellyfin requires the user GUID for item lookups; ignored for Subsonic.
     user_id: str = ""
+    # Shown to other sessions as "in use by {username}" for claimed devices.
+    username: str = ""
 
 
 @router.post("/config")
-async def configure(req: ConfigRequest):
+async def configure(req: ConfigRequest, session: SessionState = Depends(get_session)):
     internal_url = os.getenv("SERVER_INTERNAL_URL") or os.getenv(
         "NAVIDROME_INTERNAL_URL", ""
     )
     server_type = req.server_type.lower()
+    session.display_name = req.username or session.session_id
 
     if server_type == "jellyfin":
-        ctx.media = JellyfinClient(
+        session.media = JellyfinClient(
             req.url,
             token=req.credential,
             user_id=req.user_id,
@@ -57,7 +70,7 @@ async def configure(req: ConfigRequest):
             f"(internal: {internal_url or 'same'}, user_id: {req.user_id or 'missing'})"
         )
     else:
-        ctx.media = SubsonicClient(
+        session.media = SubsonicClient(
             req.url, credential=req.credential, internal_url=internal_url
         )
         logger.info(
@@ -67,18 +80,20 @@ async def configure(req: ConfigRequest):
 
 
 @router.get("/health")
-async def health():
+async def health(session: SessionState = Depends(get_session)):
     import shutil
 
     return {
         "ffmpeg": bool(shutil.which("ffmpeg")),
-        "navidrome_configured": bool(ctx.media.base_url),
+        "navidrome_configured": bool(session.media.base_url),
     }
 
 
 async def discover_all() -> dict:
-    """Scan for Sonos, AirPlay, Chromecast and DLNA devices and update the cache."""
-    cached = ctx.state.discovered
+    """Scan for Sonos, AirPlay, Chromecast and DLNA devices and update the
+    cache. Global, not session-scoped — the set of devices on the network is
+    the same regardless of who's asking (see core/state.py's Context)."""
+    cached = ctx.discovered
     logger.info("[discover] Scanning for Sonos, AirPlay, Chromecast and DLNA devices …")
     sonos_res, airplay_res, chromecast_res, dlna_res = await asyncio.gather(
         discover_sonos(),
@@ -105,18 +120,42 @@ async def discover_all() -> dict:
         f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay, "
         f"{len(chromecast)} Chromecast, {len(dlna)} DLNA found"
     )
-    ctx.state.discovered = {
+    ctx.discovered = {
         "airplay": airplay,
         "chromecast": chromecast,
         "dlna": dlna,
         "sonos": sonos,
     }
-    return ctx.state.discovered
+    return ctx.discovered
+
+
+def _annotate_claims(discovered: dict) -> dict:
+    """Attach in_use_by_session_id/in_use_by_name/in_use_by_track to each
+    device in a fresh /discover response — computed per-request (not cached,
+    unlike the device list itself) since claims change far more often than
+    the device list. Reports the raw owner regardless of who's asking; the
+    frontend decides "claimed by me" vs. "claimed by someone else" by
+    comparing against its own session id."""
+    annotated: dict = {}
+    for group_type, devices in discovered.items():
+        annotated[group_type] = []
+        for device in devices:
+            owner = claims.owner_of(group_type, device["name"])
+            owner_session = registry.get(owner) if owner else None
+            annotated[group_type].append(
+                {
+                    **device,
+                    "in_use_by_name": owner_session.display_name if owner_session else None,
+                    "in_use_by_session_id": owner,
+                    "in_use_by_track": track_label(owner_session) if owner_session else None,
+                }
+            )
+    return annotated
 
 
 @router.get("/discover")
 async def discover(fresh: bool = False):
-    cached = ctx.state.discovered
+    cached = ctx.discovered
     has_cache = bool(
         cached["sonos"] or cached["airplay"] or cached["chromecast"] or cached["dlna"]
     )
@@ -126,9 +165,9 @@ async def discover(fresh: bool = False):
     # background for snappy popover opens.
     if has_cache and not fresh:
         asyncio.create_task(discover_all())
-        return cached
+        return _annotate_claims(cached)
 
-    return await discover_all()
+    return _annotate_claims(await discover_all())
 
 
 class VolumeRequest(BaseModel):
@@ -136,8 +175,8 @@ class VolumeRequest(BaseModel):
 
 
 @router.get("/volume")
-async def get_volume():
-    sonos_targets = find_sonos(ctx.state.active_delivery)
+async def get_volume(session: SessionState = Depends(get_session)):
+    sonos_targets = find_sonos(session.state.active_delivery)
     if not sonos_targets:
         return {"error": "No active Sonos target"}
     try:
@@ -149,9 +188,9 @@ async def get_volume():
 
 
 @router.post("/volume")
-async def set_volume(req: VolumeRequest):
+async def set_volume(req: VolumeRequest, session: SessionState = Depends(get_session)):
     volume = max(0, min(100, req.volume))
-    sonos_targets = find_sonos(ctx.state.active_delivery)
+    sonos_targets = find_sonos(session.state.active_delivery)
     if not sonos_targets:
         return {"error": "No active Sonos target"}
 
@@ -205,7 +244,9 @@ async def set_device_volume(device_type: str, name: str, req: VolumeRequest):
 
 
 @router.post("/device-stop")
-async def stop_device(device_type: str, name: str):
+async def stop_device(
+    device_type: str, name: str, session: SessionState = Depends(get_session)
+):
     """Stop one device while keeping others playing.
 
     For Sonos coordinators: unjoins remaining followers first so the coordinator's
@@ -220,7 +261,7 @@ async def stop_device(device_type: str, name: str):
         type_cls = DlnaDelivery
     else:
         type_cls = AirPlayDelivery
-    active = ctx.state.active_delivery
+    active = session.state.active_delivery
 
     remaining: list[BaseDelivery] = []
     if isinstance(active, DeliveryManager):
@@ -295,7 +336,9 @@ async def stop_device(device_type: str, name: str):
         logger.error(f"[device-stop] {name}: {e}", exc_info=True)
         return {"error": str(e)}
 
-    st = ctx.state
+    await claims.release(device_type, name, session.session_id)
+
+    st = session.state
     if not remaining:
         st.is_streaming = False
         st.active_delivery = None
@@ -308,7 +351,7 @@ async def stop_device(device_type: str, name: str):
         st.active_delivery = new_delivery
 
         if need_restart and st.is_streaming:
-            url = st.radio_info["url"] if st.radio_info else stream_url()
+            url = st.radio_info["url"] if st.radio_info else stream_url(session.session_id)
             title = st.radio_info["title"] if st.radio_info else "Connect"
             logger.info(f"[device-stop] Restarting stream: {url}")
             try:
@@ -316,22 +359,25 @@ async def stop_device(device_type: str, name: str):
             except Exception as e:
                 logger.error(f"[device-stop] Restart error: {e}", exc_info=True)
 
-    await event_bus.broadcast()
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "stopped", "device": name}
 
 
 class JoinRequest(BaseModel):
     target_name: str
     target_type: str
+    # See PlayRequest.force in routes/playback.py.
+    force: bool = False
 
 
 @router.post("/join")
-async def join_stream(req: JoinRequest):
-    st = ctx.state
+async def join_stream(
+    req: JoinRequest, session: SessionState = Depends(get_session)
+):
+    st = session.state
     if not st.is_streaming:
         return {"error": "No active stream"}
 
-    url = stream_url()
     type_cls: type[BaseDelivery]
     if req.target_type == "sonos":
         type_cls = SonosDelivery
@@ -343,6 +389,15 @@ async def join_stream(req: JoinRequest):
         type_cls = AirPlayDelivery
     new_d: BaseDelivery = type_cls(req.target_name)
 
+    error, displaced = await check_claims(new_d, session, force=req.force)
+    if error:
+        return error
+    for target_type, name, owner in displaced:
+        owner_session = registry.get(owner)
+        if owner_session:
+            await displace_target(owner_session, target_type, name)
+
+    url = stream_url(session.session_id)
     logger.info(f"[join] {req.target_type}:{req.target_name} → {url}")
 
     if req.target_type == "sonos":
@@ -376,5 +431,5 @@ async def join_stream(req: JoinRequest):
     else:
         st.active_delivery = new_d
 
-    await event_bus.broadcast()
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "joined", "device": req.target_name}

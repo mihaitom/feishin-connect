@@ -12,6 +12,7 @@ import os
 import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, StreamingResponse
+from starlette.requests import ClientDisconnect
 
 from core.auth import require_token
 
@@ -27,6 +28,22 @@ _SKIP_RESP = {"transfer-encoding", "connection", "content-encoding"}
 _ALL_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"]
 
 
+def _is_forward_auth_header(name: str) -> bool:
+    """True for SSO forward-auth headers (Authentik, Authelia, oauth2-proxy, ...)
+    a reverse proxy in front of this backend may inject, identifying whoever is
+    browsing. Subsonic API auth is self-contained (u/p or t/s params) and must
+    never be influenced by who happens to be browsing — forwarding these to
+    Navidrome lets its ExtAuth (ND_EXTAUTH_TRUSTEDSOURCES) silently authenticate
+    every proxied request as the browser's SSO identity instead of the Subsonic
+    credentials actually being sent, which breaks logging into any Navidrome
+    account other than the browsing user's own (e.g. testing multi-user support
+    with a second Navidrome account fails with a Subsonic "not authorized"
+    error, even for an admin account, because Navidrome never actually
+    authenticates as that account at all)."""
+    lowered = name.lower()
+    return lowered.startswith(("x-authentik-", "remote-user", "remote-groups", "remote-email", "remote-name"))
+
+
 async def _proxy(request: Request, target: str) -> StreamingResponse | JSONResponse:
     if not _INTERNAL_URL:
         return JSONResponse(
@@ -34,7 +51,9 @@ async def _proxy(request: Request, target: str) -> StreamingResponse | JSONRespo
         )
 
     fwd_headers = {
-        k: v for k, v in request.headers.items() if k.lower() not in _SKIP_REQ
+        k: v
+        for k, v in request.headers.items()
+        if k.lower() not in _SKIP_REQ and not _is_forward_auth_header(k)
     }
     # No gzip from Navidrome: httpx would decompress but forward the original
     # Content-Length → mismatch. Identity prevents this issue.
@@ -49,6 +68,15 @@ async def _proxy(request: Request, target: str) -> StreamingResponse | JSONRespo
             content=await request.body(),
         )
         response = await client.send(req, stream=True)
+    except ClientDisconnect:
+        # Browser aborted the request (navigation, component unmount, flaky
+        # network) before we finished reading its body — nothing meaningful
+        # to forward, and no one is listening for this response either way.
+        # Without this, it surfaces as an unhandled-exception traceback at
+        # ERROR level on every occurrence, even though it's an expected,
+        # benign network condition, not a real backend fault.
+        await client.aclose()
+        return JSONResponse({"error": "client disconnected"}, status_code=499)
     except httpx.ConnectError as e:
         await client.aclose()
         return JSONResponse({"error": f"Navidrome not reachable: {e}"}, status_code=502)

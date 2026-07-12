@@ -163,6 +163,7 @@ const LoginRoute = () => {
             const serverId = existingServer?.id ?? nanoid();
             const serverItem: ServerListItemWithCredential = {
                 credential: data.credential,
+                displayName: data.displayName,
                 id: serverId,
                 isAdmin: data.isAdmin,
                 name: serverName,
@@ -176,6 +177,7 @@ const LoginRoute = () => {
             if (existingServer) {
                 const updates: Partial<ServerListItemWithCredential> = {
                     credential: data.credential,
+                    displayName: data.displayName,
                     isAdmin: data.isAdmin,
                     name: serverName,
                     remoteUrl: normalizedRemoteURL,

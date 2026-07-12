@@ -15,6 +15,7 @@ class Track:
     artist: str
     duration: int  # seconds
     cover_art_id: str = field(default="")
+    album: str = field(default="")
 
 
 @runtime_checkable
@@ -27,6 +28,12 @@ class MediaClient(Protocol):
 
     def get_stream_url(self, track_id: str) -> str: ...
 
-    def get_cover_art_url(self, cover_art_id: str) -> str | None: ...
+    def get_cover_art_url(self, cover_art_id: str, internal: bool = False) -> str | None:
+        """`internal=True` returns a URL reachable by LAN cast devices
+        (Sonos/Chromecast/AirPlay/DLNA) fetching it directly — the default
+        (False) is for the browser's own display, which may not be able to
+        reach the same address (see routes/playback.py's device-facing call
+        vs core/session.py's SSE-facing one)."""
+        ...
 
     def ping(self) -> bool: ...

@@ -1,4 +1,7 @@
-"""core/state.py — Shared runtime state and helper functions for Feishin Connect."""
+"""core/state.py — Session-agnostic runtime state: delivery resolution, global
+(operator-configured) targets, and the AppState/EventBus building blocks used
+by core/session.py's per-session SessionState.
+"""
 
 import asyncio
 import os
@@ -12,7 +15,7 @@ from delivery import (
     DlnaDelivery,
     SonosDelivery,
 )
-from media import MediaClient, SubsonicClient, Track
+from media import Track
 
 from .playback_clock import PlaybackClock
 
@@ -35,24 +38,53 @@ class AppState:
         # Set True when a track finishes naturally; cleared by /play, /play-url, /stop.
         # Lets the frontend detect track-end even after SSE reconnect or page reload.
         self.track_ended: bool = False
-        # Last successful discovery results — returned immediately on subsequent calls.
+
+
+class EventBus:
+    """Broadcasts a session's state changes to that session's connected SSE clients."""
+
+    def __init__(self):
+        self._queues: list[asyncio.Queue] = []
+
+    def subscribe(self) -> asyncio.Queue:
+        q: asyncio.Queue = asyncio.Queue(maxsize=10)
+        self._queues.append(q)
+        return q
+
+    def unsubscribe(self, q: asyncio.Queue) -> None:
+        if q in self._queues:
+            self._queues.remove(q)
+
+    async def broadcast(self, payload: dict) -> None:
+        """Push `payload` to all of this session's connected SSE clients."""
+        if not self._queues:
+            return
+        for q in self._queues:
+            try:
+                q.put_nowait(payload)
+            except asyncio.QueueFull:
+                pass  # slow consumer — drop update rather than block
+
+
+class Context:
+    """Holds process-wide state that isn't specific to any one user's
+    playback: `delivery` is the operator-configured (env `TARGETS`) fixed
+    hardware, and `discovered` is the last device-discovery scan — properties
+    of the deployment/network, not of a session. See core/session.py for the
+    per-user SessionState/SessionRegistry this used to also hold."""
+
+    def __init__(self):
+        self.delivery = DeliveryManager(TARGETS)
+        # Last successful discovery results — returned immediately on
+        # subsequent /discover calls. Shared across sessions: the set of
+        # devices on the network doesn't depend on who's asking (who's
+        # *using* one of them does — see core/claims.py).
         self.discovered: dict = {
             "airplay": [],
             "chromecast": [],
             "dlna": [],
             "sonos": [],
         }
-
-
-class Context:
-    """Mutable singleton holding all shared runtime objects."""
-
-    def __init__(self):
-        self.state = AppState()
-        # Default is an unconfigured Subsonic client — overwritten by /config
-        # with either a Subsonic or Jellyfin client.
-        self.media: MediaClient = SubsonicClient("")
-        self.delivery = DeliveryManager(TARGETS)
 
 
 ctx = Context()
@@ -70,95 +102,8 @@ def get_local_ip() -> str:
         s.close()
 
 
-def stream_url() -> str:
-    return f"http://{get_local_ip()}:{PORT}/stream"
-
-
-def compute_position() -> float:
-    """Return elapsed seconds into the current track, clamped to track duration.
-
-    See PlaybackClock.elapsed() for the buffering-delay correction — this just
-    adds the duration clamp, since the clock itself doesn't know about tracks.
-    """
-    st = ctx.state
-    if not st.is_streaming or not st.clock.play_start_time:
-        return 0.0
-    elapsed = st.clock.elapsed()
-    if st.current_track:
-        return min(elapsed, float(st.current_track.duration))
-    return elapsed
-
-
-def build_status_dict() -> dict:
-    """Build the full status payload shared by /status and SSE /events."""
-    elapsed = compute_position()
-    st = ctx.state
-
-    current_track = None
-    if st.current_track:
-        t = st.current_track
-        current_track = {
-            "artist": t.artist,
-            "cover_art_url": ctx.media.get_cover_art_url(t.cover_art_id),
-            "duration": t.duration,
-            "title": t.title,
-        }
-
-    if isinstance(st.active_delivery, DeliveryManager):
-        targets = st.active_delivery.list_targets()
-    elif st.active_delivery is not None:
-        targets = [
-            {
-                "name": st.active_delivery.target,
-                "type": type(st.active_delivery)
-                .__name__.replace("Delivery", "")
-                .lower(),
-            }
-        ]
-    else:
-        targets = []
-
-    return {
-        "current_track": current_track,
-        "current_track_index": 0,
-        "elapsed": elapsed,
-        "ended": st.track_ended,
-        "paused": st.clock.is_paused,
-        "radio": st.radio_info,
-        "streaming": st.is_streaming,
-        "targets": targets,
-        "total_tracks": 1 if st.current_track else 0,
-    }
-
-
-class EventBus:
-    """Broadcasts state changes to all connected SSE clients."""
-
-    def __init__(self):
-        self._queues: list[asyncio.Queue] = []
-
-    def subscribe(self) -> asyncio.Queue:
-        q: asyncio.Queue = asyncio.Queue(maxsize=10)
-        self._queues.append(q)
-        return q
-
-    def unsubscribe(self, q: asyncio.Queue) -> None:
-        if q in self._queues:
-            self._queues.remove(q)
-
-    async def broadcast(self) -> None:
-        """Push current status to all connected SSE clients."""
-        if not self._queues:
-            return
-        payload = build_status_dict()
-        for q in self._queues:
-            try:
-                q.put_nowait(payload)
-            except asyncio.QueueFull:
-                pass  # slow consumer — drop update rather than block
-
-
-event_bus = EventBus()
+def stream_url(session_id: str) -> str:
+    return f"http://{get_local_ip()}:{PORT}/stream/{session_id}"
 
 
 _DELIVERY_TYPES: dict[str, type[BaseDelivery]] = {
@@ -167,6 +112,10 @@ _DELIVERY_TYPES: dict[str, type[BaseDelivery]] = {
     "dlna": DlnaDelivery,
     "sonos": SonosDelivery,
 }
+
+
+def delivery_class_for(target_type: str) -> type[BaseDelivery] | None:
+    return _DELIVERY_TYPES.get(target_type)
 
 
 def resolve_target(
@@ -198,3 +147,18 @@ def find_sonos(active: BaseDelivery | DeliveryManager | None) -> list[SonosDeliv
         if found:
             return found
     return [d for d in ctx.delivery.deliveries if isinstance(d, SonosDelivery)]
+
+
+def list_target_pairs(
+    delivery: BaseDelivery | DeliveryManager | None,
+) -> list[tuple[str, str]]:
+    """Flatten a delivery into (type, name) pairs — the shape the device claim
+    registry (core/claims.py) keys on. Used for both status reporting
+    (SessionState.build_status_dict) and claim enforcement, so grouped/fanned-out
+    deliveries (e.g. Sonos multiroom followers) are accounted for identically
+    in both places."""
+    if isinstance(delivery, DeliveryManager):
+        return [(t["type"], t["name"]) for t in delivery.list_targets()]
+    if delivery is not None:
+        return [(type(delivery).__name__.replace("Delivery", "").lower(), delivery.target)]
+    return []

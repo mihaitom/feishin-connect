@@ -69,6 +69,21 @@ describe('connect/types', () => {
             expect(headers['X-Connect-Token']).toBe('secret-token');
             expect(options?.method).toBe('POST');
         });
+
+        it('adds the X-Connect-Session header once setConnectSessionId is called', async () => {
+            (window as any).__CONNECT_URL__ = 'http://example.test:9181';
+            const fetchMock = vi.fn().mockResolvedValue(new Response('{}'));
+            global.fetch = fetchMock as unknown as typeof fetch;
+
+            const { connectFetch, setConnectSessionId } = await import('../types');
+            setConnectSessionId('abc123');
+            await connectFetch('/status');
+
+            const [, options] = fetchMock.mock.calls[0];
+            expect((options?.headers as Record<string, string>)['X-Connect-Session']).toBe(
+                'abc123',
+            );
+        });
     });
 
     describe('connectEventSource', () => {
@@ -90,6 +105,31 @@ describe('connect/types', () => {
             const es = connectEventSource('/events');
 
             expect(es.url).toBe('http://example.test:9181/events?token=secret%20token');
+            es.close();
+        });
+
+        it('appends the session id as a query param once set', async () => {
+            (window as any).__CONNECT_URL__ = 'http://example.test:9181';
+
+            const { connectEventSource, setConnectSessionId } = await import('../types');
+            setConnectSessionId('abc123');
+            const es = connectEventSource('/events');
+
+            expect(es.url).toBe('http://example.test:9181/events?session=abc123');
+            es.close();
+        });
+
+        it('combines token and session id as separate query params', async () => {
+            (window as any).__CONNECT_URL__ = 'http://example.test:9181';
+            (window as any).__CONNECT_TOKEN__ = 'secret-token';
+
+            const { connectEventSource, setConnectSessionId } = await import('../types');
+            setConnectSessionId('abc123');
+            const es = connectEventSource('/events');
+
+            expect(es.url).toBe(
+                'http://example.test:9181/events?token=secret-token&session=abc123',
+            );
             es.close();
         });
     });

@@ -24,23 +24,29 @@ import { toast } from '/@/shared/components/toast/toast';
 
 interface DeviceItemProps {
     alwaysShowVolume?: boolean;
+    claimedByName?: null | string;
+    claimedByTrack?: null | string;
     device: ConnectDevice;
     isActive: boolean;
     isPaired?: boolean;
     isSelected: boolean;
     onPaired?: () => void;
     onStop: () => void;
+    onTakeover?: () => Promise<void>;
     onToggleSelect: () => void;
 }
 
 export const DeviceItem = ({
     alwaysShowVolume = false,
+    claimedByName,
+    claimedByTrack,
     device,
     isActive,
     isPaired,
     isSelected,
     onPaired,
     onStop,
+    onTakeover,
     onToggleSelect,
 }: DeviceItemProps) => {
     const { t } = useTranslation();
@@ -84,7 +90,40 @@ export const DeviceItem = ({
         });
     }, [device.name, handleUnpair, t]);
 
+    const handleTakeover = useCallback(async () => {
+        try {
+            await onTakeover?.();
+        } catch {
+            toast.error({ message: t('player.connect_takeover_error', { name: device.name }) });
+        } finally {
+            closeAllModals();
+        }
+    }, [device.name, onTakeover, t]);
+
+    const openTakeoverModal = useCallback(() => {
+        openModal({
+            children: (
+                <ConfirmModal onConfirm={handleTakeover}>
+                    <Text>
+                        {claimedByTrack
+                            ? t('player.connect_takeover_confirm_body_track', {
+                                  deviceName: device.name,
+                                  name: claimedByName,
+                                  track: claimedByTrack,
+                              })
+                            : t('player.connect_takeover_confirm_body', {
+                                  deviceName: device.name,
+                                  name: claimedByName,
+                              })}
+                    </Text>
+                </ConfirmModal>
+            ),
+            title: t('player.connect_takeover_confirm_title'),
+        });
+    }, [claimedByName, claimedByTrack, device.name, handleTakeover, t]);
+
     const checked = isActive || isSelected;
+    const isClaimedByOther = !!claimedByName;
     // Show pair button only for AirPlay 2 devices that haven't been paired yet.
     // Always rendered (visibility:hidden when not hovering) to prevent row-height jumps.
     const showPairButton = device.type === 'airplay' && device.needsPairing && !isPaired;
@@ -123,7 +162,15 @@ export const DeviceItem = ({
                 >
                     <Switch
                         checked={checked}
-                        onChange={() => (isActive ? onStop() : onToggleSelect())}
+                        onChange={() => {
+                            if (isClaimedByOther) {
+                                openTakeoverModal();
+                            } else if (isActive) {
+                                onStop();
+                            } else {
+                                onToggleSelect();
+                            }
+                        }}
                         size="xs"
                         style={{ paddingInline: '5px' }}
                     />
@@ -148,25 +195,67 @@ export const DeviceItem = ({
                         )}
                     </span>
 
-                    <span
-                        onClick={isActive ? undefined : onToggleSelect}
+                    <div
+                        onClick={
+                            isActive
+                                ? undefined
+                                : isClaimedByOther
+                                  ? openTakeoverModal
+                                  : onToggleSelect
+                        }
                         style={{
-                            color: isActive
-                                ? 'var(--theme-colors-primary)'
-                                : isSelected
-                                  ? 'var(--theme-colors-text-primary)'
-                                  : 'var(--theme-colors-text-secondary)',
                             cursor: isActive ? 'default' : 'pointer',
                             flex: 1,
-                            fontSize: '16px',
                             overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            userSelect: 'none',
-                            whiteSpace: 'nowrap',
                         }}
                     >
-                        {device.name}
-                    </span>
+                        <div
+                            style={{
+                                color: isActive
+                                    ? 'var(--theme-colors-primary)'
+                                    : isSelected
+                                      ? 'var(--theme-colors-text-primary)'
+                                      : 'var(--theme-colors-text-secondary)',
+                                fontSize: '16px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                userSelect: 'none',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {device.name}
+                        </div>
+                        {isClaimedByOther && (
+                            <>
+                                <div
+                                    style={{
+                                        color: 'var(--theme-colors-state-info, #3574fc)',
+                                        fontSize: '11px',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                    title={t('player.connect_inUseBy', { name: claimedByName })}
+                                >
+                                    {t('player.connect_inUseBy', { name: claimedByName })}
+                                </div>
+                                {claimedByTrack && (
+                                    <div
+                                        style={{
+                                            color: 'var(--theme-colors-text-secondary)',
+                                            fontSize: '11px',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                        title={claimedByTrack}
+                                    >
+                                        {claimedByTrack}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
 
                     {/* AirPlay 2 Pair-Button — only shown on hover so the label can use the full width otherwise */}
                     {showPairButton && hovered && (

@@ -13,30 +13,52 @@ export const useConnectDevices = () => {
     const [devices, setDevices] = useState<ConnectDevice[]>([]);
     const [health, setHealth] = useState<ConnectHealth | null>(null);
     const [isScanning, setIsScanning] = useState(false);
+    // Ref (not the `devices` state directly) so refresh() doesn't capture
+    // reactive state — keeps its identity closure-safe for the mount effect
+    // below without needing `devices`/`refresh` itself in a dependency array.
+    const devicesRef = useRef<ConnectDevice[]>(devices);
+    devicesRef.current = devices;
 
     const refresh = (fresh = false) => {
-        setIsScanning(true);
+        // /discover already skips a real re-scan for a plain (non-fresh) call
+        // once a cached device list exists — it serves that cache instantly
+        // and only recomputes the live claim/track annotations (see
+        // routes/devices.py). So reopening the popover to pick up fresh "in
+        // use by"/"playing" labels shouldn't flash the scanning spinner and
+        // disable "Scan again" every time — only an explicit fresh scan, or
+        // the very first load (nothing cached client-side yet either), does.
+        const showScanning = fresh || devicesRef.current.length === 0;
+        if (showScanning) setIsScanning(true);
         Promise.all([
             connectFetch(`/discover${fresh ? '?fresh=true' : ''}`).then((r) => r.json()),
             connectFetch(`/health`).then((r) => r.json()),
         ])
             .then(([discoverData, healthData]) => {
+                const claimFields = (x: any) => ({
+                    claimedByName: x.in_use_by_name ?? null,
+                    claimedBySessionId: x.in_use_by_session_id ?? null,
+                    claimedByTrack: x.in_use_by_track ?? null,
+                });
                 const sonos: ConnectDevice[] = (discoverData.sonos ?? []).map((x: any) => ({
+                    ...claimFields(x),
                     name: x.name,
                     type: 'sonos' as const,
                 }));
                 const chromecast: ConnectDevice[] = (discoverData.chromecast ?? []).map(
                     (x: any) => ({
+                        ...claimFields(x),
                         name: x.name,
                         type: 'chromecast' as const,
                     }),
                 );
                 const airplay: ConnectDevice[] = (discoverData.airplay ?? []).map((x: any) => ({
+                    ...claimFields(x),
                     name: x.name,
                     needsPairing: x.needs_pairing ?? false,
                     type: 'airplay' as const,
                 }));
                 const dlna: ConnectDevice[] = (discoverData.dlna ?? []).map((x: any) => ({
+                    ...claimFields(x),
                     name: x.name,
                     type: 'dlna' as const,
                 }));

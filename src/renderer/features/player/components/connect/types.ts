@@ -3,7 +3,15 @@ export const CONNECT_URL =
 
 export const CONNECT_TOKEN: string = (window as any).__CONNECT_TOKEN__ ?? '';
 
+// Set once per app session by useConnectSession, before the first /config call,
+// from computeConnectSessionId() — identifies this login for per-user backend
+// state (see core/session.py) and device-claim ownership.
+let connectSessionId = '';
+
 export interface ConnectDevice {
+    claimedByName?: null | string;
+    claimedBySessionId?: null | string;
+    claimedByTrack?: null | string;
     name: string;
     needsPairing?: boolean;
     type: 'airplay' | 'chromecast' | 'dlna' | 'sonos';
@@ -23,6 +31,7 @@ export interface ConnectSession {
     hasFfmpegError: boolean;
     isActive: boolean;
     isScanning: boolean;
+    mySessionId: string;
     paired: string[];
     refresh: (fresh?: boolean) => void;
     refreshPaired: () => void;
@@ -31,6 +40,7 @@ export interface ConnectSession {
     status: SendStatus;
     stopAllPlayback: () => Promise<void>;
     stopSingleDevice: (device: ConnectDevice) => Promise<void>;
+    takeoverDevice: (device: ConnectDevice) => Promise<void>;
     toggleSelectForSend: (device: ConnectDevice) => void;
     trackLabel: null | string;
 }
@@ -64,10 +74,11 @@ export type PairingStep = 'error' | 'idle' | 'needs_pin' | 'started' | 'success'
 export type SendStatus = 'error' | 'idle' | 'loading' | 'success';
 
 export function connectEventSource(path: string): EventSource {
-    const url = CONNECT_TOKEN
-        ? `${CONNECT_URL}${path}?token=${encodeURIComponent(CONNECT_TOKEN)}`
-        : `${CONNECT_URL}${path}`;
-    return new EventSource(url);
+    const params: string[] = [];
+    if (CONNECT_TOKEN) params.push(`token=${encodeURIComponent(CONNECT_TOKEN)}`);
+    if (connectSessionId) params.push(`session=${encodeURIComponent(connectSessionId)}`);
+    const query = params.join('&');
+    return new EventSource(`${CONNECT_URL}${path}${query ? `?${query}` : ''}`);
 }
 
 export function connectFetch(path: string, options?: RequestInit): Promise<Response> {
@@ -75,5 +86,14 @@ export function connectFetch(path: string, options?: RequestInit): Promise<Respo
         ...(options?.headers as Record<string, string> | undefined),
     };
     if (CONNECT_TOKEN) headers['X-Connect-Token'] = CONNECT_TOKEN;
+    if (connectSessionId) headers['X-Connect-Session'] = connectSessionId;
     return fetch(`${CONNECT_URL}${path}`, { ...options, headers });
+}
+
+export function getConnectSessionId(): string {
+    return connectSessionId;
+}
+
+export function setConnectSessionId(id: string): void {
+    connectSessionId = id;
 }

@@ -12,7 +12,7 @@ import httpx
 
 from .shared import USER_AGENT, order_search_results
 
-logger = logging.getLogger("connect.lyrics.lrclib")
+logger = logging.getLogger("connect.lyrics")
 
 FETCH_URL = "https://lrclib.net/api/get"
 SEARCH_URL = "https://lrclib.net/api/search"
@@ -33,12 +33,12 @@ async def get_lyrics_by_song_id(song_id: str) -> str | None:
         r.raise_for_status()
     except httpx.HTTPError as e:
         logger.warning(
-            f"lyrics request failed for song_id={song_id}: {type(e).__name__}: {e}"
+            f"[lrclib] lyrics request failed for song_id={song_id}: {type(e).__name__}: {e}"
         )
         return None
 
     logger.info(
-        f"fetched lyrics for song_id={song_id} in {time.perf_counter() - start:.2f}s"
+        f"[lrclib] fetched lyrics for song_id={song_id} in {time.perf_counter() - start:.2f}s"
     )
 
     data = r.json()
@@ -59,12 +59,12 @@ async def get_search_results(params: dict[str, Any]) -> list[dict[str, Any]] | N
         r.raise_for_status()
     except httpx.HTTPError as e:
         logger.warning(
-            f"search request failed for query={query!r}: {type(e).__name__}: {e}"
+            f"[lrclib] search request failed for query={query!r}: {type(e).__name__}: {e}"
         )
         return None
 
     logger.info(
-        f"fetched search results for query={query!r} in {time.perf_counter() - start:.2f}s"
+        f"[lrclib] fetched search results for query={query!r} in {time.perf_counter() - start:.2f}s"
     )
 
     songs = r.json()

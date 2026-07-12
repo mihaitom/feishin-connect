@@ -1,9 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { buildConfigBody } from './connect-config';
+import { computeConnectSessionId } from './connect-session-id';
 import { useConnectElapsed, useConnectPlayerStore } from './connect.store';
 import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
-import { ConnectDevice, connectFetch, ConnectSession, ConnectStatus, SendStatus } from './types';
+import {
+    ConnectDevice,
+    connectFetch,
+    ConnectSession,
+    ConnectStatus,
+    SendStatus,
+    setConnectSessionId,
+} from './types';
 import { useConnectPlayback } from './use-connect-playback';
 import { useConnectScrobble } from './use-connect-scrobble';
 
@@ -27,7 +35,6 @@ export const useConnectSession = (): ConnectSession => {
         usePlayer();
     const pauseRadio = useRadioStore((s) => s.actions.pause);
     const playRadio = useRadioStore((s) => s.actions.play);
-    const stopRadio = useRadioStore((s) => s.actions.stop);
     const server = useCurrentServerWithCredential();
     const connectElapsed = useConnectElapsed();
 
@@ -45,6 +52,10 @@ export const useConnectSession = (): ConnectSession => {
     const isActive = !!activeDevice;
     const connectStatus = useConnectStatus(isActive);
     const currentTrackId = currentSong?.id ?? null;
+    const mySessionId = useMemo(
+        () => (server?.url ? computeConnectSessionId(server) : ''),
+        [server],
+    );
 
     // ── Active targets sync ───────────────────────────────────────────────────
     useEffect(() => {
@@ -70,6 +81,9 @@ export const useConnectSession = (): ConnectSession => {
     // ── Server config ─────────────────────────────────────────────────────────
     useEffect(() => {
         if (!server?.url || !server?.credential) return;
+        // Must be set before the first /config call so it — and every request
+        // after it — is scoped to this login's session from the start.
+        setConnectSessionId(computeConnectSessionId(server));
         connectFetch(`/config`, {
             body: JSON.stringify(buildConfigBody(server)),
             headers: { 'Content-Type': 'application/json' },
@@ -79,7 +93,14 @@ export const useConnectSession = (): ConnectSession => {
                 configuredRef.current = true;
             })
             .catch(() => {});
-    }, [server]);
+        // Deliberately narrower than [server]: the auth store hands out a new
+        // `currentServer` object on nearly every Navidrome response (it also
+        // carries ndCredential, refreshed constantly) even though none of the
+        // fields /config actually cares about changed. Depending on the whole
+        // object re-sent /config on every unrelated store update — up to
+        // several times a second during a page load's request burst.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [server?.url, server?.credential, server?.type, server?.userId, server?.username]);
 
     // ── Restore from backend on mount ─────────────────────────────────────────
     useEffect(() => {
@@ -131,6 +152,7 @@ export const useConnectSession = (): ConnectSession => {
 
     const ensureConfigured = async () => {
         if (!configuredRef.current && server?.url && server?.credential) {
+            setConnectSessionId(computeConnectSessionId(server));
             await connectFetch(`/config`, {
                 body: JSON.stringify(buildConfigBody(server)),
                 headers: { 'Content-Type': 'application/json' },
@@ -140,20 +162,25 @@ export const useConnectSession = (): ConnectSession => {
         }
     };
 
-    const sendToSelected = async () => {
-        if (selectedForSend.length === 0) return;
-        const first = selectedForSend[0];
+    // `force` re-sends as a takeover (Phase 2) after the user confirms a
+    // "device in use" dialog — see takeoverDevice() below. Plain sendToSelected()/
+    // addToStream() always pass force=false and can still come back with a
+    // device_in_use error, which the caller surfaces for the confirm dialog.
+    const sendTo = async (devicesToSend: ConnectDevice[], force: boolean) => {
+        if (devicesToSend.length === 0) return { error: null as null | string };
+        const first = devicesToSend[0];
         lastAutoSentRef.current = currentSong?._uniqueId ?? '';
         setActive(first);
-        setActiveTargets(selectedForSend);
+        setActiveTargets(devicesToSend);
         setStatus('loading');
         try {
             await ensureConfigured();
-            const targets = selectedForSend.map((d) => ({ name: d.name, type: d.type }));
+            const targets = devicesToSend.map((d) => ({ name: d.name, type: d.type }));
             if (isRadioActive && radioStreamUrl) {
                 pauseRadio();
                 const res = await connectFetch(`/play-url`, {
                     body: JSON.stringify({
+                        force,
                         targets,
                         title: radioStationName ?? 'Radio',
                         url: radioStreamUrl,
@@ -168,52 +195,83 @@ export const useConnectSession = (): ConnectSession => {
                 if (body.error) throw new Error(body.error);
                 useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
             } else if (currentTrackId) {
-                const isCurrentlyPlaying =
-                    usePlayerStoreBase.getState().player.status === PlayerStatus.PLAYING;
-                if (isCurrentlyPlaying) {
-                    const startPosition = useTimestampStoreBase.getState().timestamp;
-                    mediaPause();
-                    const res = await connectFetch(`/play`, {
-                        body: JSON.stringify({
-                            start_position: startPosition,
-                            targets,
-                            track_ids: [currentTrackId],
-                        }),
-                        headers: { 'Content-Type': 'application/json' },
-                        method: 'POST',
-                    });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    const body = await res.json();
-                    if (body.error) throw new Error(body.error);
-                    useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
-                }
+                // Deliberately NOT gated on local PlayerStatus === PLAYING — a
+                // paused (or never-yet-played) queue is just as valid a thing to
+                // connect from. Gating on it used to mean clicking "Connect" while
+                // paused silently sent nothing at all, even though activeDevice was
+                // already optimistically set above — the popover/player-bar looked
+                // "connected" with nothing actually playing, recoverable only via
+                // the ungated /play path in handleTogglePlayPause's third branch.
+                const startPosition = useTimestampStoreBase.getState().timestamp;
+                mediaPause();
+                const res = await connectFetch(`/play`, {
+                    body: JSON.stringify({
+                        force,
+                        start_position: startPosition,
+                        targets,
+                        track_ids: [currentTrackId],
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const body = await res.json();
+                if (body.error) throw new Error(body.error);
+                useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
             }
             setStatus('success');
             setSelectedForSend([]);
+            return { error: null };
         } catch (e) {
             console.error('[Connect]', e);
             setStatus('error');
             setActive(null);
             setActiveTargets([]);
             setTimeout(() => setStatus('idle'), 2000);
+            return { error: e instanceof Error ? e.message : String(e) };
         }
     };
 
-    const addToStream = async () => {
-        if (selectedForSend.length === 0) return;
-        for (const device of selectedForSend) {
+    const sendToSelected = async () => {
+        await sendTo(selectedForSend, false);
+    };
+
+    const joinTo = async (devicesToJoin: ConnectDevice[], force: boolean) => {
+        for (const device of devicesToJoin) {
             await connectFetch(`/join`, {
-                body: JSON.stringify({ target_name: device.name, target_type: device.type }),
+                body: JSON.stringify({
+                    force,
+                    target_name: device.name,
+                    target_type: device.type,
+                }),
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST',
             }).catch(() => {});
         }
         setActiveTargets((prev) => {
             const existing = new Set(prev.map((d) => `${d.type}:${d.name}`));
-            const added = selectedForSend.filter((d) => !existing.has(`${d.type}:${d.name}`));
+            const added = devicesToJoin.filter((d) => !existing.has(`${d.type}:${d.name}`));
             return [...prev, ...added];
         });
-        setSelectedForSend([]);
+        setSelectedForSend((prev) =>
+            prev.filter((d) => !devicesToJoin.some((j) => j.type === d.type && j.name === d.name)),
+        );
+    };
+
+    const addToStream = async () => {
+        if (selectedForSend.length === 0) return;
+        await joinTo(selectedForSend, false);
+    };
+
+    // Confirmed via the takeover dialog in DeviceItem — re-sends as a single
+    // device, either joining the active stream or starting a new one, with
+    // force=true so the backend displaces whoever currently owns it.
+    const takeoverDevice = async (device: ConnectDevice) => {
+        if (isActive) {
+            await joinTo([device], true);
+        } else {
+            await sendTo([device], true);
+        }
     };
 
     // Hands playback back to the local player at the position Connect had reached,
@@ -248,6 +306,45 @@ export const useConnectSession = (): ConnectSession => {
             if (wasPlaying) mediaPlay();
         }, 0);
     };
+
+    // ── External stop (device taken over by another session, or reaped) ───────
+    // stopAllPlayback()/stopSingleDevice() already clear activeDevice/activeTargets
+    // themselves as soon as they fire the request, without waiting on SSE — so by
+    // the time a self-initiated /stop's status update arrives, isActive is already
+    // false and this is a no-op. It only fires for a stop this session didn't
+    // request itself: another session took over its last device (Phase 2 takeover)
+    // or the backend reaped an idle session. Mirrors stopAllPlayback's own
+    // snapshot/resume dance so the local player picks up where Connect left off.
+    //
+    // hasStreamedRef guards against a race with /play itself: /events sends the
+    // session's *current* status immediately on connect (see routes/stream.py),
+    // and the SSE connection opens as soon as isActive flips true — before the
+    // in-flight /play request has finished and actually started streaming. That
+    // first snapshot always reads streaming=false, which without this guard looks
+    // identical to an external stop and immediately reverts the connection that
+    // was just requested. Only treat streaming=false as a loss once we've
+    // actually observed streaming=true during this activation.
+    const hasStreamedRef = useRef(false);
+    useEffect(() => {
+        if (!isActive) {
+            hasStreamedRef.current = false;
+            return;
+        }
+        if (!connectStatus) return;
+        if (connectStatus.streaming) {
+            hasStreamedRef.current = true;
+            return;
+        }
+        if (connectStatus.ended || !hasStreamedRef.current) return;
+        const snapshot = captureDisconnectSnapshot();
+        setStatus('idle');
+        setActive(null);
+        setActiveTargets([]);
+        setSelectedForSend([]);
+        lastAutoSentRef.current = '';
+        resumeLocalAfterDisconnect(snapshot);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [connectStatus, isActive]);
 
     const stopAllPlayback = async () => {
         const snapshot = captureDisconnectSnapshot();
@@ -316,20 +413,25 @@ export const useConnectSession = (): ConnectSession => {
         }
     }
 
+    // Player-bar Stop button while Connect is active — pauses the device and
+    // resets position to 0:00, same as pause/seek(0) combined, it does NOT
+    // disconnect. Disconnecting is a separate, explicit action
+    // (stopAllPlayback/stopSingleDevice in the popover) — conflating the two here
+    // meant every "Stop" click released the device, requiring a full reconnect
+    // just to play the next track. Pause is requested before the seek so the
+    // device doesn't audibly jump back to 0:00 and keep playing — /seek only
+    // restarts the device's stream when not paused (see routes/playback.py).
     function handleStop() {
-        useConnectPlayerStore.getState().set({ isPlaying: false, isStreaming: false });
-        connectFetch(`/stop`, { method: 'POST' }).catch(() => {});
-
-        if (isRadioActive) {
-            // Mark the current (stale) queue track as already sent before
-            // flipping isRadioActive off, otherwise the auto-forward-on-track-change
-            // effect in useConnectPlayback fires and immediately re-sends it to the
-            // Connect target we just told to stop.
-            lastAutoSentRef.current = currentSong?._uniqueId ?? '';
-            stopRadio();
-        } else {
-            lastAutoSentRef.current = '';
-        }
+        useConnectPlayerStore.getState().set({ isPlaying: false });
+        connectFetch(`/pause`, { method: 'POST' })
+            .then(() =>
+                connectFetch(`/seek`, {
+                    body: JSON.stringify({ position: 0 }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                }),
+            )
+            .catch(() => {});
     }
 
     // ── Store sync ────────────────────────────────────────────────────────────
@@ -376,6 +478,7 @@ export const useConnectSession = (): ConnectSession => {
         hasFfmpegError: !!(health?.apiReachable && health.ffmpegFound === false),
         isActive,
         isScanning,
+        mySessionId,
         paired,
         refresh,
         refreshPaired,
@@ -384,6 +487,7 @@ export const useConnectSession = (): ConnectSession => {
         status,
         stopAllPlayback,
         stopSingleDevice,
+        takeoverDevice,
         toggleSelectForSend,
         trackLabel: isRadioActive ? `Radio · ${radioStationName ?? ''}` : null,
     };

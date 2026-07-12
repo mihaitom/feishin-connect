@@ -2,14 +2,25 @@
 
 import asyncio
 import logging
+import os
 
 from .airplay import AirPlayDelivery
 from .base import BaseDelivery
 from .chromecast import ChromecastDelivery, _ensure_cast_browser, _wait_for_discovery
-from .dlna import DlnaDelivery, _create_dmr_device, _location_cache
+from .dlna import DlnaDelivery, UnsupportedDlnaDevice, _create_dmr_device, _location_cache
 from .sonos import SonosDelivery
 
 logger = logging.getLogger("delivery")
+
+# Same DEBUG flag as main.py's verbose-logging switch. Also disables the
+# Sonos-as-AirPlay/Sonos-as-DLNA dedup filters below, so a household with only
+# Sonos hardware can still exercise the AirPlay/DLNA discovery and delivery
+# code paths during development. Note this doesn't make AirPlay-to-Sonos
+# actually work — that fails for the real reason documented on _is_sonos()
+# (no MFi auth) regardless of DEBUG; it only makes the entry selectable so the
+# failure path itself can be tested. DLNA-to-Sonos does work, since Sonos
+# genuinely speaks UPnP AVTransport.
+_DEBUG = os.getenv("DEBUG", "").strip().lower() in ("1", "true", "yes", "on")
 
 
 class DeliveryManager:
@@ -66,6 +77,8 @@ class DeliveryManager:
         title: str = "Connect",
         artist: str = "",
         album_art_url: str | None = None,
+        duration: float | None = None,
+        album: str = "",
     ) -> None:
         if not self.deliveries:
             return
@@ -76,12 +89,17 @@ class DeliveryManager:
         if len(sonos) > 1:
             tasks.append(
                 self._play_grouped_sonos(
-                    sonos, stream_url, title, artist, album_art_url
+                    sonos, stream_url, title, artist, album_art_url, duration, album
                 )
             )
         elif sonos:
-            tasks.append(sonos[0].play(stream_url, title, artist, album_art_url))
-        tasks.extend(d.play(stream_url, title, artist, album_art_url) for d in others)
+            tasks.append(
+                sonos[0].play(stream_url, title, artist, album_art_url, duration, album)
+            )
+        tasks.extend(
+            d.play(stream_url, title, artist, album_art_url, duration, album)
+            for d in others
+        )
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
         for result in results:
@@ -95,6 +113,8 @@ class DeliveryManager:
         title: str,
         artist: str = "",
         album_art_url: str | None = None,
+        duration: float | None = None,
+        album: str = "",
     ) -> None:
         """Group Sonos devices so they play in sync (coordinator + followers)."""
         devices = await asyncio.gather(
@@ -118,7 +138,7 @@ class DeliveryManager:
 
         await asyncio.sleep(0.5)
 
-        await deliveries[0].play(stream_url, title, artist, album_art_url)
+        await deliveries[0].play(stream_url, title, artist, album_art_url, duration, album)
 
     async def pause(self) -> None:
         await asyncio.gather(
@@ -187,7 +207,7 @@ async def discover_airplay() -> list[dict]:
     devices = await pyatv.scan(asyncio.get_event_loop(), timeout=10)
     result = []
     for d in devices:
-        if _is_sonos(d):
+        if _is_sonos(d) and not _DEBUG:
             logger.info(
                 f"[discover] Skipping AirPlay for Sonos device '{d.name}' "
                 f"(use Sonos output instead)"
@@ -255,10 +275,16 @@ async def discover_dlna() -> list[dict]:
         location = headers["location"]
         try:
             device = await _create_dmr_device(location)
+        except UnsupportedDlnaDevice as e:
+            logger.info(
+                f"[discover] '{e.friendly_name}' at {location} answered UPnP "
+                f"discovery but isn't a MediaRenderer, skipping"
+            )
+            continue
         except Exception as e:
             logger.warning(f"[discover] DLNA device at {location}: {e}")
             continue
-        if "sonos" in (device.manufacturer or "").lower():
+        if "sonos" in (device.manufacturer or "").lower() and not _DEBUG:
             logger.info(
                 f"[discover] Skipping DLNA for Sonos device '{device.name}' "
                 f"(use Sonos output instead)"

@@ -14,17 +14,6 @@ export const ConnectButton = () => {
 
     const session = useConnectSessionContext();
 
-    // Close popover when connection finishes or session becomes inactive
-    const prevStatus = useRef(session.status);
-    const prevIsActive = useRef(session.isActive);
-    useEffect(() => {
-        if (prevStatus.current === 'loading' && session.status === 'success') setOpen(false);
-        prevStatus.current = session.status;
-    }, [session.status]);
-    useEffect(() => {
-        if (prevIsActive.current && !session.isActive) setOpen(false);
-        prevIsActive.current = session.isActive;
-    }, [session.isActive]);
     const { activeDevice, fetchVolume, hasApiError, hasFfmpegError, isActive, refresh, status } =
         session;
 
@@ -106,7 +95,9 @@ export const ConnectButton = () => {
                 <LuCast size={20} style={{ opacity: isActive ? 1 : 0.7 }} />
             </button>
 
-            {open && <ConnectPopover popPos={popPos} session={session} />}
+            {open && (
+                <ConnectPopover onClose={() => setOpen(false)} popPos={popPos} session={session} />
+            )}
         </>
     );
 };

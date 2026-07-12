@@ -71,19 +71,19 @@ class SubsonicClient:
             artist=song.get("artist", "Unknown"),
             duration=song.get("duration", 0),
             cover_art_id=song.get("coverArt", ""),
+            album=song.get("album", ""),
         )
 
     def get_stream_url(self, track_id: str) -> str:
         params = "&".join(f"{k}={v}" for k, v in self._auth_params().items())
         return f"{self.internal_url}/rest/stream.view?id={track_id}&{params}"
 
-    def get_cover_art_url(self, cover_art_id: str) -> str | None:
+    def get_cover_art_url(self, cover_art_id: str, internal: bool = False) -> str | None:
         if not cover_art_id or not self.base_url:
             return None
+        base = self.internal_url if internal else self.base_url
         params = "&".join(f"{k}={v}" for k, v in self._auth_params().items())
-        return (
-            f"{self.base_url}/rest/getCoverArt.view?id={cover_art_id}&size=300&{params}"
-        )
+        return f"{base}/rest/getCoverArt.view?id={cover_art_id}&size=300&{params}"
 
     def ping(self) -> bool:
         try:

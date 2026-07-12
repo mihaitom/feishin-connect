@@ -6,6 +6,17 @@ from core import state
 from delivery import ChromecastDelivery, DlnaDelivery, SonosDelivery
 
 
+def _unclaimed(device: dict) -> dict:
+    """/discover annotates every device with claim info — with no claims in
+    the registry (the default in tests), all fields are None."""
+    return {
+        **device,
+        "in_use_by_name": None,
+        "in_use_by_session_id": None,
+        "in_use_by_track": None,
+    }
+
+
 # ── /discover ─────────────────────────────────────────────────────────────────
 
 
@@ -29,14 +40,14 @@ def test_discover_returns_all_four_device_types(client):
 
     assert r.status_code == 200
     body = r.json()
-    assert body["sonos"] == sonos
-    assert body["airplay"] == airplay
-    assert body["chromecast"] == chromecast
-    assert body["dlna"] == dlna
+    assert body["sonos"] == [_unclaimed(d) for d in sonos]
+    assert body["airplay"] == [_unclaimed(d) for d in airplay]
+    assert body["chromecast"] == [_unclaimed(d) for d in chromecast]
+    assert body["dlna"] == [_unclaimed(d) for d in dlna]
 
 
 def test_discover_returns_cached_results_immediately(client):
-    state.ctx.state.discovered = {
+    state.ctx.discovered = {
         "sonos": [{"name": "Cached"}],
         "airplay": [],
         "chromecast": [],
@@ -52,11 +63,11 @@ def test_discover_returns_cached_results_immediately(client):
         r = client.get("/discover")
 
     assert r.status_code == 200
-    assert r.json()["sonos"] == [{"name": "Cached"}]
+    assert r.json()["sonos"] == [_unclaimed({"name": "Cached"})]
 
 
 def test_discover_keeps_cached_branch_when_scanner_raises(client):
-    state.ctx.state.discovered = {
+    state.ctx.discovered = {
         "sonos": [{"name": "Stale"}],
         "airplay": [],
         "chromecast": [],
@@ -75,7 +86,7 @@ def test_discover_keeps_cached_branch_when_scanner_raises(client):
         r = client.get("/discover")
 
     assert r.status_code == 200
-    assert r.json()["sonos"] == [{"name": "Stale"}]
+    assert r.json()["sonos"] == [_unclaimed({"name": "Stale"})]
 
 
 def test_discover_fresh_scan_when_cache_empty(client):
@@ -91,7 +102,68 @@ def test_discover_fresh_scan_when_cache_empty(client):
         r = client.get("/discover")
 
     assert r.status_code == 200
-    assert r.json()["chromecast"] == [{"name": "TV"}]
+    assert r.json()["chromecast"] == [_unclaimed({"name": "TV"})]
+
+
+def test_discover_reports_claim_owner(client):
+    from core.claims import claims
+    from core.session import SessionState, registry
+    from media import Track
+
+    owner = SessionState("owner-session")
+    owner.display_name = "alice"
+    owner.state.current_track = Track("1", "Song Title", "Artist Name", 200, "")
+    registry._sessions["owner-session"] = owner
+
+    async def _claim():
+        await claims.claim("sonos", "Küche", "owner-session")
+
+    import asyncio
+
+    asyncio.run(_claim())
+
+    with (
+        patch(
+            "routes.devices.discover_sonos",
+            new=AsyncMock(return_value=[{"name": "Küche", "ip": "10.0.0.1"}]),
+        ),
+        patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_dlna", new=AsyncMock(return_value=[])),
+    ):
+        r = client.get("/discover")
+
+    device = r.json()["sonos"][0]
+    assert device["in_use_by_session_id"] == "owner-session"
+    assert device["in_use_by_name"] == "alice"
+    assert device["in_use_by_track"] == "Artist Name - Song Title"
+
+
+def test_discover_reports_radio_title_as_track_for_claim_owner(client):
+    from core.claims import claims
+    from core.session import SessionState, registry
+
+    owner = SessionState("owner-session")
+    owner.display_name = "alice"
+    owner.state.radio_info = {"title": "Radio FM", "url": "http://stream"}
+    registry._sessions["owner-session"] = owner
+
+    import asyncio
+
+    asyncio.run(claims.claim("sonos", "Küche", "owner-session"))
+
+    with (
+        patch(
+            "routes.devices.discover_sonos",
+            new=AsyncMock(return_value=[{"name": "Küche", "ip": "10.0.0.1"}]),
+        ),
+        patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_dlna", new=AsyncMock(return_value=[])),
+    ):
+        r = client.get("/discover")
+
+    assert r.json()["sonos"][0]["in_use_by_track"] == "Radio FM"
 
 
 # ── /device-volume GET ────────────────────────────────────────────────────────

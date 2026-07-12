@@ -70,6 +70,7 @@ Feishin Connect adds a cast button to the player bar. Click it to stream the cur
 - Transport control via Feishin's normal playerbar — play/pause/previous/next and in-track seeking drive the remote device instead of local playback; per-device volume with ReplayGain normalization is available from the popover (Sonos, Chromecast and DLNA)
 - Synchronized lyrics and Now-Playing metadata (title, artist, album art) follow along during remote playback
 - Persistent state that survives page reloads — local playback pauses automatically when handing off to a device
+- **Multi-user** — different logins on the same household deployment each get independent playback to independent devices at the same time. A device already in use by someone else shows who and what's playing on it in the Connect popover, with a one-click, confirmation-gated takeover
 
 ### Docker (recommended)
 

@@ -48,6 +48,26 @@ def test_sonos_play_stops_active_transport_before_setting_uri():
     dev.stop.assert_called_once()
 
 
+def test_sonos_play_includes_album_in_metadata():
+    dev = _mock_sonos_device()
+    d = SonosDelivery("Küche")
+    with patch.object(SonosDelivery, "_get_device", return_value=dev):
+        asyncio.run(
+            d.play("http://stream", "Title", "Artist", None, None, "The Album")
+        )
+    call_kwargs = dict(dev.avTransport.SetAVTransportURI.call_args.args[0])
+    assert "<upnp:album>The Album</upnp:album>" in call_kwargs["CurrentURIMetaData"]
+
+
+def test_sonos_play_omits_album_when_not_given():
+    dev = _mock_sonos_device()
+    d = SonosDelivery("Küche")
+    with patch.object(SonosDelivery, "_get_device", return_value=dev):
+        asyncio.run(d.play("http://stream", "Title"))
+    call_kwargs = dict(dev.avTransport.SetAVTransportURI.call_args.args[0])
+    assert "<upnp:album>" not in call_kwargs["CurrentURIMetaData"]
+
+
 def test_sonos_pause_resume_stop_delegate_to_device():
     dev = MagicMock()
     d = SonosDelivery("Küche")
@@ -193,20 +213,103 @@ def test_dlna_play_sets_transport_uri_then_plays():
     d = DlnaDelivery("Receiver")
     with patch.object(DlnaDelivery, "_get_device", new=AsyncMock(return_value=device)):
         asyncio.run(d.play("http://stream", "Title", "Artist"))
-    device.async_set_transport_uri.assert_called_once_with(
-        "http://stream", "Title", {"artist": "Artist"}
-    )
+    call_args = device.async_set_transport_uri.call_args.args
+    assert call_args[0] == "http://stream"
+    assert call_args[1] == "Title"
+    assert "<upnp:artist>Artist</upnp:artist>" in call_args[2]
     device.async_play.assert_called_once()
 
 
-def test_dlna_play_without_artist_sends_no_metadata():
+def test_dlna_play_without_artist_sends_no_artist_or_album_art():
     device = _mock_dmr_device()
     d = DlnaDelivery("Receiver")
     with patch.object(DlnaDelivery, "_get_device", new=AsyncMock(return_value=device)):
         asyncio.run(d.play("http://stream", "Title"))
-    device.async_set_transport_uri.assert_called_once_with(
-        "http://stream", "Title", None
+    xml = device.async_set_transport_uri.call_args.args[2]
+    assert "<upnp:artist>" not in xml
+    assert "<dc:creator>" not in xml
+    assert "<upnp:albumArtURI>" not in xml
+    assert "<upnp:album>" not in xml
+
+
+def test_dlna_play_includes_album_in_metadata():
+    device = _mock_dmr_device()
+    d = DlnaDelivery("Receiver")
+    with patch.object(DlnaDelivery, "_get_device", new=AsyncMock(return_value=device)):
+        asyncio.run(
+            d.play(
+                "http://stream", "Title", "Artist", None, None, "The Album"
+            )
+        )
+    xml = device.async_set_transport_uri.call_args.args[2]
+    assert "<upnp:album>The Album</upnp:album>" in xml
+
+
+def test_dlna_play_includes_album_art_url_and_duration_in_metadata():
+    device = _mock_dmr_device()
+    d = DlnaDelivery("Receiver")
+    with patch.object(DlnaDelivery, "_get_device", new=AsyncMock(return_value=device)):
+        asyncio.run(
+            d.play("http://stream", "Title", "Artist", "http://nav/cover.jpg", 185.0)
+        )
+    xml = device.async_set_transport_uri.call_args.args[2]
+    assert "<upnp:albumArtURI>http://nav/cover.jpg</upnp:albumArtURI>" in xml
+    assert 'duration="0:03:05"' in xml
+
+
+# ── _build_metadata / _format_didl_duration ────────────────────────────────────
+
+
+def test_build_metadata_includes_title_artist_creator_and_forces_music_track():
+    xml = _dlna_mod._build_metadata("http://stream", "My Title", "My Artist")
+    assert "<dc:title>My Title</dc:title>" in xml
+    assert "<upnp:class>object.item.audioItem.musicTrack</upnp:class>" in xml
+    assert "<upnp:artist>My Artist</upnp:artist>" in xml
+    # Both set — upnp:artist is DLNA-preferred, but some renderers only read
+    # the older dc:creator (this was reported as "{Artist} | null" showing on
+    # a real renderer before dc:creator was added).
+    assert "<dc:creator>My Artist</dc:creator>" in xml
+
+
+def test_build_metadata_omits_optional_fields_when_not_given():
+    xml = _dlna_mod._build_metadata("http://stream", "Title")
+    assert "<upnp:artist>" not in xml
+    assert "<dc:creator>" not in xml
+    assert "<upnp:albumArtURI>" not in xml
+    assert "duration=" not in xml
+
+
+def test_format_didl_duration_rounds_and_zero_pads():
+    assert _dlna_mod._format_didl_duration(0) == "0:00:00"
+    assert _dlna_mod._format_didl_duration(65) == "0:01:05"
+    assert _dlna_mod._format_didl_duration(3725) == "1:02:05"
+    assert _dlna_mod._format_didl_duration(3725.6) == "1:02:06"
+
+
+def test_dlna_music_track_didl_class_declares_album_art_uri():
+    """Regression guard for one of two upstream didl_lite gaps this module
+    patches around: MusicTrack (unlike MusicAlbum) doesn't declare
+    upnp:albumArtURI by default, so DidlObject.to_xml() silently drops it —
+    meaning any album_art_url we pass never reaches the device at all, not
+    even as a dropped/invalid value. See dlna.py's module-level patch."""
+    from didl_lite.didl_lite import MusicTrack
+
+    assert any(p[1] == "albumArtURI" for p in MusicTrack.didl_properties_defs)
+
+
+def test_resource_to_xml_serializes_duration():
+    """Regression guard for the second upstream didl_lite gap: Resource.to_xml()
+    only ever wrote protocolInfo, silently dropping duration/size/bitrate/etc.
+    even though they're accepted (and round-tripped by from_xml()). This is
+    what caused tracks to show with no playback duration on the device."""
+    from didl_lite.didl_lite import Resource
+
+    resource = Resource(
+        uri="http://stream", protocol_info="http-get:*:audio/mpeg:*", duration="0:03:05"
     )
+    el = resource.to_xml()
+    assert el.attrib["duration"] == "0:03:05"
+    assert el.attrib["protocolInfo"] == "http-get:*:audio/mpeg:*"
 
 
 def test_dlna_pause_resume_stop_delegate_to_device():
@@ -267,6 +370,35 @@ def test_dlna_set_volume_clamps_to_valid_range():
         asyncio.run(d.set_volume(-10))
     device.async_set_volume_level.assert_any_call(1.0)
     device.async_set_volume_level.assert_any_call(0.0)
+
+
+def test_create_dmr_device_wraps_non_media_renderer_with_friendly_name():
+    """Regression test for the raw, unhelpful "could not find device of type"
+    warning some non-renderer UPnP devices (routers, NAS boxes, a Philips Hue
+    bridge, ...) produce when they answer our MediaRenderer SSDP search but
+    their own XML doesn't declare one."""
+    from async_upnp_client.exceptions import UpnpError
+
+    fake_upnp_device = MagicMock()
+    fake_upnp_device.friendly_name = "Philips Hue Bridge"
+
+    async def fake_async_create_device(self, location):
+        return fake_upnp_device
+
+    def fake_dmr_init(self, device, event_handler=None):
+        raise UpnpError("Could not find device of type: [...]")
+
+    with (
+        patch(
+            "async_upnp_client.client_factory.UpnpFactory.async_create_device",
+            new=fake_async_create_device,
+        ),
+        patch("async_upnp_client.profiles.dlna.DmrDevice.__init__", new=fake_dmr_init),
+    ):
+        with pytest.raises(_dlna_mod.UnsupportedDlnaDevice) as exc_info:
+            asyncio.run(_dlna_mod._create_dmr_device("http://10.2.2.139/desc.xml"))
+
+    assert exc_info.value.friendly_name == "Philips Hue Bridge"
 
 
 def test_dlna_get_device_uses_cached_location(monkeypatch):

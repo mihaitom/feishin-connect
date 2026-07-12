@@ -197,6 +197,7 @@ export const useServerAuthenticated = () => {
                             // Update server with new credentials
                             const updatedServer = {
                                 credential: authData.credential,
+                                displayName: authData.displayName,
                                 isAdmin: authData.isAdmin,
                                 userId: authData.userId,
                                 username: authData.username,

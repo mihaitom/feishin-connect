@@ -8,13 +8,45 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from core.auth import require_token
-from core.state import compute_position, ctx, event_bus, resolve_target, stream_url
+from core.claims import claims
+from core.session import (
+    SessionState,
+    build_status_dict,
+    check_claims,
+    compute_position,
+    displace_target,
+    get_session,
+    registry,
+)
+from core.state import resolve_target, stream_url
 
 logger = logging.getLogger("connect.playback")
 router = APIRouter(dependencies=[Depends(require_token)])
 
 
-async def _apply_position_offset(target, generation: int) -> None:
+async def _claim_or_takeover(target, session: SessionState, force: bool) -> dict | None:
+    """Wraps check_claims()+displace_target(): returns a device_in_use error
+    dict on refusal (force=False), otherwise None after stopping delivery for
+    any target a force=True takeover just displaced."""
+    error, displaced = await check_claims(target, session, force=force)
+    if error:
+        return error
+    for target_type, name, owner in displaced:
+        owner_session = registry.get(owner)
+        if owner_session:
+            await displace_target(owner_session, target_type, name)
+    return None
+
+
+# A device reporting itself this far *ahead* of the wall clock this early
+# into a stream is a stale/bogus reading, not real startup-buffering lag —
+# see _apply_position_offset().
+MAX_PLAUSIBLE_POSITION_LEAD = 15.0
+
+
+async def _apply_position_offset(
+    session: SessionState, target, generation: int
+) -> None:
     """Set `position_offset` for the track that just started playing.
 
     `compute_position()` returns `wall_elapsed + position_offset`. A device
@@ -28,7 +60,7 @@ async def _apply_position_offset(target, generation: int) -> None:
     delay, then keep it constant for the rest of the track (re-buffering
     mid-track is not accounted for).
     """
-    st = ctx.state
+    st = session.state
     deliveries = getattr(target, "deliveries", [target])
 
     fixed = max((d.FIXED_OFFSET for d in deliveries), default=0.0)
@@ -37,7 +69,7 @@ async def _apply_position_offset(target, generation: int) -> None:
         logger.info(
             f"[lyrics-sync] fixed position_offset={st.clock.position_offset:.2f}s"
         )
-        await event_bus.broadcast()
+        await session.event_bus.broadcast(build_status_dict(session))
         return
 
     candidate = next((d for d in deliveries if d.SUPPORTS_POSITION), None)
@@ -56,22 +88,50 @@ async def _apply_position_offset(target, generation: int) -> None:
         if not device_pos:
             continue
         wall_elapsed = st.clock.elapsed_since_stream_start()
+        # A genuine startup-buffering delay makes the device *lag* the wall
+        # clock by a few seconds at most. A device reporting a position well
+        # *ahead* of the wall clock this early is a stale/bogus reading, not
+        # real lag — observed with a DLNA renderer reporting a fixed ~56s
+        # position mere seconds into a brand new stream (seemingly left over
+        # from before it caught up to the new URI). Trusting it would show
+        # the track as "starting" tens of seconds in even though it's audible
+        # from 0:00. Keep polling instead — most devices settle within the
+        # deadline; if none do, no calibration is applied at all, which is
+        # still far closer to correct than a wildly wrong one.
+        if device_pos - wall_elapsed > MAX_PLAUSIBLE_POSITION_LEAD:
+            logger.warning(
+                f"[lyrics-sync] {candidate.target}: ignoring implausible "
+                f"device position {device_pos:.2f}s vs. wall {wall_elapsed:.2f}s"
+            )
+            continue
         offset = st.clock.calibrate(device_pos)
         logger.info(
             f"[lyrics-sync] {candidate.target}: calibrated position_offset="
             f"{offset:.2f}s (device {device_pos:.2f}s vs. wall {wall_elapsed:.2f}s)"
         )
-        await event_bus.broadcast()
+        await session.event_bus.broadcast(build_status_dict(session))
         return
 
 
-def _current_track_play_args() -> tuple[str, str, str | None]:
-    """Return (title, artist, album_art_url) for the current track, used when
-    restarting the stream (resume/seek) so Now-Playing metadata isn't lost."""
-    track = ctx.state.current_track
+def _current_track_play_args(
+    session: SessionState,
+) -> tuple[str, str, str | None, float | None, str]:
+    """Return (title, artist, album_art_url, duration, album) for the current
+    track, used when restarting the stream (resume/seek) so Now-Playing
+    metadata isn't lost. album_art_url uses internal=True — it's fetched
+    directly by the cast device (Sonos/Chromecast/AirPlay/DLNA), not the
+    browser, so it must use a LAN-reachable address (see MediaClient.
+    get_cover_art_url's docstring)."""
+    track = session.state.current_track
     if not track:
-        return "Connect", "", None
-    return track.title, track.artist, ctx.media.get_cover_art_url(track.cover_art_id)
+        return "Connect", "", None, None, ""
+    return (
+        track.title,
+        track.artist,
+        session.media.get_cover_art_url(track.cover_art_id, internal=True),
+        float(track.duration),
+        track.album,
+    )
 
 
 class PlayRequest(BaseModel):
@@ -86,11 +146,14 @@ class PlayRequest(BaseModel):
     # Seconds into the track to start at (e.g. the position local playback had
     # reached when the user connected mid-track). 0 starts from the beginning.
     start_position: float = 0.0
+    # Take over any target already claimed by another session instead of
+    # refusing (Phase 2 — the user confirmed a takeover dialog).
+    force: bool = False
 
 
 @router.post("/play")
-async def play_tracks(req: PlayRequest):
-    if not ctx.media.base_url:
+async def play_tracks(req: PlayRequest, session: SessionState = Depends(get_session)):
+    if not session.media.base_url:
         logger.warning(
             "[play] Rejected: media server not configured (waiting for /config)"
         )
@@ -102,20 +165,25 @@ async def play_tracks(req: PlayRequest):
 
     track_id = req.track_ids[0]
     try:
-        track = ctx.media.get_track(track_id)
+        track = session.media.get_track(track_id)
     except Exception as e:
         logger.warning(f"[play] Track {track_id} not found: {e}")
         return {"error": f"Track not found: {e}"}
 
     target = resolve_target(req.targets, req.target_name, req.target_type)
-    url = stream_url()
+    url = stream_url(session.session_id)
     start_position = max(0.0, min(req.start_position, float(track.duration)))
     logger.info(
         f"[play] {track.artist} — {track.title} ({track.duration}s) → target={target}"
         + (f" (start {start_position:.1f}s)" if start_position > 0.5 else "")
     )
 
-    st = ctx.state
+    if target:
+        conflict = await _claim_or_takeover(target, session, req.force)
+        if conflict:
+            return conflict
+
+    st = session.state
     st.current_track = track
     st.current_track_gain = req.gain
     st.is_streaming = True
@@ -126,19 +194,30 @@ async def play_tracks(req: PlayRequest):
     if not target:
         logger.info(f"[play] No target — stream available at {url}")
         st.active_delivery = None
-        await event_bus.broadcast()
+        await session.event_bus.broadcast(build_status_dict(session))
         return {"status": "playing", "stream_url": url}
 
     st.active_delivery = target
-    album_art_url = ctx.media.get_cover_art_url(track.cover_art_id)
+    # internal=True: fetched directly by the cast device, not the browser —
+    # see MediaClient.get_cover_art_url's docstring.
+    album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
     try:
-        await target.play(url, track.title, track.artist, album_art_url)
+        await target.play(
+            url,
+            track.title,
+            track.artist,
+            album_art_url,
+            float(track.duration),
+            track.album,
+        )
     except Exception as e:
         logger.error(f"[play] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
-    asyncio.create_task(_apply_position_offset(target, st.clock.play_generation))
-    await event_bus.broadcast()
+    asyncio.create_task(
+        _apply_position_offset(session, target, st.clock.play_generation)
+    )
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "playing", "stream_url": url}
 
 
@@ -148,17 +227,23 @@ class PlayUrlRequest(BaseModel):
     targets: list[dict] | None = None
     target_name: str | None = None
     target_type: str | None = None
+    # See PlayRequest.force.
+    force: bool = False
 
 
 @router.post("/play-url")
-async def play_url(req: PlayUrlRequest):
+async def play_url(req: PlayUrlRequest, session: SessionState = Depends(get_session)):
     target = resolve_target(req.targets, req.target_name, req.target_type)
     if not target:
         return {"error": "No target configured"}
 
+    conflict = await _claim_or_takeover(target, session, req.force)
+    if conflict:
+        return conflict
+
     logger.info(f"[play-url] '{req.title}' → {req.url[:80]}, target={target}")
 
-    st = ctx.state
+    st = session.state
     st.current_track = None
     st.is_streaming = True
     st.radio_info = {"title": req.title, "url": req.url}
@@ -172,35 +257,39 @@ async def play_url(req: PlayUrlRequest):
         logger.error(f"[play-url] Delivery error: {e}", exc_info=True)
         return {"error": str(e)}
 
-    asyncio.create_task(_apply_position_offset(target, st.clock.play_generation))
-    await event_bus.broadcast()
+    asyncio.create_task(
+        _apply_position_offset(session, target, st.clock.play_generation)
+    )
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "playing", "url": req.url}
 
 
 @router.post("/pause")
-async def pause_playback():
-    st = ctx.state
+async def pause_playback(session: SessionState = Depends(get_session)):
+    st = session.state
     if st.active_delivery:
         await st.active_delivery.pause()
-    elapsed = compute_position()
+    elapsed = compute_position(session)
     st.clock.pause(elapsed)
     logger.info(f"[pause] ⏸ {elapsed:.1f}s into track")
-    await event_bus.broadcast()
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"paused": True}
 
 
 @router.post("/resume")
-async def resume_playback():
-    st = ctx.state
+async def resume_playback(session: SessionState = Depends(get_session)):
+    st = session.state
     st.clock.resume()
 
     logger.info(f"[resume] ▶ Seeking to {st.clock.resume_offset:.1f}s")
 
     if st.active_delivery:
         # Force a fresh /stream connection so FFmpeg applies the seek offset
-        await st.active_delivery.play(stream_url(), *_current_track_play_args())
+        await st.active_delivery.play(
+            stream_url(session.session_id), *_current_track_play_args(session)
+        )
 
-    await event_bus.broadcast()
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"paused": False}
 
 
@@ -209,8 +298,10 @@ class SeekRequest(BaseModel):
 
 
 @router.post("/seek")
-async def seek_playback(body: SeekRequest):
-    st = ctx.state
+async def seek_playback(
+    body: SeekRequest, session: SessionState = Depends(get_session)
+):
+    st = session.state
     position = max(0.0, body.position)
     if st.current_track:
         position = min(position, st.current_track.duration)
@@ -218,16 +309,18 @@ async def seek_playback(body: SeekRequest):
     st.clock.seek_to(position)
 
     if not st.clock.is_paused and st.active_delivery:
-        await st.active_delivery.play(stream_url(), *_current_track_play_args())
+        await st.active_delivery.play(
+            stream_url(session.session_id), *_current_track_play_args(session)
+        )
 
     logger.info(f"[seek] ⏩ {position:.1f}s")
-    await event_bus.broadcast()
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"position": position}
 
 
 @router.post("/stop")
-async def stop_playback():
-    st = ctx.state
+async def stop_playback(session: SessionState = Depends(get_session)):
+    st = session.state
     if st.active_delivery:
         await st.active_delivery.stop()
     st.is_streaming = False
@@ -236,6 +329,7 @@ async def stop_playback():
     st.current_track = None
     st.radio_info = None
     st.active_delivery = None
+    await claims.release_all_for_session(session.session_id)
     logger.info("[stop] ⏹ Playback stopped")
-    await event_bus.broadcast()
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "stopped"}
