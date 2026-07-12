@@ -220,7 +220,7 @@ export const MobilePlayerbar = () => {
                 />
                 <MainPlayButton
                     disabled={!connectActive && currentSong?.id === undefined}
-                    isPaused={connectActive ? !connectPlaying : status === PlayerStatus.PAUSED}
+                    isPaused={connectActive ? !connectPlaying : status !== PlayerStatus.PLAYING}
                     onClick={(e) => {
                         e.stopPropagation();
                         if (connectActive && connectHandlers) {

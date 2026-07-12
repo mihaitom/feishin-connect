@@ -1,10 +1,16 @@
+import formatDuration from 'format-duration';
 import { useTranslation } from 'react-i18next';
 
 import {
     invokeScrobbleForceSubmit,
     invokeScrobbleResetListenedState,
 } from '/@/renderer/features/player/hooks/use-scrobble';
-import { useAppStore, useScrobbleDebugStore, useSettingsStore } from '/@/renderer/store';
+import {
+    useAppStore,
+    usePlayerTimestamp,
+    useScrobbleDebugSnapshot,
+    useSettingsStore,
+} from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { HoverCard } from '/@/shared/components/hover-card/hover-card';
@@ -32,11 +38,15 @@ const ScrobbleConditionProgress = ({ value }: { value: number }) => (
     <Progress {...scrobbleProgressProps} value={value} w="100%" />
 );
 
-export const ScrobbleStatus = ({ formattedTime }: { formattedTime: string }) => {
+export const ScrobbleStatus = ({
+    formattedTime: formattedTimeOverride,
+}: { formattedTime?: string } = {}) => {
     const { t } = useTranslation();
     const scrobbleEnabled = useSettingsStore((state) => state.playback.scrobble.enabled);
     const privateMode = useAppStore((state) => state.privateMode);
-    const snapshot = useScrobbleDebugStore((state) => state.snapshot);
+    const snapshot = useScrobbleDebugSnapshot();
+    const localFormattedTime = formatDuration(usePlayerTimestamp() * 1000 || 0);
+    const formattedTime = formattedTimeOverride ?? localFormattedTime;
 
     const hookInactive = !scrobbleEnabled || privateMode;
 

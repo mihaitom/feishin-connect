@@ -211,7 +211,7 @@ const CenterPlayButton = ({ disabled }: { disabled?: boolean }) => {
     return (
         <MainPlayButton
             disabled={disabled || (!connectActive && currentSongId === undefined)}
-            isPaused={connectActive ? !connectPlaying : status === PlayerStatus.PAUSED}
+            isPaused={connectActive ? !connectPlaying : status !== PlayerStatus.PLAYING}
             onClick={
                 connectActive && connectHandlers
                     ? connectHandlers.onPlayPause
