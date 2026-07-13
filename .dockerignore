@@ -7,3 +7,9 @@ connect/.venv
 **/.env
 connect/airplay_credentials.json
 connect/tone.wav
+connect/dist
+connect/packaging
+connect/tests
+**/__pycache__
+connect/.pytest_cache
+connect/.ruff_cache
