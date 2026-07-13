@@ -21,13 +21,16 @@ from core.auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
 from core.auth import TOKEN as _CONNECT_TOKEN
 from core.session import reap_stale_sessions
 from core.state import PORT, ctx, get_local_ip
-from routes.devices import discover_all
 from routes.devices import router as devices_router
+from routes.discovery import discover_all
+from routes.discovery import router as discovery_router
+from routes.join import router as join_router
 from routes.lyrics import router as lyrics_router
 from routes.pairing import router as pairing_router
 from routes.playback import router as playback_router
 from routes.proxy import router as proxy_router
 from routes.stream import router as stream_router
+from routes.volume import router as volume_router
 
 load_dotenv()
 
@@ -256,6 +259,9 @@ app.add_middleware(
 app.include_router(stream_router)
 app.include_router(playback_router)
 app.include_router(devices_router)
+app.include_router(discovery_router)
+app.include_router(volume_router)
+app.include_router(join_router)
 app.include_router(pairing_router)
 app.include_router(lyrics_router)
 app.include_router(proxy_router)

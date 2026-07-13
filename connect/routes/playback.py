@@ -253,11 +253,15 @@ async def play_url(req: PlayUrlRequest, session: SessionState = Depends(get_sess
     if not target:
         return {"error": "No target configured"}
 
+    # Logged before the claim check, like /play — so a radio start attempt
+    # that gets refused with device_in_use still shows up, instead of only
+    # logging on success.
+    logger.info(f"[play-url] Radio '{req.title}' → {req.url[:80]}, target={target}")
+
     conflict = await _claim_or_takeover(target, session, req.force)
     if conflict:
+        logger.info(f"[play-url] Refused: {conflict}")
         return conflict
-
-    logger.info(f"[play-url] '{req.title}' → {req.url[:80]}, target={target}")
 
     st = session.state
     st.current_track = None

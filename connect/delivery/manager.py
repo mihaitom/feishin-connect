@@ -199,8 +199,13 @@ def _is_sonos(device) -> bool:
     return False
 
 
-async def discover_airplay() -> list[dict]:
-    """Discovers all AirPlay devices on the network."""
+async def discover_airplay(verbose: bool = False) -> list[dict]:
+    """Discovers all AirPlay devices on the network.
+
+    `verbose` logs which Sonos-duplicate entries were skipped — only worth
+    showing for an explicit "Scan again", not the quiet background rescans
+    triggered by every popover open or the periodic task in main.py.
+    """
     import pyatv
     from pyatv.const import Protocol
 
@@ -208,10 +213,11 @@ async def discover_airplay() -> list[dict]:
     result = []
     for d in devices:
         if _is_sonos(d) and not _DEBUG:
-            logger.info(
-                f"[discover] Skipping AirPlay for Sonos device '{d.name}' "
-                f"(use Sonos output instead)"
-            )
+            if verbose:
+                logger.info(
+                    f"[discover] Skipping AirPlay for Sonos device '{d.name}' "
+                    f"(use Sonos output instead)"
+                )
             continue
         protocols = {s.protocol for s in d.services}
         result.append(
@@ -245,13 +251,16 @@ async def discover_chromecast() -> list[dict]:
     return await asyncio.to_thread(_scan)
 
 
-async def discover_dlna() -> list[dict]:
+async def discover_dlna(verbose: bool = False) -> list[dict]:
     """Discovers all DLNA/UPnP MediaRenderer devices on the network.
 
     Sonos speakers also expose themselves as generic UPnP MediaRenderers (it's
     how SoCo itself talks to them), so they'd otherwise show up twice — once
     correctly via discover_sonos(), once again here. Filtered out by
     manufacturer, same idea as _is_sonos() for the AirPlay list.
+
+    `verbose` logs which Sonos-duplicate entries were skipped — see
+    discover_airplay()'s docstring.
     """
     from async_upnp_client.search import async_search
     from async_upnp_client.utils import CaseInsensitiveDict
@@ -285,10 +294,11 @@ async def discover_dlna() -> list[dict]:
             logger.warning(f"[discover] DLNA device at {location}: {e}")
             continue
         if "sonos" in (device.manufacturer or "").lower() and not _DEBUG:
-            logger.info(
-                f"[discover] Skipping DLNA for Sonos device '{device.name}' "
-                f"(use Sonos output instead)"
-            )
+            if verbose:
+                logger.info(
+                    f"[discover] Skipping DLNA for Sonos device '{device.name}' "
+                    f"(use Sonos output instead)"
+                )
             continue
         result.append({"location": location, "name": device.name})
         _location_cache[device.name.lower()] = location

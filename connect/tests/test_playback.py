@@ -120,26 +120,32 @@ def test_play_returns_error_for_unfetchable_track(client, default_session):
 # ── Phase 2 takeover (force=True) ───────────────────────────────────────────
 
 
-def test_play_url_rejects_claimed_target_without_force(client, default_session):
+def test_play_url_rejects_claimed_target_without_force(client, default_session, caplog):
     import asyncio
+    import logging
 
     from core.claims import claims
 
     asyncio.run(claims.claim("chromecast", "TV", "other-session"))
 
-    r = client.post(
-        "/play-url",
-        json={
-            "target_name": "TV",
-            "target_type": "chromecast",
-            "title": "Test",
-            "url": "http://example.com/stream.mp3",
-        },
-    )
+    with caplog.at_level(logging.INFO, logger="connect.playback"):
+        r = client.post(
+            "/play-url",
+            json={
+                "target_name": "TV",
+                "target_type": "chromecast",
+                "title": "Test",
+                "url": "http://example.com/stream.mp3",
+            },
+        )
 
     body = r.json()
     assert body["error"] == "device_in_use"
     assert default_session.state.is_streaming is False
+    # Logged even when refused — a radio start attempt shouldn't go
+    # completely silent just because the device was already claimed.
+    messages = "\n".join(rec.message for rec in caplog.records)
+    assert "Radio 'Test'" in messages
 
 
 def test_play_url_with_force_displaces_other_sessions_claim(client, default_session):

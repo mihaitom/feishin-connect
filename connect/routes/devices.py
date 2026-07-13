@@ -1,4 +1,9 @@
-"""routes/devices.py — /config, /discover, /volume, /device-volume, /device-stop, /join"""
+"""routes/devices.py — /config, /health, /device-stop
+
+Discovery lives in routes/discovery.py, volume in routes/volume.py, and
+/join + /claim in routes/join.py — split out since this file used to mix all
+of it together.
+"""
 
 import asyncio
 import logging
@@ -9,16 +14,8 @@ from pydantic import BaseModel
 
 from core.auth import require_token
 from core.claims import claims
-from core.session import (
-    SessionState,
-    build_status_dict,
-    check_claims,
-    displace_target,
-    get_session,
-    registry,
-    track_label,
-)
-from core.state import ctx, find_sonos, resolve_target, stream_url
+from core.session import SessionState, build_status_dict, get_session
+from core.state import stream_url
 
 from delivery import (
     AirPlayDelivery,
@@ -27,10 +24,6 @@ from delivery import (
     DeliveryManager,
     DlnaDelivery,
     SonosDelivery,
-    discover_airplay,
-    discover_chromecast,
-    discover_dlna,
-    discover_sonos,
 )
 from media import JellyfinClient, SubsonicClient
 
@@ -87,184 +80,6 @@ async def health(session: SessionState = Depends(get_session)):
         "ffmpeg": bool(shutil.which("ffmpeg")),
         "navidrome_configured": bool(session.media.base_url),
     }
-
-
-async def _scan_devices() -> dict:
-    """The actual SSDP/mDNS scan for Sonos, AirPlay, Chromecast and DLNA
-    devices — extracted so discover_all() can coalesce concurrent callers
-    into a single in-flight scan instead of each running their own."""
-    cached = ctx.discovered
-    logger.info("[discover] Scanning for Sonos, AirPlay, Chromecast and DLNA devices …")
-    sonos_res, airplay_res, chromecast_res, dlna_res = await asyncio.gather(
-        discover_sonos(),
-        discover_airplay(),
-        discover_chromecast(),
-        discover_dlna(),
-        return_exceptions=True,
-    )
-    sonos = sonos_res if isinstance(sonos_res, list) else cached["sonos"]
-    airplay = airplay_res if isinstance(airplay_res, list) else cached["airplay"]
-    chromecast = (
-        chromecast_res if isinstance(chromecast_res, list) else cached["chromecast"]
-    )
-    dlna = dlna_res if isinstance(dlna_res, list) else cached["dlna"]
-    if isinstance(sonos_res, Exception):
-        logger.warning(f"[discover] Sonos error: {sonos_res}")
-    if isinstance(airplay_res, Exception):
-        logger.warning(f"[discover] AirPlay error: {airplay_res}")
-    if isinstance(chromecast_res, Exception):
-        logger.warning(f"[discover] Chromecast error: {chromecast_res}")
-    if isinstance(dlna_res, Exception):
-        logger.warning(f"[discover] DLNA error: {dlna_res}")
-    logger.info(
-        f"[discover] {len(sonos)} Sonos, {len(airplay)} AirPlay, "
-        f"{len(chromecast)} Chromecast, {len(dlna)} DLNA found"
-    )
-    ctx.discovered = {
-        "airplay": airplay,
-        "chromecast": chromecast,
-        "dlna": dlna,
-        "sonos": sonos,
-    }
-    return ctx.discovered
-
-
-_discover_lock = asyncio.Lock()
-_discover_task: asyncio.Task | None = None
-
-
-async def discover_all() -> dict:
-    """Scan for Sonos, AirPlay, Chromecast and DLNA devices and update the
-    cache. Global, not session-scoped — the set of devices on the network is
-    the same regardless of who's asking (see core/state.py's Context).
-
-    Coalesces concurrent callers into a single in-flight scan: two users
-    opening the popover at nearly the same time (or a request-triggered
-    refresh overlapping the periodic background scan in main.py) would
-    otherwise each kick off their own redundant — and, for mDNS/SSDP,
-    mutually interfering — scan. Everyone who calls in while a scan is
-    already running just awaits that same scan's result instead.
-    """
-    global _discover_task
-    async with _discover_lock:
-        if _discover_task is None or _discover_task.done():
-            _discover_task = asyncio.create_task(_scan_devices())
-        task = _discover_task
-    return await task
-
-
-def _annotate_claims(discovered: dict) -> dict:
-    """Attach in_use_by_session_id/in_use_by_name/in_use_by_track to each
-    device in a fresh /discover response — computed per-request (not cached,
-    unlike the device list itself) since claims change far more often than
-    the device list. Reports the raw owner regardless of who's asking; the
-    frontend decides "claimed by me" vs. "claimed by someone else" by
-    comparing against its own session id."""
-    annotated: dict = {}
-    for group_type, devices in discovered.items():
-        annotated[group_type] = []
-        for device in devices:
-            owner = claims.owner_of(group_type, device["name"])
-            owner_session = registry.get(owner) if owner else None
-            annotated[group_type].append(
-                {
-                    **device,
-                    "in_use_by_name": owner_session.display_name if owner_session else None,
-                    "in_use_by_session_id": owner,
-                    "in_use_by_track": track_label(owner_session) if owner_session else None,
-                }
-            )
-    return annotated
-
-
-@router.get("/discover")
-async def discover(fresh: bool = False):
-    cached = ctx.discovered
-    has_cache = bool(
-        cached["sonos"] or cached["airplay"] or cached["chromecast"] or cached["dlna"]
-    )
-
-    # fresh=true (explicit "Scan again") awaits a full rescan so the client can
-    # show real progress. Otherwise serve cache instantly and rescan in the
-    # background for snappy popover opens.
-    if has_cache and not fresh:
-        asyncio.create_task(discover_all())
-        return _annotate_claims(cached)
-
-    return _annotate_claims(await discover_all())
-
-
-class VolumeRequest(BaseModel):
-    volume: int
-
-
-@router.get("/volume")
-async def get_volume(session: SessionState = Depends(get_session)):
-    sonos_targets = find_sonos(session.state.active_delivery)
-    if not sonos_targets:
-        return {"error": "No active Sonos target"}
-    try:
-        device = await asyncio.to_thread(sonos_targets[0]._get_device)
-        return {"volume": device.volume}
-    except Exception as e:
-        logger.warning(f"[volume] get error: {e}")
-        return {"error": str(e)}
-
-
-@router.post("/volume")
-async def set_volume(req: VolumeRequest, session: SessionState = Depends(get_session)):
-    volume = max(0, min(100, req.volume))
-    sonos_targets = find_sonos(session.state.active_delivery)
-    if not sonos_targets:
-        return {"error": "No active Sonos target"}
-
-    async def _set(d: SonosDelivery):
-        device = await asyncio.to_thread(d._get_device)
-        await asyncio.to_thread(setattr, device, "volume", volume)
-
-    await asyncio.gather(*[_set(d) for d in sonos_targets], return_exceptions=True)
-    return {"volume": volume}
-
-
-@router.get("/device-volume")
-async def get_device_volume(device_type: str, name: str):
-    try:
-        if device_type == "sonos":
-            device = await asyncio.to_thread(SonosDelivery(name)._get_device)
-            return {"volume": device.volume}
-        if device_type == "chromecast":
-            cast = await asyncio.to_thread(ChromecastDelivery(name)._get_device)
-            return {"volume": int(round(cast.status.volume_level * 100))}
-        if device_type == "dlna":
-            volume = await DlnaDelivery(name).get_volume()
-            if volume is None:
-                return {"error": f"Volume control not supported for {name}"}
-            return {"volume": volume}
-        return {"error": f"Volume control not supported for {device_type}"}
-    except Exception as e:
-        logger.warning(f"[device-volume] get '{name}': {e}")
-        return {"error": str(e)}
-
-
-@router.post("/device-volume")
-async def set_device_volume(device_type: str, name: str, req: VolumeRequest):
-    volume = max(0, min(100, req.volume))
-    try:
-        if device_type == "sonos":
-            device = await asyncio.to_thread(SonosDelivery(name)._get_device)
-            await asyncio.to_thread(setattr, device, "volume", volume)
-            return {"volume": volume}
-        if device_type == "chromecast":
-            cast = await asyncio.to_thread(ChromecastDelivery(name)._get_device)
-            await asyncio.to_thread(cast.set_volume, volume / 100.0)
-            return {"volume": volume}
-        if device_type == "dlna":
-            await DlnaDelivery(name).set_volume(volume)
-            return {"volume": volume}
-        return {"error": f"Volume control not supported for {device_type}"}
-    except Exception as e:
-        logger.warning(f"[device-volume] set '{name}': {e}")
-        return {"error": str(e)}
 
 
 @router.post("/device-stop")
@@ -385,114 +200,3 @@ async def stop_device(
 
     await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "stopped", "device": name}
-
-
-class JoinRequest(BaseModel):
-    target_name: str
-    target_type: str
-    # See PlayRequest.force in routes/playback.py.
-    force: bool = False
-
-
-@router.post("/join")
-async def join_stream(
-    req: JoinRequest, session: SessionState = Depends(get_session)
-):
-    st = session.state
-    if not st.is_streaming:
-        return {"error": "No active stream"}
-
-    type_cls: type[BaseDelivery]
-    if req.target_type == "sonos":
-        type_cls = SonosDelivery
-    elif req.target_type == "chromecast":
-        type_cls = ChromecastDelivery
-    elif req.target_type == "dlna":
-        type_cls = DlnaDelivery
-    else:
-        type_cls = AirPlayDelivery
-    new_d: BaseDelivery = type_cls(req.target_name)
-
-    error, displaced = await check_claims(new_d, session, force=req.force)
-    if error:
-        return error
-    for target_type, name, owner in displaced:
-        owner_session = registry.get(owner)
-        if owner_session:
-            await displace_target(owner_session, target_type, name)
-
-    # Radio has no track loaded (session.state.current_track stays None for
-    # it — see /play-url), so it must join on its own raw URL rather than the
-    # FFmpeg /stream proxy, which 204s with no track loaded.
-    url = st.radio_info["url"] if st.radio_info else stream_url(session.session_id)
-    title = st.radio_info["title"] if st.radio_info else "Connect"
-    logger.info(f"[join] {req.target_type}:{req.target_name} → {url}")
-
-    if req.target_type == "sonos":
-        existing_sonos = find_sonos(st.active_delivery)
-        if existing_sonos:
-            try:
-                coordinator = await asyncio.to_thread(existing_sonos[0]._get_device)
-                joiner = await asyncio.to_thread(new_d._get_device)
-                await asyncio.to_thread(joiner.join, coordinator)
-                logger.info(
-                    f"[join] {req.target_name} joining group of {existing_sonos[0].target}"
-                )
-            except Exception as e:
-                logger.warning(
-                    f"[join] Group join failed ({e}), falling back to individual stream"
-                )
-                await new_d.play(url, title)
-        else:
-            await new_d.play(url, title)
-    else:
-        await new_d.play(url, title)
-
-    if isinstance(st.active_delivery, DeliveryManager):
-        existing = {d.target for d in st.active_delivery.deliveries}
-        if req.target_name not in existing:
-            st.active_delivery.deliveries.append(new_d)
-    elif st.active_delivery:
-        st.active_delivery = DeliveryManager.from_deliveries(
-            [st.active_delivery, new_d]
-        )
-    else:
-        st.active_delivery = new_d
-
-    await session.event_bus.broadcast(build_status_dict(session))
-    return {"status": "joined", "device": req.target_name}
-
-
-class ClaimRequest(BaseModel):
-    targets: list[dict]
-    # See PlayRequest.force in routes/playback.py.
-    force: bool = False
-
-
-@router.post("/claim")
-async def claim_device(req: ClaimRequest, session: SessionState = Depends(get_session)):
-    """Claim one or more devices for this session WITHOUT starting playback.
-
-    For the takeover flow when the user has nothing loaded to play yet: a
-    device already in use can still be taken over — the previous owner's
-    playback stops and hands back to local (same as any other takeover, see
-    displace_target()) — without requiring the new owner to already have a
-    track or radio stream queued up. The device becomes this session's
-    active target so the next /play (once something is actually picked)
-    targets it automatically, and /status "targets" for it right away.
-    """
-    target = resolve_target(req.targets, None, None)
-    if not target:
-        return {"error": "No target configured"}
-
-    error, displaced = await check_claims(target, session, force=req.force)
-    if error:
-        return error
-    for target_type, name, owner in displaced:
-        owner_session = registry.get(owner)
-        if owner_session:
-            await displace_target(owner_session, target_type, name)
-
-    session.state.active_delivery = target
-    await session.event_bus.broadcast(build_status_dict(session))
-    return {"status": "claimed"}
