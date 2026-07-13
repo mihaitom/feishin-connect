@@ -73,16 +73,29 @@ const RadioCenterPlayButton = ({ disabled }: { disabled?: boolean }) => {
     const { currentStreamUrl } = useRadioPlayer();
     const isPlayingRadio = useIsPlayingRadio();
     const { pause, play } = useRadioControls();
+    const {
+        handlers: connectHandlers,
+        isActive: connectActive,
+        isPlaying: connectPlaying,
+    } = useConnectPlayerStore();
 
     const handleClick = () => {
-        if (isPlayingRadio) {
+        if (connectActive && connectHandlers) {
+            connectHandlers.onPlayPause();
+        } else if (isPlayingRadio) {
             pause();
         } else if (currentStreamUrl) {
             play();
         }
     };
 
-    return <MainPlayButton disabled={disabled} isPaused={!isPlayingRadio} onClick={handleClick} />;
+    return (
+        <MainPlayButton
+            disabled={disabled}
+            isPaused={connectActive ? !connectPlaying : !isPlayingRadio}
+            onClick={handleClick}
+        />
+    );
 };
 
 const RadioStopButton = ({ disabled }: { disabled?: boolean }) => {

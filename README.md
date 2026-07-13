@@ -174,6 +174,8 @@ uv sync
 uv run python main.py
 ```
 
+The bare web dev server has no Electron preload or nginx to inject `CONNECT_TOKEN`, so it sends none by default and every Connect API call — including `/health` — gets rejected with 401. Add `VITE_CONNECT_TOKEN=<value>` to `.env` at the repo root (gitignored, picked up by Vite automatically) to match the backend's `CONNECT_TOKEN` — or the default `feishin-connect-insecure-default` if you haven't set one — then restart `pnpm run dev:web`.
+
 ---
 
 ## Media server behind SSO (Authentik etc.)

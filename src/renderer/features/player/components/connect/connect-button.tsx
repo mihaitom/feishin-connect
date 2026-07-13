@@ -5,6 +5,7 @@ import { LuCast } from 'react-icons/lu';
 import { ConnectPopover } from './connect-popover';
 import { useConnectSessionContext } from './connect-session-context';
 import { computePopoverPosition } from './popover-position';
+import { Spinner } from './ui';
 
 export const ConnectButton = () => {
     const { t } = useTranslation();
@@ -92,7 +93,11 @@ export const ConnectButton = () => {
                         : t('player.connect_playOnDevice')
                 }
             >
-                <LuCast size={20} style={{ opacity: isActive ? 1 : 0.7 }} />
+                {status === 'loading' ? (
+                    <Spinner size={16} />
+                ) : (
+                    <LuCast size={20} style={{ opacity: isActive ? 1 : 0.7 }} />
+                )}
             </button>
 
             {open && (

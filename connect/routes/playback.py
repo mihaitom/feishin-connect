@@ -134,6 +134,22 @@ def _current_track_play_args(
     )
 
 
+def _current_reconnect_args(
+    session: SessionState,
+) -> tuple[str, str, str, str | None, float | None, str]:
+    """Return (url, title, artist, album_art_url, duration, album) to hand
+    back to target.play() when reconnecting to whatever's currently loaded —
+    used by /resume and /seek. A queued track goes back through the FFmpeg
+    /stream proxy; radio has no track loaded (session.state.current_track is
+    None for it — see /play-url) and must reconnect to its own raw URL
+    instead, or the device gets a 204 from /stream and silently stops."""
+    st = session.state
+    if st.radio_info:
+        return st.radio_info["url"], st.radio_info["title"], "", None, None, ""
+    title, artist, album_art_url, duration, album = _current_track_play_args(session)
+    return stream_url(session.session_id), title, artist, album_art_url, duration, album
+
+
 class PlayRequest(BaseModel):
     track_ids: list[str]
     targets: list[dict] | None = None
@@ -285,9 +301,8 @@ async def resume_playback(session: SessionState = Depends(get_session)):
 
     if st.active_delivery:
         # Force a fresh /stream connection so FFmpeg applies the seek offset
-        await st.active_delivery.play(
-            stream_url(session.session_id), *_current_track_play_args(session)
-        )
+        # (radio reconnects to its own URL instead — see _current_reconnect_args).
+        await st.active_delivery.play(*_current_reconnect_args(session))
 
     await session.event_bus.broadcast(build_status_dict(session))
     return {"paused": False}
@@ -309,9 +324,7 @@ async def seek_playback(
     st.clock.seek_to(position)
 
     if not st.clock.is_paused and st.active_delivery:
-        await st.active_delivery.play(
-            stream_url(session.session_id), *_current_track_play_args(session)
-        )
+        await st.active_delivery.play(*_current_reconnect_args(session))
 
     logger.info(f"[seek] ⏩ {position:.1f}s")
     await session.event_bus.broadcast(build_status_dict(session))

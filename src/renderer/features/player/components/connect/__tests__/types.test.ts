@@ -13,10 +13,15 @@ describe('connect/types', () => {
         vi.resetModules();
         delete (window as any).__CONNECT_URL__;
         delete (window as any).__CONNECT_TOKEN__;
+        // Isolate from whatever VITE_CONNECT_TOKEN happens to be set in the
+        // developer's own repo-root .env — these tests assert the no-token
+        // path explicitly and shouldn't depend on the local machine's config.
+        vi.stubEnv('VITE_CONNECT_TOKEN', '');
     });
 
     afterEach(() => {
         global.fetch = originalFetch;
+        vi.unstubAllEnvs();
     });
 
     describe('connectFetch', () => {

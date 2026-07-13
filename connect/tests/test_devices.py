@@ -46,6 +46,64 @@ def test_discover_returns_all_four_device_types(client):
     assert body["dlna"] == [_unclaimed(d) for d in dlna]
 
 
+def test_discover_all_coalesces_concurrent_callers():
+    """Two users opening the popover at nearly the same time (or a
+    request-triggered refresh overlapping the periodic background scan)
+    must share a single real scan instead of each starting their own."""
+    import asyncio
+
+    from routes.devices import discover_all
+
+    call_count = 0
+
+    async def slow_discover_sonos():
+        nonlocal call_count
+        call_count += 1
+        await asyncio.sleep(0.05)
+        return [{"name": "Küche", "ip": "10.0.0.1"}]
+
+    with (
+        patch("routes.devices.discover_sonos", new=slow_discover_sonos),
+        patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_dlna", new=AsyncMock(return_value=[])),
+    ):
+        async def _run():
+            return await asyncio.gather(discover_all(), discover_all(), discover_all())
+
+        results = asyncio.run(_run())
+
+    assert call_count == 1
+    assert results[0] == results[1] == results[2]
+    assert results[0]["sonos"] == [{"name": "Küche", "ip": "10.0.0.1"}]
+
+
+def test_discover_all_starts_a_new_scan_after_the_previous_one_finished():
+    """Coalescing must not get stuck reusing a completed scan forever —
+    the next call after completion should trigger a fresh one."""
+    import asyncio
+
+    from routes.devices import discover_all
+
+    call_count = 0
+
+    async def counting_discover_sonos():
+        nonlocal call_count
+        call_count += 1
+        return [{"name": "Küche", "ip": "10.0.0.1"}]
+
+    with (
+        patch("routes.devices.discover_sonos", new=counting_discover_sonos),
+        patch("routes.devices.discover_airplay", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_chromecast", new=AsyncMock(return_value=[])),
+        patch("routes.devices.discover_dlna", new=AsyncMock(return_value=[])),
+    ):
+        asyncio.run(discover_all())
+        asyncio.run(discover_all())
+
+    assert call_count == 2
+
+
 def test_discover_returns_cached_results_immediately(client):
     state.ctx.discovered = {
         "sonos": [{"name": "Cached"}],

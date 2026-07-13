@@ -18,7 +18,7 @@ from core.session import (
     registry,
     track_label,
 )
-from core.state import ctx, find_sonos, stream_url
+from core.state import ctx, find_sonos, resolve_target, stream_url
 
 from delivery import (
     AirPlayDelivery,
@@ -89,10 +89,10 @@ async def health(session: SessionState = Depends(get_session)):
     }
 
 
-async def discover_all() -> dict:
-    """Scan for Sonos, AirPlay, Chromecast and DLNA devices and update the
-    cache. Global, not session-scoped — the set of devices on the network is
-    the same regardless of who's asking (see core/state.py's Context)."""
+async def _scan_devices() -> dict:
+    """The actual SSDP/mDNS scan for Sonos, AirPlay, Chromecast and DLNA
+    devices — extracted so discover_all() can coalesce concurrent callers
+    into a single in-flight scan instead of each running their own."""
     cached = ctx.discovered
     logger.info("[discover] Scanning for Sonos, AirPlay, Chromecast and DLNA devices …")
     sonos_res, airplay_res, chromecast_res, dlna_res = await asyncio.gather(
@@ -127,6 +127,30 @@ async def discover_all() -> dict:
         "sonos": sonos,
     }
     return ctx.discovered
+
+
+_discover_lock = asyncio.Lock()
+_discover_task: asyncio.Task | None = None
+
+
+async def discover_all() -> dict:
+    """Scan for Sonos, AirPlay, Chromecast and DLNA devices and update the
+    cache. Global, not session-scoped — the set of devices on the network is
+    the same regardless of who's asking (see core/state.py's Context).
+
+    Coalesces concurrent callers into a single in-flight scan: two users
+    opening the popover at nearly the same time (or a request-triggered
+    refresh overlapping the periodic background scan in main.py) would
+    otherwise each kick off their own redundant — and, for mDNS/SSDP,
+    mutually interfering — scan. Everyone who calls in while a scan is
+    already running just awaits that same scan's result instead.
+    """
+    global _discover_task
+    async with _discover_lock:
+        if _discover_task is None or _discover_task.done():
+            _discover_task = asyncio.create_task(_scan_devices())
+        task = _discover_task
+    return await task
 
 
 def _annotate_claims(discovered: dict) -> dict:
@@ -397,7 +421,11 @@ async def join_stream(
         if owner_session:
             await displace_target(owner_session, target_type, name)
 
-    url = stream_url(session.session_id)
+    # Radio has no track loaded (session.state.current_track stays None for
+    # it — see /play-url), so it must join on its own raw URL rather than the
+    # FFmpeg /stream proxy, which 204s with no track loaded.
+    url = st.radio_info["url"] if st.radio_info else stream_url(session.session_id)
+    title = st.radio_info["title"] if st.radio_info else "Connect"
     logger.info(f"[join] {req.target_type}:{req.target_name} → {url}")
 
     if req.target_type == "sonos":
@@ -414,11 +442,11 @@ async def join_stream(
                 logger.warning(
                     f"[join] Group join failed ({e}), falling back to individual stream"
                 )
-                await new_d.play(url)
+                await new_d.play(url, title)
         else:
-            await new_d.play(url)
+            await new_d.play(url, title)
     else:
-        await new_d.play(url)
+        await new_d.play(url, title)
 
     if isinstance(st.active_delivery, DeliveryManager):
         existing = {d.target for d in st.active_delivery.deliveries}
@@ -433,3 +461,38 @@ async def join_stream(
 
     await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "joined", "device": req.target_name}
+
+
+class ClaimRequest(BaseModel):
+    targets: list[dict]
+    # See PlayRequest.force in routes/playback.py.
+    force: bool = False
+
+
+@router.post("/claim")
+async def claim_device(req: ClaimRequest, session: SessionState = Depends(get_session)):
+    """Claim one or more devices for this session WITHOUT starting playback.
+
+    For the takeover flow when the user has nothing loaded to play yet: a
+    device already in use can still be taken over — the previous owner's
+    playback stops and hands back to local (same as any other takeover, see
+    displace_target()) — without requiring the new owner to already have a
+    track or radio stream queued up. The device becomes this session's
+    active target so the next /play (once something is actually picked)
+    targets it automatically, and /status "targets" for it right away.
+    """
+    target = resolve_target(req.targets, None, None)
+    if not target:
+        return {"error": "No target configured"}
+
+    error, displaced = await check_claims(target, session, force=req.force)
+    if error:
+        return error
+    for target_type, name, owner in displaced:
+        owner_session = registry.get(owner)
+        if owner_session:
+            await displace_target(owner_session, target_type, name)
+
+    session.state.active_delivery = target
+    await session.event_bus.broadcast(build_status_dict(session))
+    return {"status": "claimed"}

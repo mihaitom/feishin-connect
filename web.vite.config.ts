@@ -54,6 +54,11 @@ export default defineConfig({
             localsConvention: 'camelCase',
         },
     },
+    // Vite resolves .env files relative to `root` by default, which below is
+    // pinned to src/renderer — not this file's own directory (the repo root,
+    // where .env actually lives and is gitignored). Point it back explicitly
+    // so VITE_* vars in the repo-root .env are picked up.
+    envDir: path.resolve(__dirname, '.'),
     optimizeDeps: {
         exclude: [
             '@atlaskit/pragmatic-drag-and-drop',

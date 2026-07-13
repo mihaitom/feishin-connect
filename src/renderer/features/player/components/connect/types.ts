@@ -1,7 +1,11 @@
 export const CONNECT_URL =
     (window as any).__CONNECT_URL__ || import.meta.env.VITE_CONNECT_URL || 'http://localhost:9181';
 
-export const CONNECT_TOKEN: string = (window as any).__CONNECT_TOKEN__ ?? '';
+// Electron injects __CONNECT_TOKEN__ via the preload script; the bare web
+// dev server (`pnpm run dev:web`) has no preload, so it needs its own
+// fallback the same way CONNECT_URL falls back to VITE_CONNECT_URL above.
+export const CONNECT_TOKEN: string =
+    (window as any).__CONNECT_TOKEN__ ?? import.meta.env.VITE_CONNECT_TOKEN ?? '';
 
 // Set once per app session by useConnectSession, before the first /config call,
 // from computeConnectSessionId() — identifies this login for per-user backend
@@ -28,6 +32,7 @@ export interface ConnectSession {
     handleStop: () => void;
     handleTogglePlayPause: () => void;
     hasApiError: boolean;
+    hasAuthError: boolean;
     hasFfmpegError: boolean;
     isActive: boolean;
     isScanning: boolean;

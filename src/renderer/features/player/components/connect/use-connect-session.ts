@@ -41,6 +41,8 @@ export const useConnectSession = (): ConnectSession => {
     const lastAutoSentRef = useRef<string>('');
     const configuredRef = useRef(false);
     const storeHandlersRef = useRef({ handleStop, handleTogglePlayPause });
+    const serverRef = useRef(server);
+    serverRef.current = server;
 
     const currentSong = usePlayerSong();
     const currentSongRef = useRef(currentSong);
@@ -151,15 +153,29 @@ export const useConnectSession = (): ConnectSession => {
     // ── Actions ───────────────────────────────────────────────────────────────
 
     const ensureConfigured = async () => {
-        if (!configuredRef.current && server?.url && server?.credential) {
-            setConnectSessionId(computeConnectSessionId(server));
-            await connectFetch(`/config`, {
-                body: JSON.stringify(buildConfigBody(server)),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            });
-            configuredRef.current = true;
+        if (configuredRef.current) return;
+        // The "Server config" effect below fires /config itself as soon as
+        // server.url/credential are ready and flips configuredRef once it
+        // lands — credential can still be hydrating right after a page reload
+        // (useServerAuthenticated re-validates it against the media server on
+        // startup). Wait for that instead of racing it with a second /config
+        // call: sendTo()'s caller already shows a loading spinner while this
+        // runs, so there's no need to rush or duplicate the request.
+        for (let attempt = 0; attempt < 100 && !configuredRef.current; attempt++) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
         }
+        if (configuredRef.current) return;
+        // Fallback in case the effect never got a usable server either — do it
+        // ourselves rather than leaving a slow-to-hydrate session stuck.
+        const current = serverRef.current;
+        if (!current?.url || !current?.credential) return;
+        setConnectSessionId(computeConnectSessionId(current));
+        await connectFetch(`/config`, {
+            body: JSON.stringify(buildConfigBody(current)),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
+        configuredRef.current = true;
     };
 
     // `force` re-sends as a takeover (Phase 2) after the user confirms a
@@ -168,6 +184,21 @@ export const useConnectSession = (): ConnectSession => {
     // device_in_use error, which the caller surfaces for the confirm dialog.
     const sendTo = async (devicesToSend: ConnectDevice[], force: boolean) => {
         if (devicesToSend.length === 0) return { error: null as null | string };
+        const hasRadio = isRadioActive && !!radioStreamUrl;
+        // Checked BEFORE touching any state below — previously, with neither a
+        // radio stream nor a queued track, this fell through both branches
+        // below silently doing nothing, yet had already marked the device
+        // "active" (setActive/setActiveTargets happen unconditionally further
+        // down) and still reported `setStatus('success')`. That left the UI
+        // stuck believing it was connected to a device nothing was ever sent
+        // to: local play/pause routed into Connect's (inert) handler instead
+        // of local playback, and — for a takeover specifically — the claim
+        // was never actually taken, so the device stayed claimed by its
+        // original owner, meaning even disconnecting it re-opened the
+        // takeover dialog instead.
+        if (!hasRadio && !currentTrackId) {
+            return { error: 'Nothing to play — select a track or start radio first.' };
+        }
         const first = devicesToSend[0];
         lastAutoSentRef.current = currentSong?._uniqueId ?? '';
         setActive(first);
@@ -176,7 +207,7 @@ export const useConnectSession = (): ConnectSession => {
         try {
             await ensureConfigured();
             const targets = devicesToSend.map((d) => ({ name: d.name, type: d.type }));
-            if (isRadioActive && radioStreamUrl) {
+            if (hasRadio) {
                 pauseRadio();
                 const res = await connectFetch(`/play-url`, {
                     body: JSON.stringify({
@@ -194,7 +225,10 @@ export const useConnectSession = (): ConnectSession => {
                 const body = await res.json();
                 if (body.error) throw new Error(body.error);
                 useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
-            } else if (currentTrackId) {
+            } else {
+                // currentTrackId is guaranteed here — the guard above already
+                // returned early if neither it nor hasRadio was set.
+                //
                 // Deliberately NOT gated on local PlayerStatus === PLAYING — a
                 // paused (or never-yet-played) queue is just as valid a thing to
                 // connect from. Gating on it used to mean clicking "Connect" while
@@ -233,7 +267,15 @@ export const useConnectSession = (): ConnectSession => {
     };
 
     const sendToSelected = async () => {
-        await sendTo(selectedForSend, false);
+        // Same "nothing loaded yet" case takeoverDevice() already handles —
+        // connecting with an empty queue must still claim the device instead
+        // of failing silently (sendTo() itself refuses with no visible error).
+        const hasContent = (isRadioActive && !!radioStreamUrl) || !!currentTrackId;
+        if (hasContent) {
+            await sendTo(selectedForSend, false);
+        } else {
+            await claimOnly(selectedForSend, false);
+        }
     };
 
     const joinTo = async (devicesToJoin: ConnectDevice[], force: boolean) => {
@@ -263,15 +305,72 @@ export const useConnectSession = (): ConnectSession => {
         await joinTo(selectedForSend, false);
     };
 
+    // Claiming with nothing loaded to play yet: still worth doing on its own
+    // — this session becomes "connected" to the device (visible in the
+    // popover, ready for /play the moment a track is picked) without
+    // starting anything. /claim performs just the claim(+displace when
+    // force) step, no play() call attached. Used both as takeoverDevice()'s
+    // fallback and as sendToSelected()'s (plain "Connect", not takeover) —
+    // connecting with an empty queue must succeed the same way takeover does,
+    // not fail silently with no track selected.
+    const claimOnly = async (
+        devicesToClaim: ConnectDevice[],
+        force: boolean,
+    ): Promise<{ error: null | string }> => {
+        if (devicesToClaim.length === 0) return { error: null };
+        const first = devicesToClaim[0];
+        setActive(first);
+        setActiveTargets(devicesToClaim);
+        setStatus('loading');
+        try {
+            await ensureConfigured();
+            const res = await connectFetch(`/claim`, {
+                body: JSON.stringify({
+                    force,
+                    targets: devicesToClaim.map((d) => ({ name: d.name, type: d.type })),
+                }),
+                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const body = await res.json();
+            if (body.error) throw new Error(body.error);
+            setStatus('success');
+            setSelectedForSend([]);
+            return { error: null };
+        } catch (e) {
+            console.error('[Connect]', e);
+            setStatus('error');
+            setActive(null);
+            setActiveTargets([]);
+            setTimeout(() => setStatus('idle'), 2000);
+            return { error: e instanceof Error ? e.message : String(e) };
+        }
+    };
+
     // Confirmed via the takeover dialog in DeviceItem — re-sends as a single
     // device, either joining the active stream or starting a new one, with
-    // force=true so the backend displaces whoever currently owns it.
+    // force=true so the backend displaces whoever currently owns it. Falls
+    // back to claimOnly() when there's nothing loaded to actually play yet,
+    // rather than failing outright — see claimOnly()'s comment.
     const takeoverDevice = async (device: ConnectDevice) => {
         if (isActive) {
             await joinTo([device], true);
-        } else {
-            await sendTo([device], true);
+            // Claim ownership just changed hands — re-fetch so this device's
+            // "in use by" annotation reflects the new owner (us) instead of
+            // the displaced session, without a full re-scan.
+            refresh();
+            return;
         }
+        const hasContent = (isRadioActive && !!radioStreamUrl) || !!currentTrackId;
+        const { error } = hasContent
+            ? await sendTo([device], true)
+            : await claimOnly([device], true);
+        // Reported via return value, not a throw — surface it so the takeover
+        // dialog's existing catch/toast in device-item.tsx fires instead of
+        // silently closing as if the takeover had worked.
+        if (error) throw new Error(error);
+        refresh();
     };
 
     // Hands playback back to the local player at the position Connect had reached,
@@ -474,7 +573,8 @@ export const useConnectSession = (): ConnectSession => {
         fetchVolume,
         handleStop,
         handleTogglePlayPause,
-        hasApiError: health !== null && !health.apiReachable,
+        hasApiError: health !== null && !health.apiReachable && !health.unauthorized,
+        hasAuthError: health !== null && !health.apiReachable && health.unauthorized,
         hasFfmpegError: !!(health?.apiReachable && health.ffmpegFound === false),
         isActive,
         isScanning,

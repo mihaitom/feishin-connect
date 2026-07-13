@@ -4,7 +4,7 @@ import time
 from unittest.mock import AsyncMock, patch
 
 from core.session import compute_position
-from delivery import AirPlayDelivery, SonosDelivery
+from delivery import AirPlayDelivery, ChromecastDelivery, SonosDelivery
 from media import Track
 from routes.playback import _apply_position_offset
 
@@ -264,6 +264,50 @@ def test_seek_near_zero_clamps_raw_position(client, default_session):
 
     client.post("/seek", json={"position": 1.0})
     assert default_session.state.clock.resume_offset == 0.0
+
+
+# ── /resume + /seek reconnect to radio's own URL, not the track /stream proxy ──
+# Radio has no track loaded (current_track stays None — see /play-url), so
+# reconnecting via the FFmpeg /stream/{session_id} proxy 204s with nothing to
+# play. Regression coverage for that: both must replay radio_info["url"].
+
+
+def test_resume_reconnects_to_radio_url_not_stream_proxy(client, default_session):
+    default_session.state.is_streaming = True
+    default_session.state.radio_info = {"title": "Radio FM", "url": "http://stream/radio"}
+    default_session.state.active_delivery = ChromecastDelivery("TV")
+    default_session.state.clock.is_paused = True
+
+    with patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play:
+        r = client.post("/resume")
+
+    assert r.status_code == 200
+    play.assert_awaited_once_with("http://stream/radio", "Radio FM", "", None, None, "")
+
+
+def test_seek_while_playing_reconnects_to_radio_url(client, default_session):
+    default_session.state.is_streaming = True
+    default_session.state.radio_info = {"title": "Radio FM", "url": "http://stream/radio"}
+    default_session.state.active_delivery = ChromecastDelivery("TV")
+    default_session.state.clock.is_paused = False
+
+    with patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play:
+        client.post("/seek", json={"position": 0})
+
+    play.assert_awaited_once_with("http://stream/radio", "Radio FM", "", None, None, "")
+
+
+def test_resume_still_uses_stream_proxy_for_a_regular_track(client, default_session):
+    default_session.state.is_streaming = True
+    default_session.state.current_track = Track("1", "Song", "Artist", 180, "")
+    default_session.state.active_delivery = ChromecastDelivery("TV")
+    default_session.state.clock.is_paused = True
+
+    with patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play:
+        client.post("/resume")
+
+    url = play.call_args.args[0]
+    assert url.startswith("http://") and "/stream/" in url
 
 
 # ── _apply_position_offset ──────────────────────────────────────────────────────

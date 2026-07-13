@@ -736,6 +736,8 @@
     "player": {
         "connect_apiUnreachable": "Connect-Backend nicht erreichbar",
         "connect_apiUnreachableHint": "{{url}} konnte nicht erreicht werden. Prüfe, ob das Connect-Backend läuft.",
+        "connect_authError": "Connect-Backend hat die Anfrage abgelehnt",
+        "connect_authErrorHint": "Das Connect-Token stimmt nicht überein. Prüfe, ob CONNECT_TOKEN (Backend) und VITE_CONNECT_TOKEN bzw. das konfigurierte Token der App (Frontend) denselben Wert haben.",
         "connect_ffmpegMissing": "ffmpeg nicht gefunden",
         "connect_ffmpegMissingHint": "Das Connect-Backend benötigt ffmpeg, um zu Sonos- und Chromecast-Geräten zu streamen. Installiere es und starte das Backend neu.",
         "connect_noDevices": "Keine Geräte gefunden",

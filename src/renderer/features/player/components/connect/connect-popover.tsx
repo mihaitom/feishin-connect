@@ -20,6 +20,7 @@ export const ConnectPopover = ({ onClose, popPos, session }: ConnectPopoverProps
         connectStatus,
         devices,
         hasApiError,
+        hasAuthError,
         hasFfmpegError,
         isActive,
         isScanning,
@@ -107,6 +108,37 @@ export const ConnectPopover = ({ onClose, popPos, session }: ConnectPopoverProps
                     </div>
                 </div>
             )}
+            {hasAuthError && (
+                <div
+                    style={{
+                        alignItems: 'flex-start',
+                        background: 'rgba(245,166,35,0.1)',
+                        borderBottom: '1px solid rgba(245,166,35,0.2)',
+                        display: 'flex',
+                        gap: '8px',
+                        padding: '10px 12px',
+                    }}
+                >
+                    <LuTriangleAlert
+                        size={15}
+                        style={{ color: '#f5a623', flexShrink: 0, marginTop: '2px' }}
+                    />
+                    <div>
+                        <div style={{ color: '#f5a623', fontSize: '13px', fontWeight: 600 }}>
+                            {t('player.connect_authError')}
+                        </div>
+                        <div
+                            style={{
+                                color: 'var(--theme-colors-text-secondary)',
+                                fontSize: '11px',
+                                marginTop: '2px',
+                            }}
+                        >
+                            {t('player.connect_authErrorHint')}
+                        </div>
+                    </div>
+                </div>
+            )}
             {hasFfmpegError && (
                 <div
                     style={{
@@ -140,7 +172,7 @@ export const ConnectPopover = ({ onClose, popPos, session }: ConnectPopoverProps
             )}
 
             {/* Device list */}
-            {!hasApiError && (
+            {!hasApiError && !hasAuthError && (
                 <PopSection
                     label={devices.length === 0 ? '' : (trackLabel ?? t('player.connect_sendTo'))}
                 >

@@ -7,6 +7,15 @@ import { ConnectDevice, connectEventSource, connectFetch, ConnectStatus } from '
 export interface ConnectHealth {
     apiReachable: boolean;
     ffmpegFound: boolean;
+    unauthorized: boolean;
+}
+
+class HttpStatusError extends Error {
+    status: number;
+    constructor(status: number) {
+        super(`HTTP ${status}`);
+        this.status = status;
+    }
 }
 
 export const useConnectDevices = () => {
@@ -29,9 +38,17 @@ export const useConnectDevices = () => {
         // the very first load (nothing cached client-side yet either), does.
         const showScanning = fresh || devicesRef.current.length === 0;
         if (showScanning) setIsScanning(true);
+        // A non-2xx response (e.g. 401 from a wrong/missing CONNECT_TOKEN) is
+        // still valid JSON — parsing it as if it were a real /health or
+        // /discover body would silently produce bogus fields (e.g. "ffmpeg
+        // missing") instead of surfacing the actual connectivity problem.
+        const parseOk = (r: Response) => {
+            if (!r.ok) throw new HttpStatusError(r.status);
+            return r.json();
+        };
         Promise.all([
-            connectFetch(`/discover${fresh ? '?fresh=true' : ''}`).then((r) => r.json()),
-            connectFetch(`/health`).then((r) => r.json()),
+            connectFetch(`/discover${fresh ? '?fresh=true' : ''}`).then(parseOk),
+            connectFetch(`/health`).then(parseOk),
         ])
             .then(([discoverData, healthData]) => {
                 const claimFields = (x: any) => ({
@@ -69,10 +86,18 @@ export const useConnectDevices = () => {
                     ...airplay.sort(sort),
                     ...dlna.sort(sort),
                 ]);
-                setHealth({ apiReachable: true, ffmpegFound: healthData.ffmpeg ?? false });
+                setHealth({
+                    apiReachable: true,
+                    ffmpegFound: healthData.ffmpeg ?? false,
+                    unauthorized: false,
+                });
             })
-            .catch(() => {
-                setHealth({ apiReachable: false, ffmpegFound: false });
+            .catch((e) => {
+                setHealth({
+                    apiReachable: false,
+                    ffmpegFound: false,
+                    unauthorized: e instanceof HttpStatusError && e.status === 401,
+                });
             })
             .finally(() => setIsScanning(false));
     };
