@@ -952,6 +952,13 @@ if (!singleInstance) {
 
     app.whenReady()
         .then(async () => {
+            // fix-path is ESM-only; imported dynamically here rather than as a static
+            // `import fixPath from 'fix-path'` because Rollup's CJS externalization for
+            // the packaged main bundle does not reliably unwrap `.default` for a static
+            // default import of this package, which throws "fixPath is not a function"
+            // in production. A dynamic import always resolves the real ESM default export.
+            const { default: fixPath } = await import('fix-path');
+            fixPath();
             connectPort = await findFreePort();
             process.env['CONNECT_PORT'] = String(connectPort);
             startConnectServer();
