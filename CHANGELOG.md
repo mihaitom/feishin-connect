@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Clicking "Connect" with an empty queue failed silently** — it now claims the device the same way takeover already did, ready to play once a track is picked.
 - **The very first "Connect" click after a page reload could fail while backend setup was still finishing** — connecting now waits for setup instead of racing it, with a spinner on the cast button.
 - **The in-app release notes showed a generic error for pre-release versions like `0.6.0-dev.1`** — the fallback that reads the bundled changelog when GitHub doesn't have that version published yet didn't recognize the pre-release suffix in the changelog's own version headers.
+- **Leaving the app/browser tab in the background for a while could leave the Connect progress bar stuck showing a wildly wrong time and stop the next queued track from starting automatically** — returning to the app/tab now immediately re-checks the real playback state instead of waiting indefinitely.
 
 ### Internal
 - **Split the oversized `use-connect-session.ts` frontend hook and `routes/devices.py` backend module into smaller, single-purpose files** — no behavior change, just easier to navigate.

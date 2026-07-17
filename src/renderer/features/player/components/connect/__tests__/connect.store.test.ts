@@ -80,6 +80,28 @@ describe('connect.store', () => {
             expect(result.current).toBeCloseTo(11.5, 1);
         });
 
+        // Regression test: a stale `isPlaying` (e.g. the SSE connection died
+        // silently while the tab was backgrounded) used to let this run away
+        // arbitrarily far past the track's actual length.
+        it('clamps the projected value to duration', () => {
+            vi.useFakeTimers();
+            useConnectPlayerStore.setState({
+                duration: 12,
+                elapsed: 10,
+                isActive: true,
+                isPlaying: true,
+                syncTime: Date.now(),
+            });
+
+            const { result } = renderHook(() => useConnectElapsed());
+
+            act(() => {
+                vi.advanceTimersByTime(5000);
+            });
+
+            expect(result.current).toBe(12);
+        });
+
         it('resets to the new elapsed value whenever the store updates', () => {
             vi.useFakeTimers();
             useConnectPlayerStore.setState({
