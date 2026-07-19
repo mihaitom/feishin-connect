@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from core.auth import require_token
-from core.session import SessionState, get_session
+from core.session import SessionState, check_ownership, get_session
 from core.state import find_sonos
 
 from delivery import ChromecastDelivery, DlnaDelivery, SonosDelivery
@@ -49,7 +49,12 @@ async def set_volume(req: VolumeRequest, session: SessionState = Depends(get_ses
 
 
 @router.get("/device-volume")
-async def get_device_volume(device_type: str, name: str):
+async def get_device_volume(
+    device_type: str, name: str, session: SessionState = Depends(get_session)
+):
+    error = check_ownership(device_type, name, session)
+    if error:
+        return error
     try:
         if device_type == "sonos":
             device = await asyncio.to_thread(SonosDelivery(name)._get_device)
@@ -69,7 +74,12 @@ async def get_device_volume(device_type: str, name: str):
 
 
 @router.post("/device-volume")
-async def set_device_volume(device_type: str, name: str, req: VolumeRequest):
+async def set_device_volume(
+    device_type: str, name: str, req: VolumeRequest, session: SessionState = Depends(get_session)
+):
+    error = check_ownership(device_type, name, session)
+    if error:
+        return error
     volume = max(0, min(100, req.volume))
     try:
         if device_type == "sonos":

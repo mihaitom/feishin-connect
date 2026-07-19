@@ -174,6 +174,23 @@ async def check_claims(
     }, []
 
 
+def check_ownership(target_type: str, name: str, session: SessionState) -> dict | None:
+    """Read-only claim check for actions (e.g. volume) on a device that's
+    already claimed elsewhere — unlike check_claims(), this never claims the
+    device itself, it only rejects when a *different* session currently owns
+    it. Returns the same device_in_use error shape as check_claims(), or None
+    when the device is unclaimed or owned by this session."""
+    owner = claims.owner_of(target_type, name)
+    if owner is None or owner == session.session_id:
+        return None
+    owner_session = registry.get(owner)
+    return {
+        "device": {"name": name, "type": target_type},
+        "error": "device_in_use",
+        "owner": owner_session.display_name if owner_session else "another session",
+    }
+
+
 async def displace_target(owner_session: SessionState, target_type: str, name: str) -> None:
     """Stop delivery to a single (type, name) target within owner_session,
     without touching the rest of its active_delivery — e.g. a takeover only
