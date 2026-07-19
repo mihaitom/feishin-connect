@@ -1,6 +1,6 @@
 {
     "name": "feishin-connect",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -108,6 +108,7 @@
         "electron-updater": "^6.8.9",
         "fast-average-color": "9.5.0",
         "fast-xml-parser": "^5.8.0",
+        "fix-path": "^5.0.0",
         "format-duration": "^3.0.2",
         "fuse.js": "^7.4.2",
         "i18next": "^25.10.10",
@@ -121,6 +122,7 @@
         "md5": "^2.3.0",
         "motion": "^12.40.0",
         "mpris-service": "^2.1.2",
+        "music-metadata": "^11.12.3",
         "nanoid": "^3.3.12",
         "node-mpv": "github:jeffvli/Node-MPV#32b4d64395289ad710c41d481d2707a7acfc228f",
         "overlayscrollbars": "^2.16.0",
@@ -140,6 +142,8 @@
         "react-window-v2": "npm:react-window@^2.2.7",
         "semver": "^7.8.2",
         "string-to-color": "^2.2.2",
+        "taglib-wasm": "^1.5.1",
+        "validate-color": "^2.2.4",
         "wavesurfer.js": "^7.12.7",
         "ws": "^8.21.0",
         "zod": "^3.25.76",
@@ -195,6 +199,6 @@
         "vitest": "^4.1.8"
     },
     "packageManager": "pnpm@11.5.2",
-    "feishinUpstreamVersion": "1.14.0",
+    "feishinUpstreamVersion": "1.15.0",
     "productName": "feishin"
 }

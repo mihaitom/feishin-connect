@@ -157,6 +157,7 @@ export const NavidromeController: InternalControllerEndpoint = {
 
         return {
             credential: `u=${body.username}&s=${res.body.data.subsonicSalt}&t=${res.body.data.subsonicToken}`,
+            displayName: res.body.data.name,
             isAdmin: Boolean(res.body.data.isAdmin),
             ndCredential: res.body.data.token,
             userId: res.body.data.id,
@@ -1029,6 +1030,7 @@ export const NavidromeController: InternalControllerEndpoint = {
             throw new Error('Failed to move item in playlist');
         }
     },
+    refreshItems: SubsonicController.refreshItems,
     removeFromPlaylist: async (args) => {
         const { apiClientProps, query } = args;
 

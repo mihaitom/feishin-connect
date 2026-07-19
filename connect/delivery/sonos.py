@@ -35,7 +35,12 @@ class SonosDelivery(BaseDelivery):
         title: str = "Connect",
         artist: str = "",
         album_art_url: str | None = None,
+        duration: float | None = None,
+        album: str = "",
     ) -> None:
+        # duration accepted for interface parity with BaseDelivery.play() but
+        # not yet wired up here — not part of the DLNA missing-duration fix
+        # this parameter was added for (see dlna.py).
         device = await asyncio.to_thread(self._get_device)
 
         # Leave any existing group so we play on this specific device
@@ -58,6 +63,7 @@ class SonosDelivery(BaseDelivery):
             if album_art_url
             else ""
         )
+        album_tag = f"<upnp:album>{escape(album)}</upnp:album>" if album else ""
         metadata = (
             '<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" '
             'xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" '
@@ -66,6 +72,7 @@ class SonosDelivery(BaseDelivery):
             f"<dc:title>{escape(title)}</dc:title>"
             f"<dc:creator>{escape(artist)}</dc:creator>"
             f"<upnp:artist>{escape(artist)}</upnp:artist>"
+            f"{album_tag}"
             f"{album_art_tag}"
             "<upnp:class>object.item.audioItem.audioBroadcast</upnp:class>"
             f'<res protocolInfo="http-get:*:audio/mpeg:*">{escape(stream_url)}</res>'

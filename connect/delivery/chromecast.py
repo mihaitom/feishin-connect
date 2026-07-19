@@ -97,12 +97,19 @@ class ChromecastDelivery(BaseDelivery):
         title: str = "Connect",
         artist: str = "",
         album_art_url: str | None = None,
+        duration: float | None = None,
+        album: str = "",
     ) -> None:
+        # duration accepted for interface parity with BaseDelivery.play() but
+        # not yet wired up here — not part of the DLNA missing-duration fix
+        # this parameter was added for (see dlna.py).
         cast = await asyncio.to_thread(self._get_device)
         mc = cast.media_controller
         metadata = {"metadataType": 3, "title": title, "artist": artist}
         if album_art_url:
             metadata["images"] = [{"url": album_art_url}]
+        if album:
+            metadata["albumName"] = album
         logger.info(f"[Chromecast:{self.target}] → play: {stream_url}")
         await asyncio.to_thread(
             mc.play_media,

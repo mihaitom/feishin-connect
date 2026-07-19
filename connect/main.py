@@ -19,23 +19,33 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
 from core.auth import TOKEN as _CONNECT_TOKEN
+from core.session import reap_stale_sessions
 from core.state import PORT, ctx, get_local_ip
-from routes.devices import discover_all
 from routes.devices import router as devices_router
+from routes.discovery import discover_all
+from routes.discovery import router as discovery_router
+from routes.join import router as join_router
 from routes.lyrics import router as lyrics_router
 from routes.pairing import router as pairing_router
 from routes.playback import router as playback_router
 from routes.proxy import router as proxy_router
 from routes.stream import router as stream_router
+from routes.volume import router as volume_router
 
 load_dotenv()
 
 
 class _ShortNameFilter(logging.Filter):
-    """Strip the redundant "connect." prefix from logger names (and rename
-    the bare "connect" root logger to "main"), so log lines read e.g.
-    "lyrics" / "playback" instead of "connect.lyrics" / "connect.playback" —
-    shorter and lines up with the other loggers (delivery, sonos, pyatv, ...).
+    """Strip the redundant "connect."/"pychromecast." prefix from logger
+    names (and rename the bare "connect" root logger to "main"), so log
+    lines read e.g. "lyrics" / "socket_client" instead of "connect.lyrics" /
+    "pychromecast.socket_client" — shorter and lines up with the other
+    loggers (delivery, sonos, pyatv, ...). pychromecast logs its own
+    connection/reconnection events under several dotted submodule names
+    (controllers, socket_client, discovery, ...), all noisier than our own
+    loggers even at INFO — this only fixes their alignment, not their
+    verbosity, since they're genuinely informative (e.g. a cast device
+    dropping off Wi-Fi and reconnecting).
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
@@ -43,6 +53,8 @@ class _ShortNameFilter(logging.Filter):
             record.name = record.name.removeprefix("connect.")
         elif record.name == "connect":
             record.name = "main"
+        elif record.name.startswith("pychromecast."):
+            record.name = record.name.removeprefix("pychromecast.")
         elif record.name == "uvicorn.error":
             # "uvicorn.error" is just uvicorn's logger for general
             # startup/shutdown messages (not actual errors) — rename to
@@ -220,10 +232,12 @@ async def lifespan(_: FastAPI):
     logger.info("⏳ Waiting for Feishin /config (media server credentials)")
 
     discovery_task = asyncio.create_task(_periodic_discovery())
+    reaper_task = asyncio.create_task(reap_stale_sessions())
     try:
         yield
     finally:
         discovery_task.cancel()
+        reaper_task.cancel()
 
 
 app = FastAPI(title="Feishin Connect", lifespan=lifespan)
@@ -245,6 +259,9 @@ app.add_middleware(
 app.include_router(stream_router)
 app.include_router(playback_router)
 app.include_router(devices_router)
+app.include_router(discovery_router)
+app.include_router(volume_router)
+app.include_router(join_router)
 app.include_router(pairing_router)
 app.include_router(lyrics_router)
 app.include_router(proxy_router)

@@ -3,6 +3,7 @@ import { defineConfig, normalizePath } from 'vite';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 import { VitePWA } from 'vite-plugin-pwa';
 
+import { kuromojiDictionaryPlugin } from './vite.kuromoji-plugin';
 import { createReactPlugin } from './vite.react-plugin';
 
 export default defineConfig({
@@ -54,6 +55,11 @@ export default defineConfig({
             localsConvention: 'camelCase',
         },
     },
+    // Vite resolves .env files relative to `root` by default, which below is
+    // pinned to src/renderer — not this file's own directory (the repo root,
+    // where .env actually lives and is gitignored). Point it back explicitly
+    // so VITE_* vars in the repo-root .env are picked up.
+    envDir: path.resolve(__dirname, '.'),
     optimizeDeps: {
         exclude: [
             '@atlaskit/pragmatic-drag-and-drop',
@@ -73,6 +79,7 @@ export default defineConfig({
     },
     plugins: [
         createReactPlugin(),
+        kuromojiDictionaryPlugin(),
         ViteEjsPlugin({
             root: normalizePath(path.resolve(__dirname, './src/renderer')),
             web: true,
@@ -142,6 +149,7 @@ export default defineConfig({
             workbox: {
                 cleanupOutdatedCaches: true,
                 clientsClaim: true,
+                globIgnores: ['**/kuromoji/**'],
                 maximumFileSizeToCacheInBytes: 1000000 * 5, // 5 MB
                 skipWaiting: true,
             },
@@ -150,9 +158,14 @@ export default defineConfig({
     resolve: {
         alias: {
             '/@/i18n': path.resolve(__dirname, './src/i18n'),
+            '/@/lyrics-conversion-api': path.resolve(
+                __dirname,
+                './src/main/features/core/lyrics/furigana.ts',
+            ),
             '/@/remote': path.resolve(__dirname, './src/remote'),
             '/@/renderer': path.resolve(__dirname, './src/renderer'),
             '/@/shared': path.resolve(__dirname, './src/shared'),
+            path: path.resolve(__dirname, './src/renderer/shims/path.ts'),
         },
     },
     root: path.resolve(__dirname, './src/renderer'),

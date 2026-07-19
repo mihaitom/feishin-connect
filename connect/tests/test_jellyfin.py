@@ -62,6 +62,14 @@ def test_cover_art_none_when_no_id():
     assert c.get_cover_art_url("") is None
 
 
+def test_cover_art_uses_internal_url_when_requested():
+    """internal=True is for cast devices fetching the image directly
+    themselves on the LAN, not the browser."""
+    c = _client(url="http://proxy:9180", internal_url="http://jf:8096")
+    url = c.get_cover_art_url("item-1", internal=True)
+    assert url == "http://jf:8096/Items/item-1/Images/Primary?maxHeight=300"
+
+
 # ── get_track parses Jellyfin item JSON ───────────────────────────────────────
 
 
@@ -71,6 +79,7 @@ def test_get_track_parses_item(monkeypatch):
         "Name": "Song Title",
         "Artists": ["Artist A", "Artist B"],
         "AlbumArtist": "Artist A",
+        "Album": "The Album",
         # 180s × 10_000_000 ticks/second
         "RunTimeTicks": 180 * 10_000_000,
     }
@@ -86,6 +95,7 @@ def test_get_track_parses_item(monkeypatch):
     assert track.title == "Song Title"
     assert track.artist == "Artist A, Artist B"
     assert track.duration == 180
+    assert track.album == "The Album"
     # Cover art id == item id for Jellyfin
     assert track.cover_art_id == "abc"
 

@@ -1,32 +1,31 @@
 """Tests for POST /config."""
 
-from core import state
 from media import JellyfinClient, SubsonicClient
 
 
-def test_config_sets_subsonic_url(client):
+def test_config_sets_subsonic_url(client, default_session):
     r = client.post(
         "/config", json={"url": "http://nav:4533", "credential": "token=abc"}
     )
     assert r.status_code == 200
     assert r.json() == {"status": "ok"}
-    assert isinstance(state.ctx.media, SubsonicClient)
-    assert state.ctx.media.base_url == "http://nav:4533"
+    assert isinstance(default_session.media, SubsonicClient)
+    assert default_session.media.base_url == "http://nav:4533"
 
 
-def test_config_updates_credential(client):
+def test_config_updates_credential(client, default_session):
     client.post("/config", json={"url": "http://nav:4533", "credential": "old"})
     client.post("/config", json={"url": "http://nav:4533", "credential": "new"})
-    assert state.ctx.media._credential == "new"
+    assert default_session.media._credential == "new"
 
 
-def test_config_replaces_url(client):
+def test_config_replaces_url(client, default_session):
     client.post("/config", json={"url": "http://old:4533", "credential": "x"})
     client.post("/config", json={"url": "http://new:4533", "credential": "x"})
-    assert state.ctx.media.base_url == "http://new:4533"
+    assert default_session.media.base_url == "http://new:4533"
 
 
-def test_config_explicit_subsonic_type(client):
+def test_config_explicit_subsonic_type(client, default_session):
     r = client.post(
         "/config",
         json={
@@ -36,10 +35,10 @@ def test_config_explicit_subsonic_type(client):
         },
     )
     assert r.status_code == 200
-    assert isinstance(state.ctx.media, SubsonicClient)
+    assert isinstance(default_session.media, SubsonicClient)
 
 
-def test_config_jellyfin_type_creates_jellyfin_client(client):
+def test_config_jellyfin_type_creates_jellyfin_client(client, default_session):
     r = client.post(
         "/config",
         json={
@@ -51,18 +50,18 @@ def test_config_jellyfin_type_creates_jellyfin_client(client):
     )
     assert r.status_code == 200
     assert r.json() == {"status": "ok"}
-    assert isinstance(state.ctx.media, JellyfinClient)
-    assert state.ctx.media.base_url == "http://jf:8096"
-    assert state.ctx.media.token == "jf-access-token"
-    assert state.ctx.media.user_id == "user-guid-abc"
+    assert isinstance(default_session.media, JellyfinClient)
+    assert default_session.media.base_url == "http://jf:8096"
+    assert default_session.media.token == "jf-access-token"
+    assert default_session.media.user_id == "user-guid-abc"
 
 
-def test_config_switches_between_server_types(client):
+def test_config_switches_between_server_types(client, default_session):
     client.post(
         "/config",
         json={"url": "http://nav:4533", "credential": "x", "server_type": "subsonic"},
     )
-    assert isinstance(state.ctx.media, SubsonicClient)
+    assert isinstance(default_session.media, SubsonicClient)
     client.post(
         "/config",
         json={
@@ -72,4 +71,12 @@ def test_config_switches_between_server_types(client):
             "user_id": "u1",
         },
     )
-    assert isinstance(state.ctx.media, JellyfinClient)
+    assert isinstance(default_session.media, JellyfinClient)
+
+
+def test_config_sets_display_name_from_username(client, default_session):
+    client.post(
+        "/config",
+        json={"url": "http://nav:4533", "credential": "x", "username": "alice"},
+    )
+    assert default_session.display_name == "alice"

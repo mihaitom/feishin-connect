@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-19
+
+### Added
+- **DLNA/UPnP as a fourth Connect cast target**, alongside Sonos, AirPlay and Chromecast — for smart TVs, AV receivers, and other generic UPnP MediaRenderer devices with no dedicated protocol of their own. Discovered automatically via SSDP, controlled via standard AVTransport/RenderingControl SOAP calls (`async-upnp-client`), with full play/pause/resume/stop, real device-side position, and volume control — no vendor account or pairing needed. Sonos speakers also expose themselves as generic DLNA renderers; those are filtered out of the DLNA list so they only ever show up once, under Sonos.
+- **Multi-user support** — different people logged into different accounts on the same household deployment can now cast independent tracks to independent devices at the same time, instead of sharing one global playback state. Sessions are identified by media-server login, so the same login stays one session across tabs/devices. If a device is already in use by someone else, the Connect popover shows who ("Playing for {name}") and what's currently playing on it — click it to take over, which stops their playback on that device and hands it to you, after a confirmation prompt. The person who lost the device sees their own playback stop and hand back to local playback automatically.
+
+### Changed
+- **Merged upstream Feishin v1.15.0** — 56 upstream commits since the previous base, including a batch metadata editor with artwork support in the tag editor, custom themes loadable from files, playlist creation from the current queue, furigana/romaji lyrics generation on the web build, and a long tail of lyrics/table/album-group bug fixes and translations. See <a href="https://github.com/jeffvli/feishin/releases/tag/v1.15.0">Feishin Release Notes v1.15.0</a> for more details.
+
+### Fixed
+- **On macOS, the Connect backend could report ffmpeg as missing even though it was installed** — GUI apps launched from Finder/Dock don't inherit PATH additions from `.zshrc`/`.bash_profile` the way a terminal does, so non-default ffmpeg installs were invisible to the bundled Connect server. The app now re-reads the real PATH from the user's login shell on startup before launching Connect. Not needed on Windows or Linux, where the same PATH is already available to GUI apps.
+- **Logging into a second Navidrome account failed behind an SSO reverse proxy (e.g. Authentik ForwardAuth)** — the Connect proxy no longer forwards SSO identity headers that could override the actual login.
+- **The Connect popover closed itself on device disconnect/deselect or on a successful connection** — it now only closes on an explicit "Connect"/"Add"/"Disconnect all" click.
+- **The player-bar Stop button disconnected the Connect device entirely** — it now just pauses and resets to 0:00, without releasing the device.
+- **Clicking "Connect" while paused sometimes silently did nothing** — connecting now works regardless of local play/pause state.
+- **Album art could be unreachable when the media server sits behind `SERVER_INTERNAL_URL`** — cover art sent to cast devices now uses the internal, LAN-reachable address.
+- **The play/pause button didn't reflect or control Connect during radio playback** (desktop and mobile fullscreen player) — both now stay in sync with the connected device.
+- **Resuming or seeking radio on a Connect device produced no audio** — it now reconnects to the radio's own URL instead of the track-only stream endpoint.
+- **Clicking "Connect" with an empty queue failed silently** — it now claims the device the same way takeover already did, ready to play once a track is picked.
+- **The very first "Connect" click after a page reload could fail while backend setup was still finishing** — connecting now waits for setup instead of racing it, with a spinner on the cast button.
+- **The in-app release notes showed a generic error for pre-release versions like `0.6.0-dev.1`** — the fallback that reads the bundled changelog when GitHub doesn't have that version published yet didn't recognize the pre-release suffix in the changelog's own version headers.
+- **Leaving the app/browser tab in the background for a while could leave the Connect progress bar stuck showing a wildly wrong time and stop the next queued track from starting automatically** — returning to the app/tab now immediately re-checks the real playback state instead of waiting indefinitely.
+
+### Internal
+- **Split the oversized `use-connect-session.ts` frontend hook and `routes/devices.py` backend module into smaller, single-purpose files** — no behavior change, just easier to navigate.
+- **Starting a radio stream to an already-claimed device wasn't logged** — `/play-url` now logs every attempt, like `/play` already did.
+
+### Known issues
+- **Skipping ahead or scrubbing the position directly on the device itself** (the Sonos app, a Chromecast remote, etc., instead of Feishin's own controls) **isn't detected**. Connect estimates playback position from its own wall clock, calibrated once when a track starts — it doesn't continuously poll the device for its actual position. A device-side seek or skip throws that estimate off, which shows up as the playerbar/lyrics drifting out of sync, and — more disruptively — as the wrong moment for the next track to auto-start, since that's also driven by the same estimated position. Fixing this properly would mean periodically polling every connected device for its live position, which adds constant background traffic for a relatively rare case. Haven't decided yet whether that trade-off is worth it.
+
 ## [0.5.0] - 2026-07-12
 
 ### Added

@@ -63,6 +63,22 @@ def test_cover_art_none_when_no_id():
     assert c.get_cover_art_url(None) is None
 
 
+def test_cover_art_uses_internal_url_when_requested():
+    """internal=True is for cast devices (Sonos/Chromecast/AirPlay/DLNA)
+    fetching the image directly themselves on the LAN, not the browser —
+    they can't go through the same proxy path a browser uses."""
+    c = _client(url="http://proxy:9180", internal_url="http://nav:4533")
+    url = c.get_cover_art_url("cover-1", internal=True)
+    assert url.startswith("http://nav:4533/rest/getCoverArt.view")
+    assert "id=cover-1" in url
+
+
+def test_cover_art_internal_falls_back_to_base_when_no_internal_url_configured():
+    c = _client(url="http://nav:4533", internal_url="")
+    url = c.get_cover_art_url("cover-1", internal=True)
+    assert url.startswith("http://nav:4533/rest/getCoverArt.view")
+
+
 # ── Auth-Parameter ────────────────────────────────────────────────────────────
 
 
@@ -90,6 +106,38 @@ def test_auth_params_from_user_password():
     assert "t" in params  # token = md5(password+salt)
     assert "s" in params
     assert params["f"] == "json"
+
+
+# ── get_track parses Subsonic song JSON ────────────────────────────────────────
+
+
+def test_get_track_parses_song(monkeypatch):
+    import httpx
+
+    song = {
+        "id": "abc",
+        "title": "Song Title",
+        "artist": "Artist A",
+        "album": "The Album",
+        "duration": 213,
+        "coverArt": "cover-1",
+    }
+
+    def fake_get(url, **kwargs):
+        return httpx.Response(
+            200,
+            json={"subsonic-response": {"status": "ok", "song": song}},
+            request=httpx.Request("GET", url),
+        )
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    track = _client().get_track("abc")
+    assert track.id == "abc"
+    assert track.title == "Song Title"
+    assert track.artist == "Artist A"
+    assert track.album == "The Album"
+    assert track.duration == 213
+    assert track.cover_art_id == "cover-1"
 
 
 def test_ping_uses_internal_url(monkeypatch):

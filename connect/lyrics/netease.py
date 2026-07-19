@@ -12,7 +12,7 @@ import httpx
 
 from .shared import USER_AGENT, order_search_results
 
-logger = logging.getLogger("connect.lyrics.netease")
+logger = logging.getLogger("connect.lyrics")
 
 SEARCH_URL = "https://music.163.com/api/search/get"
 LYRICS_URL = "https://music.163.com/api/song/lyric"
@@ -32,7 +32,7 @@ async def get_lyrics_by_song_id(song_id: str) -> str | None:
             )
             r.raise_for_status()
     except httpx.HTTPError as e:
-        logger.warning(f"lyrics request failed: {type(e).__name__}: {e}")
+        logger.warning(f"[netease] lyrics request failed: {type(e).__name__}: {e}")
         return None
 
     data = r.json()
@@ -56,7 +56,7 @@ async def get_search_results(params: dict[str, Any]) -> list[dict[str, Any]] | N
             )
             r.raise_for_status()
     except httpx.HTTPError as e:
-        logger.warning(f"search request failed: {type(e).__name__}: {e}")
+        logger.warning(f"[netease] search request failed: {type(e).__name__}: {e}")
         return None
 
     songs = r.json().get("result", {}).get("songs")

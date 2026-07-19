@@ -5,6 +5,7 @@ import { LuCast } from 'react-icons/lu';
 import { ConnectPopover } from './connect-popover';
 import { useConnectSessionContext } from './connect-session-context';
 import { computePopoverPosition } from './popover-position';
+import { Spinner } from './ui';
 
 export const ConnectButton = () => {
     const { t } = useTranslation();
@@ -14,23 +15,16 @@ export const ConnectButton = () => {
 
     const session = useConnectSessionContext();
 
-    // Close popover when connection finishes or session becomes inactive
-    const prevStatus = useRef(session.status);
-    const prevIsActive = useRef(session.isActive);
-    useEffect(() => {
-        if (prevStatus.current === 'loading' && session.status === 'success') setOpen(false);
-        prevStatus.current = session.status;
-    }, [session.status]);
-    useEffect(() => {
-        if (prevIsActive.current && !session.isActive) setOpen(false);
-        prevIsActive.current = session.isActive;
-    }, [session.isActive]);
     const { activeDevice, fetchVolume, hasApiError, hasFfmpegError, isActive, refresh, status } =
         session;
 
     const handleOpen = () => {
         if (!open && btnRef.current) {
-            if (activeDevice?.type === 'sonos' || activeDevice?.type === 'chromecast')
+            if (
+                activeDevice?.type === 'sonos' ||
+                activeDevice?.type === 'chromecast' ||
+                activeDevice?.type === 'dlna'
+            )
                 fetchVolume();
             const rect = btnRef.current.getBoundingClientRect();
             setPopPos(
@@ -99,10 +93,16 @@ export const ConnectButton = () => {
                         : t('player.connect_playOnDevice')
                 }
             >
-                <LuCast size={20} style={{ opacity: isActive ? 1 : 0.7 }} />
+                {status === 'loading' ? (
+                    <Spinner size={16} />
+                ) : (
+                    <LuCast size={20} style={{ opacity: isActive ? 1 : 0.7 }} />
+                )}
             </button>
 
-            {open && <ConnectPopover popPos={popPos} session={session} />}
+            {open && (
+                <ConnectPopover onClose={() => setOpen(false)} popPos={popPos} session={session} />
+            )}
         </>
     );
 };

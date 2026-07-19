@@ -142,7 +142,12 @@ class AirPlayDelivery(BaseDelivery):
         title: str = "Connect",
         artist: str = "",
         album_art_url: str | None = None,
+        duration: float | None = None,
+        album: str = "",
     ) -> None:
+        # duration accepted for interface parity with BaseDelivery.play() but
+        # not yet wired up here — not part of the DLNA missing-duration fix
+        # this parameter was added for (see dlna.py).
         import pyatv
 
         async with self._play_lock:

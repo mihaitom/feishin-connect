@@ -10,7 +10,7 @@ import httpx
 
 from .shared import USER_AGENT, order_search_results
 
-logger = logging.getLogger("connect.lyrics.simpmusic")
+logger = logging.getLogger("connect.lyrics")
 
 API_URL = "https://api-lyrics.simpmusic.org/v1"
 
@@ -27,7 +27,7 @@ async def get_lyrics_by_song_id(song_id: str) -> str | None:
             r = await client.get(f"{API_URL}/{song_id}")
             r.raise_for_status()
     except httpx.HTTPError as e:
-        logger.warning(f"lyrics request failed: {type(e).__name__}: {e}")
+        logger.warning(f"[simpmusic] lyrics request failed: {type(e).__name__}: {e}")
         return None
 
     data = r.json().get("data") or []
@@ -50,7 +50,7 @@ async def get_search_results(params: dict[str, Any]) -> list[dict[str, Any]] | N
             r = await client.get(f"{API_URL}/search", params={"q": name})
             r.raise_for_status()
     except httpx.HTTPError as e:
-        logger.warning(f"search request failed: {type(e).__name__}: {e}")
+        logger.warning(f"[simpmusic] search request failed: {type(e).__name__}: {e}")
         return None
 
     songs = r.json().get("data")

@@ -210,7 +210,7 @@ ipcMain.on('input-focus-state', (_event, focused: boolean) => {
     if (inputFocused === next) return;
     inputFocused = next;
     if (isMacOS()) {
-        rebuildMainMenu();
+        updateMainMenu();
     }
 });
 
@@ -269,21 +269,30 @@ export const getMainWindow = () => {
     return mainWindow;
 };
 
+const getMainMenuState = (): MenuPlaybackState => ({
+    accelerators: playbackMenuAccelerators,
+    inputFocused,
+    playbackStatus: currentPlaybackStatus,
+    privateMode: currentPrivateMode,
+    repeatMode: currentRepeatMode,
+    shuffleEnabled: currentShuffleEnabled,
+    sidebarCollapsed: currentSidebarCollapsed,
+});
+
 const rebuildMainMenu = () => {
     if (!menuBuilder || !mainWindow) return;
 
-    menuBuilder.buildMenu({
-        accelerators: inputFocused ? {} : playbackMenuAccelerators,
-        playbackStatus: currentPlaybackStatus,
-        privateMode: currentPrivateMode,
-        repeatMode: currentRepeatMode,
-        shuffleEnabled: currentShuffleEnabled,
-        sidebarCollapsed: currentSidebarCollapsed,
-    });
+    menuBuilder.buildMenu(getMainMenuState());
 
     if (process.platform !== 'darwin') {
         Menu.setApplicationMenu(null);
     }
+};
+
+const updateMainMenu = () => {
+    if (!menuBuilder || !mainWindow) return;
+
+    menuBuilder.updateMenu(getMainMenuState());
 };
 
 export const sendToastToRenderer = ({
@@ -749,10 +758,12 @@ enum BindingActions {
     LOCAL_SEARCH = 'localSearch',
     MUTE = 'volumeMute',
     NEXT = 'next',
+    NEXT_ALBUM = 'nextAlbum',
     PAUSE = 'pause',
     PLAY = 'play',
     PLAY_PAUSE = 'playPause',
     PREVIOUS = 'previous',
+    PREVIOUS_ALBUM = 'previousAlbum',
     SHUFFLE = 'toggleShuffle',
     SKIP_BACKWARD = 'skipBackward',
     SKIP_FORWARD = 'skipForward',
@@ -780,11 +791,15 @@ const HOTKEY_ACTIONS: Record<BindingActions, () => void> = {
     [BindingActions.LOCAL_SEARCH]: () => {},
     [BindingActions.MUTE]: () => getMainWindow()?.webContents.send('renderer-player-volume-mute'),
     [BindingActions.NEXT]: () => getMainWindow()?.webContents.send('renderer-player-next'),
+    [BindingActions.NEXT_ALBUM]: () =>
+        getMainWindow()?.webContents.send('renderer-player-next-album'),
     [BindingActions.PAUSE]: () => getMainWindow()?.webContents.send('renderer-player-pause'),
     [BindingActions.PLAY]: () => getMainWindow()?.webContents.send('renderer-player-play'),
     [BindingActions.PLAY_PAUSE]: () =>
         getMainWindow()?.webContents.send('renderer-player-play-pause'),
     [BindingActions.PREVIOUS]: () => getMainWindow()?.webContents.send('renderer-player-previous'),
+    [BindingActions.PREVIOUS_ALBUM]: () =>
+        getMainWindow()?.webContents.send('renderer-player-previous-album'),
     [BindingActions.SHUFFLE]: () =>
         getMainWindow()?.webContents.send('renderer-player-toggle-shuffle'),
     [BindingActions.SKIP_BACKWARD]: () =>
@@ -829,11 +844,11 @@ ipcMain.on(
         }
 
         playbackMenuAccelerators = {
+            globalSearch: getMenuAccelerator(data, BindingActions.GLOBAL_SEARCH),
             next: getMenuAccelerator(data, BindingActions.NEXT),
-            playPause:
-                getMenuAccelerator(data, BindingActions.PLAY_PAUSE) ||
-                getMenuAccelerator(data, BindingActions.PLAY) ||
-                getMenuAccelerator(data, BindingActions.PAUSE),
+            pause: getMenuAccelerator(data, BindingActions.PAUSE),
+            play: getMenuAccelerator(data, BindingActions.PLAY),
+            playPause: getMenuAccelerator(data, BindingActions.PLAY_PAUSE),
             previous: getMenuAccelerator(data, BindingActions.PREVIOUS),
             repeat: getMenuAccelerator(data, BindingActions.TOGGLE_REPEAT),
             seekBackward: getMenuAccelerator(data, BindingActions.SKIP_BACKWARD),
@@ -952,6 +967,13 @@ if (!singleInstance) {
 
     app.whenReady()
         .then(async () => {
+            // fix-path is ESM-only; imported dynamically here rather than as a static
+            // `import fixPath from 'fix-path'` because Rollup's CJS externalization for
+            // the packaged main bundle does not reliably unwrap `.default` for a static
+            // default import of this package, which throws "fixPath is not a function"
+            // in production. A dynamic import always resolves the real ESM default export.
+            const { default: fixPath } = await import('fix-path');
+            fixPath();
             connectPort = await findFreePort();
             process.env['CONNECT_PORT'] = String(connectPort);
             startConnectServer();
@@ -1059,7 +1081,7 @@ ipcMain.on('update-playback', (_event, status: PlayerStatus) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });
 
 ipcMain.on('update-repeat', (_event, repeat: PlayerRepeat) => {
@@ -1067,7 +1089,7 @@ ipcMain.on('update-repeat', (_event, repeat: PlayerRepeat) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });
 
 ipcMain.on('update-shuffle', (_event, shuffle: boolean) => {
@@ -1075,7 +1097,7 @@ ipcMain.on('update-shuffle', (_event, shuffle: boolean) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });
 
 ipcMain.on('update-private-mode', (_event, privateMode: boolean) => {
@@ -1083,7 +1105,7 @@ ipcMain.on('update-private-mode', (_event, privateMode: boolean) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });
 
 ipcMain.on('update-sidebar-collapsed', (_event, collapsedSidebar: boolean) => {
@@ -1091,5 +1113,5 @@ ipcMain.on('update-sidebar-collapsed', (_event, collapsedSidebar: boolean) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });

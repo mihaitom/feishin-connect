@@ -22,8 +22,11 @@ class BaseDelivery(ABC):
         title: str = "Connect",
         artist: str = "",
         album_art_url: str | None = None,
+        duration: float | None = None,
+        album: str = "",
     ) -> None:
-        """Start stream playback."""
+        """Start stream playback. `duration` (seconds) is None for radio/URL
+        streams, which have no fixed length."""
 
     @abstractmethod
     async def stop(self) -> None:

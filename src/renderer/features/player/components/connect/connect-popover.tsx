@@ -7,11 +7,12 @@ import { CONNECT_URL, ConnectSession } from './types';
 import { PopButton, PopSection, Spinner } from './ui';
 
 interface ConnectPopoverProps {
+    onClose: () => void;
     popPos: { bottom: number; right: number };
     session: ConnectSession;
 }
 
-export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
+export const ConnectPopover = ({ onClose, popPos, session }: ConnectPopoverProps) => {
     const { t } = useTranslation();
     const {
         activeTargets,
@@ -19,9 +20,11 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
         connectStatus,
         devices,
         hasApiError,
+        hasAuthError,
         hasFfmpegError,
         isActive,
         isScanning,
+        mySessionId,
         paired,
         refresh,
         refreshPaired,
@@ -29,6 +32,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
         sendToSelected,
         stopAllPlayback,
         stopSingleDevice,
+        takeoverDevice,
         toggleSelectForSend,
         trackLabel,
     } = session;
@@ -104,6 +108,37 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                     </div>
                 </div>
             )}
+            {hasAuthError && (
+                <div
+                    style={{
+                        alignItems: 'flex-start',
+                        background: 'rgba(245,166,35,0.1)',
+                        borderBottom: '1px solid rgba(245,166,35,0.2)',
+                        display: 'flex',
+                        gap: '8px',
+                        padding: '10px 12px',
+                    }}
+                >
+                    <LuTriangleAlert
+                        size={15}
+                        style={{ color: '#f5a623', flexShrink: 0, marginTop: '2px' }}
+                    />
+                    <div>
+                        <div style={{ color: '#f5a623', fontSize: '13px', fontWeight: 600 }}>
+                            {t('player.connect_authError')}
+                        </div>
+                        <div
+                            style={{
+                                color: 'var(--theme-colors-text-secondary)',
+                                fontSize: '11px',
+                                marginTop: '2px',
+                            }}
+                        >
+                            {t('player.connect_authErrorHint')}
+                        </div>
+                    </div>
+                </div>
+            )}
             {hasFfmpegError && (
                 <div
                     style={{
@@ -137,7 +172,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
             )}
 
             {/* Device list */}
-            {!hasApiError && (
+            {!hasApiError && !hasAuthError && (
                 <PopSection
                     label={devices.length === 0 ? '' : (trackLabel ?? t('player.connect_sendTo'))}
                 >
@@ -163,9 +198,13 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                         const isDeviceSelected = selectedForSend.some(
                             (s) => `${s.type}:${s.name}` === key,
                         );
+                        const isClaimedByOther =
+                            !!d.claimedBySessionId && d.claimedBySessionId !== mySessionId;
                         return (
                             <DeviceItem
                                 alwaysShowVolume={activeTargets.length === 1}
+                                claimedByName={isClaimedByOther ? d.claimedByName : null}
+                                claimedByTrack={isClaimedByOther ? d.claimedByTrack : null}
                                 device={d}
                                 isActive={isDeviceActive}
                                 isPaired={d.type === 'airplay' && paired.includes(d.name)}
@@ -173,6 +212,7 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                                 key={key}
                                 onPaired={refreshPaired}
                                 onStop={() => stopSingleDevice(d)}
+                                onTakeover={() => takeoverDevice(d)}
                                 onToggleSelect={() => toggleSelectForSend(d)}
                             />
                         );
@@ -190,7 +230,11 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                     >
                         <div style={{ padding: '4px 12px 10px' }}>
                             <button
-                                onClick={isActive ? addToStream : sendToSelected}
+                                onClick={() => {
+                                    onClose();
+                                    if (isActive) addToStream();
+                                    else sendToSelected();
+                                }}
                                 style={{
                                     background: 'var(--theme-colors-primary)',
                                     border: 'none',
@@ -227,7 +271,10 @@ export const ConnectPopover = ({ popPos, session }: ConnectPopoverProps) => {
                         danger
                         icon={<LuSquare size={14} />}
                         label={t('player.connect_stopAll')}
-                        onClick={stopAllPlayback}
+                        onClick={() => {
+                            onClose();
+                            stopAllPlayback();
+                        }}
                     />
                 </>
             )}

@@ -57,16 +57,20 @@ interface ReleaseNotesContentProps {
  * is not yet published.
  */
 function getLocalChangelogSection(version: string): null | string {
-    // CHANGELOG.md entries use the base version (e.g. "0.3.2"), not the
-    // pre-release suffix (e.g. "-dev.1"), so strip it before matching.
-    const baseVersion = version.split('-')[0];
-    const escaped = baseVersion.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(
-        `## \\[${escaped}\\][^\\n]*\\n([\\s\\S]*?)(?=\\n## \\[|\\n---\\s*\\n## \\[|$)`,
-    );
-    const match = changelogRaw.match(re);
-    const body = match?.[1]?.replace(/\n---\s*$/, '').trim();
-    return body || null;
+    const matchVersion = (v: string): null | string => {
+        const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp(
+            `## \\[${escaped}\\][^\\n]*\\n([\\s\\S]*?)(?=\\n## \\[|\\n---\\s*\\n## \\[|$)`,
+        );
+        const match = changelogRaw.match(re);
+        return match?.[1]?.replace(/\n---\s*$/, '').trim() || null;
+    };
+
+    // The current unreleased entry keeps the full pre-release string in its
+    // header (e.g. "## [0.6.0-dev.1]"), matching package.json's version
+    // exactly — try that first. Fall back to the bare version (e.g. "0.3.2")
+    // for older/base-only header conventions.
+    return matchVersion(version) ?? matchVersion(version.split('-')[0]);
 }
 
 function isAlphaVersion(version: string): boolean {

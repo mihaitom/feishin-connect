@@ -2,8 +2,8 @@
 
 # Feishin — Connect Fork
 
-> **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).** Currently built on upstream **v1.13.0**.
-> It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay and Chromecast devices directly from the player bar.
+> **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).** Currently built on upstream **v1.15.0**.
+> It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay, Chromecast and DLNA/UPnP devices directly from the player bar.
 > All upstream features are preserved.
 
   <p align="center">
@@ -35,7 +35,7 @@
 
 | Feature | This fork | Upstream |
 |---------|-----------|----------|
-| Feishin Connect (Sonos / AirPlay / Chromecast) | ✅ | ❌ |
+| Feishin Connect (Sonos / AirPlay / Chromecast / DLNA) | ✅ | ❌ |
 | Manual library scan button (Navidrome/Subsonic) | ✅ | ❌ |
 | Remote lyrics lookup (lrclib.net, SimpMusic, NetEase) in the web/Docker build | ✅ | ⚠️ Electron only |
 | Auto-updater | ✅ GitHub Releases (this fork's own) | ✅ GitHub Releases |
@@ -47,7 +47,7 @@ The desktop app checks `mihaitom/feishin-connect`'s own GitHub releases for upda
 
 ## Feishin Connect
 
-Feishin Connect adds a cast button to the player bar. Click it to stream the current queue — from Navidrome, Subsonic / OpenSubsonic, or Jellyfin — or a radio stream to any Sonos speaker, AirPlay or Chromecast device on your network, without touching the local player.
+Feishin Connect adds a cast button to the player bar. Click it to stream the current queue — from Navidrome, Subsonic / OpenSubsonic, or Jellyfin — or a radio stream to any Sonos speaker, AirPlay, Chromecast or DLNA/UPnP device on your network, without touching the local player.
 
 <img src="assets/feishin-connect-screenshot.png" width="350px">
 
@@ -57,22 +57,24 @@ Feishin Connect adds a cast button to the player bar. Click it to stream the cur
 
 - A **Python / FastAPI** backend runs alongside nginx in the same Docker container.
 - It receives media server credentials (Navidrome / Subsonic / Jellyfin) automatically from Feishin on startup — no manual config.
-- For Sonos and Chromecast, the backend re-encodes the media server stream via **FFmpeg** into a continuous MP3 stream the devices pull over HTTP, applying ReplayGain volume normalization if enabled.
+- For Sonos, Chromecast and DLNA, the backend re-encodes the media server stream via **FFmpeg** into a continuous MP3 stream the devices pull over HTTP, applying ReplayGain volume normalization if enabled.
 - **Sonos** devices are controlled via UPnP (SoCo) and pull the stream over HTTP.
 - **AirPlay** devices are fed via pyatv / RAOP — the track is downloaded directly from the media server and pushed to the device (no FFmpeg involved).
 - **Chromecast** devices are controlled via pychromecast and pull the stream over HTTP.
+- **DLNA/UPnP** devices (smart TVs, AV receivers, and other generic media renderers) are controlled via standard AVTransport/RenderingControl SOAP calls (`async-upnp-client`) and pull the stream over HTTP — no vendor account or pairing needed. Sonos speakers also expose themselves as DLNA renderers; those are filtered out here so they only show up once, under Sonos.
 
 ### Features
 
-- Stream the current queue or a radio stream to one or multiple Sonos / AirPlay / Chromecast devices simultaneously, with automatic device discovery and AirPlay 2 pairing for devices that require it
+- Stream the current queue or a radio stream to one or multiple Sonos / AirPlay / Chromecast / DLNA devices simultaneously, with automatic device discovery and AirPlay 2 pairing for devices that require it
 - Sonos multiroom grouping (devices play in sync)
-- Transport control via Feishin's normal playerbar — play/pause/previous/next and in-track seeking drive the remote device instead of local playback; per-device volume with ReplayGain normalization is available from the popover (Sonos and Chromecast)
+- Transport control via Feishin's normal playerbar — play/pause/previous/next and in-track seeking drive the remote device instead of local playback; per-device volume with ReplayGain normalization is available from the popover (Sonos, Chromecast and DLNA)
 - Synchronized lyrics and Now-Playing metadata (title, artist, album art) follow along during remote playback
 - Persistent state that survives page reloads — local playback pauses automatically when handing off to a device
+- **Multi-user** — different logins on the same household deployment each get independent playback to independent devices at the same time. A device already in use by someone else shows who and what's playing on it in the Connect popover, with a one-click, confirmation-gated takeover
 
 ### Docker (recommended)
 
-> **`network_mode: host` is required.** The Connect backend discovers Sonos, AirPlay and Chromecast devices via mDNS/SSDP multicast, which only works when the container shares the host's network stack. Without it, no devices will be found. Host networking is Linux-only — on Mac or Windows, run the backend natively.
+> **`network_mode: host` is required.** The Connect backend discovers Sonos, AirPlay, Chromecast and DLNA devices via mDNS/SSDP multicast, which only works when the container shares the host's network stack. Without it, no devices will be found. Host networking is Linux-only — on Mac or Windows, run the backend natively.
 
 ```yaml
 services:
@@ -119,7 +121,7 @@ services:
 ### Requirements
 
 - Navidrome, Subsonic / OpenSubsonic-compatible server, or Jellyfin
-- Sonos, AirPlay and/or Chromecast devices on the same network as the Docker host
+- Sonos, AirPlay, Chromecast and/or DLNA/UPnP devices on the same network as the Docker host
 - Docker host on Linux (host networking is Linux-only; Mac/Windows users need to run the backend natively)
 
 ### Electron (desktop app)
@@ -172,6 +174,8 @@ uv sync
 uv run python main.py
 ```
 
+The bare web dev server has no Electron preload or nginx to inject `CONNECT_TOKEN`, so it sends none by default and every Connect API call — including `/health` — gets rejected with 401. Add `VITE_CONNECT_TOKEN=<value>` to `.env` at the repo root (gitignored, picked up by Vite automatically) to match the backend's `CONNECT_TOKEN` — or the default `feishin-connect-insecure-default` if you haven't set one — then restart `pnpm run dev:web`.
+
 ---
 
 ## Media server behind SSO (Authentik etc.)
@@ -206,7 +210,7 @@ Feishin Connect solves this with a built-in **backend proxy**: all media server 
 
 ### Feishin Connect: ffmpeg required
 
-Feishin Connect uses **ffmpeg** to transcode the audio stream (from Navidrome, Subsonic or Jellyfin) into a continuous MP3 stream for **Sonos and Chromecast**, which pull it over HTTP. (AirPlay does not use ffmpeg — the track is downloaded directly from the media server and streamed via pyatv.) ffmpeg is **not bundled** with the app and must be installed separately.
+Feishin Connect uses **ffmpeg** to transcode the audio stream (from Navidrome, Subsonic or Jellyfin) into a continuous MP3 stream for **Sonos, Chromecast and DLNA**, which pull it over HTTP. (AirPlay does not use ffmpeg — the track is downloaded directly from the media server and streamed via pyatv.) ffmpeg is **not bundled** with the app and must be installed separately.
 
 | Platform | Install |
 |----------|---------|
@@ -256,6 +260,8 @@ chmod 4755 chrome-sandbox
 sudo chown root:root chrome-sandbox
 ```
 
+Ubuntu 24.04 specifically introduced breaking changes that affect how namespaces work. See [the Ubuntu 24.04 release notes](https://discourse.ubuntu.com/t/ubuntu-24-04-lts-noble-numbat-release-notes/39890#:~:text=security%20improvements%20) for possible fixes.
+
 ---
 
 ## Upstream: Feishin
@@ -270,7 +276,7 @@ Rewrite of [Sonixd](https://github.com/jeffvli/sonixd). Original project by [@je
 - [x] Scrobble playback to your server
 - [x] Smart playlist editor (Navidrome)
 - [x] Synchronized and unsynchronized lyrics support
-- [x] **Stream to Sonos / AirPlay / Chromecast via Feishin Connect** *(this fork)*
+- [x] **Stream to Sonos / AirPlay / Chromecast / DLNA via Feishin Connect** *(this fork)*
 - [ ] [Request a feature](https://github.com/jeffvli/feishin/issues) or [view taskboard](https://github.com/users/jeffvli/projects/5/views/1)
 
 ### Screenshots
@@ -321,6 +327,10 @@ curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/i
 7. _Optional_ — Override app defaults with `FS_`-prefixed environment variables on first run. See [the settings environment variable documentation](docs/ENV_SETTINGS.md).
 
 ---
+
+### How can I add custom themes?
+
+On the desktop app, you can add custom themes by dropping JSON files into the Themes folder (Settings → General → Theme → Open Folder). See [the custom themes documentation](docs/CUSTOM_THEMES.md) for the file format and examples.
 
 ## Development
 

@@ -52,6 +52,7 @@ class JellyfinClient:
             duration=int((item.get("RunTimeTicks") or 0) / TICKS_PER_SECOND),
             # For Jellyfin the cover art id IS the item id (Primary image endpoint).
             cover_art_id=item["Id"],
+            album=item.get("Album", ""),
         )
 
     def get_stream_url(self, track_id: str) -> str:
@@ -59,10 +60,11 @@ class JellyfinClient:
         # handles container/codec conversion downstream.
         return f"{self.internal_url}/Items/{track_id}/Download?api_key={self.token}"
 
-    def get_cover_art_url(self, cover_art_id: str) -> str | None:
+    def get_cover_art_url(self, cover_art_id: str, internal: bool = False) -> str | None:
         if not cover_art_id or not self.base_url:
             return None
-        return f"{self.base_url}/Items/{cover_art_id}/Images/Primary?maxHeight=300"
+        base = self.internal_url if internal else self.base_url
+        return f"{base}/Items/{cover_art_id}/Images/Primary?maxHeight=300"
 
     def ping(self) -> bool:
         try:

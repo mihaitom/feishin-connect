@@ -85,6 +85,11 @@ export interface SavedCollection {
 }
 
 export type ServerListItem = {
+    // The account's display name, distinct from its login username — only
+    // Navidrome exposes this (an admin-settable "Name" field separate from
+    // "Username"); undefined for Jellyfin/plain Subsonic, which have no such
+    // field, so consumers should fall back to `username`.
+    displayName?: string;
     features?: ServerFeatures;
     id: string;
     isAdmin?: boolean;
@@ -241,6 +246,8 @@ export type Artist = Omit<AlbumArtist, '_itemType'> & {
 
 export type AuthenticationResponse = {
     credential: string;
+    // See ServerListItem.displayName — only populated for Navidrome.
+    displayName?: string;
     isAdmin?: boolean;
     ndCredential?: string;
     userId: null | string;
@@ -1384,6 +1391,10 @@ export type RandomSongListQuery = {
 
 export type RandomSongListResponse = SongListResponse;
 
+export type RefreshItemsArgs = BaseEndpointArgs & { query: { ids: string[] } };
+
+export type RefreshItemsResponse = null;
+
 export type ScanStatus = {
     count: number;
     scanning: boolean;
@@ -1591,6 +1602,7 @@ export type ControllerEndpoint = {
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;
     jukeboxControl?: (args: JukeboxControlArgs) => Promise<JukeboxControlResponse>;
     movePlaylistItem?: (args: MoveItemArgs) => Promise<void>;
+    refreshItems: (args: RefreshItemsArgs) => Promise<RefreshItemsResponse>;
     removeFromPlaylist: (args: RemoveFromPlaylistArgs) => Promise<RemoveFromPlaylistResponse>;
     replacePlaylist: (args: ReplacePlaylistArgs) => Promise<ReplacePlaylistResponse>;
     savePlayQueue: (args: SaveQueueArgs) => Promise<void>;
@@ -1761,6 +1773,7 @@ export type InternalControllerEndpoint = {
         args: ReplaceApiClientProps<JukeboxControlArgs>,
     ) => Promise<JukeboxControlResponse>;
     movePlaylistItem?: (args: ReplaceApiClientProps<MoveItemArgs>) => Promise<void>;
+    refreshItems: (args: ReplaceApiClientProps<RefreshItemsArgs>) => Promise<RefreshItemsResponse>;
     removeFromPlaylist: (
         args: ReplaceApiClientProps<RemoveFromPlaylistArgs>,
     ) => Promise<RemoveFromPlaylistResponse>;

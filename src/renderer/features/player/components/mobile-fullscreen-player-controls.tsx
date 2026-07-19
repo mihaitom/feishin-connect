@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useConnectPlayerStore } from './connect/connect.store';
 import styles from './mobile-fullscreen-player.module.css';
 
 import { MainPlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
@@ -26,12 +27,17 @@ export const MobileFullscreenPlayerControls = memo(
             mediaSkipForward,
             mediaTogglePlayPause,
         } = usePlayer();
+        const {
+            handlers: connectHandlers,
+            isActive: connectActive,
+            isPlaying: connectPlaying,
+        } = useConnectPlayerStore();
 
         return (
             <div className={styles.controlsContainer}>
                 <PlayerButton
                     icon={<Icon fill="default" icon="mediaPrevious" size="xl" />}
-                    onClick={mediaPrevious}
+                    onClick={(e) => mediaPrevious(e.altKey)}
                     tooltip={{
                         label: t('player.previous'),
                         openDelay: 0,
@@ -50,9 +56,13 @@ export const MobileFullscreenPlayerControls = memo(
                     variant="tertiary"
                 />
                 <MainPlayButton
-                    disabled={currentSongId === undefined}
-                    isPaused={status !== PlayerStatus.PLAYING}
-                    onClick={mediaTogglePlayPause}
+                    disabled={!connectActive && currentSongId === undefined}
+                    isPaused={connectActive ? !connectPlaying : status !== PlayerStatus.PLAYING}
+                    onClick={
+                        connectActive && connectHandlers
+                            ? connectHandlers.onPlayPause
+                            : mediaTogglePlayPause
+                    }
                     style={{
                         height: '50px',
                         width: '50px',
@@ -71,7 +81,7 @@ export const MobileFullscreenPlayerControls = memo(
                 />
                 <PlayerButton
                     icon={<Icon fill="default" icon="mediaNext" size="xl" />}
-                    onClick={mediaNext}
+                    onClick={(e) => mediaNext(e.altKey)}
                     tooltip={{
                         label: t('player.next'),
                         openDelay: 0,
