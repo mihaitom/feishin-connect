@@ -1,3 +1,4 @@
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -32,3 +33,10 @@ fs.writeFileSync(
     'utf8',
 );
 console.log(`Updated ${sharedLyricsFile} with version ${version}`);
+
+// pyproject.toml's version is part of what uv.lock pins — without this,
+// `uv sync --locked` (used by the Dockerfile) fails after every bump because
+// the lockfile no longer matches the project version.
+const connectDir = path.dirname(pyprojectFile);
+execFileSync('uv', ['lock', '--project', connectDir], { stdio: 'inherit' });
+console.log(`Updated ${path.join(connectDir, 'uv.lock')} with version ${pep440Version}`);
