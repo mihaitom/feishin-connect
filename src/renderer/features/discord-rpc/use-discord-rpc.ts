@@ -100,13 +100,14 @@ export const useDiscordRpc = () => {
 
             if (
                 !hasTrackOrRadio || // No track and not playing radio
-                (current[2] === 'paused' && !discordSettings.showPaused) // Paused with show paused setting disabled
+                current[2] === PlayerStatus.STOPPED || // Stopped (stop button or queue end)
+                (current[2] === PlayerStatus.PAUSED && !discordSettings.showPaused) // Paused with show paused setting disabled
             ) {
                 let reason: string;
                 if (!hasTrackOrRadio) {
                     reason = current[0] ? 'no_track' : 'no_track_or_radio';
-                } else if (current[1] === 0 && !isPlayingRadio) {
-                    reason = 'start_of_track';
+                } else if (current[2] === PlayerStatus.STOPPED) {
+                    reason = 'stopped';
                 } else {
                     reason = 'paused_with_show_paused_disabled';
                 }

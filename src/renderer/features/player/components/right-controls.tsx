@@ -36,6 +36,7 @@ import {
     useSettingsStoreActions,
     useSidebarRightExpanded,
     useSideQueueType,
+    useVolumeMax,
     useVolumeWheelStep,
     useVolumeWidth,
 } from '/@/renderer/store';
@@ -60,11 +61,11 @@ import { useThrottledValue } from '/@/shared/hooks/use-throttled-value';
 import { LibraryItem, QueueSong, ServerType } from '/@/shared/types/domain-types';
 import { PlayerType } from '/@/shared/types/types';
 
-const calculateVolumeUp = (volume: number, volumeWheelStep: number) => {
+const calculateVolumeUp = (volume: number, volumeWheelStep: number, volumeMax: number) => {
     let volumeToSet: number;
-    const newVolumeGreaterThanHundred = volume + volumeWheelStep > 100;
-    if (newVolumeGreaterThanHundred) {
-        volumeToSet = 100;
+    const newVolumeGreaterThanMax = volume + volumeWheelStep > volumeMax;
+    if (newVolumeGreaterThanMax) {
+        volumeToSet = volumeMax;
     } else {
         volumeToSet = volume + volumeWheelStep;
     }
@@ -576,6 +577,7 @@ const LocalVolumeButton = () => {
     const muted = usePlayerMuted();
     const volumeWheelStep = useVolumeWheelStep();
     const volumeWidth = useVolumeWidth();
+    const volumeMax = useVolumeMax();
     const { decreaseVolume, increaseVolume, mediaToggleMute, setVolume } = usePlayer();
     const isMinWidth = useMediaQuery('(max-width: 480px)');
 
@@ -637,12 +639,12 @@ const LocalVolumeButton = () => {
             if (e.deltaY > 0 || e.deltaX > 0) {
                 volumeToSet = calculateVolumeDown(volume, volumeWheelStep);
             } else {
-                volumeToSet = calculateVolumeUp(volume, volumeWheelStep);
+                volumeToSet = calculateVolumeUp(volume, volumeWheelStep, volumeMax);
             }
 
             setVolume(volumeToSet);
         },
-        [setVolume, volume, volumeWheelStep],
+        [setVolume, volume, volumeWheelStep, volumeMax],
     );
 
     const handleVolumeDownThrottled = useThrottledCallback(handleVolumeDown, 100);
@@ -706,7 +708,7 @@ const LocalVolumeButton = () => {
             </ContextMenu>
             {!isMinWidth ? (
                 <CustomPlayerbarSlider
-                    max={100}
+                    max={volumeMax}
                     min={0}
                     onChange={handleVolumeSlider}
                     onClick={(e) => {
