@@ -29,9 +29,9 @@
     "scripts": {
         "build": "pnpm run build:connect && pnpm run build:electron && pnpm run build:remote",
         "build:connect": "uv run connect/packaging/build-binary.py",
-        "build:electron": "electron-vite build",
-        "build:remote": "vite build --config remote.vite.config.ts",
-        "build:web": "vite build --config web.vite.config.ts",
+        "build:electron": "cross-env NODE_OPTIONS=--max-old-space-size=4096 electron-vite build",
+        "build:remote": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vite build --config remote.vite.config.ts",
+        "build:web": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vite build --config web.vite.config.ts",
         "bump-version": "pnpm version --no-git-tag-version --no-git-checks",
         "dev": "electron-vite dev",
         "dev:remote": "vite dev --config remote.vite.config.ts",
