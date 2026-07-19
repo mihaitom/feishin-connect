@@ -896,32 +896,6 @@ const jukeboxControl = z.object({
     jukeboxStatus: jukeboxStatus.optional(),
 });
 
-const startScanParameters = z.object({});
-
-const startScan = baseResponse.extend({
-    'subsonic-response': z.object({
-        scanStatus: z
-            .object({
-                count: z.number(),
-                scanning: z.boolean(),
-            })
-            .optional(),
-        status: z.string(),
-        version: z.string(),
-    }),
-});
-
-const getScanStatusParameters = z.object({});
-
-const getScanStatus = z.object({
-    scanStatus: z
-        .object({
-            count: z.number(),
-            scanning: z.boolean(),
-        })
-        .optional(),
-});
-
 export const ssType = {
     _body: {
         getTranscodeDecision: transcodeDecisionRequestBody,

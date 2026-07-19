@@ -96,7 +96,7 @@ export const useConnectSession = (): ConnectSession => {
         isActive,
         isRadioActive,
         lastAutoSentRef,
-        mediaNext,
+        mediaNext: () => mediaNext(false),
         mediaPause,
         pauseRadio,
         radioStationName,
