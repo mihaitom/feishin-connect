@@ -2,7 +2,7 @@
 
 # Feishin — Connect Fork
 
-> **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).** Currently built on upstream **v1.14.0**.
+> **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).** Currently built on upstream **v1.15.0**.
 > It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay, Chromecast and DLNA/UPnP devices directly from the player bar.
 > All upstream features are preserved.
 
@@ -260,6 +260,8 @@ chmod 4755 chrome-sandbox
 sudo chown root:root chrome-sandbox
 ```
 
+Ubuntu 24.04 specifically introduced breaking changes that affect how namespaces work. See [the Ubuntu 24.04 release notes](https://discourse.ubuntu.com/t/ubuntu-24-04-lts-noble-numbat-release-notes/39890#:~:text=security%20improvements%20) for possible fixes.
+
 ---
 
 ## Upstream: Feishin
@@ -325,6 +327,10 @@ curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/i
 7. _Optional_ — Override app defaults with `FS_`-prefixed environment variables on first run. See [the settings environment variable documentation](docs/ENV_SETTINGS.md).
 
 ---
+
+### How can I add custom themes?
+
+On the desktop app, you can add custom themes by dropping JSON files into the Themes folder (Settings → General → Theme → Open Folder). See [the custom themes documentation](docs/CUSTOM_THEMES.md) for the file format and examples.
 
 ## Development
 

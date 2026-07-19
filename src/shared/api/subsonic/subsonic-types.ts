@@ -347,6 +347,19 @@ const scrobbleParameters = z.object({
 
 const scrobble = z.null();
 
+const scanStatusBody = z.object({
+    count: z.number(),
+    folderCount: z.number(),
+    lastScan: z.string().optional(),
+    scanning: z.boolean(),
+});
+
+const startScanParameters = z.object({});
+const startScan = z.object({ scanStatus: scanStatusBody });
+
+const getScanStatusParameters = z.object({});
+const getScanStatus = z.object({ scanStatus: scanStatusBody });
+
 const search3 = z.object({
     searchResult3: z
         .object({
@@ -881,32 +894,6 @@ const jukeboxPlaylist = jukeboxStatus.extend({
 const jukeboxControl = z.object({
     jukeboxPlaylist: jukeboxPlaylist.optional(),
     jukeboxStatus: jukeboxStatus.optional(),
-});
-
-const startScanParameters = z.object({});
-
-const startScan = baseResponse.extend({
-    'subsonic-response': z.object({
-        scanStatus: z
-            .object({
-                count: z.number(),
-                scanning: z.boolean(),
-            })
-            .optional(),
-        status: z.string(),
-        version: z.string(),
-    }),
-});
-
-const getScanStatusParameters = z.object({});
-
-const getScanStatus = z.object({
-    scanStatus: z
-        .object({
-            count: z.number(),
-            scanning: z.boolean(),
-        })
-        .optional(),
 });
 
 export const ssType = {

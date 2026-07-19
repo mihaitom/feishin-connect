@@ -1391,6 +1391,10 @@ export type RandomSongListQuery = {
 
 export type RandomSongListResponse = SongListResponse;
 
+export type RefreshItemsArgs = BaseEndpointArgs & { query: { ids: string[] } };
+
+export type RefreshItemsResponse = null;
+
 export type ScanStatus = {
     count: number;
     scanning: boolean;
@@ -1598,6 +1602,7 @@ export type ControllerEndpoint = {
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;
     jukeboxControl?: (args: JukeboxControlArgs) => Promise<JukeboxControlResponse>;
     movePlaylistItem?: (args: MoveItemArgs) => Promise<void>;
+    refreshItems: (args: RefreshItemsArgs) => Promise<RefreshItemsResponse>;
     removeFromPlaylist: (args: RemoveFromPlaylistArgs) => Promise<RemoveFromPlaylistResponse>;
     replacePlaylist: (args: ReplacePlaylistArgs) => Promise<ReplacePlaylistResponse>;
     savePlayQueue: (args: SaveQueueArgs) => Promise<void>;
@@ -1768,6 +1773,7 @@ export type InternalControllerEndpoint = {
         args: ReplaceApiClientProps<JukeboxControlArgs>,
     ) => Promise<JukeboxControlResponse>;
     movePlaylistItem?: (args: ReplaceApiClientProps<MoveItemArgs>) => Promise<void>;
+    refreshItems: (args: ReplaceApiClientProps<RefreshItemsArgs>) => Promise<RefreshItemsResponse>;
     removeFromPlaylist: (
         args: ReplaceApiClientProps<RemoveFromPlaylistArgs>,
     ) => Promise<RemoveFromPlaylistResponse>;

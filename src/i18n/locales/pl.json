@@ -43,7 +43,8 @@
         "openApplicationDirectory": "Otwórz katalog aplikacji",
         "goToCurrent": "Przejdź do aktualnego elementu",
         "collapseAllFolders": "Zwiń wszystkie foldery",
-        "expandAllFolders": "Rozwiń wszystkie foldery"
+        "expandAllFolders": "Rozwiń wszystkie foldery",
+        "createPlaylistFromQueue": "Utwórz $t(entity.playlist, {\"count\": 1}) z kolejki"
     },
     "common": {
         "increase": "Zwiększ",
@@ -174,7 +175,9 @@
         "numberOfResults": "{{numberOfResults}} wyników",
         "grouping": "Grupowanie",
         "back": "Wstecz",
-        "openFolder": "Otwórz folder"
+        "openFolder": "Otwórz folder",
+        "saveAndClose": "Zapisz i zamknij",
+        "undo": "Cofnij"
     },
     "entity": {
         "genre_one": "Gatunek",
@@ -435,6 +438,9 @@
         },
         "editRadioStation": {
             "success": "Stacja radiowa zaktualizowana pomyślnie"
+        },
+        "createPrefilledPlaylist": {
+            "title": "Utwórz $t(entity.playlist, {\"count\": 1}) z wybranych piosenek"
         }
     },
     "page": {
@@ -515,7 +521,8 @@
             "goToAlbum": "Przejdź do $t(entity.album, {\"count\": 1})",
             "goToAlbumArtist": "Przejdź do $t(entity.albumArtist, {\"count\": 1})",
             "moveItems": "$t(action.moveItems)",
-            "goTo": "Przejdź do"
+            "goTo": "Przejdź do",
+            "editMetadata": "Edytuj metadane"
         },
         "albumDetail": {
             "moreFromArtist": "Więcej od $t(entity.artist, {\"count\": 1})",
@@ -623,7 +630,27 @@
         "itemDetail": {
             "copyPath": "Kopiuj ścieżkę do schowka",
             "copiedPath": "Ścieżka została skopiowana pomyślnie",
-            "openFile": "Pokaż utwór w menedżerze plików"
+            "openFile": "Pokaż utwór w menedżerze plików",
+            "tagConfiguration": "Konfiguracja tagów",
+            "addTagConfig": "Dodaj tag…",
+            "multiValueToggle": "Wielowartościowy",
+            "autocompleteSource": "Źródło autowypełniania",
+            "customValues": "Niestandardowe wartości",
+            "addCustomValue": "Dodaj niestandardową wartość…",
+            "serverSuggestions": "Serwer",
+            "fileNotWritable": "Plik nie jest dostępny lub zapisywalny",
+            "triggerRescan": "Uruchom ponowne skanowanie biblioteki po zapisaniu",
+            "addField": "Dodaj pole…",
+            "emptyFields": "Pola nie mogą być puste",
+            "tagsTab": "Tagi",
+            "artworkTab": "Okładka",
+            "removeArtwork": "Usuń okładkę",
+            "noArtwork": "Brak okładki",
+            "multipleValues": "(Wiele wartości)",
+            "multipleArtworks": "Wiele okładek",
+            "noLocalSongs": "Nie znaleziono piosenek z lokalnymi ścieżkami",
+            "readPartialFailure": "Nie udało się odczytać metadanych z {{count}} na {{total}} plik(ów)",
+            "writePartialFailure": "Nie udało się zapisać {{count}} plik(ów)"
         },
         "manageServers": {
             "title": "Zarządzaj serwerami",
@@ -710,7 +737,9 @@
         "sleepTimer_cancel": "Anuluj wyłączanie",
         "albumRadio": "Radio albumu",
         "scrobbleForceSubmit": "Wymuś scrobble",
-        "sleepTimer_endOfAlbum": "Koniec aktualnego albumu"
+        "sleepTimer_endOfAlbum": "Koniec aktualnego albumu",
+        "nextAlbum": "Alt+kliknięcie aby odtworzyć następny album",
+        "previousAlbum": "Alt+kliknięcie aby odtworzyć poprzedni album"
     },
     "setting": {
         "crossfadeStyle_description": "Wybierz styl przenikania, który ma być używany do odtwarzania dźwięku",
@@ -1160,7 +1189,9 @@
         "windowBarTrackinfo_description": "Wyświetlaj tytuł, wykonawcę, pozycję w kolejce i stan Odtwarzania/Wstrzymania w tytule okna.",
         "audioDeviceDefault": "Domyślne systemu",
         "microtonalPitchControls": "Mikrotonowe sterowanie wysokością dźwięku",
-        "microtonalPitchControls_description": "Dodaj więcej sterowania wysokością dźwięku pomiędzy półtonami"
+        "microtonalPitchControls_description": "Dodaj więcej sterowania wysokością dźwięku pomiędzy półtonami",
+        "hotkey_playbackNextAlbum": "Następny album",
+        "hotkey_playbackPreviousAlbum": "Poprzedni album"
     },
     "table": {
         "config": {
@@ -1204,7 +1235,8 @@
                 "albumImageSize": "Rozmiar obrazów albumów",
                 "albumGroupConfig": "Konfiguracja grupy albumów",
                 "albumGroupMetadata": "Pola metadanych",
-                "albumGroupShowFavoriteRating": "Pokaż ulubione i oceny"
+                "albumGroupShowFavoriteRating": "Pokaż ulubione i oceny",
+                "albumGroupVerticalLayout": "Pionowy układ"
             },
             "label": {
                 "releaseDate": "Data premiery",
