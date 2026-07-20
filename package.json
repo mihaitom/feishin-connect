@@ -1,6 +1,6 @@
 {
     "name": "feishin-connect",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -119,6 +119,7 @@
         "kuroshiro": "^1.2.0",
         "kuroshiro-analyzer-kuromoji": "^1.1.0",
         "lodash": "^4.18.1",
+        "marked": "^18.0.6",
         "md5": "^2.3.0",
         "motion": "^12.40.0",
         "mpris-service": "^2.1.2",

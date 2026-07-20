@@ -486,7 +486,9 @@
         "releasenotes": {
             "commitsSinceStable": "Commits since {{stable}}",
             "noNewCommits": "No new commits in this range",
-            "noStableReleaseToCompare": "No stable release available to compare with"
+            "noStableReleaseToCompare": "No stable release available to compare with",
+            "tabConnect": "Feishin Connect",
+            "tabUpstream": "Feishin (upstream)"
         },
         "favorites": {
             "title": "$t(entity.favorite, {\"count\": 2})"

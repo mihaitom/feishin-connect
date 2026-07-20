@@ -1,8 +1,7 @@
 import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import DOMPurify from 'dompurify';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import changelogRaw from '../../CHANGELOG.md?raw';
@@ -10,10 +9,11 @@ import packageJson from '../../package.json';
 
 import {
     GITHUB_RELEASES_URL,
-    type GitHubRelease,
     parseVersionFromTag,
     RELEASES_TO_FETCH,
+    renderReleaseNotesHtml,
     toTag,
+    useGithubReleaseByTag,
     useGithubReleasesList,
 } from '/@/renderer/hooks/use-github-releases';
 import { formatHrDateTime } from '/@/renderer/utils/format';
@@ -25,10 +25,13 @@ import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Select } from '/@/shared/components/select/select';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
+import { Tabs } from '/@/shared/components/tabs/tabs';
 import { Text } from '/@/shared/components/text/text';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 
 const GITHUB_COMPARE_URL = 'https://api.github.com/repos/mihaitom/feishin-connect/compare';
+const UPSTREAM_GITHUB_RELEASES_URL = 'https://api.github.com/repos/jeffvli/feishin/releases';
+const UPSTREAM_REPO_URL = 'https://github.com/jeffvli/feishin';
 
 interface GitHubCompareCommit {
     commit: {
@@ -46,6 +49,7 @@ interface GitHubCompareResponse {
 
 interface ReleaseNotesContentProps {
     onDismiss: () => void;
+    onNavigateToUpstream?: (version: string) => void;
     version: string;
 }
 
@@ -75,7 +79,23 @@ function isAlphaVersion(version: string): boolean {
     return version.includes('-alpha');
 }
 
-const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) => {
+const UPSTREAM_RELEASE_LINK_RE =
+    /^https:\/\/github\.com\/jeffvli\/feishin\/releases\/tag\/(v[0-9][\w.-]*)$/;
+
+/**
+ * Links to upstream's own release notes (e.g. from a "Merged upstream Feishin
+ * vX.Y.Z" changelog entry) shouldn't leave the app — open the Upstream tab at
+ * that version instead. Returns the linked version, or null for any other link.
+ */
+function extractUpstreamVersionFromLink(href: string): null | string {
+    return href.match(UPSTREAM_RELEASE_LINK_RE)?.[1] ?? null;
+}
+
+const ReleaseNotesContent = ({
+    onDismiss,
+    onNavigateToUpstream,
+    version,
+}: ReleaseNotesContentProps) => {
     const { t } = useTranslation();
     const [selectedVersion, setSelectedVersion] = useState(version);
     const isAlpha = isAlphaVersion(selectedVersion);
@@ -128,17 +148,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
         data: releaseData,
         isError,
         isLoading,
-    } = useQuery({
-        enabled: !isAlpha,
-        queryFn: async () => {
-            const response = await axios.get<GitHubRelease>(
-                `${GITHUB_RELEASES_URL}/tags/${toTag(selectedVersion)}`,
-            );
-            return response.data;
-        },
-        queryKey: ['github-release', selectedVersion],
-        retry: 2,
-    });
+    } = useGithubReleaseByTag(GITHUB_RELEASES_URL, toTag(selectedVersion), !isAlpha);
 
     // Fall back to the bundled CHANGELOG.md when the GitHub release for this
     // version isn't published yet (e.g. immediately after a version bump).
@@ -148,58 +158,21 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
     );
     const effectiveBody = releaseData?.body || localChangelogBody;
 
-    // Convert markdown to HTML using GitHub's markdown API
-    const { data: htmlContent, isLoading: isConverting } = useQuery({
-        enabled: !isAlpha && !!effectiveBody,
-        queryFn: async () => {
-            const response = await axios.post(
-                'https://api.github.com/markdown',
-                {
-                    mode: 'gfm',
-                    text: effectiveBody ?? '',
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    responseType: 'text',
-                },
-            );
-            return response.data;
-        },
-        queryKey: ['github-markdown', effectiveBody],
-        retry: 2,
-    });
+    const sanitizedHtml = useMemo(() => renderReleaseNotesHtml(effectiveBody), [effectiveBody]);
 
-    const sanitizedHtml = useMemo(() => {
-        if (!htmlContent) return '';
-        return DOMPurify.sanitize(htmlContent, {
-            ALLOWED_ATTR: ['alt', 'href', 'src', 'title'],
-            ALLOWED_TAGS: [
-                'a',
-                'blockquote',
-                'br',
-                'code',
-                'em',
-                'h1',
-                'h2',
-                'h3',
-                'h4',
-                'h5',
-                'h6',
-                'img',
-                'li',
-                'ol',
-                'p',
-                'pre',
-                'strong',
-                'u',
-                'ul',
-            ],
-        });
-    }, [htmlContent]);
+    const handleContentClick = (event: MouseEvent<HTMLElement>) => {
+        if (!onNavigateToUpstream) return;
+        const anchor = (event.target as HTMLElement).closest('a');
+        const href = anchor?.getAttribute('href');
+        if (!href) return;
+        const upstreamVersion = extractUpstreamVersionFromLink(href);
+        if (upstreamVersion) {
+            event.preventDefault();
+            onNavigateToUpstream(upstreamVersion);
+        }
+    };
 
-    const isLoadingState = isAlpha ? isCompareLoading : isLoading || isConverting;
+    const isLoadingState = isAlpha ? isCompareLoading : isLoading;
     // Only show the error fallback if there's nothing to render — i.e. GitHub
     // failed AND we don't have a local CHANGELOG section to display.
     const isErrorState = isAlpha
@@ -384,6 +357,7 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
                     dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
                     fw={400}
                     lh="1.5"
+                    onClick={handleContentClick}
                     size="md"
                 />
             </ScrollArea>
@@ -391,6 +365,122 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
                 <Button
                     component="a"
                     href={`https://github.com/mihaitom/feishin-connect/releases/tag/${toTag(selectedVersion)}`}
+                    onClick={onDismiss}
+                    rightSection={<Icon icon="externalLink" />}
+                    target="_blank"
+                    variant="subtle"
+                >
+                    {t('action.viewMore')}
+                </Button>
+                <Button onClick={onDismiss} variant="filled">
+                    {t('common.dismiss')}
+                </Button>
+            </Group>
+        </Stack>
+    );
+};
+
+interface UpstreamChangesPanelProps {
+    onDismiss: () => void;
+    onVersionChange: (version: string) => void;
+    version: string;
+}
+
+const UpstreamChangesPanel = ({
+    onDismiss,
+    onVersionChange,
+    version,
+}: UpstreamChangesPanelProps) => {
+    const { t } = useTranslation();
+    const upstreamTag = toTag(version);
+    const releaseUrl = `${UPSTREAM_REPO_URL}/releases/tag/${upstreamTag}`;
+
+    // Fetch list of upstream releases for the selector — same GitHub API,
+    // just pointed at jeffvli/feishin instead of our own repo.
+    const { data: releasesList = [] } = useGithubReleasesList(UPSTREAM_GITHUB_RELEASES_URL);
+
+    const releaseOptions = useMemo(() => {
+        const options = releasesList.slice(0, RELEASES_TO_FETCH).map((r) => {
+            const v = parseVersionFromTag(r.tag_name);
+            const dateStr = formatHrDateTime(r.published_at);
+            return {
+                label: dateStr ? `${v} - ${dateStr}` : v,
+                value: v,
+            };
+        });
+        const versions = options.map((o) => o.value);
+        if (!versions.includes(version)) {
+            options.unshift({ label: version, value: version });
+        }
+        return options;
+    }, [releasesList, version]);
+
+    const {
+        data: releaseData,
+        isError,
+        isLoading,
+    } = useGithubReleaseByTag(UPSTREAM_GITHUB_RELEASES_URL, upstreamTag);
+
+    const sanitizedHtml = useMemo(
+        () => renderReleaseNotesHtml(releaseData?.body),
+        [releaseData?.body],
+    );
+
+    const versionSelect = releaseOptions.length > 1 && (
+        <Select data={releaseOptions} onChange={(v) => v && onVersionChange(v)} value={version} />
+    );
+
+    if (isLoading) {
+        return (
+            <Center h={400}>
+                <Spinner />
+            </Center>
+        );
+    }
+
+    if (isError || !releaseData) {
+        return (
+            <Stack gap="md">
+                {versionSelect}
+                <Text size="sm">{t('error.genericError')}</Text>
+                <Group justify="flex-end">
+                    <Button
+                        component="a"
+                        href={releaseUrl}
+                        onClick={onDismiss}
+                        rightSection={<Icon icon="externalLink" />}
+                        target="_blank"
+                        variant="filled"
+                    >
+                        {t('common.viewReleaseNotes')}
+                    </Button>
+                    <Button onClick={onDismiss} variant="default">
+                        {t('common.dismiss')}
+                    </Button>
+                </Group>
+            </Stack>
+        );
+    }
+
+    return (
+        <Stack gap="md">
+            {versionSelect}
+            <ScrollArea
+                style={{
+                    height: '400px',
+                }}
+            >
+                <Text
+                    dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+                    fw={400}
+                    lh="1.5"
+                    size="md"
+                />
+            </ScrollArea>
+            <Group justify="flex-end">
+                <Button
+                    component="a"
+                    href={releaseUrl}
                     onClick={onDismiss}
                     rightSection={<Icon icon="externalLink" />}
                     target="_blank"
@@ -415,8 +505,11 @@ interface ReleaseNotesModalContentWrapperProps {
 const ReleaseNotesModalContentWrapper = ({
     setDismissRef,
 }: ReleaseNotesModalContentWrapperProps) => {
+    const { t } = useTranslation();
     const { version } = packageJson;
     const [, setValue] = useLocalStorage({ key: 'version' });
+    const [activeTab, setActiveTab] = useState<'connect' | 'upstream'>('connect');
+    const [upstreamVersion, setUpstreamVersion] = useState(packageJson.feishinUpstreamVersion);
 
     const handleDismiss = useCallback(() => {
         setValue(version);
@@ -428,7 +521,40 @@ const ReleaseNotesModalContentWrapper = ({
         return () => setDismissRef?.(undefined);
     }, [handleDismiss, setDismissRef]);
 
-    return <ReleaseNotesContent onDismiss={handleDismiss} version={version} />;
+    // Clicking an upstream release-notes link inside our own changelog (e.g.
+    // "Merged upstream Feishin vX.Y.Z") switches to the Upstream tab at that
+    // version instead of leaving the app.
+    const handleNavigateToUpstream = useCallback((linkedVersion: string) => {
+        setUpstreamVersion(linkedVersion);
+        setActiveTab('upstream');
+    }, []);
+
+    return (
+        <Tabs
+            keepMounted={false}
+            onChange={(value) => value && setActiveTab(value as 'connect' | 'upstream')}
+            value={activeTab}
+        >
+            <Tabs.List>
+                <Tabs.Tab value="connect">{t('page.releasenotes.tabConnect')}</Tabs.Tab>
+                <Tabs.Tab value="upstream">{t('page.releasenotes.tabUpstream')}</Tabs.Tab>
+            </Tabs.List>
+            <Tabs.Panel pt="md" value="connect">
+                <ReleaseNotesContent
+                    onDismiss={handleDismiss}
+                    onNavigateToUpstream={handleNavigateToUpstream}
+                    version={version}
+                />
+            </Tabs.Panel>
+            <Tabs.Panel pt="md" value="upstream">
+                <UpstreamChangesPanel
+                    onDismiss={handleDismiss}
+                    onVersionChange={setUpstreamVersion}
+                    version={upstreamVersion}
+                />
+            </Tabs.Panel>
+        </Tabs>
+    );
 };
 
 export const openReleaseNotesModal = (title: string) => {

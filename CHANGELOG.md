@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- **The release notes modal now has an "Upstream" tab** showing the merged Feishin release's own notes.
+
 ### Changed
 - **Merged upstream Feishin v1.15.1** — small hotfix release: fixes an inverted condition that could send scrobble progress updates on the wrong servers, a MediaSession handler that broke after stopping playback, and a tag editor default. See <a href="https://github.com/jeffvli/feishin/releases/tag/v1.15.1">Feishin Release Notes v1.15.1</a> for more details.
 - **The desktop app's "update available" notification is now a small badge in Settings and the app menu**, instead of our own popup dialog — adopted from upstream's v1.15.1 rework, dropping our dialog in its favor. Now shows on Windows/Linux too, not just macOS, and no longer re-triggers electron-updater's download check on every periodic check (previously macOS-only) — it just polls GitHub's releases API. The startup auto-update flow (real download + install) is unchanged.

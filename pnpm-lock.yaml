@@ -153,6 +153,9 @@ importers:
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
+      marked:
+        specifier: ^18.0.6
+        version: 18.0.6
       md5:
         specifier: ^2.3.0
         version: 2.3.0
@@ -4308,6 +4311,11 @@ packages:
 
   map-stream@0.1.0:
     resolution: {integrity: sha512-CkYQrPYZfWnu/DAmVCpTSX/xHpKZ80eKh2lAkyA6AJTef6bW+6JpbQZN5rofum7da+SyN1bi5ctTm+lTfcCW3g==}
+
+  marked@18.0.6:
+    resolution: {integrity: sha512-MrV5puXBfuiy6wl6DLaq3BtIJQAJToAd5zt/ZKhRfGRAuFPALE7/4Y7jnxRQoEgK/pBgurGqLyAuRgZ2xOjr6w==}
+    engines: {node: '>= 20'}
+    hasBin: true
 
   matcher-collection@2.0.1:
     resolution: {integrity: sha512-daE62nS2ZQsDg9raM0IlZzLmI2u+7ZapXBwdoeBUKAYERPDDIc0qNqA8E0Rp2D+gspKR7BgIFP52GeujaGXWeQ==}
@@ -10465,6 +10473,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   map-stream@0.1.0: {}
+
+  marked@18.0.6: {}
 
   matcher-collection@2.0.1:
     dependencies:
