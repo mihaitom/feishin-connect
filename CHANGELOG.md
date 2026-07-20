@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Merged upstream Feishin v1.15.1** — small hotfix release: fixes an inverted condition that could send scrobble progress updates on the wrong servers, a MediaSession handler that broke after stopping playback, and a tag editor default. See <a href="https://github.com/jeffvli/feishin/releases/tag/v1.15.1">Feishin Release Notes v1.15.1</a> for more details.
+- **The desktop app's "update available" notification is now a small badge in Settings and the app menu**, instead of a popup dialog — and now shows on Windows/Linux too, not just macOS. It no longer re-triggers electron-updater's download check on every periodic check (previously macOS-only), it just polls GitHub's releases API. The startup auto-update flow (real download + install) is unchanged.
+
 ## [0.6.0] - 2026-07-19
 
 ### Added
