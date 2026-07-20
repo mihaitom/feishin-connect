@@ -199,6 +199,6 @@
         "vitest": "^4.1.8"
     },
     "packageManager": "pnpm@11.5.2",
-    "feishinUpstreamVersion": "1.15.0",
+    "feishinUpstreamVersion": "1.15.1",
     "productName": "feishin"
 }

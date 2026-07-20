@@ -2052,7 +2052,7 @@ const initialState: SettingsState = {
             ALBUMARTISTSSORT: {
                 autocompleteSource: 'serverArtists',
                 customValues: [],
-                multiValue: true,
+                multiValue: false,
             },
             artist: {
                 autocompleteSource: 'serverArtists',
@@ -2067,12 +2067,12 @@ const initialState: SettingsState = {
             artistSort: {
                 autocompleteSource: 'serverArtists',
                 customValues: [],
-                multiValue: true,
+                multiValue: false,
             },
             ARTISTSSORT: {
                 autocompleteSource: 'serverArtists',
                 customValues: [],
-                multiValue: true,
+                multiValue: false,
             },
             genre: {
                 autocompleteSource: 'serverGenres',
@@ -2705,10 +2705,26 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     }
                 }
 
+                if (version < 32) {
+                    const tagConfigs = state.tagEditor?.tagConfigs;
+                    if (tagConfigs) {
+                        for (const key of [
+                            'albumArtistSort',
+                            'ALBUMARTISTSSORT',
+                            'artistSort',
+                            'ARTISTSSORT',
+                        ] as const) {
+                            if (tagConfigs[key]) {
+                                tagConfigs[key].multiValue = false;
+                            }
+                        }
+                    }
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 31,
+            version: 32,
         },
     ),
 );

@@ -185,9 +185,9 @@ export const useScrobble = () => {
             // Because Jellyfin uses the stop event for submission, we need to send another
             // progress update after submission so that the song continues to progress in the dashboard
             const shouldSendProgress =
-                song._serverType !== ServerType.JELLYFIN ||
-                activeSong?._uniqueId !== song._uniqueId ||
-                status !== PlayerStatus.PLAYING;
+                song._serverType === ServerType.JELLYFIN &&
+                activeSong?._uniqueId === song._uniqueId &&
+                status === PlayerStatus.PLAYING;
 
             if (!shouldSendProgress) {
                 return;
