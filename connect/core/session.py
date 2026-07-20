@@ -130,6 +130,7 @@ def build_status_dict(session: SessionState) -> dict:
         "current_track_index": current_track_index,
         "elapsed": elapsed,
         "ended": st.track_ended,
+        "local_owner_client_id": st.local_owner_client_id,
         "paused": st.clock.is_paused,
         "queue_track_ids": st.queue_track_ids,
         "radio": st.radio_info,

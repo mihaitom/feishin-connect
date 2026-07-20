@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useConnectElapsed } from './connect.store';
+import { ConnectMode, useConnectElapsed } from './connect.store';
 import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
-import { ConnectDevice, connectFetch, ConnectSession, ConnectStatus, SendStatus } from './types';
+import {
+    ConnectDevice,
+    connectFetch,
+    ConnectSession,
+    ConnectStatus,
+    getConnectClientId,
+    SendStatus,
+} from './types';
 import { useConnectActions } from './use-connect-actions';
 import { useConnectControls } from './use-connect-controls';
 import { useConnectDisconnect } from './use-connect-disconnect';
@@ -19,6 +26,12 @@ export const useConnectSession = (): ConnectSession => {
     const [activeDevice, setActive] = useState<ConnectDevice | null>(null);
     const [activeTargets, setActiveTargets] = useState<ConnectDevice[]>([]);
     const [selectedForSend, setSelectedForSend] = useState<ConnectDevice[]>([]);
+    // Cast (activeDevice set) always wins. Otherwise this tracks whether THIS
+    // tab is the one producing audio for a non-cast session ('local-owner'),
+    // is passively reflecting another tab's session ('mirror'), or nobody's
+    // playing anything in this session at all ('inactive') — see connect.
+    // store.ts's ConnectMode docstring.
+    const [localMode, setLocalMode] = useState<'inactive' | 'local-owner' | 'mirror'>('inactive');
 
     const { devices, health, isScanning, refresh } = useConnectDevices();
     const { paired, refresh: refreshPaired } = usePairedDevices();
@@ -40,7 +53,8 @@ export const useConnectSession = (): ConnectSession => {
     const radioStreamUrl = useRadioStore((s) => s.currentStreamUrl);
     const radioStationName = useRadioStore((s) => s.stationName);
 
-    const isActive = !!activeDevice;
+    const isActive = !!activeDevice || localMode !== 'inactive';
+    const mode: ConnectMode = activeDevice ? 'cast' : localMode;
     const connectStatus = useConnectStatus(isActive);
     const currentTrackId = currentSong?.id ?? null;
 
@@ -83,24 +97,59 @@ export const useConnectSession = (): ConnectSession => {
                     setActive(restored[0]);
                     setStatus('success');
                     // If ended=true, the track-ended effect will call mediaNext() once SSE connects
+                    return;
+                }
+                // No cast device — is a *local* (non-cast) session already owned
+                // by some tab? Always mirror by default on load, never assume
+                // ownership even if this exact tab was the owner moments ago —
+                // a fresh page load gets a brand-new connectClientId (see
+                // types.ts), so it can't tell "that was me" apart from "that
+                // was someone else" anyway.
+                if (
+                    !d.targets?.length &&
+                    (d.streaming || d.current_track || (d.queue_track_ids?.length ?? 0) > 0)
+                ) {
+                    lastAutoSentRef.current = currentSongRef.current?._uniqueId ?? '';
+                    setLocalMode('mirror');
                 }
             })
             .catch(() => {});
     }, []);
+
+    // ── Local-ownership transitions ───────────────────────────────────────────
+    // Someone else's tab took over local playback while we thought we owned
+    // it (a "play here instead" takeover, once that UI exists) → drop to
+    // mirror. Or the session we were mirroring went fully idle → free to
+    // become the owner again on this tab's next local play.
+    useEffect(() => {
+        if (activeDevice || !connectStatus) return;
+        const owner = connectStatus.local_owner_client_id;
+        if (localMode === 'local-owner' && owner && owner !== getConnectClientId()) {
+            setLocalMode('mirror');
+        } else if (
+            localMode === 'mirror' &&
+            !owner &&
+            !connectStatus.streaming &&
+            !connectStatus.current_track
+        ) {
+            setLocalMode('inactive');
+        }
+    }, [activeDevice, connectStatus, localMode]);
 
     // ── Playback effects (auto-forward, timer, streaming-end) ─────────────────
     useConnectPlayback({
         activeTargets,
         connectStatus,
         currentSong,
-        isActive,
         isRadioActive,
         lastAutoSentRef,
         mediaNext: () => mediaNext(false),
         mediaPause,
+        mode,
         pauseRadio,
         radioStationName,
         radioStreamUrl,
+        setLocalMode,
     });
 
     // ── Scrobble effects (start + submission via Connect events) ──────────────
@@ -151,7 +200,7 @@ export const useConnectSession = (): ConnectSession => {
     });
 
     // ── Player-bar play/pause/stop pass-through + local-playback safety net ───
-    const { handleStop, handleTogglePlayPause } = useConnectControls({
+    const { handleNext, handlePrevious, handleStop, handleTogglePlayPause } = useConnectControls({
         activeTargets,
         currentSong,
         currentTrackId,
@@ -159,6 +208,7 @@ export const useConnectSession = (): ConnectSession => {
         lastAutoSentRef,
         mediaPause,
         mediaTogglePlayPause,
+        mode,
     });
 
     return {
@@ -169,6 +219,8 @@ export const useConnectSession = (): ConnectSession => {
         currentTrackId,
         devices,
         fetchVolume,
+        handleNext,
+        handlePrevious,
         handleStop,
         handleTogglePlayPause,
         hasApiError: health !== null && !health.apiReachable && !health.unauthorized,
@@ -176,6 +228,7 @@ export const useConnectSession = (): ConnectSession => {
         hasFfmpegError: !!(health?.apiReachable && health.ffmpegFound === false),
         isActive,
         isScanning,
+        mode,
         mySessionId,
         paired,
         refresh,

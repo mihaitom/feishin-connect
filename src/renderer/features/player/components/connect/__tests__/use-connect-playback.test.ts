@@ -4,6 +4,7 @@ import type { MutableRefObject } from 'react';
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { ConnectMode } from '../connect.store';
 import type { ConnectDevice, ConnectStatus } from '../types';
 
 import { connectFetch } from '../types';
@@ -34,14 +35,15 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectPlayback>[0]> =
         activeTargets: targets,
         connectStatus: null,
         currentSong: song(),
-        isActive: true,
         isRadioActive: false,
         lastAutoSentRef,
         mediaNext: vi.fn(),
         mediaPause: vi.fn(),
+        mode: 'cast' as ConnectMode,
         pauseRadio: vi.fn(),
         radioStationName: null,
         radioStreamUrl: null,
+        setLocalMode: vi.fn(),
         ...overrides,
     };
 };
@@ -73,8 +75,34 @@ describe('useConnectPlayback', () => {
             expect(args.lastAutoSentRef.current).toBe('song-1');
         });
 
-        it('does nothing when Connect is inactive', () => {
-            const args = baseArgs({ isActive: false });
+        it('registers this tab as the local audio source when inactive (no cast device)', () => {
+            const args = baseArgs({ mode: 'inactive' });
+
+            renderHook(() => useConnectPlayback(args));
+
+            // Unlike casting, there's no external target — local audio must
+            // actually play, so mediaPause() must NOT be called here.
+            expect(args.mediaPause).not.toHaveBeenCalled();
+            const [path, options] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/play');
+            const body = JSON.parse(options.body);
+            expect(body.track_ids).toEqual(['track-1']);
+            expect(body).toHaveProperty('client_id');
+            expect(body.targets).toBeUndefined();
+            expect(args.setLocalMode).toHaveBeenCalledWith('local-owner');
+        });
+
+        it('keeps pushing as local-owner without re-promoting', () => {
+            const args = baseArgs({ mode: 'local-owner' });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(connectFetchMock).toHaveBeenCalledTimes(1);
+            expect(args.setLocalMode).not.toHaveBeenCalled();
+        });
+
+        it('does nothing while mirroring another tab/device', () => {
+            const args = baseArgs({ mode: 'mirror' });
 
             renderHook(() => useConnectPlayback(args));
 
@@ -187,7 +215,9 @@ describe('useConnectPlayback', () => {
                 current_track_index: 0,
                 elapsed: 0,
                 ended: false,
+                local_owner_client_id: null,
                 paused: false,
+                queue_track_ids: [],
                 radio: null,
                 streaming: false,
                 targets: [],
@@ -205,6 +235,28 @@ describe('useConnectPlayback', () => {
             expect(args.mediaNext).toHaveBeenCalledTimes(1);
             expect(args.mediaPause).toHaveBeenCalledTimes(1);
             expect(args.lastAutoSentRef.current).toBe('');
+        });
+
+        it("does nothing in mirror mode — must not advance this tab's own unrelated local queue", () => {
+            const args = baseArgs({
+                connectStatus: status({ ended: true, streaming: false }),
+                mode: 'mirror',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaNext).not.toHaveBeenCalled();
+        });
+
+        it('does nothing in local-owner mode — natural end is detected locally instead', () => {
+            const args = baseArgs({
+                connectStatus: status({ ended: true, streaming: false }),
+                mode: 'local-owner',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaNext).not.toHaveBeenCalled();
         });
 
         it('does nothing while still streaming, even if ended is set', () => {

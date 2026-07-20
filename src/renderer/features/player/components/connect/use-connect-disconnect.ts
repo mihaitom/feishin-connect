@@ -125,14 +125,21 @@ export const useConnectDisconnect = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connectStatus, isActive]);
 
+    // Both functions below flip isActive-driving state (setActive/
+    // setActiveTargets) *before* awaiting the /stop request, not after. A
+    // track that ends naturally (SSE `ended`) while /stop is still in flight
+    // must not race the track-ended effect into calling mediaNext() — that
+    // effect is gated on isActive, so isActive has to already be false by
+    // the time such a stale/concurrent `ended` event is processed, not just
+    // once the network round-trip finishes.
     const stopAllPlayback = async () => {
         const snapshot = captureDisconnectSnapshot();
-        await connectFetch(`/stop`, { method: 'POST' }).catch(() => {});
         setStatus('idle');
         setActive(null);
         setActiveTargets([]);
         setSelectedForSend([]);
         lastAutoSentRef.current = '';
+        await connectFetch(`/stop`, { method: 'POST' }).catch(() => {});
         resumeLocalAfterDisconnect(snapshot);
     };
 
@@ -140,10 +147,6 @@ export const useConnectDisconnect = ({
         // This device is the last one active — disconnecting it ends the session.
         const willBecomeInactive = activeTargets.length <= 1;
         const snapshot = willBecomeInactive ? captureDisconnectSnapshot() : null;
-        await connectFetch(
-            `/device-stop?device_type=${device.type}&name=${encodeURIComponent(device.name)}`,
-            { method: 'POST' },
-        ).catch(() => {});
         const remaining = activeTargets.filter(
             (tgt) => !(tgt.type === device.type && tgt.name === device.name),
         );
@@ -151,10 +154,14 @@ export const useConnectDisconnect = ({
         if (remaining.length === 0) {
             setActive(null);
             setStatus('idle');
-            if (snapshot) resumeLocalAfterDisconnect(snapshot);
         } else {
             setActive(remaining[0]);
         }
+        await connectFetch(
+            `/device-stop?device_type=${device.type}&name=${encodeURIComponent(device.name)}`,
+            { method: 'POST' },
+        ).catch(() => {});
+        if (remaining.length === 0 && snapshot) resumeLocalAfterDisconnect(snapshot);
     };
 
     return { stopAllPlayback, stopSingleDevice };

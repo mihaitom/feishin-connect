@@ -43,6 +43,16 @@ class AppState:
         # Set by /queue whenever any client's local queue changes.
         self.queue_track_ids: list[str] = []
         self.queue_index: int = 0
+        # Which browser tab/client is currently producing audio for *local*
+        # (non-cast) playback — distinct from session_id, which is shared by
+        # every tab logged into the same account. Only meaningful when
+        # active_delivery is None: a real cast target has no single "owning"
+        # tab, since every tab can equally control the external device. Set by
+        # /play, /next, /prev when target=None; cleared by /stop. Not enforced
+        # like a device claim (no refusal on conflict) — the frontend decides
+        # not to claim it if another tab already owns it (see use-connect-
+        # session.ts's mount-time restore), so last-write-wins here is fine.
+        self.local_owner_client_id: str | None = None
         # True after an explicit /stop, cleared by /play, /play-url, or an
         # explicit (non-auto) /next, /prev. Distinct from is_streaming, which
         # also goes False on a *natural* track end (see routes/stream.py's

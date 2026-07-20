@@ -1,3 +1,7 @@
+import { nanoid } from 'nanoid/non-secure';
+
+import type { ConnectMode } from './connect.store';
+
 export const CONNECT_URL =
     (window as any).__CONNECT_URL__ || import.meta.env.VITE_CONNECT_URL || 'http://localhost:9181';
 
@@ -11,6 +15,15 @@ export const CONNECT_TOKEN: string =
 // from computeConnectSessionId() — identifies this login for per-user backend
 // state (see core/session.py) and device-claim ownership.
 let connectSessionId = '';
+
+// A random id generated once per browser tab load — distinct from
+// connectSessionId, which every tab logged into the same account shares.
+// Identifies which tab is producing audio for *local* (non-cast) playback;
+// see AppState.local_owner_client_id's docstring in connect/core/state.py.
+// A page reload gets a fresh id, so a reloaded tab never assumes it's still
+// the owner — it has to be re-established, same as the plan's "reload
+// defaults to mirror" rule.
+const connectClientId: string = nanoid();
 
 export interface ConnectDevice {
     claimedByName?: null | string;
@@ -29,6 +42,8 @@ export interface ConnectSession {
     currentTrackId: null | string;
     devices: ConnectDevice[];
     fetchVolume: () => void;
+    handleNext: () => void;
+    handlePrevious: () => void;
     handleStop: () => void;
     handleTogglePlayPause: () => void;
     hasApiError: boolean;
@@ -36,6 +51,7 @@ export interface ConnectSession {
     hasFfmpegError: boolean;
     isActive: boolean;
     isScanning: boolean;
+    mode: ConnectMode;
     mySessionId: string;
     paired: string[];
     refresh: (fresh?: boolean) => void;
@@ -55,7 +71,9 @@ export interface ConnectStatus {
     current_track_index: number;
     elapsed: number;
     ended: boolean;
+    local_owner_client_id: null | string;
     paused: boolean;
+    queue_track_ids: string[];
     radio: null | { title: string; url: string };
     streaming: boolean;
     targets: Array<{ name: string; type: string }>;
@@ -93,6 +111,10 @@ export function connectFetch(path: string, options?: RequestInit): Promise<Respo
     if (CONNECT_TOKEN) headers['X-Connect-Token'] = CONNECT_TOKEN;
     if (connectSessionId) headers['X-Connect-Session'] = connectSessionId;
     return fetch(`${CONNECT_URL}${path}`, { ...options, headers });
+}
+
+export function getConnectClientId(): string {
+    return connectClientId;
 }
 
 export function getConnectSessionId(): string {

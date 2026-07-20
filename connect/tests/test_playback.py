@@ -209,6 +209,60 @@ def test_stop_sets_stopped_flag(client, default_session):
     assert default_session.state.stopped is True
 
 
+def test_stop_clears_local_owner_client_id(client, default_session):
+    default_session.state.local_owner_client_id = "tab-1"
+    client.post("/stop")
+    assert default_session.state.local_owner_client_id is None
+
+
+# ── local_owner_client_id (see AppState's docstring) ─────────────────────────
+
+
+def test_play_without_target_records_client_id_as_local_owner(client, default_session):
+    client.post("/config", json={"url": "http://nav:4533", "credential": "x"})
+    with patch.object(
+        default_session.media,
+        "get_track",
+        return_value=Track("1", "Song", "Artist", 60, ""),
+    ):
+        client.post("/play", json={"track_ids": ["1"], "client_id": "tab-1"})
+    assert default_session.state.local_owner_client_id == "tab-1"
+
+
+def test_play_with_target_clears_local_owner_client_id(client, default_session):
+    client.post("/config", json={"url": "http://nav:4533", "credential": "x"})
+    default_session.state.local_owner_client_id = "tab-1"
+    with (
+        patch.object(
+            default_session.media,
+            "get_track",
+            return_value=Track("1", "Song", "Artist", 60, ""),
+        ),
+        patch.object(ChromecastDelivery, "play", new=AsyncMock()),
+    ):
+        client.post(
+            "/play",
+            json={
+                "client_id": "tab-1",
+                "target_name": "TV",
+                "target_type": "chromecast",
+                "track_ids": ["1"],
+            },
+        )
+    assert default_session.state.local_owner_client_id is None
+
+
+def test_next_without_target_reassigns_local_owner_client_id(client, default_session):
+    default_session.state.queue_track_ids = ["1", "2"]
+    default_session.state.queue_index = 0
+    default_session.state.local_owner_client_id = "tab-1"
+
+    with patch.object(default_session.media, "get_track", side_effect=_queue_track):
+        client.post("/next", json={"client_id": "tab-2"})
+
+    assert default_session.state.local_owner_client_id == "tab-2"
+
+
 def test_play_clears_stopped_flag(client, default_session):
     default_session.state.stopped = True
     client.post("/config", json={"url": "http://nav:4533", "credential": "x"})

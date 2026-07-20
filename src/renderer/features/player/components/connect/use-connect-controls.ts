@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useRef } from 'react';
 
-import { useConnectPlayerStore } from './connect.store';
-import { ConnectDevice, connectFetch } from './types';
+import { ConnectMode, useConnectPlayerStore } from './connect.store';
+import { ConnectDevice, connectFetch, getConnectClientId } from './types';
 
 import { usePlayerStoreBase } from '/@/renderer/store/player.store';
 import { QueueSong } from '/@/shared/types/domain-types';
@@ -15,6 +15,7 @@ interface UseConnectControlsArgs {
     lastAutoSentRef: MutableRefObject<string>;
     mediaPause: () => void;
     mediaTogglePlayPause: () => void;
+    mode: ConnectMode;
 }
 
 /**
@@ -31,8 +32,14 @@ export const useConnectControls = ({
     lastAutoSentRef,
     mediaPause,
     mediaTogglePlayPause,
+    mode,
 }: UseConnectControlsArgs) => {
-    const storeHandlersRef = useRef({ handleStop, handleTogglePlayPause });
+    const storeHandlersRef = useRef({
+        handleNext,
+        handlePrevious,
+        handleStop,
+        handleTogglePlayPause,
+    });
 
     function handleTogglePlayPause() {
         if (!isActive) {
@@ -83,34 +90,63 @@ export const useConnectControls = ({
             .catch(() => {});
     }
 
-    storeHandlersRef.current = { handleStop, handleTogglePlayPause };
+    // Explicit next/prev press — always advances regardless of AppState.
+    // stopped (see connect/core/state.py's docstring); only the *automatic*
+    // track-ended advance defers to it.
+    function handleNext() {
+        if (!isActive) return;
+        connectFetch(`/next`, {
+            body: JSON.stringify({ client_id: getConnectClientId() }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        }).catch(() => {});
+    }
+
+    function handlePrevious() {
+        if (!isActive) return;
+        connectFetch(`/prev`, {
+            body: JSON.stringify({ client_id: getConnectClientId() }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        }).catch(() => {});
+    }
+
+    storeHandlersRef.current = { handleNext, handlePrevious, handleStop, handleTogglePlayPause };
 
     useEffect(() => {
         useConnectPlayerStore.getState().set({
             handlers: isActive
                 ? {
+                      onNext: () => storeHandlersRef.current.handleNext(),
                       onPlayPause: () => storeHandlersRef.current.handleTogglePlayPause(),
+                      onPrevious: () => storeHandlersRef.current.handlePrevious(),
                       onStop: () => storeHandlersRef.current.handleStop(),
                   }
                 : null,
             isActive,
+            mode,
         });
-    }, [isActive]);
+    }, [isActive, mode]);
 
-    // ── Safety net: keep local Feishin player paused whenever Connect is active ─
+    // ── Safety net: keep local Feishin player paused whenever Connect owns
+    // playback via a *cast* target or as a *mirror* of another tab/device ──
     // Zustand subscribers fire synchronously on state change. If something flips
     // the local player to PLAYING (e.g. mediaNext() during auto-advance, which
     // sometimes wins over our same-task mediaPause() ~20% of the time in Docker
     // due to React timing), we immediately call mediaPause(). The PLAYING state
     // is overridden before Feishin's audio component renders and starts playback.
+    //
+    // Must NOT fire for mode 'local-owner': there, THIS tab's own <audio>/mpv
+    // output is legitimately the session's audio source — force-pausing it
+    // would permanently block local-owner playback from ever being heard.
     useEffect(() => {
-        if (!isActive) return;
+        if (!isActive || mode === 'local-owner') return;
         return usePlayerStoreBase.subscribe((state) => {
             if (state.player.status === PlayerStatus.PLAYING) {
                 mediaPause();
             }
         });
-    }, [isActive, mediaPause]);
+    }, [isActive, mode, mediaPause]);
 
-    return { handleStop, handleTogglePlayPause };
+    return { handleNext, handlePrevious, handleStop, handleTogglePlayPause };
 };

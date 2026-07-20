@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ConnectDevice } from '../types';
 
-import { useConnectPlayerStore } from '../connect.store';
+import { ConnectMode, useConnectPlayerStore } from '../connect.store';
 import { connectFetch } from '../types';
 import { useConnectControls } from '../use-connect-controls';
 
@@ -45,6 +45,7 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectControls>[0]> =
         lastAutoSentRef,
         mediaPause: vi.fn(),
         mediaTogglePlayPause: vi.fn(),
+        mode: 'cast' as ConnectMode,
         ...overrides,
     };
 };
@@ -68,7 +69,7 @@ describe('useConnectControls', () => {
 
     describe('handleTogglePlayPause', () => {
         it('controls local playback instead when Connect is inactive', () => {
-            const args = baseArgs({ isActive: false });
+            const args = baseArgs({ isActive: false, mode: 'inactive' });
             const { result } = renderHook(() => useConnectControls(args));
 
             result.current.handleTogglePlayPause();
@@ -163,7 +164,7 @@ describe('useConnectControls', () => {
                 initialProps: args,
             });
 
-            rerender({ ...args, isActive: false });
+            rerender({ ...args, isActive: false, mode: 'inactive' });
 
             expect(useConnectPlayerStore.getState().handlers).toBeNull();
             expect(useConnectPlayerStore.getState().isActive).toBe(false);
@@ -198,7 +199,7 @@ describe('useConnectControls', () => {
         });
 
         it('does not subscribe/interfere when Connect is inactive', () => {
-            const args = baseArgs({ isActive: false });
+            const args = baseArgs({ isActive: false, mode: 'inactive' });
             renderHook(() => useConnectControls(args));
 
             setLocalStatus(PlayerStatus.PLAYING);
@@ -212,10 +213,62 @@ describe('useConnectControls', () => {
                 initialProps: args,
             });
 
-            rerender({ ...args, isActive: false });
+            rerender({ ...args, isActive: false, mode: 'inactive' });
             setLocalStatus(PlayerStatus.PLAYING);
 
             expect(args.mediaPause).not.toHaveBeenCalled();
+        });
+
+        it('does not force-pause local playback in local-owner mode — this tab IS the audio source', () => {
+            const args = baseArgs({ isActive: true, mode: 'local-owner' });
+            renderHook(() => useConnectControls(args));
+
+            setLocalStatus(PlayerStatus.PLAYING);
+
+            expect(args.mediaPause).not.toHaveBeenCalled();
+        });
+
+        it('still force-pauses in mirror mode', () => {
+            const args = baseArgs({ isActive: true, mode: 'mirror' });
+            renderHook(() => useConnectControls(args));
+
+            setLocalStatus(PlayerStatus.PLAYING);
+
+            expect(args.mediaPause).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('handleNext/handlePrevious', () => {
+        it('POSTs /next with a client id when active', () => {
+            const args = baseArgs();
+            const { result } = renderHook(() => useConnectControls(args));
+
+            result.current.handleNext();
+
+            const [path, options] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/next');
+            expect(JSON.parse(options.body)).toHaveProperty('client_id');
+        });
+
+        it('POSTs /prev with a client id when active', () => {
+            const args = baseArgs();
+            const { result } = renderHook(() => useConnectControls(args));
+
+            result.current.handlePrevious();
+
+            const [path, options] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/prev');
+            expect(JSON.parse(options.body)).toHaveProperty('client_id');
+        });
+
+        it('does nothing when Connect is inactive', () => {
+            const args = baseArgs({ isActive: false, mode: 'inactive' });
+            const { result } = renderHook(() => useConnectControls(args));
+
+            result.current.handleNext();
+            result.current.handlePrevious();
+
+            expect(connectFetchMock).not.toHaveBeenCalled();
         });
     });
 });

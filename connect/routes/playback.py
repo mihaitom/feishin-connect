@@ -157,6 +157,7 @@ async def _start_track(
     gain: float = 1.0,
     start_position: float = 0.0,
     force: bool = False,
+    client_id: str | None = None,
 ) -> dict:
     """Shared tail of /play, /next, /prev: claims `target` if given (unless
     it's already this session's own active_delivery — see next_track/
@@ -181,10 +182,17 @@ async def _start_track(
     st.stopped = False
 
     if not target:
+        # No cast device — this is local (in-tab) playback. See
+        # AppState.local_owner_client_id's docstring: whichever client_id
+        # calls /play, /next, /prev with no target becomes (or reaffirms
+        # being) the tab actually producing audio for this session.
+        st.local_owner_client_id = client_id
         logger.info(f"[play] No target — stream available at {url}")
         st.active_delivery = None
         await session.event_bus.broadcast(build_status_dict(session))
         return {"status": "playing", "stream_url": url}
+
+    st.local_owner_client_id = None
 
     st.active_delivery = target
     # internal=True: fetched directly by the cast device, not the browser —
@@ -225,6 +233,8 @@ class PlayRequest(BaseModel):
     # Take over any target already claimed by another session instead of
     # refusing (Phase 2 — the user confirmed a takeover dialog).
     force: bool = False
+    # Identifies the calling browser tab — see AppState.local_owner_client_id.
+    client_id: str | None = None
 
 
 @router.post("/play")
@@ -259,6 +269,7 @@ async def play_tracks(req: PlayRequest, session: SessionState = Depends(get_sess
         gain=req.gain,
         start_position=req.start_position,
         force=req.force,
+        client_id=req.client_id,
     )
 
 
@@ -371,6 +382,7 @@ async def stop_playback(session: SessionState = Depends(get_session)):
     st.current_track = None
     st.radio_info = None
     st.active_delivery = None
+    st.local_owner_client_id = None
     # See AppState.stopped's docstring — this is what tells a subsequent auto
     # /next (natural track-end) not to revive playback.
     st.stopped = True
@@ -407,6 +419,8 @@ class NextPrevRequest(BaseModel):
     # racing against the track's natural end doesn't get revived — see
     # AppState.stopped's docstring.
     auto: bool = False
+    # Identifies the calling browser tab — see AppState.local_owner_client_id.
+    client_id: str | None = None
 
 
 async def _step_queue(
@@ -439,7 +453,12 @@ async def _step_queue(
         await session.event_bus.broadcast(build_status_dict(session))
         return {"advanced": True, "status": "paused"}
 
-    return await _start_track(session, track, target=session.state.active_delivery)
+    return await _start_track(
+        session,
+        track,
+        target=session.state.active_delivery,
+        client_id=req.client_id,
+    )
 
 
 @router.post("/next")

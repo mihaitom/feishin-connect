@@ -1,8 +1,26 @@
 import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 
+/**
+ * What this tab's relationship to the shared Connect session currently is:
+ *   - 'inactive': nobody's playing anything in this session — today's plain
+ *     local playback, untouched.
+ *   - 'cast': this tab is casting to an external AirPlay/Sonos/Chromecast
+ *     target — the original Connect behavior.
+ *   - 'local-owner': THIS tab's own <audio>/mpv output is the session's
+ *     audio source (no external target) — the new case that lets a plain
+ *     desktop/mobile browser tab (no cast device) still be seen and
+ *     controlled from another tab.
+ *   - 'mirror': another tab/device owns playback (cast or local-owner) —
+ *     this tab shows the same track read-only and forwards its own
+ *     play/pause/seek/next/prev to the backend instead of local playback.
+ */
+export type ConnectMode = 'cast' | 'inactive' | 'local-owner' | 'mirror';
+
 export interface ConnectPlayerHandlers {
+    onNext: () => void;
     onPlayPause: () => void;
+    onPrevious: () => void;
     onStop: () => void;
 }
 
@@ -13,6 +31,7 @@ interface ConnectPlayerState {
     isActive: boolean;
     isPlaying: boolean;
     isStreaming: boolean;
+    mode: ConnectMode;
     // Wall-clock time of the last elapsed sync, for smooth local animation
     syncTime: number;
 }
@@ -28,6 +47,7 @@ export const useConnectPlayerStore = create<ConnectPlayerStore>((set) => ({
     isActive: false,
     isPlaying: false,
     isStreaming: false,
+    mode: 'inactive',
     set: (patch) => set(patch),
     syncTime: 0,
 }));
