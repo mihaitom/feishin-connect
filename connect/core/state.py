@@ -38,6 +38,19 @@ class AppState:
         # Set True when a track finishes naturally; cleared by /play, /play-url, /stop.
         # Lets the frontend detect track-end even after SSE reconnect or page reload.
         self.track_ended: bool = False
+        # Shared queue mirror (track ids only — full Song objects live in each
+        # client's own local store and get re-fetched from the media server).
+        # Set by /queue whenever any client's local queue changes.
+        self.queue_track_ids: list[str] = []
+        self.queue_index: int = 0
+        # True after an explicit /stop, cleared by /play, /play-url, or an
+        # explicit (non-auto) /next, /prev. Distinct from is_streaming, which
+        # also goes False on a *natural* track end (see routes/stream.py's
+        # _fire_track_end) — without this flag, auto-advance-on-track-end
+        # can't tell "track ended, keep playing the next one" apart from "user
+        # just stopped", so a stop racing against a track's natural end would
+        # otherwise let auto-advance revive playback right after the stop.
+        self.stopped: bool = False
 
 
 class EventBus:
@@ -160,5 +173,7 @@ def list_target_pairs(
     if isinstance(delivery, DeliveryManager):
         return [(t["type"], t["name"]) for t in delivery.list_targets()]
     if delivery is not None:
-        return [(type(delivery).__name__.replace("Delivery", "").lower(), delivery.target)]
+        return [
+            (type(delivery).__name__.replace("Delivery", "").lower(), delivery.target)
+        ]
     return []

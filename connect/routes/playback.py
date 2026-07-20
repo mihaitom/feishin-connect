@@ -1,4 +1,4 @@
-"""routes/playback.py — /play, /play-url, /pause, /resume, /stop"""
+"""routes/playback.py — /play, /play-url, /pause, /resume, /stop, /queue, /next, /prev"""
 
 import asyncio
 import logging
@@ -150,6 +150,66 @@ def _current_reconnect_args(
     return stream_url(session.session_id), title, artist, album_art_url, duration, album
 
 
+async def _start_track(
+    session: SessionState,
+    track,
+    target,
+    gain: float = 1.0,
+    start_position: float = 0.0,
+    force: bool = False,
+) -> dict:
+    """Shared tail of /play, /next, /prev: claims `target` if given (unless
+    it's already this session's own active_delivery — see next_track/
+    prev_track), then starts `track` playing from `start_position`. Returns
+    the same {"status": ...} / {"error": ...} shape /play has always returned.
+    """
+    if target:
+        conflict = await _claim_or_takeover(target, session, force)
+        if conflict:
+            return conflict
+
+    url = stream_url(session.session_id)
+    start_position = max(0.0, min(start_position, float(track.duration)))
+
+    st = session.state
+    st.current_track = track
+    st.current_track_gain = gain
+    st.is_streaming = True
+    st.radio_info = None
+    st.clock.start(start_position)
+    st.track_ended = False
+    st.stopped = False
+
+    if not target:
+        logger.info(f"[play] No target — stream available at {url}")
+        st.active_delivery = None
+        await session.event_bus.broadcast(build_status_dict(session))
+        return {"status": "playing", "stream_url": url}
+
+    st.active_delivery = target
+    # internal=True: fetched directly by the cast device, not the browser —
+    # see MediaClient.get_cover_art_url's docstring.
+    album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
+    try:
+        await target.play(
+            url,
+            track.title,
+            track.artist,
+            album_art_url,
+            float(track.duration),
+            track.album,
+        )
+    except Exception as e:
+        logger.error(f"[play] Delivery error: {e}", exc_info=True)
+        return {"error": str(e)}
+
+    asyncio.create_task(
+        _apply_position_offset(session, target, st.clock.play_generation)
+    )
+    await session.event_bus.broadcast(build_status_dict(session))
+    return {"status": "playing", "stream_url": url}
+
+
 class PlayRequest(BaseModel):
     track_ids: list[str]
     targets: list[dict] | None = None
@@ -187,54 +247,19 @@ async def play_tracks(req: PlayRequest, session: SessionState = Depends(get_sess
         return {"error": f"Track not found: {e}"}
 
     target = resolve_target(req.targets, req.target_name, req.target_type)
-    url = stream_url(session.session_id)
-    start_position = max(0.0, min(req.start_position, float(track.duration)))
     logger.info(
         f"[play] {track.artist} — {track.title} ({track.duration}s) → target={target}"
-        + (f" (start {start_position:.1f}s)" if start_position > 0.5 else "")
+        + (f" (start {req.start_position:.1f}s)" if req.start_position > 0.5 else "")
     )
 
-    if target:
-        conflict = await _claim_or_takeover(target, session, req.force)
-        if conflict:
-            return conflict
-
-    st = session.state
-    st.current_track = track
-    st.current_track_gain = req.gain
-    st.is_streaming = True
-    st.radio_info = None
-    st.clock.start(start_position)
-    st.track_ended = False
-
-    if not target:
-        logger.info(f"[play] No target — stream available at {url}")
-        st.active_delivery = None
-        await session.event_bus.broadcast(build_status_dict(session))
-        return {"status": "playing", "stream_url": url}
-
-    st.active_delivery = target
-    # internal=True: fetched directly by the cast device, not the browser —
-    # see MediaClient.get_cover_art_url's docstring.
-    album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
-    try:
-        await target.play(
-            url,
-            track.title,
-            track.artist,
-            album_art_url,
-            float(track.duration),
-            track.album,
-        )
-    except Exception as e:
-        logger.error(f"[play] Delivery error: {e}", exc_info=True)
-        return {"error": str(e)}
-
-    asyncio.create_task(
-        _apply_position_offset(session, target, st.clock.play_generation)
+    return await _start_track(
+        session,
+        track,
+        target,
+        gain=req.gain,
+        start_position=req.start_position,
+        force=req.force,
     )
-    await session.event_bus.broadcast(build_status_dict(session))
-    return {"status": "playing", "stream_url": url}
 
 
 class PlayUrlRequest(BaseModel):
@@ -346,7 +371,86 @@ async def stop_playback(session: SessionState = Depends(get_session)):
     st.current_track = None
     st.radio_info = None
     st.active_delivery = None
+    # See AppState.stopped's docstring — this is what tells a subsequent auto
+    # /next (natural track-end) not to revive playback.
+    st.stopped = True
     await claims.release_all_for_session(session.session_id)
     logger.info("[stop] ⏹ Playback stopped")
     await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "stopped"}
+
+
+class QueueRequest(BaseModel):
+    track_ids: list[str]
+    index: int = 0
+
+
+@router.post("/queue")
+async def set_queue(req: QueueRequest, session: SessionState = Depends(get_session)):
+    """Mirrors a client's ordered queue (track ids only — see AppState.
+    queue_track_ids's docstring) so other clients in the same session can
+    display and navigate it. Called on every local queue edit (add/remove/
+    reorder/shuffle-resolve), independent of who currently owns playback."""
+    st = session.state
+    st.queue_track_ids = req.track_ids
+    st.queue_index = (
+        max(0, min(req.index, len(req.track_ids) - 1)) if req.track_ids else 0
+    )
+    await session.event_bus.broadcast(build_status_dict(session))
+    return {"queue_index": st.queue_index, "total_tracks": len(st.queue_track_ids)}
+
+
+class NextPrevRequest(BaseModel):
+    # True when this call was triggered by natural track-end auto-advance,
+    # not an explicit user next/prev button press. An explicit press always
+    # starts playback; an auto call defers to AppState.stopped so a /stop
+    # racing against the track's natural end doesn't get revived — see
+    # AppState.stopped's docstring.
+    auto: bool = False
+
+
+async def _step_queue(
+    req: NextPrevRequest, session: SessionState, delta: int, no_track_error: str
+) -> dict:
+    st = session.state
+    if not st.queue_track_ids:
+        return {"error": "Queue is empty"}
+
+    new_index = st.queue_index + delta
+    if not (0 <= new_index < len(st.queue_track_ids)):
+        return {"error": no_track_error}
+
+    try:
+        track = session.media.get_track(st.queue_track_ids[new_index])
+    except Exception as e:
+        logger.warning(
+            f"[queue-step] Track {st.queue_track_ids[new_index]} not found: {e}"
+        )
+        return {"error": f"Track not found: {e}"}
+
+    st.queue_index = new_index
+
+    if req.auto and st.stopped:
+        # Update the pointer/current track for display, but don't start
+        # playback — the user stopped, this call must not revive it.
+        st.current_track = track
+        st.is_streaming = False
+        st.track_ended = False
+        await session.event_bus.broadcast(build_status_dict(session))
+        return {"advanced": True, "status": "paused"}
+
+    return await _start_track(session, track, target=session.state.active_delivery)
+
+
+@router.post("/next")
+async def next_track(
+    req: NextPrevRequest, session: SessionState = Depends(get_session)
+):
+    return await _step_queue(req, session, delta=1, no_track_error="No next track")
+
+
+@router.post("/prev")
+async def prev_track(
+    req: NextPrevRequest, session: SessionState = Depends(get_session)
+):
+    return await _step_queue(req, session, delta=-1, no_track_error="No previous track")

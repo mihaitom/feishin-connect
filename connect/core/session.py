@@ -75,7 +75,9 @@ async def get_session(
     x_connect_session: str | None = Header(default=None),
     session: str | None = Query(default=None),
 ) -> SessionState:
-    return await registry.get_or_create(x_connect_session or session or DEFAULT_SESSION_ID)
+    return await registry.get_or_create(
+        x_connect_session or session or DEFAULT_SESSION_ID
+    )
 
 
 def compute_position(session: SessionState) -> float:
@@ -113,16 +115,27 @@ def build_status_dict(session: SessionState) -> dict:
         for target_type, name in list_target_pairs(st.active_delivery)
     ]
 
+    # Fall back to the single-track shape when no client has pushed a queue
+    # yet (e.g. old frontend, or the cast-only flow before it's wired to
+    # /queue) — keeps current_track_index/total_tracks meaningful either way.
+    if st.queue_track_ids:
+        current_track_index = st.queue_index
+        total_tracks = len(st.queue_track_ids)
+    else:
+        current_track_index = 0
+        total_tracks = 1 if st.current_track else 0
+
     return {
         "current_track": current_track,
-        "current_track_index": 0,
+        "current_track_index": current_track_index,
         "elapsed": elapsed,
         "ended": st.track_ended,
         "paused": st.clock.is_paused,
+        "queue_track_ids": st.queue_track_ids,
         "radio": st.radio_info,
         "streaming": st.is_streaming,
         "targets": targets,
-        "total_tracks": 1 if st.current_track else 0,
+        "total_tracks": total_tracks,
     }
 
 
@@ -191,7 +204,9 @@ def check_ownership(target_type: str, name: str, session: SessionState) -> dict 
     }
 
 
-async def displace_target(owner_session: SessionState, target_type: str, name: str) -> None:
+async def displace_target(
+    owner_session: SessionState, target_type: str, name: str
+) -> None:
     """Stop delivery to a single (type, name) target within owner_session,
     without touching the rest of its active_delivery — e.g. a takeover only
     steals the one Sonos speaker/Chromecast a new session claimed, not every
@@ -208,7 +223,8 @@ async def displace_target(owner_session: SessionState, target_type: str, name: s
 
     if isinstance(active, DeliveryManager):
         lost = next(
-            (d for d in active.deliveries if isinstance(d, cls) and d.target == name), None
+            (d for d in active.deliveries if isinstance(d, cls) and d.target == name),
+            None,
         )
         if lost is None:
             return

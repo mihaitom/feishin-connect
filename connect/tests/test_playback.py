@@ -204,6 +204,192 @@ def test_stop_is_idempotent(client):
     assert r2.json()["status"] == "stopped"
 
 
+def test_stop_sets_stopped_flag(client, default_session):
+    client.post("/stop")
+    assert default_session.state.stopped is True
+
+
+def test_play_clears_stopped_flag(client, default_session):
+    default_session.state.stopped = True
+    client.post("/config", json={"url": "http://nav:4533", "credential": "x"})
+    with patch.object(
+        default_session.media,
+        "get_track",
+        return_value=Track("1", "Song", "Artist", 60, ""),
+    ):
+        client.post("/play", json={"track_ids": ["1"]})
+    assert default_session.state.stopped is False
+
+
+# ── /queue ────────────────────────────────────────────────────────────────────
+
+
+def test_queue_sets_track_ids_and_index(client, default_session):
+    r = client.post("/queue", json={"track_ids": ["a", "b", "c"], "index": 1})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["queue_index"] == 1
+    assert body["total_tracks"] == 3
+    assert default_session.state.queue_track_ids == ["a", "b", "c"]
+    assert default_session.state.queue_index == 1
+
+
+def test_queue_clamps_out_of_range_index(client, default_session):
+    r = client.post("/queue", json={"track_ids": ["a", "b"], "index": 99})
+    assert r.json()["queue_index"] == 1
+
+
+def test_queue_empty_track_ids_resets_index_to_zero(client, default_session):
+    default_session.state.queue_track_ids = ["a"]
+    default_session.state.queue_index = 0
+    r = client.post("/queue", json={"track_ids": [], "index": 5})
+    assert r.json()["queue_index"] == 0
+    assert default_session.state.queue_track_ids == []
+
+
+def test_status_reflects_synced_queue(client, default_session):
+    default_session.state.queue_track_ids = ["a", "b", "c"]
+    default_session.state.queue_index = 2
+    r = client.get("/status")
+    body = r.json()
+    assert body["queue_track_ids"] == ["a", "b", "c"]
+    assert body["current_track_index"] == 2
+    assert body["total_tracks"] == 3
+
+
+def test_status_falls_back_to_single_track_shape_without_synced_queue(
+    client, default_session
+):
+    """Regression test: before a client ever calls /queue (e.g. an older
+    frontend, or the pre-existing cast-only flow), total_tracks/
+    current_track_index must keep reflecting current_track alone, not 0."""
+    default_session.state.current_track = Track("1", "Song", "Artist", 60, "")
+    r = client.get("/status")
+    body = r.json()
+    assert body["queue_track_ids"] == []
+    assert body["current_track_index"] == 0
+    assert body["total_tracks"] == 1
+
+
+# ── /next, /prev ──────────────────────────────────────────────────────────────
+
+
+def _queue_track(track_id: str):
+    return Track(track_id, f"Song {track_id}", "Artist", 180, "")
+
+
+def test_next_advances_and_starts_playback(client, default_session):
+    default_session.state.queue_track_ids = ["1", "2", "3"]
+    default_session.state.queue_index = 0
+    with patch.object(default_session.media, "get_track", side_effect=_queue_track):
+        r = client.post("/next", json={})
+    assert r.status_code == 200
+    assert r.json()["status"] == "playing"
+    assert default_session.state.queue_index == 1
+    assert default_session.state.current_track.id == "2"
+    assert default_session.state.is_streaming is True
+
+
+def test_prev_moves_back_and_starts_playback(client, default_session):
+    default_session.state.queue_track_ids = ["1", "2", "3"]
+    default_session.state.queue_index = 2
+    with patch.object(default_session.media, "get_track", side_effect=_queue_track):
+        r = client.post("/prev", json={})
+    assert r.json()["status"] == "playing"
+    assert default_session.state.queue_index == 1
+    assert default_session.state.current_track.id == "2"
+
+
+def test_next_at_end_of_queue_returns_error_and_does_not_advance(
+    client, default_session
+):
+    default_session.state.queue_track_ids = ["1", "2"]
+    default_session.state.queue_index = 1
+    r = client.post("/next", json={})
+    assert "error" in r.json()
+    assert default_session.state.queue_index == 1
+
+
+def test_prev_at_start_of_queue_returns_error_and_does_not_advance(
+    client, default_session
+):
+    default_session.state.queue_track_ids = ["1", "2"]
+    default_session.state.queue_index = 0
+    r = client.post("/prev", json={})
+    assert "error" in r.json()
+    assert default_session.state.queue_index == 0
+
+
+def test_next_prev_on_empty_queue_return_error(client, default_session):
+    assert "error" in client.post("/next", json={}).json()
+    assert "error" in client.post("/prev", json={}).json()
+
+
+def test_next_reuses_active_delivery_as_target(client, default_session):
+    default_session.state.queue_track_ids = ["1", "2"]
+    default_session.state.queue_index = 0
+    delivery = ChromecastDelivery("TV")
+    default_session.state.active_delivery = delivery
+
+    with (
+        patch.object(default_session.media, "get_track", side_effect=_queue_track),
+        patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play,
+    ):
+        r = client.post("/next", json={})
+
+    assert r.json()["status"] == "playing"
+    play.assert_awaited_once()
+
+
+# ── /next, /prev: stop-vs-auto-advance race (see AppState.stopped) ───────────
+
+
+def test_explicit_next_starts_playback_even_if_stopped(client, default_session):
+    """An explicit (non-auto) next/prev press always plays — only an
+    auto-advance call defers to `stopped`."""
+    default_session.state.queue_track_ids = ["1", "2"]
+    default_session.state.queue_index = 0
+    default_session.state.stopped = True
+
+    with patch.object(default_session.media, "get_track", side_effect=_queue_track):
+        r = client.post("/next", json={"auto": False})
+
+    assert r.json()["status"] == "playing"
+    assert default_session.state.is_streaming is True
+    assert default_session.state.stopped is False
+
+
+def test_auto_next_after_stop_does_not_revive_playback(client, default_session):
+    """Regression test for the race the user flagged: the current track ends
+    naturally right after an explicit /stop — auto-advance must update the
+    queue pointer/current track for display but must NOT start playback."""
+    default_session.state.queue_track_ids = ["1", "2"]
+    default_session.state.queue_index = 0
+    default_session.state.stopped = True
+    default_session.state.is_streaming = False
+
+    with patch.object(default_session.media, "get_track", side_effect=_queue_track):
+        r = client.post("/next", json={"auto": True})
+
+    assert r.json() == {"advanced": True, "status": "paused"}
+    assert default_session.state.queue_index == 1
+    assert default_session.state.current_track.id == "2"
+    assert default_session.state.is_streaming is False
+    assert default_session.state.stopped is True
+
+
+def test_auto_next_without_stop_advances_and_plays_normally(client, default_session):
+    default_session.state.queue_track_ids = ["1", "2"]
+    default_session.state.queue_index = 0
+    default_session.state.stopped = False
+
+    with patch.object(default_session.media, "get_track", side_effect=_queue_track):
+        r = client.post("/next", json={"auto": True})
+
+    assert r.json()["status"] == "playing"
+    assert default_session.state.is_streaming is True
+
+
 # ── /pause + /resume ──────────────────────────────────────────────────────────
 
 
@@ -280,7 +466,10 @@ def test_seek_near_zero_clamps_raw_position(client, default_session):
 
 def test_resume_reconnects_to_radio_url_not_stream_proxy(client, default_session):
     default_session.state.is_streaming = True
-    default_session.state.radio_info = {"title": "Radio FM", "url": "http://stream/radio"}
+    default_session.state.radio_info = {
+        "title": "Radio FM",
+        "url": "http://stream/radio",
+    }
     default_session.state.active_delivery = ChromecastDelivery("TV")
     default_session.state.clock.is_paused = True
 
@@ -293,7 +482,10 @@ def test_resume_reconnects_to_radio_url_not_stream_proxy(client, default_session
 
 def test_seek_while_playing_reconnects_to_radio_url(client, default_session):
     default_session.state.is_streaming = True
-    default_session.state.radio_info = {"title": "Radio FM", "url": "http://stream/radio"}
+    default_session.state.radio_info = {
+        "title": "Radio FM",
+        "url": "http://stream/radio",
+    }
     default_session.state.active_delivery = ChromecastDelivery("TV")
     default_session.state.clock.is_paused = False
 
