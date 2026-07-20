@@ -30,11 +30,6 @@ import { PlayerProvider } from '/@/renderer/features/player/context/player-conte
 import { AudioPlayers } from '/@/renderer/features/player/components/audio-players';
 import { ReleaseNotesModal } from '/@/renderer/release-notes-modal';
 
-const UpdateAvailableDialog = lazy(() =>
-    import('./update-available-dialog').then((module) => ({
-        default: module.UpdateAvailableDialog,
-    })),
-);
 const WebUpdateBanner = lazy(() =>
     import('./web-update-banner').then((module) => ({
         default: module.WebUpdateBanner,
@@ -108,7 +103,6 @@ const AppShell = memo(function AppShell() {
             </WebAudioContext.Provider>
             <ReleaseNotesModal />
             <Suspense fallback={null}>
-                <UpdateAvailableDialog />
                 <WebUpdateBanner />
             </Suspense>
         </>

@@ -92,10 +92,6 @@ const download = (url: string) => {
     ipcRenderer.send('download-url', url);
 };
 
-const checkForUpdates = (): Promise<{ updateAvailable: boolean; version?: string }> => {
-    return ipcRenderer.invoke('app-check-for-updates');
-};
-
 const startPowerSaveBlocker = (full: boolean) => {
     return ipcRenderer.invoke('power-save-blocker-start', { full });
 };
@@ -154,17 +150,12 @@ const rendererOpenReleaseNotes = (cb: () => void) => {
     ipcRenderer.on('renderer-open-release-notes', () => cb());
 };
 
-const rendererUpdateAvailable = (cb: (version: string) => void) => {
-    ipcRenderer.on('update-available', (_, version) => cb(version));
-};
-
 const rendererOpenAbout = (cb: (event: IpcRendererEvent) => void) => {
     ipcRenderer.on('renderer-open-about', cb);
 };
 
 export const utils = {
     cancelReadSongMetadata,
-    checkForUpdates,
     customCssUpdatedListener,
     disableAutoUpdates,
     download,
@@ -190,7 +181,6 @@ export const utils = {
     rendererOpenSettings,
     rendererTogglePrivateMode,
     rendererToggleSidebar,
-    rendererUpdateAvailable,
     saveCustomCss,
     separator: isWindows() ? '\\' : '/',
     setInputFocused,

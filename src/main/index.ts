@@ -527,44 +527,6 @@ async function createWindow(first = true): Promise<void> {
         return mainWindow?.webContents.session.clearCache();
     });
 
-    ipcMain.handle(
-        'app-check-for-updates',
-        async (): Promise<{ updateAvailable: boolean; version?: string }> => {
-            if (disableAutoUpdates() || store.get('disable_auto_updates') === true) {
-                console.log('Auto updates are disabled');
-                return { updateAvailable: false };
-            }
-
-            try {
-                console.log('Checking for updates');
-                configureUpdater();
-                const result = await autoUpdater.checkForUpdates();
-
-                const updateAvailable = result?.isUpdateAvailable ?? false;
-                console.log('Update available:', updateAvailable);
-                if (updateAvailable) {
-                    if (isMacOS()) {
-                        getMainWindow()?.webContents.send(
-                            'update-available',
-                            result?.updateInfo?.version,
-                        );
-                    } else {
-                        console.log('Downloading update');
-                        autoUpdater.downloadUpdate();
-                    }
-                }
-
-                return {
-                    updateAvailable,
-                    version: result?.updateInfo?.version,
-                };
-            } catch {
-                console.log('Error checking for updates');
-                return { updateAvailable: false };
-            }
-        },
-    );
-
     ipcMain.on('app-restart', () => {
         // Fix for .AppImage
         if (process.env.APPIMAGE) {
@@ -625,7 +587,6 @@ async function createWindow(first = true): Promise<void> {
 
     mainWindow.on('closed', () => {
         ipcMain.removeHandler('window-clear-cache');
-        ipcMain.removeHandler('app-check-for-updates');
         mainWindow = null;
     });
 

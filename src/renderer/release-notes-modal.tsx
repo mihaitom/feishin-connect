@@ -8,6 +8,14 @@ import { useTranslation } from 'react-i18next';
 import changelogRaw from '../../CHANGELOG.md?raw';
 import packageJson from '../../package.json';
 
+import {
+    GITHUB_RELEASES_URL,
+    type GitHubRelease,
+    parseVersionFromTag,
+    RELEASES_TO_FETCH,
+    toTag,
+    useGithubReleasesList,
+} from '/@/renderer/hooks/use-github-releases';
 import { formatHrDateTime } from '/@/renderer/utils/format';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
@@ -20,9 +28,7 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 
-const GITHUB_RELEASES_URL = 'https://api.github.com/repos/mihaitom/feishin-connect/releases';
 const GITHUB_COMPARE_URL = 'https://api.github.com/repos/mihaitom/feishin-connect/compare';
-const RELEASES_TO_FETCH = 30;
 
 interface GitHubCompareCommit {
     commit: {
@@ -36,14 +42,6 @@ interface GitHubCompareCommit {
 interface GitHubCompareResponse {
     commits: GitHubCompareCommit[];
     total_commits: number;
-}
-
-interface GitHubRelease {
-    body: null | string;
-    name: null | string;
-    prerelease: boolean;
-    published_at: string;
-    tag_name: string;
 }
 
 interface ReleaseNotesContentProps {
@@ -77,30 +75,13 @@ function isAlphaVersion(version: string): boolean {
     return version.includes('-alpha');
 }
 
-function parseVersionFromTag(tagName: string): string {
-    return tagName.startsWith('v') ? tagName.slice(1) : tagName;
-}
-
-function toTag(version: string): string {
-    return version.startsWith('v') ? version : `v${version}`;
-}
-
 const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) => {
     const { t } = useTranslation();
     const [selectedVersion, setSelectedVersion] = useState(version);
     const isAlpha = isAlphaVersion(selectedVersion);
 
     // Fetch list of recent releases for the selector
-    const { data: releasesList = [] } = useQuery({
-        queryFn: async () => {
-            const response = await axios.get<GitHubRelease[]>(GITHUB_RELEASES_URL, {
-                params: { per_page: RELEASES_TO_FETCH },
-            });
-            return response.data;
-        },
-        queryKey: ['github-releases-list'],
-        retry: 2,
-    });
+    const { data: releasesList = [] } = useGithubReleasesList();
 
     const latestStableRelease = useMemo(() => {
         return releasesList.find((r) => !r.prerelease);
