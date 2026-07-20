@@ -9,9 +9,70 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 RUN pnpm install
 
-COPY . .
+# Only what `pnpm run build:web` actually touches — an unrelated repo change
+# (e.g. in connect/) shouldn't bust this layer and trigger a needless rebuild.
+COPY src ./src
+COPY assets ./assets
+COPY media ./media
+COPY CHANGELOG.md web.vite.config.ts vite.kuromoji-plugin.ts vite.react-plugin.ts tsconfig.json tsconfig.node.json tsconfig.web.json postcss.config.cjs ./
 
 RUN pnpm run build:web
+
+
+# --- Build minimal ffmpeg (audio-only, statically linked)
+#
+# We only ever run `ffmpeg -i <url> -vn -acodec libmp3lame ... -f mp3 pipe:1`
+# (see connect/core/streamer.py, connect/delivery/airplay.py) — video is
+# always explicitly disabled (-vn). Alpine's `ffmpeg` apk package pulls in
+# ~130MB of codecs/libraries we never touch (AV1/H.264/H.265 encoders,
+# Vulkan shader compilation, X11/Wayland/SDL, Blu-ray, webcam capture...).
+# Building just what we need — decode for common library formats, HTTPS
+# input, MP3 encode — gets that down to ~8MB with zero runtime dependencies
+# (fully static binary, just COPY it into the final stage below).
+FROM alpine:3.22 AS ffmpeg-builder
+
+RUN apk add --no-cache \
+    build-base \
+    coreutils \
+    curl \
+    lame-dev \
+    nasm \
+    openssl-dev \
+    openssl-libs-static \
+    tar \
+    xz \
+    zlib-dev \
+    zlib-static
+
+WORKDIR /build
+
+RUN curl -sLO https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz \
+    && tar xf ffmpeg-8.1.2.tar.xz
+
+WORKDIR /build/ffmpeg-8.1.2
+
+RUN ./configure \
+    --disable-everything \
+    --disable-doc \
+    --disable-debug \
+    --disable-avdevice \
+    --disable-swscale \
+    --enable-protocol=file,http,https,tls,tcp,udp,pipe \
+    --enable-openssl \
+    --enable-demuxer=mp3,flac,ogg,wav,aac,mov,matroska,asf,ape,aiff \
+    --enable-decoder=mp3,mp3float,flac,vorbis,opus,aac,aac_latm,pcm_s16le,pcm_s16be,pcm_u8,pcm_f32le,alac,wmav1,wmav2,ape \
+    --enable-parser=mp3,aac,flac,opus,vorbis \
+    --enable-encoder=libmp3lame \
+    --enable-muxer=mp3 \
+    --enable-libmp3lame \
+    --enable-swresample \
+    --enable-filter=aresample,anull,aformat \
+    --disable-shared \
+    --enable-static \
+    --extra-ldflags="-static" \
+    --pkg-config-flags="--static" \
+    && make -j$(nproc) \
+    && make install
 
 
 # --- Final image
@@ -19,18 +80,11 @@ FROM ghcr.io/astral-sh/uv:python3.14-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache nginx gettext ffmpeg
-COPY --chown=nginx:nginx --from=builder /app/out/web /usr/share/nginx/html 
+RUN apk add --no-cache nginx gettext
+COPY --from=ffmpeg-builder /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
+COPY --chown=nginx:nginx --from=builder /app/out/web /usr/share/nginx/html
 COPY --chown=nginx:nginx ./settings.js.template /etc/nginx/templates/settings.js.template 
 COPY --chown=nginx:nginx ng.conf.template /etc/nginx/templates/default.conf.template
-
-RUN apk add --no-cache \
-    build-base \
-    zlib-dev \
-    jpeg-dev \
-    freetype-dev \
-    libpng-dev \
-    musl-dev
 
 COPY connect/pyproject.toml ./
 COPY connect/uv.lock ./

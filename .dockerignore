@@ -8,8 +8,40 @@ connect/.venv
 connect/airplay_credentials.json
 connect/tone.wav
 connect/dist
+connect/build
 connect/packaging
 connect/tests
 **/__pycache__
 connect/.pytest_cache
 connect/.ruff_cache
+
+# Local build/packaging output — never needed to build the Docker image
+# itself, and dist/ in particular can be 1GB+ of Electron installers.
+dist
+out
+
+# Editor/tooling state and caches, not part of the app
+.claude
+.git
+.eslintcache
+*.tsbuildinfo
+
+# Electron-desktop-only packaging/config — the Docker image is web-only
+electron-builder.yml
+electron.vite.config.ts
+remote.vite.config.ts
+vitest.config.ts
+vitest.setup.ts
+dev-app-update.yml
+install-feishin-appimage
+feishin.desktop.tmpl
+io.github.mihaitom.feishin-connect.metainfo.xml
+resources
+build.sh
+scripts
+
+# Docs — not read at build or run time
+docs
+README.md
+LICENSE
+merge-upstream.md

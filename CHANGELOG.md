@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Internal
+- **Docker image is about half the size** (1.29GB → 656MB). Removed a leftover `apk add build-base zlib-dev jpeg-dev freetype-dev libpng-dev musl-dev` that no dependency actually needs anymore (nothing gets compiled from source; every package resolves to a prebuilt wheel), narrowed what gets copied into the frontend build stage so unrelated backend changes don't bust its cache, trimmed the Docker build context from 43MB to under 200KB, and replaced Alpine's `ffmpeg` package (~130MB, mostly unused video/GPU/capture support) with a small statically-linked build containing only what Connect actually uses: audio decode/encode and HTTPS input.
+
 ## [0.6.1] - 2026-07-20
 
 ### Added
