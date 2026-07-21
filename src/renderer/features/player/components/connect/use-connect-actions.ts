@@ -1,6 +1,7 @@
 import { Dispatch, MutableRefObject, SetStateAction } from 'react';
 
-import { ConnectDevice, connectFetch, SendStatus } from './types';
+import { connectFetchEnsured } from './connect-request';
+import { ConnectDevice, SendStatus } from './types';
 import { useConnectSend } from './use-connect-send';
 
 import { QueueSong } from '/@/shared/types/domain-types';
@@ -9,6 +10,7 @@ interface UseConnectActionsArgs {
     currentSong: QueueSong | undefined;
     currentTrackId: null | string;
     ensureConfigured: () => Promise<void>;
+    forceReconfigure: () => Promise<void>;
     isActive: boolean;
     isRadioActive: boolean;
     lastAutoSentRef: MutableRefObject<string>;
@@ -35,6 +37,7 @@ export const useConnectActions = ({
     currentSong,
     currentTrackId,
     ensureConfigured,
+    forceReconfigure,
     isActive,
     isRadioActive,
     lastAutoSentRef,
@@ -53,6 +56,7 @@ export const useConnectActions = ({
         currentSong,
         currentTrackId,
         ensureConfigured,
+        forceReconfigure,
         isRadioActive,
         lastAutoSentRef,
         mediaPause,
@@ -79,15 +83,20 @@ export const useConnectActions = ({
 
     const joinTo = async (devicesToJoin: ConnectDevice[], force: boolean) => {
         for (const device of devicesToJoin) {
-            await connectFetch(`/join`, {
-                body: JSON.stringify({
-                    force,
-                    target_name: device.name,
-                    target_type: device.type,
-                }),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            }).catch(() => {});
+            await connectFetchEnsured(
+                `/join`,
+                {
+                    body: JSON.stringify({
+                        force,
+                        target_name: device.name,
+                        target_type: device.type,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                },
+                ensureConfigured,
+                forceReconfigure,
+            ).catch(() => {});
         }
         setActiveTargets((prev) => {
             const existing = new Set(prev.map((d) => `${d.type}:${d.name}`));

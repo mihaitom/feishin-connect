@@ -23,21 +23,24 @@ export const useConnectSetup = () => {
         [server],
     );
 
+    // Sends /config for whatever server we currently know about. Shared by
+    // the mount effect, ensureConfigured()'s fallback, and forceReconfigure()
+    // — the actual POST is identical everywhere, only when it's triggered differs.
+    const sendConfig = async (current = serverRef.current) => {
+        if (!current?.url || !current?.credential) return;
+        setConnectSessionId(computeConnectSessionId(current));
+        await connectFetch(`/config`, {
+            body: JSON.stringify(buildConfigBody(current)),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        });
+        configuredRef.current = true;
+    };
+
     // ── Server config ─────────────────────────────────────────────────────────
     useEffect(() => {
         if (!server?.url || !server?.credential) return;
-        // Must be set before the first /config call so it — and every request
-        // after it — is scoped to this login's session from the start.
-        setConnectSessionId(computeConnectSessionId(server));
-        connectFetch(`/config`, {
-            body: JSON.stringify(buildConfigBody(server)),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        })
-            .then(() => {
-                configuredRef.current = true;
-            })
-            .catch(() => {});
+        sendConfig(server).catch(() => {});
         // Deliberately narrower than [server]: the auth store hands out a new
         // `currentServer` object on nearly every Navidrome response (it also
         // carries ndCredential, refreshed constantly) even though none of the
@@ -62,16 +65,21 @@ export const useConnectSetup = () => {
         if (configuredRef.current) return;
         // Fallback in case the effect never got a usable server either — do it
         // ourselves rather than leaving a slow-to-hydrate session stuck.
-        const current = serverRef.current;
-        if (!current?.url || !current?.credential) return;
-        setConnectSessionId(computeConnectSessionId(current));
-        await connectFetch(`/config`, {
-            body: JSON.stringify(buildConfigBody(current)),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        });
-        configuredRef.current = true;
+        await sendConfig();
     };
 
-    return { ensureConfigured, mySessionId };
+    // Backend sessions are reaped after ~30 min of no request/SSE activity
+    // (see core/session.py's SESSION_IDLE_TIMEOUT) — a tab left open without
+    // actively casting can outlive that easily. configuredRef has no way to
+    // know this happened, so it keeps reporting "configured" forever once
+    // /config has succeeded once, even after the backend has silently
+    // forgotten this session entirely. Callers that get back the resulting
+    // "media server not configured" error call this to force a fresh /config
+    // and retry, instead of leaving the user stuck until a page reload.
+    const forceReconfigure = async () => {
+        configuredRef.current = false;
+        await sendConfig();
+    };
+
+    return { ensureConfigured, forceReconfigure, mySessionId };
 };

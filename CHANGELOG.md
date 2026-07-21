@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+- **Connect could get stuck reporting "not configured" after being left open for a while**, showing an error on the cast button until the page was reloaded — the backend forgets an idle session after about 30 minutes, but the app kept assuming it was still set up. It now recovers on its own and retries.
+
 ### Internal
 - **Docker image is about half the size** (1.29GB → 656MB). Removed a leftover `apk add build-base zlib-dev jpeg-dev freetype-dev libpng-dev musl-dev` that no dependency actually needs anymore (nothing gets compiled from source; every package resolves to a prebuilt wheel), narrowed what gets copied into the frontend build stage so unrelated backend changes don't bust its cache, trimmed the Docker build context from 43MB to under 200KB, and replaced Alpine's `ffmpeg` package (~130MB, mostly unused video/GPU/capture support) with a small statically-linked build containing only what Connect actually uses: audio decode/encode and HTTPS input.
 

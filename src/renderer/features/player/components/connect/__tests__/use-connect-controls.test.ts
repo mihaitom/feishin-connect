@@ -41,6 +41,8 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectControls>[0]> =
         activeTargets: targets,
         currentSong: song(),
         currentTrackId: 'track-1' as null | string,
+        ensureConfigured: vi.fn(() => Promise.resolve()),
+        forceReconfigure: vi.fn(() => Promise.resolve()),
         isActive: true,
         lastAutoSentRef,
         mediaPause: vi.fn(),
@@ -101,12 +103,14 @@ describe('useConnectControls', () => {
 
         // Deliberately not gated on local PlayerStatus === PLAYING — a paused
         // (or never-yet-played) queue is a valid thing to start Connect from.
-        it('starts a fresh /play when neither playing nor streaming, as long as a track is queued', () => {
+        it('starts a fresh /play when neither playing nor streaming, as long as a track is queued', async () => {
             useConnectPlayerStore.setState({ isPlaying: false, isStreaming: false });
             const args = baseArgs();
             const { result } = renderHook(() => useConnectControls(args));
 
             result.current.handleTogglePlayPause();
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(useConnectPlayerStore.getState().isPlaying).toBe(true);
             expect(useConnectPlayerStore.getState().isStreaming).toBe(true);
@@ -169,7 +173,7 @@ describe('useConnectControls', () => {
             expect(useConnectPlayerStore.getState().isActive).toBe(false);
         });
 
-        it('the published onPlayPause always calls the current handler, not a stale closure', () => {
+        it('the published onPlayPause always calls the current handler, not a stale closure', async () => {
             useConnectPlayerStore.setState({ isPlaying: false, isStreaming: false });
             const args = baseArgs({ currentTrackId: 'track-1' });
             const { rerender } = renderHook((props) => useConnectControls(props), {
@@ -181,6 +185,8 @@ describe('useConnectControls', () => {
             rerender({ ...args, currentTrackId: 'track-2' });
 
             useConnectPlayerStore.getState().handlers!.onPlayPause();
+            await Promise.resolve();
+            await Promise.resolve();
 
             const [, options] = connectFetchMock.mock.calls[0];
             expect(JSON.parse(options.body).track_ids).toEqual(['track-2']);
