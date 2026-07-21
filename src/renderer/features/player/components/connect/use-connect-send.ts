@@ -1,7 +1,8 @@
 import { Dispatch, MutableRefObject, SetStateAction } from 'react';
 
+import { connectFetchEnsured } from './connect-request';
 import { useConnectPlayerStore } from './connect.store';
-import { ConnectDevice, connectFetch, SendStatus } from './types';
+import { ConnectDevice, SendStatus } from './types';
 
 import { useTimestampStoreBase } from '/@/renderer/store/timestamp.store';
 import { QueueSong } from '/@/shared/types/domain-types';
@@ -10,6 +11,7 @@ interface UseConnectSendArgs {
     currentSong: QueueSong | undefined;
     currentTrackId: null | string;
     ensureConfigured: () => Promise<void>;
+    forceReconfigure: () => Promise<void>;
     isRadioActive: boolean;
     lastAutoSentRef: MutableRefObject<string>;
     mediaPause: () => void;
@@ -32,6 +34,7 @@ export const useConnectSend = ({
     currentSong,
     currentTrackId,
     ensureConfigured,
+    forceReconfigure,
     isRadioActive,
     lastAutoSentRef,
     mediaPause,
@@ -71,20 +74,24 @@ export const useConnectSend = ({
         setActiveTargets(devicesToSend);
         setStatus('loading');
         try {
-            await ensureConfigured();
             const targets = devicesToSend.map((d) => ({ name: d.name, type: d.type }));
             if (hasRadio) {
                 pauseRadio();
-                const res = await connectFetch(`/play-url`, {
-                    body: JSON.stringify({
-                        force,
-                        targets,
-                        title: radioStationName ?? 'Radio',
-                        url: radioStreamUrl,
-                    }),
-                    headers: { 'Content-Type': 'application/json' },
-                    method: 'POST',
-                });
+                const res = await connectFetchEnsured(
+                    `/play-url`,
+                    {
+                        body: JSON.stringify({
+                            force,
+                            targets,
+                            title: radioStationName ?? 'Radio',
+                            url: radioStreamUrl,
+                        }),
+                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST',
+                    },
+                    ensureConfigured,
+                    forceReconfigure,
+                );
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 // Backend returns HTTP 200 with { error } on logical failures
                 // (e.g. delivery error) rather than a non-2xx status.
@@ -104,16 +111,21 @@ export const useConnectSend = ({
                 // the ungated /play path in handleTogglePlayPause's third branch.
                 const startPosition = useTimestampStoreBase.getState().timestamp;
                 mediaPause();
-                const res = await connectFetch(`/play`, {
-                    body: JSON.stringify({
-                        force,
-                        start_position: startPosition,
-                        targets,
-                        track_ids: [currentTrackId],
-                    }),
-                    headers: { 'Content-Type': 'application/json' },
-                    method: 'POST',
-                });
+                const res = await connectFetchEnsured(
+                    `/play`,
+                    {
+                        body: JSON.stringify({
+                            force,
+                            start_position: startPosition,
+                            targets,
+                            track_ids: [currentTrackId],
+                        }),
+                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST',
+                    },
+                    ensureConfigured,
+                    forceReconfigure,
+                );
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const body = await res.json();
                 if (body.error) throw new Error(body.error);
@@ -150,15 +162,19 @@ export const useConnectSend = ({
         setActiveTargets(devicesToClaim);
         setStatus('loading');
         try {
-            await ensureConfigured();
-            const res = await connectFetch(`/claim`, {
-                body: JSON.stringify({
-                    force,
-                    targets: devicesToClaim.map((d) => ({ name: d.name, type: d.type })),
-                }),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            });
+            const res = await connectFetchEnsured(
+                `/claim`,
+                {
+                    body: JSON.stringify({
+                        force,
+                        targets: devicesToClaim.map((d) => ({ name: d.name, type: d.type })),
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                },
+                ensureConfigured,
+                forceReconfigure,
+            );
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const body = await res.json();
             if (body.error) throw new Error(body.error);

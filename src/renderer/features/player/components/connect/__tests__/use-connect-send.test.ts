@@ -37,6 +37,7 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectSend>[0]> = {})
         currentSong: song(),
         currentTrackId: 'track-1',
         ensureConfigured: vi.fn(() => Promise.resolve()),
+        forceReconfigure: vi.fn(() => Promise.resolve()),
         isRadioActive: false,
         lastAutoSentRef,
         mediaPause: vi.fn(),

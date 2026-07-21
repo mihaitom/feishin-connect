@@ -35,6 +35,8 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectPlayback>[0]> =
         activeTargets: targets,
         connectStatus: null,
         currentSong: song(),
+        ensureConfigured: vi.fn(() => Promise.resolve()),
+        forceReconfigure: vi.fn(() => Promise.resolve()),
         isRadioActive: false,
         lastAutoSentRef,
         mediaNext: vi.fn(),
@@ -58,10 +60,12 @@ describe('useConnectPlayback', () => {
     });
 
     describe('auto-forward on track change', () => {
-        it('sends the new track to /play and pauses the local player', () => {
+        it('sends the new track to /play and pauses the local player', async () => {
             const args = baseArgs();
 
             renderHook(() => useConnectPlayback(args));
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(args.mediaPause).toHaveBeenCalledTimes(1);
             expect(connectFetchMock).toHaveBeenCalledTimes(1);
@@ -75,10 +79,12 @@ describe('useConnectPlayback', () => {
             expect(args.lastAutoSentRef.current).toBe('song-1');
         });
 
-        it('registers this tab as the local audio source when inactive (no cast device)', () => {
+        it('registers this tab as the local audio source when inactive (no cast device)', async () => {
             const args = baseArgs({ mode: 'inactive' });
 
             renderHook(() => useConnectPlayback(args));
+            await Promise.resolve();
+            await Promise.resolve();
 
             // Unlike casting, there's no external target — local audio must
             // actually play, so mediaPause() must NOT be called here.
@@ -92,10 +98,12 @@ describe('useConnectPlayback', () => {
             expect(args.setLocalMode).toHaveBeenCalledWith('local-owner');
         });
 
-        it('keeps pushing as local-owner without re-promoting', () => {
+        it('keeps pushing as local-owner without re-promoting', async () => {
             const args = baseArgs({ mode: 'local-owner' });
 
             renderHook(() => useConnectPlayback(args));
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(connectFetchMock).toHaveBeenCalledTimes(1);
             expect(args.setLocalMode).not.toHaveBeenCalled();
@@ -118,28 +126,36 @@ describe('useConnectPlayback', () => {
             expect(connectFetchMock).not.toHaveBeenCalled();
         });
 
-        it('does not re-send the same track on re-render', () => {
+        it('does not re-send the same track on re-render', async () => {
             const args = baseArgs();
             const { rerender } = renderHook((props) => useConnectPlayback(props), {
                 initialProps: args,
             });
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(connectFetchMock).toHaveBeenCalledTimes(1);
 
             rerender({ ...args });
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(connectFetchMock).toHaveBeenCalledTimes(1);
         });
 
-        it('sends a new request when the track changes', () => {
+        it('sends a new request when the track changes', async () => {
             const args = baseArgs();
             const { rerender } = renderHook((props) => useConnectPlayback(props), {
                 initialProps: args,
             });
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(connectFetchMock).toHaveBeenCalledTimes(1);
 
             rerender({ ...args, currentSong: song({ _uniqueId: 'song-2', id: 'track-2' }) });
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(connectFetchMock).toHaveBeenCalledTimes(2);
             const [, options] = connectFetchMock.mock.calls[1];
@@ -162,7 +178,7 @@ describe('useConnectPlayback', () => {
     });
 
     describe('auto-forward on radio switch', () => {
-        it('pauses the local radio and starts streaming the radio URL on the Connect targets', () => {
+        it('pauses the local radio and starts streaming the radio URL on the Connect targets', async () => {
             const args = baseArgs({
                 isRadioActive: true,
                 radioStationName: 'Cool FM',
@@ -170,6 +186,8 @@ describe('useConnectPlayback', () => {
             });
 
             renderHook(() => useConnectPlayback(args));
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(args.pauseRadio).toHaveBeenCalledTimes(1);
             expect(connectFetchMock).toHaveBeenCalledTimes(1);
@@ -183,7 +201,7 @@ describe('useConnectPlayback', () => {
             expect(args.lastAutoSentRef.current).toBe('song-1');
         });
 
-        it('falls back to "Radio" as the title when no station name is given', () => {
+        it('falls back to "Radio" as the title when no station name is given', async () => {
             const args = baseArgs({
                 currentSong: undefined,
                 isRadioActive: true,
@@ -192,6 +210,8 @@ describe('useConnectPlayback', () => {
             });
 
             renderHook(() => useConnectPlayback(args));
+            await Promise.resolve();
+            await Promise.resolve();
 
             const [, options] = connectFetchMock.mock.calls[0];
             expect(JSON.parse(options.body).title).toBe('Radio');

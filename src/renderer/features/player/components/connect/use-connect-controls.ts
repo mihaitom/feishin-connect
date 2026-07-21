@@ -1,5 +1,6 @@
 import { MutableRefObject, useEffect, useRef } from 'react';
 
+import { connectFetchEnsured } from './connect-request';
 import { ConnectMode, useConnectPlayerStore } from './connect.store';
 import { ConnectDevice, connectFetch, getConnectClientId } from './types';
 
@@ -11,6 +12,8 @@ interface UseConnectControlsArgs {
     activeTargets: ConnectDevice[];
     currentSong: QueueSong | undefined;
     currentTrackId: null | string;
+    ensureConfigured: () => Promise<void>;
+    forceReconfigure: () => Promise<void>;
     isActive: boolean;
     lastAutoSentRef: MutableRefObject<string>;
     mediaPause: () => void;
@@ -28,6 +31,8 @@ export const useConnectControls = ({
     activeTargets,
     currentSong,
     currentTrackId,
+    ensureConfigured,
+    forceReconfigure,
     isActive,
     lastAutoSentRef,
     mediaPause,
@@ -57,14 +62,19 @@ export const useConnectControls = ({
             if (!currentTrackId) return;
             useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
             lastAutoSentRef.current = currentSong?._uniqueId ?? '';
-            connectFetch(`/play`, {
-                body: JSON.stringify({
-                    targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
-                    track_ids: [currentTrackId],
-                }),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            }).catch(() => {});
+            connectFetchEnsured(
+                `/play`,
+                {
+                    body: JSON.stringify({
+                        targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
+                        track_ids: [currentTrackId],
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                },
+                ensureConfigured,
+                forceReconfigure,
+            ).catch(() => {});
         }
     }
 
@@ -95,20 +105,30 @@ export const useConnectControls = ({
     // track-ended advance defers to it.
     function handleNext() {
         if (!isActive) return;
-        connectFetch(`/next`, {
-            body: JSON.stringify({ client_id: getConnectClientId() }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        }).catch(() => {});
+        connectFetchEnsured(
+            `/next`,
+            {
+                body: JSON.stringify({ client_id: getConnectClientId() }),
+                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+            },
+            ensureConfigured,
+            forceReconfigure,
+        ).catch(() => {});
     }
 
     function handlePrevious() {
         if (!isActive) return;
-        connectFetch(`/prev`, {
-            body: JSON.stringify({ client_id: getConnectClientId() }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        }).catch(() => {});
+        connectFetchEnsured(
+            `/prev`,
+            {
+                body: JSON.stringify({ client_id: getConnectClientId() }),
+                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+            },
+            ensureConfigured,
+            forceReconfigure,
+        ).catch(() => {});
     }
 
     storeHandlersRef.current = { handleNext, handlePrevious, handleStop, handleTogglePlayPause };

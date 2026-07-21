@@ -2,8 +2,9 @@ import type { QueueSong } from '/@/shared/types/domain-types';
 
 import { MutableRefObject, useEffect, useRef } from 'react';
 
+import { connectFetchEnsured } from './connect-request';
 import { ConnectMode } from './connect.store';
-import { ConnectDevice, connectFetch, ConnectStatus, getConnectClientId } from './types';
+import { ConnectDevice, ConnectStatus, getConnectClientId } from './types';
 
 import { useMpvSettings } from '/@/renderer/store';
 import {
@@ -19,6 +20,8 @@ interface ConnectPlaybackArgs {
     activeTargets: ConnectDevice[];
     connectStatus: ConnectStatus | null;
     currentSong: QueueSong | undefined;
+    ensureConfigured: () => Promise<void>;
+    forceReconfigure: () => Promise<void>;
     isRadioActive: boolean;
     lastAutoSentRef: MutableRefObject<string>;
     mediaNext: () => void;
@@ -50,6 +53,8 @@ export const useConnectPlayback = ({
     activeTargets,
     connectStatus,
     currentSong,
+    ensureConfigured,
+    forceReconfigure,
     isRadioActive,
     lastAutoSentRef,
     mediaNext,
@@ -74,15 +79,22 @@ export const useConnectPlayback = ({
 
         if (mode === 'cast') {
             mediaPause();
-            connectFetch(`/play`, {
-                body: JSON.stringify({
-                    gain: currentSong ? calculateReplayGain(currentSong, replayGainSettings) : 1,
-                    targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
-                    track_ids: [trackId],
-                }),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            }).catch(() => {});
+            connectFetchEnsured(
+                `/play`,
+                {
+                    body: JSON.stringify({
+                        gain: currentSong
+                            ? calculateReplayGain(currentSong, replayGainSettings)
+                            : 1,
+                        targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
+                        track_ids: [trackId],
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                },
+                ensureConfigured,
+                forceReconfigure,
+            ).catch(() => {});
             return;
         }
 
@@ -90,15 +102,20 @@ export const useConnectPlayback = ({
         // own audio output becomes (or reaffirms being) the session's source.
         // Do NOT mediaPause(): unlike casting, there's nowhere else for the
         // audio to come from, so it must actually play here.
-        connectFetch(`/play`, {
-            body: JSON.stringify({
-                client_id: getConnectClientId(),
-                gain: currentSong ? calculateReplayGain(currentSong, replayGainSettings) : 1,
-                track_ids: [trackId],
-            }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        }).catch(() => {});
+        connectFetchEnsured(
+            `/play`,
+            {
+                body: JSON.stringify({
+                    client_id: getConnectClientId(),
+                    gain: currentSong ? calculateReplayGain(currentSong, replayGainSettings) : 1,
+                    track_ids: [trackId],
+                }),
+                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+            },
+            ensureConfigured,
+            forceReconfigure,
+        ).catch(() => {});
         if (mode === 'inactive') setLocalMode('local-owner');
     }, [
         mode,
@@ -109,6 +126,8 @@ export const useConnectPlayback = ({
         lastAutoSentRef,
         replayGainSettings,
         setLocalMode,
+        ensureConfigured,
+        forceReconfigure,
     ]);
 
     // ── Auto-forward: radio switch ────────────────────────────────────────────
@@ -124,15 +143,20 @@ export const useConnectPlayback = ({
         // target streams the URL directly.
         pauseRadio();
         lastAutoSentRef.current = currentSong?._uniqueId ?? 'radio';
-        connectFetch(`/play-url`, {
-            body: JSON.stringify({
-                targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
-                title: radioStationName ?? 'Radio',
-                url: radioStreamUrl,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        }).catch(() => {});
+        connectFetchEnsured(
+            `/play-url`,
+            {
+                body: JSON.stringify({
+                    targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
+                    title: radioStationName ?? 'Radio',
+                    url: radioStreamUrl,
+                }),
+                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+            },
+            ensureConfigured,
+            forceReconfigure,
+        ).catch(() => {});
     }, [
         mode,
         isRadioActive,
@@ -142,6 +166,8 @@ export const useConnectPlayback = ({
         pauseRadio,
         lastAutoSentRef,
         currentSong,
+        ensureConfigured,
+        forceReconfigure,
     ]);
 
     // ── Queue mirror push ──────────────────────────────────────────────────────
@@ -165,11 +191,16 @@ export const useConnectPlayback = ({
             if (isShuffleEnabled(state)) {
                 index = mapShuffledToQueueIndex(index, state.queue.shuffled);
             }
-            connectFetch(`/queue`, {
-                body: JSON.stringify({ index, track_ids: trackIds }),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            }).catch(() => {});
+            connectFetchEnsured(
+                `/queue`,
+                {
+                    body: JSON.stringify({ index, track_ids: trackIds }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                },
+                ensureConfigured,
+                forceReconfigure,
+            ).catch(() => {});
         };
 
         const unsubQueue = subscribePlayerQueue(pushQueue);
@@ -178,7 +209,7 @@ export const useConnectPlayback = ({
             unsubQueue();
             unsubTrack();
         };
-    }, [mode]);
+    }, [mode, ensureConfigured, forceReconfigure]);
 
     // ── Track-ended detection ─────────────────────────────────────────────────
     // Level-triggered on backend `ended` flag — survives SSE reconnects and
