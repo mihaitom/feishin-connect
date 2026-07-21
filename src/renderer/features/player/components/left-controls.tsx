@@ -13,6 +13,8 @@ import {
     JoinedArtists,
 } from '/@/renderer/features/albums/components/joined-artists';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
+import { useConnectSessionContext } from '/@/renderer/features/player/components/connect/connect-session-context';
+import { MirrorModeMetadataDisplay } from '/@/renderer/features/player/components/mirror-mode-metadata-display';
 import { RadioMetadataDisplay } from '/@/renderer/features/player/components/radio-metadata-display';
 import {
     useIsRadioActive,
@@ -58,11 +60,13 @@ export const LeftControls = () => {
     const isRadioActive = useIsRadioActive();
     const { currentStationArt } = useRadioPlayer();
     const { bindings } = useHotkeySettings();
+    const { connectStatus, mode } = useConnectSessionContext();
 
-    const isRadioMode = isRadioActive;
+    const isMirroring = mode === 'mirror';
+    const isRadioMode = isRadioActive && !isMirroring;
     const hasRadioStationImage = Boolean(currentStationArt?.imageId || currentStationArt?.imageUrl);
     const hideImage = image && !collapsed;
-    const isSongDefined = Boolean(currentSong?.id) && !isRadioMode;
+    const isSongDefined = Boolean(currentSong?.id) && !isRadioMode && !isMirroring;
     const title = currentSong?.name;
     const artists = currentSong?.artists;
 
@@ -131,7 +135,20 @@ export const LeftControls = () => {
                                 transition={{ duration: 0.2, ease: 'easeIn' }}
                             >
                                 <Tooltip label={t('player.toggleFullscreenPlayer')} openDelay={0}>
-                                    {isRadioMode && hasRadioStationImage ? (
+                                    {isMirroring ? (
+                                        <ItemImage
+                                            className={clsx(
+                                                styles.playerbarImage,
+                                                PlaybackSelectors.playerCoverArt,
+                                            )}
+                                            enableDebounce={false}
+                                            enableViewport={false}
+                                            fetchPriority="high"
+                                            itemType={LibraryItem.SONG}
+                                            src={connectStatus?.current_track?.cover_art_url ?? ''}
+                                            type="table"
+                                        />
+                                    ) : isRadioMode && hasRadioStationImage ? (
                                         <ItemImage
                                             className={clsx(
                                                 styles.playerbarImage,
@@ -197,7 +214,12 @@ export const LeftControls = () => {
                     )}
                 </AnimatePresence>
                 <motion.div className={styles.metadataStack} layout="position">
-                    {isRadioMode ? (
+                    {isMirroring ? (
+                        <MirrorModeMetadataDisplay
+                            connectStatus={connectStatus}
+                            onStopPropagation={stopPropagation}
+                        />
+                    ) : isRadioMode ? (
                         <RadioMetadataDisplay
                             onStopPropagation={stopPropagation}
                             onToggleContextMenu={handleToggleContextMenu}

@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
 
 import { ConnectButton } from './connect-button';
+import { useConnectSessionContext } from './connect/connect-session-context';
 import { useConnectPlayerStore } from './connect/connect.store';
 import styles from './mobile-playerbar.module.css';
 
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
+import { MirrorModeMetadataDisplay } from '/@/renderer/features/player/components/mirror-mode-metadata-display';
 import { MainPlayButton, PlayerButton } from '/@/renderer/features/player/components/player-button';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -43,9 +45,11 @@ export const MobilePlayerbar = () => {
         isActive: connectActive,
         isPlaying: connectPlaying,
     } = useConnectPlayerStore();
+    const { connectStatus, mode } = useConnectSessionContext();
+    const isMirroring = mode === 'mirror';
     const title = currentSong?.name;
     const artists = currentSong?.artists;
-    const isSongDefined = Boolean(currentSong?.id);
+    const isSongDefined = Boolean(currentSong?.id) && !isMirroring;
 
     const handleToggleFullScreenPlayer = (e?: KeyboardEvent | MouseEvent<HTMLDivElement>) => {
         e?.stopPropagation();
@@ -75,7 +79,7 @@ export const MobilePlayerbar = () => {
             <div className={styles.contentWrapper}>
                 <LayoutGroup>
                     <AnimatePresence initial={false} mode="popLayout">
-                        {currentSong?.id && (
+                        {(isMirroring ? connectStatus?.current_track : currentSong?.id) && (
                             <div className={styles.imageWrapper}>
                                 <motion.div
                                     animate={{ opacity: 1, scale: 1 }}
@@ -92,116 +96,143 @@ export const MobilePlayerbar = () => {
                                         label={t('player.toggleFullscreenPlayer')}
                                         openDelay={0}
                                     >
-                                        <ItemImage
-                                            className={clsx(
-                                                styles.playerbarImage,
-                                                PlaybackSelectors.playerCoverArt,
-                                            )}
-                                            enableDebounce={false}
-                                            enableViewport={false}
-                                            explicitStatus={currentSong.explicitStatus}
-                                            fetchPriority="high"
-                                            id={currentSong.imageId}
-                                            itemType={LibraryItem.SONG}
-                                            type="table"
-                                        />
+                                        {isMirroring ? (
+                                            <ItemImage
+                                                className={clsx(
+                                                    styles.playerbarImage,
+                                                    PlaybackSelectors.playerCoverArt,
+                                                )}
+                                                enableDebounce={false}
+                                                enableViewport={false}
+                                                fetchPriority="high"
+                                                itemType={LibraryItem.SONG}
+                                                src={
+                                                    connectStatus?.current_track?.cover_art_url ??
+                                                    ''
+                                                }
+                                                type="table"
+                                            />
+                                        ) : (
+                                            <ItemImage
+                                                className={clsx(
+                                                    styles.playerbarImage,
+                                                    PlaybackSelectors.playerCoverArt,
+                                                )}
+                                                enableDebounce={false}
+                                                enableViewport={false}
+                                                explicitStatus={currentSong?.explicitStatus}
+                                                fetchPriority="high"
+                                                id={currentSong?.imageId}
+                                                itemType={LibraryItem.SONG}
+                                                type="table"
+                                            />
+                                        )}
                                     </Tooltip>
                                 </motion.div>
                             </div>
                         )}
                     </AnimatePresence>
                     <motion.div className={styles.metadataStack} layout="position">
-                        <div className={styles.lineItem} onClick={stopPropagation}>
-                            <Group align="center" gap="xs" wrap="nowrap">
-                                <Text
-                                    className={PlaybackSelectors.songTitle}
-                                    component={Link}
-                                    fw={500}
-                                    isLink
-                                    onClick={handleToggleFullScreenPlayer}
-                                    onContextMenu={handleToggleContextMenu}
-                                    overflow="hidden"
-                                    size="sm"
-                                    to={AppRoute.NOW_PLAYING}
-                                    truncate
+                        {isMirroring ? (
+                            <MirrorModeMetadataDisplay
+                                connectStatus={connectStatus}
+                                onStopPropagation={stopPropagation}
+                            />
+                        ) : (
+                            <>
+                                <div className={styles.lineItem} onClick={stopPropagation}>
+                                    <Group align="center" gap="xs" wrap="nowrap">
+                                        <Text
+                                            className={PlaybackSelectors.songTitle}
+                                            component={Link}
+                                            fw={500}
+                                            isLink
+                                            onClick={handleToggleFullScreenPlayer}
+                                            onContextMenu={handleToggleContextMenu}
+                                            overflow="hidden"
+                                            size="sm"
+                                            to={AppRoute.NOW_PLAYING}
+                                            truncate
+                                        >
+                                            {title || '—'}
+                                        </Text>
+                                        {isSongDefined && (
+                                            <ActionIcon
+                                                icon="ellipsisVertical"
+                                                onClick={handleToggleContextMenu}
+                                                size="xs"
+                                                styles={{
+                                                    root: {
+                                                        '--ai-size-xs': '1.15rem',
+                                                    },
+                                                }}
+                                                variant="subtle"
+                                            />
+                                        )}
+                                    </Group>
+                                </div>
+                                <div
+                                    className={clsx(
+                                        styles.lineItem,
+                                        styles.secondary,
+                                        PlaybackSelectors.songArtist,
+                                    )}
+                                    onClick={stopPropagation}
                                 >
-                                    {title || '—'}
-                                </Text>
-                                {isSongDefined && (
-                                    <ActionIcon
-                                        icon="ellipsisVertical"
-                                        onClick={handleToggleContextMenu}
-                                        size="xs"
-                                        styles={{
-                                            root: {
-                                                '--ai-size-xs': '1.15rem',
-                                            },
-                                        }}
-                                        variant="subtle"
-                                    />
-                                )}
-                            </Group>
-                        </div>
-                        <div
-                            className={clsx(
-                                styles.lineItem,
-                                styles.secondary,
-                                PlaybackSelectors.songArtist,
-                            )}
-                            onClick={stopPropagation}
-                        >
-                            {artists?.map((artist, index) => (
-                                <React.Fragment key={`bar-${artist.id}`}>
-                                    {index > 0 && <Separator />}
+                                    {artists?.map((artist, index) => (
+                                        <React.Fragment key={`bar-${artist.id}`}>
+                                            {index > 0 && <Separator />}
+                                            <Text
+                                                component={artist.id ? Link : undefined}
+                                                fw={500}
+                                                isLink={artist.id !== ''}
+                                                onClick={handleToggleFullScreenPlayer}
+                                                overflow="hidden"
+                                                size="xs"
+                                                to={
+                                                    artist.id
+                                                        ? generatePath(
+                                                              AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL,
+                                                              {
+                                                                  albumArtistId: artist.id,
+                                                              },
+                                                          )
+                                                        : undefined
+                                                }
+                                            >
+                                                {artist.name || '—'}
+                                            </Text>
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                                <div
+                                    className={clsx(
+                                        styles.lineItem,
+                                        styles.secondary,
+                                        PlaybackSelectors.songAlbum,
+                                    )}
+                                    onClick={stopPropagation}
+                                >
                                     <Text
-                                        component={artist.id ? Link : undefined}
+                                        component={Link}
                                         fw={500}
-                                        isLink={artist.id !== ''}
+                                        isLink
                                         onClick={handleToggleFullScreenPlayer}
                                         overflow="hidden"
                                         size="xs"
                                         to={
-                                            artist.id
-                                                ? generatePath(
-                                                      AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL,
-                                                      {
-                                                          albumArtistId: artist.id,
-                                                      },
-                                                  )
-                                                : undefined
+                                            currentSong?.albumId
+                                                ? generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
+                                                      albumId: currentSong.albumId,
+                                                  })
+                                                : ''
                                         }
                                     >
-                                        {artist.name || '—'}
+                                        {currentSong?.album || '—'}
                                     </Text>
-                                </React.Fragment>
-                            ))}
-                        </div>
-                        <div
-                            className={clsx(
-                                styles.lineItem,
-                                styles.secondary,
-                                PlaybackSelectors.songAlbum,
-                            )}
-                            onClick={stopPropagation}
-                        >
-                            <Text
-                                component={Link}
-                                fw={500}
-                                isLink
-                                onClick={handleToggleFullScreenPlayer}
-                                overflow="hidden"
-                                size="xs"
-                                to={
-                                    currentSong?.albumId
-                                        ? generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
-                                              albumId: currentSong.albumId,
-                                          })
-                                        : ''
-                                }
-                            >
-                                {currentSong?.album || '—'}
-                            </Text>
-                        </div>
+                                </div>
+                            </>
+                        )}
                     </motion.div>
                 </LayoutGroup>
             </div>
@@ -210,7 +241,11 @@ export const MobilePlayerbar = () => {
                     icon={<Icon fill="default" icon="mediaPrevious" size="md" />}
                     onClick={(e) => {
                         e.stopPropagation();
-                        mediaPrevious(e.altKey);
+                        if (connectActive && connectHandlers) {
+                            connectHandlers.onPrevious();
+                        } else {
+                            mediaPrevious(e.altKey);
+                        }
                     }}
                     tooltip={{
                         label: t('player.previous'),
@@ -234,7 +269,11 @@ export const MobilePlayerbar = () => {
                     icon={<Icon fill="default" icon="mediaNext" size="md" />}
                     onClick={(e) => {
                         e.stopPropagation();
-                        mediaNext(e.altKey);
+                        if (connectActive && connectHandlers) {
+                            connectHandlers.onNext();
+                        } else {
+                            mediaNext(e.altKey);
+                        }
                     }}
                     tooltip={{
                         label: t('player.next'),

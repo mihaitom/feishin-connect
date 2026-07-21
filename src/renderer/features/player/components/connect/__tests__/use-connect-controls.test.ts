@@ -48,6 +48,7 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectControls>[0]> =
         mediaPause: vi.fn(),
         mediaTogglePlayPause: vi.fn(),
         mode: 'cast' as ConnectMode,
+        noteLocalConnectAction: vi.fn(),
         ...overrides,
     };
 };

@@ -89,7 +89,9 @@ export const ConnectButton = () => {
                 }}
                 title={
                     isActive
-                        ? `▶ ${activeDevice!.name} · ${nowPlayingTitle}`
+                        ? activeDevice
+                            ? `▶ ${activeDevice.name} · ${nowPlayingTitle}`
+                            : `▶ ${nowPlayingTitle}`
                         : t('player.connect_playOnDevice')
                 }
             >

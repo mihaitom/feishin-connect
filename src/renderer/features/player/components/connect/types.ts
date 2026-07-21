@@ -53,6 +53,12 @@ export interface ConnectSession {
     isScanning: boolean;
     mode: ConnectMode;
     mySessionId: string;
+    // Stamps the moment this tab last issued an explicit play/pause/seek/
+    // next/prev — callers outside use-connect-session.ts's own composition
+    // (e.g. the local seek slider) call this so the reverse-sync grace
+    // period (see use-connect-playback.ts) also covers actions that
+    // originate outside the connect hooks themselves.
+    noteLocalConnectAction: () => void;
     paired: string[];
     refresh: (fresh?: boolean) => void;
     refreshPaired: () => void;

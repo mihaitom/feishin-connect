@@ -19,6 +19,7 @@ interface UseConnectControlsArgs {
     mediaPause: () => void;
     mediaTogglePlayPause: () => void;
     mode: ConnectMode;
+    noteLocalConnectAction: () => void;
 }
 
 /**
@@ -38,6 +39,7 @@ export const useConnectControls = ({
     mediaPause,
     mediaTogglePlayPause,
     mode,
+    noteLocalConnectAction,
 }: UseConnectControlsArgs) => {
     const storeHandlersRef = useRef({
         handleNext,
@@ -51,6 +53,7 @@ export const useConnectControls = ({
             mediaTogglePlayPause();
             return;
         }
+        noteLocalConnectAction();
         const { isPlaying, isStreaming } = useConnectPlayerStore.getState();
         if (isPlaying) {
             useConnectPlayerStore.getState().set({ isPlaying: false });
@@ -88,6 +91,7 @@ export const useConnectControls = ({
     // 0:00 and keep playing — /seek only restarts the device's stream when
     // not paused (see routes/playback.py).
     function handleStop() {
+        noteLocalConnectAction();
         useConnectPlayerStore.getState().set({ isPlaying: false });
         connectFetch(`/pause`, { method: 'POST' })
             .then(() =>
@@ -105,6 +109,7 @@ export const useConnectControls = ({
     // track-ended advance defers to it.
     function handleNext() {
         if (!isActive) return;
+        noteLocalConnectAction();
         connectFetchEnsured(
             `/next`,
             {
@@ -119,6 +124,7 @@ export const useConnectControls = ({
 
     function handlePrevious() {
         if (!isActive) return;
+        noteLocalConnectAction();
         connectFetchEnsured(
             `/prev`,
             {

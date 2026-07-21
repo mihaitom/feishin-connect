@@ -509,9 +509,20 @@ const RatingButton = () => {
 };
 
 const VolumeButton = () => {
-    const { isActive: connectActive } = useConnectSessionContext();
+    const { activeTargets, mode } = useConnectSessionContext();
+    // Device volume only makes sense when a real cast device is actually
+    // involved — this tab casting to one ('cast'), or mirroring a session
+    // that is ('mirror' with activeTargets populated from the shared
+    // status). A 'local-owner'/'inactive' tab (or a 'mirror' of a pure
+    // local-owner session, no device at all) has no device to control, so
+    // it falls back to this tab's own local volume instead — see
+    // connect.store.ts's ConnectMode docstring for why `mode` is checked
+    // here rather than the broader `isActive` (which is also true for
+    // local-owner/mirror and would otherwise show a permanently disabled
+    // device-volume control with nothing to fall back to).
+    const showDeviceVolume = mode === 'cast' || (mode === 'mirror' && activeTargets.length > 0);
 
-    return connectActive ? <ConnectVolumeButton /> : <LocalVolumeButton />;
+    return showDeviceVolume ? <ConnectVolumeButton /> : <LocalVolumeButton />;
 };
 
 const ConnectVolumeButton = () => {

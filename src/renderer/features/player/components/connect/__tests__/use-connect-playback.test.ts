@@ -10,6 +10,9 @@ import type { ConnectDevice, ConnectStatus } from '../types';
 import { connectFetch } from '../types';
 import { useConnectPlayback } from '../use-connect-playback';
 
+import { usePlayerStoreBase } from '/@/renderer/store/player.store';
+import { PlayerStatus } from '/@/shared/types/types';
+
 vi.mock('../types', async (importOriginal) => {
     const actual = await importOriginal<typeof import('../types')>();
     return {
@@ -29,8 +32,27 @@ const song = (overrides: Partial<QueueSong> = {}): QueueSong =>
 
 const targets: ConnectDevice[] = [{ name: 'Living Room', type: 'sonos' }];
 
+// Sets up the REAL local player store's queue/index/status — the reverse-sync
+// effect reads these directly via usePlayerStoreBase.getState(), not via
+// props, so tests need genuine store state rather than a mock.
+const setLocalQueue = (songs: QueueSong[], index: number, status: PlayerStatus) => {
+    const ids = songs.map((s) => s._uniqueId);
+    usePlayerStoreBase.setState((state) => ({
+        player: { ...state.player, index, status },
+        queue: {
+            ...state.queue,
+            default: ids,
+            shuffled: [],
+            songs: Object.fromEntries(songs.map((s) => [s._uniqueId, s])),
+        },
+    }));
+};
+
 const baseArgs = (overrides: Partial<Parameters<typeof useConnectPlayback>[0]> = {}) => {
     const lastAutoSentRef: MutableRefObject<string> = { current: '' };
+    // 0 (well outside the reverse-sync grace period) so existing tests that
+    // don't care about it aren't accidentally silenced by it.
+    const lastLocalActionAtRef: MutableRefObject<number> = { current: 0 };
     return {
         activeTargets: targets,
         connectStatus: null,
@@ -39,8 +61,13 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectPlayback>[0]> =
         forceReconfigure: vi.fn(() => Promise.resolve()),
         isRadioActive: false,
         lastAutoSentRef,
+        lastLocalActionAtRef,
+        localElapsed: 0,
         mediaNext: vi.fn(),
         mediaPause: vi.fn(),
+        mediaPlay: vi.fn(),
+        mediaPlayByIndex: vi.fn(),
+        mediaSeekToTimestamp: vi.fn(),
         mode: 'cast' as ConnectMode,
         pauseRadio: vi.fn(),
         radioStationName: null,
@@ -326,6 +353,232 @@ describe('useConnectPlayback', () => {
             rerender({ ...args, connectStatus: status({ ended: true, streaming: false }) });
 
             expect(args.mediaNext).toHaveBeenCalledTimes(2);
+        });
+    });
+
+    describe('reverse-sync (local-owner mode)', () => {
+        const status = (overrides: Partial<ConnectStatus> = {}): ConnectStatus =>
+            ({
+                current_track: null,
+                current_track_index: 0,
+                elapsed: 0,
+                ended: false,
+                local_owner_client_id: 'tab-1',
+                paused: false,
+                queue_track_ids: [],
+                radio: null,
+                streaming: true,
+                targets: [],
+                total_tracks: 1,
+                ...overrides,
+            }) as ConnectStatus;
+
+        const songA = song({ _uniqueId: 'song-a', id: 'track-a' });
+        const songB = song({ _uniqueId: 'song-b', id: 'track-b' });
+
+        it('jumps to the backend track index via mediaPlayByIndex when it differs from local', () => {
+            setLocalQueue([songA, songB], 0, PlayerStatus.PLAYING);
+            const args = baseArgs({
+                connectStatus: status({
+                    current_track_index: 1,
+                    queue_track_ids: ['track-a', 'track-b'],
+                }),
+                mode: 'local-owner',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaPlayByIndex).toHaveBeenCalledWith(1);
+        });
+
+        it('does nothing when the local index already matches the backend', () => {
+            setLocalQueue([songA, songB], 1, PlayerStatus.PLAYING);
+            const args = baseArgs({
+                connectStatus: status({
+                    current_track_index: 1,
+                    queue_track_ids: ['track-a', 'track-b'],
+                    streaming: true,
+                }),
+                mode: 'local-owner',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaPlayByIndex).not.toHaveBeenCalled();
+            expect(args.mediaPlay).not.toHaveBeenCalled();
+            expect(args.mediaPause).not.toHaveBeenCalled();
+        });
+
+        it("does not correct anything within the grace period after this tab's own action", () => {
+            setLocalQueue([songA, songB], 0, PlayerStatus.PLAYING);
+            const args = baseArgs({
+                connectStatus: status({
+                    current_track_index: 1,
+                    queue_track_ids: ['track-a', 'track-b'],
+                }),
+                lastLocalActionAtRef: { current: Date.now() },
+                mode: 'local-owner',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaPlayByIndex).not.toHaveBeenCalled();
+        });
+
+        it('resumes local playback when the backend says streaming and this tab is paused', () => {
+            setLocalQueue([songA], 0, PlayerStatus.PAUSED);
+            const args = baseArgs({
+                connectStatus: status({ paused: false, streaming: true }),
+                mode: 'local-owner',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaPlay).toHaveBeenCalledTimes(1);
+            expect(args.mediaPause).not.toHaveBeenCalled();
+        });
+
+        it('pauses local playback when the backend says paused and this tab is playing', () => {
+            setLocalQueue([songA], 0, PlayerStatus.PLAYING);
+            const args = baseArgs({
+                connectStatus: status({ paused: true, streaming: true }),
+                mode: 'local-owner',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaPause).toHaveBeenCalledTimes(1);
+            expect(args.mediaPlay).not.toHaveBeenCalled();
+        });
+
+        it('corrects local position on a significant divergence from the backend elapsed', () => {
+            setLocalQueue([songA], 0, PlayerStatus.PLAYING);
+            const args = baseArgs({
+                connectStatus: status({ elapsed: 90, paused: false, streaming: true }),
+                localElapsed: 10,
+                mode: 'local-owner',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaSeekToTimestamp).toHaveBeenCalledWith(90);
+        });
+
+        it('does not correct position for routine drift under the threshold', () => {
+            setLocalQueue([songA], 0, PlayerStatus.PLAYING);
+            const args = baseArgs({
+                connectStatus: status({ elapsed: 11, paused: false, streaming: true }),
+                localElapsed: 10,
+                mode: 'local-owner',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaSeekToTimestamp).not.toHaveBeenCalled();
+        });
+
+        it('does nothing outside local-owner mode', () => {
+            setLocalQueue([songA, songB], 0, PlayerStatus.PLAYING);
+            const args = baseArgs({
+                connectStatus: status({
+                    current_track_index: 1,
+                    queue_track_ids: ['track-a', 'track-b'],
+                }),
+                mode: 'mirror',
+            });
+
+            renderHook(() => useConnectPlayback(args));
+
+            expect(args.mediaPlayByIndex).not.toHaveBeenCalled();
+            expect(args.mediaPlay).not.toHaveBeenCalled();
+            expect(args.mediaPause).not.toHaveBeenCalled();
+            expect(args.mediaSeekToTimestamp).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('local seek push (local-owner mode)', () => {
+        it('pushes /seek when the local position jumps significantly on the same track', async () => {
+            const args = baseArgs({ localElapsed: 0, mode: 'local-owner' });
+            const { rerender } = renderHook((props) => useConnectPlayback(props), {
+                initialProps: args,
+            });
+            // Flush the initial mount's own auto-forward /play before
+            // clearing — otherwise its delayed (ensureConfigured-awaited)
+            // call lands after the clear and gets mistaken for this test's.
+            await Promise.resolve();
+            await Promise.resolve();
+            connectFetchMock.mockClear();
+
+            rerender({ ...args, localElapsed: 45 });
+            await Promise.resolve();
+            await Promise.resolve();
+
+            const [path, options] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/seek');
+            expect(JSON.parse(options.body)).toEqual({ position: 45 });
+        });
+
+        it('does not push for routine playback progression', async () => {
+            const args = baseArgs({ localElapsed: 10, mode: 'local-owner' });
+            const { rerender } = renderHook((props) => useConnectPlayback(props), {
+                initialProps: args,
+            });
+            // Flush the initial mount's own auto-forward /play before
+            // clearing — otherwise its delayed (ensureConfigured-awaited)
+            // call lands after the clear and gets mistaken for this test's.
+            await Promise.resolve();
+            await Promise.resolve();
+            connectFetchMock.mockClear();
+
+            rerender({ ...args, localElapsed: 11 });
+            await Promise.resolve();
+            await Promise.resolve();
+
+            expect(connectFetchMock).not.toHaveBeenCalled();
+        });
+
+        it("does not push when the track also changed (that is the auto-forward effect's job)", async () => {
+            const args = baseArgs({ localElapsed: 120, mode: 'local-owner' });
+            const { rerender } = renderHook((props) => useConnectPlayback(props), {
+                initialProps: args,
+            });
+            // Flush the initial mount's own auto-forward /play before
+            // clearing — otherwise its delayed (ensureConfigured-awaited)
+            // call lands after the clear and gets mistaken for this test's.
+            await Promise.resolve();
+            await Promise.resolve();
+            connectFetchMock.mockClear();
+
+            rerender({
+                ...args,
+                currentSong: song({ _uniqueId: 'song-2', id: 'track-2' }),
+                localElapsed: 0,
+            });
+            await Promise.resolve();
+            await Promise.resolve();
+
+            const seekCalls = connectFetchMock.mock.calls.filter(([path]) => path === '/seek');
+            expect(seekCalls).toHaveLength(0);
+        });
+
+        it('does not push outside local-owner mode', async () => {
+            const args = baseArgs({ localElapsed: 0, mode: 'cast' });
+            const { rerender } = renderHook((props) => useConnectPlayback(props), {
+                initialProps: args,
+            });
+            // Flush the initial mount's own auto-forward /play before
+            // clearing — otherwise its delayed (ensureConfigured-awaited)
+            // call lands after the clear and gets mistaken for this test's.
+            await Promise.resolve();
+            await Promise.resolve();
+            connectFetchMock.mockClear();
+
+            rerender({ ...args, localElapsed: 45 });
+            await Promise.resolve();
+            await Promise.resolve();
+
+            const seekCalls = connectFetchMock.mock.calls.filter(([path]) => path === '/seek');
+            expect(seekCalls).toHaveLength(0);
         });
     });
 });

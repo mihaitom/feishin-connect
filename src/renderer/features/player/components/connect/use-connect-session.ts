@@ -20,6 +20,7 @@ import { useConnectSetup } from './use-connect-setup';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { usePlayerSong } from '/@/renderer/store/player.store';
+import { usePlayerTimestamp } from '/@/renderer/store/timestamp.store';
 
 export const useConnectSession = (): ConnectSession => {
     const [status, setStatus] = useState<SendStatus>('idle');
@@ -36,15 +37,32 @@ export const useConnectSession = (): ConnectSession => {
     const { devices, health, isScanning, refresh } = useConnectDevices();
     const { paired, refresh: refreshPaired } = usePairedDevices();
     const { fetchVolume } = useConnectVolume();
-    const { mediaNext, mediaPause, mediaPlay, mediaSeekToTimestamp, mediaTogglePlayPause } =
-        usePlayer();
+    const {
+        mediaNext,
+        mediaPause,
+        mediaPlay,
+        mediaPlayByIndex,
+        mediaSeekToTimestamp,
+        mediaTogglePlayPause,
+    } = usePlayer();
     const pauseRadio = useRadioStore((s) => s.actions.pause);
     const playRadio = useRadioStore((s) => s.actions.play);
     const connectElapsed = useConnectElapsed();
+    const localElapsed = usePlayerTimestamp();
 
     const { ensureConfigured, forceReconfigure, mySessionId } = useConnectSetup();
 
     const lastAutoSentRef = useRef<string>('');
+    // Wall-clock time of this tab's last explicit play/pause/seek/next/prev —
+    // the reverse-sync effect (mode 'local-owner' reacting to another tab's
+    // command) skips corrections for a short grace period afterward, so the
+    // round-trip delay before our own action's broadcast comes back via SSE
+    // doesn't get misread as someone else's stale command and "corrected"
+    // right back to the pre-action state.
+    const lastLocalActionAtRef = useRef<number>(0);
+    const noteLocalConnectAction = () => {
+        lastLocalActionAtRef.current = Date.now();
+    };
 
     const currentSong = usePlayerSong();
     const currentSongRef = useRef(currentSong);
@@ -118,21 +136,29 @@ export const useConnectSession = (): ConnectSession => {
 
     // ── Local-ownership transitions ───────────────────────────────────────────
     // Someone else's tab took over local playback while we thought we owned
-    // it (a "play here instead" takeover, once that UI exists) → drop to
-    // mirror. Or the session we were mirroring went fully idle → free to
-    // become the owner again on this tab's next local play.
+    // it (another client_id claimed it, or the session moved to a real cast
+    // target instead) → drop to mirror, so the safety net in use-connect-
+    // controls.ts force-pauses this tab's own audio instead of letting it
+    // keep playing alongside the new owner. Or the whole session went fully
+    // idle → any tab here (mirror OR local-owner) is free to become the
+    // owner again on its next local play.
     useEffect(() => {
         if (activeDevice || !connectStatus) return;
         const owner = connectStatus.local_owner_client_id;
-        if (localMode === 'local-owner' && owner && owner !== getConnectClientId()) {
-            setLocalMode('mirror');
-        } else if (
-            localMode === 'mirror' &&
-            !owner &&
-            !connectStatus.streaming &&
-            !connectStatus.current_track
+        const hasCastTarget = connectStatus.targets.length > 0;
+        const sessionIdle =
+            !hasCastTarget && !owner && !connectStatus.streaming && !connectStatus.current_track;
+
+        if (sessionIdle) {
+            if (localMode !== 'inactive') setLocalMode('inactive');
+            return;
+        }
+
+        if (
+            localMode === 'local-owner' &&
+            (hasCastTarget || (owner && owner !== getConnectClientId()))
         ) {
-            setLocalMode('inactive');
+            setLocalMode('mirror');
         }
     }, [activeDevice, connectStatus, localMode]);
 
@@ -145,8 +171,13 @@ export const useConnectSession = (): ConnectSession => {
         forceReconfigure,
         isRadioActive,
         lastAutoSentRef,
+        lastLocalActionAtRef,
+        localElapsed,
         mediaNext: () => mediaNext(false),
         mediaPause,
+        mediaPlay,
+        mediaPlayByIndex,
+        mediaSeekToTimestamp,
         mode,
         pauseRadio,
         radioStationName,
@@ -214,6 +245,7 @@ export const useConnectSession = (): ConnectSession => {
         mediaPause,
         mediaTogglePlayPause,
         mode,
+        noteLocalConnectAction,
     });
 
     return {
@@ -235,6 +267,7 @@ export const useConnectSession = (): ConnectSession => {
         isScanning,
         mode,
         mySessionId,
+        noteLocalConnectAction,
         paired,
         refresh,
         refreshPaired,

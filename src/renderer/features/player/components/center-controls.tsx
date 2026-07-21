@@ -176,12 +176,19 @@ const PreviousButton = ({ disabled }: { disabled?: boolean }) => {
     const { t } = useTranslation();
     const buttonSize = useButtonSize();
     const { mediaPrevious } = usePlayer();
+    const { handlers: connectHandlers, isActive: connectActive } = useConnectPlayerStore();
 
     return (
         <PlayerButton
             disabled={disabled}
             icon={<Icon fill="default" icon="mediaPrevious" size={buttonSize} />}
-            onClick={(e) => mediaPrevious(e.altKey)}
+            onClick={(e) => {
+                if (connectActive && connectHandlers) {
+                    connectHandlers.onPrevious();
+                } else {
+                    mediaPrevious(e.altKey);
+                }
+            }}
             tooltip={{
                 label: (
                     <Stack gap="xs" justify="center">
@@ -270,12 +277,19 @@ const NextButton = ({ disabled }: { disabled?: boolean }) => {
     const { t } = useTranslation();
     const buttonSize = useButtonSize();
     const { mediaNext } = usePlayer();
+    const { handlers: connectHandlers, isActive: connectActive } = useConnectPlayerStore();
 
     return (
         <PlayerButton
             disabled={disabled}
             icon={<Icon fill="default" icon="mediaNext" size={buttonSize} />}
-            onClick={(e) => mediaNext(e.altKey)}
+            onClick={(e) => {
+                if (connectActive && connectHandlers) {
+                    connectHandlers.onNext();
+                } else {
+                    mediaNext(e.altKey);
+                }
+            }}
             tooltip={{
                 label: (
                     <Stack gap="xs" justify="center">
