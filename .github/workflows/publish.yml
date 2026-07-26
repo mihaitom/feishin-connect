@@ -8,7 +8,38 @@ env:
     IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+    # electron-builder's GitHub publisher (releaseType: draft, see
+    # electron-builder.yml) looks up the release for the current version's
+    # tag and only creates one if none exists yet — but that lookup-then-create
+    # isn't atomic, so when multiple platform jobs hit it around the same time
+    # (parallel matrix legs, all builds taking a similar number of minutes),
+    # each can see "no release yet" and create its own duplicate draft, each
+    # holding only its own platform's assets. Creating the release once here,
+    # *before* any of the (multi-minute) platform builds start, means every
+    # platform job's own lookup always finds it already there and just
+    # attaches its assets — no race left to lose. `needs: ensure-release`
+    # below makes every platform job wait for this to finish first.
+    ensure-release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Checkout git repo
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+            - name: Read version
+              id: version
+              run: echo "value=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+            - name: Ensure draft release exists
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  TAG="v${{ steps.version.outputs.value }}"
+                  gh release view "$TAG" --repo "${{ github.repository }}" \
+                      || gh release create "$TAG" --repo "${{ github.repository }}" \
+                          --title "${{ steps.version.outputs.value }}" --draft --notes ""
+
     publish:
+        needs: ensure-release
         runs-on: ${{ matrix.os }}
 
         permissions:
@@ -49,6 +80,7 @@ jobs:
             - name: Build and Publish releases (macOS)
               if: matrix.os == 'macos-26'
               env:
+                  NODE_OPTIONS: --max-old-space-size=4096
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               uses: nick-invision/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
               with:
@@ -59,6 +91,11 @@ jobs:
                       pnpm run publish:mac
                   on_retry_command: pnpm cache delete
 
+            # x64 only: the bundled Connect backend binary is built by PyInstaller
+            # on the x64 runner and cannot cross-compile to arm64 (and arm64 Linux
+            # has no built-in x64 emulation, so a mismatched binary won't run) —
+            # see publish-linux.yml, which deliberately only builds x64 for the
+            # same reason.
             - name: Build and Publish releases (Linux)
               if: matrix.os == 'ubuntu-latest'
               env:
@@ -70,19 +107,6 @@ jobs:
                   retry_on: error
                   command: |
                       pnpm run publish:linux
-                  on_retry_command: pnpm cache delete
-
-            - name: Build and Publish releases (Linux ARM64)
-              if: matrix.os == 'ubuntu-latest'
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              uses: nick-invision/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
-              with:
-                  timeout_minutes: 30
-                  max_attempts: 3
-                  retry_on: error
-                  command: |
-                      pnpm run publish:linux-arm64
                   on_retry_command: pnpm cache delete
 
     # Builds amd64 and arm64 on their own native runners (no QEMU) — the
