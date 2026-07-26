@@ -75,6 +75,26 @@ RUN ./configure \
     && make install
 
 
+# --- Build Python venv
+#
+# `miniaudio` (a pyatv/AirPlay dependency) has no musllinux wheel for arm64 —
+# only for x86_64, on every released version (checked directly against
+# PyPI's file listing) — so `uv sync` must compile it from source on arm64,
+# which needs a C++ compiler. Isolating that into its own stage (same idea as
+# ffmpeg-builder above) means the compiler toolchain doesn't have to live in
+# the final image either — only the resulting .venv is copied over. On
+# amd64, where a prebuilt wheel exists, this stage still runs (harmlessly) —
+# uv just installs the wheel instead of building anything.
+FROM ghcr.io/astral-sh/uv:python3.14-alpine AS python-builder
+
+WORKDIR /app
+
+RUN apk add --no-cache build-base
+
+COPY connect/pyproject.toml connect/uv.lock ./
+RUN uv sync --locked
+
+
 # --- Final image
 FROM ghcr.io/astral-sh/uv:python3.14-alpine
 
@@ -83,12 +103,12 @@ WORKDIR /app
 RUN apk add --no-cache nginx gettext
 COPY --from=ffmpeg-builder /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
 COPY --chown=nginx:nginx --from=builder /app/out/web /usr/share/nginx/html
-COPY --chown=nginx:nginx ./settings.js.template /etc/nginx/templates/settings.js.template 
+COPY --chown=nginx:nginx ./settings.js.template /etc/nginx/templates/settings.js.template
 COPY --chown=nginx:nginx ng.conf.template /etc/nginx/templates/default.conf.template
 
 COPY connect/pyproject.toml ./
 COPY connect/uv.lock ./
-RUN uv sync --locked
+COPY --from=python-builder /app/.venv /app/.venv
 COPY connect/. .
 
 COPY start.sh /start.sh
