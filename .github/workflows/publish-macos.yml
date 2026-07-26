@@ -3,7 +3,31 @@ name: Publish macOS (Manual)
 on: workflow_dispatch
 
 jobs:
+    # See publish.yml's ensure-release job for why this exists: electron-builder's
+    # lookup-then-create check for the release draft isn't atomic, so triggering
+    # this alongside another platform's publish workflow around the same time
+    # can otherwise create a duplicate draft holding only this platform's assets.
+    ensure-release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Checkout git repo
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+            - name: Read version
+              id: version
+              run: echo "value=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+            - name: Ensure draft release exists
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  TAG="v${{ steps.version.outputs.value }}"
+                  gh release view "$TAG" --repo "${{ github.repository }}" \
+                      || gh release create "$TAG" --repo "${{ github.repository }}" \
+                          --title "${{ steps.version.outputs.value }}" --draft --notes ""
+
     publish:
+        needs: ensure-release
         runs-on: ${{ matrix.os }}
 
         # Required so electron-builder's `--publish always` can create the release
