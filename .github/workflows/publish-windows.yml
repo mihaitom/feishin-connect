@@ -34,22 +34,9 @@ jobs:
         permissions:
             contents: write
 
-        # x64 and arm64 each build on their own native runner — same reasoning as
-        # publish-linux.yml: the bundled Connect backend binary is built by
-        # PyInstaller during `pnpm run build` and can't be cross-compiled. Windows
-        # on ARM does have a built-in x64 emulation layer (unlike Linux), so the
-        # old single-runner build wasn't a hard failure like Linux's was — just a
-        # connect-server.exe running under emulation instead of natively. This
-        # gets it running natively instead. UNVERIFIED: no way to test a Windows
-        # ARM64 build locally (unlike the Linux fix, which was verified against a
-        # real emulated build) — watch the Actions run for this leg specifically.
         strategy:
             matrix:
-                include:
-                    - os: windows-latest
-                      script: publish:win
-                    - os: windows-11-arm
-                      script: publish:win-arm64
+                os: [windows-latest]
 
         steps:
             - name: Checkout git repo
@@ -63,17 +50,6 @@ jobs:
             - name: Install uv
               uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
 
-            # miniaudio (a pyatv/AirPlay dependency) has no prebuilt wheel for
-            # Windows ARM64 (only win32/win_amd64) — `uv sync` (invoked by
-            # build:connect) has to compile it from source there, which needs an
-            # MSVC toolchain on PATH. Not needed on windows-latest (x64 has a
-            # prebuilt wheel), so gated to just the arm64 leg.
-            - name: Set up MSVC toolchain (arm64 native compile)
-              if: matrix.os == 'windows-11-arm'
-              uses: ilammy/msvc-dev-cmd@7defe9254715b088f12dddd9942945a3d75cdad5 # v1.9.0
-              with:
-                  arch: arm64
-
             - name: Install dependencies
               run: pnpm install
 
@@ -86,5 +62,5 @@ jobs:
                   max_attempts: 3
                   retry_on: error
                   command: |
-                      pnpm run ${{ matrix.script }}
+                      pnpm run publish:win
                   on_retry_command: pnpm cache delete

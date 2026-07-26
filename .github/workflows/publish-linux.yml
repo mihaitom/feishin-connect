@@ -43,6 +43,7 @@ jobs:
         # bundle the wrong-arch connect-server binary — see git history for the
         # arm64 release assets this used to produce that nobody could actually run).
         strategy:
+            fail-fast: false
             matrix:
                 include:
                     - os: ubuntu-latest

@@ -40,16 +40,16 @@ jobs:
         permissions:
             contents: write
 
-        # x64 and arm64 Windows/Linux each build on their own native runner — the
-        # bundled Connect backend binary is built by PyInstaller during
-        # `pnpm run build` and can't be cross-compiled. Windows on ARM has a
-        # built-in x64 emulation layer (unlike Linux), so this isn't fixing a hard
-        # failure there like Linux's was — just running connect-server.exe
-        # natively instead of under emulation. UNVERIFIED: no way to test a
-        # Windows ARM64 build locally — watch the Actions run for that leg.
+        # x64 and arm64 Linux each build on their own native runner — the bundled
+        # Connect backend binary is built by PyInstaller during `pnpm run build`
+        # and can't be cross-compiled (see publish-linux.yml). fail-fast: false so
+        # one platform failing (e.g. an experimental arm64 leg) doesn't cancel the
+        # other, already-working platforms' release — see git history for the
+        # windows-11-arm attempt this class of bug bit us on.
         strategy:
+            fail-fast: false
             matrix:
-                os: [windows-latest, windows-11-arm, macos-26, ubuntu-latest, ubuntu-24.04-arm]
+                os: [windows-latest, macos-26, ubuntu-latest, ubuntu-24.04-arm]
 
         steps:
             - name: Checkout git repo
@@ -72,14 +72,6 @@ jobs:
               if: matrix.os == 'ubuntu-24.04-arm'
               run: sudo apt-get update -qq && sudo apt-get install -y build-essential
 
-            # Same miniaudio gap on Windows ARM64 (only win32/win_amd64 wheels
-            # exist) — needs an MSVC toolchain on PATH instead of apt.
-            - name: Set up MSVC toolchain (arm64 native compile)
-              if: matrix.os == 'windows-11-arm'
-              uses: ilammy/msvc-dev-cmd@7defe9254715b088f12dddd9942945a3d75cdad5 # v1.9.0
-              with:
-                  arch: arm64
-
             - name: Install dependencies
               run: pnpm install
 
@@ -94,19 +86,6 @@ jobs:
                   retry_on: error
                   command: |
                       pnpm run publish:win
-                  on_retry_command: pnpm cache delete
-
-            - name: Build and Publish releases (Windows ARM64)
-              if: matrix.os == 'windows-11-arm'
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              uses: nick-invision/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
-              with:
-                  timeout_minutes: 30
-                  max_attempts: 3
-                  retry_on: error
-                  command: |
-                      pnpm run publish:win-arm64
                   on_retry_command: pnpm cache delete
 
             - name: Build and Publish releases (macOS)
