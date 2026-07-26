@@ -2,9 +2,9 @@ import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useState, WheelEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ConnectButton } from './connect-button';
+import { ConnectButton } from './connect/connect-button';
 import { useConnectSessionContext } from './connect/connect-session-context';
-import { useDeviceVolume } from './connect/hooks';
+import { useDeviceVolume } from './connect/use-device-volume';
 
 import { PopoverPlayQueue } from '/@/renderer/features/now-playing/components/popover-play-queue';
 import { PlayerConfig } from '/@/renderer/features/player/components/player-config';

@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useConnectElapsed } from './connect.store';
-import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
 import { ConnectDevice, connectFetch, ConnectSession, ConnectStatus, SendStatus } from './types';
 import { useConnectActions } from './use-connect-actions';
 import { useConnectControls } from './use-connect-controls';
+import { useConnectDevices } from './use-connect-devices';
 import { useConnectDisconnect } from './use-connect-disconnect';
 import { useConnectPlayback } from './use-connect-playback';
 import { useConnectScrobble } from './use-connect-scrobble';
 import { useConnectSetup } from './use-connect-setup';
+import { useConnectStatus } from './use-connect-status';
+import { useConnectVolume } from './use-connect-volume';
+import { usePairedDevices } from './use-paired-devices';
 
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';

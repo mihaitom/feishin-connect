@@ -13,7 +13,7 @@ vi.mock('../types', async (importOriginal) => {
     };
 });
 
-import { useConnectStatus } from '../hooks';
+import { useConnectStatus } from '../use-connect-status';
 
 const connectFetchMock = connectFetch as unknown as ReturnType<typeof vi.fn>;
 const connectEventSourceMock = connectEventSource as unknown as ReturnType<typeof vi.fn>;

@@ -8,7 +8,7 @@ import {
     useConnectElapsed,
     useConnectPlayerStore,
 } from '/@/renderer/features/player/components/connect/connect.store';
-import { useConnectSeek } from '/@/renderer/features/player/components/connect/hooks';
+import { useConnectSeek } from '/@/renderer/features/player/components/connect/use-connect-seek';
 import { ScrobbleStatus } from '/@/renderer/features/player/components/scrobble-status';
 import {
     useAppStore,
