@@ -71,7 +71,7 @@ describe('useConnectStatus', () => {
             es.onmessage({ data: JSON.stringify(statusPayload()) } as MessageEvent);
         });
 
-        expect(result.current?.streaming).toBe(true);
+        expect(result.current?.status?.streaming).toBe(true);
         expect(useConnectPlayerStore.getState().duration).toBe(200);
     });
 
@@ -92,8 +92,25 @@ describe('useConnectStatus', () => {
         });
 
         expect(connectFetchMock).toHaveBeenCalledWith('/status');
-        expect(result.current?.ended).toBe(true);
-        expect(result.current?.streaming).toBe(false);
+        expect(result.current?.status?.ended).toBe(true);
+        expect(result.current?.status?.streaming).toBe(false);
+    });
+
+    // Manual trigger used by use-connect-controls.ts when /pause or /resume
+    // reports the session was lost (reaped while idle) — exercises the same
+    // refetch() the visibility-change handler uses internally.
+    it('exposes refetch() for callers to force a re-sync outside the visibility flow', async () => {
+        const { result } = renderHook(() => useConnectStatus(true));
+        connectFetchMock.mockResolvedValueOnce(
+            new Response(JSON.stringify(statusPayload({ streaming: false }))),
+        );
+
+        await act(async () => {
+            await result.current.refetch();
+        });
+
+        expect(connectFetchMock).toHaveBeenCalledWith('/status');
+        expect(result.current.status?.streaming).toBe(false);
     });
 
     it('does not refetch when the tab becomes hidden', async () => {

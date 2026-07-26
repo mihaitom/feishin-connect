@@ -44,7 +44,7 @@ export const useConnectSession = (): ConnectSession => {
     const radioStationName = useRadioStore((s) => s.stationName);
 
     const isActive = !!activeDevice;
-    const connectStatus = useConnectStatus(isActive);
+    const { refetch: refetchConnectStatus, status: connectStatus } = useConnectStatus(isActive);
     const currentTrackId = currentSong?.id ?? null;
 
     // ── Active targets sync ───────────────────────────────────────────────────
@@ -167,6 +167,7 @@ export const useConnectSession = (): ConnectSession => {
         lastAutoSentRef,
         mediaPause,
         mediaTogglePlayPause,
+        refetchConnectStatus,
     });
 
     return {

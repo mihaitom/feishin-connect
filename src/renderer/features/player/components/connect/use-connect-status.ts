@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useConnectPlayerStore } from './connect.store';
 import { connectEventSource, connectFetch, ConnectStatus } from './types';
@@ -8,19 +8,37 @@ import { connectEventSource, connectFetch, ConnectStatus } from './types';
 export const useConnectStatus = (active: boolean) => {
     const [status, setStatus] = useState<ConnectStatus | null>(null);
 
+    const applyStatus = useCallback((d: ConnectStatus) => {
+        setStatus(d);
+        useConnectPlayerStore.getState().set({
+            duration: d.current_track?.duration ?? 0,
+            elapsed: d.elapsed ?? 0,
+            isPlaying: d.streaming && !d.paused,
+            isStreaming: d.streaming,
+            syncTime: Date.now(),
+        });
+    }, []);
+
+    // Forces a one-off /status re-sync outside the normal SSE flow — used by
+    // the visibility-change handler below, and exposed to callers (see
+    // use-connect-controls.ts) that just found out via a "media server not
+    // configured" response from /pause or /resume that the backend forgot
+    // this session (idle-reaped — see core/session.py's SESSION_IDLE_TIMEOUT)
+    // without the SSE stream ever reporting a status change. Applying a fresh
+    // /status feeds use-connect-disconnect.ts's "external stop" effect the
+    // streaming:false it needs to reset local state back to disconnected.
+    const refetch = useCallback(() => {
+        return connectFetch(`/status`)
+            .then((r) => r.json())
+            .then(applyStatus)
+            .catch(() => {});
+    }, [applyStatus]);
+
+    const refetchRef = useRef(refetch);
+    refetchRef.current = refetch;
+
     useEffect(() => {
         if (!active) return;
-
-        const applyStatus = (d: ConnectStatus) => {
-            setStatus(d);
-            useConnectPlayerStore.getState().set({
-                duration: d.current_track?.duration ?? 0,
-                elapsed: d.elapsed ?? 0,
-                isPlaying: d.streaming && !d.paused,
-                isStreaming: d.streaming,
-                syncTime: Date.now(),
-            });
-        };
 
         const es = connectEventSource(`/events`);
         es.onmessage = (e: MessageEvent) => applyStatus(JSON.parse(e.data));
@@ -34,10 +52,7 @@ export const useConnectStatus = (active: boolean) => {
         // waiting on the browser's own reconnect.
         const onVisibilityChange = () => {
             if (document.visibilityState !== 'visible') return;
-            connectFetch(`/status`)
-                .then((r) => r.json())
-                .then(applyStatus)
-                .catch(() => {});
+            refetchRef.current();
         };
         document.addEventListener('visibilitychange', onVisibilityChange);
 
@@ -45,7 +60,7 @@ export const useConnectStatus = (active: boolean) => {
             es.close();
             document.removeEventListener('visibilitychange', onVisibilityChange);
         };
-    }, [active]);
+    }, [active, applyStatus]);
 
-    return status;
+    return { refetch, status };
 };

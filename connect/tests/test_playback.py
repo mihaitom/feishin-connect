@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 from core.session import compute_position
 from delivery import AirPlayDelivery, ChromecastDelivery, SonosDelivery
-from media import Track
+from media import SubsonicClient, Track
 from routes.playback import _apply_position_offset
 
 
@@ -208,6 +208,7 @@ def test_stop_is_idempotent(client):
 
 
 def test_pause_sets_paused_flag(client, default_session):
+    default_session.media = SubsonicClient("http://nav")
     default_session.state.is_streaming = True
     default_session.state.clock.play_start_time = time.time() - 30
 
@@ -219,6 +220,7 @@ def test_pause_sets_paused_flag(client, default_session):
 
 
 def test_resume_clears_paused_flag(client, default_session):
+    default_session.media = SubsonicClient("http://nav")
     default_session.state.clock.is_paused = True
     default_session.state.clock.paused_elapsed = 30.0
     default_session.state.clock.play_start_time = time.time() - 30
@@ -232,6 +234,7 @@ def test_resume_clears_paused_flag(client, default_session):
 def test_pause_resume_roundtrip_with_position_offset(client, default_session):
     """resume_offset must be the raw position so resume doesn't double-apply
     the device's buffering lag (a negative position_offset)."""
+    default_session.media = SubsonicClient("http://nav")
     default_session.state.is_streaming = True
     default_session.state.current_track = Track("1", "Song", "Artist", 180, "")
     default_session.state.clock.play_start_time = time.time() - 30
@@ -244,6 +247,31 @@ def test_pause_resume_roundtrip_with_position_offset(client, default_session):
 
     client.post("/resume")
     assert abs(default_session.state.clock.position_offset - (-4.0)) < 0.01
+
+
+def test_pause_without_configured_media_returns_error(client, default_session):
+    """A session that never received /config — e.g. freshly re-created after
+    the backend reaped the previous one during a long idle period (see
+    core/session.py's SESSION_IDLE_TIMEOUT) — must not silently report
+    "paused": true with nothing actually paused; the frontend relies on this
+    error to detect the loss and reset to disconnected."""
+    default_session.state.is_streaming = True
+    default_session.state.clock.play_start_time = time.time() - 30
+
+    r = client.post("/pause")
+    assert r.status_code == 200
+    assert "error" in r.json()
+    assert default_session.state.clock.is_paused is False
+
+
+def test_resume_without_configured_media_returns_error(client, default_session):
+    default_session.state.clock.is_paused = True
+    default_session.state.clock.paused_elapsed = 30.0
+
+    r = client.post("/resume")
+    assert r.status_code == 200
+    assert "error" in r.json()
+    assert default_session.state.clock.is_paused is True
 
 
 # ── /seek with position_offset ────────────────────────────────────────────────
@@ -279,6 +307,7 @@ def test_seek_near_zero_clamps_raw_position(client, default_session):
 
 
 def test_resume_reconnects_to_radio_url_not_stream_proxy(client, default_session):
+    default_session.media = SubsonicClient("http://nav")
     default_session.state.is_streaming = True
     default_session.state.radio_info = {"title": "Radio FM", "url": "http://stream/radio"}
     default_session.state.active_delivery = ChromecastDelivery("TV")
@@ -304,6 +333,7 @@ def test_seek_while_playing_reconnects_to_radio_url(client, default_session):
 
 
 def test_resume_still_uses_stream_proxy_for_a_regular_track(client, default_session):
+    default_session.media = SubsonicClient("http://nav")
     default_session.state.is_streaming = True
     default_session.state.current_track = Track("1", "Song", "Artist", 180, "")
     default_session.state.active_delivery = ChromecastDelivery("TV")
