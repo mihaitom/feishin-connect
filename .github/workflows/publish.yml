@@ -45,9 +45,16 @@ jobs:
         permissions:
             contents: write
 
+        # x64 and arm64 Windows/Linux each build on their own native runner — the
+        # bundled Connect backend binary is built by PyInstaller during
+        # `pnpm run build` and can't be cross-compiled. Windows on ARM has a
+        # built-in x64 emulation layer (unlike Linux), so this isn't fixing a hard
+        # failure there like Linux's was — just running connect-server.exe
+        # natively instead of under emulation. UNVERIFIED: no way to test a
+        # Windows ARM64 build locally — watch the Actions run for that leg.
         strategy:
             matrix:
-                os: [windows-latest, macos-26, ubuntu-latest]
+                os: [windows-latest, windows-11-arm, macos-26, ubuntu-latest, ubuntu-24.04-arm]
 
         steps:
             - name: Checkout git repo
@@ -60,6 +67,23 @@ jobs:
             # uv installs the required Python version itself.
             - name: Install uv
               uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+
+            # miniaudio (a pyatv/AirPlay dependency) has no prebuilt wheel for
+            # arm64 on any Linux libc — `uv sync` (invoked by build:connect) has
+            # to compile it from source there, which needs a C++ compiler. Not
+            # needed on ubuntu-latest (x64 has a prebuilt wheel), so gated to
+            # just the arm64 leg.
+            - name: Install build tools (arm64 native compile)
+              if: matrix.os == 'ubuntu-24.04-arm'
+              run: sudo apt-get update -qq && sudo apt-get install -y build-essential
+
+            # Same miniaudio gap on Windows ARM64 (only win32/win_amd64 wheels
+            # exist) — needs an MSVC toolchain on PATH instead of apt.
+            - name: Set up MSVC toolchain (arm64 native compile)
+              if: matrix.os == 'windows-11-arm'
+              uses: ilammy/msvc-dev-cmd@7defe9254715b088f12dddd9942945a3d75cdad5 # v1.9.0
+              with:
+                  arch: arm64
 
             - name: Install dependencies
               run: pnpm install
@@ -77,6 +101,19 @@ jobs:
                       pnpm run publish:win
                   on_retry_command: pnpm cache delete
 
+            - name: Build and Publish releases (Windows ARM64)
+              if: matrix.os == 'windows-11-arm'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              uses: nick-invision/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run publish:win-arm64
+                  on_retry_command: pnpm cache delete
+
             - name: Build and Publish releases (macOS)
               if: matrix.os == 'macos-26'
               env:
@@ -91,11 +128,9 @@ jobs:
                       pnpm run publish:mac
                   on_retry_command: pnpm cache delete
 
-            # x64 only: the bundled Connect backend binary is built by PyInstaller
-            # on the x64 runner and cannot cross-compile to arm64 (and arm64 Linux
-            # has no built-in x64 emulation, so a mismatched binary won't run) —
-            # see publish-linux.yml, which deliberately only builds x64 for the
-            # same reason.
+            # x64 and arm64 each build on their own native runner — see
+            # publish-linux.yml's matrix comment for why (PyInstaller can't
+            # cross-compile the bundled Connect backend binary).
             - name: Build and Publish releases (Linux)
               if: matrix.os == 'ubuntu-latest'
               env:
@@ -107,6 +142,19 @@ jobs:
                   retry_on: error
                   command: |
                       pnpm run publish:linux
+                  on_retry_command: pnpm cache delete
+
+            - name: Build and Publish releases (Linux ARM64)
+              if: matrix.os == 'ubuntu-24.04-arm'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              uses: nick-invision/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+              with:
+                  timeout_minutes: 30
+                  max_attempts: 3
+                  retry_on: error
+                  command: |
+                      pnpm run publish:linux-arm64
                   on_retry_command: pnpm cache delete
 
     # Builds amd64 and arm64 on their own native runners (no QEMU) — the
