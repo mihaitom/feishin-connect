@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useConnectElapsed } from './connect.store';
-import { useConnectDevices, useConnectStatus, useConnectVolume, usePairedDevices } from './hooks';
 import { ConnectDevice, connectFetch, ConnectSession, ConnectStatus, SendStatus } from './types';
 import { useConnectActions } from './use-connect-actions';
 import { useConnectControls } from './use-connect-controls';
+import { useConnectDevices } from './use-connect-devices';
 import { useConnectDisconnect } from './use-connect-disconnect';
 import { useConnectPlayback } from './use-connect-playback';
 import { useConnectScrobble } from './use-connect-scrobble';
 import { useConnectSetup } from './use-connect-setup';
+import { useConnectStatus } from './use-connect-status';
+import { useConnectVolume } from './use-connect-volume';
+import { usePairedDevices } from './use-paired-devices';
 
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
@@ -29,7 +32,7 @@ export const useConnectSession = (): ConnectSession => {
     const playRadio = useRadioStore((s) => s.actions.play);
     const connectElapsed = useConnectElapsed();
 
-    const { ensureConfigured, mySessionId } = useConnectSetup();
+    const { ensureConfigured, forceReconfigure, mySessionId } = useConnectSetup();
 
     const lastAutoSentRef = useRef<string>('');
 
@@ -41,7 +44,7 @@ export const useConnectSession = (): ConnectSession => {
     const radioStationName = useRadioStore((s) => s.stationName);
 
     const isActive = !!activeDevice;
-    const connectStatus = useConnectStatus(isActive);
+    const { refetch: refetchConnectStatus, status: connectStatus } = useConnectStatus(isActive);
     const currentTrackId = currentSong?.id ?? null;
 
     // ── Active targets sync ───────────────────────────────────────────────────
@@ -93,6 +96,8 @@ export const useConnectSession = (): ConnectSession => {
         activeTargets,
         connectStatus,
         currentSong,
+        ensureConfigured,
+        forceReconfigure,
         isActive,
         isRadioActive,
         lastAutoSentRef,
@@ -116,6 +121,7 @@ export const useConnectSession = (): ConnectSession => {
         currentSong,
         currentTrackId,
         ensureConfigured,
+        forceReconfigure,
         isActive,
         isRadioActive,
         lastAutoSentRef,
@@ -155,10 +161,13 @@ export const useConnectSession = (): ConnectSession => {
         activeTargets,
         currentSong,
         currentTrackId,
+        ensureConfigured,
+        forceReconfigure,
         isActive,
         lastAutoSentRef,
         mediaPause,
         mediaTogglePlayPause,
+        refetchConnectStatus,
     });
 
     return {

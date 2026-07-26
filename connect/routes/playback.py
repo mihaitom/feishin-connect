@@ -286,6 +286,20 @@ async def play_url(req: PlayUrlRequest, session: SessionState = Depends(get_sess
 
 @router.post("/pause")
 async def pause_playback(session: SessionState = Depends(get_session)):
+    if not session.media.base_url:
+        # Same "session forgot everything" case /play guards against — a
+        # reaped-then-recreated session has no active_delivery to actually
+        # pause, but would otherwise silently report success anyway (see
+        # git history for the incident this fixes). Surfacing an error here
+        # lets the frontend detect the loss and reset to disconnected
+        # instead of leaving the play/pause button toggling a phantom
+        # session forever with no visible effect.
+        logger.warning(
+            "[pause] Rejected: media server not configured (waiting for /config)"
+        )
+        return {
+            "error": "Media server not configured — waiting for /config from Feishin"
+        }
     st = session.state
     if st.active_delivery:
         await st.active_delivery.pause()
@@ -298,6 +312,14 @@ async def pause_playback(session: SessionState = Depends(get_session)):
 
 @router.post("/resume")
 async def resume_playback(session: SessionState = Depends(get_session)):
+    if not session.media.base_url:
+        # See /pause's identical guard above for why this matters.
+        logger.warning(
+            "[resume] Rejected: media server not configured (waiting for /config)"
+        )
+        return {
+            "error": "Media server not configured — waiting for /config from Feishin"
+        }
     st = session.state
     st.clock.resume()
 

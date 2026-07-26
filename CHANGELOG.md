@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2026-07-26
+
+### Fixed
+- **Connect could get stuck reporting "not configured" after being left open for a while**, showing an error on the cast button until the page was reloaded — the backend forgets an idle session after about 30 minutes, but the app kept assuming it was still set up. It now recovers on its own and retries.
+- **The play/pause button could silently stop responding after Connect had been connected but idle for a long time** — pausing or resuming against a session the backend had already forgotten looked like it worked but didn't actually do anything, with no way to reconnect except reloading the page. It's now detected and the app disconnects cleanly instead, so picking a device again works normally.
+- **A `CONNECT_TOKEN` containing characters like `"` or `\` crashed the container in an nginx restart loop** with a cryptic `nginx: [emerg] unexpected "..."` error — the token is now checked at startup and rejected with a clear message (pointing at `openssl rand -hex 32` for a safe value) instead.
+
+### Internal
+- **Docker image is about half the size** (1.29GB → 656MB). Removed a leftover `apk add build-base zlib-dev jpeg-dev freetype-dev libpng-dev musl-dev` that no Python dependency actually needs anymore (every package resolves to a prebuilt wheel), narrowed what gets copied into the frontend build stage so unrelated backend changes don't bust its cache, trimmed the Docker build context from 43MB to under 200KB, and replaced Alpine's `ffmpeg` package (~130MB, mostly unused video/GPU/capture support) with our own minimal build compiled from source in a separate build stage, containing only what Connect actually uses (audio decode/encode and HTTPS input) — the compiler toolchain itself never ends up in the final image, only the resulting ~8MB static binary does. Supported input formats: MP3, FLAC, WAV, AAC/M4A, ALAC, OGG (Vorbis/Opus), WMA, Monkey's Audio (APE) and AIFF. If your library has something in a format that's missing here, please <a href="https://github.com/mihaitom/feishin-connect/issues">open an issue</a> and I'll try to add it.
+
 ## [0.6.1] - 2026-07-20
 
 ### Added

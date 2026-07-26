@@ -4,7 +4,7 @@ import React, { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
 
-import { ConnectButton } from './connect-button';
+import { ConnectButton } from './connect/connect-button';
 import { useConnectPlayerStore } from './connect/connect.store';
 import styles from './mobile-playerbar.module.css';
 

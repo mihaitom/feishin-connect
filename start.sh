@@ -4,6 +4,19 @@
 export CONNECT_URL="${CONNECT_URL:-/api}"
 export PUBLIC_PATH="${PUBLIC_PATH:-/}"
 export CONNECT_TOKEN="${CONNECT_TOKEN:-SzArltWiDYl44aguM2qy5qQJAD15WV3MOIzsKGnvdXeGIn4kS5JHgVBrgfiUm6y5}"
+
+# CONNECT_TOKEN is embedded in a quoted nginx directive (X-Connect-Token
+# header) — characters like " \ $ would break or silently corrupt that
+# directive, so reject anything outside a safe charset up front instead of
+# letting nginx fail cryptically later.
+case "$CONNECT_TOKEN" in
+    *[!A-Za-z0-9_-]*)
+        echo "ERROR: CONNECT_TOKEN contains unsupported characters — only letters, numbers, '_' and '-' are allowed." >&2
+        echo "Generate a safe one with: openssl rand -hex 32" >&2
+        exit 1
+        ;;
+esac
+
 # Persistent backend files (currently just paired AirPlay 2 credentials) land
 # here by default — mount a volume at /data to keep them across container
 # recreations/updates. No compose changes needed beyond that volume mount.

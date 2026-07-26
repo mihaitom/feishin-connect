@@ -198,4 +198,25 @@ describe('useConnectSetup', () => {
             expect(connectFetchMock).toHaveBeenCalledTimes(2);
         });
     });
+
+    describe('forceReconfigure', () => {
+        // Regression test: backend sessions are reaped after ~30 min idle
+        // (core/session.py's SESSION_IDLE_TIMEOUT), silently forgetting
+        // /config even though ensureConfigured() would otherwise keep
+        // reporting "already configured" forever, based only on this ref.
+        // forceReconfigure() is what a caller uses to recover from that.
+        it('re-sends /config even though the tab already successfully configured once', async () => {
+            setCurrentServer(server());
+            const { result } = renderHook(() => useConnectSetup());
+            await flushMicrotasks();
+            expect(connectFetchMock).toHaveBeenCalledTimes(1);
+
+            connectFetchMock.mockClear();
+            await result.current.forceReconfigure();
+
+            expect(connectFetchMock).toHaveBeenCalledTimes(1);
+            const [path] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/config');
+        });
+    });
 });

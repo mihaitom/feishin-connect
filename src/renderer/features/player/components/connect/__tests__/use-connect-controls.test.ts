@@ -41,10 +41,13 @@ const baseArgs = (overrides: Partial<Parameters<typeof useConnectControls>[0]> =
         activeTargets: targets,
         currentSong: song(),
         currentTrackId: 'track-1' as null | string,
+        ensureConfigured: vi.fn(() => Promise.resolve()),
+        forceReconfigure: vi.fn(() => Promise.resolve()),
         isActive: true,
         lastAutoSentRef,
         mediaPause: vi.fn(),
         mediaTogglePlayPause: vi.fn(),
+        refetchConnectStatus: vi.fn(),
         ...overrides,
     };
 };
@@ -101,12 +104,14 @@ describe('useConnectControls', () => {
 
         // Deliberately not gated on local PlayerStatus === PLAYING — a paused
         // (or never-yet-played) queue is a valid thing to start Connect from.
-        it('starts a fresh /play when neither playing nor streaming, as long as a track is queued', () => {
+        it('starts a fresh /play when neither playing nor streaming, as long as a track is queued', async () => {
             useConnectPlayerStore.setState({ isPlaying: false, isStreaming: false });
             const args = baseArgs();
             const { result } = renderHook(() => useConnectControls(args));
 
             result.current.handleTogglePlayPause();
+            await Promise.resolve();
+            await Promise.resolve();
 
             expect(useConnectPlayerStore.getState().isPlaying).toBe(true);
             expect(useConnectPlayerStore.getState().isStreaming).toBe(true);
@@ -128,6 +133,51 @@ describe('useConnectControls', () => {
 
             expect(connectFetchMock).not.toHaveBeenCalled();
         });
+
+        // Regression: a reaped-then-recreated session (idle too long — see
+        // core/session.py's SESSION_IDLE_TIMEOUT) makes /pause and /resume
+        // report an error instead of their usual silent success, since
+        // there's nothing left to actually pause/resume. Previously nothing
+        // reacted to that error at all, leaving the button toggling a
+        // phantom session forever with no visible effect.
+        it('re-syncs status when /pause reports the session was lost', async () => {
+            useConnectPlayerStore.setState({ isPlaying: true, isStreaming: true });
+            connectFetchMock.mockResolvedValueOnce(
+                new Response(JSON.stringify({ error: 'Media server not configured' })),
+            );
+            const args = baseArgs();
+            const { result } = renderHook(() => useConnectControls(args));
+
+            result.current.handleTogglePlayPause();
+
+            await vi.waitFor(() => expect(args.refetchConnectStatus).toHaveBeenCalledTimes(1));
+        });
+
+        it('re-syncs status when /resume reports the session was lost', async () => {
+            useConnectPlayerStore.setState({ isPlaying: false, isStreaming: true });
+            connectFetchMock.mockResolvedValueOnce(
+                new Response(JSON.stringify({ error: 'Media server not configured' })),
+            );
+            const args = baseArgs();
+            const { result } = renderHook(() => useConnectControls(args));
+
+            result.current.handleTogglePlayPause();
+
+            await vi.waitFor(() => expect(args.refetchConnectStatus).toHaveBeenCalledTimes(1));
+        });
+
+        it('does not re-sync status on a plain successful /pause or /resume', async () => {
+            useConnectPlayerStore.setState({ isPlaying: true, isStreaming: true });
+            const args = baseArgs();
+            const { result } = renderHook(() => useConnectControls(args));
+
+            result.current.handleTogglePlayPause();
+            await connectFetchMock.mock.results[0]?.value;
+            await Promise.resolve();
+            await Promise.resolve();
+
+            expect(args.refetchConnectStatus).not.toHaveBeenCalled();
+        });
     });
 
     describe('handleStop', () => {
@@ -137,14 +187,29 @@ describe('useConnectControls', () => {
             const { result } = renderHook(() => useConnectControls(args));
 
             result.current.handleStop();
-            await Promise.resolve();
-            await Promise.resolve();
+            await vi.waitFor(() => expect(connectFetchMock).toHaveBeenCalledTimes(2));
 
             expect(useConnectPlayerStore.getState().isPlaying).toBe(false);
             expect(connectFetchMock).toHaveBeenCalledWith('/pause', { method: 'POST' });
             const [path, options] = connectFetchMock.mock.calls[1];
             expect(path).toBe('/seek');
             expect(JSON.parse(options.body)).toEqual({ position: 0 });
+        });
+
+        // Same reaped-session case as handleTogglePlayPause above — /pause's
+        // error means there's nothing to seek back to 0:00 either.
+        it('re-syncs status instead of seeking when /pause reports the session was lost', async () => {
+            useConnectPlayerStore.setState({ isPlaying: true });
+            connectFetchMock.mockResolvedValueOnce(
+                new Response(JSON.stringify({ error: 'Media server not configured' })),
+            );
+            const args = baseArgs();
+            const { result } = renderHook(() => useConnectControls(args));
+
+            result.current.handleStop();
+
+            await vi.waitFor(() => expect(args.refetchConnectStatus).toHaveBeenCalledTimes(1));
+            expect(connectFetchMock).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -169,7 +234,7 @@ describe('useConnectControls', () => {
             expect(useConnectPlayerStore.getState().isActive).toBe(false);
         });
 
-        it('the published onPlayPause always calls the current handler, not a stale closure', () => {
+        it('the published onPlayPause always calls the current handler, not a stale closure', async () => {
             useConnectPlayerStore.setState({ isPlaying: false, isStreaming: false });
             const args = baseArgs({ currentTrackId: 'track-1' });
             const { rerender } = renderHook((props) => useConnectControls(props), {
@@ -181,6 +246,8 @@ describe('useConnectControls', () => {
             rerender({ ...args, currentTrackId: 'track-2' });
 
             useConnectPlayerStore.getState().handlers!.onPlayPause();
+            await Promise.resolve();
+            await Promise.resolve();
 
             const [, options] = connectFetchMock.mock.calls[0];
             expect(JSON.parse(options.body).track_ids).toEqual(['track-2']);

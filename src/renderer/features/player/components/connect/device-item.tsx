@@ -12,9 +12,9 @@ import {
     LuVolumeX,
 } from 'react-icons/lu';
 
-import { useDeviceVolume } from './hooks';
 import { PairingModal } from './pairing-modal';
 import { ConnectDevice, connectFetch } from './types';
+import { useDeviceVolume } from './use-device-volume';
 
 import { CustomPlayerbarSlider } from '/@/renderer/features/player/components/playerbar-slider';
 import { ConfirmModal } from '/@/shared/components/modal/modal';

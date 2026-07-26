@@ -1,5 +1,6 @@
 import { MutableRefObject, useEffect, useRef } from 'react';
 
+import { connectFetchEnsured } from './connect-request';
 import { useConnectPlayerStore } from './connect.store';
 import { ConnectDevice, connectFetch } from './types';
 
@@ -11,10 +12,13 @@ interface UseConnectControlsArgs {
     activeTargets: ConnectDevice[];
     currentSong: QueueSong | undefined;
     currentTrackId: null | string;
+    ensureConfigured: () => Promise<void>;
+    forceReconfigure: () => Promise<void>;
     isActive: boolean;
     lastAutoSentRef: MutableRefObject<string>;
     mediaPause: () => void;
     mediaTogglePlayPause: () => void;
+    refetchConnectStatus: () => void;
 }
 
 /**
@@ -27,12 +31,33 @@ export const useConnectControls = ({
     activeTargets,
     currentSong,
     currentTrackId,
+    ensureConfigured,
+    forceReconfigure,
     isActive,
     lastAutoSentRef,
     mediaPause,
     mediaTogglePlayPause,
+    refetchConnectStatus,
 }: UseConnectControlsArgs) => {
     const storeHandlersRef = useRef({ handleStop, handleTogglePlayPause });
+
+    // /pause and /resume report a "media server not configured" error instead
+    // of their usual success body when the backend has reaped this session for
+    // being idle too long (see core/session.py's SESSION_IDLE_TIMEOUT) — the
+    // session that comes back is a fresh one with nothing to actually pause,
+    // and would otherwise silently no-op forever (no error, no reconnect,
+    // just a play/pause button that stops doing anything). Re-syncing status
+    // here feeds use-connect-disconnect.ts's "external stop" effect the
+    // streaming:false it needs to reset back to disconnected, so the user can
+    // pick a device again through the normal (self-healing) connect flow
+    // instead of being stuck until a full page reload.
+    const resyncIfSessionLost = (res: Response) =>
+        res
+            .json()
+            .then((body) => {
+                if (body?.error) refetchConnectStatus();
+            })
+            .catch(() => {});
 
     function handleTogglePlayPause() {
         if (!isActive) {
@@ -42,22 +67,31 @@ export const useConnectControls = ({
         const { isPlaying, isStreaming } = useConnectPlayerStore.getState();
         if (isPlaying) {
             useConnectPlayerStore.getState().set({ isPlaying: false });
-            connectFetch(`/pause`, { method: 'POST' }).catch(() => {});
+            connectFetch(`/pause`, { method: 'POST' })
+                .then(resyncIfSessionLost)
+                .catch(() => {});
         } else if (isStreaming) {
             useConnectPlayerStore.getState().set({ isPlaying: true });
-            connectFetch(`/resume`, { method: 'POST' }).catch(() => {});
+            connectFetch(`/resume`, { method: 'POST' })
+                .then(resyncIfSessionLost)
+                .catch(() => {});
         } else {
             if (!currentTrackId) return;
             useConnectPlayerStore.getState().set({ isPlaying: true, isStreaming: true });
             lastAutoSentRef.current = currentSong?._uniqueId ?? '';
-            connectFetch(`/play`, {
-                body: JSON.stringify({
-                    targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
-                    track_ids: [currentTrackId],
-                }),
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST',
-            }).catch(() => {});
+            connectFetchEnsured(
+                `/play`,
+                {
+                    body: JSON.stringify({
+                        targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
+                        track_ids: [currentTrackId],
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                },
+                ensureConfigured,
+                forceReconfigure,
+            ).catch(() => {});
         }
     }
 
@@ -73,12 +107,21 @@ export const useConnectControls = ({
     function handleStop() {
         useConnectPlayerStore.getState().set({ isPlaying: false });
         connectFetch(`/pause`, { method: 'POST' })
-            .then(() =>
-                connectFetch(`/seek`, {
-                    body: JSON.stringify({ position: 0 }),
-                    headers: { 'Content-Type': 'application/json' },
-                    method: 'POST',
-                }),
+            .then((res) =>
+                res
+                    .clone()
+                    .json()
+                    .then((body) => {
+                        if (body?.error) {
+                            refetchConnectStatus();
+                            return undefined;
+                        }
+                        return connectFetch(`/seek`, {
+                            body: JSON.stringify({ position: 0 }),
+                            headers: { 'Content-Type': 'application/json' },
+                            method: 'POST',
+                        });
+                    }),
             )
             .catch(() => {});
     }

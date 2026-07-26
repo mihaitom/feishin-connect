@@ -9,7 +9,7 @@ import {
     shouldSkipLyricsScrollEvent,
 } from '/@/renderer/features/lyrics/hooks/lyrics-animation-engine';
 import { useConnectPlayerStore } from '/@/renderer/features/player/components/connect/connect.store';
-import { useConnectSeek } from '/@/renderer/features/player/components/connect/hooks';
+import { useConnectSeek } from '/@/renderer/features/player/components/connect/use-connect-seek';
 import {
     useLyricsDisplaySettings,
     useLyricsSettings,

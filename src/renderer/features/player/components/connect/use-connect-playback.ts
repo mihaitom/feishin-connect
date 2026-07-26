@@ -2,7 +2,8 @@ import type { QueueSong } from '/@/shared/types/domain-types';
 
 import { MutableRefObject, useEffect, useRef } from 'react';
 
-import { ConnectDevice, connectFetch, ConnectStatus } from './types';
+import { connectFetchEnsured } from './connect-request';
+import { ConnectDevice, ConnectStatus } from './types';
 
 import { useMpvSettings } from '/@/renderer/store';
 import { calculateReplayGain } from '/@/renderer/utils/replay-gain';
@@ -11,6 +12,8 @@ interface ConnectPlaybackArgs {
     activeTargets: ConnectDevice[];
     connectStatus: ConnectStatus | null;
     currentSong: QueueSong | undefined;
+    ensureConfigured: () => Promise<void>;
+    forceReconfigure: () => Promise<void>;
     isActive: boolean;
     isRadioActive: boolean;
     lastAutoSentRef: MutableRefObject<string>;
@@ -32,6 +35,8 @@ export const useConnectPlayback = ({
     activeTargets,
     connectStatus,
     currentSong,
+    ensureConfigured,
+    forceReconfigure,
     isActive,
     isRadioActive,
     lastAutoSentRef,
@@ -53,15 +58,20 @@ export const useConnectPlayback = ({
         const trackId = currentSong?.id;
         if (!trackId) return;
         mediaPause();
-        connectFetch(`/play`, {
-            body: JSON.stringify({
-                gain: currentSong ? calculateReplayGain(currentSong, replayGainSettings) : 1,
-                targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
-                track_ids: [trackId],
-            }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        }).catch(() => {});
+        connectFetchEnsured(
+            `/play`,
+            {
+                body: JSON.stringify({
+                    gain: currentSong ? calculateReplayGain(currentSong, replayGainSettings) : 1,
+                    targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
+                    track_ids: [trackId],
+                }),
+                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+            },
+            ensureConfigured,
+            forceReconfigure,
+        ).catch(() => {});
     }, [
         isActive,
         isRadioActive,
@@ -70,6 +80,8 @@ export const useConnectPlayback = ({
         mediaPause,
         lastAutoSentRef,
         replayGainSettings,
+        ensureConfigured,
+        forceReconfigure,
     ]);
 
     // ── Auto-forward: radio switch ────────────────────────────────────────────
@@ -82,15 +94,20 @@ export const useConnectPlayback = ({
         // target streams the URL directly.
         pauseRadio();
         lastAutoSentRef.current = currentSong?._uniqueId ?? 'radio';
-        connectFetch(`/play-url`, {
-            body: JSON.stringify({
-                targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
-                title: radioStationName ?? 'Radio',
-                url: radioStreamUrl,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-            method: 'POST',
-        }).catch(() => {});
+        connectFetchEnsured(
+            `/play-url`,
+            {
+                body: JSON.stringify({
+                    targets: activeTargets.map((t) => ({ name: t.name, type: t.type })),
+                    title: radioStationName ?? 'Radio',
+                    url: radioStreamUrl,
+                }),
+                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+            },
+            ensureConfigured,
+            forceReconfigure,
+        ).catch(() => {});
     }, [
         isActive,
         isRadioActive,
@@ -100,6 +117,8 @@ export const useConnectPlayback = ({
         pauseRadio,
         lastAutoSentRef,
         currentSong,
+        ensureConfigured,
+        forceReconfigure,
     ]);
 
     // ── Track-ended detection ─────────────────────────────────────────────────
