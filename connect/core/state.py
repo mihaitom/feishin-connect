@@ -38,6 +38,13 @@ class AppState:
         # Set True when a track finishes naturally; cleared by /play, /play-url, /stop.
         # Lets the frontend detect track-end even after SSE reconnect or page reload.
         self.track_ended: bool = False
+        # Identity + timestamp of the last dispatch actually sent to a delivery
+        # target from /play or /play-url — see routes/playback.py's
+        # _is_duplicate_dispatch(). Backend-side safety net against a
+        # misbehaving client re-issuing the same play command in a tight loop:
+        # each call stops and restarts the device before it can buffer audio.
+        self.last_dispatch_key: str | None = None
+        self.last_dispatch_at: float = 0.0
 
 
 class EventBus:

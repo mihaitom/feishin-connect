@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.3] - 2026-07-29
+
+### Fixed
+- **Radio never actually started playing on a Connect device** — starting a stream while casting to Sonos/AirPlay/Chromecast/DLNA re-sent the same play request roughly twice a second for as long as the radio stayed selected, which kept restarting the device's playback before it could buffer any audio.
+
+### Internal
+- **The Connect backend now ignores an identical `/play`/`/play-url` dispatch to the same target if one was already sent less than a second ago**, instead of relaying every one straight to the device — a safety net against this class of bug independent of the frontend fix above.
+
 ## [0.6.2] - 2026-07-26
 
 ### Fixed

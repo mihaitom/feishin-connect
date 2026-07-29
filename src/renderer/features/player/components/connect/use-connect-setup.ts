@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { buildConfigBody } from './connect-config';
 import { computeConnectSessionId } from './connect-session-id';
@@ -50,7 +50,10 @@ export const useConnectSetup = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [server?.url, server?.credential, server?.type, server?.userId, server?.username]);
 
-    const ensureConfigured = async () => {
+    // useCallback with empty deps: this only closes over refs, so it's safe to
+    // keep a stable identity — callers (use-connect-playback.ts's auto-forward
+    // effects) depend on it and would otherwise re-run on every render.
+    const ensureConfigured = useCallback(async () => {
         if (configuredRef.current) return;
         // The effect above fires /config itself as soon as server.url/credential
         // are ready and flips configuredRef once it lands — credential can still
@@ -66,7 +69,7 @@ export const useConnectSetup = () => {
         // Fallback in case the effect never got a usable server either — do it
         // ourselves rather than leaving a slow-to-hydrate session stuck.
         await sendConfig();
-    };
+    }, []);
 
     // Backend sessions are reaped after ~30 min of no request/SSE activity
     // (see core/session.py's SESSION_IDLE_TIMEOUT) — a tab left open without
@@ -76,10 +79,10 @@ export const useConnectSetup = () => {
     // forgotten this session entirely. Callers that get back the resulting
     // "media server not configured" error call this to force a fresh /config
     // and retry, instead of leaving the user stuck until a page reload.
-    const forceReconfigure = async () => {
+    const forceReconfigure = useCallback(async () => {
         configuredRef.current = false;
         await sendConfig();
-    };
+    }, []);
 
     return { ensureConfigured, forceReconfigure, mySessionId };
 };
