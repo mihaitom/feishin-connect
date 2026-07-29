@@ -120,6 +120,28 @@ describe('useConnectSetup', () => {
         });
     });
 
+    describe('stable identity', () => {
+        // Regression test: ensureConfigured/forceReconfigure used to be plain
+        // closures re-created on every render. Consumers (use-connect-
+        // playback.ts's auto-forward effects) list them as effect deps, so a
+        // new identity on every render — which happens continuously here
+        // since useConnectElapsed() re-renders every 500ms while playing —
+        // made those effects re-run and, for the radio effect specifically,
+        // re-send /play-url in a tight loop instead of once per stream.
+        it('keeps the same ensureConfigured/forceReconfigure identity across re-renders', () => {
+            setCurrentServer(server());
+            const { rerender, result } = renderHook(() => useConnectSetup());
+
+            const firstEnsure = result.current.ensureConfigured;
+            const firstForce = result.current.forceReconfigure;
+
+            rerender();
+
+            expect(result.current.ensureConfigured).toBe(firstEnsure);
+            expect(result.current.forceReconfigure).toBe(firstForce);
+        });
+    });
+
     describe('ensureConfigured', () => {
         it('resolves immediately once the server effect has already configured', async () => {
             setCurrentServer(server());

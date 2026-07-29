@@ -87,13 +87,14 @@ export const useConnectPlayback = ({
     // ── Auto-forward: radio switch ────────────────────────────────────────────
     useEffect(() => {
         if (!isActive || !isRadioActive || !radioStreamUrl) return;
+        if (radioStreamUrl === lastAutoSentRef.current) return;
         // Pause (don't stop) the local radio — stopping would clear
         // currentStreamUrl, flip isRadioActive back to false, and make the
         // playerbar/lyrics fall back to showing the previous track. Pausing keeps
         // the radio station "active" so the UI keeps showing it while the Connect
         // target streams the URL directly.
         pauseRadio();
-        lastAutoSentRef.current = currentSong?._uniqueId ?? 'radio';
+        lastAutoSentRef.current = radioStreamUrl;
         connectFetchEnsured(
             `/play-url`,
             {
@@ -116,7 +117,6 @@ export const useConnectPlayback = ({
         activeTargets,
         pauseRadio,
         lastAutoSentRef,
-        currentSong,
         ensureConfigured,
         forceReconfigure,
     ]);

@@ -166,7 +166,7 @@ describe('useConnectPlayback', () => {
                 title: 'Cool FM',
                 url: 'https://stream.example/radio',
             });
-            expect(args.lastAutoSentRef.current).toBe('song-1');
+            expect(args.lastAutoSentRef.current).toBe('https://stream.example/radio');
         });
 
         it('falls back to "Radio" as the title when no station name is given', async () => {
@@ -183,7 +183,7 @@ describe('useConnectPlayback', () => {
 
             const [, options] = connectFetchMock.mock.calls[0];
             expect(JSON.parse(options.body).title).toBe('Radio');
-            expect(args.lastAutoSentRef.current).toBe('radio');
+            expect(args.lastAutoSentRef.current).toBe('https://stream.example/radio');
         });
 
         it('does nothing when there is no radio stream url', () => {
@@ -193,6 +193,69 @@ describe('useConnectPlayback', () => {
 
             expect(connectFetchMock).not.toHaveBeenCalled();
             expect(args.pauseRadio).not.toHaveBeenCalled();
+        });
+
+        // Regression test: Sonos got a fresh SetAVTransportURI/Play roughly
+        // every 500ms and never buffered any audio, because ensureConfigured/
+        // forceReconfigure used to get a new identity on every render of
+        // useConnectSetup (see use-connect-setup.test.ts's "keeps a stable
+        // identity" tests) and this effect had no guard against re-sending
+        // once already forwarded, unlike the track-change effect above.
+        it('does not re-send the same radio stream on re-render, even with new callback identities', async () => {
+            const args = baseArgs({
+                isRadioActive: true,
+                radioStationName: 'Cool FM',
+                radioStreamUrl: 'https://stream.example/radio',
+            });
+            const { rerender } = renderHook((props) => useConnectPlayback(props), {
+                initialProps: args,
+            });
+            await Promise.resolve();
+            await Promise.resolve();
+
+            expect(connectFetchMock).toHaveBeenCalledTimes(1);
+
+            rerender({
+                ...args,
+                ensureConfigured: vi.fn(() => Promise.resolve()),
+                forceReconfigure: vi.fn(() => Promise.resolve()),
+            });
+            await Promise.resolve();
+            await Promise.resolve();
+
+            expect(connectFetchMock).toHaveBeenCalledTimes(1);
+            expect(args.pauseRadio).toHaveBeenCalledTimes(1);
+        });
+
+        it('sends a new request when the radio station changes', async () => {
+            const args = baseArgs({
+                isRadioActive: true,
+                radioStationName: 'Cool FM',
+                radioStreamUrl: 'https://stream.example/radio',
+            });
+            const { rerender } = renderHook((props) => useConnectPlayback(props), {
+                initialProps: args,
+            });
+            await Promise.resolve();
+            await Promise.resolve();
+
+            expect(connectFetchMock).toHaveBeenCalledTimes(1);
+
+            rerender({
+                ...args,
+                radioStationName: 'Other FM',
+                radioStreamUrl: 'https://stream.example/other',
+            });
+            await Promise.resolve();
+            await Promise.resolve();
+
+            expect(connectFetchMock).toHaveBeenCalledTimes(2);
+            const [, options] = connectFetchMock.mock.calls[1];
+            expect(JSON.parse(options.body)).toEqual({
+                targets: [{ name: 'Living Room', type: 'sonos' }],
+                title: 'Other FM',
+                url: 'https://stream.example/other',
+            });
         });
     });
 

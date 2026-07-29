@@ -18,10 +18,33 @@ from core.session import (
     get_session,
     registry,
 )
-from core.state import resolve_target, stream_url
+from core.state import AppState, resolve_target, stream_url
 
 logger = logging.getLogger("connect.playback")
 router = APIRouter(dependencies=[Depends(require_token)])
+
+
+# Backend safety net for /play and /play-url: an identical dispatch to the
+# same target arriving faster than this is treated as a duplicate and not
+# re-sent to the delivery target. The frontend has its own idempotency guard
+# (use-connect-playback.ts), but this doesn't rely on it holding — a buggy
+# effect, a stray extra client, or a future regression re-issuing
+# SetAVTransportURI/Play in a loop stops and restarts the device before it
+# can buffer any audio. Well above a realistic manual double-click, well
+# below "the frontend is actually starting something new".
+DUPLICATE_DISPATCH_COOLDOWN = 1.0
+
+
+def _is_duplicate_dispatch(st: AppState, key: str) -> bool:
+    """True if `key` matches the last dispatch and it happened within
+    DUPLICATE_DISPATCH_COOLDOWN — and leaves state untouched. Otherwise
+    records `key` as the new last dispatch and returns False."""
+    now = time.time()
+    if key == st.last_dispatch_key and now - st.last_dispatch_at < DUPLICATE_DISPATCH_COOLDOWN:
+        return True
+    st.last_dispatch_key = key
+    st.last_dispatch_at = now
+    return False
 
 
 async def _claim_or_takeover(target, session: SessionState, force: bool) -> dict | None:
@@ -217,18 +240,19 @@ async def play_tracks(req: PlayRequest, session: SessionState = Depends(get_sess
     # internal=True: fetched directly by the cast device, not the browser —
     # see MediaClient.get_cover_art_url's docstring.
     album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
-    try:
-        await target.play(
-            url,
-            track.title,
-            track.artist,
-            album_art_url,
-            float(track.duration),
-            track.album,
-        )
-    except Exception as e:
-        logger.error(f"[play] Delivery error: {e}", exc_info=True)
-        return {"error": str(e)}
+    if not _is_duplicate_dispatch(st, f"play:{target}:{track_id}"):
+        try:
+            await target.play(
+                url,
+                track.title,
+                track.artist,
+                album_art_url,
+                float(track.duration),
+                track.album,
+            )
+        except Exception as e:
+            logger.error(f"[play] Delivery error: {e}", exc_info=True)
+            return {"error": str(e)}
 
     asyncio.create_task(
         _apply_position_offset(session, target, st.clock.play_generation)
@@ -271,11 +295,12 @@ async def play_url(req: PlayUrlRequest, session: SessionState = Depends(get_sess
     st.track_ended = False
     st.active_delivery = target
 
-    try:
-        await target.play(req.url, req.title)
-    except Exception as e:
-        logger.error(f"[play-url] Delivery error: {e}", exc_info=True)
-        return {"error": str(e)}
+    if not _is_duplicate_dispatch(st, f"play-url:{target}:{req.url}"):
+        try:
+            await target.play(req.url, req.title)
+        except Exception as e:
+            logger.error(f"[play-url] Delivery error: {e}", exc_info=True)
+            return {"error": str(e)}
 
     asyncio.create_task(
         _apply_position_offset(session, target, st.clock.play_generation)
@@ -368,6 +393,7 @@ async def stop_playback(session: SessionState = Depends(get_session)):
     st.current_track = None
     st.radio_info = None
     st.active_delivery = None
+    st.last_dispatch_key = None
     await claims.release_all_for_session(session.session_id)
     logger.info("[stop] ⏹ Playback stopped")
     await session.event_bus.broadcast(build_status_dict(session))

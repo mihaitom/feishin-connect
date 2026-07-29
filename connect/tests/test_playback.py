@@ -183,6 +183,120 @@ def test_play_url_with_force_displaces_other_sessions_claim(client, default_sess
     assert claims.owner_of("chromecast", "TV") == default_session.session_id
 
 
+# ── Duplicate-dispatch cooldown ─────────────────────────────────────────────
+# Backend-side safety net for a client (buggy or otherwise) that re-issues
+# /play or /play-url for the same target in a tight loop — see
+# _is_duplicate_dispatch()'s docstring and the frontend regression it backs
+# up (use-connect-playback.ts's radio auto-forward effect used to do exactly
+# this, spamming Sonos with SetAVTransportURI/Play roughly every 500ms).
+
+
+def test_play_url_does_not_redispatch_same_target_and_url_within_cooldown(
+    client, default_session
+):
+    body = {
+        "target_name": "TV",
+        "target_type": "chromecast",
+        "title": "Test",
+        "url": "http://example.com/stream.mp3",
+    }
+    with patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play_mock:
+        r1 = client.post("/play-url", json=body)
+        r2 = client.post("/play-url", json=body)
+
+    assert r1.json()["status"] == "playing"
+    # Still reports success — a suppressed duplicate isn't an error — but the
+    # device itself only actually gets told to play once.
+    assert r2.json()["status"] == "playing"
+    play_mock.assert_awaited_once()
+
+
+def test_play_url_redispatches_once_the_cooldown_has_elapsed(client, default_session):
+    body = {
+        "target_name": "TV",
+        "target_type": "chromecast",
+        "title": "Test",
+        "url": "http://example.com/stream.mp3",
+    }
+    with patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play_mock:
+        client.post("/play-url", json=body)
+        default_session.state.last_dispatch_at -= 2.0
+        client.post("/play-url", json=body)
+
+    assert play_mock.await_count == 2
+
+
+def test_play_url_redispatches_immediately_for_a_different_url(
+    client, default_session
+):
+    with patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play_mock:
+        client.post(
+            "/play-url",
+            json={
+                "target_name": "TV",
+                "target_type": "chromecast",
+                "title": "Test",
+                "url": "http://example.com/stream.mp3",
+            },
+        )
+        client.post(
+            "/play-url",
+            json={
+                "target_name": "TV",
+                "target_type": "chromecast",
+                "title": "Other",
+                "url": "http://example.com/other.mp3",
+            },
+        )
+
+    assert play_mock.await_count == 2
+
+
+def test_play_does_not_redispatch_same_target_and_track_within_cooldown(
+    client, default_session
+):
+    client.post("/config", json={"url": "http://nav:4533", "credential": "x"})
+    track = Track(
+        id="1", title="Test Song", artist="Test Artist", duration=180, cover_art_id="c"
+    )
+    body = {
+        "target_name": "TV",
+        "target_type": "chromecast",
+        "track_ids": ["1"],
+    }
+    with (
+        patch.object(default_session.media, "get_track", return_value=track),
+        patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play_mock,
+    ):
+        client.post("/play", json=body)
+        client.post("/play", json=body)
+
+    play_mock.assert_awaited_once()
+
+
+def test_stop_clears_dispatch_key_so_the_next_play_is_not_suppressed(
+    client, default_session
+):
+    """A real /stop between two identical dispatches means the second one is
+    a genuine restart, not a runaway duplicate — must not be swallowed just
+    because it happens to land inside the cooldown window."""
+    body = {
+        "target_name": "TV",
+        "target_type": "chromecast",
+        "title": "Test",
+        "url": "http://example.com/stream.mp3",
+    }
+    with (
+        patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play_mock,
+        patch.object(ChromecastDelivery, "stop", new=AsyncMock()),
+    ):
+        client.post("/play-url", json=body)
+        client.post("/stop")
+        client.post("/play-url", json=body)
+
+    assert play_mock.await_count == 2
+
+
 # ── /stop ─────────────────────────────────────────────────────────────────────
 
 
