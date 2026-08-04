@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
-- **`WEB_PORT` and `PORT` environment variables** let the Feishin web UI and Connect API listen on ports other than the defaults (9180/9181) — mainly useful with `network_mode: host`, where it lets two deployments (e.g. a prod and a dev instance) run on the same host at once.
+- **`WEB_PORT` and `PORT` environment variables** let the Feishin web UI and Connect API listen on ports other than the defaults (9180/9181) — useful if those are already taken on the host, e.g. running a second deployment (prod + dev) at the same time.
 
 ### Fixed
 - **Casting controls (device list, playback, volume, AirPlay pairing) now also require a signed-in session, not just the backend's access key.**

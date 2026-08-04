@@ -6,8 +6,6 @@
 > It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay, Chromecast and DLNA/UPnP devices directly from the player bar.
 > All upstream features are preserved.
 
-> **Not designed to be exposed to the open internet on its own.** The Docker deployment expects an authentication layer in front of it (e.g. Authentik, Authelia, or a reverse proxy with basic auth) if it's reachable from outside your local network — your media server's own login is not a substitute for that.
-
   <p align="center">
     <a href="https://github.com/jeffvli/feishin/blob/main/LICENSE">
       <img src="https://img.shields.io/github/license/mihaitom/feishin-connect?style=flat-square&color=brightgreen"
@@ -78,6 +76,11 @@ Feishin Connect adds a cast button to the player bar. Click it to stream the cur
 
 > **`network_mode: host` is required.** The Connect backend discovers Sonos, AirPlay, Chromecast and DLNA devices via mDNS/SSDP multicast, which only works when the container shares the host's network stack. Without it, no devices will be found. Host networking is Linux-only — on Mac or Windows, run the backend natively.
 
+> [!CAUTION]
+> **Not designed to be exposed to the open internet on its own.**  
+> This deployment expects an authentication layer in front of it (e.g. Authentik, Authelia, or a reverse proxy with basic auth) if it's reachable from outside your local network.  
+> **Your media server's own login is not a substitute for that.**
+
 ```yaml
 services:
     feishin:
@@ -89,30 +92,20 @@ services:
             - SERVER_NAME=navidrome
             - SERVER_TYPE=navidrome
             - SERVER_URL=http://your-navidrome:4533
-            - SERVER_LOCK=false
+            - SERVER_LOCK=true
             - ANALYTICS_DISABLED=true
-            - CONNECT_TOKEN=change-me-to-a-random-secret
-            # - SERVER_INTERNAL_URL=http://10.x.x.x:4533
-            # - DEBUG=false
         volumes:
             - ./data:/data
 ```
 
 > **Mount a volume at `/data`** to keep AirPlay 2 pairings across container recreations/updates — that's where persistent backend files are stored by default, no extra environment variable needed.
 
-| Port | Service | Env var |
-|------|---------|---------|
-| 9180 | Feishin web UI (nginx) | `WEB_PORT` |
-| 9181 | Connect API (FastAPI, also reachable via `/api/` through nginx) | `PORT` |
-
-Both are only worth changing with `network_mode: host` — that's what lets two deployments (e.g. a prod and a dev instance) run on the same host at once, each given its own `WEB_PORT`/`PORT` pair so they don't collide.
-
 ### Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `WEB_PORT` | `9180` | Port nginx (the Feishin web UI) listens on. |
-| `PORT` | `9181` | Port the Connect API (Python backend) listens on. If you change this, `CONNECT_URL` doesn't need to change too — nginx still proxies `/api/` to whatever `PORT` is set to. |
+| `WEB_PORT` | `9180` | Port nginx (the Feishin web UI) listens on. Change this if `9180` is already taken on the host — e.g. running a second instance (prod + dev) at the same time. |
+| `PORT` | `9181` | Port the Connect API (Python backend) listens on. Same idea as `WEB_PORT` — change it if `9181` is already in use. `CONNECT_URL` doesn't need to change too — nginx still proxies `/api/` to whatever `PORT` is set to. |
 | `CONNECT_TOKEN` | *(random per start)* | Secret token protecting the Connect API on port 9181 (or `PORT`, if changed). If unset, a random one is generated each time the container starts — nginx adds it to every internal request automatically, so the browser never handles it directly. Set this explicitly only if something needs to call the API directly, bypassing nginx, with a token that survives restarts. Use alphanumeric characters only — nginx embeds the value in a quoted config directive, so characters like `"` or `\` will break it. `openssl rand -hex 32` generates a safe value. |
 | `CONNECT_URL` | `/api` | URL the browser uses to reach the Connect API. The default (`/api`) routes through nginx on the same domain — no CORS issues, no extra config needed. Change to `http://host:9181` only if you need direct access to the backend, bypassing nginx. |
 | `CONNECT_DATA_DIR` | `/data` in Docker | Directory the backend stores persistent files in — currently just `airplay_credentials.json` (paired AirPlay 2 devices). Docker already defaults this to `/data`; just mount a volume there (see the compose example above). Only set this yourself to use a different path. |

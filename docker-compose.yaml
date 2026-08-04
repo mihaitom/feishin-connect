@@ -18,8 +18,8 @@ services:
             # token that survives restarts:
             # - CONNECT_TOKEN=SzArltWiDYl44aguM2qy5qQJAD15WV3MOIzsKGnvdXeGIn4kS5JHgVBrgfiUm6y5
             # - DEBUG=true # Verbose playback logs for ALL renderers (AirPlay + Sonos)
-            # WEB_PORT/PORT only need changing to run a second instance (e.g. a dev
-            # deployment) on the same host at once — each needs its own pair:
+            # Only needed if 9180/9181 are already taken on the host — e.g. running
+            # a second instance (prod + dev) at the same time:
             # - WEB_PORT=9180 # nginx / the Feishin web UI
             # - PORT=9181     # Connect API (Python backend)
         # Keeps AirPlay 2 pairings across container recreations/updates (default path, no env var needed)

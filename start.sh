@@ -4,9 +4,8 @@
 export CONNECT_URL="${CONNECT_URL:-/api}"
 export PUBLIC_PATH="${PUBLIC_PATH:-/}"
 # WEB_PORT is nginx's own listen port (the Feishin web UI); PORT is the
-# Python backend's. Both only matter to change with `network_mode: host` —
-# that's what lets two instances (e.g. a prod and a dev deployment) run on
-# the same host at once, each on its own pair of ports.
+# Python backend's. Only need changing if the defaults are already taken on
+# the host — e.g. running a second instance (prod + dev) at the same time.
 export WEB_PORT="${WEB_PORT:-9180}"
 export PORT="${PORT:-9181}"
 
