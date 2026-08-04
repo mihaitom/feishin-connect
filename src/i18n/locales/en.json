@@ -711,7 +711,7 @@
         "connect_apiUnreachable": "Connect backend unreachable",
         "connect_apiUnreachableHint": "Could not reach {{url}}. Make sure the Connect backend is running.",
         "connect_authError": "Connect backend rejected the request",
-        "connect_authErrorHint": "The Connect token doesn't match. Check that CONNECT_TOKEN (backend) and VITE_CONNECT_TOKEN/the app's configured token (frontend) are set to the same value.",
+        "connect_authErrorHint": "The Connect token doesn't match. Try a hard refresh (Ctrl+F5 or Cmd+Shift+R) first — this is usually just a stale cached page after an update. If it persists, restart the Connect container/app.",
         "connect_ffmpegMissing": "ffmpeg not found",
         "connect_ffmpegMissingHint": "The Connect backend needs ffmpeg to stream to Sonos and Chromecast devices. Install it and restart the backend.",
         "connect_noDevices": "No devices found",

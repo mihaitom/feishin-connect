@@ -27,6 +27,26 @@ server {
     try_files $uri $uri/ /index.html =404;
   }
 
+  # index.html and the service worker (which is what actually applies an
+  # update — see web.vite.config.ts's registerType: autoUpdate/skipWaiting/
+  # clientsClaim) aren't content-hashed, so nginx sends no Cache-Control for
+  # either by default and the browser falls back to its own heuristic —
+  # meaning a stale copy of one or both can outlive a redeploy for a while,
+  # long enough for the frontend's old bundle to send the previous
+  # deployment's CONNECT_TOKEN and get a genuine-looking "token doesn't
+  # match" error even though the actual backend/frontend are in sync. A
+  # normal reload only re-fetches these two if the browser bothers to
+  # revalidate — force that every time (still cheap: a 304 when unchanged).
+  location = ${PUBLIC_PATH}index.html {
+    add_header Cache-Control "no-cache";
+    alias /usr/share/nginx/html/index.html;
+  }
+
+  location = ${PUBLIC_PATH}assets/sw.js {
+    add_header Cache-Control "no-cache";
+    alias /usr/share/nginx/html/assets/sw.js;
+  }
+
   location ${PUBLIC_PATH}settings.js {
     alias /etc/nginx/conf.d/settings.js;
     add_header Cache-Control "no-store";

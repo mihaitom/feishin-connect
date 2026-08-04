@@ -4,10 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.5] - 2026-08-04
+
+Quick hotfix after finding someone's Feishin Connect instance just sitting wide open on the internet. Patched what I could on my end. Securing your own deployment is still on you, though.
+
+> [!CAUTION]
+> **Put an authentication layer (Authentik, Authelia, or similar) in front of any Docker deployment reachable from outside your local network.**  
+> **The media server's own login isn't a substitute for that.**
 
 ### Added
-- **`WEB_PORT` and `PORT` environment variables** let the Feishin web UI and Connect API listen on ports other than the defaults (9180/9181) — useful if those are already taken on the host, e.g. running a second deployment (prod + dev) at the same time.
+- **`WEB_PORT` and `PORT` environment variables** let the Feishin web UI and Connect API listen on ports other than the defaults (9180/9181)
 
 ### Fixed
 - **Casting controls (device list, playback, volume, AirPlay pairing) now also require a signed-in session, not just the backend's access key.**
@@ -20,6 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Internal
 - **Minor hardening of the reverse-proxy header handling and CORS configuration** — no functional change.
+
+If something's broken, please [open an issue](https://github.com/mihaitom/feishin-connect/issues).
 
 ## [0.6.4] - 2026-08-04
 
