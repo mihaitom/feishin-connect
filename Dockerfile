@@ -121,13 +121,17 @@ RUN chmod +x /start.sh
 
 ENV SERVER_LOCK=false SERVER_NAME="" SERVER_TYPE="" SERVER_URL="" REMOTE_URL=""
 ENV LEGACY_AUTHENTICATION="" ANALYTICS_DISABLED="" PUBLIC_PATH="/" SERVER_INTERNAL_URL="" CONNECT_URL=/api
+ENV WEB_PORT=9180 PORT=9181
 
 EXPOSE 9180
 EXPOSE 8000
 
 # Goes through nginx to /api/health, so it fails if either nginx or the
-# Python backend is down/unresponsive — independent of PUBLIC_PATH.
+# Python backend is down/unresponsive — independent of PUBLIC_PATH. Uses
+# $WEB_PORT (not the 9180 default baked into EXPOSE above, which is only
+# documentation) so the healthcheck still hits the right port when it's
+# overridden — see WEB_PORT/PORT in start.sh.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD wget -q -O /dev/null http://127.0.0.1:9180/api/health || exit 1
+    CMD wget -q -O /dev/null "http://127.0.0.1:${WEB_PORT}/api/health" || exit 1
 
 CMD ["/start.sh"]

@@ -6,10 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- **`WEB_PORT` and `PORT` environment variables** let the Feishin web UI and Connect API listen on ports other than the defaults (9180/9181) — mainly useful with `network_mode: host`, where it lets two deployments (e.g. a prod and a dev instance) run on the same host at once.
+
 ### Fixed
 - **Casting controls (device list, playback, volume, AirPlay pairing) now also require a signed-in session, not just the backend's access key.**
 - **The Cast button no longer appears on the login screen** — it was previously rendered there along with the rest of the player bar.
 - **Docker deployments without a custom access key for the Connect backend now get a random one generated automatically**, instead of a fixed default value.
+- **The API's auto-generated documentation pages (`/docs`, `/openapi.json`, `/redoc`) are no longer served by default.**
+- **An unrecognized session id no longer creates a new session entry on its own** — only signing in does that now.
+- **Radio URLs passed to Connect must now be `http://` or `https://`.**
+- **The media-server proxy (used when Navidrome/Jellyfin sits behind Authentik, Authelia, or oauth2-proxy) now also strips oauth2-proxy's identity headers**, matching the existing handling for the other two.
+
+### Internal
+- **Minor hardening of the reverse-proxy header handling and CORS configuration** — no functional change.
 
 ## [0.6.4] - 2026-08-04
 

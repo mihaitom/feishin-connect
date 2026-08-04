@@ -12,7 +12,7 @@ import asyncio
 import os
 import time
 
-from fastapi import Depends, Header, HTTPException, Query
+from fastapi import Header, HTTPException, Query
 
 from delivery import BaseDelivery, DeliveryManager
 from media import MediaClient, SubsonicClient
@@ -88,18 +88,28 @@ async def get_session(
 
 
 async def require_authenticated_session(
-    session: SessionState = Depends(get_session),
+    x_connect_session: str | None = Header(default=None),
+    session: str | None = Query(default=None),
 ) -> SessionState:
     """Like get_session, but 401s until /config has verified real media-server
-    credentials for this session (see SessionState.authenticated). Use this
-    instead of get_session for anything that reveals or controls LAN devices."""
-    if not session.authenticated:
+    credentials for this session (see SessionState.authenticated) — and,
+    unlike get_session, never creates a session just to reject it. An
+    unauthenticated caller (anyone with just the shared CONNECT_TOKEN, which
+    nginx attaches automatically — see SessionState.authenticated's comment)
+    could otherwise grow the registry unbounded by spamming arbitrary
+    X-Connect-Session values, each surviving until the idle reaper runs.
+    Use this instead of get_session for anything that reveals or controls
+    LAN devices."""
+    session_id = x_connect_session or session or DEFAULT_SESSION_ID
+    existing = registry.get(session_id)
+    if existing is None or not existing.authenticated:
         raise HTTPException(
             status_code=401,
             detail="Session not authenticated — call /config with valid media-server "
             "credentials first",
         )
-    return session
+    existing.touch()
+    return existing
 
 
 def compute_position(session: SessionState) -> float:

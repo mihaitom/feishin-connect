@@ -246,7 +246,18 @@ async def lifespan(_: FastAPI):
         reaper_task.cancel()
 
 
-app = FastAPI(title="Feishin Connect", lifespan=lifespan)
+app = FastAPI(
+    title="Feishin Connect",
+    lifespan=lifespan,
+    # Swagger UI / ReDoc / the raw OpenAPI schema are unauthenticated by
+    # FastAPI's own design (they live outside any router, so require_token
+    # never applies to them) — reachable at /api/docs through nginx just
+    # like anything else, listing every endpoint and its parameters to
+    # anyone who finds the deployment. Off unless DEBUG=true.
+    docs_url="/docs" if _DEBUG else None,
+    openapi_url="/openapi.json" if _DEBUG else None,
+    redoc_url="/redoc" if _DEBUG else None,
+)
 _ALLOWED_ORIGINS_ENV = os.getenv("ALLOWED_ORIGINS", "")
 _ALLOWED_ORIGINS: list[str] = (
     [o.strip() for o in _ALLOWED_ORIGINS_ENV.split(",") if o.strip()]
@@ -255,7 +266,11 @@ _ALLOWED_ORIGINS: list[str] = (
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
+    # No cookies are ever used for auth here (X-Connect-Token/X-Connect-Session
+    # are explicit headers the frontend sets itself, never browser-attached) —
+    # allow_credentials=True combined with the "null" origin fallback below
+    # would otherwise be a textbook CORS misconfiguration for no actual benefit.
+    allow_credentials=False,
     allow_headers=["*"],
     allow_methods=["*"],
     allow_origins=_ALLOWED_ORIGINS,

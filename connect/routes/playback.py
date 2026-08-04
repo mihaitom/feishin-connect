@@ -279,6 +279,14 @@ class PlayUrlRequest(BaseModel):
 async def play_url(
     req: PlayUrlRequest, session: SessionState = Depends(require_authenticated_session)
 ):
+    # For AirPlay, this URL is fetched server-side (pyatv.stream.stream_file —
+    # see delivery/airplay.py), not just handed to the device — restricting
+    # to http(s) blocks e.g. file:// local-file reads without breaking
+    # legitimate LAN-hosted radio streams, which are otherwise indistinguishable
+    # from any other http(s) URL.
+    if not req.url.lower().startswith(("http://", "https://")):
+        return {"error": "Only http:// and https:// radio URLs are supported"}
+
     target = resolve_target(
         req.targets, req.target_name, req.target_type, previous=session.state.active_delivery
     )

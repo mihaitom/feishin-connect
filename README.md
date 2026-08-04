@@ -100,16 +100,20 @@ services:
 
 > **Mount a volume at `/data`** to keep AirPlay 2 pairings across container recreations/updates — that's where persistent backend files are stored by default, no extra environment variable needed.
 
-| Port | Service |
-|------|---------|
-| 9180 | Feishin web UI (nginx) |
-| 9181 | Connect API (FastAPI, also reachable via `/api/` through nginx) |
+| Port | Service | Env var |
+|------|---------|---------|
+| 9180 | Feishin web UI (nginx) | `WEB_PORT` |
+| 9181 | Connect API (FastAPI, also reachable via `/api/` through nginx) | `PORT` |
+
+Both are only worth changing with `network_mode: host` — that's what lets two deployments (e.g. a prod and a dev instance) run on the same host at once, each given its own `WEB_PORT`/`PORT` pair so they don't collide.
 
 ### Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CONNECT_TOKEN` | *(random per start)* | Secret token protecting the Connect API on port 9181. If unset, a random one is generated each time the container starts — nginx adds it to every internal request automatically, so the browser never handles it directly. Set this explicitly only if something needs to call the API directly, bypassing nginx, with a token that survives restarts. Use alphanumeric characters only — nginx embeds the value in a quoted config directive, so characters like `"` or `\` will break it. `openssl rand -hex 32` generates a safe value. |
+| `WEB_PORT` | `9180` | Port nginx (the Feishin web UI) listens on. |
+| `PORT` | `9181` | Port the Connect API (Python backend) listens on. If you change this, `CONNECT_URL` doesn't need to change too — nginx still proxies `/api/` to whatever `PORT` is set to. |
+| `CONNECT_TOKEN` | *(random per start)* | Secret token protecting the Connect API on port 9181 (or `PORT`, if changed). If unset, a random one is generated each time the container starts — nginx adds it to every internal request automatically, so the browser never handles it directly. Set this explicitly only if something needs to call the API directly, bypassing nginx, with a token that survives restarts. Use alphanumeric characters only — nginx embeds the value in a quoted config directive, so characters like `"` or `\` will break it. `openssl rand -hex 32` generates a safe value. |
 | `CONNECT_URL` | `/api` | URL the browser uses to reach the Connect API. The default (`/api`) routes through nginx on the same domain — no CORS issues, no extra config needed. Change to `http://host:9181` only if you need direct access to the backend, bypassing nginx. |
 | `CONNECT_DATA_DIR` | `/data` in Docker | Directory the backend stores persistent files in — currently just `airplay_credentials.json` (paired AirPlay 2 devices). Docker already defaults this to `/data`; just mount a volume there (see the compose example above). Only set this yourself to use a different path. |
 | `SERVER_INTERNAL_URL` | — | Internal media server address for the backend proxy (e.g. `http://10.x.x.x:4533`). Only needed when the media server sits behind an SSO layer that the browser cannot bypass. See [Media server behind SSO](#media-server-behind-sso-authentik-etc) below. With `network_mode: host`, use the actual IP — Docker container names do not resolve in host network mode. The old name `NAVIDROME_INTERNAL_URL` is still accepted as a fallback. |
@@ -118,7 +122,7 @@ services:
 | `SERVER_NAME` | — | Pre-configured server name shown in Feishin |
 | `SERVER_TYPE` | — | `navidrome`, `jellyfin`, or `subsonic` |
 | `SERVER_LOCK` | `false` | When `true`, only username and password can be changed in the UI — server name, type and URL are fixed |
-| `DEBUG` | `false` | When `true`, enables verbose playback logs across all renderers (AirPlay via pyatv, Sonos via SoCo, internal streamer), plus `httpx`/`uvicorn.access` request logs and nginx's access log. Leave `false` for normal operation — these are spammy and only useful for troubleshooting. |
+| `DEBUG` | `false` | When `true`, enables verbose playback logs across all renderers (AirPlay via pyatv, Sonos via SoCo, internal streamer), plus `httpx`/`uvicorn.access` request logs and nginx's access log, and serves the Connect API's docs at `/api/docs` (Swagger UI), `/api/redoc` and `/api/openapi.json`. Leave `false` for normal operation. |
 
 ### Requirements
 
@@ -184,7 +188,7 @@ The bare web dev server has no Electron preload or nginx to inject `CONNECT_TOKE
 
 If your media server (Navidrome, Subsonic, or Jellyfin) is protected by an SSO layer (e.g. Authentik forward auth via Traefik/nginx), the browser cannot reach its API directly — every request is intercepted and redirected to the SSO login page.
 
-Feishin Connect solves this with a built-in **backend proxy**: all media server API calls are routed through the Connect backend, which reaches the server on the internal network, bypassing the SSO middleware entirely.
+Feishin Connect solves this with a built-in **backend proxy**: all media server API calls are routed through the Connect backend, which reaches the server on the internal network, bypassing the SSO middleware entirely. Identity headers the SSO layer would normally inject (Authentik, Authelia, oauth2-proxy) are stripped before forwarding, so the media server always sees the actual Subsonic/Jellyfin credentials being sent — never the browsing user's SSO identity.
 
 **Setup:**
 

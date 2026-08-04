@@ -7,11 +7,19 @@ import { useConnectSessionContext } from './connect-session-context';
 import { computePopoverPosition } from './popover-position';
 import { Spinner } from './ui';
 
+import { useCurrentServerId } from '/@/renderer/store';
+
 export const ConnectButton = () => {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [popPos, setPopPos] = useState({ bottom: 0, right: 0 });
     const btnRef = useRef<HTMLButtonElement>(null);
+
+    // No server logged in yet (e.g. still on the login screen, which renders
+    // the same player bar as the authenticated app) — nothing to cast, and
+    // the backend session behind this button isn't authenticated either
+    // (see core/session.py's require_authenticated_session).
+    const currentServerId = useCurrentServerId();
 
     const session = useConnectSessionContext();
 
@@ -58,6 +66,8 @@ export const ConnectButton = () => {
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, [open]);
+
+    if (!currentServerId) return null;
 
     const nowPlayingTitle =
         session.connectStatus?.current_track?.title ?? session.connectStatus?.radio?.title ?? '…';

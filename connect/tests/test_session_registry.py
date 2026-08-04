@@ -48,6 +48,19 @@ def test_get_does_not_touch_last_seen():
     assert session.last_seen == 0.0
 
 
+def test_require_authenticated_session_does_not_create_a_session(client):
+    """An unauthenticated caller (anyone with just CONNECT_TOKEN) hitting a
+    require_authenticated_session-gated route with an arbitrary, never-seen
+    X-Connect-Session must not be able to grow the registry — see
+    core/session.py's require_authenticated_session docstring."""
+    from core.session import registry
+
+    r = client.get("/discover", headers={"X-Connect-Session": "never-seen-before"})
+
+    assert r.status_code == 401
+    assert registry.get("never-seen-before") is None
+
+
 def test_get_session_falls_back_to_default_with_no_header_or_query():
     from core.session import DEFAULT_SESSION_ID, SessionRegistry, get_session
 

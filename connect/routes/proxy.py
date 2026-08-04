@@ -41,7 +41,19 @@ def _is_forward_auth_header(name: str) -> bool:
     error, even for an admin account, because Navidrome never actually
     authenticates as that account at all)."""
     lowered = name.lower()
-    return lowered.startswith(("x-authentik-", "remote-user", "remote-groups", "remote-email", "remote-name"))
+    return lowered.startswith((
+        "x-authentik-",
+        "x-auth-request-",  # oauth2-proxy behind nginx's auth_request module
+        "x-forwarded-user",  # oauth2-proxy acting as its own reverse proxy
+        "x-forwarded-email",
+        "x-forwarded-groups",
+        "x-forwarded-preferred-username",
+        "x-forwarded-access-token",
+        "remote-user",
+        "remote-groups",
+        "remote-email",
+        "remote-name",
+    ))
 
 
 async def _proxy(request: Request, target: str) -> StreamingResponse | JSONResponse:

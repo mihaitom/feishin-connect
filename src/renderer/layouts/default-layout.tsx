@@ -37,7 +37,7 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
             >
                 <WindowBar />
                 <MainContent shell={shell} />
-                {!shell && <PlayerBar />}
+                <PlayerBar />
             </div>
             <ContextMenuController.Root />
             <LibraryScanWatcher />

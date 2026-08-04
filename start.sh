@@ -3,6 +3,12 @@
 # Defaults
 export CONNECT_URL="${CONNECT_URL:-/api}"
 export PUBLIC_PATH="${PUBLIC_PATH:-/}"
+# WEB_PORT is nginx's own listen port (the Feishin web UI); PORT is the
+# Python backend's. Both only matter to change with `network_mode: host` —
+# that's what lets two instances (e.g. a prod and a dev deployment) run on
+# the same host at once, each on its own pair of ports.
+export WEB_PORT="${WEB_PORT:-9180}"
+export PORT="${PORT:-9181}"
 
 # No CONNECT_TOKEN set — generate a random one for this container run rather
 # than falling back to a fixed value (a hardcoded default would be public,
@@ -45,7 +51,7 @@ esac
 # Alpine nginx reads from /etc/nginx/http.d/, not conf.d/.
 # Limit substitution to named vars only so nginx variables like $uri survive.
 mkdir -p /etc/nginx/http.d
-envsubst '${PUBLIC_PATH} ${CONNECT_TOKEN} ${NGINX_ACCESS_LOG}' \
+envsubst '${PUBLIC_PATH} ${CONNECT_TOKEN} ${NGINX_ACCESS_LOG} ${WEB_PORT} ${PORT}' \
     < /etc/nginx/templates/default.conf.template \
     > /etc/nginx/http.d/default.conf
 

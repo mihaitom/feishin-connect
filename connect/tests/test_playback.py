@@ -118,6 +118,41 @@ def test_play_returns_error_for_unfetchable_track(client, default_session):
     assert "error" in r.json()
 
 
+# ── /play-url URL scheme ─────────────────────────────────────────────────────
+# For AirPlay this URL is fetched server-side (see delivery/airplay.py), not
+# just handed to the device — restricted to http(s) so it can't be used to
+# make the backend read e.g. a local file:// path.
+
+
+def test_play_url_rejects_non_http_scheme(client, default_session):
+    r = client.post(
+        "/play-url",
+        json={
+            "target_name": "TV",
+            "target_type": "chromecast",
+            "title": "Test",
+            "url": "file:///etc/passwd",
+        },
+    )
+    assert "error" in r.json()
+    assert default_session.state.is_streaming is False
+
+
+def test_play_url_accepts_https_scheme(client, default_session):
+    with patch.object(ChromecastDelivery, "play", new=AsyncMock()) as play:
+        r = client.post(
+            "/play-url",
+            json={
+                "target_name": "TV",
+                "target_type": "chromecast",
+                "title": "Test",
+                "url": "https://example.com/stream.mp3",
+            },
+        )
+    assert r.json()["status"] == "playing"
+    play.assert_awaited_once()
+
+
 # ── Phase 2 takeover (force=True) ───────────────────────────────────────────
 
 
