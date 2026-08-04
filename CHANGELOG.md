@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.5] - 2026-08-04
+## [0.6.6] - 2026-08-04
 
 Quick hotfix after finding someone's Feishin Connect instance just sitting wide open on the internet. Patched what I could on my end. Securing your own deployment is still on you, though.
 
@@ -23,6 +23,7 @@ Quick hotfix after finding someone's Feishin Connect instance just sitting wide 
 - **An unrecognized session id no longer creates a new session entry on its own** — only signing in does that now.
 - **Radio URLs passed to Connect must now be `http://` or `https://`.**
 - **The media-server proxy (used when Navidrome/Jellyfin sits behind Authentik, Authelia, or oauth2-proxy) now also strips oauth2-proxy's identity headers**, matching the existing handling for the other two.
+- **The Electron app could briefly (or, on a slow network/device scan, not so briefly) show a "Connect token doesn't match" error on startup** — the device list was requested before the app had finished signing in its Connect session, which looked like a real auth error but wasn't.
 
 ### Internal
 - **Minor hardening of the reverse-proxy header handling and CORS configuration** — no functional change.
