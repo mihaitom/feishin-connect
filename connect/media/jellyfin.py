@@ -67,9 +67,13 @@ class JellyfinClient:
         return f"{base}/Items/{cover_art_id}/Images/Primary?maxHeight=300"
 
     def ping(self) -> bool:
+        """Verifies the token actually authenticates — hits an endpoint that
+        requires it (unlike /System/Info/Public, which any anonymous caller
+        can reach), so this can't be satisfied by an unrelated/garbage token."""
         try:
             response = httpx.get(
-                f"{self.internal_url}/System/Info/Public",
+                f"{self.internal_url}/Users/Me",
+                headers=self._auth_header(),
                 timeout=10,
             )
             response.raise_for_status()

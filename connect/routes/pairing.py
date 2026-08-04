@@ -9,10 +9,14 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from core.auth import require_token
+from core.session import require_authenticated_session
 from delivery import credentials
 
 logger = logging.getLogger("connect.pairing")
-router = APIRouter(prefix="/pair/airplay", dependencies=[Depends(require_token)])
+router = APIRouter(
+    prefix="/pair/airplay",
+    dependencies=[Depends(require_token), Depends(require_authenticated_session)],
+)
 
 # Active pairing sessions: device_name → (pyatv pairing object, started_at)
 _sessions: dict[str, tuple[object, float]] = {}

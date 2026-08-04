@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from core.auth import require_token
-from core.session import SessionState, check_ownership, get_session
+from core.session import SessionState, check_ownership, require_authenticated_session
 from core.state import find_sonos
 
 from delivery import ChromecastDelivery, DlnaDelivery, SonosDelivery
@@ -21,7 +21,7 @@ class VolumeRequest(BaseModel):
 
 
 @router.get("/volume")
-async def get_volume(session: SessionState = Depends(get_session)):
+async def get_volume(session: SessionState = Depends(require_authenticated_session)):
     sonos_targets = find_sonos(session.state.active_delivery)
     if not sonos_targets:
         return {"error": "No active Sonos target"}
@@ -34,7 +34,9 @@ async def get_volume(session: SessionState = Depends(get_session)):
 
 
 @router.post("/volume")
-async def set_volume(req: VolumeRequest, session: SessionState = Depends(get_session)):
+async def set_volume(
+    req: VolumeRequest, session: SessionState = Depends(require_authenticated_session)
+):
     volume = max(0, min(100, req.volume))
     sonos_targets = find_sonos(session.state.active_delivery)
     if not sonos_targets:
@@ -50,7 +52,9 @@ async def set_volume(req: VolumeRequest, session: SessionState = Depends(get_ses
 
 @router.get("/device-volume")
 async def get_device_volume(
-    device_type: str, name: str, session: SessionState = Depends(get_session)
+    device_type: str,
+    name: str,
+    session: SessionState = Depends(require_authenticated_session),
 ):
     error = check_ownership(device_type, name, session)
     if error:
@@ -75,7 +79,10 @@ async def get_device_volume(
 
 @router.post("/device-volume")
 async def set_device_volume(
-    device_type: str, name: str, req: VolumeRequest, session: SessionState = Depends(get_session)
+    device_type: str,
+    name: str,
+    req: VolumeRequest,
+    session: SessionState = Depends(require_authenticated_session),
 ):
     error = check_ownership(device_type, name, session)
     if error:

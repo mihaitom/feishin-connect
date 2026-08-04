@@ -39,7 +39,7 @@ class _FakePairing:
 
 
 @pytest.mark.asyncio
-async def test_concurrent_start_requests_only_pair_once(client):
+async def test_concurrent_start_requests_only_pair_once(client, default_session):
     device = _FakeDeviceConfig("TestDevice")
     fake_pairing = _FakePairing()
     pair_call_count = 0
@@ -80,7 +80,7 @@ async def test_concurrent_start_requests_only_pair_once(client):
         assert r.json() == {"device_provides_pin": True, "name": "TestDevice"}
 
 
-def test_sequential_start_calls_reuse_session(client):
+def test_sequential_start_calls_reuse_session(client, default_session):
     device = _FakeDeviceConfig("TestDevice2")
     fake_pairing = _FakePairing()
     pair_call_count = 0

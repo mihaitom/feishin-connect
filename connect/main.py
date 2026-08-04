@@ -17,8 +17,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.auth import DEFAULT_TOKEN as _DEFAULT_TOKEN
 from core.auth import TOKEN as _CONNECT_TOKEN
+from core.auth import TOKEN_WAS_GENERATED as _CONNECT_TOKEN_GENERATED
 from core.session import reap_stale_sessions
 from core.state import PORT, ctx, get_local_ip
 from routes.devices import router as devices_router
@@ -223,9 +223,15 @@ async def lifespan(_: FastAPI):
     else:
         logger.info("ℹ️  No TARGETS env — devices are controlled via Feishin's /play")
 
-    if _CONNECT_TOKEN == _DEFAULT_TOKEN:
+    if not _CONNECT_TOKEN:
         logger.warning(
-            "⚠️  Using default CONNECT_TOKEN — set a custom value in docker-compose for real security"
+            "⚠️  CONNECT_TOKEN explicitly set to empty — the Connect API has no auth!"
+        )
+    elif _CONNECT_TOKEN_GENERATED:
+        logger.warning(
+            f"⚠️  No CONNECT_TOKEN set — generated a random one for this run: {_CONNECT_TOKEN}\n"
+            "   Set CONNECT_TOKEN to a fixed value (see docker-compose.yaml) if it needs to "
+            "survive restarts."
         )
     else:
         logger.info("🔒 Token auth enabled (custom CONNECT_TOKEN set)")

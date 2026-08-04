@@ -12,7 +12,7 @@ import asyncio
 import os
 import time
 
-from fastapi import Header, Query
+from fastapi import Depends, Header, HTTPException, Query
 
 from delivery import BaseDelivery, DeliveryManager
 from media import MediaClient, SubsonicClient
@@ -35,6 +35,15 @@ class SessionState:
         self.media: MediaClient = SubsonicClient("")
         self.event_bus = EventBus()
         self.last_seen: float = time.time()
+        # Set only once /config has verified the supplied credential actually
+        # authenticates against the (optionally locked) media server — see
+        # routes/devices.py's configure() and require_authenticated_session
+        # below. Everything that reveals or controls LAN devices depends on
+        # this instead of just require_token, since nginx attaches
+        # X-Connect-Token to every same-origin request itself (see
+        # ng.conf.template) — it identifies "a request from this deployment's
+        # frontend", not "a logged-in media-server user".
+        self.authenticated: bool = False
 
     def touch(self) -> None:
         self.last_seen = time.time()
@@ -76,6 +85,21 @@ async def get_session(
     session: str | None = Query(default=None),
 ) -> SessionState:
     return await registry.get_or_create(x_connect_session or session or DEFAULT_SESSION_ID)
+
+
+async def require_authenticated_session(
+    session: SessionState = Depends(get_session),
+) -> SessionState:
+    """Like get_session, but 401s until /config has verified real media-server
+    credentials for this session (see SessionState.authenticated). Use this
+    instead of get_session for anything that reveals or controls LAN devices."""
+    if not session.authenticated:
+        raise HTTPException(
+            status_code=401,
+            detail="Session not authenticated — call /config with valid media-server "
+            "credentials first",
+        )
+    return session
 
 
 def compute_position(session: SessionState) -> float:

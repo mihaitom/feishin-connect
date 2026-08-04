@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 
 from core.auth import require_token
 from core.claims import claims
-from core.session import registry, track_label
+from core.session import SessionState, registry, require_authenticated_session, track_label
 from core.state import ctx
 
 from delivery import discover_airplay, discover_chromecast, discover_dlna, discover_sonos
@@ -115,7 +115,9 @@ def _annotate_claims(discovered: dict) -> dict:
 
 
 @router.get("/discover")
-async def discover(fresh: bool = False):
+async def discover(
+    fresh: bool = False, session: SessionState = Depends(require_authenticated_session)
+):
     cached = ctx.discovered
     has_cache = bool(
         cached["sonos"] or cached["airplay"] or cached["chromecast"] or cached["dlna"]

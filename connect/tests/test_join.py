@@ -20,7 +20,7 @@ def _streaming(default_session):
     yield
 
 
-def test_join_rejected_when_not_streaming(client):
+def test_join_rejected_when_not_streaming(client, default_session):
     r = client.post("/join", json={"target_type": "chromecast", "target_name": "TV"})
     assert "error" in r.json()
 
@@ -199,7 +199,7 @@ def test_claim_sets_active_delivery_without_starting_playback(client, default_se
     assert claims.owner_of("chromecast", "TV") == default_session.session_id
 
 
-def test_claim_rejected_without_force_when_claimed_by_another_session(client):
+def test_claim_rejected_without_force_when_claimed_by_another_session(client, default_session):
     from core.claims import claims
 
     import asyncio
@@ -246,6 +246,6 @@ def test_claim_with_force_displaces_other_sessions_claim_and_stops_their_deliver
     assert default_session.state.is_streaming is False
 
 
-def test_claim_returns_error_with_no_targets(client):
+def test_claim_returns_error_with_no_targets(client, default_session):
     r = client.post("/claim", json={"targets": []})
     assert "error" in r.json()

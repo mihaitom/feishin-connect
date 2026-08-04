@@ -9,12 +9,17 @@ import asyncio
 import logging
 import os
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from core.auth import require_token
 from core.claims import claims
-from core.session import SessionState, build_status_dict, get_session
+from core.session import (
+    SessionState,
+    build_status_dict,
+    get_session,
+    require_authenticated_session,
+)
 from core.state import stream_url
 
 from delivery import (
@@ -29,6 +34,24 @@ from media import JellyfinClient, SubsonicClient
 
 logger = logging.getLogger("connect.devices")
 router = APIRouter(dependencies=[Depends(require_token)])
+
+# When SERVER_LOCK=true, /config's url must match one of these (mirrors the
+# frontend's own server-lock — see src/renderer/features/action-required/
+# utils/server-lock.ts's normalizeServerUrl) — otherwise a caller who knows
+# the shared CONNECT_TOKEN could hand /config a *different*, real media
+# server's valid credentials and still reach this deployment's LAN devices.
+# Left unenforced if SERVER_URL isn't set, so it can't accidentally lock
+# everyone out on a deployment that hasn't been given one.
+_SERVER_LOCK = os.getenv("SERVER_LOCK", "").strip().lower() in ("1", "true", "yes", "on")
+_LOCKED_URLS = {
+    u.rstrip("/")
+    for u in (
+        os.getenv("SERVER_URL", ""),
+        os.getenv("SERVER_INTERNAL_URL", ""),
+        os.getenv("NAVIDROME_INTERNAL_URL", ""),
+    )
+    if u
+}
 
 
 class ConfigRequest(BaseModel):
@@ -49,25 +72,53 @@ async def configure(req: ConfigRequest, session: SessionState = Depends(get_sess
         "NAVIDROME_INTERNAL_URL", ""
     )
     server_type = req.server_type.lower()
-    session.display_name = req.username or session.session_id
 
+    if _SERVER_LOCK and _LOCKED_URLS and req.url.rstrip("/") not in _LOCKED_URLS:
+        logger.warning(f"[config] Rejected — url outside SERVER_LOCK allow-list: {req.url}")
+        raise HTTPException(
+            status_code=403,
+            detail="Server URL does not match the locked server for this deployment",
+        )
+
+    media: JellyfinClient | SubsonicClient
     if server_type == "jellyfin":
-        session.media = JellyfinClient(
+        media = JellyfinClient(
             req.url,
             token=req.credential,
             user_id=req.user_id,
             internal_url=internal_url,
         )
+    else:
+        media = SubsonicClient(
+            req.url, credential=req.credential, internal_url=internal_url
+        )
+
+    # Verify the credential actually authenticates before trusting it — the
+    # shared CONNECT_TOKEN only proves "this request came through our nginx",
+    # not that the caller is a legitimate media-server user (see
+    # core/session.py's require_authenticated_session).
+    if not await asyncio.to_thread(media.ping):
+        logger.warning(
+            f"[config] Rejected — {server_type} server at {req.url} "
+            "did not accept the credential"
+        )
+        raise HTTPException(
+            status_code=401, detail="Media server rejected the supplied credential"
+        )
+
+    session.media = media
+    session.authenticated = True
+    session.display_name = req.username or session.session_id
+
+    if server_type == "jellyfin":
         logger.info(
-            f"[config] Jellyfin configured: {req.url} "
+            f"[config] Jellyfin configured & verified: {req.url} "
             f"(internal: {internal_url or 'same'}, user_id: {req.user_id or 'missing'})"
         )
     else:
-        session.media = SubsonicClient(
-            req.url, credential=req.credential, internal_url=internal_url
-        )
         logger.info(
-            f"[config] Subsonic configured: {req.url} (internal: {internal_url or 'same'})"
+            f"[config] Subsonic configured & verified: {req.url} "
+            f"(internal: {internal_url or 'same'})"
         )
     return {"status": "ok"}
 
@@ -84,7 +135,9 @@ async def health(session: SessionState = Depends(get_session)):
 
 @router.post("/device-stop")
 async def stop_device(
-    device_type: str, name: str, session: SessionState = Depends(get_session)
+    device_type: str,
+    name: str,
+    session: SessionState = Depends(require_authenticated_session),
 ):
     """Stop one device while keeping others playing.
 

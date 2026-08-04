@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Casting controls (device list, playback, volume, AirPlay pairing) now also require a signed-in session, not just the backend's access key.**
+- **The Cast button no longer appears on the login screen** — it was previously rendered there along with the rest of the player bar.
+- **Docker deployments without a custom access key for the Connect backend now get a random one generated automatically**, instead of a fixed default value.
+
 ## [0.6.4] - 2026-08-04
 
 ### Fixed

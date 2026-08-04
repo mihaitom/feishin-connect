@@ -11,8 +11,12 @@ services:
             # - REMOTE_URL=http://share.localhost # Used for compatibility with external functionality, such as custom sharing URLs on Navidrome
             - LEGACY_AUTHENTICATION=false # When SERVER_LOCK is true, sets the legacyauth flag for server authentication (true or false)
             - ANALYTICS_DISABLED=false # Set to true to disable Umami analytics tracking
-            # CHANGE THIS to a random secret for real security
-            - CONNECT_TOKEN=SzArltWiDYl44aguM2qy5qQJAD15WV3MOIzsKGnvdXeGIn4kS5JHgVBrgfiUm6y5
+            # CONNECT_TOKEN secures the Connect API (casting control). Leave it unset —
+            # a random one is generated on each container start, which is enough since
+            # the browser never needs to know it (nginx injects it server-side). Only set
+            # this if something needs to call the API directly, bypassing nginx, with a
+            # token that survives restarts:
+            # - CONNECT_TOKEN=SzArltWiDYl44aguM2qy5qQJAD15WV3MOIzsKGnvdXeGIn4kS5JHgVBrgfiUm6y5
             # - DEBUG=true # Verbose playback logs for ALL renderers (AirPlay + Sonos)
         # Keeps AirPlay 2 pairings across container recreations/updates (default path, no env var needed)
         volumes:

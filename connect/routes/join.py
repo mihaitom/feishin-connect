@@ -12,8 +12,8 @@ from core.session import (
     build_status_dict,
     check_claims,
     displace_target,
-    get_session,
     registry,
+    require_authenticated_session,
 )
 from core.state import find_sonos, resolve_target, stream_url
 
@@ -39,7 +39,7 @@ class JoinRequest(BaseModel):
 
 @router.post("/join")
 async def join_stream(
-    req: JoinRequest, session: SessionState = Depends(get_session)
+    req: JoinRequest, session: SessionState = Depends(require_authenticated_session)
 ):
     st = session.state
     if not st.is_streaming:
@@ -113,7 +113,9 @@ class ClaimRequest(BaseModel):
 
 
 @router.post("/claim")
-async def claim_device(req: ClaimRequest, session: SessionState = Depends(get_session)):
+async def claim_device(
+    req: ClaimRequest, session: SessionState = Depends(require_authenticated_session)
+):
     """Claim one or more devices for this session WITHOUT starting playback.
 
     For the takeover flow when the user has nothing loaded to play yet: a

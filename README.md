@@ -6,6 +6,8 @@
 > It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay, Chromecast and DLNA/UPnP devices directly from the player bar.
 > All upstream features are preserved.
 
+> **Not designed to be exposed to the open internet on its own.** The Docker deployment expects an authentication layer in front of it (e.g. Authentik, Authelia, or a reverse proxy with basic auth) if it's reachable from outside your local network — your media server's own login is not a substitute for that.
+
   <p align="center">
     <a href="https://github.com/jeffvli/feishin/blob/main/LICENSE">
       <img src="https://img.shields.io/github/license/mihaitom/feishin-connect?style=flat-square&color=brightgreen"
@@ -107,7 +109,7 @@ services:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CONNECT_TOKEN` | *(public default)* | Secret token protecting the Connect API on port 9181. **Change this** to a random string — the built-in default is publicly known (open source) and only blocks anonymous scanners. nginx adds the token to every internal request automatically; the browser never handles it directly. In Electron, a random token is generated at startup instead. Use alphanumeric characters only — nginx embeds the value in a quoted config directive, so characters like `"` or `\` will break it. `openssl rand -hex 32` generates a safe random value. |
+| `CONNECT_TOKEN` | *(random per start)* | Secret token protecting the Connect API on port 9181. If unset, a random one is generated each time the container starts — nginx adds it to every internal request automatically, so the browser never handles it directly. Set this explicitly only if something needs to call the API directly, bypassing nginx, with a token that survives restarts. Use alphanumeric characters only — nginx embeds the value in a quoted config directive, so characters like `"` or `\` will break it. `openssl rand -hex 32` generates a safe value. |
 | `CONNECT_URL` | `/api` | URL the browser uses to reach the Connect API. The default (`/api`) routes through nginx on the same domain — no CORS issues, no extra config needed. Change to `http://host:9181` only if you need direct access to the backend, bypassing nginx. |
 | `CONNECT_DATA_DIR` | `/data` in Docker | Directory the backend stores persistent files in — currently just `airplay_credentials.json` (paired AirPlay 2 devices). Docker already defaults this to `/data`; just mount a volume there (see the compose example above). Only set this yourself to use a different path. |
 | `SERVER_INTERNAL_URL` | — | Internal media server address for the backend proxy (e.g. `http://10.x.x.x:4533`). Only needed when the media server sits behind an SSO layer that the browser cannot bypass. See [Media server behind SSO](#media-server-behind-sso-authentik-etc) below. With `network_mode: host`, use the actual IP — Docker container names do not resolve in host network mode. The old name `NAVIDROME_INTERNAL_URL` is still accepted as a fallback. |
@@ -200,7 +202,7 @@ Feishin Connect solves this with a built-in **backend proxy**: all media server 
 
 3. The media server itself no longer needs to be reachable from the browser at all — Feishin Connect acts as the only entry point to its API.
 
-**Security:** The Connect API (port 9181) is protected by `CONNECT_TOKEN`. nginx forwards it automatically, so the browser never handles it. Media server traffic is authenticated via Subsonic token/password or Jellyfin API key as usual — the proxy is transparent. How port 9180 is secured (firewall, SSO, etc.) is up to the deployment.
+**Security:** The Connect API (port 9181) is protected by `CONNECT_TOKEN`, and casting/device-control endpoints additionally require a verified media-server login before responding. Media server traffic is authenticated via Subsonic token/password or Jellyfin API key as usual — the proxy is transparent. How port 9180 itself is secured (firewall, SSO, etc.) is up to the deployment — see the note at the top of this README.
 
 **Note:** This proxy is not needed if the media server is publicly reachable or on the same network as the browser. In that case, set `SERVER_URL` directly to the media server URL and leave `SERVER_INTERNAL_URL` unset.
 

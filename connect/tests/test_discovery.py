@@ -16,7 +16,7 @@ def _unclaimed(device: dict) -> dict:
     }
 
 
-def test_discover_returns_all_four_device_types(client):
+def test_discover_returns_all_four_device_types(client, default_session):
     sonos = [{"name": "Küche", "ip": "10.0.0.1"}]
     airplay = [
         {"name": "HomePod", "address": "10.0.0.2", "model": "X", "needs_pairing": True}
@@ -100,7 +100,7 @@ def test_discover_all_starts_a_new_scan_after_the_previous_one_finished():
     assert call_count == 2
 
 
-def test_discover_returns_cached_results_immediately(client):
+def test_discover_returns_cached_results_immediately(client, default_session):
     state.ctx.discovered = {
         "sonos": [{"name": "Cached"}],
         "airplay": [],
@@ -120,7 +120,7 @@ def test_discover_returns_cached_results_immediately(client):
     assert r.json()["sonos"] == [_unclaimed({"name": "Cached"})]
 
 
-def test_discover_keeps_cached_branch_when_scanner_raises(client):
+def test_discover_keeps_cached_branch_when_scanner_raises(client, default_session):
     state.ctx.discovered = {
         "sonos": [{"name": "Stale"}],
         "airplay": [],
@@ -143,7 +143,7 @@ def test_discover_keeps_cached_branch_when_scanner_raises(client):
     assert r.json()["sonos"] == [_unclaimed({"name": "Stale"})]
 
 
-def test_discover_fresh_scan_when_cache_empty(client):
+def test_discover_fresh_scan_when_cache_empty(client, default_session):
     with (
         patch("routes.discovery.discover_sonos", new=AsyncMock(return_value=[])),
         patch("routes.discovery.discover_airplay", new=AsyncMock(return_value=[])),
@@ -159,7 +159,7 @@ def test_discover_fresh_scan_when_cache_empty(client):
     assert r.json()["chromecast"] == [_unclaimed({"name": "TV"})]
 
 
-def test_discover_explicit_fresh_scan_is_verbose(client):
+def test_discover_explicit_fresh_scan_is_verbose(client, default_session):
     """An explicit "Scan again" (fresh=true) should log which Sonos-duplicate
     AirPlay/DLNA entries get filtered out — see discover_all()'s docstring."""
     with (
@@ -194,7 +194,7 @@ def test_discover_all_defaults_to_quiet(client):
     dlna.assert_awaited_once_with(verbose=False)
 
 
-def test_discover_reports_claim_owner(client):
+def test_discover_reports_claim_owner(client, default_session):
     from core.claims import claims
     from core.session import SessionState, registry
     from media import Track
@@ -228,7 +228,7 @@ def test_discover_reports_claim_owner(client):
     assert device["in_use_by_track"] == "Artist Name - Song Title"
 
 
-def test_discover_reports_radio_title_as_track_for_claim_owner(client):
+def test_discover_reports_radio_title_as_track_for_claim_owner(client, default_session):
     from core.claims import claims
     from core.session import SessionState, registry
 

@@ -160,7 +160,7 @@ def test_proxy_navidrome_api_returns_503_when_no_url_configured(client, monkeypa
 # ── Pairing-Liste (no hardware required) ──────────────────────────────────────
 
 
-def test_pair_list_returns_empty_initially(client):
+def test_pair_list_returns_empty_initially(client, default_session):
     import tempfile
     from delivery import credentials
 
@@ -173,7 +173,7 @@ def test_pair_list_returns_empty_initially(client):
     assert r.json()["paired"] == []
 
 
-def test_pair_start_returns_404_for_unknown_device(client):
+def test_pair_start_returns_404_for_unknown_device(client, default_session):
     """Start fails when device is not found on the network."""
 
     async def fake_scan(*args, **kwargs):
@@ -186,13 +186,13 @@ def test_pair_start_returns_404_for_unknown_device(client):
     assert "error" in r.json()
 
 
-def test_pair_finish_without_start_returns_400(client):
+def test_pair_finish_without_start_returns_400(client, default_session):
     r = client.post("/pair/airplay/finish", json={"name": "HomePod"})
     assert r.status_code == 400
     assert "error" in r.json()
 
 
-def test_unpair_nonexistent_returns_404(client):
+def test_unpair_nonexistent_returns_404(client, default_session):
     import tempfile
     from delivery import credentials
 
@@ -204,7 +204,7 @@ def test_unpair_nonexistent_returns_404(client):
     assert r.status_code == 404
 
 
-def test_unpair_existing_returns_success(client):
+def test_unpair_existing_returns_success(client, default_session):
     import tempfile
     from delivery import credentials
 

@@ -2,6 +2,11 @@
 
 from media import SubsonicClient
 
+# Captured at import time, before conftest's autouse _stub_media_ping
+# monkeypatches SubsonicClient.ping for the duration of each test — lets
+# ping-specific tests below restore the real implementation.
+_REAL_PING = SubsonicClient.ping
+
 
 def _client(
     url="http://proxy:9180", internal_url="", credential="u=usr&s=salt&t=tok"
@@ -152,6 +157,7 @@ def test_ping_uses_internal_url(monkeypatch):
         )
         return mock
 
+    monkeypatch.setattr(SubsonicClient, "ping", _REAL_PING)
     monkeypatch.setattr(httpx, "get", fake_get)
 
     c = _client(url="http://proxy:9180", internal_url="http://nav:4533")

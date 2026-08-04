@@ -35,10 +35,11 @@ def test_status_reflects_state(client, default_session):
 # ── /play ─────────────────────────────────────────────────────────────────────
 
 
-def test_play_rejects_when_media_not_configured(client):
+def test_play_rejects_when_never_configured(client):
+    # No /config call ever happened for this session, so it's not
+    # authenticated yet — see core/session.py's require_authenticated_session.
     r = client.post("/play", json={"track_ids": ["abc"]})
-    assert r.status_code == 200
-    assert "error" in r.json()
+    assert r.status_code == 401
 
 
 def test_play_rejects_empty_track_list(client):
@@ -311,7 +312,7 @@ def test_stop_resets_state(client, default_session):
     assert default_session.state.current_track is None
 
 
-def test_stop_is_idempotent(client):
+def test_stop_is_idempotent(client, default_session):
     r1 = client.post("/stop")
     r2 = client.post("/stop")
     assert r1.json()["status"] == "stopped"

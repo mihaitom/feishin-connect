@@ -15,8 +15,8 @@ from core.session import (
     check_claims,
     compute_position,
     displace_target,
-    get_session,
     registry,
+    require_authenticated_session,
 )
 from core.state import AppState, resolve_target, stream_url
 
@@ -191,7 +191,9 @@ class PlayRequest(BaseModel):
 
 
 @router.post("/play")
-async def play_tracks(req: PlayRequest, session: SessionState = Depends(get_session)):
+async def play_tracks(
+    req: PlayRequest, session: SessionState = Depends(require_authenticated_session)
+):
     if not session.media.base_url:
         logger.warning(
             "[play] Rejected: media server not configured (waiting for /config)"
@@ -274,7 +276,9 @@ class PlayUrlRequest(BaseModel):
 
 
 @router.post("/play-url")
-async def play_url(req: PlayUrlRequest, session: SessionState = Depends(get_session)):
+async def play_url(
+    req: PlayUrlRequest, session: SessionState = Depends(require_authenticated_session)
+):
     target = resolve_target(
         req.targets, req.target_name, req.target_type, previous=session.state.active_delivery
     )
@@ -314,7 +318,7 @@ async def play_url(req: PlayUrlRequest, session: SessionState = Depends(get_sess
 
 
 @router.post("/pause")
-async def pause_playback(session: SessionState = Depends(get_session)):
+async def pause_playback(session: SessionState = Depends(require_authenticated_session)):
     if not session.media.base_url:
         # Same "session forgot everything" case /play guards against — a
         # reaped-then-recreated session has no active_delivery to actually
@@ -340,7 +344,7 @@ async def pause_playback(session: SessionState = Depends(get_session)):
 
 
 @router.post("/resume")
-async def resume_playback(session: SessionState = Depends(get_session)):
+async def resume_playback(session: SessionState = Depends(require_authenticated_session)):
     if not session.media.base_url:
         # See /pause's identical guard above for why this matters.
         logger.warning(
@@ -369,7 +373,7 @@ class SeekRequest(BaseModel):
 
 @router.post("/seek")
 async def seek_playback(
-    body: SeekRequest, session: SessionState = Depends(get_session)
+    body: SeekRequest, session: SessionState = Depends(require_authenticated_session)
 ):
     st = session.state
     position = max(0.0, body.position)
@@ -387,7 +391,7 @@ async def seek_playback(
 
 
 @router.post("/stop")
-async def stop_playback(session: SessionState = Depends(get_session)):
+async def stop_playback(session: SessionState = Depends(require_authenticated_session)):
     st = session.state
     if st.active_delivery:
         await st.active_delivery.stop()

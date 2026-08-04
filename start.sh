@@ -3,7 +3,20 @@
 # Defaults
 export CONNECT_URL="${CONNECT_URL:-/api}"
 export PUBLIC_PATH="${PUBLIC_PATH:-/}"
-export CONNECT_TOKEN="${CONNECT_TOKEN:-SzArltWiDYl44aguM2qy5qQJAD15WV3MOIzsKGnvdXeGIn4kS5JHgVBrgfiUm6y5}"
+
+# No CONNECT_TOKEN set — generate a random one for this container run rather
+# than falling back to a fixed value (a hardcoded default would be public,
+# since this image is open source, and give no real protection). The browser
+# never needs to know this value: nginx injects it server-side when proxying
+# to the Python backend (see ng.conf.template), so a fresh token each start
+# is safe — nothing on the frontend caches or depends on it staying stable.
+# Set CONNECT_TOKEN explicitly only if something needs to call the API
+# directly, bypassing nginx, with a token that survives restarts.
+if [ -z "$CONNECT_TOKEN" ]; then
+    CONNECT_TOKEN="$(/app/.venv/bin/python -c 'import secrets; print(secrets.token_hex(32))')"
+    echo "No CONNECT_TOKEN set — generated a random one for this run."
+fi
+export CONNECT_TOKEN
 
 # CONNECT_TOKEN is embedded in a quoted nginx directive (X-Connect-Token
 # header) — characters like " \ $ would break or silently corrupt that

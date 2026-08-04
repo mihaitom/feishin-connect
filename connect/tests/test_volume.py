@@ -52,7 +52,7 @@ def test_volume_post_without_active_sonos_target_is_a_noop(client, default_sessi
 # ── /device-volume GET ────────────────────────────────────────────────────────
 
 
-def test_device_volume_get_sonos(client):
+def test_device_volume_get_sonos(client, default_session):
     dev = MagicMock()
     dev.volume = 42
     with patch.object(SonosDelivery, "_get_device", return_value=dev):
@@ -60,7 +60,7 @@ def test_device_volume_get_sonos(client):
     assert r.json() == {"volume": 42}
 
 
-def test_device_volume_get_chromecast_maps_0_to_1_to_percent(client):
+def test_device_volume_get_chromecast_maps_0_to_1_to_percent(client, default_session):
     cast = MagicMock()
     cast.status.volume_level = 0.37
     with patch.object(ChromecastDelivery, "_get_device", return_value=cast):
@@ -68,24 +68,24 @@ def test_device_volume_get_chromecast_maps_0_to_1_to_percent(client):
     assert r.json() == {"volume": 37}
 
 
-def test_device_volume_get_returns_error_for_airplay(client):
+def test_device_volume_get_returns_error_for_airplay(client, default_session):
     r = client.get("/device-volume?device_type=airplay&name=HomePod")
     assert "error" in r.json()
 
 
-def test_device_volume_get_dlna(client):
+def test_device_volume_get_dlna(client, default_session):
     with patch.object(DlnaDelivery, "get_volume", new=AsyncMock(return_value=64)):
         r = client.get("/device-volume?device_type=dlna&name=Receiver")
     assert r.json() == {"volume": 64}
 
 
-def test_device_volume_get_dlna_returns_error_when_unsupported(client):
+def test_device_volume_get_dlna_returns_error_when_unsupported(client, default_session):
     with patch.object(DlnaDelivery, "get_volume", new=AsyncMock(return_value=None)):
         r = client.get("/device-volume?device_type=dlna&name=Receiver")
     assert "error" in r.json()
 
 
-def test_device_volume_get_swallows_device_errors(client):
+def test_device_volume_get_swallows_device_errors(client, default_session):
     with patch.object(
         SonosDelivery, "_get_device", side_effect=RuntimeError("offline")
     ):
@@ -96,7 +96,7 @@ def test_device_volume_get_swallows_device_errors(client):
 # ── /device-volume POST ───────────────────────────────────────────────────────
 
 
-def test_device_volume_set_sonos_assigns_volume(client):
+def test_device_volume_set_sonos_assigns_volume(client, default_session):
     dev = MagicMock()
     with patch.object(SonosDelivery, "_get_device", return_value=dev):
         r = client.post(
@@ -106,7 +106,7 @@ def test_device_volume_set_sonos_assigns_volume(client):
     assert dev.volume == 55
 
 
-def test_device_volume_set_chromecast_scales_to_0_to_1(client):
+def test_device_volume_set_chromecast_scales_to_0_to_1(client, default_session):
     cast = MagicMock()
     with patch.object(ChromecastDelivery, "_get_device", return_value=cast):
         r = client.post(
@@ -116,7 +116,7 @@ def test_device_volume_set_chromecast_scales_to_0_to_1(client):
     cast.set_volume.assert_called_once_with(0.5)
 
 
-def test_device_volume_set_clamps_above_100(client):
+def test_device_volume_set_clamps_above_100(client, default_session):
     dev = MagicMock()
     with patch.object(SonosDelivery, "_get_device", return_value=dev):
         r = client.post(
@@ -126,7 +126,7 @@ def test_device_volume_set_clamps_above_100(client):
     assert dev.volume == 100
 
 
-def test_device_volume_set_clamps_below_zero(client):
+def test_device_volume_set_clamps_below_zero(client, default_session):
     cast = MagicMock()
     with patch.object(ChromecastDelivery, "_get_device", return_value=cast):
         r = client.post(
@@ -136,14 +136,14 @@ def test_device_volume_set_clamps_below_zero(client):
     cast.set_volume.assert_called_once_with(0.0)
 
 
-def test_device_volume_set_rejects_unsupported_type(client):
+def test_device_volume_set_rejects_unsupported_type(client, default_session):
     r = client.post(
         "/device-volume?device_type=airplay&name=HomePod", json={"volume": 50}
     )
     assert "error" in r.json()
 
 
-def test_device_volume_set_dlna(client):
+def test_device_volume_set_dlna(client, default_session):
     with patch.object(DlnaDelivery, "set_volume", new=AsyncMock()) as set_volume:
         r = client.post(
             "/device-volume?device_type=dlna&name=Receiver", json={"volume": 70}

@@ -9,7 +9,7 @@ from core import session as session_module
 from core import state
 from core.session import DEFAULT_SESSION_ID, SessionState
 from main import app
-from media import SubsonicClient
+from media import JellyfinClient, SubsonicClient
 
 
 @pytest.fixture
@@ -26,6 +26,21 @@ def client():
         if auth.TOKEN:
             c.headers.update({"X-Connect-Token": auth.TOKEN})
         yield c
+
+
+@pytest.fixture(autouse=True)
+def _stub_media_ping(monkeypatch):
+    """/config now calls media.ping() to verify the supplied credential
+    actually authenticates before accepting it (see routes/devices.py) — but
+    most tests exercise it with fake URLs (e.g. http://nav:4533) that don't
+    resolve to a real server. Stub just the two ping() methods (not the
+    underlying httpx.get, which get_track()/get_cover_art_url() etc. also
+    use and tests mock separately) to succeed by default; tests that
+    specifically exercise ping()'s own behavior (test_subsonic.py,
+    test_jellyfin.py) or /config rejection override this with their own
+    monkeypatch.setattr call."""
+    monkeypatch.setattr(SubsonicClient, "ping", lambda self: True)
+    monkeypatch.setattr(JellyfinClient, "ping", lambda self: True)
 
 
 @pytest.fixture(autouse=True)
@@ -48,5 +63,6 @@ def default_session(reset_state) -> SessionState:
     the registry *after* that fixture clears it, not before."""
     session = SessionState(DEFAULT_SESSION_ID)
     session.media = SubsonicClient("")
+    session.authenticated = True
     session_module.registry._sessions[DEFAULT_SESSION_ID] = session
     return session

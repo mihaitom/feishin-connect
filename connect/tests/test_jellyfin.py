@@ -5,6 +5,11 @@ import pytest
 
 from media import JellyfinClient
 
+# Captured at import time, before conftest's autouse _stub_media_ping
+# monkeypatches JellyfinClient.ping for the duration of each test — lets
+# ping-specific tests below restore the real implementation.
+_REAL_PING = JellyfinClient.ping
+
 
 def _client(
     url="http://proxy:9180", internal_url="", token="tok", user_id="u1"
@@ -121,24 +126,37 @@ def test_get_track_requires_user_id():
 # ── ping ──────────────────────────────────────────────────────────────────────
 
 
-def test_ping_hits_public_info(monkeypatch):
+def test_ping_hits_authenticated_endpoint_with_token(monkeypatch):
     captured = {}
 
     def fake_get(url, **kwargs):
         captured["url"] = url
+        captured["headers"] = kwargs.get("headers")
         return httpx.Response(
-            200, json={"Id": "server"}, request=httpx.Request("GET", url)
+            200, json={"Id": "user"}, request=httpx.Request("GET", url)
         )
 
+    monkeypatch.setattr(JellyfinClient, "ping", _REAL_PING)
     monkeypatch.setattr(httpx, "get", fake_get)
-    c = _client(url="http://proxy:9180", internal_url="http://jf:8096")
+    c = _client(url="http://proxy:9180", internal_url="http://jf:8096", token="tok")
     assert c.ping() is True
-    assert captured["url"] == "http://jf:8096/System/Info/Public"
+    assert captured["url"] == "http://jf:8096/Users/Me"
+    assert captured["headers"] == {"X-Emby-Token": "tok"}
 
 
 def test_ping_returns_false_on_error(monkeypatch):
     def fake_get(url, **kwargs):
         raise httpx.ConnectError("nope")
 
+    monkeypatch.setattr(JellyfinClient, "ping", _REAL_PING)
     monkeypatch.setattr(httpx, "get", fake_get)
     assert _client().ping() is False
+
+
+def test_ping_returns_false_on_invalid_token(monkeypatch):
+    def fake_get(url, **kwargs):
+        return httpx.Response(401, request=httpx.Request("GET", url))
+
+    monkeypatch.setattr(JellyfinClient, "ping", _REAL_PING)
+    monkeypatch.setattr(httpx, "get", fake_get)
+    assert _client(token="wrong").ping() is False

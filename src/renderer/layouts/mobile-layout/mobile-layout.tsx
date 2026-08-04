@@ -55,7 +55,7 @@ export const MobileLayout = ({ shell }: MobileLayoutProps) => {
                         <Outlet />
                     </Suspense>
                 </main>
-                <PlayerBar />
+                {!shell && <PlayerBar />}
             </div>
             {!shell && (
                 <Drawer
