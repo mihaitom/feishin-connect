@@ -1134,6 +1134,10 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                 mediaPlay: (id?: string) => {
                     let playIndex: number | undefined;
 
+                    if (useRadioPlayerStore.getState().currentStreamUrl) {
+                        useRadioPlayerStore.getState().actions.stop();
+                    }
+
                     set((state) => {
                         if (id) {
                             const queue = state.getQueue();
@@ -1180,6 +1184,10 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                 mediaPlayByIndex: (index: number) => {
                     let playIndex: number | undefined;
                     let songId: string | undefined;
+
+                    if (useRadioPlayerStore.getState().currentStreamUrl) {
+                        useRadioPlayerStore.getState().actions.stop();
+                    }
 
                     set((state) => {
                         const queue = state.getQueue();
