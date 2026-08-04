@@ -23,7 +23,9 @@ export const useConnectSession = (): ConnectSession => {
     const [activeTargets, setActiveTargets] = useState<ConnectDevice[]>([]);
     const [selectedForSend, setSelectedForSend] = useState<ConnectDevice[]>([]);
 
-    const { devices, health, isScanning, refresh } = useConnectDevices();
+    const { ensureConfigured, forceReconfigure, mySessionId } = useConnectSetup();
+
+    const { devices, health, isScanning, refresh } = useConnectDevices(ensureConfigured);
     const { paired, refresh: refreshPaired } = usePairedDevices();
     const { fetchVolume } = useConnectVolume();
     const { mediaNext, mediaPause, mediaPlay, mediaSeekToTimestamp, mediaTogglePlayPause } =
@@ -31,8 +33,6 @@ export const useConnectSession = (): ConnectSession => {
     const pauseRadio = useRadioStore((s) => s.actions.pause);
     const playRadio = useRadioStore((s) => s.actions.play);
     const connectElapsed = useConnectElapsed();
-
-    const { ensureConfigured, forceReconfigure, mySessionId } = useConnectSetup();
 
     const lastAutoSentRef = useRef<string>('');
 

@@ -16,7 +16,7 @@ class HttpStatusError extends Error {
     }
 }
 
-export const useConnectDevices = () => {
+export const useConnectDevices = (ensureConfigured: () => Promise<void>) => {
     const [devices, setDevices] = useState<ConnectDevice[]>([]);
     const [health, setHealth] = useState<ConnectHealth | null>(null);
     const [isScanning, setIsScanning] = useState(false);
@@ -101,7 +101,15 @@ export const useConnectDevices = () => {
     };
 
     useEffect(() => {
-        refresh();
+        // Waits for /config so this doesn't race it and misreport a fresh,
+        // not-yet-authenticated session as a token mismatch (see
+        // require_authenticated_session in core/session.py) — most visible in
+        // Electron, where the backend is a cold process on every launch and
+        // device discovery alone can take several seconds. Manual refresh()
+        // calls (e.g. reopening the popover later) skip this — by then
+        // /config has long since completed.
+        ensureConfigured().then(() => refresh());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return { devices, health, isScanning, refresh };
