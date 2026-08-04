@@ -51,6 +51,26 @@ def test_device_stop_airplay_branch(client, default_session):
     assert default_session.state.active_delivery is None
 
 
+def test_device_stop_airplay_stops_the_real_instance(client, default_session):
+    """Regression test: /device-stop used to construct a fresh
+    AirPlayDelivery(name) and call stop() on THAT instead of the real,
+    currently-streaming instance held in session.state.active_delivery — a
+    no-op, since AirPlay's stream task/connection live on the instance
+    itself (see delivery/airplay.py), leaving the RAOP stream running
+    forever after deselecting the device in the frontend. Patching the
+    class (as the other AirPlay test above does) wouldn't catch this — it
+    intercepts stop() on ANY instance — so this asserts object identity."""
+    real = AirPlayDelivery("HomePod")
+    real.stop = AsyncMock()
+    default_session.state.is_streaming = True
+    default_session.state.active_delivery = real
+
+    r = client.post("/device-stop?device_type=airplay&name=HomePod")
+
+    assert r.json()["status"] == "stopped"
+    real.stop.assert_awaited_once()
+
+
 def test_device_stop_returns_error_on_exception(client, default_session):
     default_session.state.is_streaming = True
     default_session.state.active_delivery = ChromecastDelivery("TV")

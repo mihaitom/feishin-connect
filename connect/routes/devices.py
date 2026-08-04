@@ -101,16 +101,18 @@ async def stop_device(
     else:
         type_cls = AirPlayDelivery
     active = session.state.active_delivery
-
-    remaining: list[BaseDelivery] = []
-    if isinstance(active, DeliveryManager):
-        remaining = [
-            d
-            for d in active.deliveries
-            if not (isinstance(d, type_cls) and d.target == name)
-        ]
-    elif active and not (isinstance(active, type_cls) and active.target == name):
-        remaining = [active]
+    candidates = (
+        active.deliveries if isinstance(active, DeliveryManager) else [active] if active else []
+    )
+    # The actual live instance being stopped, if found — AirPlay in
+    # particular needs this: its RAOP stream task/connection live on the
+    # instance itself (see delivery/airplay.py), so stopping a freshly
+    # constructed AirPlayDelivery(name) below would be a no-op that never
+    # touches the real stream, leaving it playing forever.
+    matched = next(
+        (d for d in candidates if isinstance(d, type_cls) and d.target == name), None
+    )
+    remaining: list[BaseDelivery] = [d for d in candidates if d is not matched]
 
     logger.info(
         f"[device-stop] {device_type}:{name} — remaining: "
@@ -169,7 +171,7 @@ async def stop_device(
         elif device_type == "dlna":
             await DlnaDelivery(name).stop()
         else:
-            await AirPlayDelivery(name).stop()
+            await (matched or AirPlayDelivery(name)).stop()
 
     except Exception as e:
         logger.error(f"[device-stop] {name}: {e}", exc_info=True)

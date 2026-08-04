@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.4] - 2026-08-04
+
+### Fixed
+- **Casting to AirPlay devices (HomePod, AirPort Express, etc.) never actually played anything, and switching tracks while casting could get refused by the device** — a leftover reference from the session-management rework silently failed every AirPlay play request behind the scenes, and switching tracks didn't stop the previous connection before opening a new one, leaving the device caught between two competing streams.
+- **Pausing, stopping, or deselecting an AirPlay device while it was playing had no effect — it just kept playing** — AirPlay has no native pause, so pausing now stops the stream (and reconnects on resume), and deselecting the device now stops the actual active connection instead of a disconnected one.
+
 ## [0.6.3] - 2026-07-29
 
 ### Fixed

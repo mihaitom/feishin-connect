@@ -209,7 +209,9 @@ async def play_tracks(req: PlayRequest, session: SessionState = Depends(get_sess
         logger.warning(f"[play] Track {track_id} not found: {e}")
         return {"error": f"Track not found: {e}"}
 
-    target = resolve_target(req.targets, req.target_name, req.target_type)
+    target = resolve_target(
+        req.targets, req.target_name, req.target_type, previous=session.state.active_delivery
+    )
     url = stream_url(session.session_id)
     start_position = max(0.0, min(req.start_position, float(track.duration)))
     logger.info(
@@ -273,7 +275,9 @@ class PlayUrlRequest(BaseModel):
 
 @router.post("/play-url")
 async def play_url(req: PlayUrlRequest, session: SessionState = Depends(get_session)):
-    target = resolve_target(req.targets, req.target_name, req.target_type)
+    target = resolve_target(
+        req.targets, req.target_name, req.target_type, previous=session.state.active_delivery
+    )
     if not target:
         return {"error": "No target configured"}
 

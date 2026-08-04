@@ -179,6 +179,55 @@ def test_resolve_target_returns_none_when_no_config():
     assert result is None
 
 
+def test_resolve_target_reuses_matching_previous_instance():
+    """Regression test: a fresh instance on every /play left AirPlay's
+    previous RAOP stream never explicitly stopped, racing the new connection
+    for the device's single audio data port (Connection refused on track
+    switch — see CHANGELOG). Switching to the same device must reuse the
+    same delivery instance so its own play() can stop itself first."""
+    from delivery import AirPlayDelivery
+
+    first = resolve_target(target_type="airplay", target_name="HomePod")
+    second = resolve_target(target_type="airplay", target_name="HomePod", previous=first)
+    assert second is first
+    assert isinstance(second, AirPlayDelivery)
+
+
+def test_resolve_target_does_not_reuse_different_target():
+    first = resolve_target(target_type="airplay", target_name="HomePod")
+    second = resolve_target(target_type="airplay", target_name="Apple TV", previous=first)
+    assert second is not first
+    assert second.target == "Apple TV"
+
+
+def test_resolve_target_does_not_reuse_different_type():
+    from delivery import ChromecastDelivery
+
+    first = resolve_target(target_type="airplay", target_name="Living Room")
+    second = resolve_target(
+        target_type="chromecast", target_name="Living Room", previous=first
+    )
+    assert second is not first
+    assert isinstance(second, ChromecastDelivery)
+
+
+def test_resolve_target_reuses_matching_member_of_previous_manager():
+    from delivery import AirPlayDelivery, DeliveryManager
+
+    first = resolve_target(
+        targets=[
+            {"type": "sonos", "name": "Küche"},
+            {"type": "airplay", "name": "HomePod"},
+        ]
+    )
+    assert isinstance(first, DeliveryManager)
+    airplay_member = first.deliveries[1]
+
+    second = resolve_target(target_type="airplay", target_name="HomePod", previous=first)
+    assert second is airplay_member
+    assert isinstance(second, AirPlayDelivery)
+
+
 # ── find_sonos ────────────────────────────────────────────────────────────────
 
 

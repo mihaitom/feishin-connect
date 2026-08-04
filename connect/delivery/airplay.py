@@ -53,7 +53,7 @@ class AirPlayDelivery(BaseDelivery):
         cached = next(
             (
                 d
-                for d in ctx.state.discovered.get("airplay", [])
+                for d in ctx.discovered.get("airplay", [])
                 if d.get("name", "").lower() == self.target.lower() and d.get("address")
             ),
             None,
@@ -105,37 +105,6 @@ class AirPlayDelivery(BaseDelivery):
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    @staticmethod
-    async def _fetch_audio(src_url: str, offset: float) -> io.BytesIO:
-        """Download audio from src_url. If offset > 0, use ffmpeg to seek before
-        passing the bytes to pyatv — otherwise download the file directly."""
-        if offset > 0:
-            proc = await asyncio.create_subprocess_exec(
-                "ffmpeg",
-                "-y",
-                "-ss",
-                str(offset),
-                "-i",
-                src_url,
-                "-vn",
-                "-acodec",
-                "mp3",
-                "-f",
-                "mp3",
-                "pipe:1",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.DEVNULL,
-            )
-            data, _ = await proc.communicate()
-            if proc.returncode != 0:
-                raise RuntimeError(f"ffmpeg seek failed (exit {proc.returncode})")
-            return io.BytesIO(data)
-
-        async with httpx.AsyncClient(follow_redirects=True, timeout=600.0) as http:
-            resp = await http.get(src_url)
-            resp.raise_for_status()
-            return io.BytesIO(resp.content)
-
     async def play(
         self,
         stream_url: str,
@@ -166,43 +135,36 @@ class AirPlayDelivery(BaseDelivery):
         captured_atv = self._atv
 
         async def _stream():
-            from core.state import ctx
-
             try:
-                track = ctx.state.current_track
+                if not stream_url:
+                    logger.warning(f"[AirPlay:{self.target}] No stream URL")
+                    return
 
-                if not track:
-                    # Radio / live URL — pass directly to pyatv (no BytesIO needed)
-                    if not stream_url:
-                        logger.warning(
-                            f"[AirPlay:{self.target}] No track and no stream URL"
-                        )
-                        return
-                    logger.info(f"[AirPlay:{self.target}] ▶ radio: {stream_url[:80]}")
+                if duration is None:
+                    # Radio / live URL — already producing bytes in real time,
+                    # so pyatv can fetch and decode it directly.
+                    logger.info(f"[AirPlay:{self.target}] ▶ {title}: {stream_url[:80]}")
                     await captured_atv.stream.stream_file(stream_url)
-                    logger.info(f"[AirPlay:{self.target}] ✓ radio stream ended")
-                    return
-
-                if not ctx.media:
-                    logger.warning(
-                        f"[AirPlay:{self.target}] No media server configured"
-                    )
-                    return
-
-                offset = ctx.state.clock.resume_offset
-                src_url = ctx.media.get_stream_url(track.id)
-
-                if offset > 0:
-                    logger.info(
-                        f"[AirPlay:{self.target}] ↓ seeking to {offset:.1f}s: {track.title}"
-                    )
                 else:
-                    logger.info(f"[AirPlay:{self.target}] ↓ downloading: {track.title}")
+                    # Queued track: stream_url is our own /stream/<session_id>
+                    # proxy, fed by a freshly spawned ffmpeg transcode — its
+                    # first bytes can take longer than pyatv's hardcoded 10s
+                    # decoder-detection timeout to arrive, which fails with an
+                    # opaque "failed to init decoder" if handed to pyatv live.
+                    # Downloading the whole (seek/gain-adjusted) track first
+                    # sidesteps that: pyatv then decodes from an in-memory
+                    # buffer with no timeout risk.
+                    logger.info(f"[AirPlay:{self.target}] ↓ downloading: {title}")
+                    async with httpx.AsyncClient(
+                        follow_redirects=True, timeout=600.0
+                    ) as http:
+                        resp = await http.get(stream_url)
+                        resp.raise_for_status()
+                    audio = io.BytesIO(resp.content)
+                    logger.info(f"[AirPlay:{self.target}] ▶ {title}")
+                    await captured_atv.stream.stream_file(audio)
 
-                audio = await AirPlayDelivery._fetch_audio(src_url, offset)
-                logger.info(f"[AirPlay:{self.target}] ▶ {track.title}")
-                await captured_atv.stream.stream_file(audio)
-                logger.info(f"[AirPlay:{self.target}] ✓ sent")
+                logger.info(f"[AirPlay:{self.target}] ✓ stream ended")
 
             except asyncio.CancelledError:
                 logger.info(f"[AirPlay:{self.target}] Stream cancelled")
@@ -227,6 +189,13 @@ class AirPlayDelivery(BaseDelivery):
 
         self._stream_task = asyncio.create_task(_stream())
         logger.info(f"[AirPlay:{self.target}] ✓ stream task started")
+
+    async def pause(self) -> None:
+        # RAOP has no native pause — pyatv only exposes stop() for the audio
+        # stream. Stopping the push here is correct: /resume reconnects via
+        # play() with the seek offset already applied server-side (see
+        # routes/stream.py), same as it does for a plain seek.
+        await self.stop()
 
     async def stop(self) -> None:
         if self._stream_task and not self._stream_task.done():

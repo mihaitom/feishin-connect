@@ -1,6 +1,7 @@
 """Tests for SonosDelivery, AirPlayDelivery, ChromecastDelivery and DlnaDelivery."""
 
 import asyncio
+import io
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -106,6 +107,89 @@ def test_airplay_stop_closes_atv_when_no_task():
 
     atv.close.assert_called_once()
     assert d._atv is None
+
+
+def test_airplay_pause_stops_the_stream():
+    """Regression test: BaseDelivery.pause() defaults to a no-op, and
+    AirPlayDelivery didn't override it — so /pause (and therefore the
+    player bar's Pause and Stop buttons, which route through it — see
+    use-connect-controls.ts) had zero effect on an active AirPlay cast,
+    the RAOP push just kept playing. RAOP has no native pause primitive
+    (pyatv only exposes stop()), so pausing must stop the stream; /resume
+    already reconnects via play() with the seek offset applied."""
+    d = AirPlayDelivery("HomePod")
+    atv = MagicMock()
+    atv.close.return_value = []
+    d._atv = atv
+
+    asyncio.run(d.pause())
+
+    atv.close.assert_called_once()
+    assert d._atv is None
+
+
+def test_airplay_play_streams_radio_url_directly():
+    """Regression test for the 344a2540 session-management refactor, which
+    removed Context.state/Context.media but left airplay.py reading them —
+    every AirPlay play() raised AttributeError before ever reaching pyatv
+    (see CHANGELOG). Radio (no duration) must hand stream_url straight to
+    pyatv.stream.stream_file() — it's already producing bytes live."""
+    d = AirPlayDelivery("HomePod")
+    atv = MagicMock()
+    atv.stream.stream_file = AsyncMock()
+    atv.close.return_value = []
+
+    async def run():
+        with (
+            patch.object(
+                AirPlayDelivery, "_find_device", new=AsyncMock(return_value=MagicMock())
+            ),
+            patch("pyatv.connect", new=AsyncMock(return_value=atv)),
+        ):
+            await d.play("http://host/radio.mp3", "Title", "Artist")
+            await d._stream_task
+
+    asyncio.run(run())
+    atv.stream.stream_file.assert_called_once_with("http://host/radio.mp3")
+
+
+def test_airplay_play_downloads_track_before_streaming():
+    """Queued tracks (duration given) must be fully downloaded before being
+    handed to pyatv, not passed as a live URL — pyatv's decoder-detection
+    has a hardcoded 10s read timeout (see audio_source.py's DEFAULT_TIMEOUT),
+    and our own /stream/<session_id> proxy (fed by a freshly spawned ffmpeg
+    transcode) can take longer than that to produce its first bytes, which
+    fails with an opaque 'failed to init decoder' if streamed live."""
+    d = AirPlayDelivery("HomePod")
+    atv = MagicMock()
+    atv.stream.stream_file = AsyncMock()
+    atv.close.return_value = []
+
+    fake_response = MagicMock()
+    fake_response.content = b"fake-mp3-bytes"
+    fake_response.raise_for_status = MagicMock()
+
+    fake_http_client = AsyncMock()
+    fake_http_client.get = AsyncMock(return_value=fake_response)
+    fake_http_client.__aenter__ = AsyncMock(return_value=fake_http_client)
+    fake_http_client.__aexit__ = AsyncMock(return_value=False)
+
+    async def run():
+        with (
+            patch.object(
+                AirPlayDelivery, "_find_device", new=AsyncMock(return_value=MagicMock())
+            ),
+            patch("pyatv.connect", new=AsyncMock(return_value=atv)),
+            patch("delivery.airplay.httpx.AsyncClient", return_value=fake_http_client),
+        ):
+            await d.play("http://host/stream/session123", "Title", "Artist", None, 200.0)
+            await d._stream_task
+
+    asyncio.run(run())
+    fake_http_client.get.assert_called_once_with("http://host/stream/session123")
+    args, _ = atv.stream.stream_file.call_args
+    assert isinstance(args[0], io.BytesIO)
+    assert args[0].getvalue() == b"fake-mp3-bytes"
 
 
 # ── ChromecastDelivery cache ──────────────────────────────────────────────────

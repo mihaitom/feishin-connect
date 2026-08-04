@@ -129,17 +129,41 @@ def resolve_target(
     targets: list[dict] | None = None,
     target_name: str | None = None,
     target_type: str | None = None,
+    previous: BaseDelivery | DeliveryManager | None = None,
 ) -> BaseDelivery | DeliveryManager | None:
-    """Resolve one or more targets from a request into a single delivery object."""
+    """Resolve one or more targets from a request into a single delivery object.
+
+    `previous` is the caller's current active_delivery, if any — a requested
+    (type, name) pair already present in `previous` reuses that same
+    instance instead of constructing a fresh one. This matters for
+    AirPlayDelivery specifically: play() relies on its own instance state
+    (_stream_task, _atv) to stop its previous stream before reconnecting —
+    a fresh instance on every call skips that, leaving the old RAOP session
+    racing the new one for the device's single audio data port, which the
+    device then refuses instead of cleanly handing over.
+    """
+
+    def _reuse(cls: type[BaseDelivery], name: str) -> BaseDelivery | None:
+        candidates = (
+            previous.deliveries
+            if isinstance(previous, DeliveryManager)
+            else [previous]
+            if previous is not None
+            else []
+        )
+        return next(
+            (d for d in candidates if isinstance(d, cls) and d.target == name), None
+        )
+
     if targets:
         deliveries: list[BaseDelivery] = []
         for t in targets:
             cls = _DELIVERY_TYPES.get(t.get("type"), AirPlayDelivery)
-            deliveries.append(cls(t["name"]))
+            deliveries.append(_reuse(cls, t["name"]) or cls(t["name"]))
         return DeliveryManager.from_deliveries(deliveries)
     if target_type and target_name:
         cls = _DELIVERY_TYPES.get(target_type, AirPlayDelivery)
-        return cls(target_name)
+        return _reuse(cls, target_name) or cls(target_name)
     if ctx.delivery.deliveries:
         return ctx.delivery
     return None
