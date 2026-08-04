@@ -46,7 +46,12 @@ RUN apk add --no-cache \
 
 WORKDIR /build
 
-RUN curl -sLO https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz \
+# ffmpeg.org's own server is occasionally flaky under CI load — retry with
+# backoff, and force IPv4 since the SSL handshake failures observed on
+# GitHub's native arm64 runners (ubuntu-24.04-arm) look like a broken IPv6
+# path rather than an actual TLS issue.
+RUN curl -fsSL -4 --retry 5 --retry-all-errors --retry-delay 3 --connect-timeout 10 \
+        -o ffmpeg-8.1.2.tar.xz https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz \
     && tar xf ffmpeg-8.1.2.tar.xz
 
 WORKDIR /build/ffmpeg-8.1.2
