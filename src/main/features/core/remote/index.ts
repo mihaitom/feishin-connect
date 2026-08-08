@@ -12,7 +12,16 @@ import manifest from './manifest.json';
 import { isLinux } from '/@/main/env';
 import { getMainWindow } from '/@/main/index';
 import { QueueSong } from '/@/shared/types/domain-types';
-import { ClientEvent, RemoteConnectDevice, ServerEvent } from '/@/shared/types/remote-types';
+import {
+    ClientEvent,
+    RemoteConnectDevice,
+    RemotePlaylistItem,
+    RemoteQueueItem,
+    RemoteRadioItem,
+    RemoteTrackItem,
+    ServerEvent,
+    ServerRadioStatus,
+} from '/@/shared/types/remote-types';
 import { PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/types';
 
 let mprisPlayer: any | undefined;
@@ -118,6 +127,24 @@ let currentConnectState: {
     isActive: false,
     mySessionId: '',
 };
+let currentQueueState: { currentUniqueId: null | string; items: RemoteQueueItem[] } = {
+    currentUniqueId: null,
+    items: [],
+};
+let currentRadioStatus: ServerRadioStatus['data'] = { isActive: false };
+
+// Tracks/playlists/radio browsing is request/response, not broadcast — the
+// desktop renderer answers asynchronously over a separate IPC channel with no
+// `ws` in scope, so the requesting client is remembered here by requestId
+// until the matching `respond-*` IPC message arrives (or the timeout fires,
+// as a leak guard if the renderer never responds).
+const REQUEST_TIMEOUT_MS = 15000;
+const requestClientMap = new Map<string, StatefulWebSocket>();
+
+function rememberRequestClient(requestId: string, client: StatefulWebSocket): void {
+    requestClientMap.set(requestId, client);
+    setTimeout(() => requestClientMap.delete(requestId), REQUEST_TIMEOUT_MS);
+}
 
 const getEncoding = (encoding: string | string[]): Encoding => {
     const encodingArray = Array.isArray(encoding) ? encoding : [encoding];
@@ -439,6 +466,35 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                                 getMainWindow()?.webContents.send('renderer-player-play');
                                 break;
                             }
+                            case 'play-playlist': {
+                                getMainWindow()?.webContents.send('request-play-playlist', {
+                                    id: json.id,
+                                });
+                                break;
+                            }
+                            case 'play-radio': {
+                                getMainWindow()?.webContents.send('request-play-radio', {
+                                    id: json.id,
+                                });
+                                break;
+                            }
+                            case 'play-track': {
+                                getMainWindow()?.webContents.send('request-play-track', {
+                                    id: json.id,
+                                });
+                                break;
+                            }
+                            case 'playlists-request': {
+                                const { limit, requestId, searchTerm, startIndex } = json;
+                                rememberRequestClient(requestId, ws);
+                                getMainWindow()?.webContents.send('request-playlists', {
+                                    limit,
+                                    requestId,
+                                    searchTerm,
+                                    startIndex,
+                                });
+                                break;
+                            }
                             case 'previous': {
                                 getMainWindow()?.webContents.send('renderer-player-previous');
                                 break;
@@ -477,6 +533,18 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
 
                                 break;
                             }
+                            case 'queue-jump': {
+                                getMainWindow()?.webContents.send('request-queue-jump', {
+                                    uniqueId: json.uniqueId,
+                                });
+                                break;
+                            }
+                            case 'radio-request': {
+                                const { requestId } = json;
+                                rememberRequestClient(requestId, ws);
+                                getMainWindow()?.webContents.send('request-radio', { requestId });
+                                break;
+                            }
                             case 'rating': {
                                 const { id, rating } = json;
                                 if (id && id === currentState.song?.id) {
@@ -494,6 +562,17 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                             }
                             case 'shuffle': {
                                 getMainWindow()?.webContents.send('renderer-player-toggle-shuffle');
+                                break;
+                            }
+                            case 'tracks-request': {
+                                const { limit, requestId, searchTerm, startIndex } = json;
+                                rememberRequestClient(requestId, ws);
+                                getMainWindow()?.webContents.send('request-tracks', {
+                                    limit,
+                                    requestId,
+                                    searchTerm,
+                                    startIndex,
+                                });
                                 break;
                             }
                             case 'volume': {
@@ -539,6 +618,8 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                 ws.send(JSON.stringify({ data: currentState, event: 'state' }));
                 ws.send(JSON.stringify({ data: currentConnectDevices, event: 'connect-devices' }));
                 ws.send(JSON.stringify({ data: currentConnectState, event: 'connect-state' }));
+                ws.send(JSON.stringify({ data: currentQueueState, event: 'queue-state' }));
+                ws.send(JSON.stringify({ data: currentRadioStatus, event: 'radio-status' }));
             });
 
             const heartBeat = setInterval(() => {
@@ -698,6 +779,42 @@ ipcMain.on(
         broadcast({ data: state, event: 'connect-state' });
     },
 );
+
+ipcMain.on(
+    'respond-tracks',
+    (_event, requestId: string, hasMore: boolean, items: RemoteTrackItem[]) => {
+        const client = requestClientMap.get(requestId);
+        if (client) send({ client, data: { hasMore, items, requestId }, event: 'tracks-response' });
+        requestClientMap.delete(requestId);
+    },
+);
+
+ipcMain.on(
+    'respond-playlists',
+    (_event, requestId: string, hasMore: boolean, items: RemotePlaylistItem[]) => {
+        const client = requestClientMap.get(requestId);
+        if (client) {
+            send({ client, data: { hasMore, items, requestId }, event: 'playlists-response' });
+        }
+        requestClientMap.delete(requestId);
+    },
+);
+
+ipcMain.on('respond-radio', (_event, requestId: string, items: RemoteRadioItem[]) => {
+    const client = requestClientMap.get(requestId);
+    if (client) send({ client, data: { items, requestId }, event: 'radio-response' });
+    requestClientMap.delete(requestId);
+});
+
+ipcMain.on('update-queue', (_event, currentUniqueId: null | string, items: RemoteQueueItem[]) => {
+    currentQueueState = { currentUniqueId, items };
+    broadcast({ data: currentQueueState, event: 'queue-state' });
+});
+
+ipcMain.on('update-radio-status', (_event, status: ServerRadioStatus['data']) => {
+    currentRadioStatus = status;
+    broadcast({ data: status, event: 'radio-status' });
+});
 
 if (mprisPlayer) {
     mprisPlayer.on('loopStatus', (event: string) => {

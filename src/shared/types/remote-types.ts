@@ -36,9 +36,16 @@ export type ClientEvent =
     | ClientConnectDiscover
     | ClientConnectSetVolume
     | ClientFavorite
+    | ClientPlaylistsRequest
+    | ClientPlayPlaylist
+    | ClientPlayRadio
+    | ClientPlayTrack
     | ClientPosition
+    | ClientQueueJump
+    | ClientRadioRequest
     | ClientRating
     | ClientSimpleEvent
+    | ClientTracksRequest
     | ClientVolume;
 
 export interface ClientFavorite {
@@ -47,9 +54,38 @@ export interface ClientFavorite {
     id: string;
 }
 
+export interface ClientPlaylistsRequest extends RemoteListRequest {
+    event: 'playlists-request';
+}
+
+export interface ClientPlayPlaylist {
+    event: 'play-playlist';
+    id: string;
+}
+
+export interface ClientPlayRadio {
+    event: 'play-radio';
+    id: string;
+}
+
+export interface ClientPlayTrack {
+    event: 'play-track';
+    id: string;
+}
+
 export interface ClientPosition {
     event: 'position';
     position: number;
+}
+
+export interface ClientQueueJump {
+    event: 'queue-jump';
+    uniqueId: string;
+}
+
+export interface ClientRadioRequest {
+    event: 'radio-request';
+    requestId: string;
 }
 
 export interface ClientRating {
@@ -57,10 +93,14 @@ export interface ClientRating {
     id: string;
     rating: number;
 }
+
 export interface ClientSimpleEvent {
     event: 'next' | 'pause' | 'play' | 'previous' | 'proxy' | 'repeat' | 'shuffle';
 }
 
+export interface ClientTracksRequest extends RemoteListRequest {
+    event: 'tracks-request';
+}
 export interface ClientVolume {
     event: 'volume';
     volume: number;
@@ -79,6 +119,49 @@ export interface RemoteConnectDevice {
 }
 
 export type RemoteConnectDeviceRef = Pick<RemoteConnectDevice, 'name' | 'type'>;
+
+export interface RemoteListRequest {
+    limit?: number;
+    requestId: string;
+    searchTerm?: string;
+    startIndex?: number;
+}
+
+export interface RemotePlaylistItem {
+    duration: null | number;
+    id: string;
+    imageUrl: null | string;
+    name: string;
+    songCount: null | number;
+}
+
+export interface RemoteQueueItem {
+    album: null | string;
+    artistName: string;
+    duration: number;
+    imageUrl: null | string;
+    name: string;
+    uniqueId: string;
+}
+
+export interface RemoteRadioItem {
+    homepageUrl: null | string;
+    id: string;
+    imageUrl: null | string;
+    name: string;
+}
+
+// Trimmed, phone-specific shapes — deliberately not the full Song/Playlist/
+// InternetRadioStation/QueueSong domain types, which carry dozens of fields
+// the phone list rows don't need.
+export interface RemoteTrackItem {
+    album: null | string;
+    artistName: string;
+    duration: number;
+    id: string;
+    imageUrl: null | string;
+    name: string;
+}
 
 export interface ServerConnectDevices {
     data: RemoteConnectDevice[];
@@ -104,19 +187,29 @@ export type ServerEvent =
     | ServerConnectState
     | ServerError
     | ServerFavorite
+    | ServerPlaylistsResponse
     | ServerPlayStatus
     | ServerPosition
     | ServerProxy
+    | ServerQueueState
+    | ServerRadioResponse
+    | ServerRadioStatus
     | ServerRating
     | ServerRepeat
     | ServerShuffle
     | ServerSong
     | ServerState
+    | ServerTracksResponse
     | ServerVolume;
 
 export interface ServerFavorite {
     data: { favorite: boolean; id: string };
     event: 'favorite';
+}
+
+export interface ServerPlaylistsResponse {
+    data: { hasMore: boolean; items: RemotePlaylistItem[]; requestId: string };
+    event: 'playlists-response';
 }
 
 export interface ServerPlayStatus {
@@ -132,6 +225,23 @@ export interface ServerPosition {
 export interface ServerProxy {
     data: string;
     event: 'proxy';
+}
+
+// Cached + broadcast, not request/response — the queue is live desktop-driven
+// state, not a one-shot query. Same pattern as ServerConnectDevices above.
+export interface ServerQueueState {
+    data: { currentUniqueId: null | string; items: RemoteQueueItem[] };
+    event: 'queue-state';
+}
+
+export interface ServerRadioResponse {
+    data: { items: RemoteRadioItem[]; requestId: string };
+    event: 'radio-response';
+}
+
+export interface ServerRadioStatus {
+    data: { imageUrl: null | string; isActive: true; stationName: string } | { isActive: false };
+    event: 'radio-status';
 }
 
 export interface ServerRating {
@@ -157,6 +267,11 @@ export interface ServerSong {
 export interface ServerState {
     data: SongState;
     event: 'state';
+}
+
+export interface ServerTracksResponse {
+    data: { hasMore: boolean; items: RemoteTrackItem[]; requestId: string };
+    event: 'tracks-response';
 }
 
 export interface ServerVolume {

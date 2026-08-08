@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **The phone remote can now browse your library and pick what to play**, not just skip within whatever's already queued — new Tracks, Playlists, and Radio tabs with search, alongside the existing now-playing view. A new Queue tab shows what's coming up and jumps straight to any track in it.
+- **The phone remote can now discover, connect to, and control Feishin Connect casting** — Sonos, AirPlay, Chromecast, and DLNA devices can be selected (including several at once) and controlled directly from the phone, with the same confirmation prompt as the desktop app before taking over a device someone else is using.
+
+Still a work in progress, and Electron-only for now. The goal is to eventually make this the
+default mobile-friendly page served by the Docker/web build too, instead of just a remote for
+the desktop app. If it turns out well, maybe upstream it as a PR to the original Feishin project.
+
 ## [0.6.6] - 2026-08-04
 
 Quick hotfix after finding someone's Feishin Connect instance just sitting wide open on the internet. Patched what I could on my end. Securing your own deployment is still on you, though.

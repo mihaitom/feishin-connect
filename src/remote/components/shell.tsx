@@ -3,7 +3,8 @@ import { AppShell, Flex, Grid, Image } from '@mantine/core';
 import { ImageButton } from '/@/remote/components/buttons/image-button';
 import { ReconnectButton } from '/@/remote/components/buttons/reconnect-button';
 import { ThemeButton } from '/@/remote/components/buttons/theme-button';
-import { RemoteContainer } from '/@/remote/components/remote-container';
+import { TabBar } from '/@/remote/components/tab-bar';
+import { RemoteRoutes } from '/@/remote/router';
 import { useConnected } from '/@/remote/store';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
@@ -13,7 +14,7 @@ export const Shell = () => {
     const connected = useConnected();
 
     return (
-        <AppShell h="100vh" padding="md" w="100vw">
+        <AppShell footer={{ height: 64 }} h="100vh" padding="md" w="100vw">
             <AppShell.Header style={{ background: 'var(--theme-colors-surface)' }}>
                 <Grid px="md" py="sm">
                     <Grid.Col span={4}>
@@ -38,15 +39,20 @@ export const Shell = () => {
                     </Grid.Col>
                 </Grid>
             </AppShell.Header>
-            <AppShell.Main pt="60px">
+            <AppShell.Main pb="70px" pt="60px" style={{ height: '100vh', overflowY: 'auto' }}>
                 {connected ? (
-                    <RemoteContainer />
+                    <RemoteRoutes />
                 ) : (
                     <Center h="100vh" w="100vw">
                         <Spinner />
                     </Center>
                 )}
             </AppShell.Main>
+            {connected && (
+                <AppShell.Footer style={{ background: 'var(--theme-colors-surface)' }}>
+                    <TabBar />
+                </AppShell.Footer>
+            )}
         </AppShell>
     );
 };

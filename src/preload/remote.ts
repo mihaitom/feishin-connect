@@ -1,8 +1,23 @@
 import { ipcRenderer } from 'electron';
 
 import { QueueSong } from '/@/shared/types/domain-types';
-import { RemoteConnectDevice, RemoteConnectDeviceRef } from '/@/shared/types/remote-types';
+import {
+    RemoteConnectDevice,
+    RemoteConnectDeviceRef,
+    RemotePlaylistItem,
+    RemoteQueueItem,
+    RemoteRadioItem,
+    RemoteTrackItem,
+    ServerRadioStatus,
+} from '/@/shared/types/remote-types';
 import { PlayerStatus } from '/@/shared/types/types';
+
+interface RemoteListRequestPayload {
+    limit?: number;
+    requestId: string;
+    searchTerm?: string;
+    startIndex?: number;
+}
 
 const requestConnectConnect = (
     cb: (data: { devices: RemoteConnectDeviceRef[]; force: boolean }) => void,
@@ -22,6 +37,54 @@ const requestConnectSetVolume = (
     cb: (data: { device: RemoteConnectDeviceRef; volume: number }) => void,
 ) => {
     ipcRenderer.on('request-connect-set-volume', (_, data) => cb(data));
+};
+
+const requestTracks = (cb: (data: RemoteListRequestPayload) => void) => {
+    ipcRenderer.on('request-tracks', (_, data) => cb(data));
+};
+
+const requestPlaylists = (cb: (data: RemoteListRequestPayload) => void) => {
+    ipcRenderer.on('request-playlists', (_, data) => cb(data));
+};
+
+const requestRadio = (cb: (data: { requestId: string }) => void) => {
+    ipcRenderer.on('request-radio', (_, data) => cb(data));
+};
+
+const requestPlayTrack = (cb: (data: { id: string }) => void) => {
+    ipcRenderer.on('request-play-track', (_, data) => cb(data));
+};
+
+const requestPlayPlaylist = (cb: (data: { id: string }) => void) => {
+    ipcRenderer.on('request-play-playlist', (_, data) => cb(data));
+};
+
+const requestPlayRadio = (cb: (data: { id: string }) => void) => {
+    ipcRenderer.on('request-play-radio', (_, data) => cb(data));
+};
+
+const requestQueueJump = (cb: (data: { uniqueId: string }) => void) => {
+    ipcRenderer.on('request-queue-jump', (_, data) => cb(data));
+};
+
+const respondTracks = (requestId: string, hasMore: boolean, items: RemoteTrackItem[]) => {
+    ipcRenderer.send('respond-tracks', requestId, hasMore, items);
+};
+
+const respondPlaylists = (requestId: string, hasMore: boolean, items: RemotePlaylistItem[]) => {
+    ipcRenderer.send('respond-playlists', requestId, hasMore, items);
+};
+
+const respondRadio = (requestId: string, items: RemoteRadioItem[]) => {
+    ipcRenderer.send('respond-radio', requestId, items);
+};
+
+const updateQueue = (currentUniqueId: null | string, items: RemoteQueueItem[]) => {
+    ipcRenderer.send('update-queue', currentUniqueId, items);
+};
+
+const updateRadioStatus = (status: ServerRadioStatus['data']) => {
+    ipcRenderer.send('update-radio-status', status);
 };
 
 const requestFavorite = (
@@ -127,10 +190,20 @@ export const remote = {
     requestConnectDiscover,
     requestConnectSetVolume,
     requestFavorite,
+    requestPlaylists,
+    requestPlayPlaylist,
+    requestPlayRadio,
+    requestPlayTrack,
     requestPosition,
+    requestQueueJump,
+    requestRadio,
     requestRating,
     requestSeek,
+    requestTracks,
     requestVolume,
+    respondPlaylists,
+    respondRadio,
+    respondTracks,
     sendConnectError,
     setRemoteEnabled,
     setRemotePort,
@@ -140,6 +213,8 @@ export const remote = {
     updatePassword,
     updatePlayback,
     updatePosition,
+    updateQueue,
+    updateRadioStatus,
     updateRating,
     updateRepeat,
     updateSetting,

@@ -30,6 +30,9 @@ import {
 } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { RemoteHook } from '/@/renderer/features/remote/hooks/use-remote';
 import { RemoteConnectHook } from '/@/renderer/features/remote/hooks/use-remote-connect';
+import { RemoteLibraryHook } from '/@/renderer/features/remote/hooks/use-remote-library';
+import { RemoteQueuePushHook } from '/@/renderer/features/remote/hooks/use-remote-queue-push';
+import { RemoteRadioPushHook } from '/@/renderer/features/remote/hooks/use-remote-radio-push';
 import { VisualizerSystemAudioBridgeHook } from '/@/renderer/features/visualizer/components/visualizer-system-audio-bridge';
 import { useSettingsStore } from '/@/renderer/store';
 import {
@@ -138,6 +141,9 @@ export const AudioPlayers = () => {
             <PlaybackHotkeysHook />
             <RemoteHook />
             <RemoteConnectHook />
+            <RemoteLibraryHook />
+            <RemoteQueuePushHook />
+            <RemoteRadioPushHook />
             <AutoDJHook />
             <QueueRestoreTimestampHook />
             <InitialTimestampRestoreHook />

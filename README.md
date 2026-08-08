@@ -36,6 +36,7 @@
 | Feature | This fork | Upstream |
 |---------|-----------|----------|
 | Feishin Connect (Sonos / AirPlay / Chromecast / DLNA) | ✅ | ❌ |
+| Phone remote: browse & play library, control casting | ✅ | ⚠️ transport controls only |
 | Manual library scan button (Navidrome/Subsonic) | ✅ | ❌ |
 | Remote lyrics lookup (lrclib.net, SimpMusic, NetEase) in the web/Docker build | ✅ | ⚠️ Electron only |
 | Auto-updater | ✅ GitHub Releases (this fork's own) | ✅ GitHub Releases |
@@ -174,6 +175,20 @@ uv run python main.py
 ```
 
 The bare web dev server has no Electron preload or nginx to inject `CONNECT_TOKEN`, so it sends none by default and every Connect API call — including `/health` — gets rejected with 401. Either set `CONNECT_TOKEN=<value>` yourself before starting the backend, or copy the random one it prints on startup (`No CONNECT_TOKEN set — generated a random one for this run: ...`) — then add `VITE_CONNECT_TOKEN=<value>` (same value) to `.env` at the repo root (gitignored, picked up by Vite automatically) and restart `pnpm run dev:web`.
+
+---
+
+## Phone Remote
+
+The desktop app can be controlled from a phone (or any other browser on the same network) via a lightweight mobile web app it serves itself — no separate install. Enable it in **Settings → Window → Remote**, then open `http://<your-computer's-LAN-IP>:4333` on your phone (protected by the username/password set there).
+
+> **Electron only.** The phone remote is part of the desktop app's own process — it isn't available in the Docker/web build.
+
+Upstream already ships the basic remote itself — transport controls (play/pause/next/previous, seek, volume, favorite, rating) for whatever's already in the queue. This fork extends it into something closer to a full companion app:
+
+- **Browse and pick what to play** — new Tracks, Playlists, and Radio tabs with search, so you're no longer limited to skipping within whatever's already queued
+- **A Queue tab** showing what's coming up, with a tap to jump straight to any track in it
+- **Full Feishin Connect control from the phone** — discover, connect to (including several devices at once), and control Sonos / AirPlay / Chromecast / DLNA cast targets, with the same confirmation prompt as the desktop app before taking over a device someone else is using
 
 ---
 

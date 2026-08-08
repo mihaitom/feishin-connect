@@ -3,6 +3,7 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { createWithEqualityFn } from 'zustand/traditional';
 
+import { useRemoteLibraryStore } from '/@/remote/store/library';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { logMsg } from '/@/renderer/utils/logger-message';
 import { toast } from '/@/shared/components/toast/toast';
@@ -96,7 +97,13 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                         }
 
                         set((state) => {
-                            const wsUrl = location.href.replace('http', 'ws');
+                            // Use location.origin, not location.href — HashRouter puts
+                            // the current route in the URL fragment (e.g. "#/tracks"),
+                            // and WebSocket URLs must not contain a fragment (Firefox
+                            // throws "SyntaxError: An invalid or illegal string was
+                            // specified" if they do; other engines are lenient but it's
+                            // not spec-legal either way).
+                            const wsUrl = location.origin.replace(/^http/, 'ws');
                             logFn.debug(logMsg[LogCategory.REMOTE].creatingWebSocket, {
                                 category: LogCategory.REMOTE,
                                 meta: { url: wsUrl },
@@ -185,6 +192,16 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                         });
                                         break;
                                     }
+                                    case 'playlists-response': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setPlaylistsResponse(
+                                                data.requestId,
+                                                data.hasMore,
+                                                data.items,
+                                            );
+                                        break;
+                                    }
                                     case 'position': {
                                         logFn.debug(
                                             logMsg[LogCategory.REMOTE].positionEventReceived,
@@ -211,6 +228,24 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                                 state.info.song.imageUrl = `data:image/jpeg;base64,${data}`;
                                             }
                                         });
+                                        break;
+                                    }
+                                    case 'queue-state': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setQueueState(data);
+                                        break;
+                                    }
+                                    case 'radio-response': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setRadioResponse(data.requestId, data.items);
+                                        break;
+                                    }
+                                    case 'radio-status': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setRadioStatus(data);
                                         break;
                                     }
                                     case 'rating': {
@@ -284,6 +319,16 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                         set((state) => {
                                             state.info = data;
                                         });
+                                        break;
+                                    }
+                                    case 'tracks-response': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setTracksResponse(
+                                                data.requestId,
+                                                data.hasMore,
+                                                data.items,
+                                            );
                                         break;
                                     }
                                     case 'volume': {

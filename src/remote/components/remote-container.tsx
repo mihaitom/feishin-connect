@@ -7,6 +7,7 @@ import { ConnectButton } from '/@/remote/components/buttons/connect-button';
 import { PlayerImage } from '/@/remote/components/player-image';
 import { WrappedSlider } from '/@/remote/components/wrapped-slider';
 import { useInfo, useSend, useShowImage } from '/@/remote/store';
+import { useRadioStatus } from '/@/remote/store/library';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
@@ -20,6 +21,7 @@ export const RemoteContainer = () => {
     const { position, repeat, shuffle, song, status, volume } = useInfo();
     const send = useSend();
     const showImage = useShowImage();
+    const radioStatus = useRadioStatus();
 
     const id = song?.id;
 
@@ -39,8 +41,11 @@ export const RemoteContainer = () => {
                     <PlayerImage src={song?.imageUrl} />
                 </Flex>
             )}
-            {id && (
+            {radioStatus.isActive ? (
                 <Stack gap="xs">
+                    <Text isMuted size="sm">
+                        Radio
+                    </Text>
                     <Text
                         fw={700}
                         size="xl"
@@ -50,66 +55,86 @@ export const RemoteContainer = () => {
                             whiteSpace: 'nowrap',
                         }}
                     >
-                        {song.name}
+                        {radioStatus.stationName}
                     </Text>
-                    <Text
-                        isMuted
-                        style={{
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        {song.album}
-                    </Text>
-                    <Text
-                        isMuted
-                        style={{
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        {song.artistName}
-                    </Text>
-                    <Group justify="space-between">
-                        {song.releaseDate && (
-                            <Text isMuted>{new Date(song.releaseDate).toLocaleDateString()}</Text>
-                        )}
-                        <Text isMuted>Plays: {song.playCount}</Text>
-                    </Group>
                 </Stack>
+            ) : (
+                id && (
+                    <Stack gap="xs">
+                        <Text
+                            fw={700}
+                            size="xl"
+                            style={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {song.name}
+                        </Text>
+                        <Text
+                            isMuted
+                            style={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {song.album}
+                        </Text>
+                        <Text
+                            isMuted
+                            style={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {song.artistName}
+                        </Text>
+                        <Group justify="space-between">
+                            {song.releaseDate && (
+                                <Text isMuted>
+                                    {new Date(song.releaseDate).toLocaleDateString()}
+                                </Text>
+                            )}
+                            <Text isMuted>Plays: {song.playCount}</Text>
+                        </Group>
+                    </Stack>
+                )
             )}
-            <Group gap={0} grow>
-                <ActionIcon
-                    disabled={!id}
-                    icon="favorite"
-                    iconProps={{
-                        fill: song?.userFavorite ? 'primary' : 'default',
-                    }}
-                    onClick={() => {
-                        if (!id) return;
+            {!radioStatus.isActive && (
+                <Group gap={0} grow>
+                    <ActionIcon
+                        disabled={!id}
+                        icon="favorite"
+                        iconProps={{
+                            fill: song?.userFavorite ? 'primary' : 'default',
+                        }}
+                        onClick={() => {
+                            if (!id) return;
 
-                        send({ event: 'favorite', favorite: !song.userFavorite, id });
-                    }}
-                    tooltip={{
-                        label: song?.userFavorite ? 'Unfavorite' : 'Favorite',
-                    }}
-                    variant="transparent"
-                />
-                {(song?._serverType === 'navidrome' || song?._serverType === 'subsonic') && (
-                    <div style={{ margin: 'auto' }}>
-                        <Tooltip label="Double click to clear" openDelay={1000}>
-                            <Rating
-                                onChange={debouncedSetRating}
-                                onDoubleClick={() => debouncedSetRating(0)}
-                                style={{ margin: 'auto' }}
-                                value={song.userRating ?? 0}
-                            />
-                        </Tooltip>
-                    </div>
-                )}
-            </Group>
+                            send({ event: 'favorite', favorite: !song.userFavorite, id });
+                        }}
+                        tooltip={{
+                            label: song?.userFavorite ? 'Unfavorite' : 'Favorite',
+                        }}
+                        variant="transparent"
+                    />
+                    {(song?._serverType === 'navidrome' || song?._serverType === 'subsonic') && (
+                        <div style={{ margin: 'auto' }}>
+                            <Tooltip label="Double click to clear" openDelay={1000}>
+                                <Rating
+                                    onChange={debouncedSetRating}
+                                    onDoubleClick={() => debouncedSetRating(0)}
+                                    style={{ margin: 'auto' }}
+                                    value={song.userRating ?? 0}
+                                />
+                            </Tooltip>
+                        </div>
+                    )}
+                </Group>
+            )}
             <Group gap="xs" grow>
                 <ActionIcon
                     disabled={!id}

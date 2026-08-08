@@ -5,6 +5,7 @@ import '@mantine/notifications/styles.css';
 import '/@/shared/styles/global.css';
 
 import { useEffect } from 'react';
+import { HashRouter } from 'react-router';
 
 import { Shell } from '/@/remote/components/shell';
 import { useIsDark, useReconnect } from '/@/remote/store';
@@ -23,7 +24,9 @@ export const App = () => {
 
     return (
         <MantineProvider defaultColorScheme={mode} theme={theme}>
-            <Shell />
+            <HashRouter>
+                <Shell />
+            </HashRouter>
         </MantineProvider>
     );
 };
