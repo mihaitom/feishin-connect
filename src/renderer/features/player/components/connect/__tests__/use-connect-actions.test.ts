@@ -105,6 +105,92 @@ describe('useConnectActions', () => {
         });
     });
 
+    describe('connectDevices', () => {
+        // Unlike takeoverDevice(), which is always a single-device confirmed
+        // takeover, connectDevices() is the phone-remote's general-purpose
+        // "connect these device(s)" entry point — it must work for arbitrary
+        // device arrays and pass force through untouched (false for a plain
+        // connect, true only after the phone's own takeover-confirm dialog).
+        it('joins the active stream when already connected, without refreshing', async () => {
+            const args = baseArgs({ isActive: true });
+            const { result } = renderHook(() => useConnectActions(args));
+
+            const outcome = await result.current.connectDevices([livingRoom, kitchen], false);
+
+            expect(connectFetchMock).toHaveBeenCalledTimes(2);
+            const [path, options] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/join');
+            expect(JSON.parse(options.body).force).toBe(false);
+            expect(outcome).toEqual({ error: null });
+            // joinTo() itself never calls refresh() — that's specific to
+            // takeoverDevice()'s "reflect the new owner" follow-up.
+            expect(args.refresh).not.toHaveBeenCalled();
+        });
+
+        it('starts playback when not connected and a track is loaded', async () => {
+            const args = baseArgs({ isActive: false });
+            const { result } = renderHook(() => useConnectActions(args));
+
+            const outcome = await result.current.connectDevices([livingRoom], false);
+
+            const [path, options] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/play');
+            expect(JSON.parse(options.body).force).toBe(false);
+            expect(outcome).toEqual({ error: null });
+        });
+
+        it('claims without playing when not connected and nothing is loaded', async () => {
+            const args = baseArgs({
+                currentTrackId: null,
+                isActive: false,
+                isRadioActive: false,
+            });
+            const { result } = renderHook(() => useConnectActions(args));
+
+            await result.current.connectDevices([livingRoom], false);
+
+            const [path] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/claim');
+        });
+
+        it('sends the radio stream when not connected and radio is active', async () => {
+            const args = baseArgs({
+                currentTrackId: null,
+                isActive: false,
+                isRadioActive: true,
+                radioStreamUrl: 'https://stream.example/radio',
+            });
+            const { result } = renderHook(() => useConnectActions(args));
+
+            await result.current.connectDevices([livingRoom], false);
+
+            const [path] = connectFetchMock.mock.calls[0];
+            expect(path).toBe('/play-url');
+        });
+
+        it('passes force=true through to the backend request when confirmed by the caller', async () => {
+            const args = baseArgs({ isActive: false });
+            const { result } = renderHook(() => useConnectActions(args));
+
+            await result.current.connectDevices([livingRoom], true);
+
+            const [, options] = connectFetchMock.mock.calls[0];
+            expect(JSON.parse(options.body).force).toBe(true);
+        });
+
+        it('surfaces a logical backend error instead of throwing', async () => {
+            connectFetchMock.mockResolvedValueOnce(
+                new Response(JSON.stringify({ error: 'device_in_use' })),
+            );
+            const args = baseArgs({ isActive: false });
+            const { result } = renderHook(() => useConnectActions(args));
+
+            const outcome = await result.current.connectDevices([livingRoom], false);
+
+            expect(outcome).toEqual({ error: 'device_in_use' });
+        });
+    });
+
     describe('addToStream / joinTo', () => {
         it('does nothing when nothing is selected', async () => {
             const args = baseArgs({ selectedForSend: [] });

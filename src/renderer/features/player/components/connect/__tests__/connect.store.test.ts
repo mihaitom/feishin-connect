@@ -1,19 +1,27 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { ConnectDevice } from '../types';
+
 import { useConnectElapsed, useConnectPlayerStore } from '../connect.store';
 
 const resetStore = () => {
     useConnectPlayerStore.setState({
+        activeTargets: [],
+        devices: [],
         duration: 0,
         elapsed: 0,
         handlers: null,
         isActive: false,
         isPlaying: false,
         isStreaming: false,
+        mySessionId: '',
+        remoteActions: null,
         syncTime: 0,
     });
 };
+
+const livingRoom: ConnectDevice = { name: 'Living Room', type: 'sonos' };
 
 describe('connect.store', () => {
     beforeEach(() => {
@@ -30,6 +38,41 @@ describe('connect.store', () => {
 
             expect(useConnectPlayerStore.getState().elapsed).toBe(42);
             expect(useConnectPlayerStore.getState().isActive).toBe(true);
+        });
+
+        // Regression coverage for the fields added so parts of the app outside
+        // Playerbar's subtree (the phone-remote IPC bridge) can read device
+        // state and drive Connect without ConnectSessionContext — see
+        // use-connect-remote-sync.ts, the sole writer of these in the real app.
+        it('defaults the remote-bridge fields to empty/inactive', () => {
+            const state = useConnectPlayerStore.getState();
+
+            expect(state.devices).toEqual([]);
+            expect(state.activeTargets).toEqual([]);
+            expect(state.mySessionId).toBe('');
+            expect(state.remoteActions).toBeNull();
+        });
+
+        it('accepts a patch for devices/activeTargets/mySessionId/remoteActions', () => {
+            const remoteActions = {
+                connectDevices: vi.fn(),
+                disconnectAll: vi.fn(),
+                disconnectDevice: vi.fn(),
+                refresh: vi.fn(),
+            };
+
+            useConnectPlayerStore.getState().set({
+                activeTargets: [livingRoom],
+                devices: [livingRoom],
+                mySessionId: 'session-1',
+                remoteActions,
+            });
+
+            const state = useConnectPlayerStore.getState();
+            expect(state.devices).toEqual([livingRoom]);
+            expect(state.activeTargets).toEqual([livingRoom]);
+            expect(state.mySessionId).toBe('session-1');
+            expect(state.remoteActions).toBe(remoteActions);
         });
     });
 
