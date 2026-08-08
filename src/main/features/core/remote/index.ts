@@ -12,7 +12,7 @@ import manifest from './manifest.json';
 import { isLinux } from '/@/main/env';
 import { getMainWindow } from '/@/main/index';
 import { QueueSong } from '/@/shared/types/domain-types';
-import { ClientEvent, ServerEvent } from '/@/shared/types/remote-types';
+import { ClientEvent, RemoteConnectDevice, ServerEvent } from '/@/shared/types/remote-types';
 import { PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/types';
 
 let mprisPlayer: any | undefined;
@@ -108,6 +108,16 @@ const GZIP_REGEX = /\bgzip\b/;
 const ZLIB_REGEX = /bdeflate\b/;
 
 const currentState: SongState = {};
+let currentConnectDevices: RemoteConnectDevice[] = [];
+let currentConnectState: {
+    activeTargets: RemoteConnectDevice[];
+    isActive: boolean;
+    mySessionId: string;
+} = {
+    activeTargets: [],
+    isActive: false,
+    mySessionId: '',
+};
 
 const getEncoding = (encoding: string | string[]): Encoding => {
     const encodingArray = Array.isArray(encoding) ? encoding : [encoding];
@@ -376,6 +386,36 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                         }
 
                         switch (event) {
+                            case 'connect-connect': {
+                                const { devices, force } = json;
+                                getMainWindow()?.webContents.send('request-connect-connect', {
+                                    devices,
+                                    force,
+                                });
+                                break;
+                            }
+                            case 'connect-disconnect': {
+                                const { device } = json;
+                                getMainWindow()?.webContents.send('request-connect-disconnect', {
+                                    device,
+                                });
+                                break;
+                            }
+                            case 'connect-discover': {
+                                const { fresh } = json;
+                                getMainWindow()?.webContents.send('request-connect-discover', {
+                                    fresh,
+                                });
+                                break;
+                            }
+                            case 'connect-set-volume': {
+                                const { device, volume } = json;
+                                getMainWindow()?.webContents.send('request-connect-set-volume', {
+                                    device,
+                                    volume,
+                                });
+                                break;
+                            }
                             case 'favorite': {
                                 const { favorite, id } = json;
                                 if (id && id === currentState.song?.id) {
@@ -497,6 +537,8 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                 });
 
                 ws.send(JSON.stringify({ data: currentState, event: 'state' }));
+                ws.send(JSON.stringify({ data: currentConnectDevices, event: 'connect-devices' }));
+                ws.send(JSON.stringify({ data: currentConnectState, event: 'connect-state' }));
             });
 
             const heartBeat = setInterval(() => {
@@ -636,6 +678,26 @@ ipcMain.on('update-volume', (_event, volume: number) => {
     currentState.volume = volume;
     broadcast({ data: volume, event: 'volume' });
 });
+
+ipcMain.on('remote-connect-error', (_event, message: string) => {
+    broadcast({ data: message, event: 'error' });
+});
+
+ipcMain.on('update-connect-devices', (_event, devices: RemoteConnectDevice[]) => {
+    currentConnectDevices = devices;
+    broadcast({ data: devices, event: 'connect-devices' });
+});
+
+ipcMain.on(
+    'update-connect-state',
+    (
+        _event,
+        state: { activeTargets: RemoteConnectDevice[]; isActive: boolean; mySessionId: string },
+    ) => {
+        currentConnectState = state;
+        broadcast({ data: state, event: 'connect-state' });
+    },
+);
 
 if (mprisPlayer) {
     mprisPlayer.on('loopStatus', (event: string) => {

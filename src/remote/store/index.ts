@@ -6,7 +6,12 @@ import { createWithEqualityFn } from 'zustand/traditional';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { logMsg } from '/@/renderer/utils/logger-message';
 import { toast } from '/@/shared/components/toast/toast';
-import { ClientEvent, ServerEvent, SongUpdateSocket } from '/@/shared/types/remote-types';
+import {
+    ClientEvent,
+    RemoteConnectDevice,
+    ServerEvent,
+    SongUpdateSocket,
+} from '/@/shared/types/remote-types';
 
 export interface SettingsSlice extends SettingsState {
     actions: {
@@ -17,8 +22,16 @@ export interface SettingsSlice extends SettingsState {
     };
 }
 
+interface ConnectRemoteState {
+    activeTargets: RemoteConnectDevice[];
+    isActive: boolean;
+    mySessionId: string;
+}
+
 interface SettingsState {
+    connectDevices: RemoteConnectDevice[];
     connected: boolean;
+    connectState: ConnectRemoteState;
     info: Omit<SongUpdateSocket, 'currentTime'>;
     isDark: boolean;
     showImage: boolean;
@@ -30,7 +43,9 @@ interface StatefulWebSocket extends WebSocket {
 }
 
 const initialState: SettingsState = {
+    connectDevices: [],
     connected: false,
+    connectState: { activeTargets: [], isActive: false, mySessionId: '' },
     info: {},
     isDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
     showImage: true,
@@ -99,6 +114,35 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                 });
 
                                 switch (event) {
+                                    case 'connect-devices': {
+                                        logFn.debug(
+                                            logMsg[LogCategory.REMOTE].connectDevicesEventReceived,
+                                            {
+                                                category: LogCategory.REMOTE,
+                                                meta: { count: data.length },
+                                            },
+                                        );
+                                        set((state) => {
+                                            state.connectDevices = data;
+                                        });
+                                        break;
+                                    }
+                                    case 'connect-state': {
+                                        logFn.debug(
+                                            logMsg[LogCategory.REMOTE].connectStateEventReceived,
+                                            {
+                                                category: LogCategory.REMOTE,
+                                                meta: {
+                                                    isActive: data.isActive,
+                                                    targetCount: data.activeTargets.length,
+                                                },
+                                            },
+                                        );
+                                        set((state) => {
+                                            state.connectState = data;
+                                        });
+                                        break;
+                                    }
                                     case 'error': {
                                         logFn.error(
                                             logMsg[LogCategory.REMOTE].webSocketErrorEvent,
@@ -371,6 +415,10 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
 );
 
 export const useConnected = () => useRemoteStore((state) => state.connected);
+
+export const useConnectDevices = () => useRemoteStore((state) => state.connectDevices);
+
+export const useConnectRemoteState = () => useRemoteStore((state) => state.connectState);
 
 export const useInfo = () => useRemoteStore((state) => state.info);
 

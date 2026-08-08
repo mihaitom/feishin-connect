@@ -33,6 +33,58 @@ const useDeviceVolumeStore = create<{
         })),
 }));
 
+// Imperative (non-hook) access to the same store, for the phone-remote bridge
+// (use-remote-connect.tsx), which needs to read/set volume for a dynamic set
+// of devices outside of React render — the number of active targets changes
+// at runtime, so calling useDeviceVolume() in a loop there would violate the
+// Rules of Hooks.
+export const getDeviceVolumeEntry = (deviceType?: ConnectDevice['type'], deviceName?: string) => {
+    if (!deviceType || !deviceName) return undefined;
+    return useDeviceVolumeStore.getState().entries[`${deviceType}:${deviceName}`];
+};
+
+export const fetchDeviceVolumeIfNeeded = (
+    deviceType: ConnectDevice['type'],
+    deviceName: string,
+) => {
+    if (deviceType !== 'sonos' && deviceType !== 'chromecast' && deviceType !== 'dlna') return;
+    const key = `${deviceType}:${deviceName}`;
+    if (useDeviceVolumeStore.getState().entries[key]?.volume != null) return;
+    connectFetch(`/device-volume?device_type=${deviceType}&name=${encodeURIComponent(deviceName)}`)
+        .then((r) => r.json())
+        .then((d) => {
+            // Re-check at resolution time, not just at call time — a user-
+            // triggered set (setDeviceVolumeImperative) can land while this GET
+            // is in flight, and this stale response must not clobber it.
+            if (
+                d.volume !== undefined &&
+                useDeviceVolumeStore.getState().entries[key]?.volume == null
+            ) {
+                useDeviceVolumeStore.getState().patchEntry(key, { volume: d.volume });
+            }
+        })
+        .catch(() => {});
+};
+
+export const setDeviceVolumeImperative = (
+    deviceType: ConnectDevice['type'],
+    deviceName: string,
+    volume: number,
+) => {
+    const key = `${deviceType}:${deviceName}`;
+    useDeviceVolumeStore.getState().patchEntry(key, { volume });
+    connectFetch(
+        `/device-volume?device_type=${deviceType}&name=${encodeURIComponent(deviceName)}`,
+        {
+            body: JSON.stringify({ volume }),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+        },
+    ).catch(() => {});
+};
+
+export const subscribeDeviceVolume = (cb: () => void) => useDeviceVolumeStore.subscribe(cb);
+
 // Volume control for a single device, via /device-volume (Sonos, Chromecast and
 // DLNA — AirPlay has no volume control in this backend).
 // `enabled` gates the fetch (e.g. only fetch once a device row is hovered/expanded).
@@ -59,7 +111,16 @@ export const useDeviceVolume = (
         )
             .then((r) => r.json())
             .then((d) => {
-                if (d.volume !== undefined) patchEntry(key, { volume: d.volume });
+                // Re-check at resolution time — a set (setDeviceVolume, or the
+                // phone bridge's setDeviceVolumeImperative sharing this same
+                // store) can land while this GET is in flight, and this stale
+                // response must not clobber it.
+                if (
+                    d.volume !== undefined &&
+                    useDeviceVolumeStore.getState().entries[key]?.volume == null
+                ) {
+                    patchEntry(key, { volume: d.volume });
+                }
             })
             .catch(() => {});
     }, [enabled, supported, key, deviceType, deviceName, volume, patchEntry]);

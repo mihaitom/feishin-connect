@@ -1,17 +1,25 @@
 import isElectron from 'is-electron';
 import { useEffect, useRef } from 'react';
+import { useShallow } from 'zustand/shallow';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
+import {
+    useConnectElapsed,
+    useConnectPlayerStore,
+} from '/@/renderer/features/player/components/connect/connect.store';
+import { connectFetch } from '/@/renderer/features/player/components/connect/types';
+import { useDeviceVolume } from '/@/renderer/features/player/components/connect/use-device-volume';
+import { useRemotePush } from '/@/renderer/features/remote/hooks/use-remote-push';
 import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { usePlayerActions, usePlayerStore, useRemoteSettings } from '/@/renderer/store';
+import { usePlayerStoreBase } from '/@/renderer/store/player.store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { logMsg } from '/@/renderer/utils/logger-message';
 import { toast } from '/@/shared/components/toast/toast';
 import { LibraryItem } from '/@/shared/types/domain-types';
-import { PlayerShuffle } from '/@/shared/types/types';
+import { PlayerStatus } from '/@/shared/types/types';
 
 const remote = isElectron() ? window.api.remote : null;
 const ipc = isElectron() ? window.api.ipc : null;
@@ -26,6 +34,23 @@ export const useRemote = () => {
     const removeFromFavoritesMutation = useDeleteFavorite({});
 
     const isRemoteEnabled = remoteSettings.enabled;
+
+    const { activeTargets, connectActive, connectIsPlaying } = useConnectPlayerStore(
+        useShallow((s) => ({
+            activeTargets: s.activeTargets,
+            connectActive: s.isActive,
+            connectIsPlaying: s.isPlaying,
+        })),
+    );
+    // Device volume only applies with exactly one active target — same rule
+    // right-controls.tsx's ConnectVolumeButton uses, so the phone's single
+    // slider isn't ambiguous about which device it's moving.
+    const singleTarget = connectActive && activeTargets.length === 1 ? activeTargets[0] : undefined;
+    const { setDeviceVolume, supported: deviceVolumeSupported } = useDeviceVolume(
+        singleTarget?.type,
+        singleTarget?.name,
+    );
+    const connectElapsedTime = useConnectElapsed();
 
     // Initialize the remote
     useEffect(() => {
@@ -69,8 +94,22 @@ export const useRemote = () => {
                 category: LogCategory.REMOTE,
                 meta: { position: data.position },
             });
-            const newTime = data.position;
-            player.mediaSeekToTimestamp(newTime);
+            if (connectActive) {
+                // Optimistic — otherwise useConnectElapsed keeps animating from
+                // the pre-seek baseline until the next SSE status arrives,
+                // making the phone's slider jump back briefly after release.
+                useConnectPlayerStore.getState().set({
+                    elapsed: data.position,
+                    syncTime: Date.now(),
+                });
+                connectFetch(`/seek`, {
+                    body: JSON.stringify({ position: data.position }),
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                }).catch(() => {});
+                return;
+            }
+            player.mediaSeekToTimestamp(data.position);
         });
 
         remote.requestSeek((data: { offset: number }) => {
@@ -94,6 +133,10 @@ export const useRemote = () => {
                 category: LogCategory.REMOTE,
                 meta: { volume: data.volume },
             });
+            if (connectActive && singleTarget && deviceVolumeSupported) {
+                setDeviceVolume(data.volume);
+                return;
+            }
             setVolume(data.volume);
         });
 
@@ -121,12 +164,16 @@ export const useRemote = () => {
         };
     }, [
         addToFavoritesMutation,
+        connectActive,
+        deviceVolumeSupported,
         isRemoteEnabled,
         mediaSkipForward,
         player,
         removeFromFavoritesMutation,
+        setDeviceVolume,
         setVolume,
         setRating,
+        singleTarget,
     ]);
 
     // Send initial song if one is already playing
@@ -164,131 +211,39 @@ export const useRemote = () => {
         }
     }, [isRemoteEnabled, player]);
 
-    usePlayerEvents(
-        {
-            onCurrentSongChange: (properties) => {
-                if (!isRemoteEnabled || !remote) {
-                    return;
-                }
+    // Local PlayerStatus is meaningless while Connect is active — the local
+    // player stays paused the whole time (see use-connect-controls.ts's
+    // safety net) while the cast device does the actual playing. Push the
+    // Connect-derived status instead so the phone's play/pause icon reflects
+    // the cast device, not the (permanently paused) local player.
+    const wasConnectActiveRef = useRef(false);
+    useEffect(() => {
+        if (!isRemoteEnabled || !remote) return;
 
-                logFn.debug(logMsg[LogCategory.REMOTE].updateSongSent, {
-                    category: LogCategory.REMOTE,
-                    meta: {
-                        artistName: properties.song?.artistName,
-                        id: properties.song?.id,
-                        index: properties.index,
-                        name: properties.song?.name,
-                    },
-                });
-                if (properties.song) {
-                    const song = properties.song;
-                    const imageUrl =
-                        getItemImageUrl({
-                            id: song.id,
-                            imageUrl: song.imageUrl,
-                            itemType: LibraryItem.SONG,
-                            serverId: song._serverId,
-                            type: 'itemCard',
-                            useRemoteUrl: true,
-                        }) || null;
+        if (connectActive) {
+            remote.updatePlayback(connectIsPlaying ? PlayerStatus.PLAYING : PlayerStatus.PAUSED);
+        } else if (wasConnectActiveRef.current) {
+            // Just deactivated — resync with the real local status immediately.
+            // use-remote-push.tsx's own push skips while Connect is active and
+            // won't fire again until the next local status change, which could
+            // otherwise leave the phone showing a stale Connect-derived status.
+            remote.updatePlayback(usePlayerStoreBase.getState().player.status);
+        }
+        wasConnectActiveRef.current = connectActive;
+    }, [isRemoteEnabled, connectActive, connectIsPlaying]);
 
-                    remote.updateSong(song, imageUrl);
-                } else {
-                    remote.updateSong(undefined);
-                }
-            },
-            onPlayerProgress: (properties) => {
-                if (!isRemoteEnabled || !remote) {
-                    return;
-                }
-
-                logFn.debug(logMsg[LogCategory.REMOTE].updatePositionSent, {
-                    category: LogCategory.REMOTE,
-                    meta: { timestamp: properties.timestamp },
-                });
-                remote.updatePosition(properties.timestamp);
-            },
-            onPlayerRepeat: (properties) => {
-                if (!isRemoteEnabled || !remote) {
-                    return;
-                }
-
-                logFn.debug(logMsg[LogCategory.REMOTE].updateRepeatSent, {
-                    category: LogCategory.REMOTE,
-                    meta: { repeat: properties.repeat },
-                });
-                remote.updateRepeat(properties.repeat);
-            },
-            onPlayerShuffle: (properties) => {
-                if (!isRemoteEnabled || !remote) {
-                    return;
-                }
-
-                const isShuffleEnabled = properties.shuffle !== PlayerShuffle.NONE;
-                logFn.debug(logMsg[LogCategory.REMOTE].updateShuffleSent, {
-                    category: LogCategory.REMOTE,
-                    meta: { isShuffleEnabled, shuffle: properties.shuffle },
-                });
-                remote.updateShuffle(isShuffleEnabled);
-            },
-            onPlayerStatus: (properties) => {
-                if (!isRemoteEnabled || !remote) {
-                    return;
-                }
-
-                logFn.debug(logMsg[LogCategory.REMOTE].updatePlaybackSent, {
-                    category: LogCategory.REMOTE,
-                    meta: { status: properties.status },
-                });
-                remote.updatePlayback(properties.status);
-            },
-            onPlayerVolume: (properties) => {
-                if (!isRemoteEnabled || !remote) {
-                    return;
-                }
-
-                logFn.debug(logMsg[LogCategory.REMOTE].updateVolumeSent, {
-                    category: LogCategory.REMOTE,
-                    meta: { volume: properties.volume },
-                });
-                remote.updateVolume(properties.volume);
-            },
-            onUserFavorite: (properties) => {
-                if (!isRemoteEnabled || !remote) {
-                    return;
-                }
-
-                logFn.debug(logMsg[LogCategory.REMOTE].updateFavoriteSent, {
-                    category: LogCategory.REMOTE,
-                    meta: {
-                        favorite: properties.favorite,
-                        id: properties.id,
-                        serverId: properties.serverId,
-                    },
-                });
-                remote.updateFavorite(properties.favorite, properties.serverId, properties.id);
-            },
-            onUserRating: (properties) => {
-                if (!isRemoteEnabled || !remote) {
-                    return;
-                }
-
-                logFn.debug(logMsg[LogCategory.REMOTE].updateRatingSent, {
-                    category: LogCategory.REMOTE,
-                    meta: {
-                        id: properties.id,
-                        rating: properties.rating || 0,
-                        serverId: properties.serverId,
-                    },
-                });
-                remote.updateRating(properties.rating || 0, properties.serverId, properties.id);
-            },
-        },
-        [],
-    );
+    // Local playback position is frozen while Connect is active (the local
+    // player never advances — see use-remote-push.tsx's onPlayerProgress,
+    // which skips its own push for the same reason). Push Connect's own
+    // elapsed time instead, so the phone's progress bar actually advances.
+    useEffect(() => {
+        if (!isRemoteEnabled || !remote || !connectActive) return;
+        remote.updatePosition(connectElapsedTime);
+    }, [isRemoteEnabled, connectActive, connectElapsedTime]);
 };
 
 export const RemoteHook = () => {
     useRemote();
+    useRemotePush();
     return null;
 };

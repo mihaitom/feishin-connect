@@ -2,6 +2,7 @@ import { t } from 'i18next';
 import isElectron from 'is-electron';
 import { useCallback, useEffect } from 'react';
 
+import { useConnectPlayerStore } from '/@/renderer/features/player/components/connect/connect.store';
 import { useIsRadioActive } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { usePlayerActions, useVolumeWheelStep } from '/@/renderer/store';
 import { toast } from '/@/shared/components/toast/toast';
@@ -49,9 +50,13 @@ export const useMainPlayerListener = () => {
         }
 
         mpvPlayerListener.rendererPlayPause(() => {
-            if (!isRadioActive) {
-                mediaTogglePlayPause();
+            if (isRadioActive) return;
+            const { handlers, isActive } = useConnectPlayerStore.getState();
+            if (isActive && handlers) {
+                handlers.onPlayPause();
+                return;
             }
+            mediaTogglePlayPause();
         });
 
         mpvPlayerListener.rendererNext(() => {
@@ -79,15 +84,23 @@ export const useMainPlayerListener = () => {
         });
 
         mpvPlayerListener.rendererPlay(() => {
-            if (!isRadioActive) {
-                mediaPlay();
+            if (isRadioActive) return;
+            const { handlers, isActive, isPlaying } = useConnectPlayerStore.getState();
+            if (isActive && handlers) {
+                if (!isPlaying) handlers.onPlayPause();
+                return;
             }
+            mediaPlay();
         });
 
         mpvPlayerListener.rendererPause(() => {
-            if (!isRadioActive) {
-                mediaPause();
+            if (isRadioActive) return;
+            const { handlers, isActive, isPlaying } = useConnectPlayerStore.getState();
+            if (isActive && handlers) {
+                if (isPlaying) handlers.onPlayPause();
+                return;
             }
+            mediaPause();
         });
 
         mpvPlayerListener.rendererStop(() => {

@@ -3,9 +3,10 @@ import debounce from 'lodash/debounce';
 import { useCallback } from 'react';
 import { RiPauseFill, RiPlayFill, RiVolumeUpFill } from 'react-icons/ri';
 
+import { ConnectButton } from '/@/remote/components/buttons/connect-button';
 import { PlayerImage } from '/@/remote/components/player-image';
 import { WrappedSlider } from '/@/remote/components/wrapped-slider';
-import { useInfo, useSend, useShowImage } from '/@/remote/store';
+import { useConnectRemoteState, useInfo, useSend, useShowImage } from '/@/remote/store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
@@ -19,8 +20,13 @@ export const RemoteContainer = () => {
     const { position, repeat, shuffle, song, status, volume } = useInfo();
     const send = useSend();
     const showImage = useShowImage();
+    const connectState = useConnectRemoteState();
 
     const id = song?.id;
+    const castingToLabel =
+        connectState.isActive && connectState.activeTargets.length > 0
+            ? connectState.activeTargets.map((t) => t.name).join(', ')
+            : null;
 
     const setRating = useCallback(
         (rating: number) => {
@@ -33,6 +39,11 @@ export const RemoteContainer = () => {
 
     return (
         <Stack gap="md" h="100dvh" w="100%">
+            {castingToLabel && (
+                <Text isMuted size="xs" ta="center">
+                    Casting to: {castingToLabel}
+                </Text>
+            )}
             {showImage && (
                 <Flex align="center" justify="center" w="100%">
                     <PlayerImage src={song?.imageUrl} />
@@ -195,6 +206,7 @@ export const RemoteContainer = () => {
                     }}
                     variant="default"
                 />
+                <ConnectButton />
             </Group>
             <Stack gap="lg">
                 {id && position !== undefined && (

@@ -1,7 +1,28 @@
 import { ipcRenderer } from 'electron';
 
 import { QueueSong } from '/@/shared/types/domain-types';
+import { RemoteConnectDevice, RemoteConnectDeviceRef } from '/@/shared/types/remote-types';
 import { PlayerStatus } from '/@/shared/types/types';
+
+const requestConnectConnect = (
+    cb: (data: { devices: RemoteConnectDeviceRef[]; force: boolean }) => void,
+) => {
+    ipcRenderer.on('request-connect-connect', (_, data) => cb(data));
+};
+
+const requestConnectDisconnect = (cb: (data: { device?: RemoteConnectDeviceRef }) => void) => {
+    ipcRenderer.on('request-connect-disconnect', (_, data) => cb(data));
+};
+
+const requestConnectDiscover = (cb: (data: { fresh?: boolean }) => void) => {
+    ipcRenderer.on('request-connect-discover', (_, data) => cb(data));
+};
+
+const requestConnectSetVolume = (
+    cb: (data: { device: RemoteConnectDeviceRef; volume: number }) => void,
+) => {
+    ipcRenderer.on('request-connect-set-volume', (_, data) => cb(data));
+};
 
 const requestFavorite = (
     cb: (data: { favorite: boolean; id: string; serverId: string }) => void,
@@ -33,6 +54,22 @@ const setRemoteEnabled = (enabled: boolean): Promise<null | string> => {
 const setRemotePort = (port: number): Promise<null | string> => {
     const result = ipcRenderer.invoke('remote-port', port);
     return result;
+};
+
+const updateConnectDevices = (devices: RemoteConnectDevice[]) => {
+    ipcRenderer.send('update-connect-devices', devices);
+};
+
+const updateConnectState = (state: {
+    activeTargets: RemoteConnectDevice[];
+    isActive: boolean;
+    mySessionId: string;
+}) => {
+    ipcRenderer.send('update-connect-state', state);
+};
+
+const sendConnectError = (message: string) => {
+    ipcRenderer.send('remote-connect-error', message);
 };
 
 const updateFavorite = (favorite: boolean, serverId: string, ids: string[]) => {
@@ -85,13 +122,20 @@ const updatePosition = (timeSec: number) => {
 };
 
 export const remote = {
+    requestConnectConnect,
+    requestConnectDisconnect,
+    requestConnectDiscover,
+    requestConnectSetVolume,
     requestFavorite,
     requestPosition,
     requestRating,
     requestSeek,
     requestVolume,
+    sendConnectError,
     setRemoteEnabled,
     setRemotePort,
+    updateConnectDevices,
+    updateConnectState,
     updateFavorite,
     updatePassword,
     updatePlayback,

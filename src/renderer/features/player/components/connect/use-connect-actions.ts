@@ -69,16 +69,16 @@ export const useConnectActions = ({
         setStatus,
     });
 
-    const sendToSelected = async () => {
-        // Same "nothing loaded yet" case takeoverDevice() already handles —
-        // connecting with an empty queue must still claim the device instead
-        // of failing silently (sendTo() itself refuses with no visible error).
+    // Same "nothing loaded yet" case takeoverDevice() already handles —
+    // connecting with an empty queue must still claim the device instead
+    // of failing silently (sendTo() itself refuses with no visible error).
+    const sendToDevices = async (devices: ConnectDevice[], force: boolean) => {
         const hasContent = (isRadioActive && !!radioStreamUrl) || !!currentTrackId;
-        if (hasContent) {
-            await sendTo(selectedForSend, false);
-        } else {
-            await claimOnly(selectedForSend, false);
-        }
+        return hasContent ? sendTo(devices, force) : claimOnly(devices, force);
+    };
+
+    const sendToSelected = async () => {
+        await sendToDevices(selectedForSend, false);
     };
 
     const joinTo = async (devicesToJoin: ConnectDevice[], force: boolean) => {
@@ -111,6 +111,19 @@ export const useConnectActions = ({
     const addToStream = async () => {
         if (selectedForSend.length === 0) return;
         await joinTo(selectedForSend, false);
+    };
+
+    // Unified connect action for callers (the phone-remote bridge) that don't
+    // distinguish "start a new stream" from "add to the one already playing" —
+    // desktop exposes those as separate buttons (sendToSelected/addToStream),
+    // but a single imperative call is simpler for a remote client to reason
+    // about. Mirrors what those two buttons do under the hood.
+    const connectDevices = async (devices: ConnectDevice[], force: boolean) => {
+        if (isActive) {
+            await joinTo(devices, force);
+            return { error: null };
+        }
+        return sendToDevices(devices, force);
     };
 
     // Confirmed via the takeover dialog in DeviceItem — re-sends as a single
@@ -146,5 +159,5 @@ export const useConnectActions = ({
         });
     };
 
-    return { addToStream, sendToSelected, takeoverDevice, toggleSelectForSend };
+    return { addToStream, connectDevices, sendToSelected, takeoverDevice, toggleSelectForSend };
 };

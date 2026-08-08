@@ -7,6 +7,7 @@ import { useConnectControls } from './use-connect-controls';
 import { useConnectDevices } from './use-connect-devices';
 import { useConnectDisconnect } from './use-connect-disconnect';
 import { useConnectPlayback } from './use-connect-playback';
+import { useConnectRemoteSync } from './use-connect-remote-sync';
 import { useConnectScrobble } from './use-connect-scrobble';
 import { useConnectSetup } from './use-connect-setup';
 import { useConnectStatus } from './use-connect-status';
@@ -117,25 +118,26 @@ export const useConnectSession = (): ConnectSession => {
     });
 
     // ── Send/claim/join/takeover actions ───────────────────────────────────────
-    const { addToStream, sendToSelected, takeoverDevice, toggleSelectForSend } = useConnectActions({
-        currentSong,
-        currentTrackId,
-        ensureConfigured,
-        forceReconfigure,
-        isActive,
-        isRadioActive,
-        lastAutoSentRef,
-        mediaPause,
-        pauseRadio,
-        radioStationName,
-        radioStreamUrl,
-        refresh,
-        selectedForSend,
-        setActive,
-        setActiveTargets,
-        setSelectedForSend,
-        setStatus,
-    });
+    const { addToStream, connectDevices, sendToSelected, takeoverDevice, toggleSelectForSend } =
+        useConnectActions({
+            currentSong,
+            currentTrackId,
+            ensureConfigured,
+            forceReconfigure,
+            isActive,
+            isRadioActive,
+            lastAutoSentRef,
+            mediaPause,
+            pauseRadio,
+            radioStationName,
+            radioStreamUrl,
+            refresh,
+            selectedForSend,
+            setActive,
+            setActiveTargets,
+            setSelectedForSend,
+            setStatus,
+        });
 
     // ── Disconnect (explicit + external) ───────────────────────────────────────
     const { stopAllPlayback, stopSingleDevice } = useConnectDisconnect({
@@ -154,6 +156,17 @@ export const useConnectSession = (): ConnectSession => {
         setActiveTargets,
         setSelectedForSend,
         setStatus,
+    });
+
+    // ── Mirror device/target state + actions into the Context-free store ──────
+    useConnectRemoteSync({
+        activeTargets,
+        connectDevices,
+        devices,
+        mySessionId,
+        refresh,
+        stopAllPlayback,
+        stopSingleDevice,
     });
 
     // ── Player-bar play/pause/stop pass-through + local-playback safety net ───

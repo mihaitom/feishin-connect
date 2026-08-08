@@ -6,8 +6,35 @@ export interface ClientAuth {
     header: string;
 }
 
+export interface ClientConnectConnect {
+    devices: RemoteConnectDeviceRef[];
+    event: 'connect-connect';
+    force: boolean;
+}
+
+export interface ClientConnectDisconnect {
+    // Omitted device = disconnect all active targets.
+    device?: RemoteConnectDeviceRef;
+    event: 'connect-disconnect';
+}
+
+export interface ClientConnectDiscover {
+    event: 'connect-discover';
+    fresh?: boolean;
+}
+
+export interface ClientConnectSetVolume {
+    device: RemoteConnectDeviceRef;
+    event: 'connect-set-volume';
+    volume: number;
+}
+
 export type ClientEvent =
     | ClientAuth
+    | ClientConnectConnect
+    | ClientConnectDisconnect
+    | ClientConnectDiscover
+    | ClientConnectSetVolume
     | ClientFavorite
     | ClientPosition
     | ClientRating
@@ -39,12 +66,42 @@ export interface ClientVolume {
     volume: number;
 }
 
+export interface RemoteConnectDevice {
+    claimedByName?: null | string;
+    claimedBySessionId?: null | string;
+    claimedByTrack?: null | string;
+    name: string;
+    needsPairing?: boolean;
+    type: 'airplay' | 'chromecast' | 'dlna' | 'sonos';
+    // Current device volume (Sonos/Chromecast/DLNA only — AirPlay has no
+    // volume support in the backend), populated only for active targets.
+    volume?: null | number;
+}
+
+export type RemoteConnectDeviceRef = Pick<RemoteConnectDevice, 'name' | 'type'>;
+
+export interface ServerConnectDevices {
+    data: RemoteConnectDevice[];
+    event: 'connect-devices';
+}
+
+export interface ServerConnectState {
+    data: {
+        activeTargets: RemoteConnectDevice[];
+        isActive: boolean;
+        mySessionId: string;
+    };
+    event: 'connect-state';
+}
+
 export interface ServerError {
     data: string;
     event: 'error';
 }
 
 export type ServerEvent =
+    | ServerConnectDevices
+    | ServerConnectState
     | ServerError
     | ServerFavorite
     | ServerPlayStatus

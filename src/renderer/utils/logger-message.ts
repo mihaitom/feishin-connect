@@ -63,6 +63,8 @@ export const logMsg = {
     [LogCategory.REMOTE]: {
         cannotSendEvent: 'Cannot send event - socket not available',
         closingExistingSocket: 'Closing existing socket',
+        connectDevicesEventReceived: 'Connect devices event received',
+        connectStateEventReceived: 'Connect state event received',
         creatingWebSocket: 'Creating new WebSocket',
         credentialsFetched: 'Credentials fetched',
         failedToEnableRemote: 'Failed to enable remote',

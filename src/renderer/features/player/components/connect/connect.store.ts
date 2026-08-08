@@ -1,18 +1,36 @@
 import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 
+import { ConnectDevice } from './types';
+
 export interface ConnectPlayerHandlers {
     onPlayPause: () => void;
     onStop: () => void;
 }
 
+// Mirrors the Connect session's device/target state and exposes its device
+// actions imperatively, so parts of the app outside Playerbar's own subtree
+// (e.g. the phone-remote IPC bridge in use-remote-connect.tsx) can read and
+// drive Connect without needing ConnectSessionContext, which only reaches
+// Playerbar's descendants — see use-connect-remote-sync.ts, the sole writer.
+export interface RemoteConnectActions {
+    connectDevices: (devices: ConnectDevice[], force: boolean) => Promise<{ error: null | string }>;
+    disconnectAll: () => Promise<void>;
+    disconnectDevice: (device: ConnectDevice) => Promise<void>;
+    refresh: (fresh?: boolean) => void;
+}
+
 interface ConnectPlayerState {
+    activeTargets: ConnectDevice[];
+    devices: ConnectDevice[];
     duration: number;
     elapsed: number;
     handlers: ConnectPlayerHandlers | null;
     isActive: boolean;
     isPlaying: boolean;
     isStreaming: boolean;
+    mySessionId: string;
+    remoteActions: null | RemoteConnectActions;
     // Wall-clock time of the last elapsed sync, for smooth local animation
     syncTime: number;
 }
@@ -22,12 +40,16 @@ interface ConnectPlayerStore extends ConnectPlayerState {
 }
 
 export const useConnectPlayerStore = create<ConnectPlayerStore>((set) => ({
+    activeTargets: [],
+    devices: [],
     duration: 0,
     elapsed: 0,
     handlers: null,
     isActive: false,
     isPlaying: false,
     isStreaming: false,
+    mySessionId: '',
+    remoteActions: null,
     set: (patch) => set(patch),
     syncTime: 0,
 }));
