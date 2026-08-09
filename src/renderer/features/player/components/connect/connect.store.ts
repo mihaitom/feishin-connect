@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 
-import { ConnectDevice } from './types';
+import { ConnectDevice, ConnectQueueItem } from './types';
+
+// 'inactive': today's plain local playback, nothing shared. 'cast': casting
+// to a real device (unchanged, existing behavior). 'local-owner': this tab's
+// own <audio> is the account's current playback source, and it pushes state
+// to /queue for other tabs to mirror. 'mirror': another tab/device owns
+// playback (cast or local-owner) and this tab reflects it read-only,
+// forwarding its own transport commands to the backend instead of its local
+// player — see use-connect-session.ts's bootstrap/demotion effects. Additive
+// to the existing fields — the Electron phone-remote bridge
+// (use-connect-remote-sync.ts) doesn't read this and keeps working off
+// `isActive` exactly as before.
+export type ConnectMode = 'cast' | 'inactive' | 'local-owner' | 'mirror';
 
 export interface ConnectPlayerHandlers {
     onPlayPause: () => void;
@@ -29,7 +41,16 @@ interface ConnectPlayerState {
     isActive: boolean;
     isPlaying: boolean;
     isStreaming: boolean;
+    mode: ConnectMode;
     mySessionId: string;
+    // The shared queue as last reported by the backend (see AppState.queue) —
+    // populated from every SSE tick/refetch alongside elapsed/duration above
+    // (see use-connect-status.ts's applyStatus), so a `mirror` tab's queue
+    // view (outside Playerbar's subtree, same reasoning as remoteActions)
+    // can read it without ConnectSessionContext. Only meaningful in
+    // `mirror`/`cast` mode — empty otherwise.
+    queue: ConnectQueueItem[];
+    queueIndex: number;
     remoteActions: null | RemoteConnectActions;
     // Wall-clock time of the last elapsed sync, for smooth local animation
     syncTime: number;
@@ -48,7 +69,10 @@ export const useConnectPlayerStore = create<ConnectPlayerStore>((set) => ({
     isActive: false,
     isPlaying: false,
     isStreaming: false,
+    mode: 'inactive',
     mySessionId: '',
+    queue: [],
+    queueIndex: 0,
     remoteActions: null,
     set: (patch) => set(patch),
     syncTime: 0,

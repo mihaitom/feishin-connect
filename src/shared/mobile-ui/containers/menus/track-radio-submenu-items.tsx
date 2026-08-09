@@ -1,5 +1,5 @@
-import { ActionSheet } from '/@/remote/components/action-sheet';
-import { Play } from '/@/shared/types/types';
+import { ActionSheet } from '/@/shared/mobile-ui/components/action-sheet';
+import { Play } from '/@/shared/mobile-ui/types';
 
 interface TrackRadioSubmenuItemsProps {
     onSelect: (playType: Play) => void;

@@ -1,17 +1,17 @@
 import formatDuration from 'format-duration';
 
-import { ListRow } from '/@/remote/components/list-row';
-import { Thumbnail } from '/@/remote/components/thumbnail';
-import { useLongPress } from '/@/remote/hooks/use-long-press';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { RemoteTrackItem } from '/@/shared/types/remote-types';
+import { ListRow } from '/@/shared/mobile-ui/components/list-row';
+import { Thumbnail } from '/@/shared/mobile-ui/components/thumbnail';
+import { useLongPress } from '/@/shared/mobile-ui/hooks/use-long-press';
+import { MobileTrackItem } from '/@/shared/mobile-ui/types';
 
 interface TrackRowProps {
     onLongPress: () => void;
     onPlay: () => void;
-    track: RemoteTrackItem;
+    track: MobileTrackItem;
 }
 
 export const TrackRow = ({ onLongPress, onPlay, track }: TrackRowProps) => {

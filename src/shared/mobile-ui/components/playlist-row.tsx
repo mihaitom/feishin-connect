@@ -1,18 +1,18 @@
 import formatDuration from 'format-duration';
 
-import { ListRow } from '/@/remote/components/list-row';
-import { Thumbnail } from '/@/remote/components/thumbnail';
-import { useLongPress } from '/@/remote/hooks/use-long-press';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { RemotePlaylistItem } from '/@/shared/types/remote-types';
+import { ListRow } from '/@/shared/mobile-ui/components/list-row';
+import { Thumbnail } from '/@/shared/mobile-ui/components/thumbnail';
+import { useLongPress } from '/@/shared/mobile-ui/hooks/use-long-press';
+import { MobilePlaylistItem } from '/@/shared/mobile-ui/types';
 
 interface PlaylistRowProps {
     onLongPress: () => void;
     onPlay: () => void;
-    playlist: RemotePlaylistItem;
+    playlist: MobilePlaylistItem;
 }
 
 export const PlaylistRow = ({ onLongPress, onPlay, playlist }: PlaylistRowProps) => {

@@ -173,6 +173,63 @@ def _current_reconnect_args(
     return stream_url(session.session_id), title, artist, album_art_url, duration, album
 
 
+async def _start_track(
+    session: SessionState,
+    track,
+    target,
+    *,
+    force: bool,
+    start_position: float = 0.0,
+    gain: float = 1.0,
+) -> dict | None:
+    """Shared core of /play, /next, and /prev: claims `target` if any, updates
+    AppState, dispatches to the device when casting, and broadcasts the new
+    status. Returns an error dict on failure, None on success — callers add
+    whatever success-shaped response body they need on top."""
+    if target:
+        conflict = await _claim_or_takeover(target, session, force)
+        if conflict:
+            return conflict
+
+    st = session.state
+    st.current_track = track
+    st.current_track_gain = gain
+    st.is_streaming = True
+    st.radio_info = None
+    st.clock.start(max(0.0, min(start_position, float(track.duration))))
+    st.track_ended = False
+
+    if not target:
+        st.active_delivery = None
+        await session.event_bus.broadcast(build_status_dict(session))
+        return None
+
+    st.active_delivery = target
+    url = stream_url(session.session_id)
+    # internal=True: fetched directly by the cast device, not the browser —
+    # see MediaClient.get_cover_art_url's docstring.
+    album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
+    if not _is_duplicate_dispatch(st, f"play:{target}:{track.id}"):
+        try:
+            await target.play(
+                url,
+                track.title,
+                track.artist,
+                album_art_url,
+                float(track.duration),
+                track.album,
+            )
+        except Exception as e:
+            logger.error(f"[play] Delivery error: {e}", exc_info=True)
+            return {"error": str(e)}
+
+    asyncio.create_task(
+        _apply_position_offset(session, target, st.clock.play_generation)
+    )
+    await session.event_bus.broadcast(build_status_dict(session))
+    return None
+
+
 class PlayRequest(BaseModel):
     track_ids: list[str]
     targets: list[dict] | None = None
@@ -188,6 +245,11 @@ class PlayRequest(BaseModel):
     # Take over any target already claimed by another session instead of
     # refusing (Phase 2 — the user confirmed a takeover dialog).
     force: bool = False
+    # Identifies the calling tab (mobile-view plan, Phase 2) — claims local
+    # (non-cast) playback ownership so other same-account tabs know who to
+    # mirror. Omitted entirely by callers that don't participate in that
+    # (e.g. a plain cast-only /play), in which case ownership is left as-is.
+    client_id: str | None = None
 
 
 @router.post("/play")
@@ -214,55 +276,25 @@ async def play_tracks(
     target = resolve_target(
         req.targets, req.target_name, req.target_type, previous=session.state.active_delivery
     )
-    url = stream_url(session.session_id)
     start_position = max(0.0, min(req.start_position, float(track.duration)))
     logger.info(
         f"[play] {track.artist} — {track.title} ({track.duration}s) → target={target}"
         + (f" (start {start_position:.1f}s)" if start_position > 0.5 else "")
     )
 
-    if target:
-        conflict = await _claim_or_takeover(target, session, req.force)
-        if conflict:
-            return conflict
+    error = await _start_track(
+        session, track, target, force=req.force, start_position=start_position, gain=req.gain
+    )
+    if error:
+        return error
 
     st = session.state
-    st.current_track = track
-    st.current_track_gain = req.gain
-    st.is_streaming = True
-    st.radio_info = None
-    st.clock.start(start_position)
-    st.track_ended = False
-
+    if not target and req.client_id:
+        st.local_owner_client_id = req.client_id
     if not target:
-        logger.info(f"[play] No target — stream available at {url}")
-        st.active_delivery = None
-        await session.event_bus.broadcast(build_status_dict(session))
-        return {"status": "playing", "stream_url": url}
+        logger.info(f"[play] No target — stream available at {stream_url(session.session_id)}")
 
-    st.active_delivery = target
-    # internal=True: fetched directly by the cast device, not the browser —
-    # see MediaClient.get_cover_art_url's docstring.
-    album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
-    if not _is_duplicate_dispatch(st, f"play:{target}:{track_id}"):
-        try:
-            await target.play(
-                url,
-                track.title,
-                track.artist,
-                album_art_url,
-                float(track.duration),
-                track.album,
-            )
-        except Exception as e:
-            logger.error(f"[play] Delivery error: {e}", exc_info=True)
-            return {"error": str(e)}
-
-    asyncio.create_task(
-        _apply_position_offset(session, target, st.clock.play_generation)
-    )
-    await session.event_bus.broadcast(build_status_dict(session))
-    return {"status": "playing", "stream_url": url}
+    return {"status": "playing", "stream_url": stream_url(session.session_id)}
 
 
 class PlayUrlRequest(BaseModel):
@@ -398,6 +430,92 @@ async def seek_playback(
     return {"position": position}
 
 
+class QueueRequest(BaseModel):
+    # Lightweight display objects, not bare track ids — the pushing tab
+    # already has full metadata locally (see AppState.queue's docstring).
+    items: list[dict]
+    index: int = 0
+    client_id: str | None = None
+
+
+@router.post("/queue")
+async def push_queue(
+    req: QueueRequest, session: SessionState = Depends(require_authenticated_session)
+):
+    """Pure state write + broadcast, independent of active_delivery — called
+    by whichever tab is producing local audio on every queue/current-track
+    change, so other same-account tabs can mirror it (mobile-view plan,
+    Phase 2). Never dispatches to a device; casting still goes through /play."""
+    st = session.state
+    st.queue = req.items
+    st.queue_index = max(0, min(req.index, len(req.items) - 1)) if req.items else 0
+    # Only meaningful for local (non-cast) playback — a real cast target has
+    # no single owning tab (see AppState.local_owner_client_id's docstring).
+    if not st.active_delivery:
+        if req.client_id:
+            st.local_owner_client_id = req.client_id
+        # Unlike casting (where /play already sets this), nothing else marks
+        # a local-only session as "there's an active session" — without it,
+        # is_streaming stays permanently False for local playback, which a
+        # mirror tab reads (via /status and SSE /events) as "nothing is
+        # playing" even while local audio is actually going in the owning
+        # tab. Pause state itself is tracked separately by /pause /resume,
+        # same as it already is for casting.
+        st.is_streaming = bool(req.items)
+    await session.event_bus.broadcast(build_status_dict(session))
+    return {"status": "ok"}
+
+
+class QueueStepRequest(BaseModel):
+    force: bool = False
+
+
+async def _play_queue_index(session: SessionState, index: int, force: bool) -> dict:
+    st = session.state
+    item = st.queue[index]
+    try:
+        track = session.media.get_track(item["id"])
+    except Exception as e:
+        logger.warning(f"[queue-step] Track {item['id']} not found: {e}")
+        return {"error": f"Track not found: {e}"}
+
+    error = await _start_track(session, track, st.active_delivery, force=force)
+    if error:
+        return error
+
+    st.queue_index = index
+    return {"index": index, "status": "playing"}
+
+
+@router.post("/next")
+async def next_track(
+    req: QueueStepRequest, session: SessionState = Depends(require_authenticated_session)
+):
+    """Steps queue_index forward and starts the corresponding queue item —
+    lets a mirror tab (mobile-view plan, Phase 2) advance the queue without
+    knowing the next track's id itself; the backend resolves it from
+    AppState.queue/queue_index, same as it already does for the currently
+    playing entry."""
+    st = session.state
+    if not st.queue:
+        return {"error": "No queue to advance"}
+    if st.queue_index + 1 >= len(st.queue):
+        return {"error": "End of queue"}
+    return await _play_queue_index(session, st.queue_index + 1, req.force)
+
+
+@router.post("/prev")
+async def prev_track(
+    req: QueueStepRequest, session: SessionState = Depends(require_authenticated_session)
+):
+    st = session.state
+    if not st.queue:
+        return {"error": "No queue to go back in"}
+    if st.queue_index - 1 < 0:
+        return {"error": "Start of queue"}
+    return await _play_queue_index(session, st.queue_index - 1, req.force)
+
+
 @router.post("/stop")
 async def stop_playback(session: SessionState = Depends(require_authenticated_session)):
     st = session.state
@@ -410,6 +528,9 @@ async def stop_playback(session: SessionState = Depends(require_authenticated_se
     st.radio_info = None
     st.active_delivery = None
     st.last_dispatch_key = None
+    st.queue = []
+    st.queue_index = 0
+    st.local_owner_client_id = None
     await claims.release_all_for_session(session.session_id)
     logger.info("[stop] ⏹ Playback stopped")
     await session.event_bus.broadcast(build_status_dict(session))

@@ -2,19 +2,16 @@ import clsx from 'clsx';
 
 import styles from './player-image.module.css';
 
-import { useSend } from '/@/remote/store';
-
 interface PlayerImageProps {
     className?: string;
+    onError?: () => void;
     src?: null | string;
 }
-export const PlayerImage = ({ className, src }: PlayerImageProps) => {
-    const send = useSend();
-
+export const PlayerImage = ({ className, onError, src }: PlayerImageProps) => {
     return (
         <img
             className={clsx(styles.container, className)}
-            onError={() => send({ event: 'proxy' })}
+            onError={onError}
             src={src?.replaceAll(/&(size|width|height)=\d+/g, '')}
         />
     );

@@ -354,6 +354,165 @@ def test_stop_is_idempotent(client, default_session):
     assert r2.json()["status"] == "stopped"
 
 
+def test_stop_clears_queue_mirroring_state(client, default_session):
+    default_session.state.queue = [{"id": "1", "title": "Song"}]
+    default_session.state.queue_index = 3
+    default_session.state.local_owner_client_id = "tab-a"
+
+    client.post("/stop")
+
+    assert default_session.state.queue == []
+    assert default_session.state.queue_index == 0
+    assert default_session.state.local_owner_client_id is None
+
+
+# ── /queue (cross-tab queue mirroring) ──────────────────────────────────────
+
+
+def _queue_items():
+    return [
+        {"id": "1", "title": "Song One", "artist": "A", "album": "Alb", "duration": 180},
+        {"id": "2", "title": "Song Two", "artist": "A", "album": "Alb", "duration": 200},
+    ]
+
+
+def test_queue_push_sets_state(client, default_session):
+    r = client.post(
+        "/queue", json={"items": _queue_items(), "index": 1, "client_id": "tab-a"}
+    )
+    assert r.status_code == 200
+    assert default_session.state.queue == _queue_items()
+    assert default_session.state.queue_index == 1
+
+
+def test_queue_push_claims_local_ownership_when_no_cast_target(client, default_session):
+    client.post("/queue", json={"items": _queue_items(), "client_id": "tab-a"})
+    assert default_session.state.local_owner_client_id == "tab-a"
+
+
+def test_queue_push_does_not_claim_ownership_while_casting(client, default_session):
+    default_session.state.active_delivery = SonosDelivery("Küche")
+    client.post("/queue", json={"items": _queue_items(), "client_id": "tab-a"})
+    assert default_session.state.local_owner_client_id is None
+
+
+def test_queue_push_marks_local_session_as_streaming(client, default_session):
+    """A mirror tab reads streaming (via /status, SSE /events) to know
+    whether anything's playing at all — without this, local (non-cast)
+    playback would never show as active anywhere but the owning tab."""
+    client.post("/queue", json={"items": _queue_items(), "client_id": "tab-a"})
+    assert default_session.state.is_streaming is True
+
+
+def test_queue_push_empty_items_does_not_mark_streaming(client, default_session):
+    client.post("/queue", json={"items": [], "client_id": "tab-a"})
+    assert default_session.state.is_streaming is False
+
+
+def test_queue_push_does_not_set_streaming_while_casting(client, default_session):
+    default_session.state.active_delivery = SonosDelivery("Küche")
+    client.post("/queue", json={"items": _queue_items(), "client_id": "tab-a"})
+    # Casting already has /play for this — /queue must not fabricate its own
+    # is_streaming independent of whatever /play actually established.
+    assert default_session.state.is_streaming is False
+
+
+def test_queue_push_clamps_out_of_range_index(client, default_session):
+    client.post("/queue", json={"items": _queue_items(), "index": 99})
+    assert default_session.state.queue_index == 1  # last valid index
+
+
+def test_queue_push_empty_items_resets_index(client, default_session):
+    client.post("/queue", json={"items": [], "index": 5})
+    assert default_session.state.queue_index == 0
+
+
+def test_status_reflects_queue_state(client, default_session):
+    default_session.state.queue = _queue_items()
+    default_session.state.queue_index = 1
+    default_session.state.local_owner_client_id = "tab-a"
+
+    body = client.get("/status").json()
+
+    assert body["queue"] == _queue_items()
+    assert body["queue_index"] == 1
+    assert body["current_track_index"] == 1
+    assert body["total_tracks"] == 2
+    assert body["local_owner_client_id"] == "tab-a"
+
+
+# ── /next + /prev (queue stepping for a mirror tab) ─────────────────────────
+
+
+def test_next_advances_queue_and_starts_track(client, default_session):
+    default_session.state.queue = _queue_items()
+    default_session.state.queue_index = 0
+
+    track = Track(id="2", title="Song Two", artist="A", duration=200, cover_art_id="")
+    with patch.object(default_session.media, "get_track", return_value=track):
+        r = client.post("/next", json={})
+
+    assert r.status_code == 200
+    assert r.json()["status"] == "playing"
+    assert default_session.state.queue_index == 1
+    assert default_session.state.current_track.id == "2"
+
+
+def test_next_errors_at_end_of_queue(client, default_session):
+    default_session.state.queue = _queue_items()
+    default_session.state.queue_index = 1
+
+    r = client.post("/next", json={})
+    assert "error" in r.json()
+    assert default_session.state.queue_index == 1
+
+
+def test_next_errors_with_no_queue(client, default_session):
+    r = client.post("/next", json={})
+    assert "error" in r.json()
+
+
+def test_prev_moves_queue_back_and_starts_track(client, default_session):
+    default_session.state.queue = _queue_items()
+    default_session.state.queue_index = 1
+
+    track = Track(id="1", title="Song One", artist="A", duration=180, cover_art_id="")
+    with patch.object(default_session.media, "get_track", return_value=track):
+        r = client.post("/prev", json={})
+
+    assert r.status_code == 200
+    assert default_session.state.queue_index == 0
+    assert default_session.state.current_track.id == "1"
+
+
+def test_prev_errors_at_start_of_queue(client, default_session):
+    default_session.state.queue = _queue_items()
+    default_session.state.queue_index = 0
+
+    r = client.post("/prev", json={})
+    assert "error" in r.json()
+    assert default_session.state.queue_index == 0
+
+
+def test_next_dispatches_to_active_cast_target(client, default_session):
+    """A mirror tab's /next must also advance a session that's actively
+    casting — /next reuses whatever active_delivery is already set, it
+    doesn't require a target to be passed in explicitly."""
+    default_session.state.queue = _queue_items()
+    default_session.state.queue_index = 0
+    default_session.state.active_delivery = SonosDelivery("Küche")
+
+    track = Track(id="2", title="Song Two", artist="A", duration=200, cover_art_id="")
+    with (
+        patch.object(default_session.media, "get_track", return_value=track),
+        patch.object(SonosDelivery, "play", new=AsyncMock()) as mock_play,
+    ):
+        r = client.post("/next", json={})
+
+    assert r.status_code == 200
+    mock_play.assert_awaited_once()
+
+
 # ── /pause + /resume ──────────────────────────────────────────────────────────
 
 

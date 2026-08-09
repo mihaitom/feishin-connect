@@ -149,14 +149,17 @@ def build_status_dict(session: SessionState) -> dict:
 
     return {
         "current_track": current_track,
-        "current_track_index": 0,
+        "current_track_index": st.queue_index if st.queue else 0,
         "elapsed": elapsed,
         "ended": st.track_ended,
+        "local_owner_client_id": st.local_owner_client_id,
         "paused": st.clock.is_paused,
+        "queue": st.queue,
+        "queue_index": st.queue_index,
         "radio": st.radio_info,
         "streaming": st.is_streaming,
         "targets": targets,
-        "total_tracks": 1 if st.current_track else 0,
+        "total_tracks": len(st.queue) if st.queue else (1 if st.current_track else 0),
     }
 
 

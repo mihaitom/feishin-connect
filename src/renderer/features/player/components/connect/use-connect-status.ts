@@ -15,6 +15,8 @@ export const useConnectStatus = (active: boolean) => {
             elapsed: d.elapsed ?? 0,
             isPlaying: d.streaming && !d.paused,
             isStreaming: d.streaming,
+            queue: d.queue ?? [],
+            queueIndex: d.queue_index ?? 0,
             syncTime: Date.now(),
         });
     }, []);

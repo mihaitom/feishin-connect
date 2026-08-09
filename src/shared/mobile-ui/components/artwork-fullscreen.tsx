@@ -2,15 +2,16 @@ import { AnimatePresence, motion } from 'motion/react';
 
 import styles from './artwork-fullscreen.module.css';
 
-import { PlayerImage } from '/@/remote/components/player-image';
-import playerImageStyles from '/@/remote/components/player-image.module.css';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Text } from '/@/shared/components/text/text';
+import { PlayerImage } from '/@/shared/mobile-ui/components/player-image';
+import playerImageStyles from '/@/shared/mobile-ui/components/player-image.module.css';
 
 interface ArtworkFullscreenProps {
     album?: null | string;
     artist?: null | string;
     onClose: () => void;
+    onImageError?: () => void;
     opened: boolean;
     src: null | string;
     title: null | string;
@@ -20,6 +21,7 @@ export const ArtworkFullscreen = ({
     album,
     artist,
     onClose,
+    onImageError,
     opened,
     src,
     title,
@@ -43,7 +45,11 @@ export const ArtworkFullscreen = ({
                     >
                         <Icon icon="x" size="lg" />
                     </button>
-                    <PlayerImage className={playerImageStyles.fullscreen} src={src} />
+                    <PlayerImage
+                        className={playerImageStyles.fullscreen}
+                        onError={onImageError}
+                        src={src}
+                    />
                     {(title || artist || album) && (
                         <div className={styles.info}>
                             {title && (

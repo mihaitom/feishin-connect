@@ -45,6 +45,23 @@ class AppState:
         # each call stops and restarts the device before it can buffer audio.
         self.last_dispatch_key: str | None = None
         self.last_dispatch_at: float = 0.0
+        # Cross-tab queue mirroring (mobile-view plan, Phase 2). `queue` holds
+        # lightweight display objects (id/title/artist/album/duration/
+        # cover_art_url — the last one already a fully resolved, remotely-
+        # loadable URL, not a raw media-server id: a mirror tab observing
+        # local playback has no backend-relayed art path the way a casting
+        # tab does), not bare track ids — the pushing tab already has the
+        # full metadata locally, and there's no batch song-lookup endpoint a
+        # mirror tab could otherwise use to resolve ids into something
+        # displayable. Only meaningful for *local* (non-cast) playback: a real
+        # cast target has no single "owning" tab, every tab can equally
+        # control it via the existing /play /pause /seek endpoints.
+        self.queue: list[dict] = []
+        self.queue_index: int = 0
+        # The client_id (see types.ts's getConnectClientId()) of whichever tab
+        # is currently the source of truth for local playback — None means no
+        # tab currently owns it. Never set for cast playback.
+        self.local_owner_client_id: str | None = None
 
 
 class EventBus:

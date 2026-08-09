@@ -3,20 +3,20 @@ import { animate, motion, PanInfo, Reorder, useDragControls, useMotionValue } fr
 
 import styles from './queue-row.module.css';
 
-import { ListRow } from '/@/remote/components/list-row';
-import { Thumbnail } from '/@/remote/components/thumbnail';
-import { useLongPress } from '/@/remote/hooks/use-long-press';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { RemoteQueueItem } from '/@/shared/types/remote-types';
+import { ListRow } from '/@/shared/mobile-ui/components/list-row';
+import { Thumbnail } from '/@/shared/mobile-ui/components/thumbnail';
+import { useLongPress } from '/@/shared/mobile-ui/hooks/use-long-press';
+import { MobileQueueItem } from '/@/shared/mobile-ui/types';
 
 const SWIPE_DELETE_THRESHOLD = -80;
 
 interface QueueRowProps {
     index: number;
     isCurrent: boolean;
-    item: RemoteQueueItem;
+    item: MobileQueueItem;
     onJump: () => void;
     onLongPress: () => void;
     onRemove: () => void;

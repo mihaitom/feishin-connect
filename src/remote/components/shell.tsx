@@ -2,12 +2,12 @@ import { Flex, Grid, Image } from '@mantine/core';
 
 import { ReconnectButton } from '/@/remote/components/buttons/reconnect-button';
 import { ThemeButton } from '/@/remote/components/buttons/theme-button';
-import { TabBar } from '/@/remote/components/tab-bar';
 import { RemoteRoutes } from '/@/remote/router';
 import { useConnected } from '/@/remote/store';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Spinner } from '/@/shared/components/spinner/spinner';
+import { TabBar } from '/@/shared/mobile-ui/components/tab-bar';
 
 // A plain flex column instead of Mantine's <AppShell> — AppShell's header/
 // footer are `position: fixed` with Main just carrying compensating padding,

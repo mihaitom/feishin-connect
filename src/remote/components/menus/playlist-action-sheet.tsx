@@ -1,6 +1,5 @@
-import { ActionSheet } from '/@/remote/components/action-sheet';
-import { PlaySubmenuItems } from '/@/remote/components/menus/play-submenu-items';
 import { useSend } from '/@/remote/store';
+import { PlaylistActionSheet as SharedPlaylistActionSheet } from '/@/shared/mobile-ui/containers/menus/playlist-action-sheet';
 
 interface PlaylistActionSheetProps {
     onClose: () => void;
@@ -11,15 +10,10 @@ export const PlaylistActionSheet = ({ onClose, playlist }: PlaylistActionSheetPr
     const send = useSend();
 
     return (
-        <ActionSheet onClose={onClose} opened={!!playlist}>
-            {playlist && (
-                <PlaySubmenuItems
-                    onSelect={(playType) => {
-                        send({ event: 'play-playlist', id: playlist.id, playType });
-                        onClose();
-                    }}
-                />
-            )}
-        </ActionSheet>
+        <SharedPlaylistActionSheet
+            onClose={onClose}
+            onPlay={(id, playType) => send({ event: 'play-playlist', id, playType })}
+            playlist={playlist}
+        />
     );
 };

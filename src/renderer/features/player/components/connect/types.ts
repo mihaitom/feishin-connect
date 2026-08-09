@@ -21,6 +21,22 @@ export interface ConnectDevice {
     type: 'airplay' | 'chromecast' | 'dlna' | 'sonos';
 }
 
+export interface ConnectQueueItem {
+    album?: string;
+    artist?: string;
+    // Already a fully resolved, remotely-loadable URL (getItemImageUrl(...,
+    // useRemoteUrl: true)) — pushed by whichever tab owns local playback.
+    // Unlike current_track.cover_art_url (built server-side via
+    // MediaClient.get_cover_art_url, only reachable because that tab is
+    // actively casting through this backend), a mirror tab observing local
+    // (non-cast) playback has no equivalent backend-relayed image path, so
+    // the pushing tab must send something a plain <img> can load directly.
+    cover_art_url?: null | string;
+    duration?: number;
+    id: string;
+    title: string;
+}
+
 export interface ConnectSession {
     activeDevice: ConnectDevice | null;
     activeTargets: ConnectDevice[];
@@ -55,7 +71,16 @@ export interface ConnectStatus {
     current_track_index: number;
     elapsed: number;
     ended: boolean;
+    // Which tab currently owns *local* (non-cast) playback — see
+    // AppState.local_owner_client_id's docstring in core/state.py. Only ever
+    // set while `targets` is empty; irrelevant once a real cast device is
+    // active (every tab can equally control that).
+    local_owner_client_id: null | string;
     paused: boolean;
+    // Lightweight display objects, not bare track ids — see AppState.queue's
+    // docstring. Empty unless some tab has pushed one via POST /queue.
+    queue: ConnectQueueItem[];
+    queue_index: number;
     radio: null | { title: string; url: string };
     streaming: boolean;
     targets: Array<{ name: string; type: string }>;
@@ -101,4 +126,27 @@ export function getConnectSessionId(): string {
 
 export function setConnectSessionId(id: string): void {
     connectSessionId = id;
+}
+
+const CONNECT_CLIENT_ID_KEY = 'connect-client-id';
+let connectClientId: null | string = null;
+
+// Identifies *this browser tab* for local-playback ownership (POST /queue,
+// AppState.local_owner_client_id) — deliberately sessionStorage, not
+// localStorage: a reload should never silently assume it's still the same
+// owner it was before, only an explicit local /play or /queue push (see
+// use-connect-session.ts) re-establishes ownership. Different tabs of the
+// same account naturally get different sessionStorage, so this is unique
+// per tab without needing to coordinate across them.
+export function getConnectClientId(): string {
+    if (connectClientId) return connectClientId;
+    const stored = sessionStorage.getItem(CONNECT_CLIENT_ID_KEY);
+    if (stored) {
+        connectClientId = stored;
+        return stored;
+    }
+    const id = crypto.randomUUID();
+    sessionStorage.setItem(CONNECT_CLIENT_ID_KEY, id);
+    connectClientId = id;
+    return id;
 }
