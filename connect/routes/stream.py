@@ -11,9 +11,52 @@ from fastapi.responses import Response, StreamingResponse
 from core.auth import require_token
 from core.session import DEFAULT_SESSION_ID, SessionState, build_status_dict, get_session, registry
 from core.streamer import stream_tracks
+from routes.playback import play_queue_index
 
 logger = logging.getLogger("connect.stream")
 router = APIRouter()
+
+
+async def _fire_track_end(session: SessionState, my_generation: int, wait: float) -> None:
+    """Fires track-end signal after waiting for Sonos to finish playback.
+
+    Runs as an independent task (see audio_stream's stream_with_completion())
+    so Sonos closing the HTTP connection cannot cancel it (that CancelledError
+    would only affect stream_with_completion itself). Module-level (not
+    nested in audio_stream) so it's directly testable, same as
+    routes/playback.py's _apply_position_offset.
+
+    Auto-advances to the next queue item itself when one's loaded (pushed via
+    /queue — see routes/playback.py, now also pushed while casting, not just
+    local-owner mirroring) instead of only marking track_ended and waiting
+    for the frontend to notice and issue a fresh /play. The whole point of
+    casting is that playback keeps going on the physical device independently
+    of the browser tab staying active/reachable — a locked phone's browser
+    tab can have its JS suspended for as long as the screen stays locked,
+    which used to silently stall playback at the end of every track until the
+    phone was unlocked again.
+    """
+    if wait > 0.5:
+        logger.info(f"[stream] FFmpeg done early — waiting {wait:.1f}s for playback to finish")
+        await asyncio.sleep(wait)
+    st = session.state
+    if not (
+        st.is_streaming and not st.clock.is_paused and st.clock.play_generation == my_generation
+    ):
+        return
+
+    next_index = st.queue_index + 1
+    if st.queue and next_index < len(st.queue):
+        result = await play_queue_index(session, next_index, force=False)
+        if "error" not in result:
+            logger.info(f"[stream] Track finished — auto-advanced to queue index {next_index}")
+            return
+        logger.warning(f"[stream] Auto-advance to queue index {next_index} failed: {result['error']}")
+
+    logger.info("[stream] Track finished — marking stream complete")
+    st.is_streaming = False
+    st.track_ended = True
+    await session.event_bus.broadcast(build_status_dict(session))
 
 
 @router.head("/stream")
@@ -65,28 +108,6 @@ async def audio_stream(session_id: str = DEFAULT_SESSION_ID):
             f"[stream] ▶ {track.artist} — {track.title} ({track.duration}s{gain_str})"
         )
 
-    async def _fire_track_end(my_generation: int, wait: float) -> None:
-        """Fires track-end signal after waiting for Sonos to finish playback.
-
-        Runs as an independent task so Sonos closing the HTTP connection cannot
-        cancel it (that CancelledError would only affect stream_with_completion).
-        """
-        if wait > 0.5:
-            logger.info(
-                f"[stream] FFmpeg done early — waiting {wait:.1f}s for playback to finish"
-            )
-            await asyncio.sleep(wait)
-        st = session.state
-        if (
-            st.is_streaming
-            and not st.clock.is_paused
-            and st.clock.play_generation == my_generation
-        ):
-            logger.info("[stream] Track finished — marking stream complete")
-            st.is_streaming = False
-            st.track_ended = True
-            await session.event_bus.broadcast(build_status_dict(session))
-
     async def stream_with_completion():
         my_generation = session.state.clock.play_generation
         offset_consumed = False
@@ -124,7 +145,7 @@ async def audio_stream(session_id: str = DEFAULT_SESSION_ID):
                     (st.clock.play_start_time + st.current_track.duration)
                     - time.time(),
                 )
-            asyncio.create_task(_fire_track_end(my_generation, wait))
+            asyncio.create_task(_fire_track_end(session, my_generation, wait))
 
     return StreamingResponse(
         stream_with_completion(),

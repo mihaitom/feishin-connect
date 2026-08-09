@@ -42,6 +42,17 @@ interface UseConnectLocalQueueArgs {
  * diffs against the real local player and applies. No reverse-sync for
  * mirror-initiated queue reorder/remove — out of scope for v1 (see the
  * mobile-view plan).
+ *
+ * The queue-forwarding effect (only that one — not play/pause forwarding or
+ * reverse-sync, which stay local-owner-only) also runs in `cast` mode, so
+ * the backend knows what's next while casting too. Without it, a track
+ * ending had nothing to auto-advance to server-side (see routes/stream.py's
+ * _fire_track_end) and just sat there marked "ended" until this tab's own
+ * JS ran again and issued a fresh /play — which stalls for as long as a
+ * locked phone's browser tab keeps its JS suspended. /queue already leaves
+ * local_owner_client_id/is_streaming untouched whenever active_delivery is
+ * set (see routes/playback.py's push_queue), so pushing it while casting is
+ * safe — it only ever updates queue/queue_index there.
  */
 export const useConnectLocalQueue = ({
     connectStatus,
@@ -61,8 +72,9 @@ export const useConnectLocalQueue = ({
         : -1;
 
     // ── Forward: push queue + current index on change ──────────────────────────
+    // Runs in both local-owner and cast mode — see this hook's own docstring.
     useEffect(() => {
-        if (mode !== 'local-owner' || queue.length === 0) return;
+        if ((mode !== 'local-owner' && mode !== 'cast') || queue.length === 0) return;
 
         // Refresh the grace period synchronously, in the same commit as this
         // change — not only once the debounced push actually lands. Otherwise

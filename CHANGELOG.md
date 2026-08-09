@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - **Queue** — shows what's coming up; tap to jump straight to any track, swipe to remove one, or drag to reorder the queue.
 - **The phone remote can now discover, connect to, and control Feishin Connect casting** — Sonos, AirPlay, Chromecast, and DLNA devices can be selected (including several at once) and controlled directly from the phone, each with its own volume and mute, with the same confirmation prompt as the desktop app before taking over a device someone else is using.
 - **Tapping the album art on the phone remote's now-playing screen** opens a fullscreen view; tapping the volume icon mutes and unmutes, matching the desktop player.
+- **A dedicated mobile web view** — visiting the site from a mobile browser now shows a purpose-built mobile layout instead of the regular desktop one:
+  - **Now Playing, Tracks, Playlists, Radio, and Queue** screens, reachable from a bottom tab bar.
+  - **Feishin Connect casting** works the same as on desktop — pick a device (or several), see its volume and mute state, and get the same confirmation prompt before taking over a device already in use.
+  - **If music is already playing elsewhere on the same account** (another tab, or a Connect device), opening the mobile view shows a live, read-only view of it — cover art, position, and queue — with play/pause/skip/seek controls that act on the actual playing tab/device, instead of silently starting a second, conflicting playback.
+
+### Fixed
+- **Casting to a Sonos/Chromecast/DLNA/AirPlay device could get silently stopped by the backend after sitting idle for a while**, even though it was still actively playing on the physical device — most noticeable on a phone, since its browser stops checking in with the backend within seconds of the screen locking. The backend no longer cleans up a session just for being quiet while it's actively casting to a device.
+- **Casting stalled at the end of every track until the controlling browser tab was active again** — advancing to the next queued track used to depend entirely on that tab; a locked phone (whose browser suspends its JavaScript in the background) left the device sitting in silence until it was unlocked. The backend now advances the queue itself when a track finishes, regardless of whether any tab is currently active.
+
+### Known issues
+- **Local (non-Connect) playback in the mobile web view stops as soon as the phone's screen locks**, when used as a plain browser tab — a hard iOS/Android limitation on backgrounded browser audio, not something fixable from the app itself. Adding the site to the home screen ("Add to Home Screen" in Safari) runs it as a standalone app instead, which is significantly more reliable for keeping audio going in the background. Feishin Connect casting isn't affected by this — playback keeps running on the physical device regardless of the phone's screen state.
 
 ## [0.6.6] - 2026-08-04
 

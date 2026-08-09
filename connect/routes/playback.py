@@ -477,7 +477,10 @@ class QueueStepRequest(BaseModel):
     force: bool = False
 
 
-async def _play_queue_index(session: SessionState, index: int, force: bool) -> dict:
+async def play_queue_index(session: SessionState, index: int, force: bool) -> dict:
+    """Shared by /next, /prev, and routes/stream.py's server-side auto-advance
+    on natural track-end — same "start whatever's at this queue position"
+    step regardless of what triggered it."""
     st = session.state
     item = st.queue[index]
     try:
@@ -509,7 +512,7 @@ async def next_track(
         return {"error": "No queue to advance"}
     if st.queue_index + 1 >= len(st.queue):
         return {"error": "End of queue"}
-    return await _play_queue_index(session, st.queue_index + 1, req.force)
+    return await play_queue_index(session, st.queue_index + 1, req.force)
 
 
 @router.post("/prev")
@@ -521,7 +524,7 @@ async def prev_track(
         return {"error": "No queue to go back in"}
     if st.queue_index - 1 < 0:
         return {"error": "Start of queue"}
-    return await _play_queue_index(session, st.queue_index - 1, req.force)
+    return await play_queue_index(session, st.queue_index - 1, req.force)
 
 
 @router.post("/stop")

@@ -8,9 +8,12 @@ started the track from 0:00 while the app's own state still reported the
 correct position.
 """
 
-from unittest.mock import patch
+import asyncio
+from unittest.mock import AsyncMock, patch
 
+from delivery import SonosDelivery
 from media import Track
+from routes.stream import _fire_track_end
 
 
 async def _empty_stream(*args, **kwargs):
@@ -88,3 +91,108 @@ def test_stale_connection_does_not_clear_a_newer_generations_offset(
         client.get("/stream")
 
     assert default_session.state.clock.resume_offset == 99.0
+
+
+# ── _fire_track_end (server-side auto-advance) ──────────────────────────────
+
+
+def _queue_items():
+    return [
+        {"id": "1", "title": "Song One", "artist": "A", "album": "Alb", "duration": 180},
+        {"id": "2", "title": "Song Two", "artist": "A", "album": "Alb", "duration": 200},
+    ]
+
+
+def _set_up_first_track_playing(default_session, *, casting: bool = False):
+    default_session.state.queue = _queue_items()
+    default_session.state.queue_index = 0
+    default_session.state.current_track = Track(
+        id="1", title="Song One", artist="A", duration=180, cover_art_id=""
+    )
+    default_session.state.is_streaming = True
+    default_session.state.clock.start()
+    if casting:
+        default_session.state.active_delivery = SonosDelivery("Küche")
+    return default_session.state.clock.play_generation
+
+
+def test_fire_track_end_auto_advances_when_queue_has_next_item(default_session):
+    generation = _set_up_first_track_playing(default_session, casting=True)
+    next_track = Track(id="2", title="Song Two", artist="A", duration=200, cover_art_id="")
+
+    with (
+        patch.object(default_session.media, "get_track", return_value=next_track),
+        patch.object(SonosDelivery, "play", new=AsyncMock()),
+    ):
+        asyncio.run(_fire_track_end(default_session, generation, wait=0))
+
+    assert default_session.state.queue_index == 1
+    assert default_session.state.current_track.id == "2"
+    assert default_session.state.is_streaming is True
+    assert default_session.state.track_ended is False
+
+
+def test_fire_track_end_marks_ended_when_no_queue(default_session):
+    default_session.state.current_track = Track(
+        id="1", title="Song One", artist="A", duration=180, cover_art_id=""
+    )
+    default_session.state.is_streaming = True
+    default_session.state.clock.start()
+    generation = default_session.state.clock.play_generation
+
+    asyncio.run(_fire_track_end(default_session, generation, wait=0))
+
+    assert default_session.state.is_streaming is False
+    assert default_session.state.track_ended is True
+
+
+def test_fire_track_end_marks_ended_at_end_of_queue(default_session):
+    default_session.state.queue = _queue_items()
+    default_session.state.queue_index = 1  # already the last item
+    default_session.state.current_track = Track(
+        id="2", title="Song Two", artist="A", duration=200, cover_art_id=""
+    )
+    default_session.state.is_streaming = True
+    default_session.state.clock.start()
+    generation = default_session.state.clock.play_generation
+
+    asyncio.run(_fire_track_end(default_session, generation, wait=0))
+
+    assert default_session.state.queue_index == 1
+    assert default_session.state.is_streaming is False
+    assert default_session.state.track_ended is True
+
+
+def test_fire_track_end_does_nothing_if_paused(default_session):
+    generation = _set_up_first_track_playing(default_session)
+    default_session.state.clock.is_paused = True
+
+    asyncio.run(_fire_track_end(default_session, generation, wait=0))
+
+    assert default_session.state.queue_index == 0
+    assert default_session.state.is_streaming is True
+    assert default_session.state.track_ended is False
+
+
+def test_fire_track_end_does_nothing_if_generation_is_stale(default_session):
+    generation = _set_up_first_track_playing(default_session)
+    default_session.state.clock.play_generation += 1  # a newer /play or /seek since
+
+    asyncio.run(_fire_track_end(default_session, generation, wait=0))
+
+    assert default_session.state.queue_index == 0
+    assert default_session.state.is_streaming is True
+    assert default_session.state.track_ended is False
+
+
+def test_fire_track_end_falls_back_to_ended_when_auto_advance_fails(default_session):
+    generation = _set_up_first_track_playing(default_session, casting=True)
+
+    with patch.object(
+        default_session.media, "get_track", side_effect=RuntimeError("not found")
+    ):
+        asyncio.run(_fire_track_end(default_session, generation, wait=0))
+
+    assert default_session.state.queue_index == 0
+    assert default_session.state.is_streaming is False
+    assert default_session.state.track_ended is True
