@@ -1,10 +1,12 @@
 import { useCallback } from 'react';
 
 import { api } from '/@/renderer/api';
-import { queryKeys } from '/@/renderer/api/query-keys';
 import { cacheTrack, getCachedTrack } from '/@/renderer/features/mobile/lib/track-cache';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
+import {
+    addSongToPlaylist,
+    fetchSimilarSongs,
+} from '/@/renderer/features/shared/api/library-fetchers';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useArtistRadioCount } from '/@/renderer/store';
 import { useAuthStore } from '/@/renderer/store/auth.store';
@@ -68,20 +70,9 @@ export function useMobileTrackActions() {
             }
             if (!song) return;
 
-            try {
-                const similarSongs = await queryClient.fetchQuery({
-                    ...songsQueries.similar({
-                        query: { count: radioCount, songId: song.id },
-                        serverId: server.id,
-                    }),
-                    queryKey: queryKeys.player.fetch({ similarSongs: song.id }),
-                });
-
-                if (similarSongs && similarSongs.length > 0) {
-                    addToQueueByData([song, ...similarSongs], playType, song.id);
-                }
-            } catch {
-                // Nothing to do — similar-songs fetch failed.
+            const similarSongs = await fetchSimilarSongs(server.id, song.id, radioCount);
+            if (similarSongs.length > 0) {
+                addToQueueByData([song, ...similarSongs], playType, song.id);
             }
         },
         [addToQueueByData, radioCount],
@@ -90,27 +81,7 @@ export function useMobileTrackActions() {
     const onAddToPlaylist = useCallback(async (playlistId: string, songId: string) => {
         const server = useAuthStore.getState().currentServer;
         if (!server) return;
-
-        try {
-            await api.controller.addToPlaylist({
-                apiClientProps: { serverId: server.id },
-                body: { songId: [songId] },
-                query: { id: playlistId },
-            });
-
-            queryClient.invalidateQueries({
-                exact: false,
-                queryKey: queryKeys.playlists.list(server.id),
-            });
-            queryClient.invalidateQueries({
-                queryKey: queryKeys.playlists.detail(server.id, playlistId),
-            });
-            queryClient.invalidateQueries({
-                queryKey: queryKeys.playlists.songList(server.id, playlistId),
-            });
-        } catch {
-            // Nothing to do — playlist add failed.
-        }
+        await addSongToPlaylist(server.id, playlistId, songId);
     }, []);
 
     return { onAddToPlaylist, onPlay, onPlayTrackRadio };

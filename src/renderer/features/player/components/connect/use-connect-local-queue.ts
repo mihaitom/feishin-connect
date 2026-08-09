@@ -64,8 +64,15 @@ export const useConnectLocalQueue = ({
     useEffect(() => {
         if (mode !== 'local-owner' || queue.length === 0) return;
 
+        // Refresh the grace period synchronously, in the same commit as this
+        // change — not only once the debounced push actually lands. Otherwise
+        // a local skip's currentIndex change is visible to the reverse-sync
+        // effect below (same commit, same tick) up to QUEUE_PUSH_DEBOUNCE_MS
+        // before lastLocalActionAtRef caught up, which could misread it as a
+        // remote command and immediately mediaPlayByIndex() back to the stale
+        // connectStatus.queue_index.
+        lastLocalActionAtRef.current = Date.now();
         const timeout = window.setTimeout(() => {
-            lastLocalActionAtRef.current = Date.now();
             connectFetchEnsured(
                 `/queue`,
                 {

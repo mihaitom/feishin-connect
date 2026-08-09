@@ -283,18 +283,27 @@ async def reap_once() -> list[str]:
     past SESSION_IDLE_TIMEOUT. A session is "idle" only if no request AND no
     /events heartbeat has touched it — an open tab actively streaming or just
     listening never goes idle, since both paths call session.touch().
+
+    A session with an active_delivery is *never* reaped, however stale
+    last_seen gets — the whole point of casting is that playback keeps going
+    on the physical device independently of any browser tab staying open or
+    reachable. A mobile browser suspends its network activity (SSE included)
+    within seconds of the screen locking, which would otherwise make last_seen
+    go stale and silently stop a Sonos/Chromecast/DLNA/AirPlay target that's
+    still audibly playing — surprising and destructive, unlike reaping a
+    session that's merely sitting on a loaded-but-not-casting queue. Casting
+    is only ever released explicitly (/stop, /device-stop) or displaced by a
+    takeover; last_seen staleness alone is never a reason to interrupt it.
+
     Returns the session ids that were reaped, mainly so tests don't need to
     duplicate this logic to assert on it."""
     now = time.time()
     reaped = []
     for session in registry.all():
+        if session.state.active_delivery:
+            continue
         if now - session.last_seen <= SESSION_IDLE_TIMEOUT:
             continue
-        if session.state.active_delivery:
-            try:
-                await session.state.active_delivery.stop()
-            except Exception:
-                pass
         await claims.release_all_for_session(session.session_id)
         await registry.remove(session.session_id)
         reaped.append(session.session_id)

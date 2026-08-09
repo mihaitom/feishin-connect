@@ -20,6 +20,15 @@ export interface ConnectPlayerHandlers {
     onStop: () => void;
 }
 
+// Same "outside Playerbar's subtree" reasoning as RemoteConnectActions above
+// — lets the mobile view's mirror-mode containers (remote-container.tsx,
+// queue-page.tsx) self-heal a reaped session (see connect-request.ts's
+// connectFetchEnsured) without needing ConnectSessionContext.
+export interface ConnectSetupActions {
+    ensureConfigured: () => Promise<void>;
+    forceReconfigure: () => Promise<void>;
+}
+
 // Mirrors the Connect session's device/target state and exposes its device
 // actions imperatively, so parts of the app outside Playerbar's own subtree
 // (e.g. the phone-remote IPC bridge in use-remote-connect.tsx) can read and
@@ -52,6 +61,7 @@ interface ConnectPlayerState {
     queue: ConnectQueueItem[];
     queueIndex: number;
     remoteActions: null | RemoteConnectActions;
+    setupActions: ConnectSetupActions | null;
     // Wall-clock time of the last elapsed sync, for smooth local animation
     syncTime: number;
 }
@@ -75,6 +85,7 @@ export const useConnectPlayerStore = create<ConnectPlayerStore>((set) => ({
     queueIndex: 0,
     remoteActions: null,
     set: (patch) => set(patch),
+    setupActions: null,
     syncTime: 0,
 }));
 

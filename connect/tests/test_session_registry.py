@@ -140,7 +140,12 @@ def test_reap_once_leaves_recently_touched_session_alone():
     assert registry.get("fresh-session") is not None
 
 
-def test_reap_once_stops_delivery_and_releases_claims():
+def test_reap_once_never_reaps_a_session_with_an_active_delivery():
+    """A session actively casting to a device is never reaped, however stale
+    last_seen gets — casting is meant to keep playing on the physical device
+    independently of any browser tab staying open/reachable (see reap_once()'s
+    own docstring — this is what stopped a Sonos mid-track after a mobile
+    browser's SSE connection went quiet while the phone was locked)."""
     from unittest.mock import AsyncMock
 
     from core.claims import claims
@@ -153,11 +158,12 @@ def test_reap_once_stops_delivery_and_releases_claims():
     session.last_seen = time.time() - SESSION_IDLE_TIMEOUT - 1
     asyncio.run(claims.claim("chromecast", "TV", "stale-with-delivery"))
 
-    asyncio.run(reap_once())
+    reaped = asyncio.run(reap_once())
 
-    delivery.stop.assert_awaited_once()
-    assert claims.owner_of("chromecast", "TV") is None
-    assert registry.get("stale-with-delivery") is None
+    assert reaped == []
+    delivery.stop.assert_not_awaited()
+    assert claims.owner_of("chromecast", "TV") == "stale-with-delivery"
+    assert registry.get("stale-with-delivery") is not None
 
 
 # ── track_label ────────────────────────────────────────────────────────────────

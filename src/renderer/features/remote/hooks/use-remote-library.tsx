@@ -2,28 +2,22 @@ import isElectron from 'is-electron';
 import { useEffect } from 'react';
 
 import { api } from '/@/renderer/api';
-import { queryKeys } from '/@/renderer/api/query-keys';
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { radioQueries } from '/@/renderer/features/radio/api/radio-api';
 import { useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
-import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
+import {
+    addSongToPlaylist,
+    fetchPlaylistPage,
+    fetchSimilarSongs,
+    fetchTrackPage,
+} from '/@/renderer/features/shared/api/library-fetchers';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useArtistRadioCount } from '/@/renderer/store';
 import { useAuthStore } from '/@/renderer/store/auth.store';
 import { usePlayerStoreBase } from '/@/renderer/store/player.store';
 import { useRemoteSettings } from '/@/renderer/store/settings.store';
-import {
-    LibraryItem,
-    Played,
-    Playlist,
-    PlaylistListSort,
-    ServerType,
-    Song,
-    SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { LibraryItem, Playlist, Song } from '/@/shared/types/domain-types';
 import { RemotePlaylistItem, RemoteRadioItem, RemoteTrackItem } from '/@/shared/types/remote-types';
 import { Play } from '/@/shared/types/types';
 
@@ -130,40 +124,12 @@ export const useRemoteLibrary = () => {
 
             const pageSize = limit ?? DEFAULT_PAGE_SIZE;
             try {
-                // Plain Subsonic has no generic "list all songs" endpoint —
-                // a filterless getSongList falls through to an empty search3
-                // query, which isn't a reliable browse. Navidrome/Jellyfin
-                // both have real generic listings and work fine filterless.
-                if (server.type === ServerType.SUBSONIC && !searchTerm) {
-                    const { items } = await queryClient.fetchQuery(
-                        songsQueries.random({
-                            query: { limit: pageSize, played: Played.All },
-                            serverId: server.id,
-                        }),
-                    );
-                    // RandomSongListQuery has no startIndex — not paginable,
-                    // so "load more" just returns another random batch.
-                    remote?.respondTracks(requestId, true, cacheAndMapTracks(items));
-                    return;
-                }
-
-                const { items } = await queryClient.fetchQuery(
-                    songsQueries.list({
-                        query: {
-                            limit: pageSize,
-                            searchTerm,
-                            sortBy: SongListSort.NAME,
-                            sortOrder: SortOrder.ASC,
-                            startIndex: startIndex ?? 0,
-                        },
-                        serverId: server.id,
-                    }),
-                );
-                remote?.respondTracks(
-                    requestId,
-                    items.length === pageSize,
-                    cacheAndMapTracks(items),
-                );
+                const { hasMore, items } = await fetchTrackPage(server.id, server.type, {
+                    pageSize,
+                    searchTerm,
+                    startIndex: startIndex ?? 0,
+                });
+                remote?.respondTracks(requestId, hasMore, cacheAndMapTracks(items));
             } catch {
                 remote?.respondTracks(requestId, false, []);
             }
@@ -178,23 +144,12 @@ export const useRemoteLibrary = () => {
 
             const pageSize = limit ?? DEFAULT_PAGE_SIZE;
             try {
-                const { items } = await queryClient.fetchQuery(
-                    playlistsQueries.list({
-                        query: {
-                            limit: pageSize,
-                            searchTerm,
-                            sortBy: PlaylistListSort.NAME,
-                            sortOrder: SortOrder.ASC,
-                            startIndex: startIndex ?? 0,
-                        },
-                        serverId: server.id,
-                    }),
-                );
-                remote?.respondPlaylists(
-                    requestId,
-                    items.length === pageSize,
-                    items.map(toRemotePlaylistItem),
-                );
+                const { hasMore, items } = await fetchPlaylistPage(server.id, {
+                    pageSize,
+                    searchTerm,
+                    startIndex: startIndex ?? 0,
+                });
+                remote?.respondPlaylists(requestId, hasMore, items.map(toRemotePlaylistItem));
             } catch {
                 remote?.respondPlaylists(requestId, false, []);
             }
@@ -268,20 +223,9 @@ export const useRemoteLibrary = () => {
             }
             if (!song) return;
 
-            try {
-                const similarSongs = await queryClient.fetchQuery({
-                    ...songsQueries.similar({
-                        query: { count: radioCount, songId: song.id },
-                        serverId: server.id,
-                    }),
-                    queryKey: queryKeys.player.fetch({ similarSongs: song.id }),
-                });
-
-                if (similarSongs && similarSongs.length > 0) {
-                    addToQueueByData([song, ...similarSongs], playType, song.id);
-                }
-            } catch {
-                // Nothing to do — similar-songs fetch failed.
+            const similarSongs = await fetchSimilarSongs(server.id, song.id, radioCount);
+            if (similarSongs.length > 0) {
+                addToQueueByData([song, ...similarSongs], playType, song.id);
             }
         });
 
@@ -294,27 +238,7 @@ export const useRemoteLibrary = () => {
         remote.requestAddToPlaylist(async ({ playlistId, songId }) => {
             const server = useAuthStore.getState().currentServer;
             if (!server) return;
-
-            try {
-                await api.controller.addToPlaylist({
-                    apiClientProps: { serverId: server.id },
-                    body: { songId: [songId] },
-                    query: { id: playlistId },
-                });
-
-                queryClient.invalidateQueries({
-                    exact: false,
-                    queryKey: queryKeys.playlists.list(server.id),
-                });
-                queryClient.invalidateQueries({
-                    queryKey: queryKeys.playlists.detail(server.id, playlistId),
-                });
-                queryClient.invalidateQueries({
-                    queryKey: queryKeys.playlists.songList(server.id, playlistId),
-                });
-            } catch {
-                // Nothing to do — playlist add failed.
-            }
+            await addSongToPlaylist(server.id, playlistId, songId);
         });
 
         remote.requestRemoveFromQueue(({ uniqueId }) => {

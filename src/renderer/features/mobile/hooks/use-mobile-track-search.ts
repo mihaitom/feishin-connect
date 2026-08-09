@@ -2,18 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { cacheTrack } from '/@/renderer/features/mobile/lib/track-cache';
-import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
-import { queryClient } from '/@/renderer/lib/react-query';
+import { fetchTrackPage } from '/@/renderer/features/shared/api/library-fetchers';
 import { useAuthStore } from '/@/renderer/store/auth.store';
 import { MobileTrackItem } from '/@/shared/mobile-ui/types';
-import {
-    LibraryItem,
-    Played,
-    ServerType,
-    Song,
-    SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { LibraryItem, Song } from '/@/shared/types/domain-types';
 
 const PAGE_SIZE = 30;
 
@@ -40,9 +32,9 @@ const cacheAndMapTracks = (songs: Song[]): MobileTrackItem[] =>
         return toMobileTrackItem(song);
     });
 
-// Mirrors use-remote-library.tsx's requestTracks handler, minus the WS
-// request/response envelope — this is the same react-query fetch, called
-// directly on search-term change / "load more" instead of on an IPC event.
+// Wraps fetchTrackPage (shared with use-remote-library.tsx's requestTracks
+// handler) in React state instead of the phone-remote's IPC request/response
+// envelope, called directly on search-term change / "load more".
 export function useMobileTrackSearch(searchTerm: string) {
     const [items, setItems] = useState<MobileTrackItem[]>([]);
     const [hasMore, setHasMore] = useState(false);
@@ -59,41 +51,19 @@ export function useMobileTrackSearch(searchTerm: string) {
 
             const seq = ++requestSeqRef.current;
             try {
-                // Plain Subsonic has no generic "list all songs" endpoint — a
-                // filterless list falls through to an empty search3 query,
-                // not a reliable browse. Navidrome/Jellyfin both have real
-                // generic listings and work fine filterless.
-                if (server.type === ServerType.SUBSONIC && !searchTerm) {
-                    const { items: songs } = await queryClient.fetchQuery(
-                        songsQueries.random({
-                            query: { limit: PAGE_SIZE, played: Played.All },
-                            serverId: server.id,
-                        }),
-                    );
-                    if (seq !== requestSeqRef.current) return;
-                    setItems(cacheAndMapTracks(songs));
-                    // RandomSongListQuery has no startIndex — not paginable,
-                    // so "load more" just returns another random batch.
-                    setHasMore(true);
-                    return;
-                }
-
-                const { items: songs } = await queryClient.fetchQuery(
-                    songsQueries.list({
-                        query: {
-                            limit: PAGE_SIZE,
-                            searchTerm: searchTerm || undefined,
-                            sortBy: SongListSort.NAME,
-                            sortOrder: SortOrder.ASC,
-                            startIndex,
-                        },
-                        serverId: server.id,
-                    }),
-                );
+                const {
+                    hasMore: more,
+                    items: songs,
+                    paginable,
+                } = await fetchTrackPage(server.id, server.type, {
+                    pageSize: PAGE_SIZE,
+                    searchTerm,
+                    startIndex,
+                });
                 if (seq !== requestSeqRef.current) return;
                 const mapped = cacheAndMapTracks(songs);
-                setItems((prev) => (append ? [...prev, ...mapped] : mapped));
-                setHasMore(songs.length === PAGE_SIZE);
+                setItems((prev) => (append && paginable ? [...prev, ...mapped] : mapped));
+                setHasMore(more);
             } catch {
                 if (seq !== requestSeqRef.current) return;
                 setItems([]);

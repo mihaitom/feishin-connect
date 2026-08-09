@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
-import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
-import { queryClient } from '/@/renderer/lib/react-query';
+import { fetchPlaylistPage } from '/@/renderer/features/shared/api/library-fetchers';
 import { useAuthStore } from '/@/renderer/store/auth.store';
 import { MobilePlaylistItem } from '/@/shared/mobile-ui/types';
-import { LibraryItem, Playlist, PlaylistListSort, SortOrder } from '/@/shared/types/domain-types';
+import { LibraryItem, Playlist } from '/@/shared/types/domain-types';
 
 const PAGE_SIZE = 30;
 
@@ -25,7 +24,8 @@ const toMobilePlaylistItem = (playlist: Playlist): MobilePlaylistItem => ({
     songCount: playlist.songCount,
 });
 
-// Mirrors use-remote-library.tsx's requestPlaylists handler, minus the WS
+// Wraps fetchPlaylistPage (shared with use-remote-library.tsx's
+// requestPlaylists handler) in React state instead of the phone-remote's IPC
 // request/response envelope.
 export function useMobilePlaylistSearch(searchTerm: string) {
     const [items, setItems] = useState<MobilePlaylistItem[]>([]);
@@ -43,22 +43,15 @@ export function useMobilePlaylistSearch(searchTerm: string) {
 
             const seq = ++requestSeqRef.current;
             try {
-                const { items: playlists } = await queryClient.fetchQuery(
-                    playlistsQueries.list({
-                        query: {
-                            limit: PAGE_SIZE,
-                            searchTerm: searchTerm || undefined,
-                            sortBy: PlaylistListSort.NAME,
-                            sortOrder: SortOrder.ASC,
-                            startIndex,
-                        },
-                        serverId: server.id,
-                    }),
-                );
+                const { hasMore: more, items: playlists } = await fetchPlaylistPage(server.id, {
+                    pageSize: PAGE_SIZE,
+                    searchTerm,
+                    startIndex,
+                });
                 if (seq !== requestSeqRef.current) return;
                 const mapped = playlists.map(toMobilePlaylistItem);
                 setItems((prev) => (append ? [...prev, ...mapped] : mapped));
-                setHasMore(playlists.length === PAGE_SIZE);
+                setHasMore(more);
             } catch {
                 if (seq !== requestSeqRef.current) return;
                 setItems([]);

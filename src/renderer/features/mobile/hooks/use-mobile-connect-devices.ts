@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { useConnectPlayerStore } from '/@/renderer/features/player/components/connect/connect.store';
 import { ConnectDevice } from '/@/renderer/features/player/components/connect/types';
 import {
     fetchDeviceVolumeIfNeeded,
-    getDeviceVolumeEntry,
     setDeviceVolumeImperative,
-    subscribeDeviceVolume,
+    useDeviceVolumeEntries,
 } from '/@/renderer/features/player/components/connect/use-device-volume';
 import { toast } from '/@/shared/components/toast/toast';
 import {
@@ -19,9 +18,10 @@ import {
 // Reads the same Context-free Connect store the Electron phone-remote bridge
 // (use-remote-connect.tsx) uses — it's already populated as a side effect of
 // mounting useConnectSession() once (see mobile-shell.tsx), so no separate
-// wiring is needed here. Per-device volume uses the same imperative helpers
-// the phone-remote bridge uses, for the same reason: a dynamic-length device
-// list can't call useDeviceVolume() in a loop (Rules of Hooks).
+// wiring is needed here. Per-device volume reads useDeviceVolumeEntries()
+// (a proper reactive hook subscription), not useDeviceVolume() directly —
+// this list is dynamic-length, and calling a hook once per device would
+// violate the Rules of Hooks.
 export function useMobileConnectDevices() {
     const { activeTargets, devices, isActive, mySessionId, remoteActions } = useConnectPlayerStore(
         useShallow((s) => ({
@@ -32,21 +32,16 @@ export function useMobileConnectDevices() {
             remoteActions: s.remoteActions,
         })),
     );
-
-    // Forces a re-render when any device's volume arrives/changes — the
-    // mapping below reads the volume store imperatively (getDeviceVolumeEntry),
-    // so React has no other way to know it needs to re-run.
-    const [, forceUpdate] = useState(0);
+    const volumeEntries = useDeviceVolumeEntries();
 
     useEffect(() => {
         for (const target of activeTargets) {
             fetchDeviceVolumeIfNeeded(target.type, target.name);
         }
-        return subscribeDeviceVolume(() => forceUpdate((v) => v + 1));
     }, [activeTargets]);
 
     const devicesWithVolume: MobileConnectDevice[] = devices.map((device) => {
-        const entry = getDeviceVolumeEntry(device.type, device.name);
+        const entry = volumeEntries[`${device.type}:${device.name}`];
         return entry?.volume == null ? device : { ...device, volume: entry.volume };
     });
 

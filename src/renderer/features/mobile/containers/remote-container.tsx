@@ -2,7 +2,9 @@ import { useShallow } from 'zustand/shallow';
 
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { ConnectButton } from '/@/renderer/features/mobile/components/connect-button';
+import { connectFetchEnsured } from '/@/renderer/features/player/components/connect/connect-request';
 import {
+    ConnectSetupActions,
     useConnectElapsed,
     useConnectPlayerStore,
 } from '/@/renderer/features/player/components/connect/connect.store';
@@ -23,12 +25,24 @@ import { MobileNowPlayingInfo, MobileRadioStatus } from '/@/shared/mobile-ui/typ
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
-const postJson = (path: string, body?: unknown) =>
-    connectFetch(path, {
+// Uses connectFetchEnsured (self-healing against a reaped session — see its
+// docstring) whenever setupActions has been published yet, falling back to a
+// plain best-effort connectFetch for the brief window before it has (mount
+// order isn't guaranteed relative to ConnectSessionMount).
+const postJson = (path: string, setupActions: ConnectSetupActions | null, body?: unknown) => {
+    const options: RequestInit = {
         body: body ? JSON.stringify(body) : undefined,
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
-    }).catch(() => {});
+    };
+    if (!setupActions) return connectFetch(path, options).catch(() => {});
+    return connectFetchEnsured(
+        path,
+        options,
+        setupActions.ensureConfigured,
+        setupActions.forceReconfigure,
+    ).catch(() => {});
+};
 
 // Another tab/device owns playback (see connect.store.ts's ConnectMode) —
 // this screen only displays it (from the shared queue the owner pushes, see
@@ -38,8 +52,13 @@ const postJson = (path: string, body?: unknown) =>
 // for a tab that isn't actually producing any audio itself — out of scope
 // for v1 (mobile-view plan, Phase 2 — "nur Transport-Controls").
 const MirrorRemoteContainer = () => {
-    const { isPlaying, queue, queueIndex } = useConnectPlayerStore(
-        useShallow((s) => ({ isPlaying: s.isPlaying, queue: s.queue, queueIndex: s.queueIndex })),
+    const { isPlaying, queue, queueIndex, setupActions } = useConnectPlayerStore(
+        useShallow((s) => ({
+            isPlaying: s.isPlaying,
+            queue: s.queue,
+            queueIndex: s.queueIndex,
+            setupActions: s.setupActions,
+        })),
     );
     const elapsed = useConnectElapsed();
     const track = queue[queueIndex];
@@ -63,13 +82,13 @@ const MirrorRemoteContainer = () => {
         <SharedRemoteContainer
             info={info}
             onFavorite={() => {}}
-            onNext={() => postJson('/next')}
-            onPause={() => postJson('/pause')}
-            onPlay={() => postJson('/resume')}
-            onPrevious={() => postJson('/prev')}
+            onNext={() => postJson('/next', setupActions)}
+            onPause={() => postJson('/pause', setupActions)}
+            onPlay={() => postJson('/resume', setupActions)}
+            onPrevious={() => postJson('/prev', setupActions)}
             onRating={() => {}}
             onRepeat={() => {}}
-            onSeek={(position) => postJson('/seek', { position })}
+            onSeek={(position) => postJson('/seek', setupActions, { position })}
             onShuffle={() => {}}
             onVolumeChange={() => {}}
             radioStatus={{ imageUrl: null, isActive: false, stationName: null }}
@@ -104,12 +123,14 @@ const LocalOrCastRemoteContainer = () => {
         handlers: connectHandlers,
         isActive: connectActive,
         isPlaying: connectIsPlaying,
+        setupActions,
     } = useConnectPlayerStore(
         useShallow((s) => ({
             activeTargets: s.activeTargets,
             handlers: s.handlers,
             isActive: s.isActive,
             isPlaying: s.isPlaying,
+            setupActions: s.setupActions,
         })),
     );
     const connectElapsed = useConnectElapsed();
@@ -207,7 +228,7 @@ const LocalOrCastRemoteContainer = () => {
                     useConnectPlayerStore
                         .getState()
                         .set({ elapsed: position, syncTime: Date.now() });
-                    postJson('/seek', { position });
+                    postJson('/seek', setupActions, { position });
                     return;
                 }
                 mediaSeekToTimestamp(position);

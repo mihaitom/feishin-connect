@@ -3,7 +3,11 @@ import { useShallow } from 'zustand/shallow';
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { useMobilePlaylistSearch } from '/@/renderer/features/mobile/hooks/use-mobile-playlist-search';
 import { useMobileTrackActions } from '/@/renderer/features/mobile/hooks/use-mobile-track-actions';
-import { useConnectPlayerStore } from '/@/renderer/features/player/components/connect/connect.store';
+import { connectFetchEnsured } from '/@/renderer/features/player/components/connect/connect-request';
+import {
+    ConnectSetupActions,
+    useConnectPlayerStore,
+} from '/@/renderer/features/player/components/connect/connect.store';
 import { connectFetch } from '/@/renderer/features/player/components/connect/types';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { usePlayerActions, usePlayerQueue, usePlayerSong } from '/@/renderer/store';
@@ -18,7 +22,19 @@ import { QueuePage as SharedQueuePage } from '/@/shared/mobile-ui/containers/que
 import { MobileQueueItem } from '/@/shared/mobile-ui/types';
 import { LibraryItem } from '/@/shared/types/domain-types';
 
-const postJson = (path: string) => connectFetch(path, { method: 'POST' }).catch(() => {});
+// See remote-container.tsx's postJson for why connectFetchEnsured is used
+// here instead of a bare connectFetch — without it, a reaped session leaves
+// every tap on this page a permanent no-op until a full reload.
+const postJson = (path: string, setupActions: ConnectSetupActions | null) => {
+    const options: RequestInit = { method: 'POST' };
+    if (!setupActions) return connectFetch(path, options).catch(() => {});
+    return connectFetchEnsured(
+        path,
+        options,
+        setupActions.ensureConfigured,
+        setupActions.forceReconfigure,
+    ).catch(() => {});
+};
 
 // Another tab/device owns the queue (see connect.store.ts's ConnectMode) —
 // read-only display of what the owner pushed (use-connect-local-queue.ts),
@@ -27,8 +43,12 @@ const postJson = (path: string) => connectFetch(path, { method: 'POST' }).catch(
 // queue-jump for local playback — out of scope for v1 (mobile-view plan,
 // Phase 2).
 const MirrorQueuePage = () => {
-    const { queue, queueIndex } = useConnectPlayerStore(
-        useShallow((s) => ({ queue: s.queue, queueIndex: s.queueIndex })),
+    const { queue, queueIndex, setupActions } = useConnectPlayerStore(
+        useShallow((s) => ({
+            queue: s.queue,
+            queueIndex: s.queueIndex,
+            setupActions: s.setupActions,
+        })),
     );
 
     return (
@@ -36,13 +56,13 @@ const MirrorQueuePage = () => {
             <Group gap="xs" justify="center">
                 <ActionIcon
                     icon="mediaPrevious"
-                    onClick={() => postJson('/prev')}
+                    onClick={() => postJson('/prev', setupActions)}
                     tooltip={{ label: 'Previous track' }}
                     variant="default"
                 />
                 <ActionIcon
                     icon="mediaNext"
-                    onClick={() => postJson('/next')}
+                    onClick={() => postJson('/next', setupActions)}
                     tooltip={{ label: 'Next track' }}
                     variant="default"
                 />

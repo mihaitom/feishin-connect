@@ -182,51 +182,57 @@ async def _start_track(
     start_position: float = 0.0,
     gain: float = 1.0,
 ) -> dict | None:
-    """Shared core of /play, /next, and /prev: claims `target` if any, updates
-    AppState, dispatches to the device when casting, and broadcasts the new
-    status. Returns an error dict on failure, None on success — callers add
-    whatever success-shaped response body they need on top."""
+    """Shared core of /play, /next, and /prev: claims `target` if any,
+    dispatches to the device when casting, and updates AppState. Returns an
+    error dict on failure, None on success — callers add whatever
+    success-shaped response body they need on top and broadcast the new
+    status themselves once any state of their own (queue_index,
+    local_owner_client_id, ...) is also settled, so listeners never observe a
+    broadcast reflecting only part of the change.
+
+    Dispatch happens *before* any AppState mutation so a failed target.play()
+    (e.g. an unreachable Sonos/Chromecast/AirPlay device) leaves session
+    state exactly as it was — current_track/is_streaming/queue_index staying
+    in sync with each other instead of the track changing while the queue
+    position doesn't."""
     if target:
         conflict = await _claim_or_takeover(target, session, force)
         if conflict:
             return conflict
 
     st = session.state
+
+    if target:
+        url = stream_url(session.session_id)
+        # internal=True: fetched directly by the cast device, not the
+        # browser — see MediaClient.get_cover_art_url's docstring.
+        album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
+        if not _is_duplicate_dispatch(st, f"play:{target}:{track.id}"):
+            try:
+                await target.play(
+                    url,
+                    track.title,
+                    track.artist,
+                    album_art_url,
+                    float(track.duration),
+                    track.album,
+                )
+            except Exception as e:
+                logger.error(f"[play] Delivery error: {e}", exc_info=True)
+                return {"error": str(e)}
+
     st.current_track = track
     st.current_track_gain = gain
     st.is_streaming = True
     st.radio_info = None
     st.clock.start(max(0.0, min(start_position, float(track.duration))))
     st.track_ended = False
-
-    if not target:
-        st.active_delivery = None
-        await session.event_bus.broadcast(build_status_dict(session))
-        return None
-
     st.active_delivery = target
-    url = stream_url(session.session_id)
-    # internal=True: fetched directly by the cast device, not the browser —
-    # see MediaClient.get_cover_art_url's docstring.
-    album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
-    if not _is_duplicate_dispatch(st, f"play:{target}:{track.id}"):
-        try:
-            await target.play(
-                url,
-                track.title,
-                track.artist,
-                album_art_url,
-                float(track.duration),
-                track.album,
-            )
-        except Exception as e:
-            logger.error(f"[play] Delivery error: {e}", exc_info=True)
-            return {"error": str(e)}
 
-    asyncio.create_task(
-        _apply_position_offset(session, target, st.clock.play_generation)
-    )
-    await session.event_bus.broadcast(build_status_dict(session))
+    if target:
+        asyncio.create_task(
+            _apply_position_offset(session, target, st.clock.play_generation)
+        )
     return None
 
 
@@ -294,6 +300,7 @@ async def play_tracks(
     if not target:
         logger.info(f"[play] No target — stream available at {stream_url(session.session_id)}")
 
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"status": "playing", "stream_url": stream_url(session.session_id)}
 
 
@@ -484,6 +491,7 @@ async def _play_queue_index(session: SessionState, index: int, force: bool) -> d
         return error
 
     st.queue_index = index
+    await session.event_bus.broadcast(build_status_dict(session))
     return {"index": index, "status": "playing"}
 
 

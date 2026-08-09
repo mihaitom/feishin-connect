@@ -85,6 +85,18 @@ export const setDeviceVolumeImperative = (
 
 export const subscribeDeviceVolume = (cb: () => void) => useDeviceVolumeStore.subscribe(cb);
 
+// Reactive read of every device's volume entry, for a React tree that shows a
+// dynamic-length list of devices — can't call useDeviceVolume() once per item
+// (Rules of Hooks), but this is still a single, proper hook call using
+// zustand's own React binding (useSyncExternalStore under the hood), unlike
+// the imperative subscribeDeviceVolume()+forceUpdate combo this replaced in
+// the mobile Connect-devices drawer. That hand-rolled combo isn't guaranteed
+// to land in the same React commit as a sibling state update (e.g. the
+// volume slider's own local isSeeking flag resetting on release) — which
+// manifested as the slider snapping back to the pre-change value immediately
+// after a correctly-applied volume change.
+export const useDeviceVolumeEntries = () => useDeviceVolumeStore((s) => s.entries);
+
 // Volume control for a single device, via /device-volume (Sonos, Chromecast and
 // DLNA — AirPlay has no volume control in this backend).
 // `enabled` gates the fetch (e.g. only fetch once a device row is hovered/expanded).

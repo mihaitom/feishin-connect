@@ -1,5 +1,7 @@
 import { Outlet } from 'react-router';
 
+import appIcon from '../../../../assets/icons/64x64.png';
+
 import { ThemeButton } from '/@/renderer/features/mobile/components/theme-button';
 import { useConnectSession } from '/@/renderer/features/player/components/connect/use-connect-session';
 import { Group } from '/@/shared/components/group/group';
@@ -37,7 +39,7 @@ export const MobileShell = () => {
                     paddingTop: 'calc(0.5rem + env(safe-area-inset-top, 0px))',
                 }}
             >
-                <img alt="Feishin" height={32} src="/favicon.ico" width={32} />
+                <img alt="Feishin" height={32} src={appIcon} width={32} />
                 <Group gap="sm">
                     <ThemeButton />
                 </Group>
