@@ -39,7 +39,32 @@ const DEFAULT_PAGE_SIZE = 30;
 // for the tracks list and hand them to addToQueueByData() directly instead,
 // which needs no further lookup. Falls back to a single-song detail fetch for
 // the rare case a track is played without ever having been listed first.
+//
+// Bounded LRU, not an unbounded Map — a long browsing/search session over a
+// large library would otherwise keep every page of full Song objects (with
+// image URLs and metadata) resident for the renderer's entire lifetime.
+// `Map` preserves insertion order, so re-inserting on both write and read
+// hits is enough to track recency without a separate structure.
+const TRACK_CACHE_MAX_SIZE = 500;
 const trackCache = new Map<string, Song>();
+
+function cacheTrack(song: Song): void {
+    trackCache.delete(song.id);
+    trackCache.set(song.id, song);
+    if (trackCache.size > TRACK_CACHE_MAX_SIZE) {
+        const oldestKey = trackCache.keys().next().value;
+        if (oldestKey !== undefined) trackCache.delete(oldestKey);
+    }
+}
+
+function getCachedTrack(id: string): Song | undefined {
+    const song = trackCache.get(id);
+    if (song) {
+        trackCache.delete(id);
+        trackCache.set(id, song);
+    }
+    return song;
+}
 
 const toRemoteTrackItem = (song: Song): RemoteTrackItem => ({
     album: song.album,
@@ -60,7 +85,7 @@ const toRemoteTrackItem = (song: Song): RemoteTrackItem => ({
 
 const cacheAndMapTracks = (songs: Song[]): RemoteTrackItem[] =>
     songs.map((song) => {
-        trackCache.set(song.id, song);
+        cacheTrack(song);
         return toRemoteTrackItem(song);
     });
 
@@ -202,7 +227,7 @@ export const useRemoteLibrary = () => {
             const server = useAuthStore.getState().currentServer;
             if (!server) return;
 
-            let song = trackCache.get(id);
+            let song = getCachedTrack(id);
             if (!song) {
                 try {
                     song = await queryClient.fetchQuery({
@@ -226,7 +251,7 @@ export const useRemoteLibrary = () => {
             const server = useAuthStore.getState().currentServer;
             if (!server) return;
 
-            let song = trackCache.get(id);
+            let song = getCachedTrack(id);
             if (!song) {
                 try {
                     song = await queryClient.fetchQuery({

@@ -445,8 +445,18 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
         ),
         {
             merge: (persistedState, currentState) => merge(currentState, persistedState),
+            migrate: (persistedState) => {
+                // v7 -> v8: showImage/toggleShowImage were removed when the
+                // artwork toggle button was replaced by tap-to-fullscreen —
+                // strip the now-meaningless key instead of leaving it to
+                // linger forever in localStorage.
+                if (persistedState && typeof persistedState === 'object') {
+                    delete (persistedState as Record<string, unknown>).showImage;
+                }
+                return persistedState;
+            },
             name: 'store_settings',
-            version: 7,
+            version: 8,
         },
     ),
 );

@@ -5,11 +5,12 @@ import { Flex } from '/@/shared/components/flex/flex';
 
 interface ThumbnailProps {
     fallbackIcon?: ReactNode;
+    onError?: () => void;
     size?: number;
     src: null | string;
 }
 
-export const Thumbnail = ({ fallbackIcon, size = 48, src }: ThumbnailProps) => {
+export const Thumbnail = ({ fallbackIcon, onError, size = 48, src }: ThumbnailProps) => {
     if (!src) {
         return (
             <Flex
@@ -32,6 +33,7 @@ export const Thumbnail = ({ fallbackIcon, size = 48, src }: ThumbnailProps) => {
     return (
         <Image
             fit="cover"
+            onError={onError}
             radius={8}
             src={src}
             // Mantine's Image defaults to width:100% via its own stylesheet,

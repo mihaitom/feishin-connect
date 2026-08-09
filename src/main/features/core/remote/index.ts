@@ -69,9 +69,15 @@ type SendData = ServerEvent & {
 };
 
 function broadcast(message: ServerEvent): void {
-    if (wsServer) {
-        for (const client of wsServer.clients) {
-            send({ client, ...message });
+    if (!wsServer) return;
+
+    // Serialize once for every client instead of once per client — the
+    // queue-state payload alone can carry hundreds of songs, and this fires
+    // on every queue mutation.
+    const payload = JSON.stringify(message);
+    for (const client of wsServer.clients) {
+        if (client.readyState === WebSocket.OPEN && client.alive && client.auth) {
+            client.send(payload);
         }
     }
 }
@@ -82,6 +88,21 @@ function send({ client, data, event }: SendData): void {
             client.send(JSON.stringify({ data, event }));
         }
     }
+}
+
+// Only ever called once `client.auth` is true (either immediately, for an
+// unprotected server, or from the `authenticate` message handler) — sending
+// this unconditionally on every connection used to leak playback state, the
+// full queue, device-claim ownership, and radio status to a client that
+// hadn't authenticated yet.
+function sendInitialState(client: StatefulWebSocket): void {
+    if (client.readyState !== WebSocket.OPEN) return;
+
+    client.send(JSON.stringify({ data: currentState, event: 'state' }));
+    client.send(JSON.stringify({ data: currentConnectDevices, event: 'connect-devices' }));
+    client.send(JSON.stringify({ data: currentConnectState, event: 'connect-state' }));
+    client.send(JSON.stringify({ data: currentQueueState, event: 'queue-state' }));
+    client.send(JSON.stringify({ data: currentRadioStatus, event: 'radio-status' }));
 }
 
 export const shutdownServer = () => {
@@ -143,7 +164,25 @@ const requestClientMap = new Map<string, StatefulWebSocket>();
 
 function rememberRequestClient(requestId: string, client: StatefulWebSocket): void {
     requestClientMap.set(requestId, client);
-    setTimeout(() => requestClientMap.delete(requestId), REQUEST_TIMEOUT_MS);
+    setTimeout(() => {
+        // Map.delete() returns false if a respond-* handler already resolved
+        // (and removed) this request — only a genuinely unanswered request
+        // reaches here, so the client isn't left waiting with no feedback at
+        // all (e.g. the main window closed on macOS and silently dropped
+        // the webContents.send that would have produced a response).
+        if (requestClientMap.delete(requestId)) {
+            send({ client, data: 'Request timed out', event: 'error' });
+        }
+    }, REQUEST_TIMEOUT_MS);
+}
+
+// Shared by every respond-* IPC handler below — looks up and consumes the
+// client remembered for a request, so a bugfix here (or to the timeout in
+// rememberRequestClient) only has to happen in one place.
+function resolveRequestClient(requestId: string): StatefulWebSocket | undefined {
+    const client = requestClientMap.get(requestId);
+    requestClientMap.delete(requestId);
+    return client;
 }
 
 const getEncoding = (encoding: string | string[]): Encoding => {
@@ -378,6 +417,7 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
 
                 if (!settings.username && !settings.password) {
                     ws.auth = true;
+                    sendInitialState(ws);
                 } else {
                     authFail = setTimeout(() => {
                         if (!ws.auth) {
@@ -402,6 +442,7 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
 
                                 if (login === settings.username && password === settings.password) {
                                     ws.auth = true;
+                                    sendInitialState(ws);
                                 } else {
                                     ws.close();
                                 }
@@ -647,12 +688,6 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                 ws.on('pong', () => {
                     ws.alive = true;
                 });
-
-                ws.send(JSON.stringify({ data: currentState, event: 'state' }));
-                ws.send(JSON.stringify({ data: currentConnectDevices, event: 'connect-devices' }));
-                ws.send(JSON.stringify({ data: currentConnectState, event: 'connect-state' }));
-                ws.send(JSON.stringify({ data: currentQueueState, event: 'queue-state' }));
-                ws.send(JSON.stringify({ data: currentRadioStatus, event: 'radio-status' }));
             });
 
             const heartBeat = setInterval(() => {
@@ -816,27 +851,24 @@ ipcMain.on(
 ipcMain.on(
     'respond-tracks',
     (_event, requestId: string, hasMore: boolean, items: RemoteTrackItem[]) => {
-        const client = requestClientMap.get(requestId);
+        const client = resolveRequestClient(requestId);
         if (client) send({ client, data: { hasMore, items, requestId }, event: 'tracks-response' });
-        requestClientMap.delete(requestId);
     },
 );
 
 ipcMain.on(
     'respond-playlists',
     (_event, requestId: string, hasMore: boolean, items: RemotePlaylistItem[]) => {
-        const client = requestClientMap.get(requestId);
+        const client = resolveRequestClient(requestId);
         if (client) {
             send({ client, data: { hasMore, items, requestId }, event: 'playlists-response' });
         }
-        requestClientMap.delete(requestId);
     },
 );
 
 ipcMain.on('respond-radio', (_event, requestId: string, items: RemoteRadioItem[]) => {
-    const client = requestClientMap.get(requestId);
+    const client = resolveRequestClient(requestId);
     if (client) send({ client, data: { items, requestId }, event: 'radio-response' });
-    requestClientMap.delete(requestId);
 });
 
 ipcMain.on('update-queue', (_event, currentUniqueId: null | string, items: RemoteQueueItem[]) => {

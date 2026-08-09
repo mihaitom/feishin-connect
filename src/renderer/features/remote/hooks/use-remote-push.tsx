@@ -118,6 +118,17 @@ export const useRemotePush = () => {
                     return;
                 }
 
+                // Local volume is meaningless while Connect is active — the
+                // cast device has its own independent volume, and the phone's
+                // slider is rerouted to control that instead (see
+                // use-remote.tsx's requestVolume handler). Pushing the local
+                // value here would make the slider show a number that isn't
+                // actually what dragging it controls. use-remote.tsx pushes
+                // the device's real volume in its place.
+                if (useConnectPlayerStore.getState().isActive) {
+                    return;
+                }
+
                 logFn.debug(logMsg[LogCategory.REMOTE].updateVolumeSent, {
                     category: LogCategory.REMOTE,
                     meta: { volume: properties.volume },
@@ -155,7 +166,11 @@ export const useRemotePush = () => {
                 remote.updateRating(properties.rating || 0, properties.serverId, properties.id);
             },
         },
-        [],
+        // isRemoteEnabled is read inside every callback above via closure —
+        // an empty deps array would freeze that read at whatever it was on
+        // first mount, so toggling Remote Control on later (without an app
+        // restart) would never resume these pushes.
+        [isRemoteEnabled],
     );
 };
 

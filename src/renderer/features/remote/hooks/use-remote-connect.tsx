@@ -71,7 +71,11 @@ export const useRemoteConnect = () => {
 
         remote.requestConnectDiscover((data: { fresh?: boolean }) => {
             const { remoteActions } = useConnectPlayerStore.getState();
-            remoteActions?.refresh(data.fresh);
+            if (!remoteActions) {
+                remote?.sendConnectError('Connect is still starting up — try again in a moment.');
+                return;
+            }
+            remoteActions.refresh(data.fresh);
         });
 
         remote.requestConnectConnect(

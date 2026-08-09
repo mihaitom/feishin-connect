@@ -46,10 +46,11 @@ export const useRemote = () => {
     // right-controls.tsx's ConnectVolumeButton uses, so the phone's single
     // slider isn't ambiguous about which device it's moving.
     const singleTarget = connectActive && activeTargets.length === 1 ? activeTargets[0] : undefined;
-    const { setDeviceVolume, supported: deviceVolumeSupported } = useDeviceVolume(
-        singleTarget?.type,
-        singleTarget?.name,
-    );
+    const {
+        setDeviceVolume,
+        supported: deviceVolumeSupported,
+        volume: deviceVolume,
+    } = useDeviceVolume(singleTarget?.type, singleTarget?.name);
     const connectElapsedTime = useConnectElapsed();
 
     // Initialize the remote
@@ -240,6 +241,16 @@ export const useRemote = () => {
         if (!isRemoteEnabled || !remote || !connectActive) return;
         remote.updatePosition(connectElapsedTime);
     }, [isRemoteEnabled, connectActive, connectElapsedTime]);
+
+    // Same reasoning as position/status above: the local player's volume
+    // doesn't reflect what the phone's slider actually controls once
+    // Connect is active (requestVolume above reroutes it to the cast
+    // device), and use-remote-push.tsx's onPlayerVolume skips its own push
+    // for the same reason — push the device's real volume instead.
+    useEffect(() => {
+        if (!isRemoteEnabled || !remote || !connectActive || deviceVolume == null) return;
+        remote.updateVolume(deviceVolume);
+    }, [isRemoteEnabled, connectActive, deviceVolume]);
 };
 
 export const RemoteHook = () => {

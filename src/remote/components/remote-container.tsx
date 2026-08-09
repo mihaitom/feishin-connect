@@ -75,6 +75,13 @@ export const RemoteContainer = () => {
                                 size={20}
                             />
                         }
+                        // Safe here specifically because this thumbnail always
+                        // shows the current song/radio's art — the server's
+                        // 'proxy' relay always answers with currentState.song's
+                        // image, so it can't be wired up generically on every
+                        // Thumbnail (track/queue/playlist/radio list rows show
+                        // arbitrary items, not the current one).
+                        onError={() => send({ event: 'proxy' })}
                         size={64}
                         src={artworkSrc}
                     />
