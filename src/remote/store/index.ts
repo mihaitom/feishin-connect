@@ -3,6 +3,7 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { createWithEqualityFn } from 'zustand/traditional';
 
+import { useRemoteLibraryStore } from '/@/remote/store/library';
 import { logger } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
 import { ClientEvent, ServerEvent, SongUpdateSocket } from '/@/shared/types/remote-types';
@@ -12,7 +13,6 @@ export interface SettingsSlice extends SettingsState {
         reconnect: () => void;
         send: (data: ClientEvent) => void;
         toggleIsDark: () => void;
-        toggleShowImage: () => void;
     };
 }
 
@@ -20,7 +20,6 @@ interface SettingsState {
     connected: boolean;
     info: Omit<SongUpdateSocket, 'currentTime'>;
     isDark: boolean;
-    showImage: boolean;
     socket?: StatefulWebSocket;
 }
 
@@ -32,7 +31,6 @@ const initialState: SettingsState = {
     connected: false,
     info: {},
     isDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
-    showImage: true,
 };
 
 export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
@@ -69,7 +67,13 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                         }
 
                         set((state) => {
-                            const wsUrl = location.href.replace('http', 'ws');
+                            // Use location.origin, not location.href — HashRouter puts
+                            // the current route in the URL fragment (e.g. "#/tracks"),
+                            // and WebSocket URLs must not contain a fragment (Firefox
+                            // throws "SyntaxError: An invalid or illegal string was
+                            // specified" if they do; other engines are lenient but it's
+                            // not spec-legal either way).
+                            const wsUrl = location.origin.replace(/^http/, 'ws');
                             logger.info('Creating new WebSocket', { url: wsUrl });
                             const socket = new WebSocket(wsUrl) as StatefulWebSocket;
 
@@ -105,6 +109,16 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                         });
                                         break;
                                     }
+                                    case 'playlists-response': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setPlaylistsResponse(
+                                                data.requestId,
+                                                data.hasMore,
+                                                data.items,
+                                            );
+                                        break;
+                                    }
                                     case 'position': {
                                         logger.debug('Position event received', { position: data });
                                         set((state) => {
@@ -122,6 +136,24 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                                 state.info.song.imageUrl = `data:image/jpeg;base64,${data}`;
                                             }
                                         });
+                                        break;
+                                    }
+                                    case 'queue-state': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setQueueState(data);
+                                        break;
+                                    }
+                                    case 'radio-response': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setRadioResponse(data.requestId, data.items);
+                                        break;
+                                    }
+                                    case 'radio-status': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setRadioStatus(data);
                                         break;
                                     }
                                     case 'rating': {
@@ -171,6 +203,16 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                         set((state) => {
                                             state.info = data;
                                         });
+                                        break;
+                                    }
+                                    case 'tracks-response': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setTracksResponse(
+                                                data.requestId,
+                                                data.hasMore,
+                                                data.items,
+                                            );
                                         break;
                                     }
                                     case 'volume': {
@@ -256,11 +298,6 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                             state.isDark = !state.isDark;
                         });
                     },
-                    toggleShowImage: () => {
-                        set((state) => {
-                            state.showImage = !state.showImage;
-                        });
-                    },
                 },
                 ...initialState,
             })),
@@ -268,8 +305,18 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
         ),
         {
             merge: (persistedState, currentState) => merge(currentState, persistedState),
+            migrate: (persistedState) => {
+                // v7 -> v8: showImage/toggleShowImage were removed when the
+                // artwork toggle button was replaced by tap-to-fullscreen —
+                // strip the now-meaningless key instead of leaving it to
+                // linger forever in localStorage.
+                if (persistedState && typeof persistedState === 'object') {
+                    delete (persistedState as Record<string, unknown>).showImage;
+                }
+                return persistedState;
+            },
             name: 'store_settings',
-            version: 7,
+            version: 8,
         },
     ),
 );
@@ -282,10 +329,6 @@ export const useIsDark = () => useRemoteStore((state) => state.isDark);
 
 export const useReconnect = () => useRemoteStore((state) => state.actions.reconnect);
 
-export const useShowImage = () => useRemoteStore((state) => state.showImage);
-
 export const useSend = () => useRemoteStore((state) => state.actions.send);
 
 export const useToggleDark = () => useRemoteStore((state) => state.actions.toggleIsDark);
-
-export const useToggleShowImage = () => useRemoteStore((state) => state.actions.toggleShowImage);
