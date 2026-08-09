@@ -3,6 +3,7 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
 import '/@/shared/styles/global.css';
+import '/@/remote/remote-reset.css';
 
 import { useEffect } from 'react';
 import { HashRouter } from 'react-router';

@@ -1,12 +1,20 @@
-import { useMemo, useState } from 'react';
-import { LuAirplay, LuCheck, LuRadioReceiver, LuSpeaker, LuTv } from 'react-icons/lu';
-import { RiVolumeUpFill } from 'react-icons/ri';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+    LuAirplay,
+    LuCheck,
+    LuRadioReceiver,
+    LuRefreshCw,
+    LuSpeaker,
+    LuSquare,
+    LuTv,
+} from 'react-icons/lu';
 
 import { WrappedSlider } from '/@/remote/components/wrapped-slider';
 import { useConnectDevices, useConnectRemoteState, useSend } from '/@/remote/store';
 import { Button } from '/@/shared/components/button/button';
 import { Drawer } from '/@/shared/components/drawer/drawer';
 import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
 import { Modal } from '/@/shared/components/modal/modal';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
@@ -52,6 +60,17 @@ const DeviceRow = ({ device, isActive, isSelected, onToggle, onVolumeChange }: D
     // AirPlay has no volume control in the backend.
     const volumeSupported = device.type !== 'airplay';
     const highlighted = isActive || isSelected;
+
+    // Same single-numeric-volume constraint as the remote's own player
+    // volume — see the matching comment in remote-container.tsx.
+    const preMuteVolumeRef = useRef(30);
+    useEffect(() => {
+        if (device.volume) preMuteVolumeRef.current = device.volume;
+    }, [device.volume]);
+
+    const handleToggleMute = () => {
+        onVolumeChange(device.volume ? 0 : preMuteVolumeRef.current);
+    };
 
     return (
         <Stack gap={0}>
@@ -107,7 +126,31 @@ const DeviceRow = ({ device, isActive, isSelected, onToggle, onVolumeChange }: D
             {isActive && volumeSupported && (
                 <div style={{ padding: '0 16px 12px 52px' }}>
                     <WrappedSlider
-                        leftLabel={<RiVolumeUpFill size={16} />}
+                        leftLabel={
+                            <button
+                                aria-label={device.volume ? 'Mute' : 'Unmute'}
+                                onClick={handleToggleMute}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    padding: 0,
+                                }}
+                                type="button"
+                            >
+                                <Icon
+                                    icon={
+                                        !device.volume
+                                            ? 'volumeMute'
+                                            : device.volume > 50
+                                              ? 'volumeMax'
+                                              : 'volumeNormal'
+                                    }
+                                    size={16}
+                                />
+                            </button>
+                        }
                         max={100}
                         onChangeEnd={onVolumeChange}
                         rightLabel={<Text size="sm">{device.volume ?? 0}</Text>}
@@ -217,6 +260,7 @@ export const ConnectDevices = ({ onClose, opened }: ConnectDevicesProps) => {
                 <Stack gap="lg">
                     <Group grow>
                         <Button
+                            leftSection={<LuRefreshCw size={16} />}
                             onClick={() => send({ event: 'connect-discover', fresh: true })}
                             size="md"
                             variant="default"
@@ -225,9 +269,10 @@ export const ConnectDevices = ({ onClose, opened }: ConnectDevicesProps) => {
                         </Button>
                         {connectState.isActive && (
                             <Button
+                                leftSection={<LuSquare size={16} />}
                                 onClick={() => send({ event: 'connect-disconnect' })}
                                 size="md"
-                                variant="default"
+                                variant="state-error"
                             >
                                 Disconnect all
                             </Button>
@@ -272,7 +317,7 @@ export const ConnectDevices = ({ onClose, opened }: ConnectDevicesProps) => {
                         );
                     })}
                     {selected.size > 0 && (
-                        <Button fullWidth onClick={handleConnect} size="lg">
+                        <Button fullWidth onClick={handleConnect} size="lg" variant="filled">
                             Connect ({selected.size})
                         </Button>
                     )}

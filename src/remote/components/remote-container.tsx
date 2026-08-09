@@ -1,16 +1,18 @@
 import formatDuration from 'format-duration';
 import debounce from 'lodash/debounce';
-import { useCallback } from 'react';
-import { RiPauseFill, RiPlayFill, RiVolumeUpFill } from 'react-icons/ri';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { ArtworkFullscreen } from '/@/remote/components/artwork-fullscreen';
 import { ConnectButton } from '/@/remote/components/buttons/connect-button';
-import { PlayerImage } from '/@/remote/components/player-image';
+import { Thumbnail } from '/@/remote/components/thumbnail';
 import { WrappedSlider } from '/@/remote/components/wrapped-slider';
-import { useInfo, useSend, useShowImage } from '/@/remote/store';
+import { useInfo, useSend } from '/@/remote/store';
 import { useRadioStatus } from '/@/remote/store/library';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
-import { Flex } from '/@/shared/components/flex/flex';
+import { animationVariants } from '/@/shared/components/animations/animation-variants';
 import { Group } from '/@/shared/components/group/group';
+import { Icon } from '/@/shared/components/icon/icon';
 import { Rating } from '/@/shared/components/rating/rating';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
@@ -20,10 +22,26 @@ import { PlayerRepeat, PlayerStatus } from '/@/shared/types/types';
 export const RemoteContainer = () => {
     const { position, repeat, shuffle, song, status, volume } = useInfo();
     const send = useSend();
-    const showImage = useShowImage();
     const radioStatus = useRadioStatus();
+    const [isArtworkOpen, setIsArtworkOpen] = useState(false);
 
     const id = song?.id;
+    const artworkSrc = radioStatus.isActive ? radioStatus.imageUrl : (song?.imageUrl ?? null);
+
+    // The remote protocol only carries a single numeric volume, no separate
+    // mute flag (same constraint desktop's Connect devices have, since Sonos/
+    // Chromecast/DLNA don't expose native mute either) — remembering the
+    // last non-zero volume client-side is what `useDeviceVolume` does there,
+    // so clicking the icon again restores where it was rather than some
+    // fixed default.
+    const preMuteVolumeRef = useRef(30);
+    useEffect(() => {
+        if (volume) preMuteVolumeRef.current = volume;
+    }, [volume]);
+
+    const handleToggleMute = useCallback(() => {
+        send({ event: 'volume', volume: volume ? 0 : preMuteVolumeRef.current });
+    }, [send, volume]);
 
     const setRating = useCallback(
         (rating: number) => {
@@ -35,78 +53,128 @@ export const RemoteContainer = () => {
     const debouncedSetRating = debounce(setRating, 400);
 
     return (
-        <Stack gap="md" h="100dvh" w="100%">
-            {showImage && (
-                <Flex align="center" justify="center" w="100%">
-                    <PlayerImage src={song?.imageUrl} />
-                </Flex>
-            )}
-            {radioStatus.isActive ? (
-                <Stack gap="xs">
-                    <Text isMuted size="sm">
-                        Radio
-                    </Text>
-                    <Text
-                        fw={700}
-                        size="xl"
-                        style={{
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        {radioStatus.stationName}
-                    </Text>
-                </Stack>
-            ) : (
-                id && (
-                    <Stack gap="xs">
-                        <Text
-                            fw={700}
-                            size="xl"
-                            style={{
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                            }}
+        <Stack gap="md" h="100dvh" p="md" w="100%">
+            <Group align="center" gap="sm" wrap="nowrap">
+                <button
+                    aria-label="Show full artwork"
+                    disabled={!artworkSrc}
+                    onClick={() => setIsArtworkOpen(true)}
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: artworkSrc ? 'pointer' : 'default',
+                        flexShrink: 0,
+                        padding: 0,
+                    }}
+                    type="button"
+                >
+                    <Thumbnail
+                        fallbackIcon={
+                            <Icon
+                                icon={radioStatus.isActive ? 'emptyImage' : 'emptySongImage'}
+                                size={20}
+                            />
+                        }
+                        size={64}
+                        src={artworkSrc}
+                    />
+                </button>
+                <AnimatePresence mode="wait">
+                    {radioStatus.isActive ? (
+                        <motion.div
+                            animate="show"
+                            exit="hidden"
+                            initial="hidden"
+                            key="radio"
+                            style={{ flex: 1, minWidth: 0 }}
+                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                            variants={animationVariants.fadeInUp}
                         >
-                            {song.name}
-                        </Text>
-                        <Text
-                            isMuted
-                            style={{
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            {song.album}
-                        </Text>
-                        <Text
-                            isMuted
-                            style={{
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            {song.artistName}
-                        </Text>
-                        <Group justify="space-between">
-                            {song.releaseDate && (
-                                <Text isMuted>
-                                    {new Date(song.releaseDate).toLocaleDateString()}
+                            <Stack gap={0}>
+                                <Text isMuted size="sm">
+                                    Radio
                                 </Text>
-                            )}
-                            <Text isMuted>Plays: {song.playCount}</Text>
-                        </Group>
-                    </Stack>
-                )
+                                <Text
+                                    fw={700}
+                                    size="lg"
+                                    style={{
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {radioStatus.stationName}
+                                </Text>
+                            </Stack>
+                        </motion.div>
+                    ) : (
+                        id && (
+                            <motion.div
+                                animate="show"
+                                exit="hidden"
+                                initial="hidden"
+                                key={id}
+                                style={{ flex: 1, minWidth: 0 }}
+                                transition={{ duration: 0.2, ease: 'easeOut' }}
+                                variants={animationVariants.fadeInUp}
+                            >
+                                <Stack gap={0}>
+                                    <Text
+                                        fw={700}
+                                        size="lg"
+                                        style={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {song.name}
+                                    </Text>
+                                    <Text
+                                        isMuted
+                                        size="sm"
+                                        style={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {song.album}
+                                    </Text>
+                                    <Text
+                                        isMuted
+                                        size="sm"
+                                        style={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {song.artistName}
+                                    </Text>
+                                </Stack>
+                            </motion.div>
+                        )
+                    )}
+                </AnimatePresence>
+            </Group>
+            {!radioStatus.isActive && id && (
+                <Group justify="space-between">
+                    {song.releaseDate && (
+                        <Text isMuted size="sm">
+                            {new Date(song.releaseDate).toLocaleDateString()}
+                        </Text>
+                    )}
+                    <Text isMuted size="sm">
+                        Plays: {song.playCount}
+                    </Text>
+                </Group>
             )}
             {!radioStatus.isActive && (
                 <Group gap={0} grow>
                     <ActionIcon
                         disabled={!id}
+                        h={48}
                         icon="favorite"
                         iconProps={{
                             fill: song?.userFavorite ? 'primary' : 'default',
@@ -138,6 +206,7 @@ export const RemoteContainer = () => {
             <Group gap="xs" grow>
                 <ActionIcon
                     disabled={!id}
+                    h={48}
                     icon="mediaPrevious"
                     iconProps={{
                         fill: 'default',
@@ -151,6 +220,12 @@ export const RemoteContainer = () => {
                 />
                 <ActionIcon
                     disabled={!id}
+                    h={48}
+                    icon={id && status === PlayerStatus.PLAYING ? 'mediaPause' : 'mediaPlay'}
+                    iconProps={{
+                        fill: 'default',
+                        size: 'lg',
+                    }}
                     onClick={() => {
                         if (status === PlayerStatus.PLAYING) {
                             send({ event: 'pause' });
@@ -162,15 +237,10 @@ export const RemoteContainer = () => {
                         label: id && status === PlayerStatus.PLAYING ? 'Pause' : 'Play',
                     }}
                     variant="default"
-                >
-                    {id && status === PlayerStatus.PLAYING ? (
-                        <RiPauseFill size={25} />
-                    ) : (
-                        <RiPlayFill size={25} />
-                    )}
-                </ActionIcon>
+                />
                 <ActionIcon
                     disabled={!id}
+                    h={48}
                     icon="mediaNext"
                     iconProps={{
                         fill: 'default',
@@ -185,6 +255,7 @@ export const RemoteContainer = () => {
             </Group>
             <Group gap="xs" grow>
                 <ActionIcon
+                    h={48}
                     icon="mediaShuffle"
                     iconProps={{
                         fill: shuffle ? 'primary' : 'default',
@@ -197,6 +268,7 @@ export const RemoteContainer = () => {
                     variant="default"
                 />
                 <ActionIcon
+                    h={48}
                     icon={
                         repeat === undefined || repeat === PlayerRepeat.ONE
                             ? 'mediaRepeatOne'
@@ -223,7 +295,7 @@ export const RemoteContainer = () => {
                 />
                 <ConnectButton />
             </Group>
-            <Stack gap="lg">
+            <Stack gap="xl" mt="lg">
                 {id && position !== undefined && (
                     <WrappedSlider
                         label={(value) => formatDuration(value * 1e3)}
@@ -235,7 +307,31 @@ export const RemoteContainer = () => {
                     />
                 )}
                 <WrappedSlider
-                    leftLabel={<RiVolumeUpFill size={20} />}
+                    leftLabel={
+                        <button
+                            aria-label={volume ? 'Mute' : 'Unmute'}
+                            onClick={handleToggleMute}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                padding: 0,
+                            }}
+                            type="button"
+                        >
+                            <Icon
+                                icon={
+                                    !volume
+                                        ? 'volumeMute'
+                                        : volume > 50
+                                          ? 'volumeMax'
+                                          : 'volumeNormal'
+                                }
+                                size={20}
+                            />
+                        </button>
+                    }
                     max={100}
                     onChangeEnd={(e) => send({ event: 'volume', volume: e })}
                     rightLabel={
@@ -246,6 +342,14 @@ export const RemoteContainer = () => {
                     value={volume ?? 0}
                 />
             </Stack>
+            <ArtworkFullscreen
+                album={radioStatus.isActive ? null : song?.album}
+                artist={radioStatus.isActive ? null : song?.artistName}
+                onClose={() => setIsArtworkOpen(false)}
+                opened={isArtworkOpen}
+                src={artworkSrc}
+                title={radioStatus.isActive ? radioStatus.stationName : (song?.name ?? null)}
+            />
         </Stack>
     );
 };

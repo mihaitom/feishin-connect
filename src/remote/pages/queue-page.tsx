@@ -1,16 +1,64 @@
-import formatDuration from 'format-duration';
-import { RiMusic2Line } from 'react-icons/ri';
+import { AnimatePresence, Reorder } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Thumbnail } from '/@/remote/components/thumbnail';
+import { FadeIn } from '/@/remote/components/fade-in';
+import { TrackActionSheet } from '/@/remote/components/menus/track-action-sheet';
+import { QueueRow } from '/@/remote/components/queue-row';
 import { useSend } from '/@/remote/store';
 import { useQueueState } from '/@/remote/store/library';
-import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
+import { RemoteQueueItem } from '/@/shared/types/remote-types';
 
 export const QueuePage = () => {
     const send = useSend();
     const { currentUniqueId, items } = useQueueState();
+    const [activeTrack, setActiveTrack] = useState<null | { id: string; name: string }>(null);
+    const [localOrder, setLocalOrder] = useState<string[]>(() => items.map((i) => i.uniqueId));
+    const isDraggingRef = useRef(false);
+
+    // The server broadcasts the authoritative order on every queue change —
+    // resync unless a drag is in flight, so a push mid-gesture can't yank the
+    // item out from under the user's finger.
+    useEffect(() => {
+        if (isDraggingRef.current) return;
+        setLocalOrder(items.map((i) => i.uniqueId));
+    }, [items]);
+
+    const orderedItems = localOrder
+        .map((uniqueId) => items.find((i) => i.uniqueId === uniqueId))
+        .filter((i): i is RemoteQueueItem => !!i);
+
+    const handleRemove = (uniqueId: string) => {
+        setLocalOrder((prev) => prev.filter((id) => id !== uniqueId));
+        send({ event: 'remove-from-queue', uniqueId });
+    };
+
+    const handleReorderDragEnd = (movedUniqueId: string) => {
+        isDraggingRef.current = false;
+
+        const index = localOrder.indexOf(movedUniqueId);
+        if (index === -1) return;
+
+        const after = localOrder[index + 1];
+        const before = localOrder[index - 1];
+
+        if (after) {
+            send({
+                edge: 'top',
+                event: 'reorder-queue',
+                targetUniqueId: after,
+                uniqueId: movedUniqueId,
+            });
+        } else if (before) {
+            send({
+                edge: 'bottom',
+                event: 'reorder-queue',
+                targetUniqueId: before,
+                uniqueId: movedUniqueId,
+            });
+        }
+    };
 
     return (
         <Stack gap="md" p="md">
@@ -19,63 +67,36 @@ export const QueuePage = () => {
                     Queue is empty
                 </Text>
             )}
-            <Stack gap={4}>
-                {items.map((item) => {
-                    const isCurrent = item.uniqueId === currentUniqueId;
-
-                    return (
-                        <Group
-                            gap="sm"
-                            key={item.uniqueId}
-                            onClick={() => send({ event: 'queue-jump', uniqueId: item.uniqueId })}
-                            style={{
-                                background: isCurrent
-                                    ? 'var(--theme-colors-primary-transparent)'
-                                    : 'transparent',
-                                borderRadius: 12,
-                                cursor: 'pointer',
-                                minHeight: 56,
-                                padding: '8px 16px',
-                                userSelect: 'none',
-                            }}
-                            wrap="nowrap"
-                        >
-                            <Thumbnail
-                                fallbackIcon={<RiMusic2Line size={18} />}
-                                src={item.imageUrl}
+            <FadeIn>
+                <Reorder.Group
+                    as="div"
+                    axis="y"
+                    onReorder={setLocalOrder}
+                    style={{ display: 'flex', flexDirection: 'column', gap: 4 }}
+                    values={localOrder}
+                >
+                    <AnimatePresence initial={false}>
+                        {orderedItems.map((item, index) => (
+                            <QueueRow
+                                index={index + 1}
+                                isCurrent={item.uniqueId === currentUniqueId}
+                                item={item}
+                                key={item.uniqueId}
+                                onJump={() =>
+                                    send({ event: 'queue-jump', uniqueId: item.uniqueId })
+                                }
+                                onLongPress={() => setActiveTrack({ id: item.id, name: item.name })}
+                                onRemove={() => handleRemove(item.uniqueId)}
+                                onReorderDragEnd={() => handleReorderDragEnd(item.uniqueId)}
+                                onReorderDragStart={() => {
+                                    isDraggingRef.current = true;
+                                }}
                             />
-                            <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
-                                <Text
-                                    fw={isCurrent ? 700 : 500}
-                                    style={{
-                                        color: isCurrent
-                                            ? 'var(--theme-colors-primary)'
-                                            : undefined,
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                >
-                                    {item.name}
-                                </Text>
-                                <Text
-                                    isMuted
-                                    size="sm"
-                                    style={{
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                >
-                                    {item.artistName}
-                                    {item.album ? ` · ${item.album}` : ''} ·{' '}
-                                    {formatDuration(item.duration)}
-                                </Text>
-                            </Stack>
-                        </Group>
-                    );
-                })}
-            </Stack>
+                        ))}
+                    </AnimatePresence>
+                </Reorder.Group>
+            </FadeIn>
+            <TrackActionSheet onClose={() => setActiveTrack(null)} track={activeTrack} />
         </Stack>
     );
 };

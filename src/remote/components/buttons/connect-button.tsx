@@ -12,6 +12,7 @@ export const ConnectButton = () => {
     return (
         <>
             <ActionIcon
+                h={48}
                 onClick={handlers.open}
                 tooltip={{
                     label: connectState.isActive ? 'Connected' : 'Connect devices',
@@ -19,8 +20,13 @@ export const ConnectButton = () => {
                 variant="default"
             >
                 <LuCast
-                    color={connectState.isActive ? 'var(--theme-colors-primary)' : undefined}
+                    color={
+                        connectState.isActive
+                            ? 'var(--theme-colors-primary)'
+                            : 'var(--theme-colors-text-secondary)'
+                    }
                     size={24}
+                    style={{ opacity: connectState.isActive ? 1 : 0.7 }}
                 />
             </ActionIcon>
             <ConnectDevices onClose={handlers.close} opened={opened} />

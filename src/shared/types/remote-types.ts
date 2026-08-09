@@ -1,5 +1,11 @@
 import { QueueSong } from '/@/shared/types/domain-types';
-import { PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/types';
+import { Play, PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/types';
+
+export interface ClientAddToPlaylist {
+    event: 'add-to-playlist';
+    playlistId: string;
+    songId: string;
+}
 
 export interface ClientAuth {
     event: 'authenticate';
@@ -30,6 +36,7 @@ export interface ClientConnectSetVolume {
 }
 
 export type ClientEvent =
+    | ClientAddToPlaylist
     | ClientAuth
     | ClientConnectConnect
     | ClientConnectDisconnect
@@ -40,10 +47,13 @@ export type ClientEvent =
     | ClientPlayPlaylist
     | ClientPlayRadio
     | ClientPlayTrack
+    | ClientPlayTrackRadio
     | ClientPosition
     | ClientQueueJump
     | ClientRadioRequest
     | ClientRating
+    | ClientRemoveFromQueue
+    | ClientReorderQueue
     | ClientSimpleEvent
     | ClientTracksRequest
     | ClientVolume;
@@ -61,6 +71,7 @@ export interface ClientPlaylistsRequest extends RemoteListRequest {
 export interface ClientPlayPlaylist {
     event: 'play-playlist';
     id: string;
+    playType?: Play;
 }
 
 export interface ClientPlayRadio {
@@ -71,6 +82,13 @@ export interface ClientPlayRadio {
 export interface ClientPlayTrack {
     event: 'play-track';
     id: string;
+    playType?: Play;
+}
+
+export interface ClientPlayTrackRadio {
+    event: 'play-track-radio';
+    id: string;
+    playType: Play;
 }
 
 export interface ClientPosition {
@@ -92,6 +110,18 @@ export interface ClientRating {
     event: 'rating';
     id: string;
     rating: number;
+}
+
+export interface ClientRemoveFromQueue {
+    event: 'remove-from-queue';
+    uniqueId: string;
+}
+
+export interface ClientReorderQueue {
+    edge: 'bottom' | 'top';
+    event: 'reorder-queue';
+    targetUniqueId: string;
+    uniqueId: string;
 }
 
 export interface ClientSimpleEvent {
@@ -139,6 +169,7 @@ export interface RemoteQueueItem {
     album: null | string;
     artistName: string;
     duration: number;
+    id: string;
     imageUrl: null | string;
     name: string;
     uniqueId: string;

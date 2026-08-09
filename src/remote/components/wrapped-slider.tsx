@@ -1,7 +1,9 @@
-import { rem, Slider, SliderProps } from '@mantine/core';
-import { ReactNode, useState } from 'react';
+import { SliderProps } from '@mantine/core';
+import { CSSProperties, ReactNode, useState } from 'react';
 
-import { Group } from '/@/shared/components/group/group';
+import styles from './wrapped-slider.module.css';
+
+import { Slider } from '/@/shared/components/slider/slider';
 import { Text } from '/@/shared/components/text/text';
 
 const PlayerbarSlider = ({
@@ -10,44 +12,14 @@ const PlayerbarSlider = ({
 }: SliderProps & { thumbSize?: string }) => {
     return (
         <Slider
-            styles={{
-                bar: {
-                    transition: 'background-color 0.2s ease',
-                },
-                label: {
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    padding: '0 1rem',
-                },
-                root: {
-                    '&:hover': {
-                        '& .mantine-Slider-bar': {
-                            backgroundColor: 'var(--primary-color)',
-                        },
-                    },
-                    // Generous hit area beyond the visible track — this is a
-                    // touch remote, not a mouse-driven UI, so the draggable
-                    // region needs to be much taller than the visual bar.
-                    padding: '0.5rem 0',
-                },
-                thumb: {
-                    backgroundColor: 'var(--slider-thumb-bg)',
-                    borderColor: 'var(--primary-color)',
-                    borderWidth: rem(1),
-                    height: thumbSize,
-                    // Always visible — this is a touchscreen remote, where
-                    // ":hover" barely exists, so a hover-only drag handle is
-                    // effectively invisible until the user is already dragging.
-                    opacity: 1,
-                    width: thumbSize,
-                },
-                track: {
-                    '&::before': {
-                        right: 'calc(0.1rem * -1)',
-                    },
-                    height: '1rem',
-                },
+            classNames={{
+                bar: styles.bar,
+                label: styles['slider-label'],
+                root: styles.root,
+                thumb: styles.thumb,
+                track: styles.track,
             }}
+            style={{ '--thumb-size': thumbSize } as CSSProperties}
             {...props}
             onClick={(e) => {
                 e?.stopPropagation();
@@ -77,8 +49,12 @@ export const WrappedSlider = ({
     const [seek, setSeek] = useState(0);
 
     return (
-        <Group align="center" wrap="nowrap">
-            {leftLabel && <Text size="sm">{leftLabel}</Text>}
+        <div className={styles.container}>
+            {leftLabel && (
+                <Text className={styles['label-left']} isNoSelect size="sm">
+                    {leftLabel}
+                </Text>
+            )}
             <PlayerbarSlider
                 {...props}
                 min={0}
@@ -95,7 +71,11 @@ export const WrappedSlider = ({
                 value={!isSeeking ? (value ?? 0) : seek}
                 w="100%"
             />
-            {rightLabel && <Text size="sm">{rightLabel}</Text>}
-        </Group>
+            {rightLabel && (
+                <Text className={styles['label-right']} isNoSelect size="sm">
+                    {rightLabel}
+                </Text>
+            )}
+        </div>
     );
 };

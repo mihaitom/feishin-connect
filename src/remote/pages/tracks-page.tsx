@@ -1,13 +1,12 @@
-import formatDuration from 'format-duration';
 import { useState } from 'react';
-import { RiMusic2Line } from 'react-icons/ri';
 
-import { Thumbnail } from '/@/remote/components/thumbnail';
+import { FadeIn } from '/@/remote/components/fade-in';
+import { TrackActionSheet } from '/@/remote/components/menus/track-action-sheet';
+import { TrackRow } from '/@/remote/components/track-row';
 import { useRemoteQuery } from '/@/remote/hooks/use-remote-query';
 import { useSend } from '/@/remote/store';
 import { useTracksResponse } from '/@/remote/store/library';
 import { Button } from '/@/shared/components/button/button';
-import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
@@ -17,6 +16,7 @@ import { RemoteTrackItem } from '/@/shared/types/remote-types';
 export const TracksPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
+    const [activeTrack, setActiveTrack] = useState<null | RemoteTrackItem>(null);
     const send = useSend();
     const response = useTracksResponse();
 
@@ -38,55 +38,24 @@ export const TracksPage = () => {
                     No tracks found
                 </Text>
             )}
-            <Stack gap={4}>
-                {items.map((track) => (
-                    <Group
-                        gap="sm"
-                        key={track.id}
-                        onClick={() => send({ event: 'play-track', id: track.id })}
-                        style={{
-                            borderRadius: 12,
-                            cursor: 'pointer',
-                            minHeight: 56,
-                            padding: '8px 16px',
-                            userSelect: 'none',
-                        }}
-                        wrap="nowrap"
-                    >
-                        <Thumbnail fallbackIcon={<RiMusic2Line size={18} />} src={track.imageUrl} />
-                        <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
-                            <Text
-                                fw={500}
-                                style={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                {track.name}
-                            </Text>
-                            <Text
-                                isMuted
-                                size="sm"
-                                style={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                {track.artistName}
-                                {track.album ? ` · ${track.album}` : ''} ·{' '}
-                                {formatDuration(track.duration)}
-                            </Text>
-                        </Stack>
-                    </Group>
-                ))}
-            </Stack>
+            <FadeIn>
+                <Stack gap={4}>
+                    {items.map((track) => (
+                        <TrackRow
+                            key={track.id}
+                            onLongPress={() => setActiveTrack(track)}
+                            onPlay={() => send({ event: 'play-track', id: track.id })}
+                            track={track}
+                        />
+                    ))}
+                </Stack>
+            </FadeIn>
             {hasMore && (
                 <Button onClick={loadMore} variant="default">
                     Load more
                 </Button>
             )}
+            <TrackActionSheet onClose={() => setActiveTrack(null)} track={activeTrack} />
         </Stack>
     );
 };

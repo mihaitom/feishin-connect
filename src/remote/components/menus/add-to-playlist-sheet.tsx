@@ -1,10 +1,7 @@
 import { useState } from 'react';
 
-import { FadeIn } from '/@/remote/components/fade-in';
-import { PlaylistActionSheet } from '/@/remote/components/menus/playlist-action-sheet';
-import { PlaylistRow } from '/@/remote/components/playlist-row';
+import { ActionSheet } from '/@/remote/components/action-sheet';
 import { useRemoteQuery } from '/@/remote/hooks/use-remote-query';
-import { useSend } from '/@/remote/store';
 import { usePlaylistsResponse } from '/@/remote/store/library';
 import { Button } from '/@/shared/components/button/button';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -13,11 +10,13 @@ import { Text } from '/@/shared/components/text/text';
 import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
 import { RemotePlaylistItem } from '/@/shared/types/remote-types';
 
-export const PlaylistsPage = () => {
+interface AddToPlaylistSheetProps {
+    onSelect: (playlistId: string, playlistName: string) => void;
+}
+
+export const AddToPlaylistSheet = ({ onSelect }: AddToPlaylistSheetProps) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
-    const [activePlaylist, setActivePlaylist] = useState<null | RemotePlaylistItem>(null);
-    const send = useSend();
     const response = usePlaylistsResponse();
 
     const { hasMore, items, loadMore } = useRemoteQuery<RemotePlaylistItem>({
@@ -27,38 +26,32 @@ export const PlaylistsPage = () => {
     });
 
     return (
-        <Stack gap="md" p="md">
+        <Stack gap={4} px={8}>
             <TextInput
+                autoFocus
                 onChange={(e) => setSearchTerm(e.currentTarget.value)}
                 placeholder="Search playlists…"
                 value={searchTerm}
             />
             {items.length === 0 && (
-                <Text isMuted ta="center">
+                <Text isMuted py="md" ta="center">
                     No playlists found
                 </Text>
             )}
-            <FadeIn>
-                <Stack gap={4}>
-                    {items.map((playlist) => (
-                        <PlaylistRow
-                            key={playlist.id}
-                            onLongPress={() => setActivePlaylist(playlist)}
-                            onPlay={() => send({ event: 'play-playlist', id: playlist.id })}
-                            playlist={playlist}
-                        />
-                    ))}
-                </Stack>
-            </FadeIn>
+            {items.map((playlist) => (
+                <ActionSheet.Item
+                    key={playlist.id}
+                    leftIcon="playlist"
+                    onClick={() => onSelect(playlist.id, playlist.name)}
+                >
+                    {playlist.name}
+                </ActionSheet.Item>
+            ))}
             {hasMore && (
                 <Button onClick={loadMore} variant="default">
                     Load more
                 </Button>
             )}
-            <PlaylistActionSheet
-                onClose={() => setActivePlaylist(null)}
-                playlist={activePlaylist}
-            />
         </Stack>
     );
 };

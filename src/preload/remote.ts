@@ -10,7 +10,7 @@ import {
     RemoteTrackItem,
     ServerRadioStatus,
 } from '/@/shared/types/remote-types';
-import { PlayerStatus } from '/@/shared/types/types';
+import { Play, PlayerStatus } from '/@/shared/types/types';
 
 interface RemoteListRequestPayload {
     limit?: number;
@@ -51,11 +51,15 @@ const requestRadio = (cb: (data: { requestId: string }) => void) => {
     ipcRenderer.on('request-radio', (_, data) => cb(data));
 };
 
-const requestPlayTrack = (cb: (data: { id: string }) => void) => {
+const requestPlayTrack = (cb: (data: { id: string; playType?: Play }) => void) => {
     ipcRenderer.on('request-play-track', (_, data) => cb(data));
 };
 
-const requestPlayPlaylist = (cb: (data: { id: string }) => void) => {
+const requestPlayTrackRadio = (cb: (data: { id: string; playType: Play }) => void) => {
+    ipcRenderer.on('request-play-track-radio', (_, data) => cb(data));
+};
+
+const requestPlayPlaylist = (cb: (data: { id: string; playType?: Play }) => void) => {
     ipcRenderer.on('request-play-playlist', (_, data) => cb(data));
 };
 
@@ -65,6 +69,20 @@ const requestPlayRadio = (cb: (data: { id: string }) => void) => {
 
 const requestQueueJump = (cb: (data: { uniqueId: string }) => void) => {
     ipcRenderer.on('request-queue-jump', (_, data) => cb(data));
+};
+
+const requestAddToPlaylist = (cb: (data: { playlistId: string; songId: string }) => void) => {
+    ipcRenderer.on('request-add-to-playlist', (_, data) => cb(data));
+};
+
+const requestRemoveFromQueue = (cb: (data: { uniqueId: string }) => void) => {
+    ipcRenderer.on('request-remove-from-queue', (_, data) => cb(data));
+};
+
+const requestReorderQueue = (
+    cb: (data: { edge: 'bottom' | 'top'; targetUniqueId: string; uniqueId: string }) => void,
+) => {
+    ipcRenderer.on('request-reorder-queue', (_, data) => cb(data));
 };
 
 const respondTracks = (requestId: string, hasMore: boolean, items: RemoteTrackItem[]) => {
@@ -185,6 +203,7 @@ const updatePosition = (timeSec: number) => {
 };
 
 export const remote = {
+    requestAddToPlaylist,
     requestConnectConnect,
     requestConnectDisconnect,
     requestConnectDiscover,
@@ -194,10 +213,13 @@ export const remote = {
     requestPlayPlaylist,
     requestPlayRadio,
     requestPlayTrack,
+    requestPlayTrackRadio,
     requestPosition,
     requestQueueJump,
     requestRadio,
     requestRating,
+    requestRemoveFromQueue,
+    requestReorderQueue,
     requestSeek,
     requestTracks,
     requestVolume,

@@ -18,6 +18,7 @@ const toRemoteQueueItem = (song: QueueSong): RemoteQueueItem => ({
     album: song.album,
     artistName: song.artistName,
     duration: song.duration,
+    id: song.id,
     imageUrl:
         getItemImageUrl({
             id: song.id,

@@ -2,6 +2,7 @@ import isElectron from 'is-electron';
 import { useEffect } from 'react';
 
 import { api } from '/@/renderer/api';
+import { queryKeys } from '/@/renderer/api/query-keys';
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
@@ -9,6 +10,7 @@ import { radioQueries } from '/@/renderer/features/radio/api/radio-api';
 import { useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { queryClient } from '/@/renderer/lib/react-query';
+import { useArtistRadioCount } from '/@/renderer/store';
 import { useAuthStore } from '/@/renderer/store/auth.store';
 import { usePlayerStoreBase } from '/@/renderer/store/player.store';
 import { useRemoteSettings } from '/@/renderer/store/settings.store';
@@ -87,7 +89,9 @@ const toRemotePlaylistItem = (playlist: Playlist): RemotePlaylistItem => ({
  */
 export const useRemoteLibrary = () => {
     const isRemoteEnabled = useRemoteSettings().enabled;
-    const { addToQueueByData, addToQueueByFetch } = usePlayer();
+    const { addToQueueByData, addToQueueByFetch, clearSelected, getQueue, moveSelectedTo } =
+        usePlayer();
+    const radioCount = useArtistRadioCount();
 
     useEffect(() => {
         if (!isRemoteEnabled || !remote) return;
@@ -194,7 +198,7 @@ export const useRemoteLibrary = () => {
             }
         });
 
-        remote.requestPlayTrack(async ({ id }) => {
+        remote.requestPlayTrack(async ({ id, playType }) => {
             const server = useAuthStore.getState().currentServer;
             if (!server) return;
 
@@ -215,13 +219,89 @@ export const useRemoteLibrary = () => {
             }
             if (!song) return;
 
-            addToQueueByData([song], Play.NOW, song.id);
+            addToQueueByData([song], playType ?? Play.NOW, song.id);
         });
 
-        remote.requestPlayPlaylist(({ id }) => {
+        remote.requestPlayTrackRadio(async ({ id, playType }) => {
             const server = useAuthStore.getState().currentServer;
             if (!server) return;
-            addToQueueByFetch(server.id, [id], LibraryItem.PLAYLIST, Play.NOW);
+
+            let song = trackCache.get(id);
+            if (!song) {
+                try {
+                    song = await queryClient.fetchQuery({
+                        queryFn: () =>
+                            api.controller.getSongDetail({
+                                apiClientProps: { serverId: server.id },
+                                query: { id },
+                            }),
+                        queryKey: ['remote-song-detail', server.id, id],
+                    });
+                } catch {
+                    return;
+                }
+            }
+            if (!song) return;
+
+            try {
+                const similarSongs = await queryClient.fetchQuery({
+                    ...songsQueries.similar({
+                        query: { count: radioCount, songId: song.id },
+                        serverId: server.id,
+                    }),
+                    queryKey: queryKeys.player.fetch({ similarSongs: song.id }),
+                });
+
+                if (similarSongs && similarSongs.length > 0) {
+                    addToQueueByData([song, ...similarSongs], playType, song.id);
+                }
+            } catch {
+                // Nothing to do — similar-songs fetch failed.
+            }
+        });
+
+        remote.requestPlayPlaylist(({ id, playType }) => {
+            const server = useAuthStore.getState().currentServer;
+            if (!server) return;
+            addToQueueByFetch(server.id, [id], LibraryItem.PLAYLIST, playType ?? Play.NOW);
+        });
+
+        remote.requestAddToPlaylist(async ({ playlistId, songId }) => {
+            const server = useAuthStore.getState().currentServer;
+            if (!server) return;
+
+            try {
+                await api.controller.addToPlaylist({
+                    apiClientProps: { serverId: server.id },
+                    body: { songId: [songId] },
+                    query: { id: playlistId },
+                });
+
+                queryClient.invalidateQueries({
+                    exact: false,
+                    queryKey: queryKeys.playlists.list(server.id),
+                });
+                queryClient.invalidateQueries({
+                    queryKey: queryKeys.playlists.detail(server.id, playlistId),
+                });
+                queryClient.invalidateQueries({
+                    queryKey: queryKeys.playlists.songList(server.id, playlistId),
+                });
+            } catch {
+                // Nothing to do — playlist add failed.
+            }
+        });
+
+        remote.requestRemoveFromQueue(({ uniqueId }) => {
+            const song = getQueue().find((item) => item._uniqueId === uniqueId);
+            if (!song) return;
+            clearSelected([song]);
+        });
+
+        remote.requestReorderQueue(({ edge, targetUniqueId, uniqueId }) => {
+            const movedSong = getQueue().find((item) => item._uniqueId === uniqueId);
+            if (!movedSong) return;
+            moveSelectedTo([movedSong], edge, targetUniqueId);
         });
 
         remote.requestPlayRadio(async ({ id }) => {
@@ -255,11 +335,23 @@ export const useRemoteLibrary = () => {
             ipc?.removeAllListeners('request-playlists');
             ipc?.removeAllListeners('request-radio');
             ipc?.removeAllListeners('request-play-track');
+            ipc?.removeAllListeners('request-play-track-radio');
             ipc?.removeAllListeners('request-play-playlist');
             ipc?.removeAllListeners('request-play-radio');
+            ipc?.removeAllListeners('request-add-to-playlist');
+            ipc?.removeAllListeners('request-remove-from-queue');
+            ipc?.removeAllListeners('request-reorder-queue');
             ipc?.removeAllListeners('request-queue-jump');
         };
-    }, [isRemoteEnabled, addToQueueByData, addToQueueByFetch]);
+    }, [
+        isRemoteEnabled,
+        addToQueueByData,
+        addToQueueByFetch,
+        clearSelected,
+        getQueue,
+        moveSelectedTo,
+        radioCount,
+    ]);
 };
 
 export const RemoteLibraryHook = () => {

@@ -1,0 +1,33 @@
+.row {
+    min-height: 56px;
+    padding: 8px 16px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: var(--theme-radius-lg);
+    transition:
+        transform 100ms ease,
+        opacity 100ms ease;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+.row:active {
+    opacity: 0.85;
+    transform: scale(0.97);
+}
+
+@media (hover: hover) {
+    .row:hover {
+        background-color: var(--theme-colors-surface);
+    }
+}
+
+.row-current {
+    background-color: var(--theme-colors-primary-transparent);
+}
+
+@media (hover: hover) {
+    .row-current:hover {
+        background-color: var(--theme-colors-primary-transparent);
+    }
+}

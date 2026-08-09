@@ -413,6 +413,14 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                         }
 
                         switch (event) {
+                            case 'add-to-playlist': {
+                                const { playlistId, songId } = json;
+                                getMainWindow()?.webContents.send('request-add-to-playlist', {
+                                    playlistId,
+                                    songId,
+                                });
+                                break;
+                            }
                             case 'connect-connect': {
                                 const { devices, force } = json;
                                 getMainWindow()?.webContents.send('request-connect-connect', {
@@ -469,6 +477,7 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                             case 'play-playlist': {
                                 getMainWindow()?.webContents.send('request-play-playlist', {
                                     id: json.id,
+                                    playType: json.playType,
                                 });
                                 break;
                             }
@@ -481,6 +490,14 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                             case 'play-track': {
                                 getMainWindow()?.webContents.send('request-play-track', {
                                     id: json.id,
+                                    playType: json.playType,
+                                });
+                                break;
+                            }
+                            case 'play-track-radio': {
+                                getMainWindow()?.webContents.send('request-play-track-radio', {
+                                    id: json.id,
+                                    playType: json.playType,
                                 });
                                 break;
                             }
@@ -554,6 +571,22 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                                         serverId: currentState.song._serverId,
                                     });
                                 }
+                                break;
+                            }
+                            case 'remove-from-queue': {
+                                const { uniqueId } = json;
+                                getMainWindow()?.webContents.send('request-remove-from-queue', {
+                                    uniqueId,
+                                });
+                                break;
+                            }
+                            case 'reorder-queue': {
+                                const { edge, targetUniqueId, uniqueId } = json;
+                                getMainWindow()?.webContents.send('request-reorder-queue', {
+                                    edge,
+                                    targetUniqueId,
+                                    uniqueId,
+                                });
                                 break;
                             }
                             case 'repeat': {
