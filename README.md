@@ -186,9 +186,10 @@ The desktop app can be controlled from a phone (or any other browser on the same
 
 Upstream already ships the basic remote itself — transport controls (play/pause/next/previous, seek, volume, favorite, rating) for whatever's already in the queue. This fork extends it into something closer to a full companion app:
 
-- **Browse and pick what to play** — new Tracks, Playlists, and Radio tabs with search, so you're no longer limited to skipping within whatever's already queued
-- **A Queue tab** showing what's coming up, with a tap to jump straight to any track in it
-- **Full Feishin Connect control from the phone** — discover, connect to (including several devices at once), and control Sonos / AirPlay / Chromecast / DLNA cast targets, with the same confirmation prompt as the desktop app before taking over a device someone else is using
+- **Browse and pick what to play** — Tracks, Playlists (both with search), and Radio tabs, so you're no longer limited to skipping within whatever's already queued. Long-press a track or playlist for the same Play / Track Radio / Add to Playlist options as the desktop app.
+- **A Queue tab** showing what's coming up — tap to jump straight to any track, swipe to remove one, or drag to reorder
+- **Full Feishin Connect control from the phone** — discover, connect to (including several devices at once), and control Sonos / AirPlay / Chromecast / DLNA cast targets, each with its own volume and mute, with the same confirmation prompt as the desktop app before taking over a device someone else is using
+- **Tap the album art on the now-playing screen** for a fullscreen view
 
 ---
 

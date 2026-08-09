@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.7.0-dev.0] - unreleased
 
 ### Added
-- **The phone remote can now browse your library and pick what to play**, not just skip within whatever's already queued — new Tracks, Playlists, and Radio tabs with search, alongside the existing now-playing view. A new Queue tab shows what's coming up and jumps straight to any track in it.
-- **The phone remote can now discover, connect to, and control Feishin Connect casting** — Sonos, AirPlay, Chromecast, and DLNA devices can be selected (including several at once) and controlled directly from the phone, with the same confirmation prompt as the desktop app before taking over a device someone else is using.
+- **The phone remote gained four new tabs, alongside the existing now-playing view:**
+  - **Tracks, Playlists (both with search), and Radio** — so you can browse and pick what to play, not just skip within whatever's already queued. Long-pressing a track or playlist opens the same Play / Track Radio / Add to Playlist menu as the desktop app.
+  - **Queue** — shows what's coming up; tap to jump straight to any track, swipe to remove one, or drag to reorder the queue.
+- **The phone remote can now discover, connect to, and control Feishin Connect casting** — Sonos, AirPlay, Chromecast, and DLNA devices can be selected (including several at once) and controlled directly from the phone, each with its own volume and mute, with the same confirmation prompt as the desktop app before taking over a device someone else is using.
+- **Tapping the album art on the phone remote's now-playing screen** opens a fullscreen view; tapping the volume icon mutes and unmutes, matching the desktop player.
 
 Still a work in progress, and Electron-only for now. The goal is to eventually make this the
 default mobile-friendly page served by the Docker/web build too, instead of just a remote for
