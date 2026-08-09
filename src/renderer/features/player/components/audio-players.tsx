@@ -265,6 +265,28 @@ const AudioPlayersContent = ({
                 dsp: { compressor: compressorNode, eqFilters, preampGain },
                 gains,
             });
+
+            // Mobile browsers require AudioContext.resume() to happen
+            // synchronously inside a user-gesture handler. The resume()
+            // calls in web-player.tsx's handlePlayer1Start/handlePlayer2Start
+            // happen too late for that — they're async callbacks fired after
+            // react-player's own "started" event, not inside the tap itself
+            // — which routinely leaves the context stuck "suspended" on
+            // mobile Safari/Chrome: the underlying <audio> element still
+            // plays (the browser tab shows its audio-playing icon) but
+            // produces no audible output at all, since its stream is routed
+            // into this suspended context via createMediaElementSource()
+            // instead of straight to the speakers. A one-time listener on
+            // the very first tap/click anywhere resumes it while still
+            // inside that gesture's activation window. Desktop browsers
+            // don't need this (they resume regardless of the async callback
+            // timing) but it's a harmless no-op there.
+            const unlock = () => {
+                context.resume().catch(() => {});
+            };
+            document.addEventListener('pointerdown', unlock, { once: true });
+            document.addEventListener('touchend', unlock, { once: true });
+            document.addEventListener('click', unlock, { once: true });
         }
 
         // Intentionally ignore the sample rate dependency, as it makes things really messy

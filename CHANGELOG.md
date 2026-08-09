@@ -17,6 +17,9 @@ Still a work in progress, and Electron-only for now. The goal is to eventually m
 default mobile-friendly page served by the Docker/web build too, instead of just a remote for
 the desktop app. If it turns out well, maybe upstream it as a PR to the original Feishin project.
 
+### Fixed
+- **Playback in the web build could appear to start on mobile browsers — the track's progress and the browser tab's own "audio playing" indicator both moved — while producing no actual sound.** Mobile browsers require audio to be explicitly unlocked within a real tap/click before it's allowed to play, which the app wasn't doing; playback now unlocks itself on the first tap anywhere in the app.
+
 ## [0.6.6] - 2026-08-04
 
 Quick hotfix after finding someone's Feishin Connect instance just sitting wide open on the internet. Patched what I could on my end. Securing your own deployment is still on you, though.
