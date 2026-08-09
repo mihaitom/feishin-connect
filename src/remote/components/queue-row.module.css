@@ -1,0 +1,65 @@
+.wrapper {
+    position: relative;
+}
+
+.delete-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+    color: var(--theme-colors-white);
+    background-color: var(--theme-colors-state-error);
+
+    /* iOS Safari only, not reproducible in desktop devtools mobile emulation:
+       during fast scroll it can briefly paint this absolutely-positioned
+       layer before the opaque foreground sibling composites on top of it,
+       flashing red for a frame despite the z-index. Forcing both onto their
+       own GPU compositing layer makes their stacking order stable instead
+       of depending on scroll-triggered repaint timing. */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.foreground {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    background-color: var(--theme-colors-background);
+
+    /* Not `transform: translateZ(0)` here — motion sets `transform`
+       imperatively on this element for the drag `x` value, which would
+       just overwrite a CSS-declared transform. `will-change` still hints
+       the browser to give it its own compositing layer without touching
+       the property motion owns. */
+    backface-visibility: hidden;
+    will-change: transform;
+}
+
+.drag-handle {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 40px;
+    margin-right: -4px;
+    color: var(--theme-colors-text-secondary);
+    touch-action: none;
+}
+
+.index {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+}
+
+.duration {
+    flex-shrink: 0;
+    min-width: 38px;
+    text-align: right;
+}

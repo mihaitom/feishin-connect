@@ -1,0 +1,64 @@
+.container {
+    display: grid;
+
+    /* Fixed label columns, not auto — auto sizes each slider's track to
+       whatever's left over after ITS OWN label content, so two sliders
+       with differently-sized labels (e.g. "3:32" vs a volume icon) end up
+       with visibly different track widths. */
+    grid-template-columns: 3rem minmax(0, 1fr) 3rem;
+    gap: var(--theme-spacing-md);
+    align-items: center;
+    width: 100%;
+}
+
+.label-left {
+    justify-self: end;
+}
+
+.label-right {
+    justify-self: start;
+}
+
+.root {
+    /* Mantine's own root is `display: flex; flex-direction: column` with no
+       `justify-content`, so its track sits flush against the top of this
+       padded box instead of centered in it — pull it back to the middle so
+       it lines up with the (grid-centered) labels beside it. */
+    justify-content: center;
+    width: 100%;
+
+    /* Generous hit area beyond the visible track — this is a touch remote,
+       not a mouse-driven UI, so the draggable region needs to be much
+       taller than the visual bar. */
+    padding: 0.5rem 0;
+
+    &:hover .bar {
+        background-color: var(--theme-colors-primary-filled);
+    }
+}
+
+.bar {
+    background-color: var(--theme-colors-foreground);
+    transition: background-color 0.2s ease-in-out;
+}
+
+.track {
+    height: 1rem;
+}
+
+.thumb {
+    width: var(--thumb-size, 1.3rem);
+    height: var(--thumb-size, 1.3rem);
+    border-color: var(--theme-colors-primary-filled);
+
+    /* Desktop only reveals this on hover/focus — barely reachable on a
+       touchscreen, so it stays visible unconditionally here. */
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.slider-label {
+    padding: 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
