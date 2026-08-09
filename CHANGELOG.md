@@ -22,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Casting stalled at the end of every track until the controlling browser tab was active again** — advancing to the next queued track used to depend entirely on that tab; a locked phone (whose browser suspends its JavaScript in the background) left the device sitting in silence until it was unlocked. The backend now advances the queue itself when a track finishes, regardless of whether any tab is currently active.
 
 ### Known issues
-- **Local (non-Connect) playback in the mobile web view stops as soon as the phone's screen locks**, when used as a plain browser tab — a hard iOS/Android limitation on backgrounded browser audio, not something fixable from the app itself. Adding the site to the home screen ("Add to Home Screen" in Safari) runs it as a standalone app instead, which is significantly more reliable for keeping audio going in the background. Feishin Connect casting isn't affected by this — playback keeps running on the physical device regardless of the phone's screen state.
+- **Local (non-Connect) playback in the mobile web view stops as soon as the phone's screen locks**, when used as a plain browser tab — a hard iOS/Android limitation on backgrounded browser audio, not something fixable from the app itself. Adding the site to the home screen ("Add to Home Screen" in Safari) runs it as a standalone app instead of a browser tab, which *may* help keep audio going in the background. Feishin Connect casting isn't affected by this at all — playback keeps running on the physical device regardless of the phone's screen state.
 
 ## [0.6.6] - 2026-08-04
 

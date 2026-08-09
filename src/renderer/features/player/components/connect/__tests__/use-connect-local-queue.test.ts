@@ -1,3 +1,5 @@
+import type { MutableRefObject } from 'react';
+
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -51,12 +53,30 @@ const song = (id: string, uniqueId: string) => ({
     name: `Song ${id}`,
 });
 
+const connectStatus = (overrides: Partial<ConnectStatus> = {}): ConnectStatus =>
+    ({
+        current_track: null,
+        current_track_index: 0,
+        elapsed: 0,
+        ended: false,
+        local_owner_client_id: null,
+        paused: false,
+        queue: [],
+        queue_index: 0,
+        radio: null,
+        streaming: false,
+        targets: [],
+        total_tracks: 0,
+        ...overrides,
+    }) as ConnectStatus;
+
 const baseArgs = (
     overrides: Partial<{ connectStatus: ConnectStatus | null; mode: ConnectMode }> = {},
 ) => ({
     connectStatus: null as ConnectStatus | null,
     ensureConfigured: vi.fn(() => Promise.resolve()),
     forceReconfigure: vi.fn(() => Promise.resolve()),
+    lastAutoSentRef: { current: '' } as MutableRefObject<string>,
     mode: 'inactive' as ConnectMode,
     ...overrides,
 });
@@ -165,6 +185,92 @@ describe('useConnectLocalQueue', () => {
                     (call) => call[0] === '/pause' || call[0] === '/resume',
                 ),
             ).toBeUndefined();
+        });
+    });
+
+    describe('cast reverse-sync', () => {
+        // The scenario this covers: the backend auto-advanced the queue on
+        // its own (routes/stream.py's _fire_track_end, e.g. because the
+        // phone was locked when the track ended) — this tab's local queue
+        // pointer must catch up so the now-playing display doesn't stay
+        // stuck on the old track once the phone is unlocked again.
+        it('moves the local queue pointer to match a server-side auto-advance', async () => {
+            const queueSnapshot = [
+                { id: '1', title: 'Song 1' },
+                { id: '2', title: 'Song 2' },
+            ];
+            const args = baseArgs({
+                connectStatus: connectStatus({
+                    queue: queueSnapshot,
+                    queue_index: 0,
+                    streaming: true,
+                }),
+                mode: 'cast',
+            });
+            const { rerender } = renderHook((props) => useConnectLocalQueue(props), {
+                initialProps: args,
+            });
+            // Past REVERSE_SYNC_GRACE_MS, so the mount-time forward push
+            // (which also refreshes the grace timer in cast mode) doesn't
+            // suppress the next check.
+            await vi.advanceTimersByTimeAsync(1500);
+
+            // A fresh connectStatus object, same as a real SSE tick would
+            // deliver — the auto-advance itself, discovered on the next
+            // status update after the grace window has passed.
+            rerender({
+                ...args,
+                connectStatus: connectStatus({
+                    queue: queueSnapshot,
+                    queue_index: 1,
+                    streaming: true,
+                }),
+            });
+
+            expect(mediaPlayByIndex).toHaveBeenCalledWith(1);
+            expect(mediaPause).toHaveBeenCalled();
+            expect(args.lastAutoSentRef.current).toBe('b');
+        });
+
+        it('does nothing when the local pointer already matches', async () => {
+            const args = baseArgs({
+                connectStatus: connectStatus({
+                    queue: [{ id: '1', title: 'Song 1' }],
+                    queue_index: 0,
+                    streaming: true,
+                }),
+                mode: 'cast',
+            });
+            renderHook((props) => useConnectLocalQueue(props), { initialProps: args });
+            await vi.advanceTimersByTimeAsync(1500);
+
+            expect(mediaPlayByIndex).not.toHaveBeenCalled();
+            expect(mediaPause).not.toHaveBeenCalled();
+        });
+
+        // Play/pause and seek stay entirely off the local player while
+        // casting — the player-bar's own controls target the device
+        // directly (use-connect-controls.ts), and the displayed position
+        // comes from connectStatus, not the local player's timestamp.
+        it('does not sync play/pause or seek while casting', async () => {
+            mockStatus = PlayerStatus.PAUSED;
+            mockPosition = 0;
+            const args = baseArgs({
+                connectStatus: connectStatus({
+                    elapsed: 120,
+                    paused: false,
+                    queue: [{ id: '1', title: 'Song 1' }],
+                    queue_index: 0,
+                    streaming: true,
+                }),
+                mode: 'cast',
+            });
+            renderHook((props) => useConnectLocalQueue(props), { initialProps: args });
+            await vi.advanceTimersByTimeAsync(1500);
+
+            expect(mediaPlay).not.toHaveBeenCalled();
+            expect(mediaPause).not.toHaveBeenCalled();
+            expect(mediaSeekToTimestamp).not.toHaveBeenCalled();
         });
     });
 });

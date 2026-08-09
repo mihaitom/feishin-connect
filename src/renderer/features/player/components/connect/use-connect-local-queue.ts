@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { MutableRefObject, useEffect, useRef } from 'react';
 
 import { connectFetchEnsured } from './connect-request';
 import { ConnectMode } from './connect.store';
@@ -27,6 +27,11 @@ interface UseConnectLocalQueueArgs {
     connectStatus: ConnectStatus | null;
     ensureConfigured: () => Promise<void>;
     forceReconfigure: () => Promise<void>;
+    // So the cast-mode reverse-sync below can mark a server-driven queue
+    // advance as already sent, before use-connect-playback.ts's auto-forward
+    // effect sees the resulting currentSong change and would otherwise
+    // re-send it as if the user had just skipped.
+    lastAutoSentRef: MutableRefObject<string>;
     mode: ConnectMode;
 }
 
@@ -43,21 +48,33 @@ interface UseConnectLocalQueueArgs {
  * mirror-initiated queue reorder/remove — out of scope for v1 (see the
  * mobile-view plan).
  *
- * The queue-forwarding effect (only that one — not play/pause forwarding or
- * reverse-sync, which stay local-owner-only) also runs in `cast` mode, so
- * the backend knows what's next while casting too. Without it, a track
- * ending had nothing to auto-advance to server-side (see routes/stream.py's
- * _fire_track_end) and just sat there marked "ended" until this tab's own
- * JS ran again and issued a fresh /play — which stalls for as long as a
- * locked phone's browser tab keeps its JS suspended. /queue already leaves
- * local_owner_client_id/is_streaming untouched whenever active_delivery is
- * set (see routes/playback.py's push_queue), so pushing it while casting is
- * safe — it only ever updates queue/queue_index there.
+ * The queue-forwarding effect also runs in `cast` mode, so the backend knows
+ * what's next while casting too. Without it, a track ending had nothing to
+ * auto-advance to server-side (see routes/stream.py's _fire_track_end) and
+ * just sat there marked "ended" until this tab's own JS ran again and issued
+ * a fresh /play — which stalls for as long as a locked phone's browser tab
+ * keeps its JS suspended. /queue already leaves local_owner_client_id/
+ * is_streaming untouched whenever active_delivery is set (see
+ * routes/playback.py's push_queue), so pushing it while casting is safe —
+ * it only ever updates queue/queue_index there.
+ *
+ * The reverse-sync effect also runs a `cast`-specific branch: once the
+ * backend has auto-advanced on its own (same scenario as above), this tab's
+ * *local* queue pointer — what the now-playing display actually reads for
+ * anything beyond the bare title/artist/album/art a ConnectQueueItem
+ * carries (favorite, rating, play count, release date) — would otherwise
+ * stay stuck on whatever was playing when the phone locked. Play/pause and
+ * seek are deliberately NOT reverse-synced in `cast` mode — the player-bar's
+ * own play/pause already targets the device directly (use-connect-
+ * controls.ts), and elapsed position for the display already comes from
+ * connectStatus (see connect.store.ts's useConnectElapsed), not the local
+ * player.
  */
 export const useConnectLocalQueue = ({
     connectStatus,
     ensureConfigured,
     forceReconfigure,
+    lastAutoSentRef,
     mode,
 }: UseConnectLocalQueueArgs): void => {
     const { mediaPause, mediaPlay, mediaPlayByIndex, mediaSeekToTimestamp } = usePlayer();
@@ -130,10 +147,40 @@ export const useConnectLocalQueue = ({
         );
     }, [mode, status, ensureConfigured, forceReconfigure]);
 
-    // ── Reverse: apply a mirror tab's remote command to the real player ────────
+    // ── Reverse: apply a mirror tab's remote command to the real player, or
+    // keep the local queue pointer in sync with a server-side auto-advance ──
     useEffect(() => {
-        if (mode !== 'local-owner' || !connectStatus || !connectStatus.streaming) return;
+        if (!connectStatus || !connectStatus.streaming) return;
         if (Date.now() - lastLocalActionAtRef.current < REVERSE_SYNC_GRACE_MS) return;
+
+        if (mode === 'cast') {
+            if (
+                connectStatus.queue.length === 0 ||
+                connectStatus.queue_index === currentIndex ||
+                connectStatus.queue_index < 0 ||
+                connectStatus.queue_index >= queue.length
+            ) {
+                return;
+            }
+            const target = queue[connectStatus.queue_index];
+            // Mark it sent *before* mediaPlayByIndex() so the resulting
+            // currentSong change doesn't look unsent to the auto-forward
+            // effect in use-connect-playback.ts — the backend already
+            // started this track itself, a fresh /play would just restart
+            // the device on the same track it's already playing.
+            lastAutoSentRef.current = target._uniqueId;
+            mediaPlayByIndex(connectStatus.queue_index);
+            // mediaPlayByIndex() briefly flips local status to PLAYING —
+            // paused back off immediately, same belt-and-suspenders the
+            // auto-forward effect's own mediaNext()+mediaPause() pair
+            // relies on (see its comment) — the real safety net is
+            // use-connect-controls.ts's subscriber, this just narrows the
+            // window before it fires.
+            mediaPause();
+            return;
+        }
+
+        if (mode !== 'local-owner') return;
 
         const isPlaying = status === PlayerStatus.PLAYING;
         if (connectStatus.paused === isPlaying) {
@@ -153,5 +200,5 @@ export const useConnectLocalQueue = ({
             mediaSeekToTimestamp(connectStatus.elapsed);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mode, connectStatus, status, position, currentIndex, queue.length]);
+    }, [mode, connectStatus, status, position, currentIndex, queue, lastAutoSentRef]);
 };

@@ -184,7 +184,13 @@ export const useConnectSession = (): ConnectSession => {
     }, [isActive, localMode, currentSong]);
 
     // ── Cross-tab queue mirroring for local (non-cast) playback ────────────────
-    useConnectLocalQueue({ connectStatus, ensureConfigured, forceReconfigure, mode });
+    useConnectLocalQueue({
+        connectStatus,
+        ensureConfigured,
+        forceReconfigure,
+        lastAutoSentRef,
+        mode,
+    });
 
     // ── Active targets sync ───────────────────────────────────────────────────
     useEffect(() => {
