@@ -100,6 +100,7 @@ async def start_pairing(req: StartRequest):
                 status_code=404,
             )
 
+        pairing = None
         try:
             # AirPlay 2 devices (HomePod, Sonos Era) require Protocol.AirPlay (HAP).
             # Protocol.RAOP returns 470 "Connection Authorization Required" on AirPlay 2.
@@ -107,10 +108,14 @@ async def start_pairing(req: StartRequest):
             await pairing.begin()
         except Exception as e:
             logger.error(f"[pairing] Start failed for '{req.name}': {e}")
-            try:
-                await pairing.close()
-            except Exception:
-                pass
+            # pyatv.pair() itself can raise before returning anything, so
+            # `pairing` may still be None here — nothing was created that
+            # needs closing in that case.
+            if pairing is not None:
+                try:
+                    await pairing.close()
+                except Exception:
+                    pass
 
             # pyatv raises a bare KeyError (e.g. "<TlvValue.Salt: 2>") when the device's
             # pair-setup response is missing fields. This happens when the device still

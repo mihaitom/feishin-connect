@@ -17,6 +17,16 @@ Still a work in progress, and Electron-only for now. The goal is to eventually m
 default mobile-friendly page served by the Docker/web build too, instead of just a remote for
 the desktop app. If it turns out well, maybe upstream it as a PR to the original Feishin project.
 
+### Fixed
+- **Casting and cover art could silently fail to load for a Navidrome account whose username contains a space or a character like `&`** — the URL Connect builds to fetch audio or artwork wasn't encoding it properly.
+- **If a cast device briefly failed to start playback (dropped Wi-Fi, refused the connection), Connect kept showing it as playing anyway and left the device locked to that session** — nothing else could claim it until an explicit disconnect, even though nothing was actually playing.
+- **A failed or missing ffmpeg on the Connect backend could make it think a track had finished playing normally and skip straight to the next one**, instead of surfacing the actual failure — silently racing through the rest of the queue in seconds.
+- **Resuming or seeking on a device that had gone unreachable while paused could return a broken, unreadable server error** instead of a normal error message.
+- **Rapidly starting then stopping AirPlay playback on the same device could leave Connect connected to nothing, with no error shown** — a narrow timing gap between the two requests could close the wrong connection.
+
+### Internal
+- **The Navidrome/Jellyfin proxy now always releases its connection on failure**, instead of only for a few specific error types — a rare source of leaked connections on the busiest route in the backend.
+
 ## [0.6.6] - 2026-08-04
 
 Quick hotfix after finding someone's Feishin Connect instance just sitting wide open on the internet. Patched what I could on my end. Securing your own deployment is still on you, though.

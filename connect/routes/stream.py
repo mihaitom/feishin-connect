@@ -107,6 +107,16 @@ async def audio_stream(session_id: str = DEFAULT_SESSION_ID):
                 yield chunk
         except asyncio.CancelledError:
             raise  # client disconnected mid-stream — not a natural end
+        except Exception:
+            # ffmpeg itself failed (missing binary, crash, decode error —
+            # already logged by stream_tracks()). Not a natural end either:
+            # falling through to the track-end broadcast below would make
+            # the frontend think this track finished playing and advance the
+            # queue, when actually nothing (or only a partial track) played.
+            if session.state.clock.play_generation == my_generation:
+                session.state.is_streaming = False
+                await session.event_bus.broadcast(build_status_dict(session))
+            return
 
         # FFmpeg may stream faster than real-time because Sonos buffers aggressively.
         # Schedule completion in an independent task so Sonos closing the connection

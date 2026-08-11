@@ -92,7 +92,10 @@ async def stream_tracks(
             logger.error(
                 "[ffmpeg] ❌ ffmpeg not found — please install (apk add ffmpeg)"
             )
-            return
+            # Propagate (not a silent `return`) so stream_with_completion()
+            # doesn't mistake this for a normal, successful end-of-stream and
+            # fire a track-end broadcast — see its matching except clause.
+            raise
 
         except asyncio.CancelledError:
             logger.info(f"[ffmpeg] Stream cancelled (Track {i + 1})")
@@ -112,6 +115,9 @@ async def stream_tracks(
                     proc.kill()
                 except Exception:
                     pass
-            continue
+            # Propagate rather than `continue` — a genuine ffmpeg failure
+            # (crash, decode error) is not a natural end either; see the
+            # FileNotFoundError branch above for why this matters.
+            raise
 
     logger.info("[ffmpeg] All tracks streamed")

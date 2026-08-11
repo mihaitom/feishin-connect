@@ -2,7 +2,7 @@
 
 import hashlib
 import secrets
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlencode
 
 import httpx
 
@@ -75,15 +75,20 @@ class SubsonicClient:
         )
 
     def get_stream_url(self, track_id: str) -> str:
-        params = "&".join(f"{k}={v}" for k, v in self._auth_params().items())
-        return f"{self.internal_url}/rest/stream.view?id={track_id}&{params}"
+        # urlencode (not a naive f-string join) so auth param values with
+        # reserved characters (e.g. a username containing '&' or a space)
+        # can't corrupt the query string — see _auth_params()'s credential
+        # branch, which decodes the frontend's percent-encoded values via
+        # parse_qs and would otherwise hand back raw unsafe characters here.
+        params = {"id": track_id, **self._auth_params()}
+        return f"{self.internal_url}/rest/stream.view?{urlencode(params)}"
 
     def get_cover_art_url(self, cover_art_id: str, internal: bool = False) -> str | None:
         if not cover_art_id or not self.base_url:
             return None
         base = self.internal_url if internal else self.base_url
-        params = "&".join(f"{k}={v}" for k, v in self._auth_params().items())
-        return f"{base}/rest/getCoverArt.view?id={cover_art_id}&size=300&{params}"
+        params = {"id": cover_art_id, "size": 300, **self._auth_params()}
+        return f"{base}/rest/getCoverArt.view?{urlencode(params)}"
 
     def ping(self) -> bool:
         try:

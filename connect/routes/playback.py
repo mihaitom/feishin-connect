@@ -18,7 +18,7 @@ from core.session import (
     registry,
     require_authenticated_session,
 )
-from core.state import AppState, resolve_target, stream_url
+from core.state import AppState, list_target_pairs, resolve_target, stream_url
 
 logger = logging.getLogger("connect.playback")
 router = APIRouter(dependencies=[Depends(require_token)])
@@ -59,6 +59,16 @@ async def _claim_or_takeover(target, session: SessionState, force: bool) -> dict
         if owner_session:
             await displace_target(owner_session, target_type, name)
     return None
+
+
+async def _release_claims(target, session: SessionState) -> None:
+    """Release every (type, name) claim `target` holds for `session` — used
+    when a delivery's play() raises right after _claim_or_takeover() granted
+    the claim, so a failed dispatch doesn't leave the device locked to this
+    session (device_in_use for everyone else) with nothing actually playing
+    on it."""
+    for target_type, name in list_target_pairs(target):
+        await claims.release(target_type, name, session.session_id)
 
 
 # A device reporting itself this far *ahead* of the wall clock this early
@@ -227,36 +237,42 @@ async def play_tracks(
             return conflict
 
     st = session.state
+
+    if target:
+        # internal=True: fetched directly by the cast device, not the browser —
+        # see MediaClient.get_cover_art_url's docstring.
+        album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
+        if not _is_duplicate_dispatch(st, f"play:{target}:{track_id}"):
+            try:
+                await target.play(
+                    url,
+                    track.title,
+                    track.artist,
+                    album_art_url,
+                    float(track.duration),
+                    track.album,
+                )
+            except Exception as e:
+                logger.error(f"[play] Delivery error: {e}", exc_info=True)
+                # Dispatch never actually reached the device — release the
+                # claim just granted above instead of leaving it locked to
+                # this session (device_in_use for everyone else) with
+                # nothing actually playing on it.
+                await _release_claims(target, session)
+                return {"error": str(e)}
+
     st.current_track = track
     st.current_track_gain = req.gain
     st.is_streaming = True
     st.radio_info = None
     st.clock.start(start_position)
     st.track_ended = False
+    st.active_delivery = target
 
     if not target:
         logger.info(f"[play] No target — stream available at {url}")
-        st.active_delivery = None
         await session.event_bus.broadcast(build_status_dict(session))
         return {"status": "playing", "stream_url": url}
-
-    st.active_delivery = target
-    # internal=True: fetched directly by the cast device, not the browser —
-    # see MediaClient.get_cover_art_url's docstring.
-    album_art_url = session.media.get_cover_art_url(track.cover_art_id, internal=True)
-    if not _is_duplicate_dispatch(st, f"play:{target}:{track_id}"):
-        try:
-            await target.play(
-                url,
-                track.title,
-                track.artist,
-                album_art_url,
-                float(track.duration),
-                track.album,
-            )
-        except Exception as e:
-            logger.error(f"[play] Delivery error: {e}", exc_info=True)
-            return {"error": str(e)}
 
     asyncio.create_task(
         _apply_position_offset(session, target, st.clock.play_generation)
@@ -304,19 +320,23 @@ async def play_url(
         return conflict
 
     st = session.state
-    st.current_track = None
-    st.is_streaming = True
-    st.radio_info = {"title": req.title, "url": req.url}
-    st.clock.start()
-    st.track_ended = False
-    st.active_delivery = target
 
     if not _is_duplicate_dispatch(st, f"play-url:{target}:{req.url}"):
         try:
             await target.play(req.url, req.title)
         except Exception as e:
             logger.error(f"[play-url] Delivery error: {e}", exc_info=True)
+            # See /play's identical comment — don't leave the device locked
+            # to this session when nothing actually started playing on it.
+            await _release_claims(target, session)
             return {"error": str(e)}
+
+    st.current_track = None
+    st.is_streaming = True
+    st.radio_info = {"title": req.title, "url": req.url}
+    st.clock.start()
+    st.track_ended = False
+    st.active_delivery = target
 
     asyncio.create_task(
         _apply_position_offset(session, target, st.clock.play_generation)
@@ -369,7 +389,14 @@ async def resume_playback(session: SessionState = Depends(require_authenticated_
     if st.active_delivery:
         # Force a fresh /stream connection so FFmpeg applies the seek offset
         # (radio reconnects to its own URL instead — see _current_reconnect_args).
-        await st.active_delivery.play(*_current_reconnect_args(session))
+        try:
+            await st.active_delivery.play(*_current_reconnect_args(session))
+        except Exception as e:
+            # Match /play's contract: a JSON {"error": ...} body, not an
+            # unhandled exception surfacing as a 500 (the device may have
+            # gone unreachable while paused).
+            logger.error(f"[resume] Delivery error: {e}", exc_info=True)
+            return {"error": str(e)}
 
     await session.event_bus.broadcast(build_status_dict(session))
     return {"paused": False}
@@ -391,7 +418,12 @@ async def seek_playback(
     st.clock.seek_to(position)
 
     if not st.clock.is_paused and st.active_delivery:
-        await st.active_delivery.play(*_current_reconnect_args(session))
+        try:
+            await st.active_delivery.play(*_current_reconnect_args(session))
+        except Exception as e:
+            # See /resume's identical comment.
+            logger.error(f"[seek] Delivery error: {e}", exc_info=True)
+            return {"error": str(e)}
 
     logger.info(f"[seek] ⏩ {position:.1f}s")
     await session.event_bus.broadcast(build_status_dict(session))

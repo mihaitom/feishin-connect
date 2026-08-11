@@ -95,6 +95,15 @@ async def _proxy(request: Request, target: str) -> StreamingResponse | JSONRespo
     except httpx.TimeoutException as e:
         await client.aclose()
         return JSONResponse({"error": f"Navidrome Timeout: {e}"}, status_code=504)
+    except Exception as e:
+        # Catch-all so `client` (and its connection pool) always gets closed
+        # — httpx can raise several other exceptions here (RemoteProtocolError,
+        # ProtocolError, PoolTimeout, UnsupportedProtocol, ...) that aren't
+        # worth enumerating individually but would otherwise leak the client
+        # on every occurrence, on the single most frequently hit route in
+        # the backend (every proxied Navidrome API call goes through here).
+        await client.aclose()
+        return JSONResponse({"error": f"Proxy error: {e}"}, status_code=502)
 
     # If the origin sent a compressed body, httpx already decompressed it, so the
     # original Content-Length no longer matches — drop it. Otherwise (e.g. audio

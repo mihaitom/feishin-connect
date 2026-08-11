@@ -119,21 +119,6 @@ class AirPlayDelivery(BaseDelivery):
         # this parameter was added for (see dlna.py).
         import pyatv
 
-        async with self._play_lock:
-            await self.stop()
-
-            conf = await self._find_device()
-            loop = asyncio.get_event_loop()
-            self._atv = await pyatv.connect(conf, loop)
-
-        logger.info(
-            f"[AirPlay:{self.target}] connected — '{title}' (backend: {stream_url})"
-        )
-
-        # Capture connection at task-creation time so the finally block closes
-        # exactly this instance, even if self._atv is replaced by a concurrent play() call.
-        captured_atv = self._atv
-
         async def _stream():
             try:
                 if not stream_url:
@@ -187,7 +172,30 @@ class AirPlayDelivery(BaseDelivery):
                 except asyncio.CancelledError:
                     pass
 
-        self._stream_task = asyncio.create_task(_stream())
+        # Held from the previous stream's teardown through the new stream
+        # task's creation (not just the connect) — otherwise a stop() landing
+        # in the gap between releasing the lock and setting self._stream_task
+        # would see the *old* (already-stopped) task, skip cancelling it, and
+        # instead close self._atv — which by then is this call's freshly
+        # connected instance, not the old one. stop() acquires the same lock
+        # below, via _stop_locked(), so the two can never interleave.
+        async with self._play_lock:
+            await self._stop_locked()
+
+            conf = await self._find_device()
+            loop = asyncio.get_event_loop()
+            self._atv = await pyatv.connect(conf, loop)
+
+            logger.info(
+                f"[AirPlay:{self.target}] connected — '{title}' (backend: {stream_url})"
+            )
+
+            # Capture connection at task-creation time so the finally block
+            # closes exactly this instance, even if self._atv is replaced by
+            # a concurrent play() call.
+            captured_atv = self._atv
+            self._stream_task = asyncio.create_task(_stream())
+
         logger.info(f"[AirPlay:{self.target}] ✓ stream task started")
 
     async def pause(self) -> None:
@@ -198,6 +206,14 @@ class AirPlayDelivery(BaseDelivery):
         await self.stop()
 
     async def stop(self) -> None:
+        async with self._play_lock:
+            await self._stop_locked()
+
+    async def _stop_locked(self) -> None:
+        """stop()'s actual work, assuming _play_lock is already held —
+        called both by the public stop() and by play() to tear down the
+        previous stream before starting a new one. Never call this directly
+        without holding the lock (see play()'s comment for why)."""
         if self._stream_task and not self._stream_task.done():
             self._stream_task.cancel()
             try:
