@@ -13,10 +13,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **The phone remote can now discover, connect to, and control Feishin Connect casting** — Sonos, AirPlay, Chromecast, and DLNA devices can be selected (including several at once) and controlled directly from the phone, each with its own volume and mute, with the same confirmation prompt as the desktop app before taking over a device someone else is using.
 - **Tapping the album art on the phone remote's now-playing screen** opens a fullscreen view; tapping the volume icon mutes and unmutes, matching the desktop player.
 
-Still a work in progress, and Electron-only for now. The goal is to eventually make this the
-default mobile-friendly page served by the Docker/web build too, instead of just a remote for
-the desktop app. If it turns out well, maybe upstream it as a PR to the original Feishin project.
-
 ### Fixed
 - **Casting and cover art could silently fail to load for a Navidrome account whose username contains a space or a character like `&`** — the URL Connect builds to fetch audio or artwork wasn't encoding it properly.
 - **If a cast device briefly failed to start playback (dropped Wi-Fi, refused the connection), Connect kept showing it as playing anyway and left the device locked to that session** — nothing else could claim it until an explicit disconnect, even though nothing was actually playing.
