@@ -31,14 +31,15 @@
        not a mouse-driven UI, so the draggable region needs to be much
        taller than the visual bar. */
     padding: 0.5rem 0;
-
-    &:hover .bar {
-        background-color: var(--theme-colors-primary-filled);
-    }
 }
 
 .bar {
-    background-color: var(--theme-colors-foreground);
+    /* Always primary-colored, not just on `:hover` — this is a touch remote,
+       so there's effectively no persistent hover state to reveal it. Before
+       the CSS-module rewrite this had no override at all and fell through
+       to Mantine's own default (also the primary color); keep that look
+       explicit instead of the neutral foreground color it regressed to. */
+    background-color: var(--theme-colors-primary-filled);
     transition: background-color 0.2s ease-in-out;
 }
 

@@ -1,15 +1,18 @@
+import clsx from 'clsx';
 import formatDuration from 'format-duration';
 import debounce from 'lodash/debounce';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ArtworkFullscreen } from '/@/remote/components/artwork-fullscreen';
-import { Thumbnail } from '/@/remote/components/thumbnail';
+import { PlayerImage } from '/@/remote/components/player-image';
+import playerImageStyles from '/@/remote/components/player-image.module.css';
 import { WrappedSlider } from '/@/remote/components/wrapped-slider';
 import { useInfo, useSend } from '/@/remote/store';
 import { useRadioStatus } from '/@/remote/store/library';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { animationVariants } from '/@/shared/components/animations/animation-variants';
+import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Rating } from '/@/shared/components/rating/rating';
@@ -50,118 +53,128 @@ export const RemoteContainer = () => {
     const debouncedSetRating = debounce(setRating, 400);
 
     return (
-        <Stack gap="md" h="100dvh" p="md" w="100%">
-            <Group align="center" gap="sm" wrap="nowrap">
-                <button
-                    aria-label="Show full artwork"
-                    disabled={!artworkSrc}
-                    onClick={() => setIsArtworkOpen(true)}
-                    style={{
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: artworkSrc ? 'pointer' : 'default',
-                        flexShrink: 0,
-                        padding: 0,
-                    }}
-                    type="button"
-                >
-                    <Thumbnail
-                        fallbackIcon={
-                            <Icon
-                                icon={radioStatus.isActive ? 'emptyImage' : 'emptySongImage'}
-                                size={20}
-                            />
-                        }
-                        // Safe here specifically because this thumbnail always
-                        // shows the current song/radio's art — the server's
-                        // 'proxy' relay always answers with currentState.song's
-                        // image, so it can't be wired up generically on every
-                        // Thumbnail (track/queue/playlist/radio list rows show
-                        // arbitrary items, not the current one).
-                        onError={() => send({ event: 'proxy' })}
-                        size={64}
-                        src={artworkSrc}
-                    />
-                </button>
-                <AnimatePresence mode="wait">
-                    {radioStatus.isActive ? (
+        <Stack gap="md" h="100%" p="md" pb="xl" w="100%">
+            <button
+                aria-label="Show full artwork"
+                disabled={!artworkSrc}
+                onClick={() => setIsArtworkOpen(true)}
+                style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: artworkSrc ? 'pointer' : 'default',
+                    display: 'flex',
+                    // The one flexible element on this page — takes up
+                    // whatever's left after the text/buttons/sliders below
+                    // claim their natural size, instead of a fixed height
+                    // that can add up to taller than the screen and force a
+                    // scroll just to reach the volume slider.
+                    flex: 1,
+                    justifyContent: 'center',
+                    minHeight: 0,
+                    padding: 0,
+                    width: '100%',
+                }}
+                type="button"
+            >
+                {artworkSrc ? (
+                    <PlayerImage className={playerImageStyles.hero} src={artworkSrc} />
+                ) : (
+                    <Flex
+                        align="center"
+                        className={clsx(playerImageStyles.container, playerImageStyles.hero)}
+                        justify="center"
+                        style={{
+                            background: 'var(--theme-colors-surface)',
+                            color: 'var(--theme-colors-text-secondary)',
+                        }}
+                    >
+                        <Icon
+                            icon={radioStatus.isActive ? 'emptyImage' : 'emptySongImage'}
+                            size={48}
+                        />
+                    </Flex>
+                )}
+            </button>
+            <AnimatePresence mode="wait">
+                {radioStatus.isActive ? (
+                    <motion.div
+                        animate="show"
+                        exit="hidden"
+                        initial="hidden"
+                        key="radio"
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        variants={animationVariants.fadeInUp}
+                    >
+                        <Stack align="center" gap={4}>
+                            <Text isMuted size="sm">
+                                Radio
+                            </Text>
+                            <Text
+                                fw={700}
+                                size="xl"
+                                style={{
+                                    overflow: 'hidden',
+                                    textAlign: 'center',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {radioStatus.stationName}
+                            </Text>
+                        </Stack>
+                    </motion.div>
+                ) : (
+                    id && (
                         <motion.div
                             animate="show"
                             exit="hidden"
                             initial="hidden"
-                            key="radio"
-                            style={{ flex: 1, minWidth: 0 }}
+                            key={id}
                             transition={{ duration: 0.2, ease: 'easeOut' }}
                             variants={animationVariants.fadeInUp}
                         >
-                            <Stack gap={0}>
-                                <Text isMuted size="sm">
-                                    Radio
-                                </Text>
+                            <Stack align="center" gap={4}>
                                 <Text
                                     fw={700}
-                                    size="lg"
+                                    size="xl"
                                     style={{
                                         overflow: 'hidden',
+                                        textAlign: 'center',
                                         textOverflow: 'ellipsis',
                                         whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    {radioStatus.stationName}
+                                    {song.name}
+                                </Text>
+                                <Text
+                                    isMuted
+                                    size="md"
+                                    style={{
+                                        overflow: 'hidden',
+                                        textAlign: 'center',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {song.artistName}
+                                </Text>
+                                <Text
+                                    isMuted
+                                    size="sm"
+                                    style={{
+                                        overflow: 'hidden',
+                                        textAlign: 'center',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {song.album}
                                 </Text>
                             </Stack>
                         </motion.div>
-                    ) : (
-                        id && (
-                            <motion.div
-                                animate="show"
-                                exit="hidden"
-                                initial="hidden"
-                                key={id}
-                                style={{ flex: 1, minWidth: 0 }}
-                                transition={{ duration: 0.2, ease: 'easeOut' }}
-                                variants={animationVariants.fadeInUp}
-                            >
-                                <Stack gap={0}>
-                                    <Text
-                                        fw={700}
-                                        size="lg"
-                                        style={{
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    >
-                                        {song.name}
-                                    </Text>
-                                    <Text
-                                        isMuted
-                                        size="sm"
-                                        style={{
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    >
-                                        {song.album}
-                                    </Text>
-                                    <Text
-                                        isMuted
-                                        size="sm"
-                                        style={{
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    >
-                                        {song.artistName}
-                                    </Text>
-                                </Stack>
-                            </motion.div>
-                        )
-                    )}
-                </AnimatePresence>
-            </Group>
+                    )
+                )}
+            </AnimatePresence>
             {!radioStatus.isActive && id && (
                 <Group justify="space-between">
                     {song.releaseDate && (

@@ -18,3 +18,11 @@
     max-width: none;
     height: auto;
 }
+
+/* For a flex-grown parent slot instead of a fixed 40vh — lets the artwork
+   take up whatever space is actually left over after the rest of a page's
+   content (text, buttons, sliders) instead of a fixed size that can push
+   that content off-screen on shorter viewports. */
+.hero {
+    height: 100%;
+}

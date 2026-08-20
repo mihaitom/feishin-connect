@@ -2,6 +2,7 @@ import { Flex, Grid, Image } from '@mantine/core';
 
 import { ReconnectButton } from '/@/remote/components/buttons/reconnect-button';
 import { ThemeButton } from '/@/remote/components/buttons/theme-button';
+import { MiniPlayerBar } from '/@/remote/components/mini-player-bar';
 import { TabBar } from '/@/remote/components/tab-bar';
 import { RemoteRoutes } from '/@/remote/router';
 import { useConnected } from '/@/remote/store';
@@ -60,6 +61,7 @@ export const Shell = () => {
                     </Center>
                 )}
             </div>
+            {connected && <MiniPlayerBar />}
             {connected && (
                 <div
                     style={{
