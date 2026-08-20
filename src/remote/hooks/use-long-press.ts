@@ -26,6 +26,7 @@ export function useLongPress({
     onLongPress,
 }: UseLongPressOptions): UseLongPressHandlers {
     const timerRef = useRef<null | number>(null);
+    const releaseTimerRef = useRef<null | number>(null);
     const firedRef = useRef(false);
     const startPosRef = useRef<null | { x: number; y: number }>(null);
 
@@ -52,12 +53,20 @@ export function useLongPress({
         }
     }, []);
 
-    // Stops the whole gesture: cancels a pending timer and, since there's no
-    // longer a press to protect, stops watching for stray selections too.
+    const clearReleaseTimer = useCallback(() => {
+        if (releaseTimerRef.current !== null) {
+            window.clearTimeout(releaseTimerRef.current);
+            releaseTimerRef.current = null;
+        }
+    }, []);
+
+    // Stops the whole gesture: cancels any pending timer and, since there's
+    // no longer a press to protect, stops watching for stray selections too.
     const clear = useCallback(() => {
         clearTimer();
+        clearReleaseTimer();
         document.removeEventListener('selectionchange', handleSelectionChange);
-    }, [clearTimer, handleSelectionChange]);
+    }, [clearTimer, clearReleaseTimer, handleSelectionChange]);
 
     useEffect(() => clear, [clear]);
 
@@ -107,8 +116,23 @@ export function useLongPress({
     );
 
     const onPointerUp = useCallback(() => {
-        clear();
-    }, [clear]);
+        clearTimer();
+        window.getSelection()?.removeAllRanges();
+
+        // iOS Safari can finalize the native long-press-to-select selection
+        // right as the finger lifts, rendering the blue handles/callout menu
+        // from a `selectionchange` that only fires after this handler already
+        // ran. Tearing the listener down synchronously here loses that race —
+        // the longer the press was held, the more likely it is that the
+        // native gesture is still committing. Give it a brief grace period
+        // past release before actually stopping the watch.
+        clearReleaseTimer();
+        releaseTimerRef.current = window.setTimeout(() => {
+            releaseTimerRef.current = null;
+            window.getSelection()?.removeAllRanges();
+            document.removeEventListener('selectionchange', handleSelectionChange);
+        }, 300);
+    }, [clearTimer, clearReleaseTimer, handleSelectionChange]);
 
     const onClickHandler = useCallback(
         (event: React.MouseEvent) => {
