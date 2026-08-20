@@ -31,15 +31,28 @@
        not a mouse-driven UI, so the draggable region needs to be much
        taller than the visual bar. */
     padding: 0.5rem 0;
+
+    /* Mirrors the desktop playerbar slider's own :hover/:focus rule
+       (playerbar-slider.module.css) exactly, plus :active — the desktop
+       resting state is neutral, only turning primary while you're actually
+       engaging it, and :active is the touch equivalent of :hover for that
+       (a touch-and-hold/drag does trigger :active, unlike :hover, which
+       needs a pointing device that can move without touching). */
+    &:active,
+    &:focus,
+    &:hover {
+        .bar {
+            background-color: var(--theme-colors-primary-filled);
+        }
+
+        .thumb {
+            opacity: 1;
+        }
+    }
 }
 
 .bar {
-    /* Always primary-colored, not just on `:hover` — this is a touch remote,
-       so there's effectively no persistent hover state to reveal it. Before
-       the CSS-module rewrite this had no override at all and fell through
-       to Mantine's own default (also the primary color); keep that look
-       explicit instead of the neutral foreground color it regressed to. */
-    background-color: var(--theme-colors-primary-filled);
+    background-color: var(--theme-colors-foreground);
     transition: background-color 0.2s ease-in-out;
 }
 
@@ -51,15 +64,19 @@
     width: var(--thumb-size, 1.3rem);
     height: var(--thumb-size, 1.3rem);
     border-color: var(--theme-colors-primary-filled);
-
-    /* Desktop only reveals this on hover/focus — barely reachable on a
-       touchscreen, so it stays visible unconditionally here. */
-    opacity: 1;
+    opacity: 0;
     transition: opacity 0.2s ease-in-out;
 }
 
 .slider-label {
-    padding: 0 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
+    /* Matches the desktop playerbar slider's own .label bubble
+       (playerbar-slider.module.css) — was plain unstyled text here before,
+       with no background/shadow to read as a floating tooltip. */
+    max-width: 200px;
+    padding: var(--theme-spacing-sm) var(--theme-spacing-md);
+    font-size: var(--theme-font-size-md);
+    font-weight: 550;
+    color: var(--theme-colors-surface-foreground);
+    background: var(--theme-colors-surface);
+    box-shadow: 4px 4px 10px 0 rgb(0 0 0 / 20%);
 }

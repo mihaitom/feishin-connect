@@ -137,6 +137,15 @@ let currentRadioStatus: ServerRadioStatus['data'] = { isActive: false };
 // until the renderer's first push arrives, since assuming "don't ask" would
 // be the wrong direction to fail in.
 let confirmQueueChanges = true;
+// Null until the renderer's first push (use-remote-settings-push.tsx)
+// arrives — that computation needs generateColors() (@mantine/colors-
+// generator), which is a browser-context-only dependency this main process
+// can't safely run itself, so there's no meaningful default to fall back to
+// here. Until then, the phone just keeps whatever primary color its own
+// static theme CSS already set — close enough for the brief window before
+// this lands, and the effective color only actually diverges from that for
+// a desktop install that has customized its accent/shade settings anyway.
+let currentAccentColor: null | { dark: string; light: string } = null;
 
 // Only ever called once `client.auth` is true (either immediately, for an
 // unprotected server, or from the `authenticate` message handler) — sending
@@ -151,6 +160,9 @@ function sendInitialState(client: StatefulWebSocket): void {
     client.send(
         JSON.stringify({ data: confirmQueueChanges, event: 'confirm-queue-changes-setting' }),
     );
+    if (currentAccentColor) {
+        client.send(JSON.stringify({ data: currentAccentColor, event: 'accent-color' }));
+    }
 }
 
 // Tracks/playlists/radio browsing is request/response, not broadcast — the
@@ -884,6 +896,11 @@ ipcMain.on('update-radio-status', (_event, status: ServerRadioStatus['data']) =>
 ipcMain.on('update-confirm-queue-changes-setting', (_event, enabled: boolean) => {
     confirmQueueChanges = enabled;
     broadcast({ data: enabled, event: 'confirm-queue-changes-setting' });
+});
+
+ipcMain.on('update-accent-color', (_event, color: { dark: string; light: string }) => {
+    currentAccentColor = color;
+    broadcast({ data: color, event: 'accent-color' });
 });
 
 if (mprisPlayer) {

@@ -100,6 +100,10 @@ const updateConfirmQueueChangesSetting = (enabled: boolean) => {
     ipcRenderer.send('update-confirm-queue-changes-setting', enabled);
 };
 
+const updateAccentColor = (color: { dark: string; light: string }) => {
+    ipcRenderer.send('update-accent-color', color);
+};
+
 const requestFavorite = (
     cb: (data: { favorite: boolean; id: string; serverId: string }) => void,
 ) => {
@@ -206,6 +210,7 @@ export const remote = {
     respondTracks,
     setRemoteEnabled,
     setRemotePort,
+    updateAccentColor,
     updateConfirmQueueChangesSetting,
     updateFavorite,
     updatePassword,

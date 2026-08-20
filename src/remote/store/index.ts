@@ -17,6 +17,13 @@ export interface SettingsSlice extends SettingsState {
 }
 
 interface SettingsState {
+    // The resolved --theme-colors-primary for Default Dark/Light, mirrored
+    // from the desktop's actual accent/shade settings — null until the
+    // server's first push arrives, since this app runs as its own isolated
+    // browser bundle with no other way to see those settings (see
+    // use-remote-settings-push.tsx). Applied in app.tsx; while null, the
+    // static theme CSS's own default primary color is what shows.
+    accentColor: null | { dark: string; light: string };
     // Set only for the codeless/4004 "wrong credentials or auth timed out"
     // close — retrying automatically would just fail again forever, so this
     // is surfaced distinctly instead of looking like an ordinary drop.
@@ -38,6 +45,7 @@ interface StatefulWebSocket extends WebSocket {
 }
 
 const initialState: SettingsState = {
+    accentColor: null,
     authFailed: false,
     confirmQueueChanges: true,
     connected: false,
@@ -122,6 +130,12 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                 logger.debug('WebSocket message received', { data, event });
 
                                 switch (event) {
+                                    case 'accent-color': {
+                                        set((state) => {
+                                            state.accentColor = data;
+                                        });
+                                        break;
+                                    }
                                     case 'albums-response': {
                                         useRemoteLibraryStore
                                             .getState()
@@ -393,6 +407,8 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
         },
     ),
 );
+
+export const useAccentColor = () => useRemoteStore((state) => state.accentColor);
 
 export const useAuthFailed = () => useRemoteStore((state) => state.authFailed);
 

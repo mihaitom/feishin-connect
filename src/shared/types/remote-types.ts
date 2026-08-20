@@ -175,6 +175,11 @@ export interface RemoteTrackItem {
     name: string;
 }
 
+export interface ServerAccentColor {
+    data: { dark: string; light: string };
+    event: 'accent-color';
+}
+
 export interface ServerAlbumsResponse {
     data: { hasMore: boolean; items: RemoteAlbumItem[]; requestId: string };
     event: 'albums-response';
@@ -191,6 +196,7 @@ export interface ServerError {
 }
 
 export type ServerEvent =
+    | ServerAccentColor
     | ServerAlbumsResponse
     | ServerConfirmQueueChangesSetting
     | ServerError
