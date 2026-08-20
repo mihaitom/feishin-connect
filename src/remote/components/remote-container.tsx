@@ -113,6 +113,7 @@ export const RemoteContainer = () => {
                                 fw={700}
                                 size="xl"
                                 style={{
+                                    maxWidth: '100%',
                                     overflow: 'hidden',
                                     textAlign: 'center',
                                     textOverflow: 'ellipsis',
@@ -138,6 +139,7 @@ export const RemoteContainer = () => {
                                     fw={700}
                                     size="xl"
                                     style={{
+                                        maxWidth: '100%',
                                         overflow: 'hidden',
                                         textAlign: 'center',
                                         textOverflow: 'ellipsis',
@@ -150,6 +152,7 @@ export const RemoteContainer = () => {
                                     isMuted
                                     size="md"
                                     style={{
+                                        maxWidth: '100%',
                                         overflow: 'hidden',
                                         textAlign: 'center',
                                         textOverflow: 'ellipsis',
@@ -162,6 +165,7 @@ export const RemoteContainer = () => {
                                     isMuted
                                     size="sm"
                                     style={{
+                                        maxWidth: '100%',
                                         overflow: 'hidden',
                                         textAlign: 'center',
                                         textOverflow: 'ellipsis',

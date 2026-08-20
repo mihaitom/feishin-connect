@@ -17,6 +17,10 @@ export interface SettingsSlice extends SettingsState {
 }
 
 interface SettingsState {
+    // Set only for the codeless/4004 "wrong credentials or auth timed out"
+    // close — retrying automatically would just fail again forever, so this
+    // is surfaced distinctly instead of looking like an ordinary drop.
+    authFailed: boolean;
     connected: boolean;
     info: Omit<SongUpdateSocket, 'currentTime'>;
     isDark: boolean;
@@ -28,10 +32,25 @@ interface StatefulWebSocket extends WebSocket {
 }
 
 const initialState: SettingsState = {
+    authFailed: false,
     connected: false,
     info: {},
     isDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
 };
+
+// Close codes that mean "don't retry automatically" — either something else
+// already handles it (4001 self-initiated, 4002/4003 trigger a reload),
+// there's deliberately nothing to reconnect to (4000, server shut down), or
+// retrying wouldn't help (4004, bad credentials). Anything else (in
+// particular the heartbeat timeout's codeless/1006 close) is a transient
+// drop worth retrying on its own, the way beacon's SSE-based remote does.
+const NO_AUTO_RETRY_CODES = new Set([4000, 4001, 4002, 4003, 4004]);
+const RECONNECT_DELAY_MS = 2000;
+
+// Not part of the store's reactive state — nothing renders off "is a retry
+// pending", and Immer would only complicate scheduling/cancelling a plain
+// timer handle for no benefit.
+let retryTimer: null | ReturnType<typeof setTimeout> = null;
 
 export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
     persist(
@@ -40,6 +59,17 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                 actions: {
                     reconnect: async () => {
                         logger.info('Reconnect initiated');
+
+                        // A manual tap (or a fresh auto-retry firing) always
+                        // supersedes whatever retry was still pending —
+                        // without this, a manual reconnect during the 2s
+                        // wait would leave the old timer to fire later and
+                        // open a second, overlapping connection attempt.
+                        if (retryTimer !== null) {
+                            clearTimeout(retryTimer);
+                            retryTimer = null;
+                        }
+
                         const existing = get().socket;
 
                         if (existing) {
@@ -248,7 +278,7 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                         }),
                                     );
                                 }
-                                set({ connected: true });
+                                set({ authFailed: false, connected: true });
                             });
 
                             socket.addEventListener('close', (reason) => {
@@ -269,6 +299,12 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                         message: 'Feishin remote server is down',
                                         title: 'Connection closed',
                                     });
+                                } else if (reason.code === 4004) {
+                                    logger.warn('Authentication failed');
+                                    toast.error({
+                                        message: 'Check the remote password and reconnect manually',
+                                        title: 'Authentication failed',
+                                    });
                                 } else if (reason.code !== 4001 && !socket.natural) {
                                     logger.error('Socket closed unexpectedly', {
                                         code: reason.code,
@@ -281,7 +317,21 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                 }
 
                                 if (!socket.natural) {
-                                    set({ connected: false, info: {} });
+                                    set({
+                                        authFailed: reason.code === 4004,
+                                        connected: false,
+                                        info: {},
+                                    });
+
+                                    if (!NO_AUTO_RETRY_CODES.has(reason.code)) {
+                                        logger.debug('Scheduling automatic reconnect', {
+                                            delayMs: RECONNECT_DELAY_MS,
+                                        });
+                                        retryTimer = setTimeout(() => {
+                                            retryTimer = null;
+                                            get().actions.reconnect();
+                                        }, RECONNECT_DELAY_MS);
+                                    }
                                 }
                             });
 
@@ -330,6 +380,8 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
         },
     ),
 );
+
+export const useAuthFailed = () => useRemoteStore((state) => state.authFailed);
 
 export const useConnected = () => useRemoteStore((state) => state.connected);
 

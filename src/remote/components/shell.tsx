@@ -5,10 +5,12 @@ import { ThemeButton } from '/@/remote/components/buttons/theme-button';
 import { MiniPlayerBar } from '/@/remote/components/mini-player-bar';
 import { TabBar } from '/@/remote/components/tab-bar';
 import { RemoteRoutes } from '/@/remote/router';
-import { useConnected } from '/@/remote/store';
+import { useAuthFailed, useConnected } from '/@/remote/store';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
 import { Spinner } from '/@/shared/components/spinner/spinner';
+import { Stack } from '/@/shared/components/stack/stack';
+import { Text } from '/@/shared/components/text/text';
 
 // A plain flex column instead of Mantine's <AppShell> — AppShell's header/
 // footer are `position: fixed` with Main just carrying compensating padding,
@@ -20,14 +22,23 @@ import { Spinner } from '/@/shared/components/spinner/spinner';
 // bookkeeping against Mantine's internal CSS variables required.
 export const Shell = () => {
     const connected = useConnected();
+    const authFailed = useAuthFailed();
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', width: '100vw' }}>
             <div
                 style={{
-                    background: 'var(--theme-colors-surface)',
+                    // Tinted, not solid — a full error-color header would
+                    // fight with the logo/icons sitting on top of it for
+                    // contrast. color-mix keeps it readably close to the
+                    // normal surface color while still reading as "attention
+                    // needed" at a glance.
+                    background: connected
+                        ? 'var(--theme-colors-surface)'
+                        : 'color-mix(in srgb, var(--theme-colors-state-error) 25%, var(--theme-colors-surface))',
                     borderBottom: '1px solid var(--theme-colors-border)',
                     flexShrink: 0,
+                    transition: 'background 200ms ease',
                 }}
             >
                 <Grid px="md" py="sm">
@@ -46,7 +57,10 @@ export const Shell = () => {
                     </Grid.Col>
                     <Grid.Col span={8}>
                         <Group gap="sm" justify="flex-end" wrap="nowrap">
-                            <ReconnectButton />
+                            {/* Only shown when there's actually something to
+                                do — auto-retry (store/index.ts) already
+                                covers a plain transient drop on its own. */}
+                            {!connected && <ReconnectButton />}
                             <ThemeButton />
                         </Group>
                     </Grid.Col>
@@ -55,6 +69,21 @@ export const Shell = () => {
             <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
                 {connected ? (
                     <RemoteRoutes />
+                ) : authFailed ? (
+                    // Distinct from the generic spinner below — retrying
+                    // automatically here would just fail again forever
+                    // (store/index.ts skips scheduling a retry for this
+                    // exact reason), so say so instead of spinning silently.
+                    <Center h="100%" p="md" w="100%">
+                        <Stack align="center" gap="xs">
+                            <Text fw={600} ta="center">
+                                Authentication failed
+                            </Text>
+                            <Text isMuted size="sm" ta="center">
+                                Check the remote password and reconnect manually.
+                            </Text>
+                        </Stack>
+                    </Center>
                 ) : (
                     <Center h="100%" w="100%">
                         <Spinner />

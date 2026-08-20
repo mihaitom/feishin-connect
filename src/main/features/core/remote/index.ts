@@ -429,7 +429,10 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                     authFail = setTimeout(() => {
                         if (!ws.auth) {
                             log.warn('Remote client auth timeout');
-                            ws.close();
+                            // Distinct code so the client can tell this apart
+                            // from a transient network drop and not retry
+                            // automatically forever.
+                            ws.close(4004, 'Authentication timed out');
                         }
                     }, 10000) as unknown as number;
                 }
@@ -458,7 +461,7 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                                     sendInitialState(ws);
                                 } else {
                                     log.warn('Remote client auth failed');
-                                    ws.close();
+                                    ws.close(4004, 'Invalid credentials');
                                 }
 
                                 clearTimeout(authFail);
