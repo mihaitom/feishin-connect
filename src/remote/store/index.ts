@@ -397,13 +397,31 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                 // artwork toggle button was replaced by tap-to-fullscreen —
                 // strip the now-meaningless key instead of leaving it to
                 // linger forever in localStorage.
+                // v8 -> v9: only `isDark` should ever have been persisted
+                // (see `partialize` below) — normalize any older snapshot
+                // down to just that. In particular, older builds persisted
+                // `socket` too: JSON.stringify reduces a live WebSocket to
+                // just its own `natural` flag (methods live on the
+                // prototype, not as own properties), so a stale one
+                // rehydrated back into state.socket on this load is a
+                // plain, methodless object masquerading as a socket — the
+                // next `send()` call throws "send is not a function" the
+                // moment reconnect()'s real socket gets raced/overwritten
+                // by it.
                 if (persistedState && typeof persistedState === 'object') {
-                    delete (persistedState as Record<string, unknown>).showImage;
+                    const state = persistedState as Record<string, unknown>;
+                    return { isDark: state.isDark };
                 }
                 return persistedState;
             },
             name: 'store_settings',
-            version: 8,
+            // Only `isDark` is a genuine user preference worth surviving a
+            // reload — everything else here is either a live connection
+            // object or state the server re-pushes on every connect anyway
+            // (connected/authFailed/confirmQueueChanges/accentColor/info),
+            // and must never be loaded stale from a previous session.
+            partialize: (state) => ({ isDark: state.isDark }),
+            version: 9,
         },
     ),
 );

@@ -405,6 +405,21 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                         default: {
                             if (req.url?.startsWith('/worker.js')) {
                                 await serveFile(req, 'worker', 'js', res);
+                            } else if (req.method === 'GET' || req.method === 'HEAD') {
+                                // SPA fallback, not a 404 — HashRouter keeps
+                                // every route in the URL *fragment*
+                                // (`#/library`), which never reaches this
+                                // server on a normal reload, so in practice
+                                // this only matters when a client sends
+                                // something else entirely (a stray query
+                                // string, or a mobile browser/WebView that
+                                // — unlike the spec — includes the fragment
+                                // in the request). Either way, index.html is
+                                // the right response: the client-side router
+                                // reads the real route from location.hash
+                                // itself once it mounts, same as it does for
+                                // "/" today.
+                                await serveFile(req, 'index', 'html', res);
                             } else {
                                 res.statusCode = 404;
                                 res.setHeader('Content-Type', 'text/plain');
