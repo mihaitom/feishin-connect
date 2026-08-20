@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { getItemImageUrl } from '/@/renderer/components/item-image/item-image';
+import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { radioQueries } from '/@/renderer/features/radio/api/radio-api';
@@ -15,6 +16,8 @@ import { useAuthStore } from '/@/renderer/store/auth.store';
 import { usePlayerStoreBase } from '/@/renderer/store/player.store';
 import { useRemoteSettings } from '/@/renderer/store/settings.store';
 import {
+    Album,
+    AlbumListSort,
     LibraryItem,
     Played,
     Playlist,
@@ -24,7 +27,12 @@ import {
     SongListSort,
     SortOrder,
 } from '/@/shared/types/domain-types';
-import { RemotePlaylistItem, RemoteRadioItem, RemoteTrackItem } from '/@/shared/types/remote-types';
+import {
+    RemoteAlbumItem,
+    RemotePlaylistItem,
+    RemoteRadioItem,
+    RemoteTrackItem,
+} from '/@/shared/types/remote-types';
 import { Play } from '/@/shared/types/types';
 
 const remote = isElectron() ? window.api.remote : null;
@@ -88,6 +96,24 @@ const cacheAndMapTracks = (songs: Song[]): RemoteTrackItem[] =>
         cacheTrack(song);
         return toRemoteTrackItem(song);
     });
+
+const toRemoteAlbumItem = (album: Album): RemoteAlbumItem => ({
+    albumArtistName: album.albumArtistName,
+    duration: album.duration,
+    id: album.id,
+    imageUrl:
+        getItemImageUrl({
+            id: album.id,
+            imageUrl: album.imageUrl,
+            itemType: LibraryItem.ALBUM,
+            serverId: album._serverId,
+            type: 'itemCard',
+            useRemoteUrl: true,
+        }) ?? null,
+    name: album.name,
+    releaseYear: album.releaseYear,
+    songCount: album.songCount,
+});
 
 const toRemotePlaylistItem = (playlist: Playlist): RemotePlaylistItem => ({
     duration: playlist.duration,
@@ -165,6 +191,40 @@ export const useRemoteLibrary = () => {
                 );
             } catch {
                 remote?.respondTracks(requestId, false, []);
+            }
+        });
+
+        remote.requestAlbums(async ({ limit, requestId, searchTerm, startIndex }) => {
+            const server = useAuthStore.getState().currentServer;
+            if (!server) {
+                remote?.respondAlbums(requestId, false, []);
+                return;
+            }
+
+            const pageSize = limit ?? DEFAULT_PAGE_SIZE;
+            try {
+                // Unlike songs, Subsonic's getAlbumList2 is a real generic
+                // listing even without a search term — no random-batch
+                // fallback needed here.
+                const { items } = await queryClient.fetchQuery(
+                    albumQueries.list({
+                        query: {
+                            limit: pageSize,
+                            searchTerm,
+                            sortBy: AlbumListSort.NAME,
+                            sortOrder: SortOrder.ASC,
+                            startIndex: startIndex ?? 0,
+                        },
+                        serverId: server.id,
+                    }),
+                );
+                remote?.respondAlbums(
+                    requestId,
+                    items.length === pageSize,
+                    items.map(toRemoteAlbumItem),
+                );
+            } catch {
+                remote?.respondAlbums(requestId, false, []);
             }
         });
 
@@ -290,6 +350,12 @@ export const useRemoteLibrary = () => {
             addToQueueByFetch(server.id, [id], LibraryItem.PLAYLIST, playType ?? Play.NOW);
         });
 
+        remote.requestPlayAlbum(({ id, playType }) => {
+            const server = useAuthStore.getState().currentServer;
+            if (!server) return;
+            addToQueueByFetch(server.id, [id], LibraryItem.ALBUM, playType ?? Play.NOW);
+        });
+
         remote.requestAddToPlaylist(async ({ playlistId, songId }) => {
             const server = useAuthStore.getState().currentServer;
             if (!server) return;
@@ -356,11 +422,13 @@ export const useRemoteLibrary = () => {
 
         return () => {
             ipc?.removeAllListeners('request-tracks');
+            ipc?.removeAllListeners('request-albums');
             ipc?.removeAllListeners('request-playlists');
             ipc?.removeAllListeners('request-radio');
             ipc?.removeAllListeners('request-play-track');
             ipc?.removeAllListeners('request-play-track-radio');
             ipc?.removeAllListeners('request-play-playlist');
+            ipc?.removeAllListeners('request-play-album');
             ipc?.removeAllListeners('request-play-radio');
             ipc?.removeAllListeners('request-add-to-playlist');
             ipc?.removeAllListeners('request-remove-from-queue');

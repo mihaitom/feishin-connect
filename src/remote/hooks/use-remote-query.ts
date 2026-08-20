@@ -11,7 +11,7 @@ interface RemoteQueryResponse<TItem> {
 }
 
 interface UseRemoteQueryOptions<TItem> {
-    event: 'playlists-request' | 'radio-request' | 'tracks-request';
+    event: 'albums-request' | 'playlists-request' | 'radio-request' | 'tracks-request';
     pageSize?: number;
     // Radio has no search/pagination — a single one-shot fetch on mount.
     paginated?: boolean;
@@ -20,7 +20,7 @@ interface UseRemoteQueryOptions<TItem> {
 }
 
 /**
- * Shared request/response plumbing for Tracks/Playlists/Radio browsing —
+ * Shared request/response plumbing for Tracks/Albums/Playlists/Radio browsing —
  * generates a requestId per request, discards responses that don't match the
  * most recently issued request for the current search/page (so a slow
  * response to an earlier keystroke can't clobber a newer search's results),

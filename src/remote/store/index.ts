@@ -85,6 +85,16 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                 logger.debug('WebSocket message received', { data, event });
 
                                 switch (event) {
+                                    case 'albums-response': {
+                                        useRemoteLibraryStore
+                                            .getState()
+                                            .actions.setAlbumsResponse(
+                                                data.requestId,
+                                                data.hasMore,
+                                                data.items,
+                                            );
+                                        break;
+                                    }
                                     case 'error': {
                                         logger.error('WebSocket error event', { data });
                                         toast.error({ message: data, title: 'Socket error' });

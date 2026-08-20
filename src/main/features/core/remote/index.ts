@@ -15,6 +15,7 @@ import log from '/@/main/logger';
 import { QueueSong } from '/@/shared/types/domain-types';
 import {
     ClientEvent,
+    RemoteAlbumItem,
     RemotePlaylistItem,
     RemoteQueueItem,
     RemoteRadioItem,
@@ -475,6 +476,17 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                                 });
                                 break;
                             }
+                            case 'albums-request': {
+                                const { limit, requestId, searchTerm, startIndex } = json;
+                                rememberRequestClient(requestId, ws);
+                                getMainWindow()?.webContents.send('request-albums', {
+                                    limit,
+                                    requestId,
+                                    searchTerm,
+                                    startIndex,
+                                });
+                                break;
+                            }
                             case 'favorite': {
                                 const { favorite, id } = json;
                                 if (id && id === currentState.song?.id) {
@@ -496,6 +508,13 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                             }
                             case 'play': {
                                 getMainWindow()?.webContents.send('renderer-player-play');
+                                break;
+                            }
+                            case 'play-album': {
+                                getMainWindow()?.webContents.send('request-play-album', {
+                                    id: json.id,
+                                    playType: json.playType,
+                                });
                                 break;
                             }
                             case 'play-playlist': {
@@ -816,6 +835,14 @@ ipcMain.on(
     (_event, requestId: string, hasMore: boolean, items: RemoteTrackItem[]) => {
         const client = resolveRequestClient(requestId);
         if (client) send({ client, data: { hasMore, items, requestId }, event: 'tracks-response' });
+    },
+);
+
+ipcMain.on(
+    'respond-albums',
+    (_event, requestId: string, hasMore: boolean, items: RemoteAlbumItem[]) => {
+        const client = resolveRequestClient(requestId);
+        if (client) send({ client, data: { hasMore, items, requestId }, event: 'albums-response' });
     },
 );
 

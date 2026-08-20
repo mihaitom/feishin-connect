@@ -7,6 +7,10 @@ export interface ClientAddToPlaylist {
     songId: string;
 }
 
+export interface ClientAlbumsRequest extends RemoteListRequest {
+    event: 'albums-request';
+}
+
 export interface ClientAuth {
     event: 'authenticate';
     header: string;
@@ -14,8 +18,10 @@ export interface ClientAuth {
 
 export type ClientEvent =
     | ClientAddToPlaylist
+    | ClientAlbumsRequest
     | ClientAuth
     | ClientFavorite
+    | ClientPlayAlbum
     | ClientPlaylistsRequest
     | ClientPlayPlaylist
     | ClientPlayRadio
@@ -35,6 +41,12 @@ export interface ClientFavorite {
     event: 'favorite';
     favorite: boolean;
     id: string;
+}
+
+export interface ClientPlayAlbum {
+    event: 'play-album';
+    id: string;
+    playType?: Play;
 }
 
 export interface ClientPlaylistsRequest extends RemoteListRequest {
@@ -109,6 +121,16 @@ export interface ClientVolume {
     volume: number;
 }
 
+export interface RemoteAlbumItem {
+    albumArtistName: string;
+    duration: null | number;
+    id: string;
+    imageUrl: null | string;
+    name: string;
+    releaseYear: null | number;
+    songCount: null | number;
+}
+
 export interface RemoteListRequest {
     limit?: number;
     requestId: string;
@@ -153,12 +175,18 @@ export interface RemoteTrackItem {
     name: string;
 }
 
+export interface ServerAlbumsResponse {
+    data: { hasMore: boolean; items: RemoteAlbumItem[]; requestId: string };
+    event: 'albums-response';
+}
+
 export interface ServerError {
     data: string;
     event: 'error';
 }
 
 export type ServerEvent =
+    | ServerAlbumsResponse
     | ServerError
     | ServerFavorite
     | ServerPlaylistsResponse

@@ -2,6 +2,7 @@ import { ipcRenderer } from 'electron';
 
 import { QueueSong } from '/@/shared/types/domain-types';
 import {
+    RemoteAlbumItem,
     RemotePlaylistItem,
     RemoteQueueItem,
     RemoteRadioItem,
@@ -21,6 +22,10 @@ const requestTracks = (cb: (data: RemoteListRequestPayload) => void) => {
     ipcRenderer.on('request-tracks', (_, data) => cb(data));
 };
 
+const requestAlbums = (cb: (data: RemoteListRequestPayload) => void) => {
+    ipcRenderer.on('request-albums', (_, data) => cb(data));
+};
+
 const requestPlaylists = (cb: (data: RemoteListRequestPayload) => void) => {
     ipcRenderer.on('request-playlists', (_, data) => cb(data));
 };
@@ -35,6 +40,10 @@ const requestPlayTrack = (cb: (data: { id: string; playType?: Play }) => void) =
 
 const requestPlayTrackRadio = (cb: (data: { id: string; playType: Play }) => void) => {
     ipcRenderer.on('request-play-track-radio', (_, data) => cb(data));
+};
+
+const requestPlayAlbum = (cb: (data: { id: string; playType?: Play }) => void) => {
+    ipcRenderer.on('request-play-album', (_, data) => cb(data));
 };
 
 const requestPlayPlaylist = (cb: (data: { id: string; playType?: Play }) => void) => {
@@ -65,6 +74,10 @@ const requestReorderQueue = (
 
 const respondTracks = (requestId: string, hasMore: boolean, items: RemoteTrackItem[]) => {
     ipcRenderer.send('respond-tracks', requestId, hasMore, items);
+};
+
+const respondAlbums = (requestId: string, hasMore: boolean, items: RemoteAlbumItem[]) => {
+    ipcRenderer.send('respond-albums', requestId, hasMore, items);
 };
 
 const respondPlaylists = (requestId: string, hasMore: boolean, items: RemotePlaylistItem[]) => {
@@ -166,7 +179,9 @@ const updatePosition = (timeSec: number) => {
 
 export const remote = {
     requestAddToPlaylist,
+    requestAlbums,
     requestFavorite,
+    requestPlayAlbum,
     requestPlaylists,
     requestPlayPlaylist,
     requestPlayRadio,
@@ -181,6 +196,7 @@ export const remote = {
     requestSeek,
     requestTracks,
     requestVolume,
+    respondAlbums,
     respondPlaylists,
     respondRadio,
     respondTracks,

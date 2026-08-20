@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import {
+    RemoteAlbumItem,
     RemotePlaylistItem,
     RemoteQueueItem,
     RemoteRadioItem,
@@ -23,6 +24,7 @@ interface LibraryListState<T> {
 
 interface LibrarySlice extends LibraryState {
     actions: {
+        setAlbumsResponse: (requestId: string, hasMore: boolean, items: RemoteAlbumItem[]) => void;
         setPlaylistsResponse: (
             requestId: string,
             hasMore: boolean,
@@ -36,6 +38,7 @@ interface LibrarySlice extends LibraryState {
 }
 
 interface LibraryState {
+    albums: LibraryListState<RemoteAlbumItem>;
     playlists: LibraryListState<RemotePlaylistItem>;
     queue: QueueState;
     radio: { items: RemoteRadioItem[]; requestId: null | string };
@@ -50,6 +53,8 @@ interface QueueState {
 
 export const useRemoteLibraryStore = create<LibrarySlice>((set) => ({
     actions: {
+        setAlbumsResponse: (requestId, hasMore, items) =>
+            set({ albums: { hasMore, items, requestId } }),
         setPlaylistsResponse: (requestId, hasMore, items) =>
             set({ playlists: { hasMore, items, requestId } }),
         setQueueState: (state) => set({ queue: state }),
@@ -58,12 +63,15 @@ export const useRemoteLibraryStore = create<LibrarySlice>((set) => ({
         setTracksResponse: (requestId, hasMore, items) =>
             set({ tracks: { hasMore, items, requestId } }),
     },
+    albums: { hasMore: false, items: [], requestId: null },
     playlists: { hasMore: false, items: [], requestId: null },
     queue: { currentUniqueId: null, items: [] },
     radio: { items: [], requestId: null },
     radioStatus: { isActive: false },
     tracks: { hasMore: false, items: [], requestId: null },
 }));
+
+export const useAlbumsResponse = () => useRemoteLibraryStore((state) => state.albums);
 
 export const usePlaylistsResponse = () => useRemoteLibraryStore((state) => state.playlists);
 
