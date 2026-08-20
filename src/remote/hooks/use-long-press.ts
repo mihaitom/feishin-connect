@@ -87,6 +87,12 @@ export function useLongPress({
 
     const onPointerMove = useCallback(
         (event: React.PointerEvent) => {
+            // Once the long-press has fired, movement must not cancel the
+            // gesture anymore — in particular it must not tear down the
+            // selectionchange watch above, which is relied on to keep
+            // clearing stray selections until the finger actually lifts.
+            if (firedRef.current) return;
+
             const start = startPosRef.current;
             if (!start) return;
 
