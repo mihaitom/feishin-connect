@@ -2,6 +2,7 @@ import { Flex, Grid, Image } from '@mantine/core';
 
 import { ReconnectButton } from '/@/remote/components/buttons/reconnect-button';
 import { ThemeButton } from '/@/remote/components/buttons/theme-button';
+import { QueueReplaceConfirmSheet } from '/@/remote/components/menus/queue-replace-confirm-sheet';
 import { MiniPlayerBar } from '/@/remote/components/mini-player-bar';
 import { TabBar } from '/@/remote/components/tab-bar';
 import { RemoteRoutes } from '/@/remote/router';
@@ -91,6 +92,7 @@ export const Shell = () => {
                 )}
             </div>
             {connected && <MiniPlayerBar />}
+            {connected && <QueueReplaceConfirmSheet />}
             {connected && (
                 <div
                     style={{

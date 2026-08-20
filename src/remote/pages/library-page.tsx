@@ -5,8 +5,8 @@ import { FadeIn } from '/@/remote/components/fade-in';
 import { AlbumActionSheet } from '/@/remote/components/menus/album-action-sheet';
 import { TrackActionSheet } from '/@/remote/components/menus/track-action-sheet';
 import { TrackRow } from '/@/remote/components/track-row';
+import { useConfirmedSend } from '/@/remote/hooks/use-confirmed-send';
 import { useRemoteQuery } from '/@/remote/hooks/use-remote-query';
-import { useSend } from '/@/remote/store';
 import { useAlbumsResponse, useTracksResponse } from '/@/remote/store/library';
 import { Button } from '/@/shared/components/button/button';
 import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
@@ -24,7 +24,7 @@ export const LibraryPage = () => {
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
     const [activeTrack, setActiveTrack] = useState<null | RemoteTrackItem>(null);
     const [activeAlbum, setActiveAlbum] = useState<null | RemoteAlbumItem>(null);
-    const send = useSend();
+    const confirmedSend = useConfirmedSend();
     const tracksResponse = useTracksResponse();
     const albumsResponse = useAlbumsResponse();
 
@@ -68,7 +68,9 @@ export const LibraryPage = () => {
                               <TrackRow
                                   key={track.id}
                                   onLongPress={() => setActiveTrack(track)}
-                                  onPlay={() => send({ event: 'play-track', id: track.id })}
+                                  onPlay={() =>
+                                      confirmedSend({ event: 'play-track', id: track.id })
+                                  }
                                   track={track}
                               />
                           ))
@@ -77,7 +79,9 @@ export const LibraryPage = () => {
                                   album={album}
                                   key={album.id}
                                   onLongPress={() => setActiveAlbum(album)}
-                                  onPlay={() => send({ event: 'play-album', id: album.id })}
+                                  onPlay={() =>
+                                      confirmedSend({ event: 'play-album', id: album.id })
+                                  }
                               />
                           ))}
                 </Stack>

@@ -48,12 +48,18 @@ export interface PlayerContext {
         type: AddToQueueType,
         playSongId?: string,
         contextPlaylistId?: null | string,
+        // Bypasses confirmQueueChange entirely — for callers (the remote
+        // control bridge) that already obtained confirmation themselves
+        // before calling this, where the confirm modal this would otherwise
+        // open has no way to reach whoever actually needs to answer it.
+        skipConfirmation?: boolean,
     ) => void;
     addToQueueByFetch: (
         serverId: string,
         id: string[],
         itemType: LibraryItem,
         type: AddToQueueType,
+        skipConfirmation?: boolean,
     ) => void;
     addToQueueByListQuery: (
         serverId: string,
@@ -263,6 +269,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             type: AddToQueueType,
             playSongId?: string,
             contextPlaylistId?: null | string,
+            skipConfirmation?: boolean,
         ) => {
             const filters = useSettingsStore.getState().playback.filters;
             let filteredData = filterSongsByPlayerFilters(data, filters);
@@ -302,7 +309,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 }
             };
 
-            if (isReplaceQueueType(type)) {
+            if (!skipConfirmation && isReplaceQueueType(type)) {
                 confirmQueueChange(addToQueue);
             } else {
                 addToQueue();
@@ -312,7 +319,13 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const addToQueueByFetch = useCallback(
-        async (serverId: string, id: string[], itemType: LibraryItem, type: AddToQueueType) => {
+        async (
+            serverId: string,
+            id: string[],
+            itemType: LibraryItem,
+            type: AddToQueueType,
+            skipConfirmation?: boolean,
+        ) => {
             let toastId: null | string = null;
             const fetchId = nanoid();
 
@@ -394,7 +407,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                     }
                 };
 
-                if (isReplaceQueueType(type)) {
+                if (!skipConfirmation && isReplaceQueueType(type)) {
                     confirmQueueChange(addToQueue);
                 } else {
                     addToQueue();

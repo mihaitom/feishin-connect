@@ -21,6 +21,12 @@ interface SettingsState {
     // close — retrying automatically would just fail again forever, so this
     // is surfaced distinctly instead of looking like an ordinary drop.
     authFailed: boolean;
+    // Mirrors the desktop's confirmQueueChanges setting — defaults to `true`
+    // (the safer direction to be wrong in) until the server's initial state
+    // arrives. Read by play-submenu-items.tsx to ask before a play-now/
+    // -shuffle request is even sent, since the desktop-side confirm modal
+    // that would otherwise fire has no way to reach the phone.
+    confirmQueueChanges: boolean;
     connected: boolean;
     info: Omit<SongUpdateSocket, 'currentTime'>;
     isDark: boolean;
@@ -33,6 +39,7 @@ interface StatefulWebSocket extends WebSocket {
 
 const initialState: SettingsState = {
     authFailed: false,
+    confirmQueueChanges: true,
     connected: false,
     info: {},
     isDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
@@ -123,6 +130,12 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                                 data.hasMore,
                                                 data.items,
                                             );
+                                        break;
+                                    }
+                                    case 'confirm-queue-changes-setting': {
+                                        set((state) => {
+                                            state.confirmQueueChanges = data;
+                                        });
                                         break;
                                     }
                                     case 'error': {
@@ -382,6 +395,8 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
 );
 
 export const useAuthFailed = () => useRemoteStore((state) => state.authFailed);
+
+export const useConfirmQueueChanges = () => useRemoteStore((state) => state.confirmQueueChanges);
 
 export const useConnected = () => useRemoteStore((state) => state.connected);
 

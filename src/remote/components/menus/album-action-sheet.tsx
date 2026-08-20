@@ -1,6 +1,6 @@
 import { ActionSheet } from '/@/remote/components/action-sheet';
 import { PlaySubmenuItems } from '/@/remote/components/menus/play-submenu-items';
-import { useSend } from '/@/remote/store';
+import { useConfirmedSend } from '/@/remote/hooks/use-confirmed-send';
 
 interface AlbumActionSheetProps {
     album: null | { id: string };
@@ -8,14 +8,14 @@ interface AlbumActionSheetProps {
 }
 
 export const AlbumActionSheet = ({ album, onClose }: AlbumActionSheetProps) => {
-    const send = useSend();
+    const confirmedSend = useConfirmedSend();
 
     return (
         <ActionSheet onClose={onClose} opened={!!album}>
             {album && (
                 <PlaySubmenuItems
                     onSelect={(playType) => {
-                        send({ event: 'play-album', id: album.id, playType });
+                        confirmedSend({ event: 'play-album', id: album.id, playType });
                         onClose();
                     }}
                 />

@@ -24,6 +24,11 @@ interface LibraryListState<T> {
 
 interface LibrarySlice extends LibraryState {
     actions: {
+        clearQueueReplaceConfirm: () => void;
+        // `execute` is deferred here rather than run immediately — the point
+        // of asking is to let the confirm sheet (mounted once in shell.tsx)
+        // decide whether it actually happens.
+        requestQueueReplaceConfirm: (execute: () => void) => void;
         setAlbumsResponse: (requestId: string, hasMore: boolean, items: RemoteAlbumItem[]) => void;
         setPlaylistsResponse: (
             requestId: string,
@@ -41,6 +46,9 @@ interface LibraryState {
     albums: LibraryListState<RemoteAlbumItem>;
     playlists: LibraryListState<RemotePlaylistItem>;
     queue: QueueState;
+    // Non-null while the queue-replace confirm sheet (shell.tsx) is open —
+    // see use-confirmed-send.ts, the only place this gets set.
+    queueReplaceConfirm: (() => void) | null;
     radio: { items: RemoteRadioItem[]; requestId: null | string };
     radioStatus: ServerRadioStatus['data'];
     tracks: LibraryListState<RemoteTrackItem>;
@@ -53,6 +61,8 @@ interface QueueState {
 
 export const useRemoteLibraryStore = create<LibrarySlice>((set) => ({
     actions: {
+        clearQueueReplaceConfirm: () => set({ queueReplaceConfirm: null }),
+        requestQueueReplaceConfirm: (execute) => set({ queueReplaceConfirm: execute }),
         setAlbumsResponse: (requestId, hasMore, items) =>
             set({ albums: { hasMore, items, requestId } }),
         setPlaylistsResponse: (requestId, hasMore, items) =>
@@ -66,6 +76,7 @@ export const useRemoteLibraryStore = create<LibrarySlice>((set) => ({
     albums: { hasMore: false, items: [], requestId: null },
     playlists: { hasMore: false, items: [], requestId: null },
     queue: { currentUniqueId: null, items: [] },
+    queueReplaceConfirm: null,
     radio: { items: [], requestId: null },
     radioStatus: { isActive: false },
     tracks: { hasMore: false, items: [], requestId: null },
@@ -74,6 +85,9 @@ export const useRemoteLibraryStore = create<LibrarySlice>((set) => ({
 export const useAlbumsResponse = () => useRemoteLibraryStore((state) => state.albums);
 
 export const usePlaylistsResponse = () => useRemoteLibraryStore((state) => state.playlists);
+
+export const useQueueReplaceConfirm = () =>
+    useRemoteLibraryStore((state) => state.queueReplaceConfirm);
 
 export const useQueueState = () => useRemoteLibraryStore((state) => state.queue);
 

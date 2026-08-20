@@ -4,6 +4,7 @@ import { ActionSheet } from '/@/remote/components/action-sheet';
 import { AddToPlaylistSheet } from '/@/remote/components/menus/add-to-playlist-sheet';
 import { PlaySubmenuItems } from '/@/remote/components/menus/play-submenu-items';
 import { TrackRadioSubmenuItems } from '/@/remote/components/menus/track-radio-submenu-items';
+import { useConfirmedSend } from '/@/remote/hooks/use-confirmed-send';
 import { useSend } from '/@/remote/store';
 
 interface TrackActionSheetProps {
@@ -16,6 +17,7 @@ type TrackActionSheetView = 'addToPlaylist' | 'play' | 'root' | 'trackRadio';
 export const TrackActionSheet = ({ onClose, track }: TrackActionSheetProps) => {
     const [view, setView] = useState<TrackActionSheetView>('root');
     const send = useSend();
+    const confirmedSend = useConfirmedSend();
 
     const handleClose = () => {
         onClose();
@@ -56,7 +58,7 @@ export const TrackActionSheet = ({ onClose, track }: TrackActionSheetProps) => {
                     <ActionSheet.Header onBack={() => setView('root')} title={track.name} />
                     <PlaySubmenuItems
                         onSelect={(playType) => {
-                            send({ event: 'play-track', id: track.id, playType });
+                            confirmedSend({ event: 'play-track', id: track.id, playType });
                             handleClose();
                         }}
                     />
@@ -67,7 +69,7 @@ export const TrackActionSheet = ({ onClose, track }: TrackActionSheetProps) => {
                     <ActionSheet.Header onBack={() => setView('root')} title="Track Radio" />
                     <TrackRadioSubmenuItems
                         onSelect={(playType) => {
-                            send({ event: 'play-track-radio', id: track.id, playType });
+                            confirmedSend({ event: 'play-track-radio', id: track.id, playType });
                             handleClose();
                         }}
                     />

@@ -180,6 +180,11 @@ export interface ServerAlbumsResponse {
     event: 'albums-response';
 }
 
+export interface ServerConfirmQueueChangesSetting {
+    data: boolean;
+    event: 'confirm-queue-changes-setting';
+}
+
 export interface ServerError {
     data: string;
     event: 'error';
@@ -187,6 +192,7 @@ export interface ServerError {
 
 export type ServerEvent =
     | ServerAlbumsResponse
+    | ServerConfirmQueueChangesSetting
     | ServerError
     | ServerFavorite
     | ServerPlaylistsResponse

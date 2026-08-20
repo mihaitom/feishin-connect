@@ -96,6 +96,10 @@ const updateRadioStatus = (status: ServerRadioStatus['data']) => {
     ipcRenderer.send('update-radio-status', status);
 };
 
+const updateConfirmQueueChangesSetting = (enabled: boolean) => {
+    ipcRenderer.send('update-confirm-queue-changes-setting', enabled);
+};
+
 const requestFavorite = (
     cb: (data: { favorite: boolean; id: string; serverId: string }) => void,
 ) => {
@@ -202,6 +206,7 @@ export const remote = {
     respondTracks,
     setRemoteEnabled,
     setRemotePort,
+    updateConfirmQueueChangesSetting,
     updateFavorite,
     updatePassword,
     updatePlayback,

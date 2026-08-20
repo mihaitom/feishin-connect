@@ -133,6 +133,10 @@ let currentQueueState: { currentUniqueId: null | string; items: RemoteQueueItem[
     items: [],
 };
 let currentRadioStatus: ServerRadioStatus['data'] = { isActive: false };
+// Mirrors the desktop's own confirmQueueChanges setting — safe default (ask)
+// until the renderer's first push arrives, since assuming "don't ask" would
+// be the wrong direction to fail in.
+let confirmQueueChanges = true;
 
 // Only ever called once `client.auth` is true (either immediately, for an
 // unprotected server, or from the `authenticate` message handler) — sending
@@ -144,6 +148,9 @@ function sendInitialState(client: StatefulWebSocket): void {
     client.send(JSON.stringify({ data: currentState, event: 'state' }));
     client.send(JSON.stringify({ data: currentQueueState, event: 'queue-state' }));
     client.send(JSON.stringify({ data: currentRadioStatus, event: 'radio-status' }));
+    client.send(
+        JSON.stringify({ data: confirmQueueChanges, event: 'confirm-queue-changes-setting' }),
+    );
 }
 
 // Tracks/playlists/radio browsing is request/response, not broadcast — the
@@ -872,6 +879,11 @@ ipcMain.on('update-queue', (_event, currentUniqueId: null | string, items: Remot
 ipcMain.on('update-radio-status', (_event, status: ServerRadioStatus['data']) => {
     currentRadioStatus = status;
     broadcast({ data: status, event: 'radio-status' });
+});
+
+ipcMain.on('update-confirm-queue-changes-setting', (_event, enabled: boolean) => {
+    confirmQueueChanges = enabled;
+    broadcast({ data: enabled, event: 'confirm-queue-changes-setting' });
 });
 
 if (mprisPlayer) {

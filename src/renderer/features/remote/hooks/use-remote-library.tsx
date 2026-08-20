@@ -303,7 +303,11 @@ export const useRemoteLibrary = () => {
             }
             if (!song) return;
 
-            addToQueueByData([song], playType ?? Play.NOW, song.id);
+            // Confirmation (if the desktop's confirmQueueChanges setting is
+            // on) already happened on the phone, before it ever sent this
+            // request — skip it here too, or the confirm modal would open
+            // on the desktop screen with no way for the phone to answer it.
+            addToQueueByData([song], playType ?? Play.NOW, song.id, undefined, true);
         });
 
         remote.requestPlayTrackRadio(async ({ id, playType }) => {
@@ -337,7 +341,7 @@ export const useRemoteLibrary = () => {
                 });
 
                 if (similarSongs && similarSongs.length > 0) {
-                    addToQueueByData([song, ...similarSongs], playType, song.id);
+                    addToQueueByData([song, ...similarSongs], playType, song.id, undefined, true);
                 }
             } catch {
                 // Nothing to do — similar-songs fetch failed.
@@ -347,13 +351,13 @@ export const useRemoteLibrary = () => {
         remote.requestPlayPlaylist(({ id, playType }) => {
             const server = useAuthStore.getState().currentServer;
             if (!server) return;
-            addToQueueByFetch(server.id, [id], LibraryItem.PLAYLIST, playType ?? Play.NOW);
+            addToQueueByFetch(server.id, [id], LibraryItem.PLAYLIST, playType ?? Play.NOW, true);
         });
 
         remote.requestPlayAlbum(({ id, playType }) => {
             const server = useAuthStore.getState().currentServer;
             if (!server) return;
-            addToQueueByFetch(server.id, [id], LibraryItem.ALBUM, playType ?? Play.NOW);
+            addToQueueByFetch(server.id, [id], LibraryItem.ALBUM, playType ?? Play.NOW, true);
         });
 
         remote.requestAddToPlaylist(async ({ playlistId, songId }) => {

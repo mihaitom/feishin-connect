@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { FadeIn } from '/@/remote/components/fade-in';
 import { PlaylistActionSheet } from '/@/remote/components/menus/playlist-action-sheet';
 import { PlaylistRow } from '/@/remote/components/playlist-row';
+import { useConfirmedSend } from '/@/remote/hooks/use-confirmed-send';
 import { useRemoteQuery } from '/@/remote/hooks/use-remote-query';
-import { useSend } from '/@/remote/store';
 import { usePlaylistsResponse } from '/@/remote/store/library';
 import { Button } from '/@/shared/components/button/button';
 import { Stack } from '/@/shared/components/stack/stack';
@@ -17,7 +17,7 @@ export const PlaylistsPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
     const [activePlaylist, setActivePlaylist] = useState<null | RemotePlaylistItem>(null);
-    const send = useSend();
+    const confirmedSend = useConfirmedSend();
     const response = usePlaylistsResponse();
 
     const { hasMore, items, loadMore } = useRemoteQuery<RemotePlaylistItem>({
@@ -44,7 +44,9 @@ export const PlaylistsPage = () => {
                         <PlaylistRow
                             key={playlist.id}
                             onLongPress={() => setActivePlaylist(playlist)}
-                            onPlay={() => send({ event: 'play-playlist', id: playlist.id })}
+                            onPlay={() =>
+                                confirmedSend({ event: 'play-playlist', id: playlist.id })
+                            }
                             playlist={playlist}
                         />
                     ))}
