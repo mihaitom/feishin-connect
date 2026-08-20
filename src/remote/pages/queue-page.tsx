@@ -1,14 +1,21 @@
-import { AnimatePresence, Reorder } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { List, useListRef } from 'react-window-v2';
 
 import { FadeIn } from '/@/remote/components/fade-in';
 import { TrackActionSheet } from '/@/remote/components/menus/track-action-sheet';
 import { QueueRow } from '/@/remote/components/queue-row';
+import { QueueDropTarget, useQueueDragReorder } from '/@/remote/hooks/use-queue-drag-reorder';
 import { useSend } from '/@/remote/store';
 import { useQueueState } from '/@/remote/store/library';
-import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { RemoteQueueItem } from '/@/shared/types/remote-types';
+
+// 56px row (list-row.module.css's min-height) + the 4px gap the rows used to
+// get for free from `Reorder.Group`'s flex `gap` — react-window's absolutely
+// positioned rows don't get flexbox gap, so it's baked into the row height
+// and applied as the row's own top padding instead.
+const ROW_HEIGHT = 60;
+const OVERSCAN_COUNT = 4;
 
 export const QueuePage = () => {
     const send = useSend();
@@ -16,6 +23,7 @@ export const QueuePage = () => {
     const [activeTrack, setActiveTrack] = useState<null | { id: string; name: string }>(null);
     const [localOrder, setLocalOrder] = useState<string[]>(() => items.map((i) => i.uniqueId));
     const isDraggingRef = useRef(false);
+    const listRef = useListRef(null);
 
     // The server broadcasts the authoritative order on every queue change —
     // resync unless a drag is in flight, so a push mid-gesture can't yank the
@@ -25,78 +33,122 @@ export const QueuePage = () => {
         setLocalOrder(items.map((i) => i.uniqueId));
     }, [items]);
 
-    const orderedItems = localOrder
-        .map((uniqueId) => items.find((i) => i.uniqueId === uniqueId))
-        .filter((i): i is RemoteQueueItem => !!i);
+    // A `Map` lookup instead of `items.find(...)` inside `.map(...)` — the
+    // latter is O(n) per item, O(n²) overall, and reruns on every queue
+    // broadcast. At real-world reported scale (~38k items) that's over a
+    // billion comparisons, enough to hang the main thread on its own,
+    // independent of whether the rows themselves are virtualized.
+    const itemsById = useMemo(() => new Map(items.map((i) => [i.uniqueId, i])), [items]);
 
-    const handleRemove = (uniqueId: string) => {
-        setLocalOrder((prev) => prev.filter((id) => id !== uniqueId));
-        send({ event: 'remove-from-queue', uniqueId });
-    };
+    const orderedItems = useMemo(
+        () =>
+            localOrder
+                .map((uniqueId) => itemsById.get(uniqueId))
+                .filter((i): i is RemoteQueueItem => !!i),
+        [localOrder, itemsById],
+    );
 
-    const handleReorderDragEnd = (movedUniqueId: string) => {
-        isDraggingRef.current = false;
+    const handleJump = useCallback(
+        (uniqueId: string) => send({ event: 'queue-jump', uniqueId }),
+        [send],
+    );
 
-        const index = localOrder.indexOf(movedUniqueId);
-        if (index === -1) return;
+    const handleLongPress = useCallback((item: RemoteQueueItem) => {
+        setActiveTrack({ id: item.id, name: item.name });
+    }, []);
 
-        const after = localOrder[index + 1];
-        const before = localOrder[index - 1];
+    const handleRemove = useCallback(
+        (uniqueId: string) => {
+            setLocalOrder((prev) => prev.filter((id) => id !== uniqueId));
+            send({ event: 'remove-from-queue', uniqueId });
+        },
+        [send],
+    );
 
-        if (after) {
-            send({
-                edge: 'top',
-                event: 'reorder-queue',
-                targetUniqueId: after,
-                uniqueId: movedUniqueId,
+    const handleDrop = useCallback(
+        (movedUniqueId: string, target: QueueDropTarget) => {
+            isDraggingRef.current = false;
+
+            setLocalOrder((prev) => {
+                const from = prev.indexOf(movedUniqueId);
+                if (from === -1) return prev;
+
+                const withoutMoved = prev.filter((id) => id !== movedUniqueId);
+                let insertAt = target.index + (target.edge === 'bottom' ? 1 : 0);
+                // Removing the dragged item above the target shifts every
+                // later index down by one — account for that before inserting.
+                if (from < insertAt) insertAt -= 1;
+                insertAt = Math.min(Math.max(insertAt, 0), withoutMoved.length);
+
+                const next = [...withoutMoved];
+                next.splice(insertAt, 0, movedUniqueId);
+
+                const after = next[insertAt + 1];
+                const before = next[insertAt - 1];
+
+                if (after) {
+                    send({
+                        edge: 'top',
+                        event: 'reorder-queue',
+                        targetUniqueId: after,
+                        uniqueId: movedUniqueId,
+                    });
+                } else if (before) {
+                    send({
+                        edge: 'bottom',
+                        event: 'reorder-queue',
+                        targetUniqueId: before,
+                        uniqueId: movedUniqueId,
+                    });
+                }
+
+                return next;
             });
-        } else if (before) {
-            send({
-                edge: 'bottom',
-                event: 'reorder-queue',
-                targetUniqueId: before,
-                uniqueId: movedUniqueId,
-            });
-        }
-    };
+        },
+        [send],
+    );
+
+    const dragReorder = useQueueDragReorder({
+        itemCount: orderedItems.length,
+        listRef,
+        onDrop: handleDrop,
+        rowHeight: ROW_HEIGHT,
+    });
+
+    const rowProps = useMemo(
+        () => ({
+            currentUniqueId,
+            dragReorder,
+            items: orderedItems,
+            onJump: handleJump,
+            onLongPress: handleLongPress,
+            onRemove: handleRemove,
+            onReorderDragStart: () => {
+                isDraggingRef.current = true;
+            },
+        }),
+        [currentUniqueId, dragReorder, handleJump, handleLongPress, handleRemove, orderedItems],
+    );
 
     return (
-        <Stack gap="md" p="md">
-            {items.length === 0 && (
-                <Text isMuted ta="center">
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            {items.length === 0 ? (
+                <Text isMuted p="md" ta="center">
                     Queue is empty
                 </Text>
+            ) : (
+                <FadeIn style={{ flex: 1, minHeight: 0, padding: 'var(--theme-spacing-md)' }}>
+                    <List
+                        listRef={listRef}
+                        overscanCount={OVERSCAN_COUNT}
+                        rowComponent={QueueRow}
+                        rowCount={orderedItems.length}
+                        rowHeight={ROW_HEIGHT}
+                        rowProps={rowProps}
+                    />
+                </FadeIn>
             )}
-            <FadeIn>
-                <Reorder.Group
-                    as="div"
-                    axis="y"
-                    onReorder={setLocalOrder}
-                    style={{ display: 'flex', flexDirection: 'column', gap: 4 }}
-                    values={localOrder}
-                >
-                    <AnimatePresence initial={false}>
-                        {orderedItems.map((item, index) => (
-                            <QueueRow
-                                index={index + 1}
-                                isCurrent={item.uniqueId === currentUniqueId}
-                                item={item}
-                                key={item.uniqueId}
-                                onJump={() =>
-                                    send({ event: 'queue-jump', uniqueId: item.uniqueId })
-                                }
-                                onLongPress={() => setActiveTrack({ id: item.id, name: item.name })}
-                                onRemove={() => handleRemove(item.uniqueId)}
-                                onReorderDragEnd={() => handleReorderDragEnd(item.uniqueId)}
-                                onReorderDragStart={() => {
-                                    isDraggingRef.current = true;
-                                }}
-                            />
-                        ))}
-                    </AnimatePresence>
-                </Reorder.Group>
-            </FadeIn>
             <TrackActionSheet onClose={() => setActiveTrack(null)} track={activeTrack} />
-        </Stack>
+        </div>
     );
 };

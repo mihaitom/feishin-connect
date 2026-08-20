@@ -18,7 +18,7 @@ interface Tab {
 
 const TABS: Tab[] = [
     { icon: <RiHome5Line size={22} />, label: 'Home', to: '/' },
-    { icon: <RiMusic2Line size={22} />, label: 'Tracks', to: '/tracks' },
+    { icon: <RiMusic2Line size={22} />, label: 'Library', to: '/tracks' },
     { icon: <RiPlayListLine size={22} />, label: 'Playlists', to: '/playlists' },
     { icon: <RiRadioLine size={22} />, label: 'Radio', to: '/radio' },
     { icon: <RiListOrdered2 size={22} />, label: 'Queue', to: '/queue' },
