@@ -637,9 +637,14 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                                 break;
                             }
                             case 'radio-request': {
-                                const { requestId } = json;
+                                const { limit, requestId, searchTerm, startIndex } = json;
                                 rememberRequestClient(requestId, ws);
-                                getMainWindow()?.webContents.send('request-radio', { requestId });
+                                getMainWindow()?.webContents.send('request-radio', {
+                                    limit,
+                                    requestId,
+                                    searchTerm,
+                                    startIndex,
+                                });
                                 break;
                             }
                             case 'rating': {
@@ -893,10 +898,13 @@ ipcMain.on(
     },
 );
 
-ipcMain.on('respond-radio', (_event, requestId: string, items: RemoteRadioItem[]) => {
-    const client = resolveRequestClient(requestId);
-    if (client) send({ client, data: { items, requestId }, event: 'radio-response' });
-});
+ipcMain.on(
+    'respond-radio',
+    (_event, requestId: string, hasMore: boolean, items: RemoteRadioItem[]) => {
+        const client = resolveRequestClient(requestId);
+        if (client) send({ client, data: { hasMore, items, requestId }, event: 'radio-response' });
+    },
+);
 
 ipcMain.on('update-queue', (_event, currentUniqueId: null | string, items: RemoteQueueItem[]) => {
     currentQueueState = { currentUniqueId, items };

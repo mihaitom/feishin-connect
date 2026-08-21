@@ -259,26 +259,39 @@ export const useRemoteLibrary = () => {
             }
         });
 
-        remote.requestRadio(async ({ requestId }) => {
+        remote.requestRadio(async ({ limit, requestId, searchTerm, startIndex }) => {
             const server = useAuthStore.getState().currentServer;
             if (!server) {
-                remote?.respondRadio(requestId, []);
+                remote?.respondRadio(requestId, false, []);
                 return;
             }
 
+            const pageSize = limit ?? DEFAULT_PAGE_SIZE;
             try {
+                // getInternetRadioStations has no limit/startIndex/searchTerm
+                // of its own — internet radio lists aren't server-paginable
+                // (unlike songs/albums/playlists). React Query caches the
+                // full list for an hour (radio-api.ts), so slicing/filtering
+                // here per page is cheap rather than a real refetch each time.
                 const stations = await queryClient.fetchQuery(
                     radioQueries.list({ query: undefined, serverId: server.id }),
                 );
-                const items: RemoteRadioItem[] = stations.map((station) => ({
+                const filtered = searchTerm
+                    ? stations.filter((station) =>
+                          station.name.toLowerCase().includes(searchTerm.toLowerCase()),
+                      )
+                    : stations;
+                const start = startIndex ?? 0;
+                const page = filtered.slice(start, start + pageSize);
+                const items: RemoteRadioItem[] = page.map((station) => ({
                     homepageUrl: station.homepageUrl,
                     id: station.id,
                     imageUrl: station.imageUrl ?? null,
                     name: station.name,
                 }));
-                remote?.respondRadio(requestId, items);
+                remote?.respondRadio(requestId, start + pageSize < filtered.length, items);
             } catch {
-                remote?.respondRadio(requestId, []);
+                remote?.respondRadio(requestId, false, []);
             }
         });
 

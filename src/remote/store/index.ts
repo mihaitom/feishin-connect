@@ -214,7 +214,11 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                     case 'radio-response': {
                                         useRemoteLibraryStore
                                             .getState()
-                                            .actions.setRadioResponse(data.requestId, data.items);
+                                            .actions.setRadioResponse(
+                                                data.requestId,
+                                                data.hasMore,
+                                                data.items,
+                                            );
                                         break;
                                     }
                                     case 'radio-status': {

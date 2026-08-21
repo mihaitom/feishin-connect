@@ -30,7 +30,7 @@ const requestPlaylists = (cb: (data: RemoteListRequestPayload) => void) => {
     ipcRenderer.on('request-playlists', (_, data) => cb(data));
 };
 
-const requestRadio = (cb: (data: { requestId: string }) => void) => {
+const requestRadio = (cb: (data: RemoteListRequestPayload) => void) => {
     ipcRenderer.on('request-radio', (_, data) => cb(data));
 };
 
@@ -84,8 +84,8 @@ const respondPlaylists = (requestId: string, hasMore: boolean, items: RemotePlay
     ipcRenderer.send('respond-playlists', requestId, hasMore, items);
 };
 
-const respondRadio = (requestId: string, items: RemoteRadioItem[]) => {
-    ipcRenderer.send('respond-radio', requestId, items);
+const respondRadio = (requestId: string, hasMore: boolean, items: RemoteRadioItem[]) => {
+    ipcRenderer.send('respond-radio', requestId, hasMore, items);
 };
 
 const updateQueue = (currentUniqueId: null | string, items: RemoteQueueItem[]) => {

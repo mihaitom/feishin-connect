@@ -38,8 +38,10 @@ export function useRemoteQuery<TItem>({
     const requestIdRef = useRef('');
     const modeRef = useRef<'append' | 'replace'>('replace');
     const [items, setItems] = useState<TItem[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const sendRequest = (requestId: string, startIndex: number) => {
+        setIsLoading(true);
         if (paginated) {
             send({ event, limit: pageSize, requestId, searchTerm, startIndex } as ClientEvent);
         } else {
@@ -59,18 +61,24 @@ export function useRemoteQuery<TItem>({
 
     useEffect(() => {
         if (!response.requestId || response.requestId !== requestIdRef.current) return;
+        setIsLoading(false);
         setItems((prev) =>
             modeRef.current === 'replace' ? response.items : [...prev, ...response.items],
         );
     }, [response]);
 
     const loadMore = () => {
-        if (!paginated) return;
+        if (!paginated || isLoading) return;
         const requestId = nanoid();
         requestIdRef.current = requestId;
         modeRef.current = 'append';
         sendRequest(requestId, items.length);
     };
 
-    return { hasMore: paginated ? (response.hasMore ?? false) : false, items, loadMore };
+    return {
+        hasMore: paginated ? (response.hasMore ?? false) : false,
+        isLoading,
+        items,
+        loadMore,
+    };
 }

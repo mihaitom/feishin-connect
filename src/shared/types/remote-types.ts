@@ -86,9 +86,8 @@ export interface ClientQueueJump {
     uniqueId: string;
 }
 
-export interface ClientRadioRequest {
+export interface ClientRadioRequest extends RemoteListRequest {
     event: 'radio-request';
-    requestId: string;
 }
 
 export interface ClientRating {
@@ -249,7 +248,7 @@ export interface ServerQueueState {
 }
 
 export interface ServerRadioResponse {
-    data: { items: RemoteRadioItem[]; requestId: string };
+    data: { hasMore: boolean; items: RemoteRadioItem[]; requestId: string };
     event: 'radio-response';
 }
 

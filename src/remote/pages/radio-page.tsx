@@ -1,58 +1,65 @@
-import { FadeIn } from '/@/remote/components/fade-in';
-import { ListRow } from '/@/remote/components/list-row';
-import { Thumbnail } from '/@/remote/components/thumbnail';
+import { useCallback, useMemo, useState } from 'react';
+
+import { RadioRow, RadioRowSharedProps } from '/@/remote/components/radio-row';
+import { VirtualRowList } from '/@/remote/components/virtual-row-list';
 import { useRemoteQuery } from '/@/remote/hooks/use-remote-query';
 import { useSend } from '/@/remote/store';
 import { useRadioResponse } from '/@/remote/store/library';
-import { Icon } from '/@/shared/components/icon/icon';
-import { Stack } from '/@/shared/components/stack/stack';
-import { Text } from '/@/shared/components/text/text';
+import { TextInput } from '/@/shared/components/text-input/text-input';
+import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
 import { RemoteRadioItem } from '/@/shared/types/remote-types';
 
 export const RadioPage = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
     const send = useSend();
     const response = useRadioResponse();
 
-    const { items } = useRemoteQuery<RemoteRadioItem>({
+    const { hasMore, isLoading, items, loadMore } = useRemoteQuery<RemoteRadioItem>({
         event: 'radio-request',
-        paginated: false,
         response,
+        searchTerm: debouncedSearchTerm || undefined,
     });
 
+    const handlePlay = useCallback(
+        (station: RemoteRadioItem) => send({ event: 'play-radio', id: station.id }),
+        [send],
+    );
+
+    const rowProps = useMemo<RadioRowSharedProps>(
+        () => ({ items, onPlay: handlePlay }),
+        [items, handlePlay],
+    );
+
     return (
-        <Stack gap="md" p="md">
-            {items.length === 0 && (
-                <Text isMuted ta="center">
-                    No radio stations found
-                </Text>
-            )}
-            <FadeIn>
-                <Stack gap={4}>
-                    {items.map((station) => (
-                        <ListRow
-                            key={station.id}
-                            onClick={() => send({ event: 'play-radio', id: station.id })}
-                        >
-                            <Thumbnail
-                                fallbackIcon={<Icon icon="emptyImage" size={18} />}
-                                src={station.imageUrl}
-                            />
-                            <Text
-                                fw={500}
-                                style={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                {station.name}
-                            </Text>
-                        </ListRow>
-                    ))}
-                </Stack>
-            </FadeIn>
-        </Stack>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ flexShrink: 0, padding: 'var(--theme-spacing-md)' }}>
+                <TextInput
+                    onChange={(e) => setSearchTerm(e.currentTarget.value)}
+                    placeholder="Search radio stations…"
+                    value={searchTerm}
+                />
+            </div>
+            <div
+                style={{
+                    display: 'flex',
+                    flex: 1,
+                    flexDirection: 'column',
+                    minHeight: 0,
+                    padding: '0 var(--theme-spacing-md) var(--theme-spacing-md)',
+                }}
+            >
+                <VirtualRowList<RadioRowSharedProps>
+                    emptyMessage="No radio stations found"
+                    hasMore={hasMore}
+                    isLoading={isLoading}
+                    loadMore={loadMore}
+                    resetKey={debouncedSearchTerm ?? ''}
+                    rowComponent={RadioRow}
+                    rowCount={rowProps.items.length}
+                    rowProps={rowProps}
+                />
+            </div>
+        </div>
     );
 };

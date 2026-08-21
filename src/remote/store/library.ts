@@ -36,7 +36,7 @@ interface LibrarySlice extends LibraryState {
             items: RemotePlaylistItem[],
         ) => void;
         setQueueState: (state: QueueState) => void;
-        setRadioResponse: (requestId: string, items: RemoteRadioItem[]) => void;
+        setRadioResponse: (requestId: string, hasMore: boolean, items: RemoteRadioItem[]) => void;
         setRadioStatus: (status: ServerRadioStatus['data']) => void;
         setTracksResponse: (requestId: string, hasMore: boolean, items: RemoteTrackItem[]) => void;
     };
@@ -49,7 +49,7 @@ interface LibraryState {
     // Non-null while the queue-replace confirm sheet (shell.tsx) is open —
     // see use-confirmed-send.ts, the only place this gets set.
     queueReplaceConfirm: (() => void) | null;
-    radio: { items: RemoteRadioItem[]; requestId: null | string };
+    radio: LibraryListState<RemoteRadioItem>;
     radioStatus: ServerRadioStatus['data'];
     tracks: LibraryListState<RemoteTrackItem>;
 }
@@ -68,7 +68,8 @@ export const useRemoteLibraryStore = create<LibrarySlice>((set) => ({
         setPlaylistsResponse: (requestId, hasMore, items) =>
             set({ playlists: { hasMore, items, requestId } }),
         setQueueState: (state) => set({ queue: state }),
-        setRadioResponse: (requestId, items) => set({ radio: { items, requestId } }),
+        setRadioResponse: (requestId, hasMore, items) =>
+            set({ radio: { hasMore, items, requestId } }),
         setRadioStatus: (status) => set({ radioStatus: status }),
         setTracksResponse: (requestId, hasMore, items) =>
             set({ tracks: { hasMore, items, requestId } }),
@@ -77,7 +78,7 @@ export const useRemoteLibraryStore = create<LibrarySlice>((set) => ({
     playlists: { hasMore: false, items: [], requestId: null },
     queue: { currentUniqueId: null, items: [] },
     queueReplaceConfirm: null,
-    radio: { items: [], requestId: null },
+    radio: { hasMore: false, items: [], requestId: null },
     radioStatus: { isActive: false },
     tracks: { hasMore: false, items: [], requestId: null },
 }));
