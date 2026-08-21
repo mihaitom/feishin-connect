@@ -2,26 +2,26 @@ import { t } from 'i18next';
 import isElectron from 'is-electron';
 import { useCallback, useEffect } from 'react';
 
-import { useIsRadioActive } from '/@/renderer/features/radio/hooks/use-radio-player';
-import { usePlaybackType, usePlayerActions, useVolumeWheelStep } from '/@/renderer/store';
+import { useIsRadioActive, useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
+import { usePlayerActions, useVolumeWheelStep } from '/@/renderer/store';
 import { toast } from '/@/shared/components/toast/toast';
-import { PlayerType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 const mpvPlayerListener = isElectron() ? window.api.mpvPlayerListener : null;
 const ipc = isElectron() ? window.api.ipc : null;
 
+const toggleRadioPlayPause = () => {
+    const radio = useRadioStore.getState();
+
+    if (radio.isPlaying) {
+        radio.actions.pause();
+    } else if (radio.currentStreamUrl) {
+        radio.actions.play();
+    }
+};
+
 export const useMainPlayerListener = () => {
     const isRadioActive = useIsRadioActive();
-    // mpv-backed radio playback is already handled by use-radio-player.ts's
-    // own rendererPlay/rendererPause listeners (it drives mpv directly and
-    // never touches usePlayerStoreBase's status) — skip play/pause here for
-    // that case so the two listeners don't double-handle the same IPC event.
-    // The web player has no such separate handler, so it still needs these
-    // generic mediaPlay/mediaPause calls to actually respond to a remote
-    // pause/play while a radio stream is playing.
-    const playbackType = usePlaybackType();
-    const isUsingMpvRadio = isRadioActive && playbackType === PlayerType.LOCAL && !!mpvPlayer;
     const volumeWheelStep = useVolumeWheelStep();
     const {
         decreaseVolume,
@@ -59,9 +59,12 @@ export const useMainPlayerListener = () => {
         }
 
         mpvPlayerListener.rendererPlayPause(() => {
-            if (!isUsingMpvRadio) {
+            if (!isRadioActive) {
                 mediaTogglePlayPause();
+                return;
             }
+
+            toggleRadioPlayPause();
         });
 
         mpvPlayerListener.rendererNext(() => {
@@ -89,20 +92,29 @@ export const useMainPlayerListener = () => {
         });
 
         mpvPlayerListener.rendererPlay(() => {
-            if (!isUsingMpvRadio) {
+            if (!isRadioActive) {
                 mediaPlay();
+            } else {
+                const radio = useRadioStore.getState();
+                if (radio.currentStreamUrl) {
+                    radio.actions.play();
+                }
             }
         });
 
         mpvPlayerListener.rendererPause(() => {
-            if (!isUsingMpvRadio) {
+            if (!isRadioActive) {
                 mediaPause();
+            } else {
+                useRadioStore.getState().actions.pause();
             }
         });
 
         mpvPlayerListener.rendererStop(() => {
             if (!isRadioActive) {
                 mediaStop({ reset: false });
+            } else {
+                useRadioStore.getState().actions.stop();
             }
         });
 
@@ -159,7 +171,6 @@ export const useMainPlayerListener = () => {
         handleMpvError,
         increaseVolume,
         isRadioActive,
-        isUsingMpvRadio,
         mediaAutoNext,
         mediaNext,
         mediaPause,

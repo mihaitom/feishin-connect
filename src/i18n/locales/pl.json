@@ -491,7 +491,13 @@
                 "lyricSizeSynchronized_description": "Rozmiar czcionki dla zsynchronizowanego (czasowego) tekstu",
                 "lyricSizeUnsynchronized_description": "Rozmiar czcionki dla niezsynchronizowanego (zwykłego) tekstu",
                 "lyricOpacityNonActive_description": "Przeźroczystość linijek tekstu które nie są aktualnie aktywne",
-                "lyricScaleNonActive_description": "Skala linijek tekstu które nie są aktualnie aktywne"
+                "lyricScaleNonActive_description": "Skala linijek tekstu które nie są aktualnie aktywne",
+                "coverArtSize": "Rozmiar okładki",
+                "playerItemAlignment": "Ułożenie elementów odtwarzacza",
+                "titleDisplayType": "Styl wyświetlania tytułu",
+                "titleDisplayType_optionMultiLine": "Wieloliniowy",
+                "titleLineCount": "Ilość linijek tytułu",
+                "titleDisplayType_optionScroll": "Przewijanie"
             },
             "upNext": "Następne",
             "lyrics": "Tekst",
@@ -1007,7 +1013,7 @@
         "discordDisplayType_description": "Zmienia co jest pokazywane jako słuchane w twoim statusie",
         "discordDisplayType_songname": "Nazwa piosenki",
         "discordDisplayType": "Typ wyświetlania statusu {{discord}}",
-        "discordLinkType_description": "Dodaje zewnętrzny link do {{lastfm}} lub {{musicbrainz}} do pól piosenki i wykonawcy w rich presence {{discord}}. {{musicbrainz}} jest najbardziej dokładnym, ale wymaga tagów i nie daje linków do wykonawców, gdy {{lastfm}} zawsze daje link. nie wywołuje dodatkowych żądań sieciowych",
+        "discordLinkType_description": "Dodaje linki {{lastfm}} lub {{musicbrainz}} do rich presence {{discord}}. {{musicbrainz}} jest najbardziej dokładnym, ale wymaga tagów i nie daje linków do wykonawców, gdy {{lastfm}} zawsze daje link. nie wywołuje dodatkowych żądań sieciowych",
         "discordLinkType_mbz_lastfm": "{{musicbrainz}} z zastępczym {{lastfm}}",
         "discordLinkType_none": "$t(common.none)",
         "discordLinkType": "Linki w statusie {{discord}}",
@@ -1242,7 +1248,11 @@
         "shareExpiration_description": "Jak daleko w przyszłości będą domyślnie wygasać nowe linki udostępniania. Wyczyść datę w oknie udostępniania, aby użyć domyślnego czasu z serwera",
         "shareExpiration": "Domyślne wygasanie udostępniania",
         "shareExpirationUseServerDefault_description": "Pomiń dodawanie wygaśnięcia podczas tworzenia udostępnień, aby serwer mógł zastosować swoje skonfigurowane domyślne wygasanie (np. Navidrome DefaultShareExpiration)",
-        "shareExpirationUseServerDefault": "Używaj domyślnego wygasania serwera"
+        "shareExpirationUseServerDefault": "Używaj domyślnego wygasania serwera",
+        "fullscreenAutoOpenTimeout_description": "Automatycznie otwiera odtwarzacz pełnoekranowy po tylu minutach nieaktywności podczas odtwarzania piosenki. Pozostaw puste, aby wyłączyć",
+        "fullscreenAutoOpenTimeout": "Czas do automatycznego otwarcia odtwarzacza pełnoekranowego (w minutach)",
+        "sidebarImageEnabled": "Przycisk powiększania okładki",
+        "sidebarImageEnabled_description": "Pokazuje przycisk na okładce w pasku odtwarzacza, aby powiększyć okładkę do paska bocznego. Wyłączenie tego ukrywa też ten przycisk i pomniejsza okładkę jeśli jest aktualnie powiększona"
     },
     "table": {
         "config": {
