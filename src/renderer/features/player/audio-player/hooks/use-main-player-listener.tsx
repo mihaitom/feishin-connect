@@ -3,8 +3,9 @@ import isElectron from 'is-electron';
 import { useCallback, useEffect } from 'react';
 
 import { useIsRadioActive } from '/@/renderer/features/radio/hooks/use-radio-player';
-import { usePlayerActions, useVolumeWheelStep } from '/@/renderer/store';
+import { usePlaybackType, usePlayerActions, useVolumeWheelStep } from '/@/renderer/store';
 import { toast } from '/@/shared/components/toast/toast';
+import { PlayerType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
 const mpvPlayerListener = isElectron() ? window.api.mpvPlayerListener : null;
@@ -12,6 +13,15 @@ const ipc = isElectron() ? window.api.ipc : null;
 
 export const useMainPlayerListener = () => {
     const isRadioActive = useIsRadioActive();
+    // mpv-backed radio playback is already handled by use-radio-player.ts's
+    // own rendererPlay/rendererPause listeners (it drives mpv directly and
+    // never touches usePlayerStoreBase's status) — skip play/pause here for
+    // that case so the two listeners don't double-handle the same IPC event.
+    // The web player has no such separate handler, so it still needs these
+    // generic mediaPlay/mediaPause calls to actually respond to a remote
+    // pause/play while a radio stream is playing.
+    const playbackType = usePlaybackType();
+    const isUsingMpvRadio = isRadioActive && playbackType === PlayerType.LOCAL && !!mpvPlayer;
     const volumeWheelStep = useVolumeWheelStep();
     const {
         decreaseVolume,
@@ -49,7 +59,7 @@ export const useMainPlayerListener = () => {
         }
 
         mpvPlayerListener.rendererPlayPause(() => {
-            if (!isRadioActive) {
+            if (!isUsingMpvRadio) {
                 mediaTogglePlayPause();
             }
         });
@@ -79,13 +89,13 @@ export const useMainPlayerListener = () => {
         });
 
         mpvPlayerListener.rendererPlay(() => {
-            if (!isRadioActive) {
+            if (!isUsingMpvRadio) {
                 mediaPlay();
             }
         });
 
         mpvPlayerListener.rendererPause(() => {
-            if (!isRadioActive) {
+            if (!isUsingMpvRadio) {
                 mediaPause();
             }
         });
@@ -149,6 +159,7 @@ export const useMainPlayerListener = () => {
         handleMpvError,
         increaseVolume,
         isRadioActive,
+        isUsingMpvRadio,
         mediaAutoNext,
         mediaNext,
         mediaPause,

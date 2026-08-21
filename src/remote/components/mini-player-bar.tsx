@@ -65,6 +65,17 @@ export const MiniPlayerBar = () => {
                 </Text>
             </Stack>
             <ActionIcon
+                disabled={radioStatus.isActive}
+                icon="mediaPrevious"
+                iconProps={{ fill: 'default', size: 'lg' }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    send({ event: 'previous' });
+                }}
+                tooltip={{ label: 'Previous track' }}
+                variant="transparent"
+            />
+            <ActionIcon
                 icon={status === PlayerStatus.PLAYING ? 'mediaPause' : 'mediaPlay'}
                 iconProps={{ fill: 'default', size: 'lg' }}
                 onClick={(e) => {
@@ -75,6 +86,7 @@ export const MiniPlayerBar = () => {
                 variant="transparent"
             />
             <ActionIcon
+                disabled={radioStatus.isActive}
                 icon="mediaNext"
                 iconProps={{ fill: 'default', size: 'lg' }}
                 onClick={(e) => {

@@ -226,7 +226,7 @@ export const RemoteContainer = () => {
             )}
             <Group gap="xs" grow>
                 <ActionIcon
-                    disabled={!id}
+                    disabled={!id || radioStatus.isActive}
                     h={48}
                     icon="mediaPrevious"
                     iconProps={{
@@ -260,7 +260,7 @@ export const RemoteContainer = () => {
                     variant="default"
                 />
                 <ActionIcon
-                    disabled={!id}
+                    disabled={!id || radioStatus.isActive}
                     h={48}
                     icon="mediaNext"
                     iconProps={{
@@ -276,6 +276,7 @@ export const RemoteContainer = () => {
             </Group>
             <Group gap="xs" grow>
                 <ActionIcon
+                    disabled={radioStatus.isActive}
                     h={48}
                     icon="mediaShuffle"
                     iconProps={{
@@ -289,6 +290,7 @@ export const RemoteContainer = () => {
                     variant="default"
                 />
                 <ActionIcon
+                    disabled={radioStatus.isActive}
                     h={48}
                     icon={
                         repeat === undefined || repeat === PlayerRepeat.ONE
