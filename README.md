@@ -2,6 +2,15 @@
 
 # Feishin — Connect Fork
 
+> [!IMPORTANT]
+> **This fork is no longer maintained - no further updates are planned.**
+>
+> The recommended move is back to [upstream Feishin](https://github.com/jeffvli/feishin), where DLNA casting is in the works ([jeffvli/feishin#1887](https://github.com/jeffvli/feishin/pull/1887)) - enough to play to network receivers, smart TVs and similar devices.
+>
+> If you also want Sonos, AirPlay and Chromecast, you are welcome to try [Beacon](https://github.com/mihaitom/beacon): a self-hosted client for Navidrome, Subsonic / OpenSubsonic, Jellyfin and Plex that casts to all four.
+>
+> Everything below is kept for reference.
+
 > **This is a fork of [jeffvli/feishin](https://github.com/jeffvli/feishin).** Currently built on upstream **v1.15.0**.
 > It adds **Feishin Connect** — a Spotify Connect-like feature that streams your music library (Navidrome, Subsonic / OpenSubsonic, or Jellyfin) to Sonos, AirPlay, Chromecast and DLNA/UPnP devices directly from the player bar.
 > All upstream features are preserved.
