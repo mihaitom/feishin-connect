@@ -10,6 +10,7 @@ import { Play, PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/typ
 // a row has no way to know the first tap landed before firing the second.
 export type AckableClientEvent =
     | ClientAddToPlaylist
+    | ClientClearQueue
     | ClientPlayAlbum
     | ClientPlayPlaylist
     | ClientPlayTrack
@@ -34,10 +35,16 @@ export interface ClientAuth {
     header: string;
 }
 
+export interface ClientClearQueue {
+    event: 'clear-queue';
+    requestId?: string;
+}
+
 export type ClientEvent =
     | ClientAddToPlaylist
     | ClientAlbumsRequest
     | ClientAuth
+    | ClientClearQueue
     | ClientFavorite
     | ClientPlayAlbum
     | ClientPlaylistsRequest

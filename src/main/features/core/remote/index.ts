@@ -544,6 +544,14 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                                 });
                                 break;
                             }
+                            case 'clear-queue': {
+                                const { requestId } = json;
+                                if (requestId) rememberRequestClient(requestId, ws);
+                                getMainWindow()?.webContents.send('request-clear-queue', {
+                                    requestId,
+                                });
+                                break;
+                            }
                             case 'favorite': {
                                 const { favorite, id } = json;
                                 if (id && id === currentState.song?.id) {

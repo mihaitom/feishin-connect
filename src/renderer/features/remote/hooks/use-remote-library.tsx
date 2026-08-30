@@ -139,8 +139,14 @@ const toRemotePlaylistItem = (playlist: Playlist): RemotePlaylistItem => ({
  */
 export const useRemoteLibrary = () => {
     const isRemoteEnabled = useRemoteSettings().enabled;
-    const { addToQueueByData, addToQueueByFetch, clearSelected, getQueue, moveSelectedTo } =
-        usePlayer();
+    const {
+        addToQueueByData,
+        addToQueueByFetch,
+        clearQueue,
+        clearSelected,
+        getQueue,
+        moveSelectedTo,
+    } = usePlayer();
     const radioCount = useArtistRadioCount();
 
     useEffect(() => {
@@ -442,6 +448,14 @@ export const useRemoteLibrary = () => {
             }
         });
 
+        remote.requestClearQueue(({ requestId }) => {
+            // Confirmation already happened on the phone (see
+            // use-confirmed-send.ts) — same skip-and-trust as every other
+            // AckableClientEvent handler here.
+            clearQueue(true);
+            ackOperation(requestId);
+        });
+
         remote.requestRemoveFromQueue(({ uniqueId }) => {
             const song = getQueue().find((item) => item._uniqueId === uniqueId);
             if (!song) return;
@@ -491,6 +505,7 @@ export const useRemoteLibrary = () => {
             ipc?.removeAllListeners('request-play-album');
             ipc?.removeAllListeners('request-play-radio');
             ipc?.removeAllListeners('request-add-to-playlist');
+            ipc?.removeAllListeners('request-clear-queue');
             ipc?.removeAllListeners('request-remove-from-queue');
             ipc?.removeAllListeners('request-reorder-queue');
             ipc?.removeAllListeners('request-queue-jump');
@@ -499,6 +514,7 @@ export const useRemoteLibrary = () => {
         isRemoteEnabled,
         addToQueueByData,
         addToQueueByFetch,
+        clearQueue,
         clearSelected,
         getQueue,
         moveSelectedTo,

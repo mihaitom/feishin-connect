@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { List, useListRef } from 'react-window-v2';
 
+import { ClearQueueButton } from '/@/remote/components/buttons/clear-queue-button';
 import { FadeIn } from '/@/remote/components/fade-in';
 import { TrackActionSheet } from '/@/remote/components/menus/track-action-sheet';
 import { QueueRow } from '/@/remote/components/queue-row';
@@ -141,16 +142,26 @@ export const QueuePage = () => {
                     Queue is empty
                 </Text>
             ) : (
-                <FadeIn style={{ flex: 1, minHeight: 0, padding: 'var(--theme-spacing-md)' }}>
-                    <List
-                        listRef={listRef}
-                        overscanCount={OVERSCAN_COUNT}
-                        rowComponent={QueueRow}
-                        rowCount={orderedItems.length}
-                        rowHeight={ROW_HEIGHT}
-                        rowProps={rowProps}
-                    />
-                </FadeIn>
+                <>
+                    <div
+                        style={{
+                            flexShrink: 0,
+                            padding: 'var(--theme-spacing-md) var(--theme-spacing-md) 0',
+                        }}
+                    >
+                        <ClearQueueButton />
+                    </div>
+                    <FadeIn style={{ flex: 1, minHeight: 0, padding: 'var(--theme-spacing-md)' }}>
+                        <List
+                            listRef={listRef}
+                            overscanCount={OVERSCAN_COUNT}
+                            rowComponent={QueueRow}
+                            rowCount={orderedItems.length}
+                            rowHeight={ROW_HEIGHT}
+                            rowProps={rowProps}
+                        />
+                    </FadeIn>
+                </>
             )}
             <TrackActionSheet
                 onClose={() => setActiveTrack(null)}

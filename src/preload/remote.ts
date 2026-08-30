@@ -34,6 +34,10 @@ const requestRadio = (cb: (data: RemoteListRequestPayload) => void) => {
     ipcRenderer.on('request-radio', (_, data) => cb(data));
 };
 
+const requestClearQueue = (cb: (data: { requestId?: string }) => void) => {
+    ipcRenderer.on('request-clear-queue', (_, data) => cb(data));
+};
+
 const requestPlayTrack = (
     cb: (data: { id: string; playType?: Play; requestId?: string }) => void,
 ) => {
@@ -202,6 +206,7 @@ const updatePosition = (timeSec: number) => {
 export const remote = {
     requestAddToPlaylist,
     requestAlbums,
+    requestClearQueue,
     requestFavorite,
     requestPlayAlbum,
     requestPlaylists,
