@@ -60,7 +60,7 @@ export interface PlayerContext {
         itemType: LibraryItem,
         type: AddToQueueType,
         skipConfirmation?: boolean,
-    ) => void;
+    ) => Promise<void>;
     addToQueueByListQuery: (
         serverId: string,
         query: any,
@@ -101,7 +101,7 @@ export interface PlayerContext {
 
 export const PlayerContext = createContext<PlayerContext>({
     addToQueueByData: () => {},
-    addToQueueByFetch: () => {},
+    addToQueueByFetch: async () => {},
     addToQueueByListQuery: async () => {},
     clearQueue: () => {},
     clearSelected: () => {},

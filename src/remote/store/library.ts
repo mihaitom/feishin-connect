@@ -9,6 +9,18 @@ import {
     ServerRadioStatus,
 } from '/@/shared/types/remote-types';
 
+// `execute` is deferred here rather than run immediately — the point of
+// asking is to let the confirm sheet (mounted once in shell.tsx) decide
+// whether it actually happens. `cancel` lets whoever asked (use-confirmed-
+// send.ts) settle its own pending promise when the user declines instead of
+// leaving it hanging forever — a Play submenu tap that ends in "discard the
+// queue? no" still needs its acked-send promise to resolve so the action
+// sheet's spinner clears.
+export interface QueueReplaceConfirmRequest {
+    cancel: () => void;
+    execute: () => void;
+}
+
 // Transient session data (not persisted, unlike store/index.ts's settings) —
 // tracks/playlists browsing results, the one-shot radio station list, live
 // queue state, and radio-active status. Written by store/index.ts's existing
@@ -25,10 +37,7 @@ interface LibraryListState<T> {
 interface LibrarySlice extends LibraryState {
     actions: {
         clearQueueReplaceConfirm: () => void;
-        // `execute` is deferred here rather than run immediately — the point
-        // of asking is to let the confirm sheet (mounted once in shell.tsx)
-        // decide whether it actually happens.
-        requestQueueReplaceConfirm: (execute: () => void) => void;
+        requestQueueReplaceConfirm: (request: QueueReplaceConfirmRequest) => void;
         setAlbumsResponse: (requestId: string, hasMore: boolean, items: RemoteAlbumItem[]) => void;
         setPlaylistsResponse: (
             requestId: string,
@@ -48,7 +57,7 @@ interface LibraryState {
     queue: QueueState;
     // Non-null while the queue-replace confirm sheet (shell.tsx) is open —
     // see use-confirmed-send.ts, the only place this gets set.
-    queueReplaceConfirm: (() => void) | null;
+    queueReplaceConfirm: null | QueueReplaceConfirmRequest;
     radio: LibraryListState<RemoteRadioItem>;
     radioStatus: ServerRadioStatus['data'];
     tracks: LibraryListState<RemoteTrackItem>;
@@ -62,7 +71,7 @@ interface QueueState {
 export const useRemoteLibraryStore = create<LibrarySlice>((set) => ({
     actions: {
         clearQueueReplaceConfirm: () => set({ queueReplaceConfirm: null }),
-        requestQueueReplaceConfirm: (execute) => set({ queueReplaceConfirm: execute }),
+        requestQueueReplaceConfirm: (request) => set({ queueReplaceConfirm: request }),
         setAlbumsResponse: (requestId, hasMore, items) =>
             set({ albums: { hasMore, items, requestId } }),
         setPlaylistsResponse: (requestId, hasMore, items) =>

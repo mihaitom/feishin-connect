@@ -1,4 +1,5 @@
 import merge from 'lodash/merge';
+import { nanoid } from 'nanoid/non-secure';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { createWithEqualityFn } from 'zustand/traditional';
@@ -6,12 +7,18 @@ import { createWithEqualityFn } from 'zustand/traditional';
 import { useRemoteLibraryStore } from '/@/remote/store/library';
 import { logger } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
-import { ClientEvent, ServerEvent, SongUpdateSocket } from '/@/shared/types/remote-types';
+import {
+    AckableClientEvent,
+    ClientEvent,
+    ServerEvent,
+    SongUpdateSocket,
+} from '/@/shared/types/remote-types';
 
 export interface SettingsSlice extends SettingsState {
     actions: {
         reconnect: () => void;
         send: (data: ClientEvent) => void;
+        sendAcked: (data: AckableClientEvent) => Promise<void>;
         toggleIsDark: () => void;
     };
 }
@@ -66,6 +73,22 @@ const RECONNECT_DELAY_MS = 2000;
 // pending", and Immer would only complicate scheduling/cancelling a plain
 // timer handle for no benefit.
 let retryTimer: null | ReturnType<typeof setTimeout> = null;
+
+// Requests awaiting an `operation-ack`, keyed by the requestId sent with
+// them — same reasoning as retryTimer above, this is plumbing for
+// sendAcked's promises, not UI state. The main process (remote/index.ts)
+// remembers the same requestId server-side and answers it once the desktop
+// has actually applied the operation; this timeout is a fallback for a
+// connection that drops entirely mid-flight, where no answer (success or
+// the main process's own timeout error) can ever arrive on the new socket a
+// reconnect creates — kept longer than the main process's own 15s
+// REQUEST_TIMEOUT_MS so that a still-connected desktop's real answer/error
+// normally wins the race.
+const pendingOperations = new Map<
+    string,
+    { reject: (error: Error) => void; resolve: () => void }
+>();
+const OPERATION_TIMEOUT_MS = 20000;
 
 export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
     persist(
@@ -167,6 +190,19 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                                 state.info.song.userFavorite = data.favorite;
                                             }
                                         });
+                                        break;
+                                    }
+                                    case 'operation-ack': {
+                                        logger.debug('Operation ack received', {
+                                            error: data.error,
+                                            requestId: data.requestId,
+                                        });
+                                        const pending = pendingOperations.get(data.requestId);
+                                        if (pending) {
+                                            pendingOperations.delete(data.requestId);
+                                            if (data.error) pending.reject(new Error(data.error));
+                                            else pending.resolve();
+                                        }
                                         break;
                                     }
                                     case 'playback': {
@@ -384,6 +420,42 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                             });
                         }
                     },
+                    sendAcked: (data: AckableClientEvent) => {
+                        const socket = get().socket;
+                        if (!socket) {
+                            logger.warn('Cannot send event - socket not available', {
+                                event: data.event,
+                            });
+                            return Promise.reject(new Error('Not connected'));
+                        }
+
+                        const requestId = nanoid();
+                        logger.debug('Sending acked event to server', {
+                            data,
+                            event: data.event,
+                            requestId,
+                        });
+
+                        return new Promise<void>((resolve, reject) => {
+                            const timeout = setTimeout(() => {
+                                pendingOperations.delete(requestId);
+                                reject(new Error('Request timed out'));
+                            }, OPERATION_TIMEOUT_MS);
+
+                            pendingOperations.set(requestId, {
+                                reject: (error) => {
+                                    clearTimeout(timeout);
+                                    reject(error);
+                                },
+                                resolve: () => {
+                                    clearTimeout(timeout);
+                                    resolve();
+                                },
+                            });
+
+                            socket.send(JSON.stringify({ ...data, requestId }));
+                        });
+                    },
                     toggleIsDark: () => {
                         set((state) => {
                             state.isDark = !state.isDark;
@@ -445,5 +517,7 @@ export const useIsDark = () => useRemoteStore((state) => state.isDark);
 export const useReconnect = () => useRemoteStore((state) => state.actions.reconnect);
 
 export const useSend = () => useRemoteStore((state) => state.actions.send);
+
+export const useSendAcked = () => useRemoteStore((state) => state.actions.sendAcked);
 
 export const useToggleDark = () => useRemoteStore((state) => state.actions.toggleIsDark);

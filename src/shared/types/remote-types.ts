@@ -1,9 +1,27 @@
 import { QueueSong } from '/@/shared/types/domain-types';
 import { Play, PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/types';
 
+// The subset of ClientEvent that gets an `operation-ack` back once the
+// desktop has actually applied it — every one of these mutates the queue
+// (or a playlist) as a side effect with no other feedback path, unlike the
+// browsing *-request events (which already answer with their own *-response)
+// or the simple playback controls (whose effect is visible immediately in
+// the pushed player state). Without an ack, a phone tapping "Next" twice in
+// a row has no way to know the first tap landed before firing the second.
+export type AckableClientEvent =
+    | ClientAddToPlaylist
+    | ClientPlayAlbum
+    | ClientPlayPlaylist
+    | ClientPlayTrack
+    | ClientPlayTrackRadio;
+
 export interface ClientAddToPlaylist {
     event: 'add-to-playlist';
     playlistId: string;
+    // Present on every ack-tracked send (see AckableClientEvent) — echoed
+    // back on the matching `operation-ack`, so the sender can tell its own
+    // in-flight request apart from any other client's traffic.
+    requestId?: string;
     songId: string;
 }
 
@@ -47,6 +65,7 @@ export interface ClientPlayAlbum {
     event: 'play-album';
     id: string;
     playType?: Play;
+    requestId?: string;
 }
 
 export interface ClientPlaylistsRequest extends RemoteListRequest {
@@ -57,6 +76,7 @@ export interface ClientPlayPlaylist {
     event: 'play-playlist';
     id: string;
     playType?: Play;
+    requestId?: string;
 }
 
 export interface ClientPlayRadio {
@@ -68,12 +88,14 @@ export interface ClientPlayTrack {
     event: 'play-track';
     id: string;
     playType?: Play;
+    requestId?: string;
 }
 
 export interface ClientPlayTrackRadio {
     event: 'play-track-radio';
     id: string;
     playType: Play;
+    requestId?: string;
 }
 
 export interface ClientPosition {
@@ -200,6 +222,7 @@ export type ServerEvent =
     | ServerConfirmQueueChangesSetting
     | ServerError
     | ServerFavorite
+    | ServerOperationAck
     | ServerPlaylistsResponse
     | ServerPlayStatus
     | ServerPosition
@@ -218,6 +241,14 @@ export type ServerEvent =
 export interface ServerFavorite {
     data: { favorite: boolean; id: string };
     event: 'favorite';
+}
+
+// Answers an AckableClientEvent's `requestId` once the desktop has actually
+// applied it — sent to that one client only (like the *-response events),
+// never broadcast. `error` unset means it succeeded.
+export interface ServerOperationAck {
+    data: { error?: string; requestId: string };
+    event: 'operation-ack';
 }
 
 export interface ServerPlaylistsResponse {

@@ -13,20 +13,29 @@ export const QueueReplaceConfirmSheet = () => {
     const pending = useQueueReplaceConfirm();
     const clear = useRemoteLibraryStore((state) => state.actions.clearQueueReplaceConfirm);
 
+    // Declining (Cancel, or dismissing the sheet any other way) still has to
+    // settle the acked-send promise this confirmation is blocking on — see
+    // QueueReplaceConfirmRequest's own comment — or the action sheet that
+    // asked would spin forever.
+    const handleDecline = () => {
+        pending?.cancel();
+        clear();
+    };
+
     return (
-        <ActionSheet onClose={clear} opened={!!pending}>
+        <ActionSheet onClose={handleDecline} opened={!!pending}>
             <Stack gap="md" p="md">
                 <Text fw={700}>Discard the current queue?</Text>
                 <Text isMuted size="sm">
                     This will remove all items from the current queue.
                 </Text>
                 <Group gap="sm" grow>
-                    <Button onClick={clear} variant="default">
+                    <Button onClick={handleDecline} variant="default">
                         Cancel
                     </Button>
                     <Button
                         onClick={() => {
-                            pending?.();
+                            pending?.execute();
                             clear();
                         }}
                         variant="filled"

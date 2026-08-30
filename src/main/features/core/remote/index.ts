@@ -506,9 +506,11 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
 
                         switch (event) {
                             case 'add-to-playlist': {
-                                const { playlistId, songId } = json;
+                                const { playlistId, requestId, songId } = json;
+                                if (requestId) rememberRequestClient(requestId, ws);
                                 getMainWindow()?.webContents.send('request-add-to-playlist', {
                                     playlistId,
+                                    requestId,
                                     songId,
                                 });
                                 break;
@@ -548,16 +550,20 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                                 break;
                             }
                             case 'play-album': {
+                                if (json.requestId) rememberRequestClient(json.requestId, ws);
                                 getMainWindow()?.webContents.send('request-play-album', {
                                     id: json.id,
                                     playType: json.playType,
+                                    requestId: json.requestId,
                                 });
                                 break;
                             }
                             case 'play-playlist': {
+                                if (json.requestId) rememberRequestClient(json.requestId, ws);
                                 getMainWindow()?.webContents.send('request-play-playlist', {
                                     id: json.id,
                                     playType: json.playType,
+                                    requestId: json.requestId,
                                 });
                                 break;
                             }
@@ -568,16 +574,20 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                                 break;
                             }
                             case 'play-track': {
+                                if (json.requestId) rememberRequestClient(json.requestId, ws);
                                 getMainWindow()?.webContents.send('request-play-track', {
                                     id: json.id,
                                     playType: json.playType,
+                                    requestId: json.requestId,
                                 });
                                 break;
                             }
                             case 'play-track-radio': {
+                                if (json.requestId) rememberRequestClient(json.requestId, ws);
                                 getMainWindow()?.webContents.send('request-play-track-radio', {
                                     id: json.id,
                                     playType: json.playType,
+                                    requestId: json.requestId,
                                 });
                                 break;
                             }
@@ -730,6 +740,7 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                 });
 
                 ws.on('pong', () => {
+                    log.debug('Remote heartbeat pong received');
                     ws.alive = true;
                 });
             });
@@ -737,11 +748,15 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
             const heartBeat = setInterval(() => {
                 wsServer?.clients.forEach((ws) => {
                     if (!ws.alive) {
+                        log.warn('Remote heartbeat missed - terminating client', {
+                            readyState: ws.readyState,
+                        });
                         ws.terminate();
                         return;
                     }
 
                     ws.alive = false;
+                    log.debug('Remote heartbeat ping sent');
                     ws.ping();
                 });
             }, PING_TIMEOUT_MS);
@@ -905,6 +920,11 @@ ipcMain.on(
         if (client) send({ client, data: { hasMore, items, requestId }, event: 'radio-response' });
     },
 );
+
+ipcMain.on('respond-operation', (_event, requestId: string, error?: string) => {
+    const client = resolveRequestClient(requestId);
+    if (client) send({ client, data: { error, requestId }, event: 'operation-ack' });
+});
 
 ipcMain.on('update-queue', (_event, currentUniqueId: null | string, items: RemoteQueueItem[]) => {
     currentQueueState = { currentUniqueId, items };

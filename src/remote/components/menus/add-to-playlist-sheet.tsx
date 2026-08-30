@@ -11,10 +11,16 @@ import { useDebouncedValue } from '/@/shared/hooks/use-debounced-value';
 import { RemotePlaylistItem } from '/@/shared/types/remote-types';
 
 interface AddToPlaylistSheetProps {
+    disabled?: boolean;
     onSelect: (playlistId: string, playlistName: string) => void;
+    pendingPlaylistId?: null | string;
 }
 
-export const AddToPlaylistSheet = ({ onSelect }: AddToPlaylistSheetProps) => {
+export const AddToPlaylistSheet = ({
+    disabled,
+    onSelect,
+    pendingPlaylistId,
+}: AddToPlaylistSheetProps) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
     const response = usePlaylistsResponse();
@@ -40,15 +46,17 @@ export const AddToPlaylistSheet = ({ onSelect }: AddToPlaylistSheetProps) => {
             )}
             {items.map((playlist) => (
                 <ActionSheet.Item
+                    disabled={disabled}
                     key={playlist.id}
                     leftIcon="playlist"
+                    loading={pendingPlaylistId === playlist.id}
                     onClick={() => onSelect(playlist.id, playlist.name)}
                 >
                     {playlist.name}
                 </ActionSheet.Item>
             ))}
             {hasMore && (
-                <Button onClick={loadMore} variant="default">
+                <Button disabled={disabled} onClick={loadMore} variant="default">
                     Load more
                 </Button>
             )}

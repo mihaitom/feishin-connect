@@ -4,8 +4,10 @@ import { ActionSheet } from '/@/remote/components/action-sheet';
 import { AddToPlaylistSheet } from '/@/remote/components/menus/add-to-playlist-sheet';
 import { PlaySubmenuItems } from '/@/remote/components/menus/play-submenu-items';
 import { TrackRadioSubmenuItems } from '/@/remote/components/menus/track-radio-submenu-items';
+import { useAckedAction } from '/@/remote/hooks/use-acked-action';
 import { useConfirmedSend } from '/@/remote/hooks/use-confirmed-send';
-import { useSend } from '/@/remote/store';
+import { useSendAcked } from '/@/remote/store';
+import { Play } from '/@/shared/types/types';
 
 interface TrackActionSheetProps {
     onClose: () => void;
@@ -22,8 +24,9 @@ type TrackActionSheetView = 'addToPlaylist' | 'play' | 'root' | 'trackRadio';
 
 export const TrackActionSheet = ({ onClose, onRemoveFromQueue, track }: TrackActionSheetProps) => {
     const [view, setView] = useState<TrackActionSheetView>('root');
-    const send = useSend();
     const confirmedSend = useConfirmedSend();
+    const sendAcked = useSendAcked();
+    const { pendingKey, run } = useAckedAction();
 
     const handleClose = () => {
         onClose();
@@ -77,10 +80,15 @@ export const TrackActionSheet = ({ onClose, onRemoveFromQueue, track }: TrackAct
                 <>
                     <ActionSheet.Header onBack={() => setView('root')} title={track.name} />
                     <PlaySubmenuItems
-                        onSelect={(playType) => {
-                            confirmedSend({ event: 'play-track', id: track.id, playType });
-                            handleClose();
-                        }}
+                        disabled={pendingKey !== null}
+                        onSelect={(playType) =>
+                            run(
+                                playType,
+                                confirmedSend({ event: 'play-track', id: track.id, playType }),
+                                handleClose,
+                            )
+                        }
+                        pendingPlayType={pendingKey as null | Play}
                     />
                 </>
             )}
@@ -88,10 +96,19 @@ export const TrackActionSheet = ({ onClose, onRemoveFromQueue, track }: TrackAct
                 <>
                     <ActionSheet.Header onBack={() => setView('root')} title="Track Radio" />
                     <TrackRadioSubmenuItems
-                        onSelect={(playType) => {
-                            confirmedSend({ event: 'play-track-radio', id: track.id, playType });
-                            handleClose();
-                        }}
+                        disabled={pendingKey !== null}
+                        onSelect={(playType) =>
+                            run(
+                                playType,
+                                confirmedSend({
+                                    event: 'play-track-radio',
+                                    id: track.id,
+                                    playType,
+                                }),
+                                handleClose,
+                            )
+                        }
+                        pendingPlayType={pendingKey as null | Play}
                     />
                 </>
             )}
@@ -99,10 +116,19 @@ export const TrackActionSheet = ({ onClose, onRemoveFromQueue, track }: TrackAct
                 <>
                     <ActionSheet.Header onBack={() => setView('root')} title="Add to Playlist" />
                     <AddToPlaylistSheet
-                        onSelect={(playlistId) => {
-                            send({ event: 'add-to-playlist', playlistId, songId: track.id });
-                            handleClose();
-                        }}
+                        disabled={pendingKey !== null}
+                        onSelect={(playlistId) =>
+                            run(
+                                playlistId,
+                                sendAcked({
+                                    event: 'add-to-playlist',
+                                    playlistId,
+                                    songId: track.id,
+                                }),
+                                handleClose,
+                            )
+                        }
+                        pendingPlaylistId={pendingKey}
                     />
                 </>
             )}

@@ -295,9 +295,21 @@ export const useRemoteLibrary = () => {
             }
         });
 
-        remote.requestPlayTrack(async ({ id, playType }) => {
+        // Acks the phone's requestId (if it sent one — older/simpler
+        // events like request-play-radio don't carry one) once this
+        // operation has actually landed, success or failure — the phone
+        // blocks its action sheet on this instead of the ambiguous
+        // "did my tap register?" silence a fire-and-forget send would leave.
+        const ackOperation = (requestId: string | undefined, error?: string) => {
+            if (requestId) remote?.respondOperation(requestId, error);
+        };
+
+        remote.requestPlayTrack(async ({ id, playType, requestId }) => {
             const server = useAuthStore.getState().currentServer;
-            if (!server) return;
+            if (!server) {
+                ackOperation(requestId, 'No server connected');
+                return;
+            }
 
             let song = getCachedTrack(id);
             if (!song) {
@@ -311,21 +323,29 @@ export const useRemoteLibrary = () => {
                         queryKey: ['remote-song-detail', server.id, id],
                     });
                 } catch {
+                    ackOperation(requestId, 'Failed to load track');
                     return;
                 }
             }
-            if (!song) return;
+            if (!song) {
+                ackOperation(requestId, 'Track not found');
+                return;
+            }
 
             // Confirmation (if the desktop's confirmQueueChanges setting is
             // on) already happened on the phone, before it ever sent this
             // request — skip it here too, or the confirm modal would open
             // on the desktop screen with no way for the phone to answer it.
             addToQueueByData([song], playType ?? Play.NOW, song.id, undefined, true);
+            ackOperation(requestId);
         });
 
-        remote.requestPlayTrackRadio(async ({ id, playType }) => {
+        remote.requestPlayTrackRadio(async ({ id, playType, requestId }) => {
             const server = useAuthStore.getState().currentServer;
-            if (!server) return;
+            if (!server) {
+                ackOperation(requestId, 'No server connected');
+                return;
+            }
 
             let song = getCachedTrack(id);
             if (!song) {
@@ -339,10 +359,14 @@ export const useRemoteLibrary = () => {
                         queryKey: ['remote-song-detail', server.id, id],
                     });
                 } catch {
+                    ackOperation(requestId, 'Failed to load track');
                     return;
                 }
             }
-            if (!song) return;
+            if (!song) {
+                ackOperation(requestId, 'Track not found');
+                return;
+            }
 
             try {
                 const similarSongs = await queryClient.fetchQuery({
@@ -356,26 +380,44 @@ export const useRemoteLibrary = () => {
                 if (similarSongs && similarSongs.length > 0) {
                     addToQueueByData([song, ...similarSongs], playType, song.id, undefined, true);
                 }
+                ackOperation(requestId);
             } catch {
-                // Nothing to do — similar-songs fetch failed.
+                ackOperation(requestId, 'Failed to load track radio');
             }
         });
 
-        remote.requestPlayPlaylist(({ id, playType }) => {
+        remote.requestPlayPlaylist(async ({ id, playType, requestId }) => {
             const server = useAuthStore.getState().currentServer;
-            if (!server) return;
-            addToQueueByFetch(server.id, [id], LibraryItem.PLAYLIST, playType ?? Play.NOW, true);
+            if (!server) {
+                ackOperation(requestId, 'No server connected');
+                return;
+            }
+            await addToQueueByFetch(
+                server.id,
+                [id],
+                LibraryItem.PLAYLIST,
+                playType ?? Play.NOW,
+                true,
+            );
+            ackOperation(requestId);
         });
 
-        remote.requestPlayAlbum(({ id, playType }) => {
+        remote.requestPlayAlbum(async ({ id, playType, requestId }) => {
             const server = useAuthStore.getState().currentServer;
-            if (!server) return;
-            addToQueueByFetch(server.id, [id], LibraryItem.ALBUM, playType ?? Play.NOW, true);
+            if (!server) {
+                ackOperation(requestId, 'No server connected');
+                return;
+            }
+            await addToQueueByFetch(server.id, [id], LibraryItem.ALBUM, playType ?? Play.NOW, true);
+            ackOperation(requestId);
         });
 
-        remote.requestAddToPlaylist(async ({ playlistId, songId }) => {
+        remote.requestAddToPlaylist(async ({ playlistId, requestId, songId }) => {
             const server = useAuthStore.getState().currentServer;
-            if (!server) return;
+            if (!server) {
+                ackOperation(requestId, 'No server connected');
+                return;
+            }
 
             try {
                 await api.controller.addToPlaylist({
@@ -394,8 +436,9 @@ export const useRemoteLibrary = () => {
                 queryClient.invalidateQueries({
                     queryKey: queryKeys.playlists.songList(server.id, playlistId),
                 });
+                ackOperation(requestId);
             } catch {
-                // Nothing to do — playlist add failed.
+                ackOperation(requestId, 'Failed to add to playlist');
             }
         });
 

@@ -6,6 +6,7 @@ import styles from './action-sheet.module.css';
 import { Drawer } from '/@/shared/components/drawer/drawer';
 import { AppIcon, Icon } from '/@/shared/components/icon/icon';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
+import { Spinner } from '/@/shared/components/spinner/spinner';
 
 interface ActionSheetProps {
     children: ReactNode;
@@ -84,13 +85,25 @@ const Header = ({ onBack, title }: ActionSheetHeaderProps) => {
 
 interface ActionSheetItemProps extends Omit<ComponentPropsWithoutRef<'button'>, 'type'> {
     leftIcon?: keyof typeof AppIcon;
+    // Swaps leftIcon for a spinner and forces the item disabled — the
+    // in-flight state for an acked send (see use-acked-action.ts), so the
+    // user sees which item they tapped rather than just "everything's
+    // greyed out".
+    loading?: boolean;
     rightIcon?: keyof typeof AppIcon;
 }
 
-const Item = ({ children, leftIcon, rightIcon, ...props }: ActionSheetItemProps) => {
+const Item = ({
+    children,
+    disabled,
+    leftIcon,
+    loading,
+    rightIcon,
+    ...props
+}: ActionSheetItemProps) => {
     return (
-        <button className={styles.item} type="button" {...props}>
-            {leftIcon && <Icon icon={leftIcon} />}
+        <button className={styles.item} disabled={disabled || loading} type="button" {...props}>
+            {loading ? <Spinner size={18} /> : leftIcon && <Icon icon={leftIcon} />}
             <span className={styles['item-label']}>{children}</span>
             {rightIcon && <Icon className={styles['item-right-icon']} icon={rightIcon} />}
         </button>
