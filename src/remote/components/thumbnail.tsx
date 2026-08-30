@@ -1,7 +1,9 @@
 import { Image } from '@mantine/core';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useMemo } from 'react';
 
 import { Flex } from '/@/shared/components/flex/flex';
+import { useNativeImage } from '/@/shared/components/image/use-native-image';
+import { useInViewport } from '/@/shared/hooks/use-in-viewport';
 
 interface ThumbnailProps {
     fallbackIcon?: ReactNode;
@@ -11,30 +13,36 @@ interface ThumbnailProps {
 }
 
 export const Thumbnail = ({ fallbackIcon, onError, size = 48, src }: ThumbnailProps) => {
+    const { inViewport, ref } = useInViewport<HTMLDivElement>();
+
+    // Queue/track/album/playlist rows are virtualized and recycle their DOM
+    // nodes across items as they scroll (see queue-row.tsx) — plain
+    // `<img src>` has no way to say "stop" once a fetch is on the wire, so
+    // scrolling fast through a long list fires (and lets finish) one request
+    // per row it ever passed, even rows only ever rendered in react-window's
+    // overscan buffer and never actually seen. `useNativeImage` fetches
+    // through an AbortController and is gated on `inViewport`, so leaving
+    // the viewport mid-fetch (or never entering it at all) aborts the
+    // request instead of letting it run to completion — the same
+    // desktop-app image loader already used elsewhere, not a new mechanism.
+    const imageRequest = useMemo(() => (src ? { cacheKey: src, url: src } : undefined), [src]);
+    const nativeImage = useNativeImage({
+        enabled: inViewport,
+        onFetchError: onError,
+        request: imageRequest,
+    });
+
     // Falls back to `fallbackIcon` on a load error, not just a missing `src`
     // — previously a broken image (unreachable server, no `remoteUrl`
     // configured) rendered the browser's raw broken-image glyph on every
     // list row (tracks/albums/playlists/queue) with no graceful fallback,
-    // unlike the desktop app's own image components. `onError` stays
-    // available for callers that want to react further (e.g.
-    // remote-container.tsx retrying via the 'proxy' WS relay) — this doesn't
-    // replace that, it just guarantees every caller gets a sane default even
-    // if they don't wire anything up themselves.
-    const [hasError, setHasError] = useState(false);
-
-    // A new `src` deserves a fresh attempt — without this, once one item
-    // shown through a given instance fails, a later item reusing it (e.g. a
-    // recycled virtualized row, or the player thumbnail switching songs)
-    // would stay stuck on the fallback even though its own image is fine.
-    useEffect(() => {
-        setHasError(false);
-    }, [src]);
-
-    if (!src || hasError) {
+    // unlike the desktop app's own image components.
+    if (!src || nativeImage.isError) {
         return (
             <Flex
                 align="center"
                 justify="center"
+                ref={ref}
                 style={{
                     background: 'var(--theme-colors-surface)',
                     borderRadius: 8,
@@ -50,20 +58,21 @@ export const Thumbnail = ({ fallbackIcon, onError, size = 48, src }: ThumbnailPr
     }
 
     return (
-        <Image
-            fit="cover"
-            onError={() => {
-                setHasError(true);
-                onError?.();
-            }}
-            radius={8}
-            src={src}
-            // Mantine's Image defaults to width:100% via its own stylesheet,
-            // which beats the bare width/height props (those only set the
-            // native <img> attribute, near-zero CSS specificity) — without
-            // this the thumbnail stretched to fill the whole row. Setting
-            // size here, as an inline style, wins reliably.
-            style={{ flexShrink: 0, height: size, width: size }}
-        />
+        <div ref={ref} style={{ flexShrink: 0, height: size, width: size }}>
+            {nativeImage.displaySrc && (
+                <Image
+                    fit="cover"
+                    radius={8}
+                    src={nativeImage.displaySrc}
+                    // Mantine's Image defaults to width:100% via its own
+                    // stylesheet, which beats the bare width/height props
+                    // (those only set the native <img> attribute, near-zero
+                    // CSS specificity) — without this the thumbnail
+                    // stretched to fill the whole row. Setting size here, as
+                    // an inline style, wins reliably.
+                    style={{ height: size, width: size }}
+                />
+            )}
+        </div>
     );
 };
