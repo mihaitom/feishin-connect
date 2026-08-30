@@ -91,13 +91,28 @@ function send({ client, data, event }: SendData): void {
     }
 }
 
-export const shutdownServer = () => {
+// `closeCode` defaults to 4000 ("server is down", no client auto-retry) for
+// a genuine shutdown. enableServer() below passes 4002 instead ("settings
+// changed", the client already reloads and reconnects on that code) — it's
+// not really shutting down, just replacing the running server with a fresh
+// one, and reusing this function is what actually tears down the *previous*
+// wsServer/heartBeat interval before that happens. Without this,
+// re-enabling (or re-applying settings) left the old wsServer's clients set
+// and its heartBeat `setInterval` running forever alongside the new one —
+// `server.close()` alone stops new connections but never touches an
+// already-upgraded WebSocket, and wsServer's own 'close' handler (which
+// clears heartBeat) only fires from an explicit wsServer.close() call, which
+// nothing here was ever making. Every re-enable leaked one more zombie
+// heartbeat interval, each still ping/terminating whatever client it still
+// held a reference to — indistinguishable, from the client's side, from the
+// connection simply dying on its own every so often.
+export const shutdownServer = (closeCode = 4000) => {
     if (wsServer || server) {
         log.info('Remote server shutting down');
     }
 
     if (wsServer) {
-        wsServer.clients.forEach((client) => client.close(4000));
+        wsServer.clients.forEach((client) => client.close(closeCode));
         wsServer.close();
         wsServer = undefined;
     }
@@ -360,9 +375,12 @@ function setOk(
 const enableServer = (config: RemoteConfig): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
         try {
-            if (server) {
-                server.close();
-            }
+            // 4002, not the shutdownServer() default of 4000 — this is a
+            // restart (re-enable, or a settings change re-applying), not a
+            // real shutdown, and the client already knows how to handle
+            // 4002 cleanly (reload and reconnect) from the existing
+            // remote-username/remote-password flows.
+            shutdownServer(4002);
 
             server = createServer({}, async (req, res) => {
                 if (!authorize(req)) {
