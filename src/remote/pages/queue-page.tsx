@@ -20,7 +20,11 @@ const OVERSCAN_COUNT = 4;
 export const QueuePage = () => {
     const send = useSend();
     const { currentUniqueId, items } = useQueueState();
-    const [activeTrack, setActiveTrack] = useState<null | { id: string; name: string }>(null);
+    const [activeTrack, setActiveTrack] = useState<null | {
+        id: string;
+        name: string;
+        uniqueId: string;
+    }>(null);
     const [localOrder, setLocalOrder] = useState<string[]>(() => items.map((i) => i.uniqueId));
     const isDraggingRef = useRef(false);
     const listRef = useListRef(null);
@@ -54,7 +58,7 @@ export const QueuePage = () => {
     );
 
     const handleLongPress = useCallback((item: RemoteQueueItem) => {
-        setActiveTrack({ id: item.id, name: item.name });
+        setActiveTrack({ id: item.id, name: item.name, uniqueId: item.uniqueId });
     }, []);
 
     const handleRemove = useCallback(
@@ -148,7 +152,13 @@ export const QueuePage = () => {
                     />
                 </FadeIn>
             )}
-            <TrackActionSheet onClose={() => setActiveTrack(null)} track={activeTrack} />
+            <TrackActionSheet
+                onClose={() => setActiveTrack(null)}
+                onRemoveFromQueue={
+                    activeTrack ? () => handleRemove(activeTrack.uniqueId) : undefined
+                }
+                track={activeTrack}
+            />
         </div>
     );
 };
