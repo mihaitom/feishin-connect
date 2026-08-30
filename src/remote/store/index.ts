@@ -150,7 +150,20 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                             socket.addEventListener('message', (message) => {
                                 const { data, event } = JSON.parse(message.data) as ServerEvent;
 
-                                logger.debug('WebSocket message received', { data, event });
+                                // Event name only, not the raw `data` — a
+                                // `queue-state` broadcast can carry hundreds
+                                // of songs, and `position` alone fires every
+                                // ~150-200ms for as long as something is
+                                // playing, so logging the full payload here
+                                // on every single message meant
+                                // JSON.stringifying (for the debounce
+                                // dedup key below) and console.logging a
+                                // sizeable object several times a second
+                                // with debug logging on — most of it
+                                // redundant with the case below, which
+                                // already logs whatever's actually useful
+                                // about that event, summarized.
+                                logger.debug('WebSocket message received', { event });
 
                                 switch (event) {
                                     case 'accent-color': {
@@ -242,6 +255,15 @@ export const useRemoteStore = createWithEqualityFn<SettingsSlice>()(
                                         break;
                                     }
                                     case 'queue-state': {
+                                        // Summarized, not the full `items`
+                                        // array (see the top-level message
+                                        // log's own comment) — this is the
+                                        // one event that can genuinely carry
+                                        // hundreds of entries.
+                                        logger.debug('Queue state event received', {
+                                            currentUniqueId: data.currentUniqueId,
+                                            itemCount: data.items.length,
+                                        });
                                         useRemoteLibraryStore
                                             .getState()
                                             .actions.setQueueState(data);
