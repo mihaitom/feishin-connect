@@ -18,9 +18,11 @@ interface UseLongPressOptions {
 
 // Long-press via pointer events rather than the native `contextmenu` event —
 // iOS Safari doesn't reliably fire `contextmenu` on a touch-and-hold over an
-// arbitrary element, only Android/desktop do.
+// arbitrary element, only Android/desktop do. `contextmenu` is still wired
+// up below, just as a second, faster trigger for desktop mouse users
+// (right click) rather than the sole source.
 export function useLongPress({
-    delay = 450,
+    delay = 350,
     moveThreshold = 10,
     onClick,
     onLongPress,
@@ -148,9 +150,16 @@ export function useLongPress({
         [onClick],
     );
 
-    const onContextMenu = useCallback((event: React.MouseEvent) => {
-        event.preventDefault();
-    }, []);
+    // Right click on desktop — jumps straight to the menu instead of making
+    // mouse users hold the button down for `delay`.
+    const onContextMenu = useCallback(
+        (event: React.MouseEvent) => {
+            event.preventDefault();
+            clear();
+            onLongPress();
+        },
+        [clear, onLongPress],
+    );
 
     return {
         onClick: onClickHandler,
