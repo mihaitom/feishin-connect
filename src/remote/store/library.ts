@@ -18,7 +18,11 @@ import {
 // sheet's spinner clears.
 export interface QueueReplaceConfirmRequest {
     cancel: () => void;
-    execute: () => void;
+    // Returns the acked-send promise so the confirm sheet can show its own
+    // loading state instead of closing instantly on tap - the sheet that
+    // asked is already gone by then (see track/album/playlist-action-sheet),
+    // so this is the only place left to show that anything is happening.
+    execute: () => Promise<void>;
 }
 
 // Transient session data (not persisted, unlike store/index.ts's settings) —

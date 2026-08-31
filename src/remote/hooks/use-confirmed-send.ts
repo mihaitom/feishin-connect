@@ -63,7 +63,15 @@ export function useConfirmedSend() {
                         // rather than rejecting into an "Action failed"
                         // toast.
                         cancel: () => resolve(),
-                        execute: () => sendAcked(event).then(resolve, reject),
+                        // Returned to the confirm sheet too (see
+                        // QueueReplaceConfirmRequest) so it can show its own
+                        // loading state - `.then` below is just an extra
+                        // listener on the same promise, doesn't consume it.
+                        execute: () => {
+                            const acked = sendAcked(event);
+                            acked.then(resolve, reject);
+                            return acked;
+                        },
                     });
                 });
             } else {

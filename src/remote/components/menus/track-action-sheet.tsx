@@ -7,6 +7,7 @@ import { TrackRadioSubmenuItems } from '/@/remote/components/menus/track-radio-s
 import { useAckedAction } from '/@/remote/hooks/use-acked-action';
 import { useConfirmedSend } from '/@/remote/hooks/use-confirmed-send';
 import { useSendAcked } from '/@/remote/store';
+import { useQueueReplaceConfirm } from '/@/remote/store/library';
 import { Play } from '/@/shared/types/types';
 
 interface TrackActionSheetProps {
@@ -27,6 +28,10 @@ export const TrackActionSheet = ({ onClose, onRemoveFromQueue, track }: TrackAct
     const confirmedSend = useConfirmedSend();
     const sendAcked = useSendAcked();
     const { pendingKey, run } = useAckedAction();
+    // A play-type/track-radio pick here can trigger the "discard the
+    // queue?" confirm sheet (shell.tsx) — step aside while it's up instead
+    // of stacking two sheets.
+    const queueReplaceConfirmPending = !!useQueueReplaceConfirm();
 
     const handleClose = () => {
         onClose();
@@ -36,7 +41,7 @@ export const TrackActionSheet = ({ onClose, onRemoveFromQueue, track }: TrackAct
     };
 
     return (
-        <ActionSheet onClose={handleClose} opened={!!track}>
+        <ActionSheet onClose={handleClose} opened={!!track && !queueReplaceConfirmPending}>
             {track && view === 'root' && (
                 <>
                     <ActionSheet.Item

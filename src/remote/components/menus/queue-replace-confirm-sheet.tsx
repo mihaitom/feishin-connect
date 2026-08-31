@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { ActionSheet } from '/@/remote/components/action-sheet';
 import { useQueueReplaceConfirm, useRemoteLibraryStore } from '/@/remote/store/library';
 import { Button } from '/@/shared/components/button/button';
@@ -12,6 +14,7 @@ import { Text } from '/@/shared/components/text/text';
 export const QueueReplaceConfirmSheet = () => {
     const pending = useQueueReplaceConfirm();
     const clear = useRemoteLibraryStore((state) => state.actions.clearQueueReplaceConfirm);
+    const [isExecuting, setIsExecuting] = useState(false);
 
     // Declining (Cancel, or dismissing the sheet any other way) still has to
     // settle the acked-send promise this confirmation is blocking on — see
@@ -22,6 +25,19 @@ export const QueueReplaceConfirmSheet = () => {
         clear();
     };
 
+    // The action sheet that asked for this (track/album/playlist-action-
+    // sheet) closes itself the moment `pending` is set, so this is the only
+    // place left to show that the send is in flight — closing instantly on
+    // tap, like before, made the ack wait invisible.
+    const handleConfirm = () => {
+        if (!pending) return;
+        setIsExecuting(true);
+        pending.execute().finally(() => {
+            setIsExecuting(false);
+            clear();
+        });
+    };
+
     return (
         <ActionSheet onClose={handleDecline} opened={!!pending}>
             <Stack gap="md" p="md">
@@ -30,16 +46,10 @@ export const QueueReplaceConfirmSheet = () => {
                     This will remove all items from the current queue.
                 </Text>
                 <Group gap="sm" grow>
-                    <Button onClick={handleDecline} variant="default">
+                    <Button disabled={isExecuting} onClick={handleDecline} variant="default">
                         Cancel
                     </Button>
-                    <Button
-                        onClick={() => {
-                            pending?.execute();
-                            clear();
-                        }}
-                        variant="filled"
-                    >
+                    <Button loading={isExecuting} onClick={handleConfirm} variant="filled">
                         Confirm
                     </Button>
                 </Group>
