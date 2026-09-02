@@ -398,13 +398,9 @@ export const useRemoteLibrary = () => {
                 ackOperation(requestId, 'No server connected');
                 return;
             }
-            await addToQueueByFetch(
-                server.id,
-                [id],
-                LibraryItem.PLAYLIST,
-                playType ?? Play.NOW,
-                true,
-            );
+            addToQueueByFetch(server.id, [id], LibraryItem.PLAYLIST, playType ?? Play.NOW, {
+                skipConfirmation: true,
+            });
             ackOperation(requestId);
         });
 
@@ -414,7 +410,9 @@ export const useRemoteLibrary = () => {
                 ackOperation(requestId, 'No server connected');
                 return;
             }
-            await addToQueueByFetch(server.id, [id], LibraryItem.ALBUM, playType ?? Play.NOW, true);
+            addToQueueByFetch(server.id, [id], LibraryItem.ALBUM, playType ?? Play.NOW, {
+                skipConfirmation: true,
+            });
             ackOperation(requestId);
         });
 
