@@ -167,6 +167,11 @@ export function mapShuffledToQueueIndex(shuffledIndex: number, shuffled: number[
     return shuffledIndex;
 }
 
+// We need to use a unique id so that the equalityFn can work if attempting to set the same timestamp
+export function uniqueSeekToTimestamp(timestamp: number) {
+    return `${timestamp}-${nanoid()}`;
+}
+
 // Helper function to add new indexes to shuffled array after current position
 function addIndexesToShuffled(
     shuffled: number[],
@@ -1334,8 +1339,8 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     const reset = options?.reset !== false;
                     set((state) => {
                         state.player.status = PlayerStatus.STOPPED;
-                        setTimestampStore(0);
                         if (reset) {
+                            setTimestampStore(0);
                             state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
                         }
                     });
@@ -1835,6 +1840,11 @@ export type AddToQueueByPlayType = Play;
 export type AddToQueueByUniqueId = {
     edge: 'bottom' | 'left' | 'right' | 'top' | null;
     uniqueId: string;
+};
+
+export type AddToQueueOptions = {
+    filter?: (song: Song) => boolean;
+    skipConfirmation?: boolean;
 };
 
 export type AddToQueueType = AddToQueueByPlayType | AddToQueueByUniqueId;
@@ -2372,9 +2382,4 @@ function toQueueSong(item: Song): QueueSong {
         ...item,
         _uniqueId: nanoid(),
     };
-}
-
-// We need to use a unique id so that the equalityFn can work if attempting to set the same timestamp
-function uniqueSeekToTimestamp(timestamp: number) {
-    return `${timestamp}-${nanoid()}`;
 }

@@ -18,6 +18,7 @@ import {
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import {
+    AddToQueueOptions,
     AddToQueueType,
     usePlayerActions,
     useSettingsStore,
@@ -59,8 +60,8 @@ export interface PlayerContext {
         id: string[],
         itemType: LibraryItem,
         type: AddToQueueType,
-        skipConfirmation?: boolean,
-    ) => Promise<void>;
+        options?: AddToQueueOptions,
+    ) => void;
     addToQueueByListQuery: (
         serverId: string,
         query: any,
@@ -324,7 +325,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             id: string[],
             itemType: LibraryItem,
             type: AddToQueueType,
-            skipConfirmation?: boolean,
+            options?: AddToQueueOptions,
         ) => {
             let toastId: null | string = null;
             const fetchId = nanoid();
@@ -384,6 +385,10 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 const filters = useSettingsStore.getState().playback.filters;
                 let filteredSongs = filterSongsByPlayerFilters(sortedSongs, filters);
 
+                if (options?.filter) {
+                    filteredSongs = filteredSongs.filter(options.filter);
+                }
+
                 // Songs from multiple playlists are merged together, so there is no single
                 // playlist to attribute them to: skip tagging (and URL inference) entirely.
                 const isMultiPlaylist = itemType === LibraryItem.PLAYLIST && id.length > 1;
@@ -407,7 +412,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                     }
                 };
 
-                if (!skipConfirmation && isReplaceQueueType(type)) {
+                if (!options?.skipConfirmation && isReplaceQueueType(type)) {
                     confirmQueueChange(addToQueue);
                 } else {
                     addToQueue();

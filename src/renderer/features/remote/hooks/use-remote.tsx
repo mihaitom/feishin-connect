@@ -57,18 +57,18 @@ export const useRemote = () => {
         }
 
         remote.requestPosition((data: { position: number }) => {
-            logger.debug('Request position received', { position: data.position });
+            logger.debug('Remote request position received', { position: data.position });
             const newTime = data.position;
             player.mediaSeekToTimestamp(newTime);
         });
 
         remote.requestSeek((data: { offset: number }) => {
-            logger.debug('Request seek received', { offset: data.offset });
+            logger.debug('Remote request seek received', { offset: data.offset });
             mediaSkipForward(data.offset);
         });
 
         remote.requestRating((data: { id: string; rating: number; serverId: string }) => {
-            logger.debug('Request rating received', {
+            logger.debug('Remote request rating received', {
                 id: data.id,
                 rating: data.rating,
                 serverId: data.serverId,
@@ -77,12 +77,12 @@ export const useRemote = () => {
         });
 
         remote.requestVolume((data: { volume: number }) => {
-            logger.debug('Request volume received', { volume: data.volume });
+            logger.debug('Remote request volume received', { volume: data.volume });
             setVolume(data.volume);
         });
 
         remote.requestFavorite((data: { favorite: boolean; id: string; serverId: string }) => {
-            logger.debug('Request favorite received', {
+            logger.debug('Remote request favorite received', {
                 favorite: data.favorite,
                 id: data.id,
                 serverId: data.serverId,
@@ -126,7 +126,7 @@ export const useRemote = () => {
         const currentSong = player.getCurrentSong();
 
         if (currentSong) {
-            logger.debug('Sending initial song', {
+            logger.debug('Remote sending initial song', {
                 artistName: currentSong.artistName,
                 id: currentSong.id,
                 name: currentSong.name,

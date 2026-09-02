@@ -27,7 +27,7 @@
         "moveToNext": "Ga naar volgende",
         "downloadStarted": "Begonnen met downloaden van {{count}} items",
         "moveItems": "Verplaats items",
-        "shuffle": "Shuffle",
+        "shuffle": "Willekeurig afspelen",
         "shuffleAll": "Shuffle alles",
         "shuffleSelected": "Shuffle geselecteerde",
         "viewMore": "Bekijk meer",
@@ -59,7 +59,7 @@
         "collapse": "Samenvouwen",
         "descending": "Aflopend",
         "add": "Toevoegen",
-        "gap": "Gat",
+        "gap": "Tussenruimte",
         "ascending": "Oplopend",
         "dismiss": "Negeren",
         "manage": "Beheren",
@@ -319,7 +319,13 @@
                 "lyricScaleNonActive": "Schaal niet-actieve songtekst",
                 "lyricScaleNonActive_description": "Schaal van songtekstregels die momenteel niet actief zijn",
                 "showLyricMatch_description": "Toon het naam en de artiest van het nummer van de overeenkomende songteksten",
-                "showLyricProvider_description": "Toon welke provider de songteksten levert"
+                "showLyricProvider_description": "Toon welke provider de songteksten levert",
+                "coverArtSize": "Hoesontwerp grootte",
+                "playerItemAlignment": "Uitlijning van speleritems",
+                "titleDisplayType": "Weergavestijl van de titel",
+                "titleDisplayType_optionMultiLine": "Meerdere regels",
+                "titleDisplayType_optionScroll": "Scroll",
+                "titleLineCount": "Aantal titelregels"
             },
             "lyrics": "Liedtekst",
             "related": "Gerelateerd",
@@ -452,7 +458,7 @@
             "albums": "Albums",
             "artists": "Artiesten",
             "favorites": "Favorieten",
-            "folders": "Folders",
+            "folders": "Mappen",
             "genres": "Genres",
             "home": "Home",
             "myLibrary": "Mijn bibliotheek",
@@ -461,7 +467,7 @@
             "search": "Zoeken",
             "settings": "Instellingen",
             "shared": "Gedeelde afspeellijsten",
-            "tracks": "Tracks",
+            "tracks": "Nummers",
             "radio": "Radiostations",
             "collections": "Verzamelingen"
         },
@@ -549,7 +555,7 @@
         "artistWithCount_other": "{{count}} artiesten",
         "folder_one": "Folder",
         "folder_other": "Folders",
-        "smartPlaylist": "Smart $t(entity.playlist, {\"count\": 1})",
+        "smartPlaylist": "Slimme $t(entity.playlist, {\"count\": 1})",
         "album_one": "Album",
         "album_other": "Albums",
         "genreWithCount_one": "{{count}} genre",
@@ -588,7 +594,7 @@
             "owner": "Eigenaar",
             "albumCount": "Albums",
             "artist": "Artiest",
-            "bitDepth": "Bitsdiepte",
+            "bitDepth": "Bitdiepte",
             "channels": "Kanalen",
             "codec": "Codec",
             "genre": "Genre",
@@ -634,7 +640,9 @@
                 "titleArtist": "$t(common.title) (artiest)",
                 "titleCombined": "$t(common.title) (gecombineerd)",
                 "year": "$t(common.year)",
-                "albumGroup": "Albumgroep"
+                "albumGroup": "Albumgroep",
+                "date": "Datum",
+                "releaseYear": "Uitgavejaar"
             },
             "general": {
                 "advancedSettings": "Geavanceerde instellingen",
@@ -670,10 +678,11 @@
                 "albumGroupConfig": "Albumgroep configuratie",
                 "albumGroupShowFavoriteRating": "Favorieten en beoordelingen weergeven",
                 "albumGroupVerticalLayout": "Verticale indeling",
-                "albumGroupMetadata": "Metadata velden"
+                "albumGroupMetadata": "Metadata velden",
+                "albumImageSize": "Grootte van albumafbeelding"
             },
             "view": {
-                "grid": "Grid",
+                "grid": "Raster",
                 "list": "Lijst",
                 "table": "Tabel",
                 "detail": "Details"
@@ -717,7 +726,7 @@
         "fontType": "Lettertype-type",
         "gaplessAudio_description": "Stelt de gapless audio-instelling voor mpv in",
         "gaplessAudio_optionWeak": "Zwak (aanbevolen)",
-        "gaplessAudio": "Gapless audio",
+        "gaplessAudio": "Naadloze audio",
         "globalMediaHotkeys_description": "Het gebruik van systeem mediahotkeys voor controle van afspelen aan-/uitzetten",
         "globalMediaHotkeys": "Globale mediasneltoetsen",
         "autoDJ": "Auto-DJ",
@@ -1150,7 +1159,12 @@
         "waveformLoadingDelay_description": "Vertraging in seconden voordat de golfvorm wordt geladen. Vergroot deze waarde als je stotteringen ervaart bij gebruik van de webspeler.",
         "windowBarTrackinfo_description": "Geef de titel en de artiest van het huidige nummer, de positie in de wachtrij en de status (afspelen/pauze) weer in de titelbalk van het venster.",
         "microtonalPitchControls": "Microtonale toonhoogteregelaars",
-        "microtonalPitchControls_description": "Voeg meer toonhoogteregelaars toe om tussen halve tonen te schakelen"
+        "microtonalPitchControls_description": "Voeg meer toonhoogteregelaars toe om tussen halve tonen te schakelen",
+        "autoDJ_onlySimilar_description": "Alleen items toevoegen die vergelijkbaar zijn met het nummer dat de toevoeging heeft geactiveerd. Het aantal items wordt beschouwd als het maximale aantal toe te voegen items, in plaats van dat de limiet wordt aangevuld met items uit andere bronnen",
+        "fullscreenAutoOpenTimeout_description": "Opent automatisch de fullscreen-speler na dit aantal minuten inactiviteit terwijl er een nummer wordt afgespeeld. Stel in op 0 om uit te schakelen.",
+        "fullscreenAutoOpenTimeout": "Time-out voor automatisch openen van fullscreen-speler (minuten)",
+        "sidebarImageEnabled": "Albumhoes vergroten",
+        "sidebarImageEnabled_description": "Toon een knop op de albumhoes van de spelerbalk om deze uit te vouwen naar de zijbalk. Als je deze optie uitschakelt, wordt de knop verborgen en wordt de albumhoes ingeklapt als deze momenteel is uitgevouwen"
     },
     "form": {
         "addServer": {
@@ -1437,7 +1451,7 @@
         "lineWidth": "Lijnbreedte",
         "fillAlpha": "Alfavulling",
         "channelLayout": "Kanaalindeling",
-        "maxFPS": "Max FPS",
+        "maxFPS": "Max. FPS",
         "opacity": "Opaciteit",
         "customGradients": "Aangepaste Kleurverlopen",
         "addCustomGradient": "Voeg Aangepast Kleurverloop Toe",
